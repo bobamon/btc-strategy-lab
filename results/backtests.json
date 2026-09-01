@@ -1,0 +1,62 @@
+[
+  {
+    "id": "002-vrs-btcusdt-15m",
+    "name": "VRS-1 Variance-Ratio Regime Switch",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-01",
+    "lastTestedDate": "2026-09-01",
+    "description": "Lo-MacKinlay variance ratio VR = Var(q-bar move) / (q * Var(1-bar move)) classifies the regime each bar. VR >= 1.15 (trending) takes 20-bar Donchian breakouts; VR <= 0.85 (mean-reverting) fades Bollinger band crossbacks; between the two it stands aside. Stop and target are both fixed at entry from ATR(14) -- trend 1.2/2.4x, reversion 1.0/1.2x -- plus a 48-bar max-hold flatten. No trailing stop.",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "metrics": {
+      "netProfitPct": -99.37868825,
+      "profitFactor": 0.5998069,
+      "maxDrawdownPct": 99.38527621,
+      "totalTrades": 4645,
+      "winRatePct": 37.93326157,
+      "avgTradePct": -0.02139477
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1EFPXCXSVWC6BKN5FTN5580",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1EFPXCXKHH6YWHMBRAQ7Y9T",
+      "verifiedAt": "2026-09-01T12:41:18Z"
+    },
+    "pineSource": "//@version=6\n// VRS-1 \"Variance-Ratio Regime Switch\" \u2014 crypto port (24/7, no session filter)\n// KEPT: Lo-MacKinlay variance-ratio regime classification; Donchian breakout in TREND;\n//       Bollinger band-fade in REVERT; fixed ATR stop + target set at entry; max-hold flatten.\n// REFUSED/DROPPED: nothing forbidden was requested. No trailing stop (fixed SL/TP by design),\n//       no pyramiding, no cross-symbol data, no martingale or averaging down.\nstrategy(\"VRS-1 Variance-Ratio Regime Switch\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\n// ---- inputs ----\nq       = input.int(5,     \"VR horizon q\")\nL       = input.int(120,   \"VR lookback\")\nvrHi    = input.float(1.15, \"Trend threshold\")\nvrLo    = input.float(0.85, \"Revert threshold\")\ndcLen   = input.int(20,    \"Donchian length\")\nbbLen   = input.int(20,    \"BB length\")\nbbMult  = input.float(2.0, \"BB mult\")\natrLen  = input.int(14,    \"ATR length\")\ntSL     = input.float(1.2, \"Trend SL xATR\")\ntTP     = input.float(2.4, \"Trend TP xATR\")\nrSL     = input.float(1.0, \"Revert SL xATR\")\nrTP     = input.float(1.2, \"Revert TP xATR\")\nmaxBars = input.int(48,    \"Max bars in trade\")\n\n// ---- variance ratio: VR = Var(q-bar move) / (q * Var(1-bar move)) ----\nr1 = close - close[1]\nrq = close - close[q]\nv1 = ta.variance(r1, L)\nvq = ta.variance(rq, L)\nvr = v1 > 0 ? vq / (q * v1) : na\n\n// ---- signal series ----\natr = ta.atr(atrLen)\n[bbMid, bbUp, bbLo] = ta.bb(close, bbLen, bbMult)\nhh = ta.highest(high, dcLen)[1]\nll = ta.lowest(low, dcLen)[1]\n\ntrendRegime  = not na(vr) and vr >= vrHi\nrevertRegime = not na(vr) and vr <= vrLo\n\nlongTrend  = trendRegime  and ta.crossover(close, hh)\nshortTrend = trendRegime  and ta.crossunder(close, ll)\nlongRev    = revertRegime and ta.crossover(close, bbLo)\nshortRev   = revertRegime and ta.crossunder(close, bbUp)\n\n// ---- state ----\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\n// ---- entries: stop and target are both computed at the moment of entry ----\nif flat and longTrend\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - atr * tSL\n    tpPx   := close + atr * tTP\n    barsIn := 0\nelse if flat and shortTrend\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + atr * tSL\n    tpPx   := close - atr * tTP\n    barsIn := 0\nelse if flat and longRev\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - atr * rSL\n    tpPx   := close + atr * rTP\n    barsIn := 0\nelse if flat and shortRev\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + atr * rSL\n    tpPx   := close - atr * rTP\n    barsIn := 0\n\n// ---- exits: fixed bracket re-issued each bar at the SAME prices set on entry ----\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\n// ---- max-hold flatten (time stop, not a trailing stop) ----\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(vr, title=\"VarianceRatio\")\nplot(trendRegime ? 1 : revertRegime ? -1 : 0, title=\"Regime\")\n",
+    "specPath": "strategies/002-vrs-variance-ratio-regime-switch.md",
+    "notes": "REJECTED. The regime switch has no edge at this trade frequency: average trade is roughly -0.02%, and commission at 0.05% consumes 36-53% of gross profit across both symbols. Note the engine's forced parity profile sizes every trade at 100% of equity, which is NOT the spec's 0.5%-risk sizing -- so this tests the signal, not the spec's risk management. The signal is what failed. The ETH run also raised an 'oversized_position_sizing' warning from the engine. Commission paid $7,937 against $14,895 gross profit."
+  },
+  {
+    "id": "002-vrs-ethusdt-15m",
+    "name": "VRS-1 Variance-Ratio Regime Switch",
+    "symbol": "ETHUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-01",
+    "lastTestedDate": "2026-09-01",
+    "description": "Lo-MacKinlay variance ratio VR = Var(q-bar move) / (q * Var(1-bar move)) classifies the regime each bar. VR >= 1.15 (trending) takes 20-bar Donchian breakouts; VR <= 0.85 (mean-reverting) fades Bollinger band crossbacks; between the two it stands aside. Stop and target are both fixed at entry from ATR(14) -- trend 1.2/2.4x, reversion 1.0/1.2x -- plus a 48-bar max-hold flatten. No trailing stop.",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "metrics": {
+      "netProfitPct": -99.67673142,
+      "profitFactor": 0.74558347,
+      "maxDrawdownPct": 99.67934933,
+      "totalTrades": 6397,
+      "winRatePct": 37.9865562,
+      "avgTradePct": -0.01558179
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1EFRCH30TDRY0JMQ0T5T56K",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1EFRCH390SNMFKHSCEM2TH8",
+      "verifiedAt": "2026-09-01T12:41:18Z"
+    },
+    "pineSource": "//@version=6\n// VRS-1 \"Variance-Ratio Regime Switch\" \u2014 crypto port (24/7, no session filter)\n// KEPT: Lo-MacKinlay variance-ratio regime classification; Donchian breakout in TREND;\n//       Bollinger band-fade in REVERT; fixed ATR stop + target set at entry; max-hold flatten.\n// REFUSED/DROPPED: nothing forbidden was requested. No trailing stop (fixed SL/TP by design),\n//       no pyramiding, no cross-symbol data, no martingale or averaging down.\nstrategy(\"VRS-1 Variance-Ratio Regime Switch\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\n// ---- inputs ----\nq       = input.int(5,     \"VR horizon q\")\nL       = input.int(120,   \"VR lookback\")\nvrHi    = input.float(1.15, \"Trend threshold\")\nvrLo    = input.float(0.85, \"Revert threshold\")\ndcLen   = input.int(20,    \"Donchian length\")\nbbLen   = input.int(20,    \"BB length\")\nbbMult  = input.float(2.0, \"BB mult\")\natrLen  = input.int(14,    \"ATR length\")\ntSL     = input.float(1.2, \"Trend SL xATR\")\ntTP     = input.float(2.4, \"Trend TP xATR\")\nrSL     = input.float(1.0, \"Revert SL xATR\")\nrTP     = input.float(1.2, \"Revert TP xATR\")\nmaxBars = input.int(48,    \"Max bars in trade\")\n\n// ---- variance ratio: VR = Var(q-bar move) / (q * Var(1-bar move)) ----\nr1 = close - close[1]\nrq = close - close[q]\nv1 = ta.variance(r1, L)\nvq = ta.variance(rq, L)\nvr = v1 > 0 ? vq / (q * v1) : na\n\n// ---- signal series ----\natr = ta.atr(atrLen)\n[bbMid, bbUp, bbLo] = ta.bb(close, bbLen, bbMult)\nhh = ta.highest(high, dcLen)[1]\nll = ta.lowest(low, dcLen)[1]\n\ntrendRegime  = not na(vr) and vr >= vrHi\nrevertRegime = not na(vr) and vr <= vrLo\n\nlongTrend  = trendRegime  and ta.crossover(close, hh)\nshortTrend = trendRegime  and ta.crossunder(close, ll)\nlongRev    = revertRegime and ta.crossover(close, bbLo)\nshortRev   = revertRegime and ta.crossunder(close, bbUp)\n\n// ---- state ----\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\n// ---- entries: stop and target are both computed at the moment of entry ----\nif flat and longTrend\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - atr * tSL\n    tpPx   := close + atr * tTP\n    barsIn := 0\nelse if flat and shortTrend\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + atr * tSL\n    tpPx   := close - atr * tTP\n    barsIn := 0\nelse if flat and longRev\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - atr * rSL\n    tpPx   := close + atr * rTP\n    barsIn := 0\nelse if flat and shortRev\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + atr * rSL\n    tpPx   := close - atr * rTP\n    barsIn := 0\n\n// ---- exits: fixed bracket re-issued each bar at the SAME prices set on entry ----\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\n// ---- max-hold flatten (time stop, not a trailing stop) ----\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(vr, title=\"VarianceRatio\")\nplot(trendRegime ? 1 : revertRegime ? -1 : 0, title=\"Regime\")\n",
+    "specPath": "strategies/002-vrs-variance-ratio-regime-switch.md",
+    "notes": "REJECTED. The regime switch has no edge at this trade frequency: average trade is roughly -0.02%, and commission at 0.05% consumes 36-53% of gross profit across both symbols. Note the engine's forced parity profile sizes every trade at 100% of equity, which is NOT the spec's 0.5%-risk sizing -- so this tests the signal, not the spec's risk management. The signal is what failed. The ETH run also raised an 'oversized_position_sizing' warning from the engine. Commission paid $10,462 against $29,211 gross profit."
+  }
+]

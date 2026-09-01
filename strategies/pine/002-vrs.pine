@@ -1,0 +1,93 @@
+//@version=6
+// VRS-1 "Variance-Ratio Regime Switch" — crypto port (24/7, no session filter)
+// KEPT: Lo-MacKinlay variance-ratio regime classification; Donchian breakout in TREND;
+//       Bollinger band-fade in REVERT; fixed ATR stop + target set at entry; max-hold flatten.
+// REFUSED/DROPPED: nothing forbidden was requested. No trailing stop (fixed SL/TP by design),
+//       no pyramiding, no cross-symbol data, no martingale or averaging down.
+strategy("VRS-1 Variance-Ratio Regime Switch", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+// ---- inputs ----
+q       = input.int(5,     "VR horizon q")
+L       = input.int(120,   "VR lookback")
+vrHi    = input.float(1.15, "Trend threshold")
+vrLo    = input.float(0.85, "Revert threshold")
+dcLen   = input.int(20,    "Donchian length")
+bbLen   = input.int(20,    "BB length")
+bbMult  = input.float(2.0, "BB mult")
+atrLen  = input.int(14,    "ATR length")
+tSL     = input.float(1.2, "Trend SL xATR")
+tTP     = input.float(2.4, "Trend TP xATR")
+rSL     = input.float(1.0, "Revert SL xATR")
+rTP     = input.float(1.2, "Revert TP xATR")
+maxBars = input.int(48,    "Max bars in trade")
+
+// ---- variance ratio: VR = Var(q-bar move) / (q * Var(1-bar move)) ----
+r1 = close - close[1]
+rq = close - close[q]
+v1 = ta.variance(r1, L)
+vq = ta.variance(rq, L)
+vr = v1 > 0 ? vq / (q * v1) : na
+
+// ---- signal series ----
+atr = ta.atr(atrLen)
+[bbMid, bbUp, bbLo] = ta.bb(close, bbLen, bbMult)
+hh = ta.highest(high, dcLen)[1]
+ll = ta.lowest(low, dcLen)[1]
+
+trendRegime  = not na(vr) and vr >= vrHi
+revertRegime = not na(vr) and vr <= vrLo
+
+longTrend  = trendRegime  and ta.crossover(close, hh)
+shortTrend = trendRegime  and ta.crossunder(close, ll)
+longRev    = revertRegime and ta.crossover(close, bbLo)
+shortRev   = revertRegime and ta.crossunder(close, bbUp)
+
+// ---- state ----
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+// ---- entries: stop and target are both computed at the moment of entry ----
+if flat and longTrend
+    strategy.entry("L", strategy.long)
+    slPx   := close - atr * tSL
+    tpPx   := close + atr * tTP
+    barsIn := 0
+else if flat and shortTrend
+    strategy.entry("S", strategy.short)
+    slPx   := close + atr * tSL
+    tpPx   := close - atr * tTP
+    barsIn := 0
+else if flat and longRev
+    strategy.entry("L", strategy.long)
+    slPx   := close - atr * rSL
+    tpPx   := close + atr * rTP
+    barsIn := 0
+else if flat and shortRev
+    strategy.entry("S", strategy.short)
+    slPx   := close + atr * rSL
+    tpPx   := close - atr * rTP
+    barsIn := 0
+
+// ---- exits: fixed bracket re-issued each bar at the SAME prices set on entry ----
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+// ---- max-hold flatten (time stop, not a trailing stop) ----
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(vr, title="VarianceRatio")
+plot(trendRegime ? 1 : revertRegime ? -1 : 0, title="Regime")
