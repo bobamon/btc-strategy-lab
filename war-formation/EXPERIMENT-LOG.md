@@ -1289,3 +1289,40 @@ exit model, which keeps pointing at the same conclusion — **the entry was neve
 3. **Sample-size reality check:** at ~3 days per trade on 4.5 months of 1m data, this family will
    never produce more than roughly 20–30 trades. That ceiling should be stated on the board before
    any ALCM configuration is described as validated.
+
+
+---
+
+## ██ E37 — THE PRE-REGISTERED OUTCOME THAT UPHOLDS HARD LESSON 13
+
+One change from E36: `rr` 2.0 → 1.0, target $3,000, symmetric with the shield.
+
+| | E36 (2R) | **E37 (1R)** |
+|---|---|---|
+| Profit factor | **1.19181730** | 0.98697850 |
+| Max drawdown | **14.02869041%** | 16.53904131% |
+| Trades | 20 | 21 |
+| Win rate | 55.00% | 52.38% |
+| **avgBarsWinning** | 4125.82 (95.5% of cap) | **3520.91 (81.5%)** |
+
+**The diagnosis was right and the fix worked mechanically — and it still lost.** Winners genuinely do
+resolve better: the share of the cap they consume fell from 95.5% to 81.5%. But profit factor fell
+0.205 and drawdown rose 2.5pp. The predicted frequency gain also failed to appear — 20 → 21 trades.
+
+**REVERTED**, on the reading written into E37's own Pine before it ran: *"PF falls while winners do
+resolve → the ALCM needs the wide target after all, and HARD LESSON 13 holds even here."*
+
+### HARD LESSON 13 NOW HOLDS IN FOUR MECHANISMS
+| Lab | Target change | Result |
+|---|---|---|
+| BTC | 2R → 3R | neutral |
+| War Formation (structural stop, E26) | 1.5R → 1R | negative |
+| 3M Elite | 2R → 2.5R | negative |
+| **War Formation (ALCM, E37)** | **2R → 1R** | **negative** |
+
+The lesson's escape clause was invoked legitimately — a target 95.5% of winners could not reach is a
+broken parameter, not a frontier point — and the axis *still* came back negative. **That is the
+strongest form the lesson has taken: it survived a case that genuinely qualified for the exception.**
+
+**E36 remains the best ALCM configuration at PF 1.19181730 on 20 trades — a direction, not a
+validated result.** The sample ceiling of ~20–30 trades stands.

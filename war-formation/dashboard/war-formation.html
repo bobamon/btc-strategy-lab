@@ -1537,9 +1537,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T12:43:32Z"
     },
     "notes": "THE FIRST PROFITABLE ALCM RUN, AND STILL NOT CLEAN. PF 0.94121736 -> 1.19181730, net +4.88%, 55.00% win on 20 trades. The cap no longer pins the AVERAGE trade (3607.4 against 4320) but it still pins the WINNERS: avgBarsWinning 4125.82 is 95.5% of the cap while avgBarsLosing is 2973.78. So losers resolve at the shield and winners are STILL being cut at the time limit before the $6,000 target. Half-fixed, and the honest label is partially inconclusive. TWO CAVEATS I FLAGGED IN ADVANCE: (1) 20 trades is exactly the threshold I said would be uninterpretable, so this is a direction not a result; (2) DD 14.03% is a 1x figure -- at the ~33x the $3,000 shield implies it is far past total loss, so position sizing is unsolved. Next: raise the cap again, or cut the target, and re-read avgBarsWinning."
+  },
+  {
+    "id": "war-formation-e37-alcm-1r",
+    "name": "WF E37 ALCM $3,000 shield, 1R target",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "One change from E36: rr 2.0 to 1.0, so the target becomes $3,000, symmetric with the shield. Chosen over another cap raise because it shortens holds and should therefore raise the trade count rather than shrink an already marginal sample.",
+    "metrics": {
+      "netProfitPct": -0.37244787,
+      "profitFactor": 0.9869785,
+      "maxDrawdownPct": 16.53904131,
+      "totalTrades": 21,
+      "winRatePct": 52.38095238,
+      "avgTradePct": -0.01773561
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1HXMK88PKNJ2VE4KB30R295",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HXMK88TT6RXWSWQH4WP6MS",
+      "verifiedAt": "2026-09-02T20:40:46Z"
+    },
+    "notes": "THE OUTCOME I NAMED IN ADVANCE AS THE ONE THAT UPHOLDS HARD LESSON 13. Winners DID resolve better -- avgBarsWinning fell 4125.82 to 3520.91, from 95.5% of the cap to 81.5% -- so the diagnosis was right and the fix worked mechanically. But profit factor fell 1.19181730 to 0.98697850 and drawdown rose 14.03% to 16.54%. Trade count barely moved, 20 to 21, so the frequency gain I predicted did not materialise either. REVERTED. The pre-registered reading applies: the ALCM needs the wide target, and the risk-reward axis is neutral-to-negative even under an exit model built around a wide stop. That is the fourth mechanism in this project to say so. E36 remains the best ALCM configuration at PF 1.19181730 on 20 trades, and it is still a direction rather than a validated result."
   }
 ];
-const BUILT = "2026-09-02 06:45";
+const BUILT = "2026-09-02 14:43";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

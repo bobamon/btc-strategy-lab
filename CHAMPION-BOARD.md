@@ -996,3 +996,40 @@ name has now been confirmed load-bearing, which is what closes the loop.
 
 **Base unchanged: PF 1.15252596, DD 16.54214281%, 166 trades, long-only. Still no champion** — the
 H1/H2 spread of 0.773 is the open problem, not the entry terms.
+
+
+## ██ ATTACK 19 — A DUPLICATED TREND REQUIREMENT, AND IT EXPLAINS ATTACK 13 (2026-09-02)
+
+| | Base (Attack 15) | Without `vwUp` |
+|---|---|---|
+| Profit factor | **1.15252596** | 1.12540646 |
+| Max drawdown | 16.54214281% | **15.17443126%** |
+| Trades | 166 | **176** |
+| Win rate | 44.58% | 43.75% |
+
+**REVERTED** — the ratchet requires profit factor to improve, and it fell 0.027. Drawdown improved
+1.37pp, which is not enough on its own.
+
+### THE TRADE COUNT IS THE FINDING, NOT THE PROFIT FACTOR
+**Removing `vwUp` admits only TEN extra trades out of 176.** A 150-bar VWAP slope requirement that
+excludes ten candidates across 2.2 years is barely binding — and that **explains Attack 13 exactly.**
+
+Attack 13 found `trendOk` (the 600-bar EMA) nearly inert: 6 trades of 134. The reason is now clear:
+**`vwUp` had already excluded almost everything `trendOk` would have.** The base carries a
+**duplicated trend requirement** — two instruments encoding one piece of information, each appearing
+inert *because the other is doing the work*.
+
+**Neither can be judged alone.** The E14 redundancy check flagged this pair as the only real overlap
+in the conjunction before the run, and the result confirms it.
+
+### THE OPEN QUESTION THIS CREATES
+**Is the trend requirement load-bearing at all?** Both terms individually look near-inert, but that is
+exactly what a redundant pair looks like. The test is to **remove BOTH together** — the only way to
+measure information that two terms share. If the count explodes and profit factor collapses, trend
+matters and one term is free to delete for simplicity. If the count barely moves, this system has no
+meaningful trend requirement and two of its seven terms are decoration.
+
+**That is the next BTC cycle**, and it is a case where removing two terms is the single coherent
+change rather than a violation of the one-thing rule — they are one requirement expressed twice.
+
+**Base unchanged: PF 1.15252596, DD 16.54214281%, 166 trades, long-only. No champion.**

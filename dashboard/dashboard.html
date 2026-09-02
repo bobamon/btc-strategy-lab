@@ -1449,9 +1449,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T12:44:04Z"
     },
     "notes": "THE PULLBACK IS THE EDGE. PF 1.15252596 -> 0.87379592, drawdown 16.54% -> 42.83%, trades 166 -> 290, win rate 44.58% -> 41.03%. Removing it admits 124 extra trades that are heavily net negative and nearly triples the drawdown. REVERTED. This resolves what Attack 15 started: the ORIGINAL name (mean-reversion from a +2 sigma stretch) pointed at a decorative term, and the CORRECTED name (VWAP pullback-continuation) points at the load-bearing one. Attack 15 did not just improve the base, it renamed the strategy correctly -- and the corrected name's term survives the same test the old one failed."
+  },
+  {
+    "id": "vwm-attack19-no-vwap-slope",
+    "name": "VWM Attack19 no VWAP slope requirement",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "The continuation half of the corrected name. One change from the Attack 15 base: vwUp removed, with trendOk deliberately left in place so the run doubles as a test of the redundancy hypothesis between the two trend terms.",
+    "metrics": {
+      "netProfitPct": 14.1423494,
+      "profitFactor": 1.12540646,
+      "maxDrawdownPct": 15.17443126,
+      "totalTrades": 176,
+      "winRatePct": 43.75,
+      "avgTradePct": 0.08035426
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1HXNK3R13XD8PBN4MZ1AENB",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HXNK3RN0RRHYFBY48YH7G1",
+      "verifiedAt": "2026-09-02T20:41:18Z"
+    },
+    "notes": "THE REDUNDANCY HYPOTHESIS IS CONFIRMED. Base PF 1.15252596 / DD 16.54214281% / 166 trades; without vwUp PF 1.12540646 / DD 15.17443126% / 176 trades. REVERTED -- the ratchet requires profit factor to IMPROVE and it fell 0.027, even though drawdown improved 1.37pp. THE TRADE COUNT IS THE FINDING: removing vwUp admits only TEN extra trades out of 176. A 150-bar VWAP slope requirement that excludes 10 candidates is barely binding, and it explains Attack 13 exactly -- trendOk was found nearly inert (6 trades of 134) because vwUp had already excluded almost everything it would have. The base carries a DUPLICATED trend requirement: two instruments, one piece of information, each looking inert because the other is doing the work. Neither can be judged alone; the open question is whether the trend requirement is load-bearing AT ALL, which needs both removed together."
   }
 ];
-const BUILT = "2026-09-02 06:45";
+const BUILT = "2026-09-02 14:43";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
