@@ -434,9 +434,38 @@ const DATA = [
     "pineSource": "//@version=6\n// VTS-1 \"Volatility Term-Structure Regime\" — BTCUSDT, 15m and 5m.\n// Bitcoin shows INVERTED volatility asymmetry: vol reacts more to positive returns than negative\n// ones, the opposite of equities. So the two legs are built differently, not mirrored:\n//   LONG  = breakout WITH vol expansion   (BTC's real up-moves arrive loud)\n//   SHORT = breakdown WITH vol compression (BTC's distribution arrives quiet)\n// Flip signal: the term-structure ratio crossing either threshold. On a flip, stand down for\n// coolBars bars -- the regime is in transition and neither leg's premise holds.\n// SL and TP fixed at entry. Stops sit beyond STRUCTURE (swing extremes), never beyond the trigger.\nstrategy(\"VTS-1 Volatility Term-Structure Regime\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\nfastLen  = input.int(5,     \"Fast ATR (short horizon)\")\nslowLen  = input.int(50,    \"Slow ATR (long horizon)\")\nhiK      = input.float(1.40,\"Expansion if fast/slow >= K\")\nloK      = input.float(0.75,\"Compression if fast/slow <= K\")\nbrkLen   = input.int(50,    \"Breakout lookback\")\nswgLen   = input.int(20,    \"Swing lookback for the structural stop\")\ncoolBars = input.int(20,    \"Bars to stand down after a regime flip\")\nbufK     = input.float(0.25,\"Stop buffer beyond the swing, x ATR14\")\nrr       = input.float(2.0, \"Reward:risk\")\nminRpct  = input.float(0.80,\"Min risk as % of price\")\nmaxRpct  = input.float(3.00,\"Max risk as % of price\")\nmaxBars  = input.int(96,    \"Max bars in trade\")\n\natrFast = ta.atr(fastLen)\natrSlow = ta.atr(slowLen)\natrStop = ta.atr(14)\n\n// ---- the term structure ----\nvts = (not na(atrSlow) and atrSlow > 0) ? atrFast / atrSlow : na\n\nexpansion   = not na(vts) and vts >= hiK\ncompression = not na(vts) and vts <= loK\n\n// ---- FLIP DETECTION: the regime changing, in either direction ----\nregime     = expansion ? 1 : compression ? -1 : 0\nflipped    = regime != regime[1] and not na(vts) and not na(vts[1])\nvar int sinceFlip = 9999\nsinceFlip := flipped ? 0 : sinceFlip + 1\ncoolingOff = sinceFlip < coolBars\n\n// ---- levels ----\nbrkHi = ta.highest(high, brkLen)[1]\nbrkLo = ta.lowest(low,  brkLen)[1]\nswgHi = ta.highest(high, swgLen)[1]\nswgLo = ta.lowest(low,  swgLen)[1]\n\n// ---- LONG leg: the loud breakout. Needs vol EXPANSION. ----\ngoLong = expansion and not coolingOff and ta.crossover(close, brkHi)\n\n// ---- SHORT leg: the quiet breakdown. Needs vol COMPRESSION. Different premise entirely. ----\ngoShort = compression and not coolingOff and ta.crossunder(close, brkLo)\n\n// ---- risk: each leg stops beyond its OWN structure, floored so fees stay small vs R ----\nbuf  = na(atrStop) ? 0.0 : atrStop * bufK\nminR = close * minRpct / 100\nmaxR = close * maxRpct / 100\n\nrawLongR  = close - (swgLo - buf)\nrawShortR = (swgHi + buf) - close\nlongR     = math.min(math.max(rawLongR,  minR), maxR)\nshortR    = math.min(math.max(rawShortR, minR), maxR)\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goLong and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - longR\n    tpPx   := close + longR * rr\n    barsIn := 0\nelse if flat and goShort and shortR > 0\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + shortR\n    tpPx   := close - shortR * rr\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(vts,                  title=\"VolTermStructure\")\nplot(regime,               title=\"Regime\")\nplot(flipped ? 1 : 0,      title=\"FlipEvent\")\nplot(coolingOff ? 1 : 0,   title=\"CoolingOff\")\n",
     "specPath": "strategies/006-vts-volatility-term-structure-regime.md",
     "notes": "Rung C: FAILED. Same rules, different timeframe, PF 0.36 and -20.2%. Both legs lose here -- longs 24 trades (5 winners, -$1,163), shorts 53 trades (13 winners, -$854). This settles the 15m result: PF 1.04 there was noise, not edge. Note 5m coverage starts 2024-06-08, not 2022, so this window is 2.2 years rather than 4.7."
+  },
+  {
+    "id": "007-vwm-btcusdt-15m",
+    "name": "VWM-1 VWAP Value Migration",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "description": "VWAP with 2-sigma bands as the fair-value frame, trading two DIFFERENT events rather than a mirrored pair. LONG is accepted value: price stretched to +2 sigma recently, then pulls back to VWAP and holds above it while VWAP rises. SHORT is rejected value: a wick through +2 sigma that closes back inside the bands while VWAP falls, with no pullback involved. The flip signal is close crossing VWAP, which stands the strategy down for 20 bars and then arms the opposite leg. Stops sit beyond the 20-bar swing extreme on each side, floored at 0.8% of price, target 2R, fixed at entry.",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "metrics": {
+      "netProfitPct": -31.74583211,
+      "profitFactor": 0.89192159,
+      "maxDrawdownPct": 39.2426703,
+      "totalTrades": 564,
+      "winRatePct": 33.68794326,
+      "avgTradePct": -0.05628694
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GG05ACZSF1DR2A1DP4M1PG",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GG05ACYAQ0D61AATXTJW92",
+      "verifiedAt": "2026-09-02T07:24:03Z"
+    },
+    "specPath": "strategies/007-vwm-vwap-value-migration.md",
+    "notes": "Ladder stopped at rung A: PF 0.89. Leg split: longs 457 trades (175 winners, 38.3%, -$2,310), shorts 107 (15 winners, 14.0%, -$865) -- BOTH legs lose, with the short leg the weaker half as in every short tested on this project. Payoff geometry was fine at 1.76:1 (break-even ~36%) and longs reached 38.3% before costs, but 564 trades at 18% fee drag ($4,661 of $26,198 gross) turns a marginal edge negative. FREQUENCY ESTIMATE: predicted 400-1200, actual 564 -- the FIRST estimate to land inside its range. Notable that pullback-to-VWAP is the most conventional idea tried and it still fails at this cost level on BTC perps."
   }
 ];
-const BUILT = "2026-09-02 00:25";
+const BUILT = "2026-09-02 01:24";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

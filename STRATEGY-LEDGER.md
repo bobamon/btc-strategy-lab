@@ -19,6 +19,16 @@ day (see Archived note at the bottom). One pair means strategies no longer have 
 across instruments, so BTC-specific structure — its funding cycle, liquidation behaviour, weekend
 regime, round-number magnetism — is now fair game and should be exploited rather than avoided.
 
+## MANDATE CHANGED 2026-09-02 — read CHAMPION-BOARD.md first
+The lab no longer invents one new mechanism per cycle. That mandate produced **seven rejections in
+seven cycles**, and it structurally could not produce the only thing that has ever worked here —
+the War Formation's five-filter cascade (PF 1.69), whose ablation proved the *stack* is the edge.
+
+**New mandate: stack, measure, keep what earns its place.** Each cycle changes exactly ONE thing
+about the current base, then keeps the change only if profit factor improves AND max drawdown does
+not worsen. `CHAMPION-BOARD.md` holds the base, the champion, the ranked attack, and the
+tried-and-reverted table. The mechanism registry below is now history, not a to-do list.
+
 ## STANDING OBJECTIVES — every strategy in this lab must satisfy these
 1. **Both directions, built separately.** Long and short each need their own entry logic, level
    definition and risk geometry. **A short rule that is only a sign-flipped long rule does not count.**
@@ -50,6 +60,7 @@ regime, round-number magnetism — is now fair game and should be exploited rath
 | 004 | MAR-1 Moving-Average Retest Fade | Fade the retest of a sloped EMA200; target the opposite band | Sign of the EMA200 slope | **REJECTED** — PF 0.65, ladder rung A | 2026-09-01 |
 | 005 | CRX-1 Compression Release Volume Verdict | Compressed box releases; volume decides follow vs. fade | Volume >= 2x avg / < 1x avg | **REJECTED** — PF 0.52, ladder rung A | 2026-09-01 |
 | 006 | VTS-1 Volatility Term-Structure Regime | ATR(5)/ATR(50) term structure; loud breakout long vs. quiet breakdown short | Term-structure regime change, 20-bar stand-down | **REJECTED** — 15m PF 1.04, 5m PF 0.36 | 2026-09-02 |
+| 007 | VWM-1 VWAP Value Migration | VWAP 2-sigma bands; accepted-value pullback long vs. rejected-excursion short | Close crossing VWAP, 20-bar stand-down | **REJECTED** — PF 0.89, ladder rung A | 2026-09-02 |
 
 ## Mechanism families already consumed
 - `cross-complex-OR-confirmation` (001, archived)
@@ -57,11 +68,12 @@ regime, round-number magnetism — is now fair game and should be exploited rath
 - `liquidation-cascade signatures` (003) — closePos switch, **rejected on real data**
 - `trend-anchored MA retest` (004, new family) — first-tag entry, **rejected on real data**; a confirmed-rejection variant is still untested
 - `range-compression expansion` (005) — volume-verdict switch, **rejected on real data**; a follow-only variant is still untested
+- `session-VWAP band mechanics` (007) — acceptance vs. rejection, **rejected on real data**
 - `volatility-term-structure` (006) — expansion/compression asymmetry, **rejected**; thresholds too tight to give the long leg a testable sample
 
 ## Families still open for future cycles
 volume/participation profile · time-of-day seasonality (Asia/London/US overlap) · order-flow imbalance proxies
-· session-VWAP band mechanics · funding-rate / basis effects
+· funding-rate / basis effects
 · autocorrelation regime via other estimators (Hurst, ACF sign)
 · microstructure round-number behaviour · realized-vs-implied vol spread
 
@@ -147,6 +159,8 @@ noise.** Check this ratio on every result before interpreting anything else.
 | 003 | 150–400 | 1,532 | 4–10x HIGH |
 | 004 | 500–1,500 | 844 | inside range |
 | 005 | 200–600 | 93 | ~2x LOW |
+| 006 | 300–800 | 44 / 77 | 4–7x LOW |
+| 007 | 400–1,200 | 564 | **inside range** |
 
 Estimates are improving but still unreliable in both directions. Keep pre-registering them, keep
 scoring them, and treat any commission-gate argument built on one as provisional.
