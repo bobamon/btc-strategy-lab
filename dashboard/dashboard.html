@@ -610,9 +610,68 @@ const DATA = [
     "pineSource": "//@version=6\n// 009 — cycle 009: base (008-vwm-base.pine) + ONE change — attack item #2, \"require the pullback\n// to be shallow\". The pullback condition changes from CLOSE holding above VWAP to the entire bar's\n// LOW holding above VWAP (price never traded back below fair value at all during the pullback).\nstrategy(\"009-VWM base + shallow pullback\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\ndevLen       = input.int(50,    \"Stdev window for VWAP bands\")\nbandK        = input.float(2.0, \"Band multiple (sigma)\")\npullbackK    = input.float(0.5, \"Pullback proximity, x sigma\")\nstretchLen   = input.int(50,    \"Bars to look back for the +2sigma stretch\")\nvwapSlopeLen = input.int(50,    \"Bars back to confirm VWAP rising\")\nswgLen       = input.int(20,    \"Swing lookback for the structural stop\")\ncoolBars     = input.int(20,    \"Bars to stand down after a VWAP flip\")\nbufK         = input.float(0.25,\"Stop buffer beyond the swing, x ATR14\")\nrr           = input.float(2.0, \"Reward:risk\")\nminRpct      = input.float(0.80,\"Min risk as % of price\")\nmaxRpct      = input.float(3.00,\"Max risk as % of price\")\nmaxBars      = input.int(96,    \"Max bars in trade\")\ntrendLen     = input.int(200,   \"Trend-filter EMA length\")\n\nvwapVal   = ta.vwap(close)\ndev       = ta.stdev(close - vwapVal, devLen)\nupperBand = vwapVal + bandK * dev\natr14     = ta.atr(14)\nema200    = ta.ema(close, trendLen)\n\nbs           = ta.barssince(high >= upperBand)\nwasStretched = not na(bs) and bs <= stretchLen\npullback     = low >= vwapVal and close <= vwapVal + pullbackK * dev\nvwapRising   = vwapVal > vwapVal[vwapSlopeLen]\ntrendUp      = close > ema200\n\nflipped = ta.cross(close, vwapVal)\nvar int sinceFlip = 9999\nsinceFlip := flipped ? 0 : sinceFlip + 1\ncoolingOff = sinceFlip < coolBars\n\ngoLong = wasStretched and pullback and vwapRising and trendUp and not coolingOff\n\nswgLo = ta.lowest(low, swgLen)[1]\nbuf   = na(atr14) ? 0.0 : atr14 * bufK\nminR  = close * minRpct / 100\nmaxR  = close * maxRpct / 100\nrawR  = close - (swgLo - buf)\nlongR = math.min(math.max(rawR, minR), maxR)\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goLong and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - longR\n    tpPx   := close + longR * rr\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(vwapVal,              title=\"VWAP\")\nplot(ema200,               title=\"EMA200\")\nplot(goLong ? 1 : 0,       title=\"LongSignal\")\nplot(coolingOff ? 1 : 0,   title=\"CoolingOff\")\n",
     "specPath": "strategies/pine/009-vwm-shallow-pullback.pine",
     "notes": "RATCHET: REVERTED. Vs. 008-vwm-base-btcusdt-15m -- PF 0.9555 -> 0.8551 (WORSENED), so the ratchet's first condition already fails regardless of the second. Max DD did improve (47.7% -> 32.5%) and trades fell sharply (649 -> 284, 56% fewer) -- the shallow-pullback filter is highly selective, but it selected AWAY good trades along with bad ones: win rate barely moved (39.4% -> 37.0%) while avg losing trade got worse relative to avg winning trade (ratio 1.47 -> 1.46, roughly flat) and removed profitable volume. Requiring the low to never dip below VWAP apparently excludes some of the strongest reclaim setups, not just the weak ones. Recorded here so this exact change is never retried."
+  },
+  {
+    "id": "010-vwm-tod-filter-btcusdt-15m",
+    "name": "010 -- VWM base + ET witching-hour filter (long)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "description": "Cycle 010, attack item #3 from the ranked list: ban longs during the 1:00-4:00am ET \"witching hour\" documented in war-formation/WAR-FORMATION.md. Identical to 008-vwm-base.pine with exactly ONE change -- goLong additionally requires the bar's ET hour (computed from UTC `time` with an input offset, default -4/EDT) to fall outside [1,4).",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "metrics": {
+      "netProfitPct": -15.1272885,
+      "profitFactor": 0.96141963,
+      "maxDrawdownPct": 45.77972334,
+      "totalTrades": 636,
+      "winRatePct": 39.1509434,
+      "avgTradePct": -0.02378504
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1HZC700WGKXF5SB904RQEBE",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HZC700PJ0R7KAQ8HRC7NTP",
+      "verifiedAt": "2026-09-02T21:00:00Z"
+    },
+    "pineSource": "//@version=6\n// 010 — ONE change from the base (008-vwm-base.pine): ban longs during the 1:00-4:00am ET\n// \"witching hour\" documented in war-formation/WAR-FORMATION.md (overnight dump window, no longs).\n// Everything else — VWAP pullback, EMA200 trend filter, stop/target geometry, flip/cooldown — is\n// byte-for-byte the 008 base. Bar time is UTC on this engine; ET offset is an input (default -4,\n// i.e. EDT) exactly as the war-formation doc specifies, computed from `time` with no session/ticker\n// rewrite (forbidden) — plain arithmetic on the UTC hour.\nstrategy(\"010-VWM base + ET witching-hour filter (long)\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\ndevLen       = input.int(50,    \"Stdev window for VWAP bands\")\nbandK        = input.float(2.0, \"Band multiple (sigma)\")\npullbackK    = input.float(0.5, \"Pullback proximity, x sigma\")\nstretchLen   = input.int(50,    \"Bars to look back for the +2sigma stretch\")\nvwapSlopeLen = input.int(50,    \"Bars back to confirm VWAP rising\")\nswgLen       = input.int(20,    \"Swing lookback for the structural stop\")\ncoolBars     = input.int(20,    \"Bars to stand down after a VWAP flip\")\nbufK         = input.float(0.25,\"Stop buffer beyond the swing, x ATR14\")\nrr           = input.float(2.0, \"Reward:risk\")\nminRpct      = input.float(0.80,\"Min risk as % of price\")\nmaxRpct      = input.float(3.00,\"Max risk as % of price\")\nmaxBars      = input.int(96,    \"Max bars in trade\")\ntrendLen     = input.int(200,   \"Trend-filter EMA length\")\netOffset     = input.int(-4,    \"ET offset from UTC, hours (default -4 = EDT)\")\n\nvwapVal   = ta.vwap(close)\ndev       = ta.stdev(close - vwapVal, devLen)\nupperBand = vwapVal + bandK * dev\natr14     = ta.atr(14)\nema200    = ta.ema(close, trendLen)\n\nbs           = ta.barssince(high >= upperBand)\nwasStretched = not na(bs) and bs <= stretchLen\npullback     = close >= vwapVal and close <= vwapVal + pullbackK * dev\nvwapRising   = vwapVal > vwapVal[vwapSlopeLen]\ntrendUp      = close > ema200\n\nutcHour  = math.floor(time / 3600000) % 24\netHour   = (utcHour + etOffset + 24) % 24\nwitching = etHour >= 1 and etHour < 4\n\nflipped = ta.cross(close, vwapVal)\nvar int sinceFlip = 9999\nsinceFlip := flipped ? 0 : sinceFlip + 1\ncoolingOff = sinceFlip < coolBars\n\ngoLong = wasStretched and pullback and vwapRising and trendUp and not coolingOff and not witching\n\nswgLo = ta.lowest(low, swgLen)[1]\nbuf   = na(atr14) ? 0.0 : atr14 * bufK\nminR  = close * minRpct / 100\nmaxR  = close * maxRpct / 100\nrawR  = close - (swgLo - buf)\nlongR = math.min(math.max(rawR, minR), maxR)\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goLong and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - longR\n    tpPx   := close + longR * rr\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(vwapVal,              title=\"VWAP\")\nplot(ema200,               title=\"EMA200\")\nplot(goLong ? 1 : 0,       title=\"LongSignal\")\nplot(witching ? 1 : 0,     title=\"WitchingHour\")\n",
+    "specPath": "strategies/pine/010-vwm-tod-filter.pine",
+    "notes": "RATCHET: KEPT. Vs. 008-vwm-base-btcusdt-15m -- PF 0.9555 -> 0.9614 (IMPROVED), max DD 47.65% -> 45.78% (IMPROVED, i.e. did not worsen), trades 649 -> 636 (13 fewer, all in the banned window). Both ratchet conditions pass, so this becomes the new CURRENT BASE. Still clears rung A (>=0.95) but see the paired 5m record: it does NOT clear rung C, so it is NOT promoted to champion this cycle."
+  },
+  {
+    "id": "010-vwm-tod-filter-btcusdt-5m",
+    "name": "010 -- VWM base + ET witching-hour filter (long) -- 5m confirmation",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "description": "Same exact Pine source as 010-vwm-tod-filter-btcusdt-15m, run on 5m to check whether the 15m rung-A pass (PF 0.9614) generalizes. HARD LESSON 7: a single-timeframe pass is not evidence.",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "metrics": {
+      "netProfitPct": -44.80237916,
+      "profitFactor": 0.78828543,
+      "maxDrawdownPct": 52.22464908,
+      "totalTrades": 642,
+      "winRatePct": 39.56386293,
+      "avgTradePct": -0.06978564
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1HZD85JGDXTDR0YTQFTQZYH",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HZD85JH1TDN77T4Y5DN5QS",
+      "verifiedAt": "2026-09-02T21:00:00Z"
+    },
+    "specPath": "strategies/pine/010-vwm-tod-filter.pine",
+    "notes": "REJECTED for generalization, same pattern as 008's 5m run: PF 0.9614 (15m) -> 0.7883 (5m), max DD 45.78% -> 52.22%. The witching-hour filter is defined in ET and the 5m window skews toward a different (shorter, more recent) sub-period than the 15m window -- it did not transfer, and on 5m this variant is very slightly WORSE than 008's own 5m result (PF 0.7992 -> 0.7883, DD 51.36% -> 52.22%). The time-of-day filter helps the 15m rung but does not touch the underlying 5m fee-drag/generalization problem HARD LESSON 7 flagged on the base itself."
   }
 ];
-const BUILT = "2026-09-02 20:19";
+const BUILT = "2026-09-02 21:12";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

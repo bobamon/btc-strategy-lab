@@ -204,6 +204,21 @@ any attack candidate (HARD LESSON 7) before the next several cycles lean on it. 
 passed 15m at PF 0.9555 but failed 5m at PF 0.7992 — the pass was noise, exactly as it was for 006.
 Check generalization on the base itself, not just on cycles that individually clear rung A.
 
+## HARD LESSON 9 — a 15m-only fix does not touch 5m fee drag (from cycle 010, 2026-09-02)
+The ET witching-hour filter (ban longs 1:00–4:00am ET) improved the 15m base cleanly — PF
+0.9555→0.9614, max DD 47.65%→45.78% — clearing the ratchet and rung A. Its 5m run came back
+PF 0.7883, DD 52.22%: not just still-failing, but marginally *worse* than 008's own unfiltered 5m
+result (PF 0.7992, DD 51.36%).
+
+A time-of-day gate removes a slice of bars roughly proportional to its width regardless of
+timeframe, so it *should* transfer if the edge it's cutting is real. That it didn't move 5m at all
+means the 5m loss isn't concentrated in that window — it's fee drag from trade frequency and R
+sizing, the mechanism HARD LESSON 3 names directly. **Rule:** a candidate change should be judged by
+whether it plausibly touches the failure mode rung C already diagnosed (fee drag on 5m), not just
+by whether it improves the 15m number. Selectivity filters (time-of-day, shallow pullback) prune
+bars; they don't change the R-vs-fee ratio. The R floor (attack list item 1 as of cycle 011) is the
+first change on this base that hits the actual mechanism.
+
 ## Platform constraints — trader.dev engine
 - Pine **//@version=6**, allowlist of 65 `ta.*` indicators.
 - **FORBIDDEN:** `request.security` (no cross-symbol), arrays/maps, `strategy.cancel`,
