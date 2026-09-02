@@ -784,3 +784,37 @@ of work were spent producing deltas against an unanchored baseline.**
   reclassifies every result that depended on the unreproducible one.
 - **This generalises past the ALCM:** E36–E41 have the same defect, so the $2,000 shield optimum rests
   on the same unverifiable ground as E38.
+
+
+---
+
+## ██ SOURCE AUDIT, 2026-09-02 — HARD LESSON 21 WAS NEVER A WAR FORMATION PROBLEM
+
+E44 found that War Formation's E38 could not be reproduced because its source had never been saved.
+An audit of all three labs immediately afterwards found the same defect everywhere:
+
+| Lab | Base at audit time | What was actually on disk |
+|---|---|---|
+| BTC | Attack 29 (`coolBars` 150) | `002`–`006` — the discovery strategies REJECTED before the mandate changed |
+| War Formation | none (2x2 closed) | `alcm-reference.pine`, created an hour earlier by the E44 failure |
+| 3M Elite | v30 (zone freshness) | `3m-elite-v1.pine` only |
+
+**Not one of Attacks 1–30 had been written to disk. Neither had any 3M version after v1.** Three labs,
+roughly a hundred recorded backtests, and the working history existed as metrics plus prose — the
+exact form that proved insufficient to rebuild E38.
+
+### WHAT WAS DONE
+- **BTC: fixed.** `strategies/pine/vwm-base-current.pine` now holds the exact program behind Attack 29,
+  with its result URL, the four KEPT changes that produced it, the full six-point `coolBars` curve,
+  and Attack 30's out-of-period figure in the header.
+- **War Formation: already fixed** by E44's fallout.
+- **3M Elite: NOT fixed, and deliberately not faked.** v30's source is gone. Reconstructing it from
+  SYSTEM.md prose and running v31 against the reconstruction is precisely the error that voided two
+  War Formation cycles today, so no 3M experiment should run until the base is rebuilt and saved.
+
+### THE GENERAL POINT
+**A lab's real state is what is on disk, not what is in its log.** Every lab here believed it had a
+base; two of the three could not have produced one on demand. The defect is invisible until something
+forces a reproduction, and by then the comparisons built on it are already void.
+
+**Audit the sources whenever a base is promoted, not only when a reproduction fails.**

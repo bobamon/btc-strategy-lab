@@ -1206,3 +1206,36 @@ one-point-wide optimum that nobody had measured. **v30 introduces a new paramete
 its neighbourhood is unmeasured.** Per HARD LESSON 16 that has to be tested before 0.897 is quoted as
 if it were robust — 12 was chosen as a round number, not searched, which is the right way to start and
 not a substitute for checking.
+
+
+---
+
+## ██ STOP — v30's SOURCE IS NOT ON DISK (2026-09-02)
+
+A source audit across all three labs found `three-m-elite/pine/` contains **only `3m-elite-v1.pine`.**
+The current base is **v30**. Every version from v2 to v30 exists as metrics and prose, not as code.
+
+**This is the same defect that made War Formation's E38 unreproducible** (HARD LESSON 21). There, a
+best-faith reconstruction from the log's prose returned PF 0.346 on 28 trades against a recorded
+1.502 on 21 — different code — and **two cycles of comparisons against E38 were voided.**
+
+### THE QUEUE IS SUSPENDED UNTIL THIS IS FIXED
+v31 and v32 both compare against v30. **Running either against a reconstruction would repeat, in a
+third lab, the error that has already cost this project two cycles today.**
+
+**0-V30-ANCHOR (blocking, before anything else): rebuild the v30 lifecycle in Pine, run it, and save
+it to `pine/` in the same action that records the metrics.** If the rebuild does not reproduce
+PF 0.89710112 / DD 40.78978663% / 811 trades, then **v30 is unreproducible too** and must be
+reclassified exactly as E38 was — recorded, real, but not comparable against.
+
+Only after an anchor exists do these resume:
+- **v32** — the freshness neighbourhood, `dzAge <= 6` and `<= 24`, both sides together. Note the
+  cross-lab warning from BTC Attacks 28/29: a selectivity parameter can be a MONOTONE ratio-for-sample
+  walk with no interior optimum at all, and the ratchet cannot stop one. Measure both sides and read
+  the trade count, not just the profit factor.
+- **v31** — the remaining signal terms.
+
+### WHERE THE LAB HONESTLY STANDS
+**PF 0.89710112 on 811 trades with a 40.79% drawdown — a reliable loser on the largest sample in the
+project.** Its one advantage over the sister labs is that 811 trades makes its negative result
+trustworthy, which is worth more than a thin positive.

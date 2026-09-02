@@ -1,0 +1,124 @@
+//@version=6
+// VWM CURRENT BASE — the anchored BTC baseline (Attack 29, 2026-09-02).
+//
+// WHY THIS FILE EXISTS. A source audit on 2026-09-02 found that NONE of Attacks 1-30 had ever been
+// written to disk. strategies/pine/ held only 002-006, the discovery strategies REJECTED before the
+// mandate changed. The lab's entire working history existed as metrics plus prose.
+// That is the exact defect that made War Formation's E38 unreproducible (HARD LESSON 21) and voided
+// two cycles of comparisons against it. This file closes it for BTC.
+//
+// THIS IS THE CURRENT BASE. It is the exact program that produced Attack 29:
+//   https://mcp-api.trader.dev/backtest/01M1J0H9HX31NNBK7WQ92MCD4N
+//   PF 1.47184908 | DD 6.98569615% | 56 trades | 51.79% win | +14.32% | long-only
+//
+// HISTORY OF THE FOUR KEPT CHANGES THAT PRODUCED IT:
+//   Attack 15 -- removed `reachedUpper`, the +2 sigma stretch the strategy was NAMED for. It was
+//                decoration that cost money, and removing it renamed the mechanism correctly: this is
+//                a VWAP pullback-continuation, not mean-reversion from extension.
+//   Attack 23 -- coolBars 60 -> 120.
+//   Attack 26 -- removed `close > open`. It excluded only 9.4% of candidates and they were net
+//                positive: a mild NEGATIVE filter, largely restating pulledBack's `close > vw`.
+//   Attack 29 -- coolBars 120 -> 150.
+//
+// READ THIS BEFORE TUNING coolBars AGAIN. Attacks 22/23/28/29 plus 24 measured six points:
+//   coolBars |    PF    |   DD    | trades
+//       30   | 1.003389 | 22.520% |  231
+//       60   | 1.152526 | 16.542% |  166
+//       90   | 1.223420 | 16.662% |  145
+//      120   | 1.349925 |  7.143% |   85
+//      150   | 1.471849 |  6.986% |   56   <-- this file
+//      240   | 2.302310 |  1.999% |    7   <-- degenerate, not a reading
+// PERFECTLY MONOTONE. There is NO interior optimum. coolBars trades ratio for sample, and every point
+// passes the ratchet against the point below it, so the rule walks it toward degeneracy.
+// **coolBars is FROZEN until the user answers OPEN RULE QUESTION 3 (a minimum-sample floor).**
+//
+// AND THE NUMBER ABOVE IS OPTIMISTIC. Attack 30 ran this build on 15m back to 2022 -- 4.7 years,
+// 141 trades, including a 2022-2024 stretch never seen before -- and got PF 1.23178053 with a 13.56%
+// drawdown. The edge SURVIVES out of period, and 1.232 on 141 trades is the more trustworthy figure.
+// A 56-trade profit factor is the top of a noisy range, not the truth about it.
+//
+// ALL SEVEN ORIGINAL SIGNAL TERMS HAVE BEEN BINDING-TESTED. Six remain. Nothing here is untested.
+// Binding shares: coolingOff 60%, pulledBack 43%, the trend pair 20%, close > open 9.4% (deleted).
+//
+// AUDIT: long-only, one leg (LESSON 6). Stop at the 60-bar swing low minus a 0.25x ATR buffer --
+// STRUCTURE, not the signal level (LESSON 5). R floor 0.80% of price (LESSON 3). SL and TP fixed at
+// entry, no trailing stop. Latching unchanged since the base was formed (HARD LESSON 8).
+strategy("VWM Current Base", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+sdLen    = input.int(300,   "Stdev length for the bands (100 x3)")
+slopeLen = input.int(150,   "Bars used to measure VWAP slope (50 x3)")
+pullK    = input.float(0.5, "Pullback must reach VWAP + K x sigma")
+coolBars = input.int(150,   "Flip stand-down -- FROZEN, see the header")
+swgLen   = input.int(60,    "Swing lookback for the structural stop (20 x3)")
+bufK     = input.float(0.25,"Stop buffer beyond the swing, x ATR")
+rr       = input.float(2.0, "Reward:risk")
+minRpct  = input.float(0.80,"Min risk as % of price")
+maxRpct  = input.float(3.00,"Max risk as % of price")
+maxBars  = input.int(288,   "Max bars in trade (96 x3)")
+trendLen = input.int(600,   "Trend filter EMA length (200 x3)")
+volLen   = input.int(600,   "Bars for the volatility reference (200 x3)")
+atrLen   = input.int(42,    "ATR length (14 x3)")
+etOffset = input.int(-4,    "ET offset from UTC")
+
+vw   = ta.vwap
+sd   = ta.stdev(close, sdLen)
+atrS = ta.atr(atrLen)
+
+vwUp  = not na(vw[slopeLen]) and vw > vw[slopeLen]
+
+flipUp   = ta.crossover(close, vw)
+flipDn   = ta.crossunder(close, vw)
+flipped  = flipUp or flipDn
+var int sinceFlip = 9999
+sinceFlip := flipped ? 0 : sinceFlip + 1
+coolingOff = sinceFlip < coolBars
+
+pulledBack = low <= vw + pullK * sd and close > vw
+
+trendMA = ta.ema(close, trendLen)
+trendOk = not na(trendMA) and close > trendMA
+
+volRatio = close > 0 and not na(atrS) ? atrS / close : na
+volRef   = ta.sma(volRatio, volLen)
+highVol  = not na(volRatio) and not na(volRef) and volRatio > volRef
+
+hUTC     = math.floor(time / 3600000) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+
+goLong = vwUp and not coolingOff and pulledBack and trendOk and highVol and not witching
+
+swgLo = ta.lowest(low, swgLen)
+buf   = na(atrS) ? 0.0 : atrS * bufK
+minR  = close * minRpct / 100
+maxR  = close * maxRpct / 100
+
+rawLongR = close - (swgLo - buf)
+longR    = math.min(math.max(rawLongR, minR), maxR)
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong and longR > 0
+    strategy.entry("L", strategy.long)
+    slPx   := close - longR
+    tpPx   := close + longR * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
