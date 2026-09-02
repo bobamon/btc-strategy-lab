@@ -1136,5 +1136,63 @@
    "verifiedAt": "2026-09-02T12:20:26Z"
   },
   "notes": "ATTACK 15 RAISED BOTH HALVES AND WIDENED THE SPREAD. New base H1 1.55157635 / H2 0.77846786, spread 0.773. Old base on the identical windows: 1.3552 / 0.6566, spread 0.699. So removing the stretch genuinely improved both regimes -- +0.196 early and +0.122 late -- but it did NOT make the strategy consistent, and H2 still loses money at 0.778 with a 33.75% win rate. PF 1.15252596 on the full sample remains a BLEND, and the caution recorded when Attack 15 was kept was correct. No champion."
+ },
+ {
+  "id": "vwm-attack17a-flipcount-h1",
+  "name": "VWM Attack17a VWAP flip counter H1 (diagnostic)",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "both",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2025-07-20",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "A COUNTER, NOT A STRATEGY. Counts VWAP flips in H1 as a direct measure of choppiness, to characterise the good half rather than filter it. One-bar exits, longs are up-flips and shorts down-flips, so totalTrades is the flip count. P&L meaningless by construction.",
+  "metrics": {
+   "netProfitPct": -98.98804061,
+   "profitFactor": 0.15369302,
+   "maxDrawdownPct": 98.98804061,
+   "totalTrades": 4905,
+   "winRatePct": 16.83995923,
+   "avgTradePct": -0.02018105
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1H1921AS2XP9CW05J4NRCTQ",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1H1921ANYZ1KWAF5GVB469T",
+   "verifiedAt": "2026-09-02T12:25:07Z"
+  },
+  "notes": "4,905 VWAP flips over 117,254 bars in H1 = 0.04183 flips per bar. 2,464 up and 2,441 down, essentially balanced. The good half, where the base scores PF 1.55157635. See Attack 17b for the comparison that makes this mean anything."
+ },
+ {
+  "id": "vwm-attack17b-flipcount-h2",
+  "name": "VWM Attack17b VWAP flip counter H2 (diagnostic)",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "both",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2025-07-20",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "The control for Attack 17a. Identical counter Pine, H2 window. P&L meaningless by construction.",
+  "metrics": {
+   "netProfitPct": -99.29491686,
+   "profitFactor": 0.11982553,
+   "maxDrawdownPct": 99.29644953,
+   "totalTrades": 5609,
+   "winRatePct": 14.77981815,
+   "avgTradePct": -0.01770278
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1H19GQMVCZXMDHG1WMAS3N6",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1H19GQMWPNP1R27S3C9FFQ8",
+   "verifiedAt": "2026-09-02T12:25:22Z"
+  },
+  "notes": "PREDICTION CONFIRMED. H2 has 5,609 flips over 117,997 bars = 0.04754 per bar, against H1's 0.04183 -- 13.6% MORE flips per bar in the half where the base fails. Stated in advance that a VWAP pullback-continuation system should degrade when price oscillates across VWAP, and it does. This is the FIRST measurable regime descriptor this lab has found that separates the two windows -- volatility, trend and clock all failed to. The effect is modest (13.6%) so it is a real signal rather than a dramatic one, and it is directionally correct."
  }
 ]

@@ -573,7 +573,17 @@ never been in the thing being tested — they have been in the assumptions under
 0-V29. ~~THE ENTRY: BINDING TEST ON A SIGNAL TERM~~ — **DONE. Removing the zone TOUCH raised PF
     0.89445064 -> 0.97210749 on 833 -> 1,076 trades, but drawdown went 42.50% -> 61.45%. REVERTED on
     the ratchet. The touch is NOT what carries this system.**
-0-V30-NEXT. **RECOVER v29's PROFIT FACTOR WITHOUT ITS DRAWDOWN (top priority).** v29 is the closest
+0-V30. ~~ZONE FRESHNESS~~ — **KEPT. PF 0.89445064 -> 0.89710112, DD 42.49990566% -> 40.78978663%,
+    trades 833 -> 811.** Both ratchet terms improved, so it is the new base. THE PF GAIN IS NOISE
+    (+0.0027) -- the real change is 1.7pp of drawdown. Do not describe it as an edge improvement.
+0-V31-NEXT. **NOW combine: remove the zone touch ON TOP OF freshness (top priority).** This is one
+    change from the NEW base, so it is attributable. v29 showed the touch removal is worth +0.078 of
+    PF but cost 19pp of drawdown; freshness has just bought 1.7pp back. If the combination lands above
+    0.95 with drawdown near v24's, this lab is genuinely close for the first time.
+0-V32. **Then the freshness neighbourhood** (HARD LESSON 16): dzAge <= 6 and <= 24. A KEPT parameter
+    must have its sensitivity profile measured before the result is quoted -- War Formation's champion
+    was just demoted for exactly this omission.
+    Superseded text: RECOVER v29's PROFIT FACTOR WITHOUT ITS DRAWDOWN. v29 is the closest
     this lab has come to 1.0 and it failed on one term only. The drawdown came from 243 extra trades
     compounding at percent_of_equity 100, not from worse trades -- the win rate ROSE. Test v29 with
     the entry re-narrowed by a DIFFERENT term than the touch, so frequency comes down without
@@ -1159,3 +1169,40 @@ size. That is a frequency-and-sizing problem, not a signal problem, which is why
 frequency with a *different* term rather than putting the touch back.
 
 **Best config unchanged: v24, long-only, PF 0.894 on 833 trades.**
+
+
+---
+
+## ██ v30 — ZONE FRESHNESS. KEPT, AND WORTH LESS THAN IT LOOKS.
+
+| | v24 | **v30 (new base)** |
+|---|---|---|
+| Profit factor | 0.89445064 | **0.89710112** |
+| Max drawdown | 42.49990566% | **40.78978663%** |
+| Trades | 833 | 811 |
+| Win rate | 36.61% | 36.74% |
+
+**Both ratchet terms improved, so this is KEPT — the first change ever accepted in this lab.**
+
+### AND THE HONEST READING
+**The profit-factor gain is +0.0027. That is noise.** The real change is **1.7 percentage points of
+drawdown for 22 fewer trades**. Zone age is a mild *risk* improvement, not an *edge* improvement, and
+describing it as the latter would be exactly the overselling this project has tried to avoid.
+
+What it does establish: **unbounded zone lifetime was costing something.** v24 placed no upper bound
+on `dzAge` at all — a zone created in 2022 was as tradeable in 2024 as one created yesterday. That is
+the same class of defect as the deepest-zone lock-up v22 found: a rule with no expiry, written as if a
+human would silently retire stale structure.
+
+### WHERE THE LAB STANDS
+**PF 0.897 on 811 trades with a 40.8% drawdown is not tradeable and is not close.** But the pieces are
+now separable: v29 showed the touch removal is worth **+0.078 of profit factor** at the cost of 19pp
+of drawdown, and v30 has just bought 1.7pp of drawdown back by a different route. **v31 combines
+them** — one change from the new base, so it stays attributable.
+
+### A DISCIPLINE NOTE FOR v32
+War Formation's champion was demoted this same cycle for having a load-bearing parameter with a
+one-point-wide optimum that nobody had measured. **v30 introduces a new parameter (`maxAge = 12`) and
+its neighbourhood is unmeasured.** Per HARD LESSON 16 that has to be tested before 0.897 is quoted as
+if it were robust — 12 was chosen as a round number, not searched, which is the right way to start and
+not a substitute for checking.

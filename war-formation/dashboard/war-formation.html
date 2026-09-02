@@ -1450,9 +1450,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T12:21:04Z"
     },
     "notes": "THE WORST-CASE OUTCOME, AND IT IS THE STRONGEST NEGATIVE EVIDENCE ABOUT THE CHAMPION TO DATE. coilK 0.85 -> 0.75: PF 1.68623784 -> 0.74926984, win rate 56.25% -> 43.48%, trades 32 -> 23. Combined with E32, the profile around 0.85 is: remove the coil entirely 0.611, coilK 0.75 gives 0.749, coilK 0.85 gives 1.686. Steep falloff on BOTH sides of a single setting, on a 32-trade sample. That is the signature of a FITTED parameter, not a robust one, and it contrasts sharply with E19 where greenBull 4 -> 3 degraded gracefully to 1.28 on 42 trades. The champion's headline number now has to be read with this attached. REVERTED."
+  },
+  {
+    "id": "war-formation-e34-coilk-095",
+    "name": "WF E34 coilK 0.95",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "description": "The loose side of coilK, run to resolve the curve-fit question E33 raised. One change from v6: coilK 0.85 to 0.95. Outcomes were stated before the run: PF holding near 1.686 means a plateau and a defensible champion; PF collapsing means a one-point-wide peak and the champion should be demoted.",
+    "metrics": {
+      "netProfitPct": -4.63475817,
+      "profitFactor": 0.41366124,
+      "maxDrawdownPct": 4.95879718,
+      "totalTrades": 43,
+      "winRatePct": 32.55813953,
+      "avgTradePct": -0.10778507
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1H1ASTJX50FXSSNQ7KSPJPC",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1H1ASTJ3G1667QRKSYZ8EG7",
+      "verifiedAt": "2026-09-02T12:26:05Z"
+    },
+    "notes": "THE PEAK IS ONE POINT WIDE. THE CHAMPION IS DEMOTED. Full profile on an identical window and sample: coil removed 0.611 / 67 trades, coilK 0.75 gives 0.749 / 23, coilK 0.85 gives 1.686 / 32, coilK 0.95 gives 0.414 / 43. BOTH neighbours collapse and 0.95 is the worst of the four. A load-bearing term whose threshold has PF above 1.0 at exactly one tested value, on a 32-trade sample, is a curve-fit -- that is the conclusion stated in advance for this outcome and it is the one that occurred. v6 is reclassified from CHAMPION to BEST FITTED RESULT. This lab now has no validated strategy, which is the honest position."
   }
 ];
-const BUILT = "2026-09-02 06:23";
+const BUILT = "2026-09-02 06:28";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

@@ -916,3 +916,45 @@ trend persistence, autocorrelation of returns, or the ratio of directional to ra
    untested for binding. Attack 15 found +0.13 in that family.
 3. **Re-test the three gates against the new base.** Their verdicts were earned against a signal that
    has changed.
+
+
+## ██ ATTACK 17 — THE FIRST REGIME DESCRIPTOR THAT ACTUALLY SEPARATES H1 FROM H2 (2026-09-02)
+
+The board's top question after Attack 16: what distinguishes the good half from the bad? Volatility,
+trend and clock had all been tested **as filters** and none explained it. Attack 17 stopped filtering
+and **characterised** the two windows instead.
+
+**The measure: VWAP flip frequency** — every crossover or crossunder of VWAP. It is the right
+descriptor for *this* system specifically, because Attack 15 established the base is a **VWAP
+pullback-continuation** strategy, which should profit when price holds one side of VWAP and suffer
+when it oscillates across it.
+
+| | H1 (good half) | H2 (bad half) |
+|---|---|---|
+| VWAP flips | 4,905 | **5,609** |
+| Bars | 117,254 | 117,997 |
+| **Flips per bar** | **0.04183** | **0.04754** |
+| Base profit factor | **1.55157635** | 0.77846786 |
+
+**H2 has 13.6% more flips per bar — and the prediction was stated before the run.**
+
+### WHY THIS MATTERS MORE THAN THE SIZE OF THE EFFECT
+13.6% is modest, and that is worth saying plainly rather than dressing up. But **it is the first
+structural property this lab has measured that moves in the right direction between the two windows**,
+after three filter-based attempts found nothing. It is also mechanistically coherent: a
+pullback-continuation system needs price to *stay* on one side of its reference, and H2 gives it less
+of that.
+
+### WHAT IT DOES AND DOES NOT LICENCE
+**It does not licence a chop filter.** That would repeat the error the gate sweep exposed — the board
+has fourteen reverted attacks that were all filters, and HARD LESSON 12 says a hard-binding gate
+re-selects the sample rather than improving it. A flip-rate gate would bind hard by construction.
+
+**What it licences is a better question.** If flip rate separates the regimes, the productive test is
+whether the base's profit factor is *monotone* in flip rate — measurable by splitting the sample on
+the descriptor rather than on the calendar. That is a decomposition, not a filter, and it is the next
+BTC cycle.
+
+### THE BASE, UNCHANGED
+**PF 1.15252596, DD 16.54%, 166 trades, long-only. No champion.** Attacks 17a and 17b were counters;
+they changed nothing and were never candidates.

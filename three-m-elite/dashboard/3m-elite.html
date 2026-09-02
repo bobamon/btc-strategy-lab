@@ -921,9 +921,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T12:21:26Z"
     },
     "notes": "THE ZONE TOUCH IS NOT DOING THE WORK -- THE BTC PATTERN, NOT THE WAR FORMATION ONE. PF 0.89445064 -> 0.97210749, the closest to 1.0 this lab has ever been, and the win rate rose 36.61% -> 39.87% on 833 -> 1,076 trades. The 243 extra trades are net accretive. REVERTED STRICTLY ON DRAWDOWN, which worsened 42.50% -> 61.45%, and the ratchet is both terms or nothing. But the finding stands: the condition this system is NAMED for -- price trading back into the zone -- is not what carries it. What remains is 'a demand zone is live and price is above its base', which is closer to a trend condition than a zone condition. FREE E14 FINDING, no credit: dzTouch < 2 in the entry is redundant with the lifecycle's own dzLive kill."
+  },
+  {
+    "id": "3m-elite-v30-zone-freshness",
+    "name": "3M ELITE v30 zone freshness (NEW BASE)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "One change from v24: entries require dzAge <= 12, so a zone is only tradeable within 12 four-hour candles of creation. Taken from v24 rather than stacked onto v29, so the result is attributable. FIRST CHANGE EVER KEPT IN THIS LAB.",
+    "metrics": {
+      "netProfitPct": -40.69005764,
+      "profitFactor": 0.89710112,
+      "maxDrawdownPct": 40.78978663,
+      "totalTrades": 811,
+      "winRatePct": 36.74475956,
+      "avgTradePct": -0.0501727
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1H1BG3E0W06M4QME9GX3X0N",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1H1BG3DHNVQT5F4YJCQG6NC",
+      "verifiedAt": "2026-09-02T12:26:27Z"
+    },
+    "notes": "KEPT ON THE RATCHET, BUT READ IT HONESTLY. PF 0.89445064 -> 0.89710112 and drawdown 42.49990566% -> 40.78978663%, so both terms improved and the rule says keep. THE PROFIT-FACTOR GAIN IS +0.0027, WHICH IS NOISE -- the real change is 1.7 percentage points of drawdown for 22 fewer trades. So zone age is a mild risk improvement, not an edge improvement, and it should not be described as one. What it does establish is that unbounded zone lifetime was costing something, which is the same class of defect as the deepest-zone lock-up v22 found. First change ever kept in this lab; still nowhere near tradeable at PF 0.897 and 40.8% drawdown."
   }
 ];
-const BUILT = "2026-09-02 06:23";
+const BUILT = "2026-09-02 06:28";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

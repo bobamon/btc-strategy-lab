@@ -622,3 +622,36 @@ right, which is what curve-fitting produces.
    factor without its parameter neighbourhood is an unqualified claim.
 4. **One intermediate point resolves it.** Testing the other side of the peak distinguishes a plateau
    edge from a spike, and it is cheaper than any new construction.
+
+
+---
+
+## ██ HARD LESSON 17 — STATE THE DEMOTION CRITERION BEFORE THE RUN, THEN HONOUR IT
+
+**Earned:** War Formation E33 → E34, 2026-09-02, when the project's only "champion" was demoted.
+
+E33 found the champion's load-bearing parameter collapsed when tightened. Before running E34 — the
+loose side — the log recorded both outcomes in advance:
+
+> *PF holds near 1.686 → 0.85 sits on a plateau and the champion is defensible.*
+> *PF collapses → the peak is one point wide, the champion should be demoted to "best fitted result",
+> and the honest position is that this lab has no validated strategy.*
+
+**It collapsed: 0.41366124, the worst of the four points tested.** So v6 was demoted, and the board
+now says this lab has no validated strategy.
+
+**Why writing it down first mattered.** After a result arrives there is always a way to soften it —
+different threshold, sample-size caveat, "the trend is still favourable". Fixing the criterion in
+advance removes that latitude. It is the same discipline as the counter builds (HARD LESSON 10) and
+the forward predictions on trade count: **the value comes from committing before the data, not from
+interpreting after it.**
+
+**How to apply:**
+1. **Before a decisive run, write down what each outcome will mean** — including the outcome that
+   destroys the result you like. Put it in the Pine comment and the notes field, where it is
+   timestamped by the run itself.
+2. **When the unfavourable outcome lands, report it in the same terms.** No new caveats invented
+   afterwards.
+3. **Separate what is damaged from what survives.** E34 destroyed the claim that v6 has an edge; it
+   did NOT destroy E32's finding that the coil is load-bearing, which holds at every threshold. Being
+   precise about the boundary is what keeps a negative result useful.

@@ -1140,3 +1140,52 @@ also collapses, the peak is one point wide and the champion should be demoted fr
 new construction.**
 
 **Champion unchanged for now — v6, PF 1.68623784, DD 3.10289714%, 32 trades — but flagged.**
+
+
+---
+
+# ██ E34 — THE PEAK IS ONE POINT WIDE. THE CHAMPION IS DEMOTED.
+
+E33 raised the curve-fit question. E34 answers it, and the answer is the one I said in advance would
+require demoting v6.
+
+| coilK | Profit factor | Trades | Win rate |
+|---|---|---|---|
+| removed (E32) | 0.61133755 | 67 | 35.82% |
+| 0.75 (E33) | 0.74926984 | 23 | 43.48% |
+| **0.85 — v6** | **1.68623784** | 32 | 56.25% |
+| **0.95 (E34)** | **0.41366124** | 43 | 32.56% |
+
+**Both neighbours collapse, and 0.95 is the worst of the four.** Profit factor exceeds 1.0 at exactly
+one tested value of the parameter that carries the strategy, on a **32-trade sample**.
+
+## THE CONCLUSION, STATED AS PROMISED
+**v6 is reclassified from CHAMPION to BEST FITTED RESULT.** I wrote before running E34 that this
+outcome would mean "the peak is one point wide and the champion should be demoted", and I am not going
+to soften it now that it has happened.
+
+**This lab has no validated strategy.** That is the honest position and it should stay on the board
+until something survives a sensitivity test.
+
+## WHAT IS AND IS NOT DAMAGED
+**Damaged:** the claim that v6's PF 1.68623784 represents an edge. A result that requires one
+parameter to sit at one value, measured on 32 trades, is indistinguishable from a fit.
+
+**Not damaged:** the *finding* that the coil is load-bearing (E32). Removing it still costs more than
+a full point of profit factor, and that is true at every threshold tested. **The coil is doing
+something real; the strategy's dependence on one exact threshold of it is what is not credible.**
+
+**Also not damaged:** the Oracle's underlying observation. "Candles get smaller, the move gets weaker"
+survives as a description of something the market does — the failure is in the mechanisation being
+knife-edged, not in the observation.
+
+## WHAT WOULD REHABILITATE IT
+Nothing available on this data. **1m coverage is fixed at 2025-12-16 → 2026-05-03 and 32 trades is
+the ceiling** (E31 closed the 5m route: the mechanism does not survive aggregation). A knife-edge
+parameter on a small sample cannot be validated by more parameter work — only by more data, and there
+is none.
+
+**So the honest next move in this lab is not another War Formation variant.** It is to accept the
+result, keep the coil finding, and spend cycles where a sample exists.
+
+**Champion: NONE. Best fitted result: v6, PF 1.68623784 on 32 trades, coilK-sensitive and flagged.**
