@@ -111,16 +111,26 @@ lower bound on the system, not a verdict on it.**
 0. ~~Get definitions for Type 1/Type 2~~ — **DONE 2026-09-02, see VOCABULARY.md.**
    Type 1 = a 3M candle; Type 2 = an engulfing candle in the direction of bias; both only on the
    STRUCTURE timeframe (48m for this variant), inside the tapped zone.
-0a. **IMPLEMENT THE VALIDATION GATE (top priority).** The current Pine has NO validation gate at all.
-    Add: after a zone tap, require an engulfing candle in the direction of bias on the 48m
-    reconstruction before an entry is allowed (that is Type 2, fully specifiable). Type 1 needs the
-    3M candle anatomy, which is still unknown — implement Type 2 alone first and label it as such.
+0a. ~~IMPLEMENT THE VALIDATION GATE~~ — **DONE 2026-09-02, REJECTED.** Built as `3m-elite-v2-validation.pine`:
+    a zone tap arms a wait, a qualifying 48m engulfing candle (Type 2, computed independently for
+    longs and shorts per HARD LESSON 6) validates it, a zone-bias flip clears it; entry requires the
+    persistent `validLong`/`validShort` flag instead of v1's instant `demandTap`/`supplyTap` test.
+    Result: PF 0.64 (v1: 0.91), maxDD 12.1% (v1: 3.47%), net -11.2%, 92 trades (v1: 20), WR 33.7%.
+    Worse on both gates, so v1 stays the best-known config. Trade count rose ~4.6x — the persistent
+    validated-state test turned out to pass MORE setups than v1's instant tap-and-go, not fewer, so
+    this was not a pure filter on v1's trades. Both legs are now net losers (longs -$860.79/23 trades,
+    shorts -$259.83/69 trades) versus v1 where longs alone carried the profit. avgBarsLosing/avgBarsWinning
+    = 0.52, the HARD LESSON 5/6 diagnostic: losers still die roughly twice as fast as winners run,
+    which points at the stop (unchanged 3H zone edge, not touched by this experiment), not the gate.
+    Full record: `results/backtests.json` id `3m-elite-v2-type2-validation`.
 0b. **IMPLEMENT ZONE INVALIDATION.** A candle BODY closing beyond the zone kills it, judged on the
     ZONE's own timeframe. Also: if the candle immediately after a validation body-closes beyond,
     the validation is void and a new one is required. Neither is in the current build.
-0c. **IMPLEMENT THE PROTECTED LOW/HIGH.** After validating, mark the structure-timeframe low (for
-    longs) as the protected level and stop beneath it. The current build stops at the 3H zone edge
-    instead, which is not what the source does.
+0c. **IMPLEMENT THE PROTECTED LOW/HIGH (raised priority after 0a).** After validating, mark the
+    structure-timeframe low (for longs) as the protected level and stop beneath it, replacing the
+    3H-zone-edge stop both v1 and v2 use. 0a's result diagnostic (avgBarsLosing far below
+    avgBarsWinning, the same defect HARD LESSONS 5 and 6 both flagged) points straight at this stop
+    as the next thing to fix, ahead of 0b.
 1. Port the cascade to a 15m base (scaling every layer up) to get 4.7 years of data instead of 4.6
    months. Loses 3m entry precision, buys a real sample.
 2. Test the source's BE-at-2RR rule as a variant.

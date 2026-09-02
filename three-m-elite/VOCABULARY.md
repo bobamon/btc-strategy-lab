@@ -8,6 +8,12 @@ read with OpenCV. Quotes are the author's own words.
 ---
 
 ## ✅ TYPE 1 AND TYPE 2 VALIDATION — DECODED
+**Type 2 implemented and tested 2026-09-02** (`3m-elite-v2-validation.pine`, see SYSTEM.md queue 0a).
+Result: PF 0.64 / maxDD 12.1%, worse than v1's PF 0.91 / maxDD 3.47% on both gates — rejected, v1
+stays the best-known config. The loss diagnostic (avgBarsLosing well below avgBarsWinning) points at
+the stop, not the gate — see queue item 0c. Type 1 (the 3M candle itself) is still not implemented;
+its anatomy remains undefined below.
+
 Source: `2026-08-09 07-20-21.txt`, a dedicated 10-minute lesson.
 
 > "The two types of validations: **type 1 validation is just going to be a 3M candle.** Okay, and
