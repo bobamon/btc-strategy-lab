@@ -1189,3 +1189,58 @@ is none.
 result, keep the coil finding, and spend cycles where a sample exists.
 
 **Champion: NONE. Best fitted result: v6, PF 1.68623784 on 32 trades, coilK-sensitive and flagged.**
+
+
+---
+
+# ██ E35 — THE ALCM SPEC CORRECTION. THE LAB REOPENS.
+
+The user has corrected the exit specification: **War Formation has no stop loss.** It uses a fixed
+dollar gap to liquidation — the shield. Full decode at the top of `ORACLE-RULES.md`.
+
+**Every run in this log up to E34 used a structural stop clamped to 0.15–1.50% of price.** The shield
+is $3,000, roughly 3% on BTC in this window — **twice the widest stop those runs allowed and twenty
+times the narrowest.**
+
+## E35: v6's ENTRY, THE SHIELD AS THE EXIT
+
+| | v6 (structural stop) | **E35 ($3,000 shield)** |
+|---|---|---|
+| Profit factor | 1.68623784 | 0.94121736 |
+| **Win rate** | 56.25% | **57.14285714%** |
+| Payoff ratio | — | 0.70591302 |
+| Trades | 32 | 28 |
+| Max drawdown | 3.10289714% | 6.71587495% |
+| **avgBarsInTrade** | — | **708.39 against a 720 cap** |
+
+## THIS RUN IS INCONCLUSIVE ON THE ALCM, AND I SAID SO BEFORE RUNNING IT
+**avgBarsInTrade is 708.39 against `maxBars = 720`.** Essentially every trade times out at the
+12-hour cap rather than reaching the $6,000 target or the $3,000 shield. **So this measures a 12-hour
+hold, not the ALCM**, which is exactly the confound the Pine comment flagged in advance.
+
+`maxBars = 720` is a leftover from the narrow-stop model. With a $150–$1,500 stop a 12-hour cap is
+generous; **with a $3,000 shield and a $6,000 target it terminates the trade before the design can
+resolve.** The shield implies a trade measured in **days**, not hours.
+
+## WHAT IS REAL IN IT ANYWAY, AND IT IS THE BEST NEWS THIS LAB HAS HAD
+**Win rate 57.14% — the highest ever recorded here, above v6's 56.25% — on a byte-identical entry.**
+Even truncated at 12 hours and exiting at market, the entry picks winners more often than any prior
+build. **Payoff 0.70591302** (avgWin $91.98 against avgLoss $130.29) says the failure is entirely in
+the exit: winners are being cut mid-move by the cap while losers run toward a wide shield.
+
+**The entry is sound. The exit model was wrong, and the fix for it is not yet tested.**
+
+## WHAT THIS RETRACTS
+Last cycle the board said this lab was **out of productive moves** because only more data could
+validate a curve-fit. **That is withdrawn.** It was reached under an exit model the strategy does not
+use. The E33/E34 coilK profile still describes *that build* accurately — v6 stays demoted — but it
+is not a statement about War Formation as specified.
+
+## QUEUE
+1. **E36 (next): `maxBars` 720 → 4320 (three days).** One change from E35. The shield needs room to
+   resolve, and the current cap is a narrow-stop artifact. Read `avgBarsInTrade` again — if it still
+   pins to the cap, raise it further before interpreting anything.
+2. **Then the shield neighbourhood**: $2,000 / $4,000 (HARD LESSON 16 — measure the parameter's
+   neighbourhood before quoting the result, which is exactly what cost v6 its championship).
+3. **Then re-test the coil under the corrected exit.** E32's finding that the coil is load-bearing was
+   measured on the wrong exit model and deserves re-checking.

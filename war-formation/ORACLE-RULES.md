@@ -1,3 +1,60 @@
+# ██ SPECIFICATION CORRECTION FROM THE USER, 2026-09-02 — THERE IS NO STOP LOSS
+
+**"War formation does not have a stop loss."** The exit model is **A.L.C.M. — Anti-Liquidation
+CounterMeasures**, supplied as an annotated image. This invalidates the exit model of every run in
+this lab up to and including E34.
+
+## THE RULE AS STATED
+| Element | Rule |
+|---|---|
+| Leverage | 58x nominal — "the perfect speed to profit as fast as possible" |
+| **The shield** | **A fixed DOLLAR gap between entry and liquidation. $3,000; $4,000 is safer.** |
+| Adjusting it | The "Bitunix Pencil" — move the liquidation price by adjusting margin |
+| **Exit** | **No protective stop. The position ends at target or at liquidation.** |
+| Hard prohibition | **NEVER add to a losing trade.** "You are giving up your shield for an arrow." |
+
+## WHAT EVERY PRIOR RUN DID INSTEAD, AND WHY IT MATTERS
+All 43 runs before E35 used a **structural stop** at the swept 15m low, clamped to
+`[minRpct 0.15%, maxRpct 1.50%]` of price. On BTC near $100,000 that is a **$150 to $1,500** stop.
+
+**The shield is $3,000 — twice v6's widest permitted stop and twenty times its narrowest.**
+
+That is not a parameter difference, it is a different strategy. Two consequences follow immediately:
+- **The E33/E34 coilK curve-fit finding was measured on an exit model the strategy does not use.**
+  The demotion of v6 stands as a statement about *that* build, but it says nothing about the
+  strategy as actually specified.
+- **The lab is NOT out of productive moves.** The previous conclusion — that only more data could
+  help — was reached under the wrong exit model and is withdrawn.
+
+## AN ARITHMETIC POINT WORTH KNOWING, AND IT IS NOT A CRITICISM
+**The $3,000 gap and "58x" describe the same dial, and the gap is the binding one.**
+
+At 58x, liquidation sits about `1/58 = 1.72%` away — roughly **$1,724** on BTC at $100,000. That is
+**narrower than the shield**. To hold a $3,000 gap the effective leverage must be at most
+`100,000 / 3,000 = 33x`; for $4,000 it is **25x**.
+
+So the pencil is not adding safety on top of 58x — **it is reducing effective leverage to ~33x**,
+which is exactly what makes the shield work. The 58x is the nominal setting; **the gap is the real
+risk parameter.** Anyone reading "58x" as the risk level has the wrong number.
+
+## WHAT CAN AND CANNOT BE MODELLED HERE
+**Can:** the shield as a fixed dollar price distance at which the position dies. That is what the gap
+specifies, and profit factor and win rate are leverage-invariant, so the EDGE is measured correctly.
+
+**Cannot, and these are hard limits:**
+- **Actual liquidation at 58x.** The engine forces `margin_long/short = 100` (1x) on every run and
+  logs the override. Drawdown percentages are therefore 1x figures and must be scaled.
+- **Adding margin mid-trade to push the gap out.** The engine cannot express it, and the strategy's
+  own rule forbids the related move ("never add to a losing trade").
+
+## THE 3M ELITE LAB IS UNAFFECTED
+The user was explicit that the ALCM is **War Formation only** and that 3M Elite keeps its own model
+from its own source material. 3M uses structural stops beyond the zone base, which is what
+`VOCABULARY.md` records from the videos and images. **Do not port the ALCM into 3M** — that would be
+the sixth cross-lab inheritance error in this project.
+
+---
+
 # ██ THE 950 RULE & ROUND NUMBER PHENOMENON — SUPPLIED BY THE USER, 2026-09-02
 
 **This is now the top of the queue.** It arrived as an annotated infographic ("Titans"), and it is the

@@ -1253,5 +1253,34 @@
    "verifiedAt": "2026-09-02T12:26:05Z"
   },
   "notes": "THE PEAK IS ONE POINT WIDE. THE CHAMPION IS DEMOTED. Full profile on an identical window and sample: coil removed 0.611 / 67 trades, coilK 0.75 gives 0.749 / 23, coilK 0.85 gives 1.686 / 32, coilK 0.95 gives 0.414 / 43. BOTH neighbours collapse and 0.95 is the worst of the four. A load-bearing term whose threshold has PF above 1.0 at exactly one tested value, on a 32-trade sample, is a curve-fit -- that is the conclusion stated in advance for this outcome and it is the one that occurred. v6 is reclassified from CHAMPION to BEST FITTED RESULT. This lab now has no validated strategy, which is the honest position."
+ },
+ {
+  "id": "war-formation-e35-alcm-3000",
+  "name": "WF E35 ALCM $3,000 shield",
+  "symbol": "BTCUSDT",
+  "timeframe": "1m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2025-12-16",
+  "backtestEnd": "2026-05-03",
+  "specPath": "war-formation/ORACLE-RULES.md",
+  "description": "First run under the CORRECTED exit specification supplied by the user: War Formation has no stop loss, it uses A.L.C.M. -- a fixed dollar gap to liquidation. One change from v6: the structural stop clamped to 0.15-1.50% of price is replaced by a flat $3,000 shield. rr stays 2.0, so the target widens with R; declared in advance as unavoidable since R is what the stop model defines.",
+  "metrics": {
+   "netProfitPct": -0.91908849,
+   "profitFactor": 0.94121736,
+   "maxDrawdownPct": 6.71587495,
+   "totalTrades": 28,
+   "winRatePct": 57.14285714,
+   "avgTradePct": -0.03282459
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1H1ZNNAKT6ATVDP7G0M6KHY",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1H1ZNNANCYPD3TXWHV3CBTX",
+   "verifiedAt": "2026-09-02T12:37:29Z"
+  },
+  "notes": "INCONCLUSIVE ON THE ALCM ITSELF, AND THE REASON WAS PREDICTED. avgBarsInTrade is 708.39 against a maxBars cap of 720 -- essentially EVERY trade times out at the 12-hour cap instead of reaching either the $6,000 target or the $3,000 shield. So this measures a 12-hour hold, not the ALCM. WHAT IS STILL REAL: win rate 57.14%, the highest this lab has recorded and above v6's 56.25%, on an entry that is byte-identical -- the ENTRY is sound and the exits are what fail. Payoff 0.706 (avgWin $91.98 vs avgLoss $130.29) confirms it. Trades 32 to 28 because 12-hour holds block new entries. THE STRUCTURAL FINDING: a $3,000 shield implies a trade measured in DAYS, and maxBars 720 is a leftover from the narrow-stop model that was never part of the real specification."
  }
 ]
