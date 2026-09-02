@@ -59,6 +59,8 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E17 | Raise the R floor 0.15% -> 0.80% (HARD LESSON 3 compliance) | **IDENTICAL RESULTS.** PF 1.68623784, DD 3.10289714%, 32 trades, 56.25% -- the floor never bound. 0.80% adopted as the documented config · [report](https://mcp-api.trader.dev/backtest/01M1GQYHZ94F1QPS3HFR8641NB) |
 | E18 | Cross-lab transfer: restrict the champion to the high-volatility regime | **REVERTED.** PF 1.69->1.10, trades 32->7. The edge concentration is NOT a volatility regime · [report](https://mcp-api.trader.dev/backtest/01M1GR7Q2PD409YCKNDDQJ2J86) |
 | E19 | SENSITIVITY: greenBull 4 -> 3 | **Degrades gracefully.** PF 1.686->1.282, win 56.25%->47.62%, trades 32->42, DD 3.10%->4.79%. Still clearly profitable -- not a knife-edge fit · [report](https://mcp-api.trader.dev/backtest/01M1GRHCBX2GY7QQ7NK1N173VB) |
+| E20 | Timeframe translation to 5m, parameters scaled x5 | **REVERTED.** PF 1.621, DD 2.73%, but trades 32->5 · [report](https://mcp-api.trader.dev/backtest/01M1GTNK25PJC0J19WKQ6GKQXK) |
+| E20b | CONTROL: same, but the coil keeps its 1:10 RATIO instead of wall-clock | **REVERTED.** Trades 5->9, so the coil was part of it -- but PF fell to 0.951 and 9 is still far below 32 · [report](https://mcp-api.trader.dev/backtest/01M1GTQ6BGVNPYGKX1AQAHQA39) |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -270,3 +272,38 @@ artefact would have fallen below break-even at the adjacent value — this did n
 The champion keeps `greenBull = 4` because it is better on both ratchet terms, but **confidence in
 the 32-trade result is materially higher than it was**, and that is worth more than another failed
 filter. Sensitivity in the other direction (`greenBull = 5`) is still owed, as is `coilK`.
+
+
+## E20/E20b LESSON — THIS STRATEGY NEEDS 1m ENTRY PRECISION, AND THE BTC RESULT DOES NOT TRANSFER
+
+The BTC lab had just found that moving a strategy to a faster timeframe mattered more than any entry
+filter. The reverse question here — would this champion do better SLOWER — is answered no, and the
+control says why.
+
+| | Champion (1m) | E20 (5m, wall-clock coil) | E20b (5m, ratio coil) |
+|---|---|---|---|
+| Profit factor | **1.686** | 1.621 | 0.951 |
+| Max drawdown | 3.10% | 2.73% | 3.57% |
+| Trades | **32** | 5 | 9 |
+
+**The control did its job and split the cause.** Fixing the coil approximation raised trades from 5 to
+9, so that parameter genuinely was suppressing frequency — naming it in the Pine header before the run
+was correct. But 9 against 32 means **roughly three quarters of the loss is the timeframe itself.**
+
+**The mechanism is the entry trigger.** The champion enters on `ta.crossover(close, p15l)` — a reclaim
+of the previous 15m low. On a 1m chart there are fifteen opportunities per 15m candle to catch that
+crossover; on 5m there are three. The cascade *identifies* the level on higher timeframes, but the
+*entry* needs 1m granularity to catch the reclaim of it.
+
+**Two strategies on the same instrument, opposite relationships to the same variable.** The BTC signal
+is a mean-reversion needing price to travel to a fixed target, so coarser bars and longer horizons
+help it. This one needs precision at a level, so coarser bars destroy it. **A cross-lab finding is a
+hypothesis, never an inheritance** — the same caution E18 established, now confirmed from the other
+direction.
+
+**Consequence for the lab's biggest problem:** the sample-size constraint is NOT solvable by changing
+timeframe. 1m coverage starting 2025-12-16 is a hard limit, and 32 trades is what this champion gets
+until the engine's history extends. Robustness must therefore come from parameter sensitivity (E19's
+approach) rather than from a bigger sample.
+
+**Champion unchanged: v6, long-only, PF 1.68623784, DD 3.10289714%, 32 trades.**

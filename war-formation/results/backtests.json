@@ -586,5 +586,63 @@
       "verifiedAt": "2026-09-02T09:52:23Z"
     },
     "notes": "THE CHAMPION IS NOT A KNIFE-EDGE FIT, WHICH IS THE POINT OF THE TEST. Loosening the regime by one candle degrades gracefully rather than collapsing: PF 1.686 -> 1.282, win rate 56.25% -> 47.62%, DD 3.10% -> 4.79%, trades 32 -> 42. It remains clearly profitable at the neighbouring parameter value, on a 31% larger sample. That is what a real edge looks like under perturbation -- a fitted artefact would have fallen below 1.0. The champion keeps greenBull = 4 because it is better on both ratchet terms, but confidence in the 32-trade result is materially higher than it was before this run. Sensitivity in the other direction (greenBull 5) is still owed."
+  },
+  {
+    "id": "war-formation-e20-5m-translation",
+    "name": "WF E20 timeframe translation to 5m",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "description": "The champion translated from 1m to 5m with bar-denominated parameters scaled x5, run over the champion's exact window for a like-for-like comparison. maxBars 720->144 and the slow coil ATR 30->6 both preserve wall-clock. The fast coil leg is sub-bar on 5m so atr(1) was used, shifting the coil ratio from 1:10 to 1:6. Long-only.",
+    "metrics": {
+      "netProfitPct": 1.13617464,
+      "profitFactor": 1.62099524,
+      "maxDrawdownPct": 2.73361123,
+      "totalTrades": 5,
+      "winRatePct": 40.0,
+      "avgTradePct": 0.22723493
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GTNK25G8BYXFQM8F1VYHVS",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GTNK25PJC0J19WKQ6GKQXK",
+      "verifiedAt": "2026-09-02T10:29:38Z"
+    },
+    "notes": "Trade count collapsed 32 to 5. PF 1.621 and drawdown 2.73% both look respectable but five trades is not a sample. The suspect was named in the Pine header BEFORE the run: the coil's fast leg is sub-bar on 5m. E20b tests that directly."
+  },
+  {
+    "id": "war-formation-e20b-coil-ratio",
+    "name": "WF E20b control, coil ratio preserved",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "description": "Control for E20. Identical 5m translation except the coil keeps atr(3) vs atr(30) so its RATIO matches the 1m champion (1:10) rather than its wall-clock. Isolates whether E20's frequency collapse came from the coil approximation or from the timeframe itself. Long-only.",
+    "metrics": {
+      "netProfitPct": -0.18875358,
+      "profitFactor": 0.95115239,
+      "maxDrawdownPct": 3.57408212,
+      "totalTrades": 9,
+      "winRatePct": 33.33333333,
+      "avgTradePct": -0.02097262
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GTQ6BGE5GZ539AR1Q84ZSE",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GTQ6BGVNPYGKX1AQAHQA39",
+      "verifiedAt": "2026-09-02T10:30:31Z"
+    },
+    "notes": "THE CONTROL SPLITS THE CAUSE, AND MOST OF IT IS THE TIMEFRAME. Fixing the coil approximation took trades from 5 to 9 -- so it WAS suppressing frequency, and naming it before the run was right -- but 9 against the champion's 32 means roughly three quarters of the loss is the timeframe itself, not my approximation. PF also fell to 0.951. THE MECHANISM IS THE ENTRY TRIGGER: the champion enters on ta.crossover(close, p15l), a reclaim of the previous 15m low. On 1m there are fifteen chances per 15m candle to catch that crossover; on 5m there are three. The cascade identifies the level on higher timeframes but the ENTRY needs 1m granularity to catch the reclaim. THIS IS THE OPPOSITE OF THE BTC LAB'S RESULT, where coarsening from 15m to 5m helped -- there the signal needed price to travel to a fixed target, here it needs precision at a level. The sample-size problem is NOT solvable by moving to 5m; 1m coverage from 2025-12-16 remains the binding constraint."
   }
 ]
