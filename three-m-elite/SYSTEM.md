@@ -155,15 +155,34 @@ lower bound on the system, not a verdict on it.**
     unimplemented VOCABULARY.md gates (Type 2 validation, protected stop, zone invalidation) have
     now been tried, individually and stacked, and none rescues the validation-gate architecture
     against v1's plain instant-tap cascade.
-0e. **ISOLATE THE STOP FROM THE GATE.** With the validation gate (0a), the protected stop (0c) and
+0e. ~~IMPLEMENT THE ONE CANDLE RULE~~ — **DONE 2026-09-02, NULL RESULT (rejected, no change).**
+    Built as `3m-elite-v5-one-candle-rule.pine` on top of v1 (not the v2-v4 gate stack): a demand/
+    supply zone is mitigated once two consecutive completed 3H candles close beyond the same prior
+    edge without a pullback between them, blocking `demandTap`/`supplyTap` while mitigated. This was
+    the last decoded-but-unimplemented VOCABULARY.md gate (Type 2, protected stop and zone
+    invalidation were already in v2/v3/v4), so it took automatic top priority ahead of 0e (now 0f)
+    per this project's standing rule. Result: **byte-identical to v1 on every metric** — PF
+    0.91419933, maxDD 3.47086085%, 20 trades, 8W/12L. The gate fired ZERO times in this sample: not
+    rare, literally inert. Diagnosis: under v1's zone model (zone = most recent completed 3H
+    candle, refreshed every 3H bar with no persistence), the mitigation trigger (two consecutive
+    3H closes beyond the SAME edge, i.e. a hard continuation move) is nearly incompatible with
+    `zoneBull`/`zoneBear` being true at the same time, since those require the MOST RECENT close to
+    have reversed direction relative to the one before it — the opposite of what mitigation needs.
+    A zone about to be tapped for entry essentially can't simultaneously be mid-mitigation under
+    this ephemeral zone architecture. The rule needs a persistent zone (like v2-v4's arm-on-tap
+    state machine) to have any teeth at all. Best-known config stays v1, unchanged (no ratchet
+    triggers on a tie). Full record: `results/backtests.json` id `3m-elite-v5-one-candle-rule`.
+0f. **ISOLATE THE STOP FROM THE GATE.** With the validation gate (0a), the protected stop (0c) and
     zone invalidation (0d) all tested and rejected — individually and now stacked together — and
     the gate not clearly the cause (v1's own zone-edge stop already showed the same
     avgBarsLosing/avgBarsWinning defect at a smaller sample), test v1's cascade (no validation gate
     at all) with the protected-stop swapped in for the 3H zone edge — this isolates whether the
     stop fix helps even without the gate, since the gate roughly quadrupled trade count and may
-    simply be admitting more low-quality setups than it removes. This is now the top unblocked
-    queue item — all decoded VOCABULARY.md gates are implemented, so no automatic-priority item
-    remains ahead of it.
+    simply be admitting more low-quality setups than it removes.
+0g. **RETEST THE ONE CANDLE RULE ON A PERSISTENT ZONE.** 0e's null result was an artifact of v1's
+    ephemeral zone model, not evidence the rule itself has no effect — re-implement it on top of a
+    v2/v3/v4-style arm-on-tap persistent zone (mitigation clears the armed/valid state instead of
+    gating an instant tap) so the rule gets a real chance to fire before drawing a conclusion.
 1. Port the cascade to a 15m base (scaling every layer up) to get 4.7 years of data instead of 4.6
    months. Loses 3m entry precision, buys a real sample.
 2. Test the source's BE-at-2RR rule as a variant.

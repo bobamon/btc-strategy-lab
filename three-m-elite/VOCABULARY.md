@@ -76,6 +76,17 @@ And it is judged on the **zone's own** timeframe, not the validation timeframe:
 ---
 
 ## ✅ ONE CANDLE RULE — DECODED
+**Implemented and tested 2026-09-02** (`3m-elite-v5-one-candle-rule.pine`, built on v1, see
+SYSTEM.md queue 0e). Mechanical reading: a zone is mitigated once two consecutive completed 3H
+candles close beyond the same prior edge without a pullback between them. Result: byte-identical
+to v1 on every metric — the gate fired zero times in the sample. Diagnosis: v1's zone model has no
+persistence across 3H bars (it's just "the most recently completed 3H candle," refreshed every
+period), so the two-candle mitigation trigger is structurally near-incompatible with
+`zoneBull`/`zoneBear` being true at the same time — the trigger needs a hard continuation move,
+which is the opposite of the reversal `zoneBull`/`zoneBear` require. This is a null result caused
+by the zone architecture, not evidence the rule itself is inert — SYSTEM.md queue 0g proposes a
+retest on a persistent (arm-on-tap) zone.
+
 Source: `2026-08-09 03-24-31.txt` (the whole video).
 
 Governs **when a supply/demand zone counts as mitigated**.
