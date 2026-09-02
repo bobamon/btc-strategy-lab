@@ -1076,3 +1076,55 @@ doing it. Distinguishing them requires removing the candidate partners together,
 done a "does not bind" reading is provisional.
 
 **Base unchanged: PF 1.15252596, DD 16.54214281%, 166 trades, long-only. No champion.**
+
+
+## ██ ATTACK 21 — coolingOff IS THE CHOP DEFENCE, AND IT GUARDS DRAWDOWN NOT PROFIT FACTOR (2026-09-02)
+
+| | Base (Attack 15) | Without `coolingOff` |
+|---|---|---|
+| Profit factor | **1.15252596** | 1.07714686 |
+| Max drawdown | **16.54214281%** | 28.17240888% |
+| Trades | 166 | **413** |
+| Win rate | 44.58% | 43.58% |
+
+**REVERTED.** Profit factor fell 0.075 and **drawdown nearly doubled**.
+
+### THE BINDING TABLE — coolingOff DWARFS EVERYTHING ELSE
+| Term | Candidates it excludes |
+|---|---|
+| **`coolingOff`** | **247 of 413 — 60%** |
+| `pulledBack` | 124 of 290 — 43% |
+| `highVol` | 79 of 207 — 38% |
+| trend pair together | 42 of 208 — 20% |
+| `reachedUpper` (removed, was costly) | 38 of 166 — 23% |
+| `witching` | 2 of 130 — 2% |
+
+**Six of every ten would-be entries are blocked by a single term nobody had tested.**
+
+### THE PRECISE READING, BECAUSE THE TWO COSTS ARE VERY DIFFERENT
+Profit factor falls only 0.075 while drawdown rises 11.6 percentage points. **So `coolingOff` is a
+RISK control, not an edge term.** The trades it blocks are not much worse *on average* — they are
+worse *in sequence*. It stops the strategy re-entering repeatedly through the same VWAP oscillation,
+which is exactly how a drawdown gets built without the average trade looking bad.
+
+This is a distinction the ratchet's two terms are built to catch and a single-metric view would miss.
+
+### IT ALSO GIVES THE H1/H2 PROBLEM ITS FIRST CONCRETE LEVER
+Attack 17 found the only property separating the regimes: **H2 has 13.6% more VWAP flips per bar** and
+is where the base fails. **`coolingOff` is the only term in the strategy that responds to flip
+frequency** — and it turns out to be the most binding term in the base.
+
+**So the response to the regime gap is to tune `coolBars`, not to bolt on the chop filter the board
+warned against.** That is a parameter the strategy already has, aimed at the mechanism actually
+identified, rather than a fifteenth filter.
+
+### QUEUE
+1. **`coolBars` neighbourhood: 30 and 120 against the current 60** (HARD LESSON 16 — and with 60%
+   binding, this is the highest-leverage parameter in the base). Run both sides together; one side
+   cannot distinguish a plateau from a spike.
+2. **Then `close > open`** — the last untested signal term.
+3. Note in passing: **PF 1.077 on 413 trades is the largest positive-profit-factor sample this lab
+   has produced.** Not a candidate (the ratchet rejected it), but worth remembering that the
+   wider-population version is not far below break-even-plus.
+
+**Base unchanged: PF 1.15252596, DD 16.54214281%, 166 trades, long-only. No champion.**

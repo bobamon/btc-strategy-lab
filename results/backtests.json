@@ -1281,5 +1281,34 @@
    "verifiedAt": "2026-09-02T20:51:42Z"
   },
   "notes": "THE TREND REQUIREMENT IS LOAD-BEARING, AND BOTH EARLIER 'INERT' VERDICTS WERE ARTIFACTS. Base PF 1.15252596 / DD 16.54214281% / 166 trades; without either trend term PF 1.04432441 / DD 15.91706953% / 208 trades. REVERTED -- the ratchet needs PF to improve and it fell 0.108, though drawdown did improve 0.63pp. THE ARITHMETIC IS THE FINDING: removing vwUp alone admitted 10 trades and cost 0.027 of PF; removing BOTH admits 42 trades and costs 0.108. The pair excludes far more together than either does alone, which is the quantitative signature of shared information. So the trend requirement genuinely carries part of this edge, and Attack 13's verdict that trendOk is 'inert' must be re-scoped: it measured trendOk GIVEN vwUp, not the trend requirement itself. Neither term is free to delete -- the earlier reading that the base carried decoration here was wrong."
+ },
+ {
+  "id": "vwm-attack21-no-flip-standdown",
+  "name": "VWM Attack21 no flip stand-down",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "The binding test on coolingOff, one of only two signal terms never tested, chosen because it is the only term in the strategy that responds to VWAP flip frequency -- the single structural property Attack 17 found separating H1 from H2. One change from the Attack 15 base: coolingOff removed, still computed so the deviation stays visible.",
+  "metrics": {
+   "netProfitPct": 25.74546643,
+   "profitFactor": 1.07714686,
+   "maxDrawdownPct": 28.17240888,
+   "totalTrades": 413,
+   "winRatePct": 43.58353511,
+   "avgTradePct": 0.06233769
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1HYKTBW2G0YF0D26X4MYSG5",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HYKTBWT3TS30G82J5J49SK",
+   "verifiedAt": "2026-09-02T20:57:49Z"
+  },
+  "notes": "THE HARDEST-BINDING TERM IN THE BASE BY A WIDE MARGIN, AND IT DEFENDS DRAWDOWN RATHER THAN PROFIT FACTOR. Base PF 1.15252596 / DD 16.54214281% / 166 trades; without coolingOff PF 1.07714686 / DD 28.17240888% / 413 trades. REVERTED -- PF fell 0.075 and drawdown nearly DOUBLED. It excludes 247 of 413 candidates, 60% of the population, against 43% for pulledBack and 20% for the trend pair. PRECISE READING: the profit-factor cost is modest and the DRAWDOWN cost is severe, so this term is a RISK control, not an edge term -- the trades it blocks are not much worse on average, they are worse in sequence. That matters because Attack 17 showed H2 is 13.6% choppier and coolingOff is the only term responding to flip frequency, giving the H1/H2 problem a concrete lever: tune coolBars rather than bolt on a chop filter. Also note PF 1.077 on 413 trades is the largest positive-PF sample this lab has produced."
  }
 ]
