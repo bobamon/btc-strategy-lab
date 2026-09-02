@@ -1,0 +1,696 @@
+<title>War Formation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#F6F7F9; --surface:#FFFFFF; --surface-2:#EFF2F6; --surface-3:#E4E9F0;
+  --ink:#141A22; --ink-2:#3A4756; --muted:#5D6B7A; --faint:#8996A5;
+  --border:#DDE3EA; --border-2:#C8D1DC;
+  --accent:#2B4C8C; --accent-ink:#FFFFFF; --accent-soft:#E7ECF7;
+  --pass:#15803D; --pass-soft:#E3F3E9;
+  --testing:#B45309; --testing-soft:#FAEEE0;
+  --research:#64748B; --research-soft:#EDF0F4;
+  --rejected:#B91C1C; --rejected-soft:#FBE9E9;
+  --pos:#15803D; --neg:#B91C1C;
+  --shadow:0 1px 2px rgba(20,26,34,.06),0 4px 12px rgba(20,26,34,.05);
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E1319; --surface:#161D26; --surface-2:#1D2732; --surface-3:#26323F;
+    --ink:#E8EDF3; --ink-2:#C2CCD8; --muted:#94A2B2; --faint:#6E7D8D;
+    --border:#28323E; --border-2:#384553;
+    --accent:#7CA0E0; --accent-ink:#0E1319; --accent-soft:#1B2740;
+    --pass:#4ADE80; --pass-soft:#14301F;
+    --testing:#FBBF24; --testing-soft:#33260C;
+    --research:#94A2B2; --research-soft:#212B36;
+    --rejected:#F87171; --rejected-soft:#331717;
+    --pos:#4ADE80; --neg:#F87171;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1319; --surface:#161D26; --surface-2:#1D2732; --surface-3:#26323F;
+  --ink:#E8EDF3; --ink-2:#C2CCD8; --muted:#94A2B2; --faint:#6E7D8D;
+  --border:#28323E; --border-2:#384553;
+  --accent:#7CA0E0; --accent-ink:#0E1319; --accent-soft:#1B2740;
+  --pass:#4ADE80; --pass-soft:#14301F;
+  --testing:#FBBF24; --testing-soft:#33260C;
+  --research:#94A2B2; --research-soft:#212B36;
+  --rejected:#F87171; --rejected-soft:#331717;
+  --pos:#4ADE80; --neg:#F87171;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 20px 72px}
+
+.mast{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;margin-bottom:22px}
+.mast h1{
+  font-family:Archivo,ui-sans-serif,system-ui,sans-serif;font-weight:700;
+  font-size:clamp(24px,3.2vw,33px);letter-spacing:-.02em;margin:0;text-wrap:balance;
+}
+.mast p{margin:6px 0 0;color:var(--muted);max-width:62ch;font-size:14px}
+.stamp{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--faint);border:1px solid var(--border);
+  border-radius:999px;padding:5px 11px;white-space:nowrap;
+}
+
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:1px;
+  background:var(--border);border:1px solid var(--border);border-radius:var(--r);
+  overflow:hidden;margin-bottom:24px}
+.cell{background:var(--surface);padding:13px 15px}
+.cell .k{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.cell .v{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+  font-size:21px;font-weight:600;margin-top:3px;letter-spacing:-.01em}
+
+.rail{position:sticky;top:0;z-index:20;background:var(--ground);
+  padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:4px}
+.rail-row{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.rail-row + .rail-row{margin-top:9px}
+.lbl{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);
+  font-weight:600;margin-right:2px}
+input[type=search],select,input[type=number]{
+  font:inherit;font-size:13.5px;color:var(--ink);background:var(--surface);
+  border:1px solid var(--border-2);border-radius:7px;padding:7px 10px;min-width:0;
+}
+input[type=search]{flex:1 1 210px;max-width:320px}
+input[type=number]{width:88px;font-family:"IBM Plex Mono",monospace}
+select{cursor:pointer}
+input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px}
+.chip{
+  font:inherit;font-size:12.5px;font-weight:500;cursor:pointer;
+  background:var(--surface);color:var(--ink-2);border:1px solid var(--border-2);
+  border-radius:999px;padding:6px 13px;transition:background .12s,border-color .12s,color .12s;
+}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.sortbtn{
+  font:inherit;font-size:12.5px;font-weight:500;cursor:pointer;background:var(--surface);
+  color:var(--ink-2);border:1px solid var(--border-2);border-radius:7px;padding:6px 11px;
+}
+.sortbtn:hover{border-color:var(--accent)}
+.sortbtn[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.sortbtn .dir{font-family:"IBM Plex Mono",monospace;opacity:.75;margin-left:4px}
+.ghost{
+  font:inherit;font-size:12.5px;cursor:pointer;background:none;border:none;
+  color:var(--accent);text-decoration:underline;text-underline-offset:3px;padding:6px 4px;
+}
+.count{margin-left:auto;font-size:12.5px;color:var(--muted);font-family:"IBM Plex Mono",monospace}
+
+.list{display:flex;flex-direction:column;gap:11px;margin-top:18px}
+.row{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  box-shadow:var(--shadow);overflow:hidden;display:grid;grid-template-columns:5px 1fr}
+.stripe{background:var(--research)}
+.row[data-status=passed] .stripe{background:var(--pass)}
+.row[data-status=testing] .stripe{background:var(--testing)}
+.row[data-status=rejected] .stripe{background:var(--rejected)}
+.row-in{padding:15px 17px}
+.row-head{display:flex;flex-wrap:wrap;gap:9px;align-items:baseline;margin-bottom:3px}
+.row-head h2{font-family:Archivo,sans-serif;font-size:17px;font-weight:600;margin:0;letter-spacing:-.01em}
+.pill{font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+  padding:3px 9px;border-radius:999px;white-space:nowrap}
+.pill.research{background:var(--research-soft);color:var(--research)}
+.pill.testing{background:var(--testing-soft);color:var(--testing)}
+.pill.passed{background:var(--pass-soft);color:var(--pass)}
+.pill.rejected{background:var(--rejected-soft);color:var(--rejected)}
+.tag{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-2);
+  background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:2px 7px}
+.desc{color:var(--muted);font-size:13.5px;margin:7px 0 13px;max-width:78ch}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:11px;
+  padding:12px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.m .k{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.m .v{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+  font-size:17px;font-weight:600;margin-top:2px}
+.pos{color:var(--pos)} .neg{color:var(--neg)}
+.row-foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+.dates{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--faint);
+  display:flex;flex-wrap:wrap;gap:12px}
+.acts{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+.btn{font:inherit;font-size:12.5px;font-weight:500;cursor:pointer;text-decoration:none;
+  display:inline-block;background:var(--surface-2);color:var(--ink);
+  border:1px solid var(--border-2);border-radius:7px;padding:6px 12px;transition:border-color .12s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn[disabled]{opacity:.42;cursor:not-allowed}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{color:var(--accent-ink);opacity:.9}
+
+.empty{border:1px dashed var(--border-2);border-radius:var(--r);background:var(--surface);
+  padding:34px 30px;text-align:left}
+.empty h3{font-family:Archivo,sans-serif;font-size:19px;margin:0 0 8px;font-weight:600}
+.empty p{color:var(--muted);margin:0 0 16px;max-width:66ch;font-size:14px}
+.empty ol{color:var(--ink-2);margin:0;padding-left:20px;max-width:66ch;font-size:14px}
+.empty li{margin-bottom:7px}
+.empty code{font-family:"IBM Plex Mono",monospace;font-size:12.5px;
+  background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:1px 5px}
+.gate{margin-top:20px;padding:13px 15px;background:var(--surface-2);
+  border-left:3px solid var(--accent);border-radius:0 7px 7px 0;font-size:13.5px;color:var(--ink-2)}
+.gate b{color:var(--ink)}
+
+dialog{border:none;border-radius:12px;padding:0;background:var(--surface);color:var(--ink);
+  max-width:min(920px,94vw);width:100%;box-shadow:0 12px 48px rgba(0,0,0,.28)}
+dialog::backdrop{background:rgba(10,14,19,.62)}
+.dlg-head{display:flex;gap:12px;align-items:center;padding:15px 18px;border-bottom:1px solid var(--border)}
+.dlg-head h3{font-family:Archivo,sans-serif;font-size:16px;margin:0;font-weight:600;flex:1}
+.dlg-body{padding:0;max-height:68vh;overflow:auto}
+.dlg-body pre{margin:0;padding:18px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;
+  line-height:1.6;white-space:pre;overflow-x:auto;color:var(--ink-2)}
+.dlg-body .prose{padding:18px;font-size:14px;color:var(--ink-2)}
+.spec-note{margin-top:14px;color:var(--faint)}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div>
+      <h1>War Formation</h1>
+      <p>The 6h &rarr; 1h &rarr; 15m &rarr; 3m &rarr; 1m cascade on BTCUSDT, tested on the 1-minute chart. Every row is a recorded backtest &mdash; nothing here is estimated.</p>
+    </div>
+    <div class="stamp" id="stamp"></div>
+  </header>
+
+  <section class="strip" id="strip"></section>
+
+  <div class="rail">
+    <div class="rail-row">
+      <input type="search" id="q" placeholder="Search name or rules&hellip;" aria-label="Search strategies">
+      <span class="lbl">Status</span>
+      <button class="chip" data-f="status" data-v="passed" aria-pressed="false">Passed</button>
+      <button class="chip" data-f="status" data-v="testing" aria-pressed="false">Testing</button>
+      <button class="chip" data-f="status" data-v="research" aria-pressed="false">Research</button>
+      <button class="chip" data-f="status" data-v="rejected" aria-pressed="false">Rejected</button>
+      <span class="count" id="count"></span>
+    </div>
+    <div class="rail-row">
+      <span class="lbl">Symbol</span>
+      <select id="sym" aria-label="Filter by symbol"><option value="">All</option></select>
+      <span class="lbl">TF</span>
+      <select id="tf" aria-label="Filter by timeframe"><option value="">All</option></select>
+      <span class="lbl">Side</span>
+      <select id="dir" aria-label="Filter by direction"><option value="">All</option></select>
+      <span class="lbl">Min trades</span><input type="number" id="minT" min="0" step="10" placeholder="0">
+      <span class="lbl">Min PF</span><input type="number" id="minPF" min="0" step="0.1" placeholder="0">
+      <span class="lbl">Max DD%</span><input type="number" id="maxDD" min="0" step="1" placeholder="100">
+      <button class="ghost" id="reset">Reset</button>
+    </div>
+    <div class="rail-row">
+      <span class="lbl">Sort</span>
+      <button class="sortbtn" data-s="profitFactor" aria-pressed="true">Profit factor<span class="dir">&darr;</span></button>
+      <button class="sortbtn" data-s="netProfitPct" aria-pressed="false">Return<span class="dir"></span></button>
+      <button class="sortbtn" data-s="maxDrawdownPct" aria-pressed="false">Max DD<span class="dir"></span></button>
+      <button class="sortbtn" data-s="totalTrades" aria-pressed="false">Trades<span class="dir"></span></button>
+      <button class="sortbtn" data-s="winRatePct" aria-pressed="false">Win rate<span class="dir"></span></button>
+      <button class="sortbtn" data-s="lastTestedDate" aria-pressed="false">Last tested<span class="dir"></span></button>
+    </div>
+  </div>
+
+  <div class="list" id="list"></div>
+</div>
+
+<dialog id="dlg">
+  <div class="dlg-head">
+    <h3 id="dlgTitle"></h3>
+    <button class="btn" id="dlgCopy" hidden>Copy</button>
+    <button class="btn" id="dlgClose">Close</button>
+  </div>
+  <div class="dlg-body" id="dlgBody"></div>
+</dialog>
+
+<script>
+const DATA = [
+  {
+    "name": "War Formation",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-01",
+    "lastTestedDate": "2026-09-01",
+    "description": "Five stacked vetoes on a 1m chart, with 6h/1h/15m/3m rebuilt from bar timestamps. The previous 6h block sets direction by counting green 1h candles (4+ = bull, 2- = bear). No trading in the first or last hour of the 6h block. The current 1h must agree. The level is the previous 15m extreme, which price must first violate. The prior bar must be coiled (atr3 < atr30 x 0.85). Then the 1m must reclaim the level with velocity (>= 0.8x atr30). Oracle overlays: no entries in the whole-number middles (sub 400-600), no longs in the 1-4am ET witching hour. Protective gap stop and target both fixed at entry, never moved.",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "pineSource": "//@version=6\n// THE WAR FORMATION — BTCUSDT, 1m base chart.\n// Cascade: 6h regime -> time gate -> 1h agreement -> 15m level -> 3m coil -> 1m velocity trigger.\n// Higher timeframes are rebuilt from 1m bar timestamps, using only allowlisted builtins.\n// KEPT: five-layer veto cascade, whole-number middles filter, witching-hour long ban,\n//       protective-gap fixed SL/TP set at entry, max-hold flatten.\n// DROPPED: nothing forbidden requested. No trailing stop, no pyramiding, no averaging down.\nstrategy(\"War Formation\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\n// ---------------- inputs ----------------\ngreenBull = input.int(4,     \"Green 1h candles for BULL\")\ngreenBear = input.int(2,     \"Green 1h candles at or below for BEAR\")\nskipOpen  = input.int(60,    \"Skip first N minutes of 6h block\")\nskipClose = input.int(60,    \"Skip last N minutes of 6h block\")\ncoilK     = input.float(0.85,\"3m coil: atr(3) < atr(30) * K\")\nvelK      = input.float(0.8, \"Velocity: min reclaim as multiple of atr(30)\")\nmidLo     = input.float(400, \"Whole-number middles low\")\nmidHi     = input.float(600, \"Whole-number middles high\")\netOffset  = input.int(-4,    \"ET offset from UTC\")\nwitchOn   = input.bool(true, \"Ban longs in witching hour 1-4am ET\")\ngapPct    = input.float(4.0, \"Protective gap % (stop)\")\nrr        = input.float(1.5, \"Reward:risk for take profit\")\nmaxBars   = input.int(1440,  \"Max bars in trade\")\n\n// ---------------- timeframe buckets from 1m timestamps ----------------\nMS6H = 21600000\nMS1H = 3600000\nMS15 = 900000\n\nb6  = math.floor(time / MS6H)\nb1h = math.floor(time / MS1H)\nb15 = math.floor(time / MS15)\n\nnew6  = b6  != b6[1]\nnew1h = b1h != b1h[1]\nnew15 = b15 != b15[1]\n\n// ---------------- LAYER 1: 6h regime from previous block's 1h candles ----------------\nvar float h1o     = na      // open of the 1h candle currently forming\nvar int   grnCur  = 0       // green 1h candles counted inside the current 6h block\nvar int   cntCur  = 0       // completed 1h candles inside the current 6h block\nvar int   grnPrev = 0\nvar int   cntPrev = 0\n\nif new6\n    grnPrev := grnCur\n    cntPrev := cntCur\n    grnCur  := 0\n    cntCur  := 0\n\nif new1h\n    if not na(h1o)\n        cntCur := cntCur + 1\n        if close[1] > h1o\n            grnCur := grnCur + 1\n    h1o := open\n\nregimeReady = cntPrev >= 5\nbullRegime  = regimeReady and grnPrev >= greenBull\nbearRegime  = regimeReady and grnPrev <= greenBear\n\n// ---------------- LAYER 2: time gate inside the 6h block ----------------\nminsIn    = (time - b6 * MS6H) / 60000\ntimeGate  = minsIn >= skipOpen and minsIn <= (360 - skipClose)\n\n// ---------------- LAYER 3: current 1h must agree ----------------\nh1Bull = not na(h1o) and close > h1o\nh1Bear = not na(h1o) and close < h1o\n\n// ---------------- LAYER 4: previous completed 15m extreme ----------------\nvar float c15h = na\nvar float c15l = na\nvar float p15h = na\nvar float p15l = na\n\nif new15\n    p15h := c15h\n    p15l := c15l\n    c15h := high\n    c15l := low\nelse\n    c15h := na(c15h) ? high : math.max(c15h, high)\n    c15l := na(c15l) ? low  : math.min(c15l, low)\n\n// the level must have been violated inside the current 15m candle before it can be reclaimed\nbrokeBelow = not na(p15l) and c15l < p15l\nbrokeAbove = not na(p15h) and c15h > p15h\n\n// ---------------- LAYER 5: 3m coil ----------------\natrFast = ta.atr(3)\natrSlow = ta.atr(30)\ncoiled  = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK\n// The coil must precede the thrust. A bar cannot be compressed AND expanding at once,\n// so the compression is read on the PRIOR bar and the trigger fires on this one.\ncoilPrev = coiled[1]\nvelMin   = na(atrSlow) ? na : atrSlow * velK\n\n// ---------------- Oracle overlays ----------------\nsub      = close - math.floor(close / 1000) * 1000\ninMiddle = sub >= midLo and sub <= midHi\n\nhUTC     = math.floor(time / MS1H) % 24\nhET      = (hUTC + etOffset + 24) % 24\nwitching = hET >= 1 and hET < 4\nlongBan  = witchOn and witching\n\n// ---------------- TRIGGER: 1m reclaim with velocity ----------------\nlongTrig  = not na(p15l) and not na(velMin) and ta.crossover(close, p15l)  and (close - p15l) >= velMin\nshortTrig = not na(p15h) and not na(velMin) and ta.crossunder(close, p15h) and (p15h - close) >= velMin\n\ngoLong  = bullRegime and timeGate and h1Bull and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig\ngoShort = bearRegime and timeGate and h1Bear and brokeAbove and coilPrev and not inMiddle and shortTrig\n\n// ---------------- state ----------------\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\n// ---------------- entries: protective gap fixed at the moment of entry ----------------\nif flat and goLong\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close * (1 - gapPct / 100)\n    tpPx   := close * (1 + gapPct * rr / 100)\n    barsIn := 0\nelse if flat and goShort\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close * (1 + gapPct / 100)\n    tpPx   := close * (1 - gapPct * rr / 100)\n    barsIn := 0\n\n// ---------------- exits: same prices every bar, never moved ----------------\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\n// ---------------- diagnostics ----------------\nplot(grnPrev,                     title=\"Green1hPrev6h\")\nplot(bullRegime ? 1 : bearRegime ? -1 : 0, title=\"Regime\")\nplot(coilPrev ? 1 : 0,            title=\"CoiledPrev\")\nplot(velMin,                      title=\"VelMin\")\nplot(inMiddle ? 1 : 0,            title=\"InMiddles\")\nplot(witching ? 1 : 0,            title=\"WitchingHour\")\nplot(hET,                         title=\"HourET\")\n",
+    "specPath": "war-formation/WAR-FORMATION.md",
+    "id": "war-formation-v2-1m",
+    "metrics": {
+      "netProfitPct": -11.59297056,
+      "profitFactor": 0.37990933,
+      "maxDrawdownPct": 14.94100623,
+      "totalTrades": 32,
+      "winRatePct": 21.875,
+      "avgTradePct": -0.36228033
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1EJC9ECMVSW40ZJ9SYSQ4M2",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1EJC9EBN4SYP2TYQ5P85X8R",
+      "verifiedAt": "2026-09-01T13:28:27Z"
+    },
+    "notes": "v2 baseline: 4% protective gap, 6% target, 24h max hold. avgBarsWinning = 1441, exactly the 1440-bar time stop -- EVERY winner exited on the clock, not at target. The 6% TP was never reached once. Shorts 1 winner in 19; longs 6 in 13. v1 of this strategy took ZERO trades: the coil and the velocity trigger were required on the same bar, and a bar cannot be compressed and expanding simultaneously. Fixed by reading the coil on the prior bar."
+  },
+  {
+    "name": "War Formation",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-01",
+    "lastTestedDate": "2026-09-01",
+    "description": "Five stacked vetoes on a 1m chart, with 6h/1h/15m/3m rebuilt from bar timestamps. The previous 6h block sets direction by counting green 1h candles (4+ = bull, 2- = bear). No trading in the first or last hour of the 6h block. The current 1h must agree. The level is the previous 15m extreme, which price must first violate. The prior bar must be coiled (atr3 < atr30 x 0.85). Then the 1m must reclaim the level with velocity (>= 0.8x atr30). Oracle overlays: no entries in the whole-number middles (sub 400-600), no longs in the 1-4am ET witching hour. Protective gap stop and target both fixed at entry, never moved.",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "pineSource": "//@version=6\n// THE WAR FORMATION — BTCUSDT, 1m base chart.\n// Cascade: 6h regime -> time gate -> 1h agreement -> 15m level -> 3m coil -> 1m velocity trigger.\n// Higher timeframes are rebuilt from 1m bar timestamps, using only allowlisted builtins.\n// KEPT: five-layer veto cascade, whole-number middles filter, witching-hour long ban,\n//       protective-gap fixed SL/TP set at entry, max-hold flatten.\n// DROPPED: nothing forbidden requested. No trailing stop, no pyramiding, no averaging down.\nstrategy(\"War Formation\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\n// ---------------- inputs ----------------\ngreenBull = input.int(4,     \"Green 1h candles for BULL\")\ngreenBear = input.int(2,     \"Green 1h candles at or below for BEAR\")\nskipOpen  = input.int(60,    \"Skip first N minutes of 6h block\")\nskipClose = input.int(60,    \"Skip last N minutes of 6h block\")\ncoilK     = input.float(0.85,\"3m coil: atr(3) < atr(30) * K\")\nvelK      = input.float(0.8, \"Velocity: min reclaim as multiple of atr(30)\")\nmidLo     = input.float(400, \"Whole-number middles low\")\nmidHi     = input.float(600, \"Whole-number middles high\")\netOffset  = input.int(-4,    \"ET offset from UTC\")\nwitchOn   = input.bool(true, \"Ban longs in witching hour 1-4am ET\")\ngapPct    = input.float(4.0, \"Protective gap % (stop)\")\nrr        = input.float(1.5, \"Reward:risk for take profit\")\nmaxBars   = input.int(1440,  \"Max bars in trade\")\n\n// ---------------- timeframe buckets from 1m timestamps ----------------\nMS6H = 21600000\nMS1H = 3600000\nMS15 = 900000\n\nb6  = math.floor(time / MS6H)\nb1h = math.floor(time / MS1H)\nb15 = math.floor(time / MS15)\n\nnew6  = b6  != b6[1]\nnew1h = b1h != b1h[1]\nnew15 = b15 != b15[1]\n\n// ---------------- LAYER 1: 6h regime from previous block's 1h candles ----------------\nvar float h1o     = na      // open of the 1h candle currently forming\nvar int   grnCur  = 0       // green 1h candles counted inside the current 6h block\nvar int   cntCur  = 0       // completed 1h candles inside the current 6h block\nvar int   grnPrev = 0\nvar int   cntPrev = 0\n\nif new6\n    grnPrev := grnCur\n    cntPrev := cntCur\n    grnCur  := 0\n    cntCur  := 0\n\nif new1h\n    if not na(h1o)\n        cntCur := cntCur + 1\n        if close[1] > h1o\n            grnCur := grnCur + 1\n    h1o := open\n\nregimeReady = cntPrev >= 5\nbullRegime  = regimeReady and grnPrev >= greenBull\nbearRegime  = regimeReady and grnPrev <= greenBear\n\n// ---------------- LAYER 2: time gate inside the 6h block ----------------\nminsIn    = (time - b6 * MS6H) / 60000\ntimeGate  = minsIn >= skipOpen and minsIn <= (360 - skipClose)\n\n// ---------------- LAYER 3: current 1h must agree ----------------\nh1Bull = not na(h1o) and close > h1o\nh1Bear = not na(h1o) and close < h1o\n\n// ---------------- LAYER 4: previous completed 15m extreme ----------------\nvar float c15h = na\nvar float c15l = na\nvar float p15h = na\nvar float p15l = na\n\nif new15\n    p15h := c15h\n    p15l := c15l\n    c15h := high\n    c15l := low\nelse\n    c15h := na(c15h) ? high : math.max(c15h, high)\n    c15l := na(c15l) ? low  : math.min(c15l, low)\n\n// the level must have been violated inside the current 15m candle before it can be reclaimed\nbrokeBelow = not na(p15l) and c15l < p15l\nbrokeAbove = not na(p15h) and c15h > p15h\n\n// ---------------- LAYER 5: 3m coil ----------------\natrFast = ta.atr(3)\natrSlow = ta.atr(30)\ncoiled  = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK\n// The coil must precede the thrust. A bar cannot be compressed AND expanding at once,\n// so the compression is read on the PRIOR bar and the trigger fires on this one.\ncoilPrev = coiled[1]\nvelMin   = na(atrSlow) ? na : atrSlow * velK\n\n// ---------------- Oracle overlays ----------------\nsub      = close - math.floor(close / 1000) * 1000\ninMiddle = sub >= midLo and sub <= midHi\n\nhUTC     = math.floor(time / MS1H) % 24\nhET      = (hUTC + etOffset + 24) % 24\nwitching = hET >= 1 and hET < 4\nlongBan  = witchOn and witching\n\n// ---------------- TRIGGER: 1m reclaim with velocity ----------------\nlongTrig  = not na(p15l) and not na(velMin) and ta.crossover(close, p15l)  and (close - p15l) >= velMin\nshortTrig = not na(p15h) and not na(velMin) and ta.crossunder(close, p15h) and (p15h - close) >= velMin\n\ngoLong  = bullRegime and timeGate and h1Bull and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig\ngoShort = bearRegime and timeGate and h1Bear and brokeAbove and coilPrev and not inMiddle and shortTrig\n\n// ---------------- state ----------------\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\n// ---------------- entries: protective gap fixed at the moment of entry ----------------\nif flat and goLong\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close * (1 - gapPct / 100)\n    tpPx   := close * (1 + gapPct * rr / 100)\n    barsIn := 0\nelse if flat and goShort\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close * (1 + gapPct / 100)\n    tpPx   := close * (1 - gapPct * rr / 100)\n    barsIn := 0\n\n// ---------------- exits: same prices every bar, never moved ----------------\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\n// ---------------- diagnostics ----------------\nplot(grnPrev,                     title=\"Green1hPrev6h\")\nplot(bullRegime ? 1 : bearRegime ? -1 : 0, title=\"Regime\")\nplot(coilPrev ? 1 : 0,            title=\"CoiledPrev\")\nplot(velMin,                      title=\"VelMin\")\nplot(inMiddle ? 1 : 0,            title=\"InMiddles\")\nplot(witching ? 1 : 0,            title=\"WitchingHour\")\nplot(hET,                         title=\"HourET\")\n",
+    "specPath": "war-formation/WAR-FORMATION.md",
+    "id": "war-formation-v3-1m",
+    "metrics": {
+      "netProfitPct": -5.52931243,
+      "profitFactor": 0.58180967,
+      "maxDrawdownPct": 7.02852286,
+      "totalTrades": 36,
+      "winRatePct": 33.33333333,
+      "avgTradePct": -0.15359201
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1EJE40V3MDCGKSH7T4E9JPP",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1EJE40VYM8V9JYM9F91HZ93",
+      "verifiedAt": "2026-09-01T13:28:27Z"
+    },
+    "notes": "v3: gap tightened to 2%, target 3%, max hold 12h -- testing whether the 6% target was simply unreachable. Everything improved (PF 0.38 -> 0.58, DD 14.9% -> 7.0%, win rate 21.9% -> 33.3%) but avgBarsWinning = 721, again exactly the time stop. The target is still never hit. Shorts 3 of 22, longs 9 of 14. Sample is 36 trades over 4.6 months in one market era -- screening evidence only, not validation."
+  },
+  {
+    "name": "War Formation HA",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "both",
+    "createdDate": "2026-09-01",
+    "lastTestedDate": "2026-09-01",
+    "description": "Heikin Ashi edition. HA is used for direction and colour only -- the 6h regime counts green HA 1h candles, the live 1h must agree on HA, and the 1m trigger bar must be the right HA colour -- while all levels, entries, stops and targets use REAL prices, because HA prices are synthetic and orders fill at real prices. Cascade: previous 6h block sets direction (4+ green HA 1h = bull, 2 or fewer = bear); no trading in the first or last hour of the block; live 1h must agree; the level is the previous 15m extreme which price must first violate; the prior bar must be coiled; then the 1m reclaims with velocity. Whole-number middles and the 1-4am ET witching hour veto entries. Stop sits beyond the swept level, target at 2R, both fixed at entry.",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "pineSource": "//@version=6\n// THE WAR FORMATION v4 — HEIKIN ASHI edition. BTCUSDT, 1m base chart.\n// Cascade: 6h regime (HA 1h colours) -> time gate -> 1h agreement -> 15m level -> 3m coil -> 1m HA trigger.\n// Higher timeframes are rebuilt from 1m bar timestamps, using only allowlisted builtins.\n//\n// HEIKIN ASHI POLICY — this matters for whether the numbers are real:\n//   HA is used for DIRECTION and COLOUR only (the 1h green count, the 1h agreement, the 1m trigger candle).\n//   Levels, entries, stops and targets all use REAL prices, because HA prices are synthetic and orders\n//   fill at real prices. Backtests that enter and exit at HA prices report fills that cannot happen.\nstrategy(\"War Formation HA\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\ngreenBull = input.int(4,     \"Green HA 1h candles for BULL\")\ngreenBear = input.int(2,     \"Green HA 1h candles at or below for BEAR\")\nskipOpen  = input.int(60,    \"Skip first N minutes of 6h block\")\nskipClose = input.int(60,    \"Skip last N minutes of 6h block\")\ncoilK     = input.float(0.85,\"3m coil: atr(3) < atr(30) * K\")\nvelK      = input.float(0.8, \"Velocity: min reclaim as multiple of atr(30)\")\nmidLo     = input.float(400, \"Whole-number middles low\")\nmidHi     = input.float(600, \"Whole-number middles high\")\netOffset  = input.int(-4,    \"ET offset from UTC\")\nwitchOn   = input.bool(true, \"Ban longs in witching hour 1-4am ET\")\nbufK      = input.float(0.25,\"Stop buffer beyond swept level, x atr(30)\")\nrr        = input.float(2.0, \"Reward:risk\")\nminRpct   = input.float(0.15,\"Min risk as % of price\")\nmaxRpct   = input.float(1.50,\"Max risk as % of price\")\nmaxBars   = input.int(720,   \"Max bars in trade\")\n\nMS6H = 21600000\nMS1H = 3600000\nMS15 = 900000\n\nb6  = math.floor(time / MS6H)\nb1h = math.floor(time / MS1H)\nb15 = math.floor(time / MS15)\n\nnew6  = b6  != b6[1]\nnew1h = b1h != b1h[1]\nnew15 = b15 != b15[1]\n\n// ---------------- 1-minute Heikin Ashi (computed, not fetched) ----------------\nvar float haO = na\nhaC   = (open + high + low + close) / 4\nhaO  := na(haO[1]) ? (open + close) / 2 : (haO[1] + haC[1]) / 2\nhaUp  = haC > haO\nhaDn  = haC < haO\n\n// ---------------- 1-hour real OHLC + its Heikin Ashi ----------------\nvar float o1   = na\nvar float h1   = na\nvar float l1   = na\nvar float ha1o = na\nvar float ha1c = na\n\nvar int grnCur  = 0\nvar int cntCur  = 0\nvar int grnPrev = 0\nvar int cntPrev = 0\n\nif new6\n    grnPrev := grnCur\n    cntPrev := cntCur\n    grnCur  := 0\n    cntCur  := 0\n\nif new1h\n    if not na(o1)\n        c1 = close[1]\n        newC = (o1 + h1 + l1 + c1) / 4\n        newO = na(ha1o) ? (o1 + c1) / 2 : (ha1o + ha1c) / 2\n        ha1o := newO\n        ha1c := newC\n        cntCur := cntCur + 1\n        if ha1c > ha1o\n            grnCur := grnCur + 1\n    o1 := open\n    h1 := high\n    l1 := low\nelse\n    h1 := na(h1) ? high : math.max(h1, high)\n    l1 := na(l1) ? low  : math.min(l1, low)\n\n// ---------------- LAYER 1: 6h regime from the previous block's HA 1h colours ----------------\nregimeReady = cntPrev >= 5\nbullRegime  = regimeReady and grnPrev >= greenBull\nbearRegime  = regimeReady and grnPrev <= greenBear\n\n// ---------------- LAYER 2: time gate inside the 6h block ----------------\nminsIn   = (time - b6 * MS6H) / 60000\ntimeGate = minsIn >= skipOpen and minsIn <= (360 - skipClose)\n\n// ---------------- LAYER 3: the forming 1h must agree (HA direction of the live hour) ----------------\nliveHaC = na(o1) ? na : (o1 + math.max(h1, high) + math.min(l1, low) + close) / 4\nliveHaO = na(ha1o) ? na : (ha1o + ha1c) / 2\nh1Bull  = not na(liveHaC) and not na(liveHaO) and liveHaC > liveHaO\nh1Bear  = not na(liveHaC) and not na(liveHaO) and liveHaC < liveHaO\n\n// ---------------- LAYER 4: previous completed 15m extreme (REAL prices - these are fill levels) ----------------\nvar float c15h = na\nvar float c15l = na\nvar float p15h = na\nvar float p15l = na\n\nif new15\n    p15h := c15h\n    p15l := c15l\n    c15h := high\n    c15l := low\nelse\n    c15h := na(c15h) ? high : math.max(c15h, high)\n    c15l := na(c15l) ? low  : math.min(c15l, low)\n\nbrokeBelow = not na(p15l) and c15l < p15l\nbrokeAbove = not na(p15h) and c15h > p15h\n\n// ---------------- LAYER 5: 3m coil, read on the PRIOR bar ----------------\natrFast  = ta.atr(3)\natrSlow  = ta.atr(30)\ncoiled   = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK\ncoilPrev = coiled[1]\nvelMin   = na(atrSlow) ? na : atrSlow * velK\n\n// ---------------- Oracle overlays ----------------\nsub      = close - math.floor(close / 1000) * 1000\ninMiddle = sub >= midLo and sub <= midHi\n\nhUTC     = math.floor(time / MS1H) % 24\nhET      = (hUTC + etOffset + 24) % 24\nwitching = hET >= 1 and hET < 4\nlongBan  = witchOn and witching\n\n// ---------------- TRIGGER: 1m reclaim, with velocity, on a turning HA candle ----------------\nlongTrig  = not na(p15l) and not na(velMin) and ta.crossover(close, p15l)  and (close - p15l) >= velMin and haUp\nshortTrig = not na(p15h) and not na(velMin) and ta.crossunder(close, p15h) and (p15h - close) >= velMin and haDn\n\ngoLong  = bullRegime and timeGate and h1Bull and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig\ngoShort = bearRegime and timeGate and h1Bear and brokeAbove and coilPrev and not inMiddle and shortTrig\n\n// ---------------- structural risk: stop beyond the level that was swept ----------------\nminR = close * minRpct / 100\nmaxR = close * maxRpct / 100\nbuf  = na(atrSlow) ? 0.0 : atrSlow * bufK\n\nrawLongR  = na(c15l) ? na : close - (c15l - buf)\nrawShortR = na(c15h) ? na : (c15h + buf) - close\nlongR     = na(rawLongR)  ? na : math.min(math.max(rawLongR,  minR), maxR)\nshortR    = na(rawShortR) ? na : math.min(math.max(rawShortR, minR), maxR)\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goLong and not na(longR) and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - longR\n    tpPx   := close + longR * rr\n    barsIn := 0\nelse if flat and goShort and not na(shortR) and shortR > 0\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + shortR\n    tpPx   := close - shortR * rr\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(grnPrev,                              title=\"GreenHA1hPrev6h\")\nplot(bullRegime ? 1 : bearRegime ? -1 : 0, title=\"Regime\")\nplot(haUp ? 1 : haDn ? -1 : 0,             title=\"HA1mColour\")\nplot(coilPrev ? 1 : 0,                     title=\"CoiledPrev\")\nplot(inMiddle ? 1 : 0,                     title=\"InMiddles\")\nplot(hET,                                  title=\"HourET\")\n",
+    "specPath": "war-formation/WAR-FORMATION.md",
+    "id": "war-formation-v4-ha-tight",
+    "status": "rejected",
+    "metrics": {
+      "netProfitPct": -4.56824159,
+      "profitFactor": 0.47005358,
+      "maxDrawdownPct": 4.85961065,
+      "totalTrades": 52,
+      "winRatePct": 34.61538462,
+      "avgTradePct": -0.0878508
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1EJTQ5VMMQ3NKRKAV43578S",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1EJTQ5TPBV9EMXVJY723FMX",
+      "verifiedAt": "2026-09-01T13:35:57Z"
+    },
+    "notes": "v4: first Heikin Ashi build, structural stop with a 0.15% risk floor. The HA switch FIXED the exit problem -- avgBarsInTrade fell to 64 with winners at 64.9 and losers at 63.6, so trades finally resolved at stop or target instead of on the time stop. But it exposed a new one: commission paid $508 against $405 gross profit. With R at 0.15-0.5% of price, the 0.10% round-trip fee consumed 20-66% of every R, turning a nominal 2:1 into an actual 0.89:1."
+  },
+  {
+    "name": "War Formation HA",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "both",
+    "createdDate": "2026-09-01",
+    "lastTestedDate": "2026-09-01",
+    "description": "Heikin Ashi edition. HA is used for direction and colour only -- the 6h regime counts green HA 1h candles, the live 1h must agree on HA, and the 1m trigger bar must be the right HA colour -- while all levels, entries, stops and targets use REAL prices, because HA prices are synthetic and orders fill at real prices. Cascade: previous 6h block sets direction (4+ green HA 1h = bull, 2 or fewer = bear); no trading in the first or last hour of the block; live 1h must agree; the level is the previous 15m extreme which price must first violate; the prior bar must be coiled; then the 1m reclaims with velocity. Whole-number middles and the 1-4am ET witching hour veto entries. Stop sits beyond the swept level, target at 2R, both fixed at entry.",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "pineSource": "//@version=6\n// THE WAR FORMATION v4 — HEIKIN ASHI edition. BTCUSDT, 1m base chart.\n// Cascade: 6h regime (HA 1h colours) -> time gate -> 1h agreement -> 15m level -> 3m coil -> 1m HA trigger.\n// Higher timeframes are rebuilt from 1m bar timestamps, using only allowlisted builtins.\n//\n// HEIKIN ASHI POLICY — this matters for whether the numbers are real:\n//   HA is used for DIRECTION and COLOUR only (the 1h green count, the 1h agreement, the 1m trigger candle).\n//   Levels, entries, stops and targets all use REAL prices, because HA prices are synthetic and orders\n//   fill at real prices. Backtests that enter and exit at HA prices report fills that cannot happen.\nstrategy(\"War Formation HA\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\ngreenBull = input.int(4,     \"Green HA 1h candles for BULL\")\ngreenBear = input.int(2,     \"Green HA 1h candles at or below for BEAR\")\nskipOpen  = input.int(60,    \"Skip first N minutes of 6h block\")\nskipClose = input.int(60,    \"Skip last N minutes of 6h block\")\ncoilK     = input.float(0.85,\"3m coil: atr(3) < atr(30) * K\")\nvelK      = input.float(0.8, \"Velocity: min reclaim as multiple of atr(30)\")\nmidLo     = input.float(400, \"Whole-number middles low\")\nmidHi     = input.float(600, \"Whole-number middles high\")\netOffset  = input.int(-4,    \"ET offset from UTC\")\nwitchOn   = input.bool(true, \"Ban longs in witching hour 1-4am ET\")\nbufK      = input.float(0.25,\"Stop buffer beyond swept level, x atr(30)\")\nrr        = input.float(2.0, \"Reward:risk\")\nminRpct   = input.float(0.15,\"Min risk as % of price\")\nmaxRpct   = input.float(1.50,\"Max risk as % of price\")\nmaxBars   = input.int(720,   \"Max bars in trade\")\n\nMS6H = 21600000\nMS1H = 3600000\nMS15 = 900000\n\nb6  = math.floor(time / MS6H)\nb1h = math.floor(time / MS1H)\nb15 = math.floor(time / MS15)\n\nnew6  = b6  != b6[1]\nnew1h = b1h != b1h[1]\nnew15 = b15 != b15[1]\n\n// ---------------- 1-minute Heikin Ashi (computed, not fetched) ----------------\nvar float haO = na\nhaC   = (open + high + low + close) / 4\nhaO  := na(haO[1]) ? (open + close) / 2 : (haO[1] + haC[1]) / 2\nhaUp  = haC > haO\nhaDn  = haC < haO\n\n// ---------------- 1-hour real OHLC + its Heikin Ashi ----------------\nvar float o1   = na\nvar float h1   = na\nvar float l1   = na\nvar float ha1o = na\nvar float ha1c = na\n\nvar int grnCur  = 0\nvar int cntCur  = 0\nvar int grnPrev = 0\nvar int cntPrev = 0\n\nif new6\n    grnPrev := grnCur\n    cntPrev := cntCur\n    grnCur  := 0\n    cntCur  := 0\n\nif new1h\n    if not na(o1)\n        c1 = close[1]\n        newC = (o1 + h1 + l1 + c1) / 4\n        newO = na(ha1o) ? (o1 + c1) / 2 : (ha1o + ha1c) / 2\n        ha1o := newO\n        ha1c := newC\n        cntCur := cntCur + 1\n        if ha1c > ha1o\n            grnCur := grnCur + 1\n    o1 := open\n    h1 := high\n    l1 := low\nelse\n    h1 := na(h1) ? high : math.max(h1, high)\n    l1 := na(l1) ? low  : math.min(l1, low)\n\n// ---------------- LAYER 1: 6h regime from the previous block's HA 1h colours ----------------\nregimeReady = cntPrev >= 5\nbullRegime  = regimeReady and grnPrev >= greenBull\nbearRegime  = regimeReady and grnPrev <= greenBear\n\n// ---------------- LAYER 2: time gate inside the 6h block ----------------\nminsIn   = (time - b6 * MS6H) / 60000\ntimeGate = minsIn >= skipOpen and minsIn <= (360 - skipClose)\n\n// ---------------- LAYER 3: the forming 1h must agree (HA direction of the live hour) ----------------\nliveHaC = na(o1) ? na : (o1 + math.max(h1, high) + math.min(l1, low) + close) / 4\nliveHaO = na(ha1o) ? na : (ha1o + ha1c) / 2\nh1Bull  = not na(liveHaC) and not na(liveHaO) and liveHaC > liveHaO\nh1Bear  = not na(liveHaC) and not na(liveHaO) and liveHaC < liveHaO\n\n// ---------------- LAYER 4: previous completed 15m extreme (REAL prices - these are fill levels) ----------------\nvar float c15h = na\nvar float c15l = na\nvar float p15h = na\nvar float p15l = na\n\nif new15\n    p15h := c15h\n    p15l := c15l\n    c15h := high\n    c15l := low\nelse\n    c15h := na(c15h) ? high : math.max(c15h, high)\n    c15l := na(c15l) ? low  : math.min(c15l, low)\n\nbrokeBelow = not na(p15l) and c15l < p15l\nbrokeAbove = not na(p15h) and c15h > p15h\n\n// ---------------- LAYER 5: 3m coil, read on the PRIOR bar ----------------\natrFast  = ta.atr(3)\natrSlow  = ta.atr(30)\ncoiled   = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK\ncoilPrev = coiled[1]\nvelMin   = na(atrSlow) ? na : atrSlow * velK\n\n// ---------------- Oracle overlays ----------------\nsub      = close - math.floor(close / 1000) * 1000\ninMiddle = sub >= midLo and sub <= midHi\n\nhUTC     = math.floor(time / MS1H) % 24\nhET      = (hUTC + etOffset + 24) % 24\nwitching = hET >= 1 and hET < 4\nlongBan  = witchOn and witching\n\n// ---------------- TRIGGER: 1m reclaim, with velocity, on a turning HA candle ----------------\nlongTrig  = not na(p15l) and not na(velMin) and ta.crossover(close, p15l)  and (close - p15l) >= velMin and haUp\nshortTrig = not na(p15h) and not na(velMin) and ta.crossunder(close, p15h) and (p15h - close) >= velMin and haDn\n\ngoLong  = bullRegime and timeGate and h1Bull and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig\ngoShort = bearRegime and timeGate and h1Bear and brokeAbove and coilPrev and not inMiddle and shortTrig\n\n// ---------------- structural risk: stop beyond the level that was swept ----------------\nminR = close * minRpct / 100\nmaxR = close * maxRpct / 100\nbuf  = na(atrSlow) ? 0.0 : atrSlow * bufK\n\nrawLongR  = na(c15l) ? na : close - (c15l - buf)\nrawShortR = na(c15h) ? na : (c15h + buf) - close\nlongR     = na(rawLongR)  ? na : math.min(math.max(rawLongR,  minR), maxR)\nshortR    = na(rawShortR) ? na : math.min(math.max(rawShortR, minR), maxR)\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goLong and not na(longR) and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - longR\n    tpPx   := close + longR * rr\n    barsIn := 0\nelse if flat and goShort and not na(shortR) and shortR > 0\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + shortR\n    tpPx   := close - shortR * rr\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(grnPrev,                              title=\"GreenHA1hPrev6h\")\nplot(bullRegime ? 1 : bearRegime ? -1 : 0, title=\"Regime\")\nplot(haUp ? 1 : haDn ? -1 : 0,             title=\"HA1mColour\")\nplot(coilPrev ? 1 : 0,                     title=\"CoiledPrev\")\nplot(inMiddle ? 1 : 0,                     title=\"InMiddles\")\nplot(hET,                                  title=\"HourET\")\n",
+    "specPath": "war-formation/WAR-FORMATION.md",
+    "id": "war-formation-v5-ha",
+    "status": "testing",
+    "metrics": {
+      "netProfitPct": 6.45054135,
+      "profitFactor": 1.40138547,
+      "maxDrawdownPct": 4.73492855,
+      "totalTrades": 47,
+      "winRatePct": 42.55319149,
+      "avgTradePct": 0.13724556
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1EJWW22TNXPNP291TN0P4VZ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1EJWW229D1XYPE2TAK9MSFV",
+      "verifiedAt": "2026-09-01T13:35:57Z"
+    },
+    "notes": "v5: identical to v4 except the risk floor is raised from 0.15% to 0.80%, so the 0.10% round-trip commission is a small fraction of R rather than most of it. FIRST PROFITABLE RESULT: PF 1.40, Sharpe 1.70, avgWin/avgLoss 1.89. BUT the edge is entirely long-side -- longs 18 of 32 for +$784, shorts 2 of 15 for -$139. Status is TESTING, not passed: 47 trades over 4.6 months in a single market era, no out-of-sample period, no parameter sensitivity run. Shorts are not working and the sample is too short to tell whether the long edge is real or just a rising market."
+  },
+  {
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "createdDate": "2026-09-01",
+    "lastTestedDate": "2026-09-01",
+    "pineSource": "//@version=6\n// THE WAR FORMATION v4 — HEIKIN ASHI edition. BTCUSDT, 1m base chart.\n// Cascade: 6h regime (HA 1h colours) -> time gate -> 1h agreement -> 15m level -> 3m coil -> 1m HA trigger.\n// Higher timeframes are rebuilt from 1m bar timestamps, using only allowlisted builtins.\n//\n// HEIKIN ASHI POLICY — this matters for whether the numbers are real:\n//   HA is used for DIRECTION and COLOUR only (the 1h green count, the 1h agreement, the 1m trigger candle).\n//   Levels, entries, stops and targets all use REAL prices, because HA prices are synthetic and orders\n//   fill at real prices. Backtests that enter and exit at HA prices report fills that cannot happen.\nstrategy(\"War Formation HA\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\ngreenBull = input.int(4,     \"Green HA 1h candles for BULL\")\ngreenBear = input.int(2,     \"Green HA 1h candles at or below for BEAR\")\nskipOpen  = input.int(60,    \"Skip first N minutes of 6h block\")\nskipClose = input.int(60,    \"Skip last N minutes of 6h block\")\ncoilK     = input.float(0.85,\"3m coil: atr(3) < atr(30) * K\")\nvelK      = input.float(0.8, \"Velocity: min reclaim as multiple of atr(30)\")\nmidLo     = input.float(400, \"Whole-number middles low\")\nmidHi     = input.float(600, \"Whole-number middles high\")\netOffset  = input.int(-4,    \"ET offset from UTC\")\nwitchOn   = input.bool(true, \"Ban longs in witching hour 1-4am ET\")\nbufK      = input.float(0.25,\"Stop buffer beyond swept level, x atr(30)\")\nrr        = input.float(2.0, \"Reward:risk\")\nminRpct   = input.float(0.15,\"Min risk as % of price\")\nmaxRpct   = input.float(1.50,\"Max risk as % of price\")\nmaxBars   = input.int(720,   \"Max bars in trade\")\n\nMS6H = 21600000\nMS1H = 3600000\nMS15 = 900000\n\nb6  = math.floor(time / MS6H)\nb1h = math.floor(time / MS1H)\nb15 = math.floor(time / MS15)\n\nnew6  = b6  != b6[1]\nnew1h = b1h != b1h[1]\nnew15 = b15 != b15[1]\n\n// ---------------- 1-minute Heikin Ashi (computed, not fetched) ----------------\nvar float haO = na\nhaC   = (open + high + low + close) / 4\nhaO  := na(haO[1]) ? (open + close) / 2 : (haO[1] + haC[1]) / 2\nhaUp  = haC > haO\nhaDn  = haC < haO\n\n// ---------------- 1-hour real OHLC + its Heikin Ashi ----------------\nvar float o1   = na\nvar float h1   = na\nvar float l1   = na\nvar float ha1o = na\nvar float ha1c = na\n\nvar int grnCur  = 0\nvar int cntCur  = 0\nvar int grnPrev = 0\nvar int cntPrev = 0\n\nif new6\n    grnPrev := grnCur\n    cntPrev := cntCur\n    grnCur  := 0\n    cntCur  := 0\n\nif new1h\n    if not na(o1)\n        c1 = close[1]\n        newC = (o1 + h1 + l1 + c1) / 4\n        newO = na(ha1o) ? (o1 + c1) / 2 : (ha1o + ha1c) / 2\n        ha1o := newO\n        ha1c := newC\n        cntCur := cntCur + 1\n        if ha1c > ha1o\n            grnCur := grnCur + 1\n    o1 := open\n    h1 := high\n    l1 := low\nelse\n    h1 := na(h1) ? high : math.max(h1, high)\n    l1 := na(l1) ? low  : math.min(l1, low)\n\n// ---------------- LAYER 1: 6h regime from the previous block's HA 1h colours ----------------\nregimeReady = cntPrev >= 5\nbullRegime  = regimeReady and grnPrev >= greenBull\nbearRegime  = regimeReady and grnPrev <= greenBear\n\n// ---------------- LAYER 2: time gate inside the 6h block ----------------\nminsIn   = (time - b6 * MS6H) / 60000\ntimeGate = minsIn >= skipOpen and minsIn <= (360 - skipClose)\n\n// ---------------- LAYER 3: the forming 1h must agree (HA direction of the live hour) ----------------\nliveHaC = na(o1) ? na : (o1 + math.max(h1, high) + math.min(l1, low) + close) / 4\nliveHaO = na(ha1o) ? na : (ha1o + ha1c) / 2\nh1Bull  = not na(liveHaC) and not na(liveHaO) and liveHaC > liveHaO\nh1Bear  = not na(liveHaC) and not na(liveHaO) and liveHaC < liveHaO\n\n// ---------------- LAYER 4: previous completed 15m extreme (REAL prices - these are fill levels) ----------------\nvar float c15h = na\nvar float c15l = na\nvar float p15h = na\nvar float p15l = na\n\nif new15\n    p15h := c15h\n    p15l := c15l\n    c15h := high\n    c15l := low\nelse\n    c15h := na(c15h) ? high : math.max(c15h, high)\n    c15l := na(c15l) ? low  : math.min(c15l, low)\n\nbrokeBelow = not na(p15l) and c15l < p15l\nbrokeAbove = not na(p15h) and c15h > p15h\n\n// ---------------- LAYER 5: 3m coil, read on the PRIOR bar ----------------\natrFast  = ta.atr(3)\natrSlow  = ta.atr(30)\ncoiled   = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK\ncoilPrev = coiled[1]\nvelMin   = na(atrSlow) ? na : atrSlow * velK\n\n// ---------------- Oracle overlays ----------------\nsub      = close - math.floor(close / 1000) * 1000\ninMiddle = sub >= midLo and sub <= midHi\n\nhUTC     = math.floor(time / MS1H) % 24\nhET      = (hUTC + etOffset + 24) % 24\nwitching = hET >= 1 and hET < 4\nlongBan  = witchOn and witching\n\n// ---------------- TRIGGER: 1m reclaim, with velocity, on a turning HA candle ----------------\nlongTrig  = not na(p15l) and not na(velMin) and ta.crossover(close, p15l)  and (close - p15l) >= velMin and haUp\nshortTrig = not na(p15h) and not na(velMin) and ta.crossunder(close, p15h) and (p15h - close) >= velMin and haDn\n\ngoLong  = bullRegime and timeGate and h1Bull and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig\ngoShort = bearRegime and timeGate and h1Bear and brokeAbove and coilPrev and not inMiddle and shortTrig\n\n// ---------------- structural risk: stop beyond the level that was swept ----------------\nminR = close * minRpct / 100\nmaxR = close * maxRpct / 100\nbuf  = na(atrSlow) ? 0.0 : atrSlow * bufK\n\nrawLongR  = na(c15l) ? na : close - (c15l - buf)\nrawShortR = na(c15h) ? na : (c15h + buf) - close\nlongR     = na(rawLongR)  ? na : math.min(math.max(rawLongR,  minR), maxR)\nshortR    = na(rawShortR) ? na : math.min(math.max(rawShortR, minR), maxR)\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goLong and not na(longR) and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - longR\n    tpPx   := close + longR * rr\n    barsIn := 0\nelse if flat and goShort and not na(shortR) and shortR > 0\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + shortR\n    tpPx   := close - shortR * rr\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(grnPrev,                              title=\"GreenHA1hPrev6h\")\nplot(bullRegime ? 1 : bearRegime ? -1 : 0, title=\"Regime\")\nplot(haUp ? 1 : haDn ? -1 : 0,             title=\"HA1mColour\")\nplot(coilPrev ? 1 : 0,                     title=\"CoiledPrev\")\nplot(inMiddle ? 1 : 0,                     title=\"InMiddles\")\nplot(hET,                                  title=\"HourET\")\n",
+    "specPath": "war-formation/WAR-FORMATION.md",
+    "id": "war-formation-ablation-strip",
+    "name": "War Formation STRIP (velocity only)",
+    "direction": "both",
+    "status": "rejected",
+    "description": "ABLATION TEST, not a candidate. v5 with the entire cascade removed: no 6h regime, no time gate, no 1h agreement, no 3m coil, no middles filter, no witching ban. Only the 15m level reclaim plus velocity plus HA colour plus the structural stop remain. Run to answer one question: does the cascade contribute anything, or is velocity the whole edge?",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "metrics": {
+      "netProfitPct": -54.06974302,
+      "profitFactor": 0.68056624,
+      "maxDrawdownPct": 55.05559787,
+      "totalTrades": 521,
+      "winRatePct": 25.14395393,
+      "avgTradePct": -0.1037807
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GA7SQC7J41FEJ9FGFANQTQ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GA7SQC7XF2MQGA806KDQZT",
+      "verifiedAt": "2026-09-02T05:45:39Z"
+    },
+    "notes": "ANSWER: the cascade IS the edge. Stripping it takes PF from 1.40 to 0.68 and win rate from 42.6% to 25.1%, while trade count explodes from 47 to 521. The velocity trigger alone is a losing coin flip. The 6h/1h/15m/3m vetoes are doing the work, not decorating it."
+  },
+  {
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "createdDate": "2026-09-01",
+    "lastTestedDate": "2026-09-01",
+    "pineSource": "//@version=6\n// THE WAR FORMATION v4 — HEIKIN ASHI edition. BTCUSDT, 1m base chart.\n// Cascade: 6h regime (HA 1h colours) -> time gate -> 1h agreement -> 15m level -> 3m coil -> 1m HA trigger.\n// Higher timeframes are rebuilt from 1m bar timestamps, using only allowlisted builtins.\n//\n// HEIKIN ASHI POLICY — this matters for whether the numbers are real:\n//   HA is used for DIRECTION and COLOUR only (the 1h green count, the 1h agreement, the 1m trigger candle).\n//   Levels, entries, stops and targets all use REAL prices, because HA prices are synthetic and orders\n//   fill at real prices. Backtests that enter and exit at HA prices report fills that cannot happen.\nstrategy(\"War Formation HA\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\ngreenBull = input.int(4,     \"Green HA 1h candles for BULL\")\ngreenBear = input.int(2,     \"Green HA 1h candles at or below for BEAR\")\nskipOpen  = input.int(60,    \"Skip first N minutes of 6h block\")\nskipClose = input.int(60,    \"Skip last N minutes of 6h block\")\ncoilK     = input.float(0.85,\"3m coil: atr(3) < atr(30) * K\")\nvelK      = input.float(0.8, \"Velocity: min reclaim as multiple of atr(30)\")\nmidLo     = input.float(400, \"Whole-number middles low\")\nmidHi     = input.float(600, \"Whole-number middles high\")\netOffset  = input.int(-4,    \"ET offset from UTC\")\nwitchOn   = input.bool(true, \"Ban longs in witching hour 1-4am ET\")\nbufK      = input.float(0.25,\"Stop buffer beyond swept level, x atr(30)\")\nrr        = input.float(2.0, \"Reward:risk\")\nminRpct   = input.float(0.15,\"Min risk as % of price\")\nmaxRpct   = input.float(1.50,\"Max risk as % of price\")\nmaxBars   = input.int(720,   \"Max bars in trade\")\n\nMS6H = 21600000\nMS1H = 3600000\nMS15 = 900000\n\nb6  = math.floor(time / MS6H)\nb1h = math.floor(time / MS1H)\nb15 = math.floor(time / MS15)\n\nnew6  = b6  != b6[1]\nnew1h = b1h != b1h[1]\nnew15 = b15 != b15[1]\n\n// ---------------- 1-minute Heikin Ashi (computed, not fetched) ----------------\nvar float haO = na\nhaC   = (open + high + low + close) / 4\nhaO  := na(haO[1]) ? (open + close) / 2 : (haO[1] + haC[1]) / 2\nhaUp  = haC > haO\nhaDn  = haC < haO\n\n// ---------------- 1-hour real OHLC + its Heikin Ashi ----------------\nvar float o1   = na\nvar float h1   = na\nvar float l1   = na\nvar float ha1o = na\nvar float ha1c = na\n\nvar int grnCur  = 0\nvar int cntCur  = 0\nvar int grnPrev = 0\nvar int cntPrev = 0\n\nif new6\n    grnPrev := grnCur\n    cntPrev := cntCur\n    grnCur  := 0\n    cntCur  := 0\n\nif new1h\n    if not na(o1)\n        c1 = close[1]\n        newC = (o1 + h1 + l1 + c1) / 4\n        newO = na(ha1o) ? (o1 + c1) / 2 : (ha1o + ha1c) / 2\n        ha1o := newO\n        ha1c := newC\n        cntCur := cntCur + 1\n        if ha1c > ha1o\n            grnCur := grnCur + 1\n    o1 := open\n    h1 := high\n    l1 := low\nelse\n    h1 := na(h1) ? high : math.max(h1, high)\n    l1 := na(l1) ? low  : math.min(l1, low)\n\n// ---------------- LAYER 1: 6h regime from the previous block's HA 1h colours ----------------\nregimeReady = cntPrev >= 5\nbullRegime  = regimeReady and grnPrev >= greenBull\nbearRegime  = regimeReady and grnPrev <= greenBear\n\n// ---------------- LAYER 2: time gate inside the 6h block ----------------\nminsIn   = (time - b6 * MS6H) / 60000\ntimeGate = minsIn >= skipOpen and minsIn <= (360 - skipClose)\n\n// ---------------- LAYER 3: the forming 1h must agree (HA direction of the live hour) ----------------\nliveHaC = na(o1) ? na : (o1 + math.max(h1, high) + math.min(l1, low) + close) / 4\nliveHaO = na(ha1o) ? na : (ha1o + ha1c) / 2\nh1Bull  = not na(liveHaC) and not na(liveHaO) and liveHaC > liveHaO\nh1Bear  = not na(liveHaC) and not na(liveHaO) and liveHaC < liveHaO\n\n// ---------------- LAYER 4: previous completed 15m extreme (REAL prices - these are fill levels) ----------------\nvar float c15h = na\nvar float c15l = na\nvar float p15h = na\nvar float p15l = na\n\nif new15\n    p15h := c15h\n    p15l := c15l\n    c15h := high\n    c15l := low\nelse\n    c15h := na(c15h) ? high : math.max(c15h, high)\n    c15l := na(c15l) ? low  : math.min(c15l, low)\n\nbrokeBelow = not na(p15l) and c15l < p15l\nbrokeAbove = not na(p15h) and c15h > p15h\n\n// ---------------- LAYER 5: 3m coil, read on the PRIOR bar ----------------\natrFast  = ta.atr(3)\natrSlow  = ta.atr(30)\ncoiled   = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK\ncoilPrev = coiled[1]\nvelMin   = na(atrSlow) ? na : atrSlow * velK\n\n// ---------------- Oracle overlays ----------------\nsub      = close - math.floor(close / 1000) * 1000\ninMiddle = sub >= midLo and sub <= midHi\n\nhUTC     = math.floor(time / MS1H) % 24\nhET      = (hUTC + etOffset + 24) % 24\nwitching = hET >= 1 and hET < 4\nlongBan  = witchOn and witching\n\n// ---------------- TRIGGER: 1m reclaim, with velocity, on a turning HA candle ----------------\nlongTrig  = not na(p15l) and not na(velMin) and ta.crossover(close, p15l)  and (close - p15l) >= velMin and haUp\nshortTrig = not na(p15h) and not na(velMin) and ta.crossunder(close, p15h) and (p15h - close) >= velMin and haDn\n\ngoLong  = bullRegime and timeGate and h1Bull and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig\ngoShort = bearRegime and timeGate and h1Bear and brokeAbove and coilPrev and not inMiddle and shortTrig\n\n// ---------------- structural risk: stop beyond the level that was swept ----------------\nminR = close * minRpct / 100\nmaxR = close * maxRpct / 100\nbuf  = na(atrSlow) ? 0.0 : atrSlow * bufK\n\nrawLongR  = na(c15l) ? na : close - (c15l - buf)\nrawShortR = na(c15h) ? na : (c15h + buf) - close\nlongR     = na(rawLongR)  ? na : math.min(math.max(rawLongR,  minR), maxR)\nshortR    = na(rawShortR) ? na : math.min(math.max(rawShortR, minR), maxR)\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goLong and not na(longR) and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - longR\n    tpPx   := close + longR * rr\n    barsIn := 0\nelse if flat and goShort and not na(shortR) and shortR > 0\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + shortR\n    tpPx   := close - shortR * rr\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(grnPrev,                              title=\"GreenHA1hPrev6h\")\nplot(bullRegime ? 1 : bearRegime ? -1 : 0, title=\"Regime\")\nplot(haUp ? 1 : haDn ? -1 : 0,             title=\"HA1mColour\")\nplot(coilPrev ? 1 : 0,                     title=\"CoiledPrev\")\nplot(inMiddle ? 1 : 0,                     title=\"InMiddles\")\nplot(hET,                                  title=\"HourET\")\n",
+    "specPath": "war-formation/WAR-FORMATION.md",
+    "id": "war-formation-v6-longonly",
+    "name": "War Formation HA v6 (long only)",
+    "direction": "long",
+    "status": "testing",
+    "description": "v5 with the short leg removed. Full Heikin Ashi cascade otherwise unchanged: previous 6h block sets bull regime by counting green HA 1h candles, no trading in the first or last hour of the block, the live 1h must agree on HA, the level is the previous 15m low which price must first violate, the prior bar must be coiled, then the 1m reclaims with velocity on a green HA candle. Whole-number middles and the witching hour veto entries. Structural stop beyond the swept low with a 0.8% risk floor, target 2R, both fixed at entry.",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "metrics": {
+      "netProfitPct": 7.8388076,
+      "profitFactor": 1.68623784,
+      "maxDrawdownPct": 3.10289714,
+      "totalTrades": 32,
+      "winRatePct": 56.25,
+      "avgTradePct": 0.24496274
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GA99X2PRSFA706YZPHQ8DR",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GA99X15WPG8JMACHS11PC2",
+      "verifiedAt": "2026-09-02T05:45:39Z"
+    },
+    "notes": "BEST FULL-WINDOW RESULT. Dropping the short leg improved every metric over v5: PF 1.40 to 1.69, win rate 42.6% to 56.3%, Sharpe 1.70 to 2.19, and max drawdown FELL from 4.73% to 3.10%. Shorts were pure dead weight. BUT the split-half test below shows the edge is concentrated in the first half of the window, so this stays TESTING, not passed."
+  },
+  {
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "createdDate": "2026-09-01",
+    "lastTestedDate": "2026-09-01",
+    "pineSource": "//@version=6\n// THE WAR FORMATION v4 — HEIKIN ASHI edition. BTCUSDT, 1m base chart.\n// Cascade: 6h regime (HA 1h colours) -> time gate -> 1h agreement -> 15m level -> 3m coil -> 1m HA trigger.\n// Higher timeframes are rebuilt from 1m bar timestamps, using only allowlisted builtins.\n//\n// HEIKIN ASHI POLICY — this matters for whether the numbers are real:\n//   HA is used for DIRECTION and COLOUR only (the 1h green count, the 1h agreement, the 1m trigger candle).\n//   Levels, entries, stops and targets all use REAL prices, because HA prices are synthetic and orders\n//   fill at real prices. Backtests that enter and exit at HA prices report fills that cannot happen.\nstrategy(\"War Formation HA\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\ngreenBull = input.int(4,     \"Green HA 1h candles for BULL\")\ngreenBear = input.int(2,     \"Green HA 1h candles at or below for BEAR\")\nskipOpen  = input.int(60,    \"Skip first N minutes of 6h block\")\nskipClose = input.int(60,    \"Skip last N minutes of 6h block\")\ncoilK     = input.float(0.85,\"3m coil: atr(3) < atr(30) * K\")\nvelK      = input.float(0.8, \"Velocity: min reclaim as multiple of atr(30)\")\nmidLo     = input.float(400, \"Whole-number middles low\")\nmidHi     = input.float(600, \"Whole-number middles high\")\netOffset  = input.int(-4,    \"ET offset from UTC\")\nwitchOn   = input.bool(true, \"Ban longs in witching hour 1-4am ET\")\nbufK      = input.float(0.25,\"Stop buffer beyond swept level, x atr(30)\")\nrr        = input.float(2.0, \"Reward:risk\")\nminRpct   = input.float(0.15,\"Min risk as % of price\")\nmaxRpct   = input.float(1.50,\"Max risk as % of price\")\nmaxBars   = input.int(720,   \"Max bars in trade\")\n\nMS6H = 21600000\nMS1H = 3600000\nMS15 = 900000\n\nb6  = math.floor(time / MS6H)\nb1h = math.floor(time / MS1H)\nb15 = math.floor(time / MS15)\n\nnew6  = b6  != b6[1]\nnew1h = b1h != b1h[1]\nnew15 = b15 != b15[1]\n\n// ---------------- 1-minute Heikin Ashi (computed, not fetched) ----------------\nvar float haO = na\nhaC   = (open + high + low + close) / 4\nhaO  := na(haO[1]) ? (open + close) / 2 : (haO[1] + haC[1]) / 2\nhaUp  = haC > haO\nhaDn  = haC < haO\n\n// ---------------- 1-hour real OHLC + its Heikin Ashi ----------------\nvar float o1   = na\nvar float h1   = na\nvar float l1   = na\nvar float ha1o = na\nvar float ha1c = na\n\nvar int grnCur  = 0\nvar int cntCur  = 0\nvar int grnPrev = 0\nvar int cntPrev = 0\n\nif new6\n    grnPrev := grnCur\n    cntPrev := cntCur\n    grnCur  := 0\n    cntCur  := 0\n\nif new1h\n    if not na(o1)\n        c1 = close[1]\n        newC = (o1 + h1 + l1 + c1) / 4\n        newO = na(ha1o) ? (o1 + c1) / 2 : (ha1o + ha1c) / 2\n        ha1o := newO\n        ha1c := newC\n        cntCur := cntCur + 1\n        if ha1c > ha1o\n            grnCur := grnCur + 1\n    o1 := open\n    h1 := high\n    l1 := low\nelse\n    h1 := na(h1) ? high : math.max(h1, high)\n    l1 := na(l1) ? low  : math.min(l1, low)\n\n// ---------------- LAYER 1: 6h regime from the previous block's HA 1h colours ----------------\nregimeReady = cntPrev >= 5\nbullRegime  = regimeReady and grnPrev >= greenBull\nbearRegime  = regimeReady and grnPrev <= greenBear\n\n// ---------------- LAYER 2: time gate inside the 6h block ----------------\nminsIn   = (time - b6 * MS6H) / 60000\ntimeGate = minsIn >= skipOpen and minsIn <= (360 - skipClose)\n\n// ---------------- LAYER 3: the forming 1h must agree (HA direction of the live hour) ----------------\nliveHaC = na(o1) ? na : (o1 + math.max(h1, high) + math.min(l1, low) + close) / 4\nliveHaO = na(ha1o) ? na : (ha1o + ha1c) / 2\nh1Bull  = not na(liveHaC) and not na(liveHaO) and liveHaC > liveHaO\nh1Bear  = not na(liveHaC) and not na(liveHaO) and liveHaC < liveHaO\n\n// ---------------- LAYER 4: previous completed 15m extreme (REAL prices - these are fill levels) ----------------\nvar float c15h = na\nvar float c15l = na\nvar float p15h = na\nvar float p15l = na\n\nif new15\n    p15h := c15h\n    p15l := c15l\n    c15h := high\n    c15l := low\nelse\n    c15h := na(c15h) ? high : math.max(c15h, high)\n    c15l := na(c15l) ? low  : math.min(c15l, low)\n\nbrokeBelow = not na(p15l) and c15l < p15l\nbrokeAbove = not na(p15h) and c15h > p15h\n\n// ---------------- LAYER 5: 3m coil, read on the PRIOR bar ----------------\natrFast  = ta.atr(3)\natrSlow  = ta.atr(30)\ncoiled   = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK\ncoilPrev = coiled[1]\nvelMin   = na(atrSlow) ? na : atrSlow * velK\n\n// ---------------- Oracle overlays ----------------\nsub      = close - math.floor(close / 1000) * 1000\ninMiddle = sub >= midLo and sub <= midHi\n\nhUTC     = math.floor(time / MS1H) % 24\nhET      = (hUTC + etOffset + 24) % 24\nwitching = hET >= 1 and hET < 4\nlongBan  = witchOn and witching\n\n// ---------------- TRIGGER: 1m reclaim, with velocity, on a turning HA candle ----------------\nlongTrig  = not na(p15l) and not na(velMin) and ta.crossover(close, p15l)  and (close - p15l) >= velMin and haUp\nshortTrig = not na(p15h) and not na(velMin) and ta.crossunder(close, p15h) and (p15h - close) >= velMin and haDn\n\ngoLong  = bullRegime and timeGate and h1Bull and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig\ngoShort = bearRegime and timeGate and h1Bear and brokeAbove and coilPrev and not inMiddle and shortTrig\n\n// ---------------- structural risk: stop beyond the level that was swept ----------------\nminR = close * minRpct / 100\nmaxR = close * maxRpct / 100\nbuf  = na(atrSlow) ? 0.0 : atrSlow * bufK\n\nrawLongR  = na(c15l) ? na : close - (c15l - buf)\nrawShortR = na(c15h) ? na : (c15h + buf) - close\nlongR     = na(rawLongR)  ? na : math.min(math.max(rawLongR,  minR), maxR)\nshortR    = na(rawShortR) ? na : math.min(math.max(rawShortR, minR), maxR)\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goLong and not na(longR) and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - longR\n    tpPx   := close + longR * rr\n    barsIn := 0\nelse if flat and goShort and not na(shortR) and shortR > 0\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + shortR\n    tpPx   := close - shortR * rr\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(grnPrev,                              title=\"GreenHA1hPrev6h\")\nplot(bullRegime ? 1 : bearRegime ? -1 : 0, title=\"Regime\")\nplot(haUp ? 1 : haDn ? -1 : 0,             title=\"HA1mColour\")\nplot(coilPrev ? 1 : 0,                     title=\"CoiledPrev\")\nplot(inMiddle ? 1 : 0,                     title=\"InMiddles\")\nplot(hET,                                  title=\"HourET\")\n",
+    "specPath": "war-formation/WAR-FORMATION.md",
+    "id": "war-formation-v6-half1",
+    "name": "War Formation HA v6 - first half",
+    "direction": "long",
+    "status": "testing",
+    "description": "Split-half stability test. Identical v6 long-only code and parameters, first half of the 1m window only.",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-02-23",
+    "metrics": {
+      "netProfitPct": 8.71361846,
+      "profitFactor": 3.79720649,
+      "maxDrawdownPct": 2.81277697,
+      "totalTrades": 17,
+      "winRatePct": 70.58823529,
+      "avgTradePct": 0.51256579
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GAATC1Z15E5KPP2SGSK0R4",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GAATC13G8BHJFBW8ZPH8M3",
+      "verifiedAt": "2026-09-02T05:45:39Z"
+    },
+    "notes": "First half carries the entire edge: PF 3.80, 70.6% win rate, Sharpe 4.51 across 17 trades."
+  },
+  {
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "createdDate": "2026-09-01",
+    "lastTestedDate": "2026-09-01",
+    "pineSource": "//@version=6\n// THE WAR FORMATION v4 — HEIKIN ASHI edition. BTCUSDT, 1m base chart.\n// Cascade: 6h regime (HA 1h colours) -> time gate -> 1h agreement -> 15m level -> 3m coil -> 1m HA trigger.\n// Higher timeframes are rebuilt from 1m bar timestamps, using only allowlisted builtins.\n//\n// HEIKIN ASHI POLICY — this matters for whether the numbers are real:\n//   HA is used for DIRECTION and COLOUR only (the 1h green count, the 1h agreement, the 1m trigger candle).\n//   Levels, entries, stops and targets all use REAL prices, because HA prices are synthetic and orders\n//   fill at real prices. Backtests that enter and exit at HA prices report fills that cannot happen.\nstrategy(\"War Formation HA\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\ngreenBull = input.int(4,     \"Green HA 1h candles for BULL\")\ngreenBear = input.int(2,     \"Green HA 1h candles at or below for BEAR\")\nskipOpen  = input.int(60,    \"Skip first N minutes of 6h block\")\nskipClose = input.int(60,    \"Skip last N minutes of 6h block\")\ncoilK     = input.float(0.85,\"3m coil: atr(3) < atr(30) * K\")\nvelK      = input.float(0.8, \"Velocity: min reclaim as multiple of atr(30)\")\nmidLo     = input.float(400, \"Whole-number middles low\")\nmidHi     = input.float(600, \"Whole-number middles high\")\netOffset  = input.int(-4,    \"ET offset from UTC\")\nwitchOn   = input.bool(true, \"Ban longs in witching hour 1-4am ET\")\nbufK      = input.float(0.25,\"Stop buffer beyond swept level, x atr(30)\")\nrr        = input.float(2.0, \"Reward:risk\")\nminRpct   = input.float(0.15,\"Min risk as % of price\")\nmaxRpct   = input.float(1.50,\"Max risk as % of price\")\nmaxBars   = input.int(720,   \"Max bars in trade\")\n\nMS6H = 21600000\nMS1H = 3600000\nMS15 = 900000\n\nb6  = math.floor(time / MS6H)\nb1h = math.floor(time / MS1H)\nb15 = math.floor(time / MS15)\n\nnew6  = b6  != b6[1]\nnew1h = b1h != b1h[1]\nnew15 = b15 != b15[1]\n\n// ---------------- 1-minute Heikin Ashi (computed, not fetched) ----------------\nvar float haO = na\nhaC   = (open + high + low + close) / 4\nhaO  := na(haO[1]) ? (open + close) / 2 : (haO[1] + haC[1]) / 2\nhaUp  = haC > haO\nhaDn  = haC < haO\n\n// ---------------- 1-hour real OHLC + its Heikin Ashi ----------------\nvar float o1   = na\nvar float h1   = na\nvar float l1   = na\nvar float ha1o = na\nvar float ha1c = na\n\nvar int grnCur  = 0\nvar int cntCur  = 0\nvar int grnPrev = 0\nvar int cntPrev = 0\n\nif new6\n    grnPrev := grnCur\n    cntPrev := cntCur\n    grnCur  := 0\n    cntCur  := 0\n\nif new1h\n    if not na(o1)\n        c1 = close[1]\n        newC = (o1 + h1 + l1 + c1) / 4\n        newO = na(ha1o) ? (o1 + c1) / 2 : (ha1o + ha1c) / 2\n        ha1o := newO\n        ha1c := newC\n        cntCur := cntCur + 1\n        if ha1c > ha1o\n            grnCur := grnCur + 1\n    o1 := open\n    h1 := high\n    l1 := low\nelse\n    h1 := na(h1) ? high : math.max(h1, high)\n    l1 := na(l1) ? low  : math.min(l1, low)\n\n// ---------------- LAYER 1: 6h regime from the previous block's HA 1h colours ----------------\nregimeReady = cntPrev >= 5\nbullRegime  = regimeReady and grnPrev >= greenBull\nbearRegime  = regimeReady and grnPrev <= greenBear\n\n// ---------------- LAYER 2: time gate inside the 6h block ----------------\nminsIn   = (time - b6 * MS6H) / 60000\ntimeGate = minsIn >= skipOpen and minsIn <= (360 - skipClose)\n\n// ---------------- LAYER 3: the forming 1h must agree (HA direction of the live hour) ----------------\nliveHaC = na(o1) ? na : (o1 + math.max(h1, high) + math.min(l1, low) + close) / 4\nliveHaO = na(ha1o) ? na : (ha1o + ha1c) / 2\nh1Bull  = not na(liveHaC) and not na(liveHaO) and liveHaC > liveHaO\nh1Bear  = not na(liveHaC) and not na(liveHaO) and liveHaC < liveHaO\n\n// ---------------- LAYER 4: previous completed 15m extreme (REAL prices - these are fill levels) ----------------\nvar float c15h = na\nvar float c15l = na\nvar float p15h = na\nvar float p15l = na\n\nif new15\n    p15h := c15h\n    p15l := c15l\n    c15h := high\n    c15l := low\nelse\n    c15h := na(c15h) ? high : math.max(c15h, high)\n    c15l := na(c15l) ? low  : math.min(c15l, low)\n\nbrokeBelow = not na(p15l) and c15l < p15l\nbrokeAbove = not na(p15h) and c15h > p15h\n\n// ---------------- LAYER 5: 3m coil, read on the PRIOR bar ----------------\natrFast  = ta.atr(3)\natrSlow  = ta.atr(30)\ncoiled   = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK\ncoilPrev = coiled[1]\nvelMin   = na(atrSlow) ? na : atrSlow * velK\n\n// ---------------- Oracle overlays ----------------\nsub      = close - math.floor(close / 1000) * 1000\ninMiddle = sub >= midLo and sub <= midHi\n\nhUTC     = math.floor(time / MS1H) % 24\nhET      = (hUTC + etOffset + 24) % 24\nwitching = hET >= 1 and hET < 4\nlongBan  = witchOn and witching\n\n// ---------------- TRIGGER: 1m reclaim, with velocity, on a turning HA candle ----------------\nlongTrig  = not na(p15l) and not na(velMin) and ta.crossover(close, p15l)  and (close - p15l) >= velMin and haUp\nshortTrig = not na(p15h) and not na(velMin) and ta.crossunder(close, p15h) and (p15h - close) >= velMin and haDn\n\ngoLong  = bullRegime and timeGate and h1Bull and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig\ngoShort = bearRegime and timeGate and h1Bear and brokeAbove and coilPrev and not inMiddle and shortTrig\n\n// ---------------- structural risk: stop beyond the level that was swept ----------------\nminR = close * minRpct / 100\nmaxR = close * maxRpct / 100\nbuf  = na(atrSlow) ? 0.0 : atrSlow * bufK\n\nrawLongR  = na(c15l) ? na : close - (c15l - buf)\nrawShortR = na(c15h) ? na : (c15h + buf) - close\nlongR     = na(rawLongR)  ? na : math.min(math.max(rawLongR,  minR), maxR)\nshortR    = na(rawShortR) ? na : math.min(math.max(rawShortR, minR), maxR)\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goLong and not na(longR) and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - longR\n    tpPx   := close + longR * rr\n    barsIn := 0\nelse if flat and goShort and not na(shortR) and shortR > 0\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + shortR\n    tpPx   := close - shortR * rr\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(grnPrev,                              title=\"GreenHA1hPrev6h\")\nplot(bullRegime ? 1 : bearRegime ? -1 : 0, title=\"Regime\")\nplot(haUp ? 1 : haDn ? -1 : 0,             title=\"HA1mColour\")\nplot(coilPrev ? 1 : 0,                     title=\"CoiledPrev\")\nplot(inMiddle ? 1 : 0,                     title=\"InMiddles\")\nplot(hET,                                  title=\"HourET\")\n",
+    "specPath": "war-formation/WAR-FORMATION.md",
+    "id": "war-formation-v6-half2",
+    "name": "War Formation HA v6 - second half",
+    "direction": "long",
+    "status": "rejected",
+    "description": "Split-half stability test. Identical v6 long-only code and parameters, second half of the 1m window only.",
+    "backtestStart": "2026-02-23",
+    "backtestEnd": "2026-05-03",
+    "metrics": {
+      "netProfitPct": -0.8181718,
+      "profitFactor": 0.89300523,
+      "maxDrawdownPct": 3.09907855,
+      "totalTrades": 15,
+      "winRatePct": 40.0,
+      "avgTradePct": -0.05454479
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GAC65RDT4KCND9B5AW9BHB",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GAC65RVAG0G71QW446AHNY",
+      "verifiedAt": "2026-09-02T05:45:39Z"
+    },
+    "notes": "THE STABILITY PROBLEM. Same code, same parameters, second half of the window: PF 0.89 vs 3.80 in the first half, win rate 40% vs 70.6%, net -0.8% vs +8.7%. The full-window +7.8% comes almost entirely from Dec-Feb. Only 15 trades, so PF 0.89 is within noise of break-even rather than proof of failure -- but it is NOT confirmation, and it means v6 cannot be called validated."
+  }
+];
+const BUILT = "2026-09-01 23:45";
+
+const $ = (s) => document.querySelector(s);
+const list = $('#list');
+$('#stamp').textContent = DATA.length
+  ? DATA.length + ' backtested · built ' + BUILT
+  : 'No backtests yet · built ' + BUILT;
+
+const state = {
+  q:'', status:new Set(), sym:'', tf:'', dir:'',
+  minT:null, minPF:null, maxDD:null, sort:'profitFactor', desc:true
+};
+// Drawdown is the one axis where lower is better, so it defaults to ascending.
+const ASC_IS_BETTER = new Set(['maxDrawdownPct']);
+
+const ENT = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ENT[c]);
+const n1 = (v) => v.toFixed(1);
+const n2 = (v) => v.toFixed(2);
+const sign = (v) => (v > 0 ? '+' : '') + n1(v) + '%';
+
+function fillSelect(el, vals){
+  vals.forEach((v) => {
+    const o = document.createElement('option');
+    o.value = v; o.textContent = v; el.appendChild(o);
+  });
+}
+fillSelect($('#sym'), [...new Set(DATA.map((d) => d.symbol))].sort());
+fillSelect($('#tf'),  [...new Set(DATA.map((d) => d.timeframe))].sort());
+fillSelect($('#dir'), [...new Set(DATA.map((d) => d.direction))].sort());
+
+function summary(rows){
+  let cells;
+  if (!DATA.length){
+    cells = [['Strategies backtested','0'],['Passed','0'],['Best profit factor','—'],
+             ['Lowest max DD','—'],['Total trades','—']];
+  } else {
+    const pf = rows.map((r) => r.metrics.profitFactor);
+    const dd = rows.map((r) => r.metrics.maxDrawdownPct);
+    cells = [
+      ['Strategies backtested', String(DATA.length)],
+      ['Passed', String(DATA.filter((r) => r.status === 'passed').length)],
+      ['Best profit factor', pf.length ? n2(Math.max.apply(null, pf)) : '—'],
+      ['Lowest max DD', dd.length ? n1(Math.min.apply(null, dd)) + '%' : '—'],
+      ['Total trades', String(rows.reduce((a, r) => a + r.metrics.totalTrades, 0))]
+    ];
+  }
+  $('#strip').innerHTML = cells.map(
+    (c) => '<div class="cell"><div class="k">' + esc(c[0]) + '</div><div class="v">' + esc(c[1]) + '</div></div>'
+  ).join('');
+}
+
+function apply(){
+  const rows = DATA.filter((r) => {
+    if (state.status.size && !state.status.has(r.status)) return false;
+    if (state.sym && r.symbol !== state.sym) return false;
+    if (state.tf && r.timeframe !== state.tf) return false;
+    if (state.dir && r.direction !== state.dir) return false;
+    if (state.minT !== null && r.metrics.totalTrades < state.minT) return false;
+    if (state.minPF !== null && r.metrics.profitFactor < state.minPF) return false;
+    if (state.maxDD !== null && r.metrics.maxDrawdownPct > state.maxDD) return false;
+    if (state.q){
+      const hay = (r.name + ' ' + r.description + ' ' + r.symbol).toLowerCase();
+      if (hay.indexOf(state.q.toLowerCase()) === -1) return false;
+    }
+    return true;
+  });
+  const k = state.sort;
+  rows.sort((a, b) => {
+    const av = k === 'lastTestedDate' ? a[k] : a.metrics[k];
+    const bv = k === 'lastTestedDate' ? b[k] : b.metrics[k];
+    const c = av < bv ? -1 : av > bv ? 1 : 0;
+    return state.desc ? -c : c;
+  });
+  summary(rows);
+  $('#count').textContent = DATA.length ? rows.length + ' of ' + DATA.length : '';
+  render(rows);
+}
+
+function metric(k, v, cls){
+  return '<div class="m"><div class="k">' + k + '</div><div class="v ' + (cls || '') + '">' + v + '</div></div>';
+}
+
+function render(rows){
+  if (!DATA.length){ list.innerHTML = emptyState(); return; }
+  if (!rows.length){
+    list.innerHTML = '<div class="empty"><h3>No strategies match these filters</h3>' +
+      '<p>Loosen a threshold or clear the filters to see the full set.</p></div>';
+    return;
+  }
+  list.innerHTML = rows.map((r) => {
+    const m = r.metrics;
+    const full = (r.provenance && r.provenance.backtestUrl)
+      ? '<a class="btn primary" href="' + esc(r.provenance.backtestUrl) + '" target="_blank" rel="noopener">Full backtest</a>'
+      : '<button class="btn primary" disabled>Full backtest</button>';
+    return '<article class="row" data-status="' + esc(r.status) + '"><div class="stripe"></div><div class="row-in">' +
+      '<div class="row-head"><h2>' + esc(r.name) + '</h2>' +
+        '<span class="pill ' + esc(r.status) + '">' + esc(r.status) + '</span>' +
+        '<span class="tag">' + esc(r.symbol) + '</span>' +
+        '<span class="tag">' + esc(r.timeframe) + '</span>' +
+        '<span class="tag">' + esc(r.direction) + '</span></div>' +
+      '<p class="desc">' + esc(r.description) + '</p>' +
+      '<div class="metrics">' +
+        metric('Net return', sign(m.netProfitPct), m.netProfitPct >= 0 ? 'pos' : 'neg') +
+        metric('Profit factor', n2(m.profitFactor), m.profitFactor >= 1 ? 'pos' : 'neg') +
+        metric('Max drawdown', n1(m.maxDrawdownPct) + '%') +
+        metric('Trades', String(m.totalTrades)) +
+        metric('Win rate', n1(m.winRatePct) + '%') +
+        metric('Avg trade', sign(m.avgTradePct), m.avgTradePct >= 0 ? 'pos' : 'neg') +
+      '</div>' +
+      '<div class="row-foot"><div class="dates">' +
+        '<span>Tested ' + esc(r.backtestStart) + ' → ' + esc(r.backtestEnd) + '</span>' +
+        '<span>Created ' + esc(r.createdDate) + '</span>' +
+        '<span>Last tested ' + esc(r.lastTestedDate) + '</span></div>' +
+      '<div class="acts">' +
+        '<button class="btn" data-act="rules" data-id="' + esc(r.id) + '">Rules</button>' +
+        '<button class="btn" data-act="pine" data-id="' + esc(r.id) + '"' + (r.pineSource ? '' : ' disabled') + '>Pine script</button>' +
+        full +
+      '</div></div></div></article>';
+  }).join('');
+}
+
+function emptyState(){
+  return '<div class="empty">' +
+    '<h3>Nothing has been backtested yet</h3>' +
+    '<p>This panel only ever shows strategies with a recorded backtest behind them. Specifications that ' +
+    'have not been run do not appear here.</p>' +
+    '<ol>' +
+      '<li>Code the strategy as Pine v6 and run a real backtest.</li>' +
+      '<li>Read the metrics off the returned report.</li>' +
+      '<li>Append a record to <code>results/backtests.json</code>.</li>' +
+      '<li>Run <code>python build_dashboard.py</code>.</li>' +
+      '<li>Republish <code>dashboard/dashboard.html</code> to this same URL.</li>' +
+    '</ol>' +
+    '<div class="gate"><b>Build-time gate.</b> The generator rejects any record without a ' +
+    '<code>provenance</code> block naming a real backtest job or report URL, and any record whose trade ' +
+    'count is zero. Estimated or invented numbers cannot reach this page &mdash; the build fails instead.</div>' +
+  '</div>';
+}
+
+$('#q').addEventListener('input', (e) => { state.q = e.target.value.trim(); apply(); });
+
+document.querySelectorAll('.chip').forEach((b) => {
+  b.addEventListener('click', () => {
+    const v = b.dataset.v;
+    const on = b.getAttribute('aria-pressed') === 'true';
+    b.setAttribute('aria-pressed', String(!on));
+    if (on) state.status.delete(v); else state.status.add(v);
+    apply();
+  });
+});
+
+function bindSel(id, key){
+  $(id).addEventListener('change', (e) => { state[key] = e.target.value; apply(); });
+}
+bindSel('#sym','sym'); bindSel('#tf','tf'); bindSel('#dir','dir');
+
+function bindNum(id, key){
+  $(id).addEventListener('input', (e) => {
+    const v = e.target.value;
+    state[key] = v === '' ? null : Number(v);
+    apply();
+  });
+}
+bindNum('#minT','minT'); bindNum('#minPF','minPF'); bindNum('#maxDD','maxDD');
+
+document.querySelectorAll('.sortbtn').forEach((b) => {
+  b.addEventListener('click', () => {
+    const s = b.dataset.s;
+    if (state.sort === s){ state.desc = !state.desc; }
+    else { state.sort = s; state.desc = !ASC_IS_BETTER.has(s); }
+    document.querySelectorAll('.sortbtn').forEach((o) => {
+      const active = o.dataset.s === state.sort;
+      o.setAttribute('aria-pressed', String(active));
+      o.querySelector('.dir').textContent = active ? (state.desc ? '↓' : '↑') : '';
+    });
+    apply();
+  });
+});
+
+$('#reset').addEventListener('click', () => {
+  state.q = ''; state.sym = ''; state.tf = ''; state.dir = '';
+  state.minT = null; state.minPF = null; state.maxDD = null;
+  state.status.clear();
+  $('#q').value = ''; $('#sym').value = ''; $('#tf').value = ''; $('#dir').value = '';
+  $('#minT').value = ''; $('#minPF').value = ''; $('#maxDD').value = '';
+  document.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed','false'));
+  apply();
+});
+
+const dlg = $('#dlg');
+const dlgBody = $('#dlgBody');
+const dlgTitle = $('#dlgTitle');
+const dlgCopy = $('#dlgCopy');
+let copyText = '';
+
+list.addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-act]');
+  if (!b) return;
+  const r = DATA.filter((x) => x.id === b.dataset.id)[0];
+  if (!r) return;
+  if (b.dataset.act === 'pine'){
+    dlgTitle.textContent = r.name + ' — Pine v6';
+    dlgBody.innerHTML = '<pre>' + esc(r.pineSource) + '</pre>';
+    copyText = r.pineSource;
+    dlgCopy.hidden = false;
+    dlgCopy.textContent = 'Copy';
+  } else {
+    dlgTitle.textContent = r.name + ' — rules';
+    dlgBody.innerHTML = '<div class="prose">' + esc(r.description) +
+      (r.specPath ? '<p class="spec-note">Full spec: <code>' + esc(r.specPath) + '</code></p>' : '') +
+      (r.notes ? '<p class="spec-note">' + esc(r.notes) + '</p>' : '') + '</div>';
+    dlgCopy.hidden = true;
+  }
+  dlg.showModal();
+});
+
+dlgCopy.addEventListener('click', () => {
+  navigator.clipboard.writeText(copyText).then(
+    () => { dlgCopy.textContent = 'Copied'; },
+    () => { dlgCopy.textContent = 'Press Ctrl+C'; }
+  );
+});
+$('#dlgClose').addEventListener('click', () => dlg.close());
+dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+
+apply();
+</script>

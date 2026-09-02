@@ -1,0 +1,90 @@
+//@version=6
+// MAR-1 "Moving-Average Retest Fade" — BTCUSDT.
+// From a charted setup: a slow MA sloping down acts as resistance. Price rallies up, TAGS the MA,
+// and rejects back below it -> short. Target is the opposite band of a volatility channel.
+// Mirrored for an up-sloping MA. The MA slope IS the regime switch.
+// Stop and target both fixed at entry. No trailing stop, no pyramiding, no averaging down.
+strategy("MAR-1 Moving-Average Retest Fade", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+slowLen  = input.int(200,   "Slow MA length (the blue line)")
+slopeLen = input.int(20,    "Bars used to measure MA slope")
+slopeMin = input.float(0.10,"Min MA slope over that span, % of price")
+bbLen    = input.int(20,    "Band length")
+bbMult   = input.float(2.0, "Band multiplier")
+bufK     = input.float(0.25,"Stop buffer beyond the MA, x ATR")
+atrLen   = input.int(14,    "ATR length")
+minRpct  = input.float(0.80,"Min risk as % of price")
+maxRpct  = input.float(3.00,"Max risk as % of price")
+minRR    = input.float(1.0, "Target floor, in R")
+maxRR    = input.float(4.0, "Target cap, in R")
+maxBars  = input.int(96,    "Max bars in trade")
+
+slowMA = ta.ema(close, slowLen)
+atr    = ta.atr(atrLen)
+[bbMid, bbUp, bbLo] = ta.bb(close, bbLen, bbMult)
+
+// ---- regime: the slope of the slow MA ----
+slopeAbs = slowMA - slowMA[slopeLen]
+slopePct = close > 0 ? slopeAbs / close * 100 : 0.0
+downTrend = not na(slowMA[slopeLen]) and slopePct <= -slopeMin
+upTrend   = not na(slowMA[slopeLen]) and slopePct >=  slopeMin
+
+// ---- the retest: price reaches the MA this bar, then closes back on the trend side ----
+tagFromBelow = high >= slowMA and close < slowMA and close < open
+tagFromAbove = low  <= slowMA and close > slowMA and close > open
+
+goShort = downTrend and tagFromBelow
+goLong  = upTrend   and tagFromAbove
+
+// ---- risk: stop beyond the MA that just rejected price ----
+buf  = na(atr) ? 0.0 : atr * bufK
+minR = close * minRpct / 100
+maxR = close * maxRpct / 100
+
+rawShortR = (slowMA + buf) - close
+rawLongR  = close - (slowMA - buf)
+shortR    = math.min(math.max(rawShortR, minR), maxR)
+longR     = math.min(math.max(rawLongR,  minR), maxR)
+
+// ---- target: the opposite band, measured AT ENTRY and then never moved, clamped in R ----
+rawShortTP = bbLo
+rawLongTP  = bbUp
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goShort and shortR > 0
+    strategy.entry("S", strategy.short)
+    slPx := close + shortR
+    tgt   = math.min(math.max(rawShortTP, close - shortR * maxRR), close - shortR * minRR)
+    tpPx := tgt
+    barsIn := 0
+else if flat and goLong and longR > 0
+    strategy.entry("L", strategy.long)
+    slPx := close - longR
+    tgt   = math.max(math.min(rawLongTP, close + longR * maxRR), close + longR * minRR)
+    tpPx := tgt
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(slowMA, title="SlowMA")
+plot(slopePct, title="SlopePct")
+plot(downTrend ? -1 : upTrend ? 1 : 0, title="Regime")

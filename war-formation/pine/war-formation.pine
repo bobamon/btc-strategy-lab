@@ -1,0 +1,157 @@
+//@version=6
+// THE WAR FORMATION — BTCUSDT, 1m base chart.
+// Cascade: 6h regime -> time gate -> 1h agreement -> 15m level -> 3m coil -> 1m velocity trigger.
+// Higher timeframes are rebuilt from 1m bar timestamps, using only allowlisted builtins.
+// KEPT: five-layer veto cascade, whole-number middles filter, witching-hour long ban,
+//       protective-gap fixed SL/TP set at entry, max-hold flatten.
+// DROPPED: nothing forbidden requested. No trailing stop, no pyramiding, no averaging down.
+strategy("War Formation", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+// ---------------- inputs ----------------
+greenBull = input.int(4,     "Green 1h candles for BULL")
+greenBear = input.int(2,     "Green 1h candles at or below for BEAR")
+skipOpen  = input.int(60,    "Skip first N minutes of 6h block")
+skipClose = input.int(60,    "Skip last N minutes of 6h block")
+coilK     = input.float(0.85,"3m coil: atr(3) < atr(30) * K")
+velK      = input.float(0.8, "Velocity: min reclaim as multiple of atr(30)")
+midLo     = input.float(400, "Whole-number middles low")
+midHi     = input.float(600, "Whole-number middles high")
+etOffset  = input.int(-4,    "ET offset from UTC")
+witchOn   = input.bool(true, "Ban longs in witching hour 1-4am ET")
+gapPct    = input.float(4.0, "Protective gap % (stop)")
+rr        = input.float(1.5, "Reward:risk for take profit")
+maxBars   = input.int(1440,  "Max bars in trade")
+
+// ---------------- timeframe buckets from 1m timestamps ----------------
+MS6H = 21600000
+MS1H = 3600000
+MS15 = 900000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+b15 = math.floor(time / MS15)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+new15 = b15 != b15[1]
+
+// ---------------- LAYER 1: 6h regime from previous block's 1h candles ----------------
+var float h1o     = na      // open of the 1h candle currently forming
+var int   grnCur  = 0       // green 1h candles counted inside the current 6h block
+var int   cntCur  = 0       // completed 1h candles inside the current 6h block
+var int   grnPrev = 0
+var int   cntPrev = 0
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    grnCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(h1o)
+        cntCur := cntCur + 1
+        if close[1] > h1o
+            grnCur := grnCur + 1
+    h1o := open
+
+regimeReady = cntPrev >= 5
+bullRegime  = regimeReady and grnPrev >= greenBull
+bearRegime  = regimeReady and grnPrev <= greenBear
+
+// ---------------- LAYER 2: time gate inside the 6h block ----------------
+minsIn    = (time - b6 * MS6H) / 60000
+timeGate  = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+// ---------------- LAYER 3: current 1h must agree ----------------
+h1Bull = not na(h1o) and close > h1o
+h1Bear = not na(h1o) and close < h1o
+
+// ---------------- LAYER 4: previous completed 15m extreme ----------------
+var float c15h = na
+var float c15l = na
+var float p15h = na
+var float p15l = na
+
+if new15
+    p15h := c15h
+    p15l := c15l
+    c15h := high
+    c15l := low
+else
+    c15h := na(c15h) ? high : math.max(c15h, high)
+    c15l := na(c15l) ? low  : math.min(c15l, low)
+
+// the level must have been violated inside the current 15m candle before it can be reclaimed
+brokeBelow = not na(p15l) and c15l < p15l
+brokeAbove = not na(p15h) and c15h > p15h
+
+// ---------------- LAYER 5: 3m coil ----------------
+atrFast = ta.atr(3)
+atrSlow = ta.atr(30)
+coiled  = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK
+// The coil must precede the thrust. A bar cannot be compressed AND expanding at once,
+// so the compression is read on the PRIOR bar and the trigger fires on this one.
+coilPrev = coiled[1]
+velMin   = na(atrSlow) ? na : atrSlow * velK
+
+// ---------------- Oracle overlays ----------------
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+hUTC     = math.floor(time / MS1H) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+longBan  = witchOn and witching
+
+// ---------------- TRIGGER: 1m reclaim with velocity ----------------
+longTrig  = not na(p15l) and not na(velMin) and ta.crossover(close, p15l)  and (close - p15l) >= velMin
+shortTrig = not na(p15h) and not na(velMin) and ta.crossunder(close, p15h) and (p15h - close) >= velMin
+
+goLong  = bullRegime and timeGate and h1Bull and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig
+goShort = bearRegime and timeGate and h1Bear and brokeAbove and coilPrev and not inMiddle and shortTrig
+
+// ---------------- state ----------------
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+// ---------------- entries: protective gap fixed at the moment of entry ----------------
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := close * (1 - gapPct / 100)
+    tpPx   := close * (1 + gapPct * rr / 100)
+    barsIn := 0
+else if flat and goShort
+    strategy.entry("S", strategy.short)
+    slPx   := close * (1 + gapPct / 100)
+    tpPx   := close * (1 - gapPct * rr / 100)
+    barsIn := 0
+
+// ---------------- exits: same prices every bar, never moved ----------------
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+// ---------------- diagnostics ----------------
+plot(grnPrev,                     title="Green1hPrev6h")
+plot(bullRegime ? 1 : bearRegime ? -1 : 0, title="Regime")
+plot(coilPrev ? 1 : 0,            title="CoiledPrev")
+plot(velMin,                      title="VelMin")
+plot(inMiddle ? 1 : 0,            title="InMiddles")
+plot(witching ? 1 : 0,            title="WitchingHour")
+plot(hET,                         title="HourET")

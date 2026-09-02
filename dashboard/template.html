@@ -1,4 +1,4 @@
-<title>Strategy Control Panel</title>
+<title>__TITLE__</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -170,8 +170,8 @@ dialog::backdrop{background:rgba(10,14,19,.62)}
 <div class="wrap">
   <header class="mast">
     <div>
-      <h1>Strategy Control Panel</h1>
-      <p>Backtested index strategies for US30, NAS100, YM and NQ. Every row is generated from a recorded backtest &mdash; nothing here is estimated.</p>
+      <h1>__TITLE__</h1>
+      <p>__SUBTITLE__</p>
     </div>
     <div class="stamp" id="stamp"></div>
   </header>
@@ -350,8 +350,8 @@ function render(rows){
 function emptyState(){
   return '<div class="empty">' +
     '<h3>Nothing has been backtested yet</h3>' +
-    '<p>This panel only ever shows strategies with a recorded backtest behind them. The lab currently holds ' +
-    'one specification &mdash; <b>001 RSB-1 Relative-Strength Baton</b> &mdash; which has not been run, so it is not shown here.</p>' +
+    '<p>This panel only ever shows strategies with a recorded backtest behind them. Specifications that ' +
+    'have not been run do not appear here.</p>' +
     '<ol>' +
       '<li>Code the strategy as Pine v6 and run a real backtest.</li>' +
       '<li>Read the metrics off the returned report.</li>' +

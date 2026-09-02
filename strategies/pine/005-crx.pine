@@ -1,0 +1,102 @@
+//@version=6
+// CRX-1 "Compression Release, Volume Verdict" — BTCUSDT, 15m and 5m.
+// A range compresses; price breaks out; VOLUME decides whether the break is real.
+// Heavy volume -> follow the break. Thin volume -> fade it. In between -> no trade.
+// Stops sit beyond STRUCTURE (the opposite side of the box, or beyond the breakout extreme),
+// never just beyond the trigger level -- HARD LESSON 5.
+// SL and TP both fixed at entry. No trailing stop, no pyramiding, no averaging down, no martingale.
+strategy("CRX-1 Compression Release Volume Verdict", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+boxLen   = input.int(48,    "Compression box length")
+atrLong  = input.int(100,   "ATR length for the compression yardstick")
+tightK   = input.float(3.0, "Compressed if box width < K x ATR")
+holdBars = input.int(5,     "Bars the box must stay compressed")
+volLen   = input.int(50,    "Volume average length")
+volHi    = input.float(2.0, "Follow the break if volume >= K x average")
+volLo    = input.float(1.0, "Fade the break if volume < K x average")
+bufK     = input.float(0.25,"Structural stop buffer, x ATR14")
+rr       = input.float(1.8, "Reward:risk")
+minRpct  = input.float(0.80,"Min risk as % of price")
+maxRpct  = input.float(3.00,"Max risk as % of price")
+maxBars  = input.int(96,    "Max bars in trade")
+
+atrL   = ta.atr(atrLong)
+atrS   = ta.atr(14)
+volAvg = ta.sma(volume, volLen)
+
+// ---- the box, measured BEFORE this bar so the breakout bar cannot widen it ----
+boxHi = ta.highest(high, boxLen)[1]
+boxLo = ta.lowest(low,  boxLen)[1]
+boxW  = boxHi - boxLo
+
+tight = not na(atrL) and atrL > 0 and boxW < atrL * tightK
+// compression must have been sustained, not a one-bar accident
+held  = tight[1] and tight[2] and tight[3] and tight[4] and tight[5]
+
+// ---- the release ----
+breakUp = ta.crossover(close, boxHi)
+breakDn = ta.crossunder(close, boxLo)
+
+// ---- the verdict: volume decides follow vs fade. Between the thresholds is a dead band. ----
+heavy = not na(volAvg) and volAvg > 0 and volume >= volAvg * volHi
+thin  = not na(volAvg) and volAvg > 0 and volume <  volAvg * volLo
+
+followLong  = held and breakUp and heavy
+followShort = held and breakDn and heavy
+fadeShort   = held and breakUp and thin
+fadeLong    = held and breakDn and thin
+
+// ---- structural risk ----
+buf  = na(atrS) ? 0.0 : atrS * bufK
+minR = close * minRpct / 100
+maxR = close * maxRpct / 100
+
+// follow: stop at the far side of the box. fade: stop beyond the breakout bar's extreme.
+rawFollowLongR  = close - (boxLo - buf)
+rawFollowShortR = (boxHi + buf) - close
+rawFadeShortR   = (high + buf) - close
+rawFadeLongR    = close - (low - buf)
+
+goLong  = followLong or fadeLong
+goShort = followShort or fadeShort
+rawLongR  = followLong  ? rawFollowLongR  : rawFadeLongR
+rawShortR = followShort ? rawFollowShortR : rawFadeShortR
+longR     = math.min(math.max(rawLongR,  minR), maxR)
+shortR    = math.min(math.max(rawShortR, minR), maxR)
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong and longR > 0
+    strategy.entry("L", strategy.long)
+    slPx   := close - longR
+    tpPx   := close + longR * rr
+    barsIn := 0
+else if flat and goShort and shortR > 0
+    strategy.entry("S", strategy.short)
+    slPx   := close + shortR
+    tpPx   := close - shortR * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(boxW,                       title="BoxWidth")
+plot(held ? 1 : 0,               title="CompressionHeld")
+plot(heavy ? 1 : thin ? -1 : 0,  title="VolumeVerdict")

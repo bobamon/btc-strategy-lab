@@ -6,7 +6,8 @@ dashboard if it carries provenance pointing at a real backtest and a non-zero tr
 count. If any record fails, the build aborts and the existing dashboard is left
 untouched -- so estimated or invented numbers cannot be published by accident.
 
-Usage:  python build_dashboard.py [--check]
+Usage:  python build_dashboard.py [--lab btc|war] [--check]
+        --lab    which lab to build (default: btc)
         --check  validate only, do not write output
 """
 
@@ -17,16 +18,34 @@ from datetime import date, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-DATA_FILE = ROOT / "results" / "backtests.json"
 TEMPLATE = ROOT / "dashboard" / "template.html"
-OUTPUT = ROOT / "dashboard" / "dashboard.html"
+
+# Each lab gets its own results file, output page, and identity. Adding a lab is a
+# one-line change here -- the validation gate is shared, so no lab can bypass it.
+LABS = {
+    "btc": {
+        "data": ROOT / "results" / "backtests.json",
+        "out": ROOT / "dashboard" / "dashboard.html",
+        "title": "Strategy Control Panel",
+        "subtitle": "Backtested BTCUSDT strategies. Every row is generated from a recorded "
+                    "backtest &mdash; nothing here is estimated.",
+    },
+    "war": {
+        "data": ROOT / "war-formation" / "results" / "backtests.json",
+        "out": ROOT / "war-formation" / "dashboard" / "war-formation.html",
+        "title": "War Formation",
+        "subtitle": "The 6h &rarr; 1h &rarr; 15m &rarr; 3m &rarr; 1m cascade on BTCUSDT, tested on the "
+                    "1-minute chart. Every row is a recorded backtest &mdash; nothing here is estimated.",
+    },
+}
 
 STATUSES = {"research", "testing", "passed", "rejected"}
 DIRECTIONS = {"long", "short", "both"}
 # Bybit USDT linear perpetuals (639-instrument catalog). Validated by shape, not
 # an enumerated list, so new pairs do not require a code change.
 SYMBOL_RE = re.compile(r"^[A-Z0-9]{2,15}USDT$")
-TIMEFRAMES = {"15m", "5m"}
+# Timeframes the engine actually serves. 3m has no bars at all.
+TIMEFRAMES = {"1m", "5m", "15m", "1h", "4h"}
 SOURCES = {"trader.dev", "tradingview", "python"}
 
 TEXT_FIELDS = ["id", "name", "symbol", "timeframe", "direction", "status",
@@ -126,6 +145,16 @@ def validate(record, index):
 def main():
     check_only = "--check" in sys.argv
 
+    lab_name = "btc"
+    for i, arg in enumerate(sys.argv):
+        if arg == "--lab" and i + 1 < len(sys.argv):
+            lab_name = sys.argv[i + 1]
+    if lab_name not in LABS:
+        sys.exit("error: unknown lab '%s'. Known: %s" % (lab_name, ", ".join(sorted(LABS))))
+    lab = LABS[lab_name]
+    DATA_FILE = lab["data"]
+    OUTPUT = lab["out"]
+
     if not DATA_FILE.exists():
         sys.exit("error: %s not found" % DATA_FILE)
     if not TEMPLATE.exists():
@@ -159,7 +188,8 @@ def main():
               "and run again.", file=sys.stderr)
         sys.exit(1)
 
-    print("validated %d record(s) -- all carry backtest provenance" % len(records))
+    print("[%s] validated %d record(s) -- all carry backtest provenance"
+          % (lab_name, len(records)))
     if check_only:
         return
 
@@ -168,6 +198,9 @@ def main():
     html = html.replace("/*__BACKTESTS__*/[]",
                         json.dumps(records, indent=2, ensure_ascii=False))
     html = html.replace("__BUILT__", built)
+    html = html.replace("__TITLE__", lab["title"])
+    html = html.replace("__SUBTITLE__", lab["subtitle"])
+    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(html, encoding="utf-8")
     print("wrote %s (%d strategies, built %s)" % (OUTPUT.name, len(records), built))
 

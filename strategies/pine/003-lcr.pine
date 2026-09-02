@@ -1,0 +1,94 @@
+//@version=6
+// LCR-1 "Liquidation Cascade Reclaim" — BTCUSDT, 15m and 5m.
+// Detect a cascade bar (range expansion + volume spike + new 50-bar extreme), then let the CLOSE
+// POSITION inside that bar decide the side: a rejected flush is faded, a flush that closes on its
+// low is followed. Stop and target both fixed at entry; risk floored at 1.2% so the round-trip fee
+// stays a small fraction of R (HARD LESSON 3).
+// No trailing stop, no pyramiding, no averaging down, no martingale.
+strategy("LCR-1 Liquidation Cascade Reclaim", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+lenN     = input.int(50,    "Lookback for ATR / volume / extremes")
+rangeK   = input.float(2.5, "Cascade: range > K x ATR")
+volK     = input.float(3.0, "Cascade: volume > K x average")
+revLo    = input.float(0.55,"Down cascade: closePos at/above this = reversion long")
+contLo   = input.float(0.25,"Down cascade: closePos at/below this = continuation short")
+revHi    = input.float(0.45,"Up cascade: closePos at/below this = reversion short")
+contHi   = input.float(0.75,"Up cascade: closePos at/above this = continuation long")
+bufK     = input.float(0.2, "Stop buffer beyond the cascade extreme, x ATR")
+rr       = input.float(2.0, "Reward:risk")
+minRpct  = input.float(1.20,"Min risk as % of price")
+maxRpct  = input.float(4.00,"Max risk as % of price")
+maxBars  = input.int(96,    "Max bars in trade")
+
+atrN   = ta.atr(lenN)
+volAvg = ta.sma(volume, lenN)
+rng    = high - low
+
+// ---- cascade detection ----
+bigRange = not na(atrN) and atrN > 0 and rng > rangeK * atrN
+bigVol   = not na(volAvg) and volAvg > 0 and volume > volK * volAvg
+cascade  = bigRange and bigVol
+
+newLow  = low  <= ta.lowest(low,  lenN)[1]
+newHigh = high >= ta.highest(high, lenN)[1]
+
+downCascade = cascade and newLow
+upCascade   = cascade and newHigh
+
+closePos = rng > 0 ? (close - low) / rng : 0.5
+
+// ---- the regime switch: where the close sits decides the side ----
+revLong   = downCascade and closePos >= revLo
+contShort = downCascade and closePos <= contLo
+revShort  = upCascade   and closePos <= revHi
+contLong  = upCascade   and closePos >= contHi
+
+// ---- risk, floored so commission stays a small fraction of R ----
+buf  = na(atrN) ? 0.0 : atrN * bufK
+minR = close * minRpct / 100
+maxR = close * maxRpct / 100
+
+rawLongR  = close - (low - buf)
+rawShortR = (high + buf) - close
+longR     = math.min(math.max(rawLongR,  minR), maxR)
+shortR    = math.min(math.max(rawShortR, minR), maxR)
+
+goLong  = revLong  or contLong
+goShort = revShort or contShort
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong and longR > 0
+    strategy.entry("L", strategy.long)
+    slPx   := close - longR
+    tpPx   := close + longR * rr
+    barsIn := 0
+else if flat and goShort and shortR > 0
+    strategy.entry("S", strategy.short)
+    slPx   := close + shortR
+    tpPx   := close - shortR * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(cascade ? 1 : 0,   title="CascadeBar")
+plot(closePos,          title="ClosePos")
+plot(revLong or revShort ? 1 : contLong or contShort ? -1 : 0, title="ReversionVsContinuation")

@@ -19,6 +19,17 @@ day (see Archived note at the bottom). One pair means strategies no longer have 
 across instruments, so BTC-specific structure — its funding cycle, liquidation behaviour, weekend
 regime, round-number magnetism — is now fair game and should be exploited rather than avoided.
 
+## STANDING OBJECTIVES — every strategy in this lab must satisfy these
+1. **Both directions, built separately.** Long and short each need their own entry logic, level
+   definition and risk geometry. **A short rule that is only a sign-flipped long rule does not count.**
+   The War Formation learned this the expensive way: its mirrored short leg went 2 winners in 15 and
+   removing it improved every metric. That is a verdict on mirroring, not on shorting.
+2. **Handle the flip.** The strategy must mechanically detect when the regime *changes* and respond —
+   not merely filter for one regime and sit out the other. State the flip signal and the response.
+3. **Report the legs separately.** Long vs short, and bull-regime vs bear-regime where the design
+   allows. A blended profit factor hides a dead leg, which is exactly how 005's fade leg escaped
+   notice until after the credit was spent.
+
 ## Structural notes (apply to every strategy)
 1. **24/7 market.** No opening bell, no RTH close, no session gaps. Any mechanism built on an
    opening range, a cash-session close, or an overnight gap does not transfer. Time-of-day effects
@@ -35,16 +46,22 @@ regime, round-number magnetism — is now fair game and should be exploited rath
 |---|----------|----------------|--------------------|--------|------|
 | 001 | RSB-1 Relative-Strength Baton | Cross-complex opening-range confirmation vs. non-confirmation | Partner-index confirmation sign | ARCHIVED — index-era, off-universe | 2026-09-01 |
 | 002 | VRS-1 Variance-Ratio Regime Switch | Lo-MacKinlay variance ratio selects breakout vs. band-fade behaviour | VR above 1.15 / below 0.85 | **REJECTED** — backtested, no edge | 2026-09-01 |
+| 003 | LCR-1 Liquidation Cascade Reclaim | Cascade bar (range + volume + new extreme); close position inside the bar picks fade vs. follow | closePos above 0.55 / below 0.25 | **REJECTED** — PF 0.69, ladder rung A | 2026-09-01 |
+| 004 | MAR-1 Moving-Average Retest Fade | Fade the retest of a sloped EMA200; target the opposite band | Sign of the EMA200 slope | **REJECTED** — PF 0.65, ladder rung A | 2026-09-01 |
+| 005 | CRX-1 Compression Release Volume Verdict | Compressed box releases; volume decides follow vs. fade | Volume >= 2x avg / < 1x avg | **REJECTED** — PF 0.52, ladder rung A | 2026-09-01 |
 
 ## Mechanism families already consumed
 - `cross-complex-OR-confirmation` (001, archived)
 - `autocorrelation-sign regime` (002) — variance-ratio form, **rejected on real data**
+- `liquidation-cascade signatures` (003) — closePos switch, **rejected on real data**
+- `trend-anchored MA retest` (004, new family) — first-tag entry, **rejected on real data**; a confirmed-rejection variant is still untested
+- `range-compression expansion` (005) — volume-verdict switch, **rejected on real data**; a follow-only variant is still untested
 
 ## Families still open for future cycles
 volume/participation profile · volatility-term-structure (5m vs 15m realized vol ratio)
 · time-of-day seasonality (Asia/London/US overlap) · order-flow imbalance proxies
-· range-compression expansion · session-VWAP band mechanics · funding-rate / basis effects
-· liquidation-cascade signatures · autocorrelation regime via other estimators (Hurst, ACF sign)
+· session-VWAP band mechanics · funding-rate / basis effects
+· autocorrelation regime via other estimators (Hurst, ACF sign)
 · microstructure round-number behaviour · realized-vs-implied vol spread
 
 ---
@@ -67,6 +84,71 @@ with a larger per-trade payoff.
 Consequence: a backtest here tests the **signal**, not the spec's risk management. A −99% result
 means the signal has no edge; it does *not* mean the spec's sizing was tested and failed. Always
 record this caveat alongside the numbers.
+
+## HARD LESSON 3 — commission sets a FLOOR on stop distance (from the War Formation, 2026-09-01)
+The 0.05% fee is charged twice per round trip: **0.10% of notional**, a fixed cost. Its damage depends
+entirely on how wide the stop is.
+
+| Risk (R) as % of price | Fee as % of R | A nominal 2:1 becomes |
+|---|---|---|
+| 0.15% | ~66% | 0.89:1 — PF 0.47 |
+| **0.80%+** | **~12%** | **1.89:1 — PF 1.40** |
+
+Those two rows are the *same strategy* with one number changed. **R must be at least ~8x the
+round-trip fee**, i.e. R >= 0.8%. This is HARD LESSON 1 seen from the other side: there, too many
+trades killed it; here, too tight a stop.
+
+## HARD LESSON 4 — measure trade frequency, never estimate it (from 003, 2026-09-01)
+The commission gate depends on a trade-frequency estimate, and **that estimate was wrong by 4-10x**.
+003 pre-registered 150-400 trades and took **1,532**. Bars meeting "range > 2.5x ATR + volume > 3x
+average + new 50-bar extreme" occur on roughly **1% of bars**, not the 0.1-0.3% assumed. Rare-sounding
+conjunctions are far more common than intuition suggests over 163k bars.
+
+**Rule:** treat the pre-registered estimate as a hypothesis to be scored, not a fact. If the actual
+count misses the estimate by more than 2x, say so explicitly in the record and re-derive the gate —
+the economics of the design were computed on a number that turned out to be wrong.
+
+**Also from 003:** a good payoff ratio does not rescue a bad signal. The R floor worked exactly as
+intended (avgWin/avgLoss 1.68), but at 1.68:1 the strategy needs a ~37% win rate to break even and
+delivered 29.2%. Getting the risk geometry right only buys the chance to be right about direction.
+
+## HARD LESSON 5 — never put the stop just beyond the level you entered at (from 004, 2026-09-01)
+004 entered at the EMA200 and stopped a fraction of an ATR beyond it. **Price oscillates around a
+moving average by construction** — that is what a moving average is — so the stop was planted in the
+noisiest location available. Result: 23.8% win rate against a perfectly healthy 2.07:1 payoff, which
+needed ~33% to break even.
+
+The diagnostic to watch for: **`avgBarsLosing` far below `avgBarsWinning`** (12.3 vs 27.1 here).
+Losers dying in half the time winners take means trades are being shaken out before the thesis can
+resolve — the stop is inside the noise, not outside the structure.
+
+**Rule:** the stop belongs beyond the *structure* (a swing high/low, a prior extreme), not beyond the
+*signal level*. And an entry level and a stop level should never be the same object.
+
+## HARD LESSON 6 — apply the risk rules to EVERY leg (from 005, 2026-09-01)
+005 had two entry types. The **follow** leg got a properly structural stop (far side of the box). The
+**fade** leg's stop sat a few ticks beyond the breakout bar's extreme — inside the noise, the exact
+mistake HARD LESSON 5 exists to prevent. I had applied the lesson to the leg I designed first and not
+to the leg I designed second. Because thin-volume bars are far more common than 2x-volume bars, the
+badly-stopped leg probably dominated the sample.
+
+**Rule:** before running any multi-leg design, write an explicit audit — one line per leg, one line
+per hard lesson — and confirm each cell. The leg you design second inherits none of your thinking.
+
+## A recurring diagnostic worth naming
+`avgBarsLosing` far below `avgBarsWinning` has now flagged the same defect twice (004: 12.3 vs 27.1;
+005: 31.7 vs 75.6). **Losers dying roughly twice as fast as winners means the stop is inside the
+noise.** Check this ratio on every result before interpreting anything else.
+
+## Frequency-estimate scorecard (HARD LESSON 4 in practice)
+| Cycle | Estimated | Actual | Miss |
+|---|---|---|---|
+| 003 | 150–400 | 1,532 | 4–10x HIGH |
+| 004 | 500–1,500 | 844 | inside range |
+| 005 | 200–600 | 93 | ~2x LOW |
+
+Estimates are improving but still unreliable in both directions. Keep pre-registering them, keep
+scoring them, and treat any commission-gate argument built on one as provisional.
 
 ## Platform constraints — trader.dev engine
 - Pine **//@version=6**, allowlist of 65 `ta.*` indicators.
