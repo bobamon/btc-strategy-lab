@@ -1740,9 +1740,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T21:22:00Z"
     },
     "notes": "REVERTED -- worse on both terms against E38 (PF 1.50193294 / DD 10.82866633% / 21 trades vs 0.92252113 / 16.73115958% / 39). BUT THE LEG SPLIT CORRECTS WHAT I WROTE LAST CYCLE. Long without the coil: 25 trades, 14 wins (56.0%), +$219.95 -- PROFITABLE. Short WITH the coil: 14 trades, ZERO wins, -$482.61. After E42 I wrote that the coil is the only thing that has ever made the shorts survivable. That is wrong: fully coil-filtered shorts went 0-for-14. The coil reduces short DAMAGE by reducing short COUNT; it does not select winning shorts. THIS RAISES A QUESTION ABOUT E38 THAT THE LOG CANNOT ANSWER: if coil-filtered shorts win nothing, E38's PF 1.502 on 21 trades may rest on roughly seven longs. E38's leg split was never recorded -- that gap is now queue item 1. CONFOUND NAMED: the legs are not independent, because only one position runs at a time. The long leg produced 25 trades and -$210.86 in E42 but 25 trades and +$219.95 in E43, same count, different occupancy."
+  },
+  {
+    "id": "wf-e44-e38-repro-failed",
+    "name": "WF E44 E38 reproduction FAILED",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "An attempt to reproduce E38 byte-identically in order to record its long/short split, which was never captured. The reproduction FAILED, and that failure is the result.",
+    "metrics": {
+      "netProfitPct": -15.48402996,
+      "profitFactor": 0.34584164,
+      "maxDrawdownPct": 20.39372123,
+      "totalTrades": 28,
+      "winRatePct": 14.28571429,
+      "avgTradePct": -0.55300107
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1J095BFXEQA936ZGTT6D04W",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1J095BEW1JPSWWNN13HWT4S",
+      "verifiedAt": "2026-09-02T21:35:00Z"
+    },
+    "notes": "E38 IS NOT REPRODUCIBLE FROM THE LOG, AND THAT IS THE FINDING. This run was intended to be byte-identical to E38 (PF 1.50193294, DD 10.82866633%, 21 trades) purely to read its leg composition. It returned PF 0.34584164, DD 20.39372123%, 28 trades. A different trade count settles it: this is different code. E38's SOURCE WAS NEVER SAVED to pine/ -- the log holds its aggregate metrics and a prose description (2000 dollar shield, rr 2.0, maxBars 4320, v6 entry) but not the program, and a best-faith reconstruction from that prose does not reproduce it. THE DAMAGE EXTENDS BACKWARD: E42 and E43 were built on this same reconstruction, so every claim of the form 'worse than E38' compared my code against a number produced by different code. Those deltas are VOID. WHAT SURVIVES is the internal comparison, since E42/E43/E44 share one reconstruction and are self-consistent -- adding the coil to the long leg takes 39 to 28 trades, removing it from the shorts takes 39 to 68. On that reproducible basis: E43 coil-on-shorts-only PF 0.92252113 / DD 16.73115958% / 39 trades; E42 no coil PF 0.64544502 / DD 22.95213930% / 68; E44 coil both legs PF 0.34584164 / DD 20.39372123% / 28. THAT INVERTS LAST CYCLE'S VERDICT: E43 was reverted for being worse than E38, but against the only baseline that can actually be reproduced it is the BEST of the three by a wide margin. All three remain below 1.0, so none is a candidate, but the ordering reported last cycle was wrong. E38's leg split -- the question this cycle set out to answer -- REMAINS UNANSWERED, because the run that would answer it is not E38. Leg split of this run, recorded for completeness: long 12 trades 3 wins -$1100.20, short 16 trades 1 win -$448.20."
   }
 ];
-const BUILT = "2026-09-02 15:21";
+const BUILT = "2026-09-02 15:28";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

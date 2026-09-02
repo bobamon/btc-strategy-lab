@@ -751,3 +751,36 @@ that is better on average over the version that is better everywhere.
 - **When a rule fails to capture something that matters, surface it as a rule question rather than
   quietly applying a better rule.** Changing the ratchet mid-experiment would make every prior KEPT
   and REVERTED verdict incomparable.
+
+
+---
+
+## ██ HARD LESSON 21 — A RESULT WITHOUT ITS SOURCE ON DISK IS NOT A RESULT
+
+*(War Formation E44, 2026-09-02)*
+
+E38 was this lab's best configuration for six experiments. E44 attempted a byte-identical re-run to
+read a number that had not been recorded, and got **PF 0.346 on 28 trades against E38's 1.502 on 21**.
+The source had never been written to `pine/`. The log held the metrics and an English description of
+the build; that was not enough to rebuild it.
+
+**Why:** a prose description of a strategy is lossy in ways that are invisible until reproduction is
+attempted. Every parameter can be listed correctly and the program still differ — in a gate that went
+unmentioned because it seemed obvious, an ordering, a default. **The metrics are a hash of the code,
+and without the code they cannot be checked, extended, or compared against.**
+
+**The compounding cost is the real damage.** E42 and E43 were both measured against E38's number.
+Neither verdict survives, because neither was comparing what it claimed to compare. **Two full cycles
+of work were spent producing deltas against an unanchored baseline.**
+
+**How to apply:**
+- **Write the Pine to `pine/` (or `strategies/pine/`) in the SAME action that records the metrics.**
+  Not afterwards, not when the build looks promising — a run that is worth recording is worth saving.
+- **Re-derive a baseline before comparing against it** whenever the source is not on disk. One
+  reproduction run is far cheaper than two cycles of void conclusions.
+- **Record the composition, not only the aggregate.** E38's leg split was the trigger here; had it
+  been captured at the time, the defect would have surfaced six experiments earlier.
+- **A failed reproduction is a finding worth publishing**, not an embarrassment to quietly re-run. It
+  reclassifies every result that depended on the unreproducible one.
+- **This generalises past the ALCM:** E36–E41 have the same defect, so the $2,000 shield optimum rests
+  on the same unverifiable ground as E38.

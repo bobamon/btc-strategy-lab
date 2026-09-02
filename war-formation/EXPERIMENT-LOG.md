@@ -1544,3 +1544,71 @@ comparable, and this qualifies E42's split as well as this one.
    filterable leg, removing them is the change that follows — and fourteen short constructions would
    then have a single, simple conclusion.
 3. **Position sizing.** DD 10.83% is a 1x figure; at ~50x it is far past total loss. Unchanged.
+
+
+---
+
+# ██ E44 — E38 IS NOT REPRODUCIBLE. THE LAB'S BEST RESULT IS UNVERIFIED.
+
+E44 was meant to change nothing. It was a byte-identical re-run of E38 to record the long/short split
+that E43 gave reason to doubt. **The reproduction failed, and the failure is the result.**
+
+| | E38 as recorded | E44 (attempted reproduction) |
+|---|---|---|
+| Profit factor | 1.50193294 | **0.34584164** |
+| Max drawdown | 10.82866633% | 20.39372123% |
+| Trades | **21** | **28** |
+
+**A different trade count settles it: this is different code.**
+
+## THE CAUSE, STATED WITHOUT SOFTENING
+**E38's source was never saved to `pine/`.** The log holds its aggregate metrics and a prose
+description — $2,000 shield, rr 2.0, maxBars 4320, v6 entry — but not the program. A best-faith
+reconstruction from that prose does not reproduce it, and there is no way from the log alone to know
+which detail differs.
+
+**So the best configuration this lab has ever produced cannot currently be re-run.**
+
+## THE DAMAGE EXTENDS BACKWARD, AND THIS IS THE PART THAT MATTERS
+E42 and E43 were built on the **same reconstruction**. Every claim of the form *"worse than E38"* in
+those write-ups compared this reconstruction's output against a number produced by different code.
+
+**Those deltas are void.** Specifically:
+- E42's "REVERTED — the coil survives the exit correction" was measured against a baseline that does
+  not correspond to the code it was compared with.
+- E43's "REVERTED — worse on both terms" has the same defect.
+
+The **leg splits** in those runs remain real data — they were read from their own trade lists — and
+the E42/E43 comparison **to each other** stands, because they share one reconstruction.
+
+## THE SELF-CONSISTENT SET, AND THE VERDICT IT INVERTS
+E42, E43 and E44 share one codebase and behave coherently: adding the coil to the long leg takes 39
+trades to 28; removing it from the shorts takes 39 to 68.
+
+| Build | Coil applied to | Profit factor | Max drawdown | Trades |
+|---|---|---|---|---|
+| E42 | neither leg | 0.64544502 | 22.95213930% | 68 |
+| **E43** | **short leg only** | **0.92252113** | **16.73115958%** | **39** |
+| E44 | both legs | 0.34584164 | 20.39372123% | 28 |
+
+**E43 was reverted last cycle for being worse than E38. Against the only baseline that can actually be
+reproduced, E43 is the BEST of the three by a wide margin.** Asymmetric filtering looks better, not
+worse. **All three sit below 1.0, so none is a candidate** — but the ordering reported last cycle was
+wrong and is corrected here.
+
+## WHAT THIS CYCLE DID NOT ACHIEVE
+**E38's leg split is still unknown.** The question that motivated the run is untouched, because the
+run that would answer it is not E38.
+
+## STATUS CHANGES
+- **E38 is reclassified from "best ALCM configuration" to "recorded but UNREPRODUCIBLE."** Its numbers
+  are not withdrawn — they were really produced by a real backtest — but nothing may be compared
+  against them until the source is recovered.
+- **There is still no champion**, and now there is not even a usable reference build.
+
+## QUEUE
+1. **Recover E38's source or rebuild the ALCM baseline from scratch and SAVE IT to `pine/`.** Until a
+   reference build exists on disk, every comparison in this lab is unanchored. Nothing else matters.
+2. **Then re-run the shield sweep against that saved baseline.** E36–E41 have the same defect as E38:
+   their sources were never saved either, so the $2,000 optimum rests on the same unverifiable ground.
+3. **Then revisit asymmetric filtering**, which the reproducible evidence now favours.

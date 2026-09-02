@@ -1,0 +1,172 @@
+//@version=6
+// A.L.C.M. REFERENCE BUILD — the anchored baseline for this lab (E44, 2026-09-02).
+//
+// WHY THIS FILE EXISTS. E38 was recorded as the best ALCM configuration for six experiments, but its
+// SOURCE WAS NEVER SAVED. E44 attempted a byte-identical re-run from the log's prose description and
+// got PF 0.34584164 on 28 trades against E38's recorded 1.50193294 on 21. A different trade count
+// means different code, and E42/E43's comparisons "against E38" are void as a result.
+// See HARD LESSON 21: a result without its source on disk is not a result.
+//
+// THIS FILE IS THAT ANCHOR. It is the exact program that produced E44:
+//   https://mcp-api.trader.dev/backtest/01M1J095BEW1JPSWWNN13HWT4S
+//   PF 0.34584164 | DD 20.39372123% | 28 trades | long 12 (3W, -$1100.20) | short 16 (1W, -$448.20)
+//
+// It is NOT a good strategy. It is a REPRODUCIBLE one, which the lab did not previously have.
+// Every future ALCM comparison anchors here until E38's real source is recovered.
+//
+// THE SPECIFICATION: War Formation has NO STOP LOSS. The exit is the A.L.C.M. shield -- a fixed
+// dollar gap to liquidation, adjusted with the "Bitunix Pencil". The position ends at target or at
+// liquidation. NEVER add to a losing trade. Runs before E35 used a structural stop clamped to
+// 0.15-1.50% of price and are wrong on the exit.
+//
+// VARIANTS MEASURED ON THIS EXACT CODEBASE (change only the two goLong/goShort lines):
+//   coil on BOTH legs    (this file, E44) : PF 0.34584164 | DD 20.39372123% | 28 trades
+//   coil on SHORT only         (E43)      : PF 0.92252113 | DD 16.73115958% | 39 trades  <-- best
+//   coil on NEITHER leg        (E42)      : PF 0.64544502 | DD 22.95213930% | 68 trades
+// Self-consistent: adding the coil to the long leg takes 39 -> 28; removing it from shorts 39 -> 68.
+// All three are below 1.0. None is a candidate. E43's ordering is the reproducible finding.
+//
+// SAMPLE CEILING: ~3 days per trade across 4.5 months of 1m data caps this family near 20-30 trades.
+// No configuration here is validated and none can be on this window.
+//
+// AUDIT:
+//   LONG  -- R = $2,000, ~2% of price: PASSES the 0.8% floor (LESSON 3) where v6's 0.15% clamp did
+//            not. Stop is RISK-DEFINED, not structural -- the DECLARED deviation from LESSON 5 that
+//            the ALCM requires. SL and TP fixed at entry. Latch order: 15m level breaks, then the 1m
+//            reclaim fires (HARD LESSON 8).
+//   SHORT -- same shield arithmetic, NOT mirrored off the long: it keeps bearRegime, h1Bear,
+//            brokeAbove and its own crossunder trigger, unchanged since E13.
+strategy("War Formation ALCM reference", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+greenBull = input.int(4,     "Green 1h candles for BULL")
+greenBear = input.int(2,     "Green 1h candles at or below for BEAR")
+skipOpen  = input.int(60,    "Skip first N minutes of 6h block")
+skipClose = input.int(60,    "Skip last N minutes of 6h block")
+coilK     = input.float(0.85,"3m coil: atr(3) < atr(30) * K")
+velK      = input.float(0.8, "Velocity: min reclaim as multiple of atr(30)")
+midLo     = input.float(400, "Whole-number middles low")
+midHi     = input.float(600, "Whole-number middles high")
+etOffset  = input.int(-4,    "ET offset from UTC")
+witchOn   = input.bool(true, "Ban longs in witching hour 1-4am ET")
+shieldUsd = input.float(2000,"THE SHIELD: fixed dollar gap to liquidation")
+rr        = input.float(2.0, "Reward:risk")
+maxBars   = input.int(4320,  "Max bars in trade -- three days")
+
+MS6H = 21600000
+MS1H = 3600000
+MS15 = 900000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+b15 = math.floor(time / MS15)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+new15 = b15 != b15[1]
+
+var float h1o     = na
+var int   grnCur  = 0
+var int   cntCur  = 0
+var int   grnPrev = 0
+var int   cntPrev = 0
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    grnCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(h1o)
+        cntCur := cntCur + 1
+        if close[1] > h1o
+            grnCur := grnCur + 1
+    h1o := open
+
+regimeReady = cntPrev >= 5
+bullRegime  = regimeReady and grnPrev >= greenBull
+bearRegime  = regimeReady and grnPrev <= greenBear
+
+minsIn    = (time - b6 * MS6H) / 60000
+timeGate  = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+h1Bull = not na(h1o) and close > h1o
+h1Bear = not na(h1o) and close < h1o
+
+var float c15h = na
+var float c15l = na
+var float p15h = na
+var float p15l = na
+
+if new15
+    p15h := c15h
+    p15l := c15l
+    c15h := high
+    c15l := low
+else
+    c15h := na(c15h) ? high : math.max(c15h, high)
+    c15l := na(c15l) ? low  : math.min(c15l, low)
+
+brokeBelow = not na(p15l) and c15l < p15l
+brokeAbove = not na(p15h) and c15h > p15h
+
+atrFast = ta.atr(3)
+atrSlow = ta.atr(30)
+coiled  = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK
+coilPrev = coiled[1]
+velMin   = na(atrSlow) ? na : atrSlow * velK
+
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+hUTC     = math.floor(time / MS1H) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+longBan  = witchOn and witching
+
+longTrig  = not na(p15l) and not na(velMin) and ta.crossover(close, p15l)  and (close - p15l) >= velMin
+shortTrig = not na(p15h) and not na(velMin) and ta.crossunder(close, p15h) and (p15h - close) >= velMin
+
+goLong  = bullRegime and timeGate and h1Bull and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig
+goShort = bearRegime and timeGate and h1Bear and brokeAbove and coilPrev and not inMiddle and shortTrig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+longR  = shieldUsd
+shortR = shieldUsd
+
+if flat and goLong and longR > 0
+    strategy.entry("L", strategy.long)
+    slPx   := close - longR
+    tpPx   := close + longR * rr
+    barsIn := 0
+
+if flat and goShort and shortR > 0
+    strategy.entry("S", strategy.short)
+    slPx   := close + shortR
+    tpPx   := close - shortR * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong  ? 1 : 0, title="LongSignal")
+plot(goShort ? 1 : 0, title="ShortSignal")
