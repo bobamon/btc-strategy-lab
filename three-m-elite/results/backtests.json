@@ -173,5 +173,34 @@
       "verifiedAt": "2026-09-02T09:43:14Z"
     },
     "notes": "THE MODEL IS RIGHT; THE SINGLE-SLOT APPROXIMATION IS WRONG, AND I FLAGGED IT BEFORE RUNNING. 3 trades (2 long, 1 short), down from v6's 10. The cause is precisely the deviation declared in the source comment: Pine forbids arrays, so only ONE zone per side is tracked and every new engulfing candle overwrites the previous zone. In a trending market engulfing candles arrive every few 4H bars, so a zone is almost never still alive when price returns to it. The source says to trade the DEEPEST UNMITIGATED zone, which presupposes several being tracked at once. Fix in v10 is one line and follows the source directly: replace the tracked zone only when the new one is DEEPER (lower bottom for demand, higher top for supply), or when the current one is dead. Do not read PF 0.64 on 3 trades as information about the model."
+  },
+  {
+    "id": "3m-elite-v10-deepest-zone",
+    "name": "3M ELITE v10 deepest unmitigated zone",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Queue item 0-V10. One line changed from v9: a new engulfing candle replaces the tracked zone only if it is deeper (lower bottom for demand, higher top for supply) or the tracked zone is already dead, implementing the source's deepest unmitigated zone. Both legs reported separately.",
+    "metrics": {
+      "netProfitPct": -0.8532197,
+      "profitFactor": 0.64013804,
+      "maxDrawdownPct": 3.77563845,
+      "totalTrades": 3,
+      "winRatePct": 33.33333333,
+      "avgTradePct": -0.28440657
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GRCBFVPNW8GVW3S3ZGN635",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GRCBFT1PRT556PPKAJ1Q1X",
+      "verifiedAt": "2026-09-02T09:49:38Z"
+    },
+    "notes": "IDENTICAL TO v9 IN EVERY FIGURE, AND THAT IS THE DIAGNOSIS. Same PF 0.64013804, same 3 trades, same net. If overwriting had been the cause of v9's scarcity, requiring the new zone to be deeper would have changed something. It changed nothing, which proves the selection rule never fires: zones are already DEAD by the time the next engulfing candle arrives, so the guard clause always sees a dead zone and replaces it exactly as v9 did. THE REAL DEFECT IS THE ZONE GEOMETRY. I defined a demand zone as the engulfing candle's whole high-to-low range, so the zone TOP equals the impulse high -- price is inside the zone the instant the candle closes. The mitigation test then trips within two candles every time. In supply and demand a zone is the BASE the impulse left behind, not the impulse itself. v11 must fix the geometry before any selection rule can matter."
   }
 ]

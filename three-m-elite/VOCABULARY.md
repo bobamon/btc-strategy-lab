@@ -164,3 +164,16 @@ required to coincide, which is precisely why v2 and v4 returned zero trades and 
 stuck at exactly ten. **In the real model the engulf and the zone are the same event**, separated in
 time from the mitigation that follows. The scarcity was an artefact of my specification, not of the
 system.
+
+
+## ZONE GEOMETRY — CORRECTED AGAIN, 2026-09-02 (v10)
+The engulfing candle **creates** the zone, but the zone is **not the whole candle**. It is the BASE
+the impulse left behind:
+
+- **Demand zone** = [low, open] of the bullish engulfing candle — the region price accelerated up from.
+- **Supply zone** = [open, high] of the bearish engulfing candle.
+
+Using the candle's full high-to-low range puts the zone's proximal edge at the impulse extreme, so
+price is inside the zone at the moment of creation and any mitigation rule fires immediately. v9 and
+v10 both made exactly 3 trades for this reason, and their identical results are the proof: the zone
+died before anything downstream could act on it.

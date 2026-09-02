@@ -238,6 +238,7 @@ This explains the entire failure history of this lab in one stroke:
 | v5 | 2 | tap latched, but engulf still had to coincide with everything else |
 | v6, v7 | 10 | both latched, but the zone was still the wrong object entirely |
 | v9 | THE CORRECTED MODEL: engulfing 4H candle CREATES the zone; One Candle Rule mitigation | **3 trades** (2 long, 1 short). Model right, single-slot approximation wrong · [report](https://mcp-api.trader.dev/backtest/01M1GR0M5GXEY4BAP7P9R13SZS) |
+| v10 | Keep the DEEPEST unmitigated zone instead of the most recent | **IDENTICAL TO v9** in every figure. The selection rule never fires -- zones die before the next engulf arrives · [report](https://mcp-api.trader.dev/backtest/01M1GRCBFT1PRT556PPKAJ1Q1X) |
 
 **The scarcity was never the system. It was my definition of a zone.** A zone defined as the previous
 12H candle's extreme is one level per 12 hours that price rarely revisits under all the other
@@ -262,6 +263,27 @@ already dead. That keeps a zone alive across the many shallower engulfs that cur
 
 Do not read PF 0.64 on 3 trades as information about the model. It is information about the slot.
 
+## v10 — AN IDENTICAL RESULT IS A DIAGNOSIS, AND IT POINTS AT THE ZONE GEOMETRY
+PF 0.64013804, 3 trades, same net, same everything as v9. **If overwriting had been the cause of v9's
+scarcity, requiring the replacement zone to be deeper would have changed something.** It changed
+nothing — which proves the guard clause never fires. By the time the next engulfing candle arrives,
+the tracked zone is already dead, so `not dzLive` is true and the replacement happens exactly as before.
+
+**The real defect is the zone geometry, and it was mine, not the source's.**
+
+I defined a demand zone as the engulfing candle's whole range, low to high. That makes the zone TOP
+equal to the impulse HIGH — so price is sitting inside its own zone the instant the candle closes.
+The mitigation counter then trips within two candles, every time, and no zone ever survives long
+enough to be returned to.
+
+**In supply and demand a zone is the BASE the impulse left behind, not the impulse itself.** For a
+demand zone that is the region from the candle's low up to its OPEN (the body's lower edge) — the
+small area price accelerated away from — not the full extent of the move.
+
+**v11: fix the geometry first.** Demand zone = [low, open] of the engulfing candle; supply zone =
+[open, high]. Only once a zone can survive its own creation does any selection rule, mitigation count
+or validation gate mean anything. The last three cycles have all been downstream of this one error.
+
 ## Open queue
 0. ~~Get definitions for Type 1/Type 2~~ — **DONE 2026-09-02, see VOCABULARY.md.**
    Type 1 = a 3M candle; Type 2 = an engulfing candle in the direction of bias; both only on the
@@ -271,7 +293,11 @@ Do not read PF 0.64 on 3 trades as information about the model. It is informatio
 0-V7. ~~MEASURE WHICH GATE IS BINDING~~ — **DONE. My gates were NOT binding; the source conjunction is.**
 0-V8. ~~SETTLE THE SPECIFICATION~~ — **DONE 2026-09-02. The engulfing candle CREATES the zone.**
 0-V9. ~~REBUILD ON THE CORRECTED MODEL~~ — **DONE. Model correct, 3 trades, single-slot is the limit.**
-0-V10-NEXT. **KEEP THE DEEPEST ZONE, NOT THE MOST RECENT (top priority).** One-line change: a new
+0-V10. ~~KEEP THE DEEPEST ZONE~~ — **DONE. Identical to v9; the rule never fires. See the v10 lesson.**
+0-V11-NEXT. **FIX THE ZONE GEOMETRY (top priority, blocks everything else).** A demand zone is the
+    BASE beneath the impulse -- [low, open] of the engulfing candle -- not its whole range. Supply is
+    [open, high]. With the top set at the impulse high, price is inside the zone at creation and the
+    mitigation counter trips immediately, which is why v9 and v10 both made 3 trades. Superseded text: One-line change: a new
     engulf replaces the tracked zone only if it is deeper (lower bottom for demand, higher top for
     supply) or the tracked zone is dead. This is what "deepest unmitigated zone" means and it should
     restore frequency without adding anything the source does not contain. Superseded v9 text:
