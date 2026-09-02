@@ -318,5 +318,34 @@
       "verifiedAt": "2026-09-02T10:44:05Z"
     },
     "notes": "THE EXIT IS BROKEN, AND THAT INVALIDATES THE QUESTION THIS RUN ASKED. Win rate 4.17% -- one winner against twenty-three losers -- with avgWin 306.97 against avgLoss 45.99, a payoff ratio of 6.67. The distribution is the tell: avgBarsWinning is 96, which is EXACTLY maxBars, while avgBarsLosing is 18.5. So the single winner exited at the TIME CAP, not at the target, and NO TRADE IN 4.7 YEARS EVER REACHED THE TAKE PROFIT. tpATR = 12 x ATR14 on 15m is an unreachable target that has been carried unexamined since v1, so the system has been structurally stop-or-timeout the whole time and the reward leg has never paid. THEREFORE DO NOT CONCLUDE THE ZONES ARE UNPREDICTIVE -- that question is still open and this run could not answer it. Long 5 (0 wins), short 19 (1 win); the short skew is itself worth noting once the exit is fixed. v15 must replace the ATR target with a fixed multiple of R, 2R as in the other labs, and re-ask the question."
+  },
+  {
+    "id": "3m-elite-v15-2r-target",
+    "name": "3M ELITE v15 reachable 2R target",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Replaces the unreachable 12 x ATR14 target with a fixed 2R, matching both other labs, and re-asks v14's question: does the repaired zone population have an edge before any filter? Still no bias, direction or candle-colour condition. Both legs reported separately.",
+    "metrics": {
+      "netProfitPct": -6.68062876,
+      "profitFactor": 0.36311855,
+      "maxDrawdownPct": 8.38006874,
+      "totalTrades": 24,
+      "winRatePct": 8.33333333,
+      "avgTradePct": -0.27835953
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GVV0F2SE29TMYYHJ3HVKAW",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GVV0F20WJY72GZSQWM2VJX",
+      "verifiedAt": "2026-09-02T10:50:04Z"
+    },
+    "notes": "THE TARGET FIX WORKED AND THE ANSWER IS STILL NO -- BUT THE REASON IS INFORMATIVE. PF 0.290->0.363 and win rate 4.17%->8.33%, with two winners now actually reaching the target (avgBarsWinning 43.5 against maxBars 96), so v14's diagnosis that the exit was unreachable is confirmed. THE DECISIVE COMPARISON IS AGAINST CHANCE: a coin flip with a 2R target and a 1R stop wins about 33% of the time. These entries win 8.33%, a quarter of that, which means they are not merely unpredictive but SYSTEMATICALLY BADLY TIMED -- price is far more likely to continue through the zone than to reverse off it. Longs 5 (1 win), shorts 19 (1 win). THE RIGHT READING IS NOT THAT THE SYSTEM FAILS. It is that entering on the FIRST TOUCH of a zone is premature, and the source never says to do that -- it requires a VALIDATION inside the zone (a 3M candle or an engulfing candle) before entry, which this diagnostic deliberately removed. Being worse than chance without the validation is evidence that the validation is LOAD-BEARING, not optional. v16 restores the Type 2 validation on this corrected lifecycle."
   }
 ]

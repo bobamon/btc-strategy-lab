@@ -957,9 +957,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T10:46:47Z"
     },
     "notes": "THIRD PERTURBATION, THIRD GRACEFUL DEGRADATION, AND THE STRONGEST OF THE THREE. PF 1.686->1.458, win rate 56.25%->50.00%, trades 32->46, DD 3.10%->5.58%, Sharpe 2.07. The sensitivity suite is now complete: greenBull 3 gave PF 1.282 on 42 trades, coilK 0.95 gave 1.300 on 41, velK 0.6 gives 1.458 on 46. EVERY parameter perturbation stays clearly above 1.0 while enlarging the sample by 28 to 44 percent, which is what a real edge looks like and not what a curve fit does. This is the strongest evidence the champion has, and it is the only kind available: the sample is fixed at 32 trades by 1m coverage and E20 proved the timeframe cannot be changed to grow it. Champion keeps velK 0.8, better on both ratchet terms."
+  },
+  {
+    "id": "war-formation-e24-velk-weakhalf",
+    "name": "WF E24 velK 0.6 on the weak half",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2026-02-23",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "description": "Tests whether the velK 0.6 variant, which E23 showed carries 46 trades against the champion's 32, retains any edge in the champion's weak second half. Nothing here was tuned to this window; velK 0.6 was chosen in E23 as a full-sample sensitivity probe. Long-only.",
+    "metrics": {
+      "netProfitPct": -1.6157276,
+      "profitFactor": 0.87453494,
+      "maxDrawdownPct": 5.5830508,
+      "totalTrades": 25,
+      "winRatePct": 36.0,
+      "avgTradePct": -0.0646291
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GVTAJEXWRJY60197QAJ8Z3",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GVTAJEFTNTP0EHED3XMF1N",
+      "verifiedAt": "2026-09-02T10:49:42Z"
+    },
+    "notes": "THE LOOSER VARIANT DOES NOT RESCUE THE WEAK HALF. PF 0.8745 on 25 trades against the champion's own second half at 0.8930 on 15 -- statistically indistinguishable, and both just under break-even. Loosening the velocity threshold buys 67% more trades in this window and none of them are better. THE WEAKNESS IS IN THE SIGNAL, NOT THE THRESHOLD, so no amount of permissiveness recovers it. This closes the sensitivity line of enquiry: the champion is robust to parameter perturbation on the full sample (E19, E22, E23) but that robustness does not extend to the weak period, where every variant lands near 0.88. Champion unchanged."
   }
 ];
-const BUILT = "2026-09-02 04:47";
+const BUILT = "2026-09-02 04:51";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

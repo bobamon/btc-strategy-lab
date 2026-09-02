@@ -64,6 +64,7 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E21 | Macro trend filter: close above a 14400-bar EMA (~10 days) | **REVERTED.** PF 1.686->1.043, win 56.25%->38.89%, trades 32->18. Macro trend does NOT explain the concentration · [report](https://mcp-api.trader.dev/backtest/01M1GV425K3361APZQJ6BR9K24) |
 | E22 | SENSITIVITY: coilK 0.85 -> 0.95 | **Degrades gracefully.** PF 1.686->1.300, win 56.25%->48.78%, trades 32->41, DD 3.10%->4.72%. Second parameter, second graceful result · [report](https://mcp-api.trader.dev/backtest/01M1GVATYA8Z4TR2VB58V9XHTT) |
 | E23 | SENSITIVITY: velK 0.8 -> 0.6 | **Degrades gracefully, best of the three.** PF 1.686->1.458, win 56.25%->50.00%, trades 32->46, Sharpe 2.07 · [report](https://mcp-api.trader.dev/backtest/01M1GVMZZQ8JPNCPD7XV07WNYC) |
+| E24 | velK 0.6 variant measured on the WEAK half only | **No rescue.** PF 0.8745 on 25 trades against the champion's own 0.8930 on 15. Loosening buys trades, not edge · [report](https://mcp-api.trader.dev/backtest/01M1GVTAJEFTNTP0EHED3XMF1N) |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -387,5 +388,44 @@ coverage is only 4.6 months and cannot be split meaningfully.
 **So the honest position on the champion is:** robust to parameter perturbation, unproven across
 time, and untestable across time with the data available. Those are three different statements and
 the log should keep them apart.
+
+**Champion unchanged: v6, long-only, PF 1.68623784, DD 3.10289714%, 32 trades.**
+
+
+## CORRECTION — THE CHAMPION IS NOT "UNTESTABLE ACROSS TIME". IT WAS ALREADY TESTED, AND IT SHOWS THE SAME DECAY.
+The previous entry described the champion as robust to perturbation but *untestable* across time.
+**That was wrong, and the data was already in this repo.** `results/backtests.json` holds
+`war-formation-v6-half1` and `war-formation-v6-half2`:
+
+| Half | PF | Win rate | Trades |
+|---|---|---|---|
+| Dec 16 – Feb 23 | **3.797** | 70.59% | 17 |
+| Feb 23 – May 3 | **0.893** | 40.00% | 15 |
+| Full | 1.686 | 56.25% | 32 |
+
+**The champion's 1.686 is an average of a very strong period and a break-even one — precisely the
+structure the BTC base was just condemned for.** The two labs are in the same position, and this log
+should have said so a cycle earlier.
+
+## E24 — AND LOOSENING DOES NOT RECOVER THE WEAK HALF
+E23's velK 0.6 variant carried 46 trades against 32 on the full sample and had the best profit factor
+of the three perturbations, so it was the natural candidate to test where it matters:
+
+| Weak half, Feb 23 – May 3 | PF | Trades |
+|---|---|---|
+| Champion (velK 0.8) | 0.8930 | 15 |
+| velK 0.6 variant | 0.8745 | 25 |
+
+**Indistinguishable, and both just under break-even.** 67% more trades in that window, none of them
+better. The weakness is in the signal, not the threshold.
+
+### Where this leaves the champion, stated in three separate parts
+1. **Robust to parameter perturbation** on the full sample — E19, E22, E23 all degrade gracefully.
+2. **NOT robust across time** — 3.80 then 0.89, and E24 shows no parameter setting recovers the second half.
+3. **The full-sample 1.686 should not be quoted alone**, for the same reason the BTC lab's 1.02 should not be.
+
+The sensitivity line of enquiry is now closed. What remains genuinely unexplored is the **short leg**,
+built from its own geometry with the E13 cycle-position gate — the only route to a return stream that
+does not depend on this decaying long signal.
 
 **Champion unchanged: v6, long-only, PF 1.68623784, DD 3.10289714%, 32 trades.**

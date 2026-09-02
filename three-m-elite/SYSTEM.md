@@ -297,6 +297,7 @@ so the code genuinely behaves differently. **But the count stayed at 3.**
 | v12 | DIAGNOSTIC: entry stripped to "zone live and price inside it", 1-bar exits, to COUNT opportunities | **15 opportunities in 4.7 years** (6 long, 9 short). Ignore the P&L -- it is an instrument · [report](https://mcp-api.trader.dev/backtest/01M1GTWJTF7K07205ZD8P4EM5Y) |
 | v13 | Mitigation judged on the BODY (a 4H close inside the zone) instead of a wick, counter form | **Opportunities 15 -> 40** (13 long, 27 short). The fix works · [report](https://mcp-api.trader.dev/backtest/01M1GV4JAZ169SE54YC2AZAVVT) |
 | v14 | Repaired lifecycle, NO filters, REAL fixed exits -- does the zone population have an edge? | **PF 0.29, win rate 4.17%, 24 trades** (5 long 0W, 19 short 1W). The TAKE PROFIT IS UNREACHABLE -- no trade ever hit it · [report](https://mcp-api.trader.dev/backtest/01M1GVG1713A1BXSDAF6551N29) |
+| v15 | Unreachable ATR target replaced with a fixed 2R, still no filters | **PF 0.363, win rate 8.33%, 24 trades** (5 long 1W, 19 short 1W). Target fix confirmed; entries are worse than chance · [report](https://mcp-api.trader.dev/backtest/01M1GVV0F20WJY72GZSQWM2VJX) |
 
 **When three independent corrections land on the same trade count, the binding constraint is upstream
 of all of them.** I have now spent three cycles fixing things that were genuinely wrong and none of
@@ -383,6 +384,35 @@ v14 question.** Only then do filters go back on, one at a time.
 Note also the leg split: 5 long against 19 short. Once the exit is fixed, that skew needs explaining —
 the zone logic is meant to be symmetric.
 
+## v15 — THE TARGET FIX IS CONFIRMED, AND THE ENTRIES ARE WORSE THAN CHANCE
+
+| | v14 (12 x ATR14) | v15 (2R) |
+|---|---|---|
+| Profit factor | 0.290 | 0.363 |
+| Win rate | 4.17% | 8.33% |
+| avgBarsWinning | 96 (= maxBars) | 43.5 |
+
+v14's diagnosis holds: the target really was unreachable, and with a 2R target trades now resolve at
+the target rather than only at the time cap.
+
+**But the comparison that matters is against chance.** A coin flip with a 2R target and a 1R stop
+wins about **33%** of the time. These entries win **8.33%** — a quarter of that. They are not merely
+unpredictive; they are **systematically badly timed**. Price is far more likely to continue through a
+zone than to reverse off it.
+
+**The right reading is NOT that the system fails.** It is that **entering on the first touch of a zone
+is premature, and the source never says to do that.** It requires a VALIDATION inside the zone — a 3M
+candle (Type 1) or an engulfing candle (Type 2) — before an entry is allowed. This diagnostic
+deliberately removed that step to measure the raw population.
+
+**Being worse than chance without the validation is evidence that the validation is LOAD-BEARING, not
+optional.** That is a genuinely useful result: it tells us which part of the system carries the work.
+
+**v16: restore the Type 2 validation on the corrected lifecycle** — an engulfing candle in the
+direction of bias occurring INSIDE a live zone, latched per HARD LESSON 8, with the 2R target. That is
+the first build in this lab where the lifecycle, the geometry, the mitigation rule and the exit are
+all correct at the same time.
+
 ## Open queue
 0. ~~Get definitions for Type 1/Type 2~~ — **DONE 2026-09-02, see VOCABULARY.md.**
    Type 1 = a 3M candle; Type 2 = an engulfing candle in the direction of bias; both only on the
@@ -397,7 +427,10 @@ the zone logic is meant to be symmetric.
 0-V12. ~~DIAGNOSTIC RUN~~ — **DONE. 15 opportunities in 4.7 years. The zone lifecycle is the constraint.**
 0-V13. ~~MITIGATION ON THE BODY~~ — **DONE. Opportunities 15 -> 40. Settled rule.**
 0-V14. ~~UNFILTERED EDGE TEST~~ — **RUN, BUT INCONCLUSIVE: the take profit is unreachable. See the v14 lesson.**
-0-V15-NEXT. **FIX THE TAKE PROFIT FIRST (top priority, blocks the edge question).** Replace
+0-V15. ~~FIX THE TAKE PROFIT~~ — **DONE. Confirmed broken and fixed; entries are worse than chance without validation.**
+0-V16-NEXT. **RESTORE THE TYPE 2 VALIDATION (top priority).** An engulfing candle in the direction of
+    bias, occurring INSIDE a live zone, latched in sequence with the zone tap. With the 2R target and
+    the corrected lifecycle this is the first build where every layer is right at once. Superseded text: Replace
     `tpATR = 12 x ATR14` with a fixed 2R target, then re-run the unfiltered edge test. No filter goes
     back on until the exit can actually pay. Superseded text: Measure the
     cost of each gate separately -- 4H structure, then 12H zone direction, then 2D bias, then candle
