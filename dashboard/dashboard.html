@@ -669,9 +669,68 @@ const DATA = [
     },
     "specPath": "strategies/pine/010-vwm-tod-filter.pine",
     "notes": "REJECTED for generalization, same pattern as 008's 5m run: PF 0.9614 (15m) -> 0.7883 (5m), max DD 45.78% -> 52.22%. The witching-hour filter is defined in ET and the 5m window skews toward a different (shorter, more recent) sub-period than the 15m window -- it did not transfer, and on 5m this variant is very slightly WORSE than 008's own 5m result (PF 0.7992 -> 0.7883, DD 51.36% -> 52.22%). The time-of-day filter helps the 15m rung but does not touch the underlying 5m fee-drag/generalization problem HARD LESSON 7 flagged on the base itself."
+  },
+  {
+    "id": "011-vwm-r-floor-btcusdt-15m",
+    "name": "011 -- VWM base + ET filter + 1.2% R floor (long)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "description": "Cycle 011, attack item #1 from the ranked list: raise the min-risk floor from 0.80% to 1.20% of price. Identical to 010-vwm-tod-filter.pine with exactly ONE change -- minRpct 0.80 -> 1.20.",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "metrics": {
+      "netProfitPct": 10.20537493,
+      "profitFactor": 1.02114446,
+      "maxDrawdownPct": 40.6725656,
+      "totalTrades": 598,
+      "winRatePct": 42.30769231,
+      "avgTradePct": 0.01706584
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1J2Z5QZS6NHH7WNKHNMZZ57",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1J2Z5QYH4YBD76Q6FC643FP",
+      "verifiedAt": "2026-09-02T21:00:00Z"
+    },
+    "pineSource": "//@version=6\n// 011 — ONE change from the base (010-vwm-tod-filter.pine): raise the min-risk floor\n// from 0.80% to 1.20% of price. Everything else -- VWAP pullback, EMA200 trend filter,\n// ET witching-hour ban, stop/target geometry, flip/cooldown -- is byte-for-byte the 010 base.\n// Rationale (attack list item 1, CHAMPION-BOARD.md): HARD LESSON 3 says fees scale against R;\n// HARD LESSON 9 says selectivity filters (010's time-of-day ban) prune bars but don't change the\n// R-vs-fee ratio that is actually driving the 5m failure. This is the first change that touches it.\nstrategy(\"011-VWM base + ET filter + 1.2% R floor (long)\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\ndevLen       = input.int(50,    \"Stdev window for VWAP bands\")\nbandK        = input.float(2.0, \"Band multiple (sigma)\")\npullbackK    = input.float(0.5, \"Pullback proximity, x sigma\")\nstretchLen   = input.int(50,    \"Bars to look back for the +2sigma stretch\")\nvwapSlopeLen = input.int(50,    \"Bars back to confirm VWAP rising\")\nswgLen       = input.int(20,    \"Swing lookback for the structural stop\")\ncoolBars     = input.int(20,    \"Bars to stand down after a VWAP flip\")\nbufK         = input.float(0.25,\"Stop buffer beyond the swing, x ATR14\")\nrr           = input.float(2.0, \"Reward:risk\")\nminRpct      = input.float(1.20,\"Min risk as % of price\")\nmaxRpct      = input.float(3.00,\"Max risk as % of price\")\nmaxBars      = input.int(96,    \"Max bars in trade\")\ntrendLen     = input.int(200,   \"Trend-filter EMA length\")\netOffset     = input.int(-4,    \"ET offset from UTC, hours (default -4 = EDT)\")\n\nvwapVal   = ta.vwap(close)\ndev       = ta.stdev(close - vwapVal, devLen)\nupperBand = vwapVal + bandK * dev\natr14     = ta.atr(14)\nema200    = ta.ema(close, trendLen)\n\nbs           = ta.barssince(high >= upperBand)\nwasStretched = not na(bs) and bs <= stretchLen\npullback     = close >= vwapVal and close <= vwapVal + pullbackK * dev\nvwapRising   = vwapVal > vwapVal[vwapSlopeLen]\ntrendUp      = close > ema200\n\nutcHour  = math.floor(time / 3600000) % 24\netHour   = (utcHour + etOffset + 24) % 24\nwitching = etHour >= 1 and etHour < 4\n\nflipped = ta.cross(close, vwapVal)\nvar int sinceFlip = 9999\nsinceFlip := flipped ? 0 : sinceFlip + 1\ncoolingOff = sinceFlip < coolBars\n\ngoLong = wasStretched and pullback and vwapRising and trendUp and not coolingOff and not witching\n\nswgLo = ta.lowest(low, swgLen)[1]\nbuf   = na(atr14) ? 0.0 : atr14 * bufK\nminR  = close * minRpct / 100\nmaxR  = close * maxRpct / 100\nrawR  = close - (swgLo - buf)\nlongR = math.min(math.max(rawR, minR), maxR)\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goLong and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - longR\n    tpPx   := close + longR * rr\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(vwapVal,              title=\"VWAP\")\nplot(ema200,               title=\"EMA200\")\nplot(goLong ? 1 : 0,       title=\"LongSignal\")\nplot(witching ? 1 : 0,     title=\"WitchingHour\")\n",
+    "specPath": "strategies/pine/011-vwm-r-floor.pine",
+    "notes": "KEPT as base on the 15m ratchet: PF 0.9614->1.0211 (improved), max DD 45.78%->40.67% (improved), vs the 010 base. All longs, 0 shorts (base is still long-only). However it FAILS rung C (5m) -- see 011-vwm-r-floor-btcusdt-5m -- and 5m came back WORSE than 010's own 5m result on both metrics, the opposite of the HARD LESSON 9 hypothesis that raising R would help fee drag on 5m. Not promoted to champion."
+  },
+  {
+    "id": "011-vwm-r-floor-btcusdt-5m",
+    "name": "011 -- VWM base + ET filter + 1.2% R floor (long) -- 5m confirmation",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "description": "Same exact Pine source as 011-vwm-r-floor-btcusdt-15m, run on 5m to check whether the 15m ratchet pass (PF 1.0211) generalizes. HARD LESSON 7: a single-timeframe pass is not evidence.",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "metrics": {
+      "netProfitPct": -49.82520287,
+      "profitFactor": 0.77690111,
+      "maxDrawdownPct": 57.02254727,
+      "totalTrades": 622,
+      "winRatePct": 41.96141479,
+      "avgTradePct": -0.08010483
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1J308EP422PE3RZVHNWBA63",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1J308EP1QV1ZCTNZQV3645G",
+      "verifiedAt": "2026-09-02T21:00:00Z"
+    },
+    "specPath": "strategies/pine/011-vwm-r-floor.pine",
+    "notes": "REJECTED for generalization, and this time it is worse than the base it was cut from, not merely flat: PF 0.7883 (010's 5m) -> 0.7769, max DD 52.22% -> 57.02%. Raising the R floor was supposed to help fee drag per HARD LESSON 3/9 -- instead it hurt 5m on both metrics. Likely mechanism: 5m's tighter swing-based rawR is more often floor-bound than 15m's, so a higher floor inflates nominal risk per trade disproportionately more on 5m, amplifying drawdown instead of just diluting fees. See STRATEGY-LEDGER.md HARD LESSON 10."
   }
 ];
-const BUILT = "2026-09-02 21:12";
+const BUILT = "2026-09-02 22:15";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

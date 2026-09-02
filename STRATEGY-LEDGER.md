@@ -219,6 +219,27 @@ by whether it improves the 15m number. Selectivity filters (time-of-day, shallow
 bars; they don't change the R-vs-fee ratio. The R floor (attack list item 1 as of cycle 011) is the
 first change on this base that hits the actual mechanism.
 
+## HARD LESSON 10 — a flat % R floor binds harder on the tighter timeframe (from cycle 011, 2026-09-02)
+Cycle 011 raised the min-risk floor from 0.8% to 1.2% of price, reasoning from HARD LESSON 3/9 that a
+wider floor dilutes the fixed 0.10% round-trip fee and should help *both* timeframes. It helped 15m
+cleanly — PF 0.9614→1.0211, max DD 45.78%→40.67%, the first time this base line has cleared PF 1.0 —
+but 5m came back *worse* than the pre-change base on both metrics: PF 0.7883→0.7769, max DD
+52.22%→57.02%. Not flat, like the time-of-day filter in cycle 010 — actively worse.
+
+The likely mechanism: `rawR` (distance from close to the structural swing low) is naturally smaller
+on 5m than 15m, because 5m swings are tighter. That means the min-R floor binds — i.e. `rawR` gets
+overridden by `minR` — on a larger share of 5m trades than 15m trades. Raising the floor therefore
+inflates nominal per-trade risk *more* on 5m than on 15m, which widens 5m's losses and drawdown
+instead of just diluting its fee drag.
+
+**Rule:** a fee-economics argument ("wider R dilutes the fixed fee") is necessary but not sufficient
+— it ignores how a *flat percentage* floor interacts with a timeframe's typical structural stop
+distance. Before trusting a stop-sizing change to transfer across timeframes, check what fraction of
+trades are floor-bound on each timeframe; if that fraction differs a lot, the change's effect will
+differ a lot too, in a direction that isn't obvious from the fee math alone. A volatility-relative
+floor (e.g. a multiple of ATR%, not a flat % of price) is the natural fix and is now on the attack
+list.
+
 ## Platform constraints — trader.dev engine
 - Pine **//@version=6**, allowlist of 65 `ta.*` indicators.
 - **FORBIDDEN:** `request.security` (no cross-symbol), arrays/maps, `strategy.cancel`,
