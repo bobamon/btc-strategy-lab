@@ -740,3 +740,66 @@ and the "edge concentrated in time" question may have been a question about nois
 
 **Champion unchanged — the ratchet has nothing to compare, since E30 is not a like-for-like test.**
 But the champion's status line should now read *unconfirmed on any sample larger than 32 trades*.
+
+
+---
+
+## ██ E31 — THE CONTROL, AND A CORRECTION TO WHAT I WROTE ABOUT E30
+
+E30 moved timeframe and period together and I flagged that the missing control had to run before the
+result could be called decisive. It has now run: E30's Pine byte-identical, on the champion's own
+window, so the **only** difference from v6 is the timeframe.
+
+| Same window, 2025-12-16 → 2026-05-03 | v6 at 1m | E31 at 5m |
+|---|---|---|
+| Profit factor | **1.68623784** | 0.39362758 |
+| Trades | 32 | **9** |
+| Win rate | 56.25% | 33.33% |
+| Max drawdown | 3.10289714% | 2.59008890% |
+
+**E30 on 2.2 years scored 0.3289. E31 on 4.5 months scores 0.3936.** Two wildly different periods,
+essentially the same number. **Period explains nothing. The timeframe explains everything.**
+
+### THE CORRECTION
+Last cycle I wrote that "the most likely reading is that PF 1.686 on 32 trades was always a
+small-sample artifact." **That was an overreach and the control disproves it.** E30 did not test
+whether the champion survives a longer sample — it tested whether the mechanism survives a slower
+timeframe, and it does not. The trade count falls from 32 to 9 on an *identical* window, which means
+the 1m reclaim trigger largely disappears under 5m aggregation: a `ta.crossover` of the previous 15m
+low, filtered by a velocity threshold, needs 1m resolution to fire at all.
+
+**So the champion's durability is still an open question, and the 5m route to answering it is now
+closed.** 1m coverage is fixed at 2025-12-16 → 2026-05-03. There is no larger sample available for
+this mechanism on this engine, and no amount of experiment design will create one.
+
+### WHAT THIS COSTS THE LAB, STATED HONESTLY
+The champion is measured on 32 trades and **cannot be measured on more**. That is not a defect in the
+strategy, it is a hard limit of the data. Every future claim about v6 has to carry it. The remaining
+honest options are a walk-forward split *within* the 4.5 months (already done: 17 and 15 trades), or
+accepting the champion as unfalsifiable at this sample size and spending cycles elsewhere.
+
+**Champion unchanged — E31 is a control, not a challenger.**
+
+
+---
+
+## ██ NEXT QUEUE: THE 950 RULE (supplied by the user, 2026-09-02)
+
+Full decode in `ORACLE-RULES.md`, which now opens with it. Short version:
+
+- **The setup:** price reaching x950 marks the whole number as one that will be taken.
+- **The discriminator:** once the whole number breaks, read the VELOCITY of the break. Strong (full
+  bodies, no wicks) → follow it to the next whole number. Weak (small bodies, top wicks) → **short
+  above the whole number.**
+- **Why it earns a cycle:** ten short constructions have failed here, and all ten chose a *location*.
+  E29 proved location is not the problem. **This proposes a TEST at the location instead** — the one
+  axis untried — and it is natively bidirectional, which is the user's standing requirement.
+
+**Two things must happen before any strategy is built**, both from HARD LESSON 10:
+1. **Count how often the 950→whole-number event occurs.** If it is rare, there is nothing to test.
+2. **Count the strong/weak split** once velocity is defined numerically. A label that applies to 95%
+   of breaks discriminates nothing.
+
+**And the E14 redundancy check is mandatory:** the champion's `inMiddle` filter already encodes a
+whole-number geography, so the 950 gate must be tested with `inMiddle` REMOVED or the result cannot be
+attributed.

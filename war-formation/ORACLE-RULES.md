@@ -1,3 +1,93 @@
+# ██ THE 950 RULE & ROUND NUMBER PHENOMENON — SUPPLIED BY THE USER, 2026-09-02
+
+**This is now the top of the queue.** It arrived as an annotated infographic ("Titans"), and it is the
+first material this lab has received that is **natively bidirectional** — the same setup produces a
+long or a short depending on one discriminator, exactly the design the user has been asking for.
+
+## THE RULE AS STATED
+
+| Step | Rule |
+|---|---|
+| 1 | **950 advance signal.** When price reaches x950 of a whole number, that whole number **will** be taken. Mark it. |
+| 2 | **Whole number taken.** Once it breaks over, watch the **strength** of the break, not the break itself. |
+| 3 | **Read velocity.** Strong → follow the move. Weak → look for exhaustion and a short. |
+| 4 | **Next whole number.** If strong, ride toward it. **If weak, short above the whole number.** |
+
+**Strong velocity break:** large full-bodied candles, little or no wicks, momentum continues.
+**Weak velocity break:** small bodies, wicks on top, momentum fades — "the Green Army is exhausted".
+
+**"Time doesn't matter."** No session or clock gate. If 950 is hit at 8am and the next wave is at 2pm,
+the whole number still gets taken. Patience, not timing.
+
+**Stated failure modes** (these are the author's, and they are diagnostic): killing the first whole
+number; seeing price mid-range and assuming the next whole number is about to break; **shorting too
+early**; confusing the end of one move with the start of the next.
+
+**Claimed evidence:** price clusters at round numbers ~2.05x more than chance; order books show more
+resting orders at 00 and 50; abnormal buying pressure below and selling pressure above round numbers.
+
+## WHY THIS MATTERS MORE THAN THE ORACLE QUEUE DID
+
+**1. It is the first genuinely new SHORT discriminator this lab has been given.** Ten short
+constructions have failed here and in the BTC lab, and every one of them decided *where* to short. The
+level-based family peaked at PF 0.749 (E13), continuation scored 0.555 (E29), and adding the coil
+scored 0.490 (E28). **This rule does not propose a new location — it proposes a new TEST at a
+location the strategy is already at.** Strong break, go with it; weak break, fade it. That is a
+discriminator, not another geometry, and it is the axis nothing has tried.
+
+**2. It directly answers the failure E29 exposed.** E29 established that entering at a level is not
+what breaks the shorts — level-based builds are the better half of the record. What was missing was a
+way to tell a break that will continue from one that will fail. **That is precisely what step 3 is.**
+
+**3. It is one strategy, both directions, decided mechanically.** Matches the user's standing
+requirement without bolting a second system onto the first.
+
+## WHAT THIS LAB ALREADY HAS, AND THE REDUNDANCY THAT MUST BE CHECKED (E14)
+
+**The champion already carries a crude version of this idea.** `inMiddle` bans entries when price sits
+400–600 past a whole number — the dead zone *between* round numbers. The 950 rule works the same
+geography from the other side: it acts in the 950–000 approach and just above the break.
+
+**So `inMiddle` and the 950 gate are not independent, and any test must check whether the new gate is
+doing anything `inMiddle` is not.** They could easily be two encodings of one effect, which is exactly
+how E14's weakening trigger failed against the coil. **Test the 950 rule with `inMiddle` REMOVED**, or
+the result is uninterpretable.
+
+**Second redundancy, on the short side:** step 4's weak-break short is an exhaustion fade above a
+level. E13's near-touch rejection short is also an exhaustion fade at a level, and it scored 0.749.
+**The velocity test is the only genuinely new term**, so the honest experiment isolates it.
+
+## IMPLEMENTATION QUEUE — 950 RULE
+
+**950-1. COUNT THE POPULATION FIRST (HARD LESSON 10, and this lab has now been burned four times).**
+Before building anything, count how often price reaches x950 and then takes the whole number within a
+reasonable horizon. Counter build, one-bar exit, so `totalTrades` is the event count. **If the 950
+signal fires 20 times in the sample there is nothing to test.** This is the single most important step
+and it is cheap.
+
+**950-2. DEFINE VELOCITY MECHANICALLY, THEN COUNT THE SPLIT.** "Large full bodies, no wicks" needs a
+number: body / (high−low) above a threshold, plus range relative to `atr(30)`, measured on the break
+candle and the one after. Then count how many breaks land STRONG versus WEAK. **A discriminator that
+labels 95% of breaks one way is not a discriminator** — measure the split before trusting it.
+
+**950-3. THE LONG: strong break, ride toward the next whole number.** Target becomes the next round
+number rather than a fixed R multiple — note this changes the exit from the fixed-R rule the labs use,
+so it must be tested as a separate variable, not smuggled in.
+
+**950-4. THE SHORT: weak break, short above the whole number.** Judged ALONE on its own profit factor,
+against E13's 0.74897196. This is short construction number eleven and the first with a new term.
+
+**950-5. ONLY THEN combine, with `inMiddle` removed and both legs reported separately.**
+
+## THE HONEST CAVEAT, STATED UP FRONT
+The Oracle queue finished **1 of 5**, and the one item that helped was the *diagnostic* one — his
+explanation of why entries fail — not any rule he stated as a rule. **This material is also a stated
+rule set from a trader, and the base rate for those in this lab is poor.** What makes it worth
+spending credits on is not that it is stated confidently; it is that step 3 names a term nothing here
+has ever measured. **Mine it for the discriminator, not for the ritual.**
+
+---
+
 # ██ DESIGN CLARIFICATION FROM THE USER, 2026-09-02 — READ THIS FIRST
 
 **"War formation should be any direction, it all depends on the higher time frames. That's what makes

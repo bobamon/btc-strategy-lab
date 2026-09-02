@@ -1218,9 +1218,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T11:36:27Z"
     },
     "notes": "THE CHAMPION DOES NOT SURVIVE A LONGER SAMPLE. PF 1.68623784 on 32 trades in 4.5 months at 1m becomes PF 0.3288793 on 38 trades across 2.2 years at 5m. The payoff ratio collapses from the champion's profile to 1.06 and the win rate falls to 23.7%. TWO CAVEATS, both mine: the run confounds timeframe with period, and the v6 reconstruction is unverified. Neither rescues the result -- a mechanism with a real edge should not invert this hard -- but they do mean the missing control (5m on the 1m window) must run before this is called decisive. REVERTED; champion unchanged."
+  },
+  {
+    "id": "war-formation-e31-5m-1mwindow-control",
+    "name": "WF E31 5m port on the 1m window (control)",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "description": "The missing control for E30, which moved timeframe and period at once. Byte-identical Pine to E30, run on the champion's own window, so the only difference from v6 is the timeframe. Long-only.",
+    "metrics": {
+      "netProfitPct": -1.7082557,
+      "profitFactor": 0.39362758,
+      "maxDrawdownPct": 2.5900889,
+      "totalTrades": 9,
+      "winRatePct": 33.33333333,
+      "avgTradePct": -0.18980619
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GYSPXJ97D81QJTKDG9X3J7",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GYSPXJFAQQ9TMMB4TZN1ED",
+      "verifiedAt": "2026-09-02T11:41:47Z"
+    },
+    "notes": "THE COLLAPSE IS THE TIMEFRAME, NOT THE PERIOD -- AND THIS CORRECTS E30's WRITTEN CONCLUSION. On the champion's own window the 5m port scores PF 0.39362758 on 9 trades against v6's 1.68623784 on 32. E30 (2.2 years) scored 0.32887930 and E31 (4.5 months) scores 0.39362758: essentially the same number on wildly different periods, so period explains nothing and timeframe explains everything. Trade frequency falls 32 to 9 on an identical window, which means the 1m trigger simply does not survive aggregation to 5m. CONSEQUENCE: E30 did NOT test whether the champion holds up on a longer sample, and my conclusion there that PF 1.686 was probably a small-sample artifact was an overreach. That question is still open, and the 5m route to answering it is now closed."
   }
 ];
-const BUILT = "2026-09-02 05:38";
+const BUILT = "2026-09-02 05:44";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

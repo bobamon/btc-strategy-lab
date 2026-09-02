@@ -139,6 +139,7 @@ should be rejected without spending a credit on it.
 | Attack 7 | Raise the target 2R → 3R | PF 0.9121→0.9100, DD 28.8%→33.0%, payoff 1.498→1.787, win rate 38.3%→33.7% | **REVERTED** — payoff gain exactly cancelled by win-rate loss |
 | Attack 8 | Short leg 5m → 15m, every bar parameter /3 | PF 0.7413→0.5995, DD 34.40%→50.60%, trades 273→270 | **REVERTED** — the short's timeframe curve runs the OTHER way |
 | Attack 9 | Remove the EMA200 filter, measured in H2 alone | PF 0.65656→0.66177, DD 12.66%→16.06%, trades 61→64 | **REVERTED** — but the filter is nearly INERT in H2 |
+| Attack 10 | Remove the highVol split, measured in H2 alone | PF 0.65656→**0.76511**, DD 12.66%→19.59%, trades 61→103 | **REVERTED** on drawdown — but the gate is COSTING profit factor |
 
 7. ~~Attack the EXIT, not the entry~~ — **DONE, REVERTED.** See the frontier note below.
 8. **Attack the EXIT, original text:** Every attack so far has been an entry filter. The system lives
@@ -643,3 +644,40 @@ gate credited on a mixed sample can be inert in one half and load-bearing in the
 aggregate number cannot tell the difference. The other KEPT changes (the high-volatility regime
 split, the witching ban) are still unvalidated on this axis and should be checked the same way before
 any of them is treated as established.
+
+
+## ██ ATTACK 10 — THE SECOND GATE HAS THE OPPOSITE DISEASE (2026-09-02)
+
+Attack 9 found the EMA200 filter nearly inert in H2 — three trades removed out of 64. Attack 10 ran
+the same test on the other unvalidated gate, `highVol`, the volatility regime split.
+
+| H2 only (2025-07-20 → 2026-09-01) | With highVol (control) | Without |
+|---|---|---|
+| Profit factor | 0.65655726 | **0.76510562** |
+| Win rate | 29.69% | 33.98% |
+| Max drawdown | **12.66%** | 19.59% |
+| Trades | 61 | 103 |
+
+**This gate is the opposite of inert. It removes 42 of 103 trades — and the trades it removes are
+disproportionately WINNERS.** Taking it out lifts profit factor by 0.109 and the win rate by 4.3pp.
+
+**REVERTED, strictly by the ratchet** — profit factor improved but drawdown worsened by 6.9pp, and
+the rule is *both* terms or nothing. That is the right call and I am not going to argue with it, but
+the finding underneath deserves to be stated plainly: **the volatility split is paying for its
+drawdown reduction with profit factor, in the half of the sample where this system loses money.**
+
+### TWO KEPT GATES, TWO DIFFERENT DISEASES
+| Gate | Trades removed in H2 | Effect on PF |
+|---|---|---|
+| EMA200 trend filter | 3 of 64 | none (0.005) — **inert** |
+| highVol regime split | 42 of 103 | −0.109 — **actively harmful** |
+
+Neither is doing what its KEPT verdict claimed. One barely binds; the other binds hard and costs.
+**Both verdicts were artifacts of measuring on a sample that turned out not to be homogeneous** —
+they were credited for behaviour in H1 and neither was ever checked in H2.
+
+**What this means for the board.** The 5m base is not "the mechanism plus two validated
+improvements". It is the mechanism plus one gate that does nothing and one that suppresses winners
+to flatter the drawdown. **The PF 1.0202 headline on the full sample is now doubly qualified**: it
+was measured on a mixed sample, and two of its components fail re-validation on the failing half.
+The remaining unvalidated term is the witching ban, and it should be checked the same way.

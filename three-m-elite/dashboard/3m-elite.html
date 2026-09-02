@@ -689,9 +689,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T11:36:45Z"
     },
     "notes": "HYPOTHESIS CONFIRMED, AND WORSE THAN PREDICTED. 2,711 engulfs produce only 71 zone creations -- 29 demand, 42 supply -- which is 2.6%. The deepest-zone rule discards 97.4% of them. AND CREATION STOPS: the last one is 2025-10-07, matching v21's last trade on 2025-10-06 almost exactly. So v21's eleven-month gap is not a market feature, it is a lock-up: once an incumbent zone can only be replaced by a deeper (or higher) one, a trending market can never replace it, and if price never returns to mitigate it the zone sits forever and blocks the side permanently."
+  },
+  {
+    "id": "3m-elite-v23-most-recent-zone",
+    "name": "3M ELITE v23 most-recent zone",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "testing",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "One change from v21: the deepest-zone clause is dropped, so every engulf creates or replaces its zone and the freshest structure always wins. This removes the lock-up v22 proved. First measurement of this system that is not distorted by a zone going permanently blind.",
+    "metrics": {
+      "netProfitPct": -88.96577877,
+      "profitFactor": 0.7362667,
+      "maxDrawdownPct": 89.27244261,
+      "totalTrades": 1792,
+      "winRatePct": 25.61383929,
+      "avgTradePct": -0.04964608
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GYTGY7AZ6PJ3G548EZZ1G6",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GYTGY7YZSNAP6QNCAMFP4A",
+      "verifiedAt": "2026-09-02T11:42:14Z"
+    },
+    "notes": "THE LOCK-UP IS FIXED AND THE EDGE WAS THE LOCK-UP. Trades 185 to 1792 and they now span the whole window to 2026-08 instead of stopping in 2025-10, so the fix works exactly as v22 predicted. But profit factor falls 1.02389497 to 0.73626670. Longs 749 (275W, -$1,814.86); shorts 1043 (184W, -$7,081.71). v21's 1.02 was not an edge -- it was an accidental filter, a frozen zone that happened to sit in a favourable place while the strategy was blind to everything else. This is the FIRST undistorted measurement of the SPENNYFX mechanism on this engine, and it says 0.736. Recorded as the reference base on correctness grounds despite the lower number. DD 89% -- not tradeable."
   }
 ];
-const BUILT = "2026-09-02 05:38";
+const BUILT = "2026-09-02 05:44";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

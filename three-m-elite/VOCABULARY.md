@@ -218,3 +218,20 @@ equals the previous close to within a tick, so that clause is decided by noise. 
 in 4.7 years. Without it, 2,711 — about 28% of all 4H candles.
 
 An engulf **CREATES** a zone; it does not validate one. See [[3m-zone-lifecycle]].
+
+
+---
+
+## ZONE REPLACEMENT — MOST RECENT, NOT DEEPEST (v23, corrected)
+
+**A new engulfing candle always creates or replaces its zone.** The freshest structure wins.
+
+**The superseded rule** required a replacement demand zone to be *deeper* than the incumbent (and a
+supply zone *higher*). It was meant to express "prefer the strongest zone". Mechanised as a monotone
+ratchet with no expiry it becomes a **lock**: in a rising market no later engulf is ever deeper, so
+the incumbent is never replaced, and if price never returns to close inside it, it never mitigates
+either. v22 measured the damage — 2,711 engulfs produced **71** zone creations, and creation stopped
+entirely on 2025-10-07.
+
+**Why a human never hits this:** a trader silently retires stale zones. The rule only fails when
+written down. See [[3m-zone-lifecycle]] and HARD LESSON 9.

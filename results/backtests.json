@@ -904,5 +904,34 @@
    "verifiedAt": "2026-09-02T11:35:50Z"
   },
   "notes": "THE FILTER BARELY BINDS IN H2. Control PF 0.65655726 / DD 12.66% / 61 trades; without the filter PF 0.66176879 / DD 16.06% / 64 trades. Profit factor moved by 0.005 -- noise -- and the gate only removed THREE trades out of 64. Attack 1 cut 35 trades on the 15m full sample; in H2 it is nearly inert. So its KEPT verdict was earned in H1 and does not transfer. It stays in only because removing it worsens drawdown by 3.4pp, which the ratchet forbids. REVERTED, but recorded as an E17 finding: a constraint that does not bind is not a filter."
+ },
+ {
+  "id": "vwm-attack10-no-highvol-h2",
+  "name": "VWM Attack10 no highVol in H2",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2025-07-20",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "The second unvalidated KEPT gate, tested by Attack 9's method. One change from the 5m scaled base: highVol removed from the entry conjunction, still computed so the deviation stays visible. H2 alone; the H2 decomposition run is the control and already exists.",
+  "metrics": {
+   "netProfitPct": -12.05990695,
+   "profitFactor": 0.76510562,
+   "maxDrawdownPct": 19.5906385,
+   "totalTrades": 103,
+   "winRatePct": 33.98058252,
+   "avgTradePct": -0.11708648
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GYR9JW2EWS6R1D9C79C2V2",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GYR9JWH35GPKQTRCXKR1HP",
+   "verifiedAt": "2026-09-02T11:41:01Z"
+  },
+  "notes": "THE OPPOSITE PATHOLOGY TO ATTACK 9. Control PF 0.65655726 / DD 12.66% / 61 trades; without highVol PF 0.76510562 / DD 19.59% / 103 trades. This gate BINDS HARD -- it removes 42 of 103 trades, where trendOk removed 3 of 64 -- and removing it RAISES profit factor by 0.109 while win rate climbs 29.7% to 34.0%. So the volatility split is not inert, it is actively costing profit factor in H2 and paying for that only in drawdown. REVERTED strictly by the ratchet: PF improved but DD worsened 12.66% to 19.59%. Two KEPT gates, two different diseases -- one does nothing, one does harm."
  }
 ]

@@ -305,6 +305,7 @@ so the code genuinely behaves differently. **But the count stayed at 3.**
 | v20 | The SAME counter with the gap clause removed — body containment only | **2,711 ENGULFS** (1,325 bull, 1,386 bear). 271x the old count, ~28% of all 4H candles · [report](https://mcp-api.trader.dev/backtest/01M1GXHFTDY20ZA3GP2HBDW7J6) |
 | v21 | v15's source with the corrected engulf — the lifecycle's first real population | **PF 1.0239, DD 10.58%, 185 trades** (56 long 21W +$652 / 129 short 25W -$423). Best on record; 11-month trade gap disclosed · [report](https://mcp-api.trader.dev/backtest/01M1GXYHSEMAS3J7ABRE3V169G) |
 | v22 | Count ZONE CREATION — the engulf AND the deepest-zone condition | **71 creations from 2,711 engulfs** (29 demand, 42 supply). Last creation 2025-10-07. The rule discards 97.4% then locks up · [report](https://mcp-api.trader.dev/backtest/01M1GYGFHTD06PZWQS0FQF8JQG) |
+| v23 | Most-recent zone replaces deepest zone | **PF 0.7363, DD 89.27%, 1,792 trades** (749 long 275W / 1,043 short 184W), spanning the full window. The lock-up is fixed and the edge went with it · [report](https://mcp-api.trader.dev/backtest/01M1GYTGY7YZSNAP6QNCAMFP4A) |
 
 **When three independent corrections land on the same trade count, the binding constraint is upstream
 of all of them.** I have now spent three cycles fixing things that were genuinely wrong and none of
@@ -549,7 +550,15 @@ never been in the thing being tested — they have been in the assumptions under
     v15 still carried the gap clause, so zone CREATION was the binding step, upstream of the gate.
 0-V22. ~~EXPLAIN THE ELEVEN-MONTH TRADE GAP~~ — **DONE. CONFIRMED, and worse than predicted.**
     71 zone creations from 2,711 engulfs; last creation 2025-10-07. It is a lock-up, not a market.
-0-V23-NEXT. **REPLACE THE DEEPEST-ZONE RULE WITH A MOST-RECENT-ZONE RULE (top priority).** One
+0-V23. ~~REPLACE THE DEEPEST-ZONE RULE WITH MOST-RECENT~~ — **DONE. The lock-up is fixed; PF 1.024
+    -> 0.736 on 1,792 trades. v21's edge WAS the lock-up.** v23 is the new reference base.
+0-V24-NEXT. **RESTORE THE TYPE 2 VALIDATION GATE, now on a working lifecycle (top priority).** For
+    the first time the gate can be tested against a strategy that is neither starved (v16-v18) nor
+    blind (v21). One change from v23: entries require an engulf in the direction of the 2D bias
+    inside the live zone, latched in sequence. If PF rises above 0.736 the gate is doing real work;
+    if not, the SPENNYFX entry has no edge on this instrument and the lab should say so.
+0-V25. **The short leg is the bleed: 1,043 trades, -$7,082 against the long's -$1,815.** After v24,
+    test the long leg ALONE before anything else. Superseded text: REPLACE THE DEEPEST-ZONE RULE WITH A MOST-RECENT-ZONE RULE. One
     change: a new engulf always replaces the incumbent zone, dropping the `pL < dzBot` /
     `pH > szTop` clause entirely. The rule was invented to prefer the strongest zone; v22 shows it
     instead makes the strategy blind to everything after the first deep low. Re-run the v22 counter
@@ -778,3 +787,43 @@ sound-sounding rule has failed on the transition from judgement to mechanism.**
 **Third diagnostic in a row that paid.** v19 counted a term and found it empty; v20 counted the fix;
 v22 counted the term one level down and found the real blocker. The pattern is established: **when
 the trade count is the symptom, count the terms, do not tune the strategy.**
+
+
+---
+
+## ██ v23 — THE LOCK-UP IS FIXED, AND THE EDGE WAS THE LOCK-UP
+
+One change from v21: drop `pL < dzBot` / `pH > szTop`, so the freshest engulf always owns the zone.
+
+| | v21 (deepest zone) | **v23 (most recent)** |
+|---|---|---|
+| Profit factor | 1.02389497 | **0.73626670** |
+| Trades | 185 | **1,792** |
+| Trades span | stops 2025-10-06 | **full window, to 2026-08** |
+| Max drawdown | 10.58% | 89.27% |
+| Long | 56 (21W) **+$652** | 749 (275W) **−$1,814.86** |
+| Short | 129 (25W) −$423 | 1,043 (184W) **−$7,081.71** |
+
+**The fix works exactly as v22 predicted** — the strategy now trades across the entire window instead
+of going blind in October 2025. **And profit factor falls from 1.02 to 0.74.**
+
+### WHAT v21's 1.02 ACTUALLY WAS
+Not an edge. **An accidental filter.** A frozen demand zone sat in one favourable location while the
+strategy was blind to every zone that formed afterwards. Being unable to trade turned out to be worth
+more than the entry logic, which is a damning thing to discover about an entry.
+
+**This retires the entire numeric history of this lab.** v21's 1.024, v15's 0.363, and the v3
+reference base's 0.64 were all produced by builds carrying the lock-up. **v23 at 0.736 on 1,792
+trades is the first undistorted measurement the SPENNYFX mechanism has ever received here**, and it
+becomes the reference base on correctness grounds even though its headline number is worse. A real
+0.736 is worth more than a fabricated 1.02.
+
+**It is not tradeable and I am not going to dress it up:** −89% return, 89% drawdown, and the short
+leg alone loses $7,082 against the long's $1,815. But it is finally an honest starting point, and the
+next test — restoring the validation gate — is the first one in this lab that will be measured
+against a lifecycle that is neither starved nor blind.
+
+### THE PATTERN, FOUR FOR FOUR
+v19 counted a term and found it empty. v20 counted the fix. v22 counted the term one level down and
+found the blocker. v23 removed it and found the edge was the blocker all along. **Every diagnostic in
+this sequence paid, and every one of them paid by deleting a belief rather than adding a feature.**
