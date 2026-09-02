@@ -699,3 +699,44 @@ geometry are unlikely to be what changes that.
 **The next cycle should stop proposing short geometries.** The open question worth a credit is the
 one the log has never answered: what makes the bear-labelled periods themselves different, given E10
 and E11 already showed *both* directions lose across bear bars.
+
+
+---
+
+## ██ E30 — THE CHAMPION DOES NOT SURVIVE A LONGER SAMPLE
+
+**Why this run, and why it is not a timeframe experiment.** The lab's biggest open question is why
+the edge is concentrated in time: half1 PF 3.797, half2 0.893. That finding rests on **17 and 15
+trades**. Thirty-two trades cannot support a conclusion about regime dependence, and several cycles
+have now been spent explaining a difference that may not exist. 1m coverage is fixed at 2025-12-16 to
+2026-05-03 and cannot be extended — but **5m coverage starts 2024-06-08**, so porting the champion is
+the only route this lab has to a real sample.
+
+| | v6 champion, 1m, 4.5 months | E30, 5m, 2.2 years |
+|---|---|---|
+| Profit factor | **1.68623784** | 0.32887930 |
+| Win rate | 56.25% | 23.68% |
+| Payoff ratio | — | 1.060 |
+| Max drawdown | 3.10289714% | 7.46864462% |
+| Trades | 32 | 38 |
+
+**The mechanism inverts.** A 56% win rate becomes 24%; profit factor falls from 1.69 to 0.33.
+
+### TWO CAVEATS, BOTH MINE, STATED BEFORE THE CONCLUSION
+1. **This run moves two variables — timeframe AND period.** That breaks the lab's single-variable
+   rule. It was a deliberate trade: a 2.2-year sample was judged worth more than a fourth clean slice
+   of the same 4.5 months. Deliberate does not make it clean, and the missing control — **the 5m port
+   run on the 1m window** — must be the next cycle before this is called decisive.
+2. **The v6 reconstruction is unverified.** v6's strategy record predates what the API returns, so it
+   was rebuilt from `pine/war-formation-v8-weakening.pine`, which contains v6's `baseSig` verbatim.
+   Faithful in principle; unproven in fact.
+
+### WHAT IT STILL SAYS
+Neither caveat is a rescue. A mechanism with a durable edge does not inspect this badly when given
+more data — and the frequency is consistent with the port being correct (38 trades in 2.2 years at 5m
+versus 32 in 4.5 months at 1m is the drop in trigger opportunities you would expect from 5x fewer
+bars). **The most likely reading is that PF 1.686 on 32 trades was always a small-sample artifact**,
+and the "edge concentrated in time" question may have been a question about noise the whole way.
+
+**Champion unchanged — the ratchet has nothing to compare, since E30 is not a like-for-like test.**
+But the champion's status line should now read *unconfirmed on any sample larger than 32 trades*.

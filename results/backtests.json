@@ -875,5 +875,34 @@
    "verifiedAt": "2026-09-02T11:28:39Z"
   },
   "notes": "THE SHORT'S TIMEFRAME CURVE RUNS THE OTHER WAY. 5m PF 0.7413 / DD 34.40% / 273 trades -> 15m PF 0.5995 / DD 50.60% / 270 trades. Trade count barely moved (273 vs 270) so this is not a sampling artifact -- the same signal is simply worse when read slower. The long improved going 15m->5m; the short degrades going 5m->15m, which is consistent with both legs preferring FASTER, not with the two legs sharing an optimum. REVERTED on both ratchet terms."
+ },
+ {
+  "id": "vwm-attack9-no-ema200-h2",
+  "name": "VWM Attack9 no EMA200 in H2",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2025-07-20",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "Re-validation of Attack 1 (the EMA200 trend filter, KEPT on the full mixed sample) in H2 alone, the half where the system fails. One change from the 5m scaled base: trendOk removed from the entry conjunction. The H2 decomposition run is the control and already exists, so no control run was needed.",
+  "metrics": {
+   "netProfitPct": -11.65112403,
+   "profitFactor": 0.66176879,
+   "maxDrawdownPct": 16.06421349,
+   "totalTrades": 64,
+   "winRatePct": 29.6875,
+   "avgTradePct": -0.18204881
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GYESFH11HE5KT17RTDK5XX",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GYESFGS1KYYXVWMSFQD15T",
+   "verifiedAt": "2026-09-02T11:35:50Z"
+  },
+  "notes": "THE FILTER BARELY BINDS IN H2. Control PF 0.65655726 / DD 12.66% / 61 trades; without the filter PF 0.66176879 / DD 16.06% / 64 trades. Profit factor moved by 0.005 -- noise -- and the gate only removed THREE trades out of 64. Attack 1 cut 35 trades on the 15m full sample; in H2 it is nearly inert. So its KEPT verdict was earned in H1 and does not transfer. It stays in only because removing it worsens drawdown by 3.4pp, which the ratchet forbids. REVERTED, but recorded as an E17 finding: a constraint that does not bind is not a filter."
  }
 ]

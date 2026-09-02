@@ -434,5 +434,34 @@
    "verifiedAt": "2026-09-02T11:26:57Z"
   },
   "notes": "BEST 3M RESULT ON RECORD, WITH A DISCLOSED ANOMALY. PF 0.3626 -> 1.0239, trades 24 -> 185, DD 15.53% -> 10.58%. Longs 56 (21W, +$652.14); shorts 129 (25W, -$423.19) -- the long leg carries it and the short leg loses, matching both sister labs. THE ANOMALY: the last trade exits 2025-10-06 but the window runs to 2026-09-01, so roughly eleven months produced no entries at all. Suspected cause is the deepest-zone rule -- in a rising market a live demand zone can never be replaced by a shallower one, so it persists untouched and blocks demand entries indefinitely. NOT PROMOTED past reference until that is measured. PF 1.02 is break-even plus noise regardless."
+ },
+ {
+  "id": "3m-elite-v22-zone-creation-counter",
+  "name": "3M ELITE v22 zone-creation counter (diagnostic)",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "both",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "specPath": "three-m-elite/SYSTEM.md",
+  "description": "A COUNTER, NOT A STRATEGY. Fires on the zone-CREATION event itself -- the engulf AND the deepest-zone condition, the conjunction that has never been counted -- with a one-bar exit, so totalTrades is the creation count and the long/short split separates demand from supply. P&L meaningless by construction.",
+  "metrics": {
+   "netProfitPct": -11.53597327,
+   "profitFactor": 0.32654682,
+   "maxDrawdownPct": 11.54485529,
+   "totalTrades": 71,
+   "winRatePct": 25.35211268,
+   "avgTradePct": -0.1624785
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GYGFHTB8V3JCE9T229JAW3",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GYGFHTD06PZWQS0FQF8JQG",
+   "verifiedAt": "2026-09-02T11:36:45Z"
+  },
+  "notes": "HYPOTHESIS CONFIRMED, AND WORSE THAN PREDICTED. 2,711 engulfs produce only 71 zone creations -- 29 demand, 42 supply -- which is 2.6%. The deepest-zone rule discards 97.4% of them. AND CREATION STOPS: the last one is 2025-10-07, matching v21's last trade on 2025-10-06 almost exactly. So v21's eleven-month gap is not a market feature, it is a lock-up: once an incumbent zone can only be replaced by a deeper (or higher) one, a trending market can never replace it, and if price never returns to mitigate it the zone sits forever and blocks the side permanently."
  }
 ]

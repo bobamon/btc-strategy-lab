@@ -138,6 +138,7 @@ should be rejected without spending a credit on it.
 | Attack 5 | Require volume above the 50-bar average on the reclaim | PF 0.912→0.839, DD 28.8%→26.9%, trades 433→241, commission $3,954→$2,078 | **REVERTED** — fee saving realised, edge lost with it |
 | Attack 7 | Raise the target 2R → 3R | PF 0.9121→0.9100, DD 28.8%→33.0%, payoff 1.498→1.787, win rate 38.3%→33.7% | **REVERTED** — payoff gain exactly cancelled by win-rate loss |
 | Attack 8 | Short leg 5m → 15m, every bar parameter /3 | PF 0.7413→0.5995, DD 34.40%→50.60%, trades 273→270 | **REVERTED** — the short's timeframe curve runs the OTHER way |
+| Attack 9 | Remove the EMA200 filter, measured in H2 alone | PF 0.65656→0.66177, DD 12.66%→16.06%, trades 61→64 | **REVERTED** — but the filter is nearly INERT in H2 |
 
 7. ~~Attack the EXIT, not the entry~~ — **DONE, REVERTED.** See the frontier note below.
 8. **Attack the EXIT, original text:** Every attack so far has been an entry filter. The system lives
@@ -611,3 +612,34 @@ sample-limited to Dec 2025 onward.
 axis that rescued the long did nothing for the short, exactly as the seven filters did nothing for
 the long. **Each leg has now had one axis that moves it and a long list that does not, and the
 short's has not been found.**
+
+
+## ██ ATTACK 9 — A KEPT FILTER THAT DOES NOTHING IN THE HALF THAT MATTERS (2026-09-02)
+
+Every KEPT change on this board was accepted on the **full** sample. The decomposition then showed
+that sample is not homogeneous — PF 1.3552 early against 0.6566 late — which means a change could
+have been kept for removing trades that were only bad in the half where the system already worked.
+Nobody had checked. Attack 9 checks the biggest one: Attack 1, the EMA200 trend filter.
+
+| H2 only (2025-07-20 → 2026-09-01) | With EMA200 (control) | Without |
+|---|---|---|
+| Profit factor | 0.65655726 | 0.66176879 |
+| Max drawdown | **12.66%** | 16.06% |
+| Trades | 61 | 64 |
+
+**Profit factor moved by 0.005.** That is noise, not a filter working.
+
+**The trade count is the real finding: the gate removes THREE trades out of 64.** On the 15m full
+sample Attack 1 cut 35 trades from 468 and was credited with lifting PF 0.89 → 0.91. In H2 it barely
+binds at all — price is above the 600-bar EMA almost whenever the other seven conditions align, so
+the term is very nearly a tautology here.
+
+**REVERTED — the filter stays**, because removing it worsens drawdown by 3.4pp and the ratchet
+forbids that. But it stays as ballast, not as an edge: **it is not contributing to profit factor in
+the regime where this system is losing money.**
+
+**This is E17 generalised — check whether a constraint BINDS, not just whether the metric moved.** A
+gate credited on a mixed sample can be inert in one half and load-bearing in the other, and the
+aggregate number cannot tell the difference. The other KEPT changes (the high-volatility regime
+split, the witching ban) are still unvalidated on this axis and should be checked the same way before
+any of them is treated as established.

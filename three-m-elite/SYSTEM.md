@@ -304,6 +304,7 @@ so the code genuinely behaves differently. **But the count stayed at 3.**
 | v19 | Count 4H engulfing candles alone | **TEN in 4.7 years** (5 bull, 5 bear) out of ~9,800 candles. The engulf definition assumes GAPS · [report](https://mcp-api.trader.dev/backtest/01M1GX4DEVQGF6R39CE7FJWRC9) |
 | v20 | The SAME counter with the gap clause removed — body containment only | **2,711 ENGULFS** (1,325 bull, 1,386 bear). 271x the old count, ~28% of all 4H candles · [report](https://mcp-api.trader.dev/backtest/01M1GXHFTDY20ZA3GP2HBDW7J6) |
 | v21 | v15's source with the corrected engulf — the lifecycle's first real population | **PF 1.0239, DD 10.58%, 185 trades** (56 long 21W +$652 / 129 short 25W -$423). Best on record; 11-month trade gap disclosed · [report](https://mcp-api.trader.dev/backtest/01M1GXYHSEMAS3J7ABRE3V169G) |
+| v22 | Count ZONE CREATION — the engulf AND the deepest-zone condition | **71 creations from 2,711 engulfs** (29 demand, 42 supply). Last creation 2025-10-07. The rule discards 97.4% then locks up · [report](https://mcp-api.trader.dev/backtest/01M1GYGFHTD06PZWQS0FQF8JQG) |
 
 **When three independent corrections land on the same trade count, the binding constraint is upstream
 of all of them.** I have now spent three cycles fixing things that were genuinely wrong and none of
@@ -546,7 +547,14 @@ never been in the thing being tested — they have been in the assumptions under
     the whole problem. The population is real and balanced; the validation gate can now be tested.
 0-V21. ~~CORRECT THE ENGULF IN THE LIFECYCLE ITSELF~~ — **DONE. PF 0.363 -> 1.024 on 185 trades.**
     v15 still carried the gap clause, so zone CREATION was the binding step, upstream of the gate.
-0-V22-NEXT. **EXPLAIN THE ELEVEN-MONTH TRADE GAP (top priority, diagnostic).** v21's last trade exits
+0-V22. ~~EXPLAIN THE ELEVEN-MONTH TRADE GAP~~ — **DONE. CONFIRMED, and worse than predicted.**
+    71 zone creations from 2,711 engulfs; last creation 2025-10-07. It is a lock-up, not a market.
+0-V23-NEXT. **REPLACE THE DEEPEST-ZONE RULE WITH A MOST-RECENT-ZONE RULE (top priority).** One
+    change: a new engulf always replaces the incumbent zone, dropping the `pL < dzBot` /
+    `pH > szTop` clause entirely. The rule was invented to prefer the strongest zone; v22 shows it
+    instead makes the strategy blind to everything after the first deep low. Re-run the v22 counter
+    first to confirm creations track the engulf population, THEN re-run v21's full build.
+0-V24. **THEN restore the Type 2 validation gate.** Superseded text: EXPLAIN THE ELEVEN-MONTH TRADE GAP. v21's last trade exits
     2025-10-06 on a window running to 2026-09-01. Suspected cause: the deepest-zone rule — a live
     demand zone can only be replaced by a DEEPER one, so in a rising market it persists untouched
     and blocks demand entries indefinitely. Counter-build it: fire on dzLive alone with a one-bar
@@ -732,3 +740,41 @@ and the same rule that produces the gap would also have distorted v15 and v3. Me
 **The method held, though, and that is worth stating:** v19 counted a term, v20 counted the fix, v21
 applied it to the lifecycle — and the trade count went 24 -> 185 exactly as the counter predicted.
 The number that had never been measured was the one that mattered.
+
+
+---
+
+## ██ v22 — THE DEEPEST-ZONE RULE IS THE BLOCKER. CONFIRMED, AND WORSE THAN PREDICTED.
+
+v20 counted the engulf alone: **2,711**. v21 used it. Nobody had counted the conjunction that
+actually gates creation — `bullEng AND (not dzLive OR pL < dzBot)`.
+
+| | Count |
+|---|---|
+| Engulfing candles (v20) | **2,711** |
+| Zone CREATIONS (v22) | **71** — 29 demand, 42 supply |
+| Survival rate | **2.6%** |
+| Last creation | **2025-10-07** |
+
+**The deepest-zone rule discards 97.4% of zone creation, and then stops creating altogether.** The
+last creation on 2025-10-07 matches v21's last trade on 2025-10-06 almost exactly, which closes the
+question: v21's eleven-month gap is **not a market feature, it is a lock-up.**
+
+**The mechanism of the lock-up.** An incumbent demand zone can only be replaced by a *deeper* one. In
+a rising market every subsequent engulf low is higher, so replacement never happens; and if price
+never returns to close inside the incumbent, mitigation never happens either. The zone becomes
+immortal and blocks that side permanently. Supply has the mirror pathology in a falling market.
+
+**What this retires.** v21's PF 1.0239 was computed on two thirds of its window, and **v15 and the v3
+reference base carry the same defect** — every historical number in this lab was produced by a
+strategy that had gone blind partway through. None of them mean what they appeared to mean.
+
+**The rule was a reasonable idea.** Preferring the strongest, deepest zone is sound discretionary
+practice. Mechanised as a monotone ratchet with no expiry, it converts "prefer the best zone" into
+"ignore every zone after the first extreme one" — a distinction a human reading a chart would never
+make, because a human silently retires stale zones. **That is now the fourth time in this lab a
+sound-sounding rule has failed on the transition from judgement to mechanism.**
+
+**Third diagnostic in a row that paid.** v19 counted a term and found it empty; v20 counted the fix;
+v22 counted the term one level down and found the real blocker. The pattern is established: **when
+the trade count is the symptom, count the terms, do not tune the strategy.**

@@ -1189,9 +1189,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T11:28:25Z"
     },
     "notes": "CONTINUATION IS WORSE THAN REVERSAL, AND IT IS NOT CLOSE. PF 0.5549 against E13's 0.7490, on 336 trades versus 39 -- the largest short sample this lab has ever produced, so the verdict is not a sample-size question. Removing the level requirement multiplied frequency 8.6x and made every trade worse. Tenth short construction, still nothing above 1.0. The level was never the problem. REVERTED."
+  },
+  {
+    "id": "war-formation-e30-5m-port",
+    "name": "WF E30 champion ported to 5m",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "description": "The champion ported to 5m to obtain a 2.2-year sample instead of 4.5 months, because the time-concentration finding rests on only 32 trades. v6 reconstructed from pine/war-formation-v8-weakening.pine, which contains its baseSig verbatim. maxBars 720 to 144; the atr(3)/atr(30) coil cannot be scaled below one bar and is kept, declared. Long-only. TWO variables move at once -- timeframe and period -- which is a deliberate and disclosed tradeoff for sample size.",
+    "metrics": {
+      "netProfitPct": -7.46864462,
+      "profitFactor": 0.3288793,
+      "maxDrawdownPct": 7.46864462,
+      "totalTrades": 38,
+      "winRatePct": 23.68421053,
+      "avgTradePct": -0.19654328
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GYFYAQM6TMCN36M47MPNG6",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GYFYAQKEYC93791KQRZ2MP",
+      "verifiedAt": "2026-09-02T11:36:27Z"
+    },
+    "notes": "THE CHAMPION DOES NOT SURVIVE A LONGER SAMPLE. PF 1.68623784 on 32 trades in 4.5 months at 1m becomes PF 0.3288793 on 38 trades across 2.2 years at 5m. The payoff ratio collapses from the champion's profile to 1.06 and the win rate falls to 23.7%. TWO CAVEATS, both mine: the run confounds timeframe with period, and the v6 reconstruction is unverified. Neither rescues the result -- a mechanism with a real edge should not invert this hard -- but they do mean the missing control (5m on the 1m window) must run before this is called decisive. REVERTED; champion unchanged."
   }
 ];
-const BUILT = "2026-09-02 05:29";
+const BUILT = "2026-09-02 05:38";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
