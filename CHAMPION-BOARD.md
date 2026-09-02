@@ -263,3 +263,31 @@ result on the same base.
 
 **This is the first configuration to clear PF 0.95, so 5m and parameter sensitivity are owed next
 cycle.** It remains below 1.0 and is not a profitable system.
+
+
+## ⚠️ THE 5m CONFIRMATION FAILED — AND THE TEST WAS CONFOUNDED (2026-09-02)
+The base cleared PF 0.95 on 15m, so a second timeframe was owed. Identical code on 5m:
+
+| | 15m base | 5m |
+|---|---|---|
+| Profit factor | 0.9640 | 0.7066 |
+| Max drawdown | 22.61% | 41.00% |
+| Win rate | 39.11% | 38.76% |
+| avgWin / avgLoss | 1.501 | 1.116 |
+| Trades | 271 | 356 |
+
+**Read the two middle rows together.** The win rate is unchanged; the payoff ratio collapses. That is
+the signature of trades running out of *time*, not out of edge.
+
+**And that points straight at a confound I should have caught before running.** Every bar-denominated
+parameter means three times less wall-clock on 5m: `maxBars` 96 is **8 hours** here against 24 on 15m,
+and `sdLen`, `slopeLen`, `pushLook`, `coolBars`, `swgLen`, `trendLen` and `volLen` are all compressed
+the same way. **This was not a clean timeframe-transfer test**, and the result cannot carry the weight
+a clean one would.
+
+**Honest status: inconclusive, leaning negative.** A properly scaled re-run — `maxBars` 288 and every
+lookback tripled — is owed before the 15m result is either trusted or discarded. Until then the
+15m base stands but should be regarded as unconfirmed on a second timeframe.
+
+**Rule for this lab going forward:** when changing timeframe, scale every bar-denominated parameter
+by the timeframe ratio, or the test measures the parameters rather than the signal.

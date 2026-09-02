@@ -58,6 +58,7 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E16 | Queue item 5: require the SINGULARITY (last completed 1h HA candle green too) | **REVERTED.** PF 1.69->0.52, win 56.3%->34.6%, trades 32->26. He said don't wait for it, and he was right · [report](https://mcp-api.trader.dev/backtest/01M1GQM0TYEWM41J1DPAYB0HT2) |
 | E17 | Raise the R floor 0.15% -> 0.80% (HARD LESSON 3 compliance) | **IDENTICAL RESULTS.** PF 1.68623784, DD 3.10289714%, 32 trades, 56.25% -- the floor never bound. 0.80% adopted as the documented config · [report](https://mcp-api.trader.dev/backtest/01M1GQYHZ94F1QPS3HFR8641NB) |
 | E18 | Cross-lab transfer: restrict the champion to the high-volatility regime | **REVERTED.** PF 1.69->1.10, trades 32->7. The edge concentration is NOT a volatility regime · [report](https://mcp-api.trader.dev/backtest/01M1GR7Q2PD409YCKNDDQJ2J86) |
+| E19 | SENSITIVITY: greenBull 4 -> 3 | **Degrades gracefully.** PF 1.686->1.282, win 56.25%->47.62%, trades 32->42, DD 3.10%->4.79%. Still clearly profitable -- not a knife-edge fit · [report](https://mcp-api.trader.dev/backtest/01M1GRHCBX2GY7QQ7NK1N173VB) |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -250,3 +251,22 @@ from 32 to 7 is what that looks like.
 
 **Record this so a later cycle does not assume a cross-lab result should carry.** Two strategies that
 both trade BTCUSDT can still have opposite relationships to the same variable.
+
+
+## E19 — THE FIRST GOOD NEWS ABOUT THE CHAMPION'S ROBUSTNESS
+A 32-trade champion is only as trustworthy as its behaviour at neighbouring parameter values.
+Loosening the 6h regime by one candle:
+
+| | greenBull 4 (champion) | greenBull 3 |
+|---|---|---|
+| Profit factor | 1.686 | 1.282 |
+| Win rate | 56.25% | 47.62% |
+| Max drawdown | 3.10% | 4.79% |
+| Trades | 32 | 42 |
+
+**It degrades; it does not collapse.** PF stays well above 1.0 on a 31% larger sample. A fitted
+artefact would have fallen below break-even at the adjacent value — this did not.
+
+The champion keeps `greenBull = 4` because it is better on both ratchet terms, but **confidence in
+the 32-trade result is materially higher than it was**, and that is worth more than another failed
+filter. Sensitivity in the other direction (`greenBull = 5`) is still owed, as is `coilK`.

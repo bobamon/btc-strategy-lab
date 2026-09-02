@@ -527,5 +527,34 @@
       "verifiedAt": "2026-09-02T09:46:06Z"
     },
     "notes": "KEPT, AND IT RESOLVES THE OPEN TOLERANCE QUESTION BY MAKING IT UNNECESSARY. PF 0.9321->0.9640 and max drawdown 23.432%->22.612%: both ratchet terms improved strictly, on the strictest possible reading. Against the OLD mixed base this identical change cost 0.064pp of drawdown and was reverted; against the high-volatility base it IMPROVES drawdown. The two changes are complementary rather than competing, and only 8 trades were removed. Best profit factor this lab has recorded, and the first to clear 0.95 -- so 5m and parameter sensitivity are owed next cycle. Still below 1.0: this is the best description of the signal yet, not a profitable system."
+  },
+  {
+    "id": "vwm-base-5m-confirmation",
+    "name": "VWM base 5m confirmation run",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "Owed confirmation run after the 15m base cleared PF 0.95. Identical code, nothing reoptimised, only the timeframe changed. Long only.",
+    "metrics": {
+      "netProfitPct": -38.57377753,
+      "profitFactor": 0.70657441,
+      "maxDrawdownPct": 41.00293602,
+      "totalTrades": 356,
+      "winRatePct": 38.76404494,
+      "avgTradePct": -0.10835331
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GRGNS2XSAY88H1WHBDYGTQ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GRGNS2X9FF48HYEYV50ZW0",
+      "verifiedAt": "2026-09-02T09:52:00Z"
+    },
+    "notes": "FAILS ON 5m -- BUT THE TEST IS CONFOUNDED AND I AM NOT CLAIMING MORE THAN IT SUPPORTS. PF 0.9640 -> 0.7066, DD 22.61% -> 41.00%, net -38.6%. The win rate is essentially unchanged (39.11% -> 38.76%) while the payoff ratio collapses 1.501 -> 1.116, which is the signature of trades running out of time rather than out of edge. THE CONFOUND: every bar-denominated parameter means three times less wall-clock on 5m -- maxBars 96 is 8 hours here against 24 hours on 15m, and sdLen, slopeLen, pushLook, coolBars, swgLen, trendLen and volLen are all similarly compressed. This is therefore NOT a clean timeframe-transfer test. The honest reading is inconclusive and leaning negative. A properly scaled re-run (maxBars 288, lookbacks x3) is owed before the 15m result is either trusted or discarded."
   }
 ]

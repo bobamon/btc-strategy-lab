@@ -239,6 +239,7 @@ This explains the entire failure history of this lab in one stroke:
 | v6, v7 | 10 | both latched, but the zone was still the wrong object entirely |
 | v9 | THE CORRECTED MODEL: engulfing 4H candle CREATES the zone; One Candle Rule mitigation | **3 trades** (2 long, 1 short). Model right, single-slot approximation wrong · [report](https://mcp-api.trader.dev/backtest/01M1GR0M5GXEY4BAP7P9R13SZS) |
 | v10 | Keep the DEEPEST unmitigated zone instead of the most recent | **IDENTICAL TO v9** in every figure. The selection rule never fires -- zones die before the next engulf arrives · [report](https://mcp-api.trader.dev/backtest/01M1GRCBFT1PRT556PPKAJ1Q1X) |
+| v11 | Zone = the BASE ([low, open] demand / [open, high] supply), not the whole candle | **Still 3 trades** (1 long, 2 short). Real change, wrong constraint · [report](https://mcp-api.trader.dev/backtest/01M1GRHZGJY679F1V9P4P5NPZD) |
 
 **The scarcity was never the system. It was my definition of a zone.** A zone defined as the previous
 12H candle's extreme is one level per 12 hours that price rarely revisits under all the other
@@ -284,6 +285,28 @@ small area price accelerated away from — not the full extent of the move.
 [open, high]. Only once a zone can survive its own creation does any selection rule, mitigation count
 or validation gate mean anything. The last three cycles have all been downstream of this one error.
 
+## v11 — THREE STRUCTURAL FIXES, THREE TIMES THE SAME ANSWER. STOP GUESSING.
+The geometry fix was real: the trade composition changed from 2 long / 1 short to 1 long / 2 short,
+so the code genuinely behaves differently. **But the count stayed at 3.**
+
+| Build | Fix applied | Trades |
+|---|---|---|
+| v9 | latched tap, engulf creates the zone | 3 |
+| v10 | keep the deepest zone, not the most recent | 3 |
+| v11 | zone is the base, not the whole candle | 3 |
+
+**When three independent corrections land on the same trade count, the binding constraint is upstream
+of all of them.** I have now spent three cycles fixing things that were genuinely wrong and none of
+them was the thing limiting the strategy.
+
+**v12 MUST BE A DIAGNOSTIC, NOT A FIX.** Strip the entry to the single condition *a zone is live and
+price is inside it* — no 2D bias, no direction, no candle-colour requirement — purely to count how
+many opportunities exist at all. If that returns a handful, the zone lifecycle is still broken. If it
+returns hundreds, the bias and direction gates are doing the killing and the lifecycle was fine.
+
+**The general error is worth naming: I have been filtering a population without ever measuring its
+size.** That is what produced v9, v10 and v11.
+
 ## Open queue
 0. ~~Get definitions for Type 1/Type 2~~ — **DONE 2026-09-02, see VOCABULARY.md.**
    Type 1 = a 3M candle; Type 2 = an engulfing candle in the direction of bias; both only on the
@@ -294,7 +317,9 @@ or validation gate mean anything. The last three cycles have all been downstream
 0-V8. ~~SETTLE THE SPECIFICATION~~ — **DONE 2026-09-02. The engulfing candle CREATES the zone.**
 0-V9. ~~REBUILD ON THE CORRECTED MODEL~~ — **DONE. Model correct, 3 trades, single-slot is the limit.**
 0-V10. ~~KEEP THE DEEPEST ZONE~~ — **DONE. Identical to v9; the rule never fires. See the v10 lesson.**
-0-V11-NEXT. **FIX THE ZONE GEOMETRY (top priority, blocks everything else).** A demand zone is the
+0-V11. ~~FIX THE ZONE GEOMETRY~~ — **DONE. Real change, still 3 trades. Not the binding constraint.**
+0-V12-NEXT. **DIAGNOSTIC RUN, NOT A FIX (top priority).** Entry = zone live AND price inside it.
+    Nothing else. Count the opportunities before filtering them. Superseded text: A demand zone is the
     BASE beneath the impulse -- [low, open] of the engulfing candle -- not its whole range. Supply is
     [open, high]. With the top set at the impulse high, price is inside the zone at creation and the
     mitigation counter trips immediately, which is why v9 and v10 both made 3 trades. Superseded text: One-line change: a new

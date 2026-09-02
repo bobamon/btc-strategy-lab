@@ -428,9 +428,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T09:49:38Z"
     },
     "notes": "IDENTICAL TO v9 IN EVERY FIGURE, AND THAT IS THE DIAGNOSIS. Same PF 0.64013804, same 3 trades, same net. If overwriting had been the cause of v9's scarcity, requiring the new zone to be deeper would have changed something. It changed nothing, which proves the selection rule never fires: zones are already DEAD by the time the next engulfing candle arrives, so the guard clause always sees a dead zone and replaces it exactly as v9 did. THE REAL DEFECT IS THE ZONE GEOMETRY. I defined a demand zone as the engulfing candle's whole high-to-low range, so the zone TOP equals the impulse high -- price is inside the zone the instant the candle closes. The mitigation test then trips within two candles every time. In supply and demand a zone is the BASE the impulse left behind, not the impulse itself. v11 must fix the geometry before any selection rule can matter."
+  },
+  {
+    "id": "3m-elite-v11-base-geometry",
+    "name": "3M ELITE v11 corrected zone geometry",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Queue item 0-V11. The zone is redefined as the BASE the impulse left behind -- demand [low, open] of the bullish engulfing candle, supply [open, high] of the bearish one -- rather than the candle's whole range. Both legs reported separately.",
+    "metrics": {
+      "netProfitPct": -1.59392708,
+      "profitFactor": 0.0,
+      "maxDrawdownPct": 4.08369692,
+      "totalTrades": 3,
+      "winRatePct": 0.0,
+      "avgTradePct": -0.53130903
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GRHZGJ33J3SKXCH49RYM9H",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GRHZGJY679F1V9P4P5NPZD",
+      "verifiedAt": "2026-09-02T09:52:43Z"
+    },
+    "notes": "THE GEOMETRY FIX WAS REAL BUT IT WAS NOT THE BINDING CONSTRAINT. Still 3 trades, though the composition changed (1 long 2 short, against v10's 2 long 1 short), which confirms the code genuinely behaves differently. THREE SUCCESSIVE STRUCTURAL FIXES HAVE NOW ALL LANDED ON ROUGHLY THREE TRADES -- v9 the latched model, v10 the deepest-zone rule, v11 the base geometry. When three independent corrections produce the same trade count, the limiting factor is upstream of all of them. STOP GUESSING AND MEASURE: v12 must be a DIAGNOSTIC that strips the entry to nothing but 'a zone is live and price is inside it', with no bias, no direction and no candle-colour condition, purely to count how many opportunities exist at all. Filtering a population before knowing its size is what produced these last three cycles."
   }
 ];
-const BUILT = "2026-09-02 03:50";
+const BUILT = "2026-09-02 03:53";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

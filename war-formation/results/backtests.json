@@ -557,5 +557,34 @@
       "verifiedAt": "2026-09-02T09:47:06Z"
     },
     "notes": "REVERTED, AND IT ANSWERS A STANDING QUESTION IN THE NEGATIVE. PF 1.69->1.10, trades 32->7. The champion's edge concentration -- PF 3.80 from Dec to Feb against 0.89 from Feb to May -- is NOT a volatility regime. The filter kept only 7 of 32 trades and the survivors were worse, so high volatility does not select the good period. WHAT WORKED IN THE BTC LAB DOES NOT TRANSFER HERE, and that is worth recording so a later cycle does not assume it should: the BTC signal is a VWAP mean-reversion that needs travel distance to reach a fixed 2R target, while this one is a multi-timeframe momentum cascade whose edge evidently depends on something else. Whatever makes December to February good remains unexplained."
+  },
+  {
+    "id": "war-formation-e19-greenbull3",
+    "name": "WF E19 sensitivity, greenBull 3",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "description": "Parameter sensitivity on the champion: the 6h bull regime needs only 3 green HA 1h candles in the prior block instead of 4. Run as a robustness check on a 32-trade champion, not as an improvement attempt. Long-only.",
+    "metrics": {
+      "netProfitPct": 4.612701,
+      "profitFactor": 1.2818535,
+      "maxDrawdownPct": 4.78585454,
+      "totalTrades": 42,
+      "winRatePct": 47.61904762,
+      "avgTradePct": 0.10982621
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GRHCBXKZ7E0RDDD9M56PBW",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GRHCBX2GY7QQ7NK1N173VB",
+      "verifiedAt": "2026-09-02T09:52:23Z"
+    },
+    "notes": "THE CHAMPION IS NOT A KNIFE-EDGE FIT, WHICH IS THE POINT OF THE TEST. Loosening the regime by one candle degrades gracefully rather than collapsing: PF 1.686 -> 1.282, win rate 56.25% -> 47.62%, DD 3.10% -> 4.79%, trades 32 -> 42. It remains clearly profitable at the neighbouring parameter value, on a 31% larger sample. That is what a real edge looks like under perturbation -- a fitted artefact would have fallen below 1.0. The champion keeps greenBull = 4 because it is better on both ratchet terms, but confidence in the 32-trade result is materially higher than it was before this run. Sensitivity in the other direction (greenBull 5) is still owed."
   }
 ]
