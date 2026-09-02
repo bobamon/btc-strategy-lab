@@ -270,3 +270,18 @@ entirely on 2025-10-07.
 
 **Why a human never hits this:** a trader silently retires stale zones. The rule only fails when
 written down. See [[3m-zone-lifecycle]] and HARD LESSON 9.
+
+
+---
+
+## ⚠️ ANCHOR REPRODUCTION FAILED, 2026-09-02 (v31) — READ EVERY DEFINITION ABOVE AS UNVERIFIED PROSE
+Every rule on this page (engulf creates the zone, [low, open] geometry, most-recent replacement, body
+mitigation with the One Candle Rule, zone freshness) was re-coded in Pine exactly as described and
+saved to `pine/3m-elite-v30-zone-freshness.pine`. It did not reproduce v30's recorded numbers — 2,469
+trades and PF 0.639 against a recorded 811 trades and PF 0.897. See SYSTEM.md's v31 entry for the
+full comparison and the leading hypothesis (an unguarded re-entry storm after a stop-out).
+
+This does not mean the decoded definitions above are wrong — the reconstruction may simply be missing
+an implicit guard no transcript ever stated. But until a saved, reproducible build confirms otherwise,
+none of the trade counts or profit factors quoted in this file's zone-lifecycle sections should be
+treated as verified against real code.

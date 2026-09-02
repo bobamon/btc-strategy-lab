@@ -1243,7 +1243,56 @@ trustworthy, which is worth more than a thin positive.
 
 ---
 
-## ██ THE CLOUD FORK, MERGED 2026-09-02 — AND WHAT IT GOT RIGHT THAT THIS SIDE DID NOT
+## ⚠️ v31 — THE ANCHOR REBUILD, AND IT DID NOT REPRODUCE (2026-09-02)
+
+0-V30-ANCHOR ran as specified: every decoded rule from VOCABULARY.md was re-coded in Pine v6 exactly as
+measured across v9-v30 — engulf creates the zone (body containment, no gap, v19/v20), demand zone =
+[low, open] of the engulfing 4H candle (v10/v11), most-recent zone always replaces the incumbent (v23),
+mitigation on a completed 4H candle's BODY closing inside the zone with the One Candle Rule cap at 2
+(v13), long-only (v24), stop = zone bottom / target = 2R / time stop 96 15m-bars (v15, v25-27), zone
+freshness `dzAge <= 12` (v30's own change). Source saved to `pine/3m-elite-v30-zone-freshness.pine`
+in the same action that ran it, per HARD LESSON 21.
+
+| | v30 (recorded, no source) | **v31 (reconstruction, real source)** |
+|---|---|---|
+| Profit factor | 0.89710112 | **0.63917105** |
+| Max drawdown | 40.78978663% | **91.74760797%** |
+| Trades | 811 | **2,469** |
+| Win rate | 36.74475956% | 33.65735115% |
+
+**It did not reproduce.** Three times the trade count and a far worse result is not sampling noise —
+it is different code. Recorded as its own entry, `3m-elite-v30-anchor-repro-failed`, exactly as War
+Formation's E44 recorded E38's failed reproduction. **v30 is unreproducible** and every number from v9
+through v30 must now be read as **unverified prose, not verified code** — that includes v24's PF 0.894
+long-only result this lab has been calling its best honest number. None of v9-v30 have source on disk.
+
+**A hypothesis for the gap, NOT tested this cycle:** the reconstruction checks the entry conjunction on
+every 15m bar with no memory of a prior stop-out from the same zone. If a trade stops out while price
+is still sitting inside `[dzBot, dzTop]`, the very next bar re-arms the identical entry — a whipsaw
+re-entry storm within one zone visit that the mitigation counter (evaluated only at 4H boundaries)
+cannot see, because dzTouch only updates once per 4H candle while entries are checked every 15m bar.
+`avgBarsLosing` fell to 6.86, consistent with fast repeated stop-outs. This is plausible, matches the
+failure shape, and is exactly the sort of thing prose would never mention because a discretionary
+trader would never do it — but it is a hypothesis, not a measurement, and must not be treated as
+settled without a counter build (HARD LESSON 10) to confirm it.
+
+**Per HARD LESSON 8 (BTC lab) and the identical E44 precedent: the reconstruction's real, on-disk
+numbers become the working baseline, because nothing else in this branch has source.** v31 —
+PF 0.639, DD 91.7%, 2,469 trades, long-only — is therefore what the next cycle must build from, not
+v30. It is not viable as it stands.
+
+## Open queue — REBUILT AFTER THE ANCHOR FAILURE
+0-V31-DIAGNOSE. **Counter-build the re-entry-storm hypothesis before touching anything else.** Isolate
+    whether trades are stacking multiple entries into the same zone within a short window (e.g. count
+    entries per distinct zone-creation event; or add a `var bool zoneConsumed` flag set on a stop-out
+    and cleared only on the next zone creation, and read the trade-count delta). If the count collapses
+    toward 811, the hypothesis is confirmed and the guard becomes part of the anchor. If it does not,
+    the gap is elsewhere and must not be patched by further guessing (this is a reconstruction-fidelity
+    question, not a tuning one — do not chase v30's specific numbers).
+0-V32. Only after v31-diagnose settles: re-anchor the base and resume the freshness-neighbourhood and
+    remaining-signal-terms work that was queued before the STOP, now measured against real, saved code
+    instead of prose.
+
 
 For most of this project two lineages ran in parallel without either knowing it. The local session
 worked from this disk; three CLOUD routines cloned the GitHub repo hourly, ran their own cycles, and
