@@ -236,3 +236,20 @@ this API's actual output. Three runs were designed around it before the gap was 
 entry condition and force a one-bar exit, so `totalTrades` becomes the gate's hit count and
 `longTrades`/`shortTrades` split it by side. It costs a credit but returns a real number. Use it
 whenever a gate's frequency is in question, and never trust a plot to answer it.
+
+
+### HARD LESSON 8 — GENERALISED, 2026-09-02 (3M Elite v17)
+The original lesson was that a setup and its trigger must be latched in sequence, never required on
+the same bar. **A third zero-trade run showed the rule is narrower than the failure mode it describes.**
+
+In 3M Elite v16 and v17 the sequencing was correct — the setup latched and the trigger came later —
+and the build still made zero trades across 4.7 years. The cause was that **the same price action that
+ARMED the setup also started the clock on its DEATH**: entering a zone armed it, and closing inside
+that zone mitigated it, with mitigation evaluated first at every higher-timeframe boundary.
+
+**The generalised rule: whenever a latch is introduced, ask what ELSE the arming event triggers.**
+A latch is only useful if the state it creates can outlive the event that created it. Check the
+invalidation path with the same care as the trigger path.
+
+**And use the counter build to check it** — gate as entry, one-bar exit, `totalTrades` is the hit
+count — because this engine returns no plot values.

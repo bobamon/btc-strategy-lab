@@ -986,9 +986,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T10:49:42Z"
     },
     "notes": "THE LOOSER VARIANT DOES NOT RESCUE THE WEAK HALF. PF 0.8745 on 25 trades against the champion's own second half at 0.8930 on 15 -- statistically indistinguishable, and both just under break-even. Loosening the velocity threshold buys 67% more trades in this window and none of them are better. THE WEAKNESS IS IN THE SIGNAL, NOT THE THRESHOLD, so no amount of permissiveness recovers it. This closes the sensitivity line of enquiry: the champion is robust to parameter perturbation on the full sample (E19, E22, E23) but that robustness does not extend to the weak period, where every variant lands near 0.88. Champion unchanged."
+  },
+  {
+    "id": "war-formation-e25-short-1r",
+    "name": "WF E25 short with a 1R target",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "short",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "description": "A rejection-at-resistance short gated by the 3m cycle position, with a 1R target instead of 2R. Intended as a single-variable change from E13, motivated by the BTC short leg whose winners ground for 254 bars while losers died in 32. Short-only, judged alone.",
+    "metrics": {
+      "netProfitPct": -3.12297403,
+      "profitFactor": 0.48941743,
+      "maxDrawdownPct": 3.922729,
+      "totalTrades": 24,
+      "winRatePct": 20.83333333,
+      "avgTradePct": -0.13012392
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GW8GZXX9X1X2QRZJR7NCFE",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GW8GZXNDHCXCAED1G87A17",
+      "verifiedAt": "2026-09-02T10:57:27Z"
+    },
+    "notes": "THE COMPARISON IS CONFOUNDED AND THE FAULT IS MINE. This was described as a one-variable change from E13 (target 2R -> 1R), but E13 made 39 trades and this made 24. AN EXIT CHANGE CANNOT MOVE THE ENTRY COUNT BY THAT MUCH, so the entry logic differs -- I rebuilt E13's entry from its written description instead of pulling its exact Pine source with get_strategy. The rr hypothesis is therefore UNTESTED, and PF 0.4894 stands only as its own data point. THE SAME ERROR WAS CAUGHT AND AVOIDED EARLIER THIS SESSION on the BTC 007 base, where the exact source was recovered rather than reconstructed from prose; the tool existed and was not used here. Standing rule for this lab from now on: when a run claims to be a single-variable change from an earlier experiment, recover that experiment's SOURCE, never its description. Champion unchanged."
   }
 ];
-const BUILT = "2026-09-02 04:51";
+const BUILT = "2026-09-02 04:58";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

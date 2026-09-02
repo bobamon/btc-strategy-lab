@@ -299,6 +299,7 @@ so the code genuinely behaves differently. **But the count stayed at 3.**
 | v14 | Repaired lifecycle, NO filters, REAL fixed exits -- does the zone population have an edge? | **PF 0.29, win rate 4.17%, 24 trades** (5 long 0W, 19 short 1W). The TAKE PROFIT IS UNREACHABLE -- no trade ever hit it · [report](https://mcp-api.trader.dev/backtest/01M1GVG1713A1BXSDAF6551N29) |
 | v15 | Unreachable ATR target replaced with a fixed 2R, still no filters | **PF 0.363, win rate 8.33%, 24 trades** (5 long 1W, 19 short 1W). Target fix confirmed; entries are worse than chance · [report](https://mcp-api.trader.dev/backtest/01M1GVV0F20WJY72GZSQWM2VJX) |
 | v16 | Type 2 validation restored, latched setup + later trigger | **0 TRADES.** Sequencing was correct; the four-way conjunction at firing is what kills it · [report](https://mcp-api.trader.dev/backtest/01M1GW1PWQ2YY4ZX0AFCMBCCYM) |
+| v17 | Counter build for the validation gate, 2D bias DROPPED | **0 TRADES.** The bias was not the binding term -- arming and mitigation race, and mitigation wins · [report](https://mcp-api.trader.dev/backtest/01M1GW9BZV25S3MC76DK784RBE) |
 
 **When three independent corrections land on the same trade count, the binding constraint is upstream
 of all of them.** I have now spent three cycles fixing things that were genuinely wrong and none of
@@ -440,6 +441,32 @@ not a backtest" — which is the provenance gate working exactly as intended.
 logic.** If the count is near zero, the 2D bias is the binding term and should be dropped or widened;
 if it is healthy, the fault is in the entry plumbing.
 
+## v17 — THE COUNTER BUILD WORKED, AND IT FOUND A STRUCTURAL CONFLICT
+Dropping the 2D bias changed nothing: still zero. **So the bias was never the binding term**, and the
+counter technique earned its credit by ruling that out cleanly instead of leaving it to guesswork.
+
+**The real conflict: ARMING AND MITIGATION ARE DRIVEN BY THE SAME PRICE ACTION.**
+
+- A zone **arms** when price enters it.
+- A zone is **mitigated** when a 4H candle CLOSES inside it — and the One Candle Rule kills it on the
+  second such close.
+- The mitigation check runs at each 4H boundary **before** the fire check.
+
+So the very act of entering a zone begins killing it, and the zone dies within two 4H candles of
+arming — before any later engulfing candle can fire the entry. The two states can essentially never
+coexist.
+
+**This is HARD LESSON 8 in a new disguise.** Not setup-and-trigger required on the same bar, but a
+**setup and a death condition driven by the same event.** The lesson should be generalised: whenever a
+latch is introduced, check what ELSE that same price action triggers.
+
+**v18: the arming candle must not count toward mitigation.** The candle that first brings price into
+the zone is the setup, not a mitigation of it; only closes inside on SUBSEQUENT candles should count.
+That is also closer to the source, which treats mitigation as what happens when price comes back
+*again*, not when it first arrives.
+
+**Not on the dashboard** — a zero-trade run is not a backtest, and `build_dashboard.py` refuses it.
+
 ## Open queue
 0. ~~Get definitions for Type 1/Type 2~~ — **DONE 2026-09-02, see VOCABULARY.md.**
    Type 1 = a 3M candle; Type 2 = an engulfing candle in the direction of bias; both only on the
@@ -456,7 +483,10 @@ if it is healthy, the fault is in the entry plumbing.
 0-V14. ~~UNFILTERED EDGE TEST~~ — **RUN, BUT INCONCLUSIVE: the take profit is unreachable. See the v14 lesson.**
 0-V15. ~~FIX THE TAKE PROFIT~~ — **DONE. Confirmed broken and fixed; entries are worse than chance without validation.**
 0-V16. ~~RESTORE THE TYPE 2 VALIDATION~~ — **0 trades. Sequencing correct; the firing conjunction is too narrow.**
-0-V17-NEXT. **COUNTER-BUILD THE VALIDATION GATE (top priority).** Entry = armed zone AND engulf, with
+0-V17. ~~COUNTER-BUILD THE VALIDATION GATE~~ — **DONE. Bias exonerated; arming and mitigation conflict.**
+0-V18-NEXT. **THE ARMING CANDLE MUST NOT COUNT TOWARD MITIGATION (top priority).** Only closes inside
+    the zone on candles AFTER the one that first brought price into it should increment the touch
+    counter. Re-run the v17 counter to confirm the gate can now fire. Superseded text: Entry = armed zone AND engulf, with
     a one-bar exit, so totalTrades is the hit count. Then relax the narrowest term. Do NOT rely on
     plot() -- this engine does not return plot values. Superseded text: An engulfing candle in the direction of
     bias, occurring INSIDE a live zone, latched in sequence with the zone tap. With the 2R target and

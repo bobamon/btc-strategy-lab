@@ -65,6 +65,7 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E22 | SENSITIVITY: coilK 0.85 -> 0.95 | **Degrades gracefully.** PF 1.686->1.300, win 56.25%->48.78%, trades 32->41, DD 3.10%->4.72%. Second parameter, second graceful result · [report](https://mcp-api.trader.dev/backtest/01M1GVATYA8Z4TR2VB58V9XHTT) |
 | E23 | SENSITIVITY: velK 0.8 -> 0.6 | **Degrades gracefully, best of the three.** PF 1.686->1.458, win 56.25%->50.00%, trades 32->46, Sharpe 2.07 · [report](https://mcp-api.trader.dev/backtest/01M1GVMZZQ8JPNCPD7XV07WNYC) |
 | E24 | velK 0.6 variant measured on the WEAK half only | **No rescue.** PF 0.8745 on 25 trades against the champion's own 0.8930 on 15. Loosening buys trades, not edge · [report](https://mcp-api.trader.dev/backtest/01M1GVTAJEFTNTP0EHED3XMF1N) |
+| E25 | Rejection short + cycle gate, target 1R instead of 2R | **PF 0.489, 24 trades. COMPARISON CONFOUNDED** -- E13 made 39 trades, so the entry differs; E13 was rebuilt from prose, not source · [report](https://mcp-api.trader.dev/backtest/01M1GW8GZXNDHCXCAED1G87A17) |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -427,5 +428,26 @@ better. The weakness is in the signal, not the threshold.
 The sensitivity line of enquiry is now closed. What remains genuinely unexplored is the **short leg**,
 built from its own geometry with the E13 cycle-position gate — the only route to a return stream that
 does not depend on this decaying long signal.
+
+**Champion unchanged: v6, long-only, PF 1.68623784, DD 3.10289714%, 32 trades.**
+
+
+## E25 — A CONFOUNDED TEST, AND A RULE THAT SHOULD HAVE PREVENTED IT
+The run was designed as a single-variable change from E13: target 2R to 1R, everything else identical.
+**It was not.** E13 made 39 trades; this made 24. An exit change cannot move the entry count by 38%,
+so the entry logic differs — **E13 was rebuilt from its written description rather than from its Pine
+source.**
+
+**The rr hypothesis is therefore untested.** PF 0.4894 is a real number for what was actually run, and
+nothing more. It says nothing about whether a fade wants a nearer target.
+
+**This exact error was caught and avoided earlier the same session.** When the BTC lab needed its 007
+base for a single-variable attack, the exact Pine was recovered with `get_strategy` precisely because
+reconstructing from prose risked a two-variable change. The tool existed, the precedent existed, and
+it was not applied here.
+
+**STANDING RULE, both labs:** when a run claims to be a single-variable change from an earlier
+experiment, recover that experiment's **SOURCE**, never its description. A trade-count mismatch
+between the two is the tell that the claim is false — check it before interpreting anything.
 
 **Champion unchanged: v6, long-only, PF 1.68623784, DD 3.10289714%, 32 trades.**
