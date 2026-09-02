@@ -370,9 +370,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T09:33:10Z"
     },
     "notes": "THE MEASUREMENT ANSWERED, AND THE ANSWER WAS NOT WHAT I EXPECTED. Removing four gates left the trade count at exactly 10, unchanged from v6 (still 5 long, 5 short). My additions were NOT binding. The frequency ceiling comes from the SOURCE-derived conjunction itself -- 2D bias, 12H zone and 4H structure all having to rise together while a tap and a validation are both live. PF fell 1.77->1.32 on the same tiny sample, which is noise either way and is not a reason to keep the invented gates. The next question is therefore a specification question, not a tuning one: requiring bias, zone AND structure to agree may be my reading of 'direction' rather than his, and the latched tap plus validation may already encode the location those three were meant to establish."
+  },
+  {
+    "id": "3m-elite-v9-engulf-zones",
+    "name": "3M ELITE v9 engulfing-created zones",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "First build on the corrected model. An engulfing 4H candle CREATES a zone spanning it plus the following candle; the zone stays unmitigated until a second 4H candle enters it (the One Candle Rule); entry is the first return into a live zone with the 2D bias agreeing. Replaces the inverted model in v1-v7. Both legs from the author's symmetric definition, reported separately.",
+    "metrics": {
+      "netProfitPct": -0.8532197,
+      "profitFactor": 0.64013804,
+      "maxDrawdownPct": 3.77563845,
+      "totalTrades": 3,
+      "winRatePct": 33.33333333,
+      "avgTradePct": -0.28440657
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GR0M5GGW20S32R08B04A4S",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GR0M5GXEY4BAP7P9R13SZS",
+      "verifiedAt": "2026-09-02T09:43:14Z"
+    },
+    "notes": "THE MODEL IS RIGHT; THE SINGLE-SLOT APPROXIMATION IS WRONG, AND I FLAGGED IT BEFORE RUNNING. 3 trades (2 long, 1 short), down from v6's 10. The cause is precisely the deviation declared in the source comment: Pine forbids arrays, so only ONE zone per side is tracked and every new engulfing candle overwrites the previous zone. In a trending market engulfing candles arrive every few 4H bars, so a zone is almost never still alive when price returns to it. The source says to trade the DEEPEST UNMITIGATED zone, which presupposes several being tracked at once. Fix in v10 is one line and follows the source directly: replace the tracked zone only when the new one is DEEPER (lower bottom for demand, higher top for supply), or when the current one is dead. Do not read PF 0.64 on 3 trades as information about the model."
   }
 ];
-const BUILT = "2026-09-02 03:34";
+const BUILT = "2026-09-02 03:44";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

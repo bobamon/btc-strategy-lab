@@ -237,6 +237,7 @@ This explains the entire failure history of this lab in one stroke:
 | v2, v4 | 0 | engulf and 12H tap required on the same bar -- two unrelated events |
 | v5 | 2 | tap latched, but engulf still had to coincide with everything else |
 | v6, v7 | 10 | both latched, but the zone was still the wrong object entirely |
+| v9 | THE CORRECTED MODEL: engulfing 4H candle CREATES the zone; One Candle Rule mitigation | **3 trades** (2 long, 1 short). Model right, single-slot approximation wrong · [report](https://mcp-api.trader.dev/backtest/01M1GR0M5GXEY4BAP7P9R13SZS) |
 
 **The scarcity was never the system. It was my definition of a zone.** A zone defined as the previous
 12H candle's extreme is one level per 12 hours that price rarely revisits under all the other
@@ -246,6 +247,21 @@ population of levels, each with a mitigated/unmitigated state.
 **No backtest this cycle** -- v7's queue entry explicitly said not to spend a credit until this was
 settled, and the right move now is to rebuild on the corrected model rather than tune the wrong one.
 
+## v9 — THE MODEL IS RIGHT, THE SLOT LIMIT IS WRONG (and it was flagged before running)
+3 trades, down from v6's 10. The cause is exactly the deviation declared in the Pine header: arrays
+are forbidden, so **one zone per side is tracked and every new engulfing candle overwrites the
+previous one.** In a trending market engulfing candles arrive every few 4H bars, so a zone is almost
+never still alive when price finally returns to it.
+
+The source presupposes several zones being tracked at once -- that is what **"deepest unmitigated
+zone"** means. Tracking the most RECENT zone is the opposite of tracking the deepest.
+
+**v10 is a one-line fix that follows the source directly:** replace the tracked zone only when the new
+one is DEEPER -- a lower bottom for demand, a higher top for supply -- or when the current one is
+already dead. That keeps a zone alive across the many shallower engulfs that currently destroy it.
+
+Do not read PF 0.64 on 3 trades as information about the model. It is information about the slot.
+
 ## Open queue
 0. ~~Get definitions for Type 1/Type 2~~ — **DONE 2026-09-02, see VOCABULARY.md.**
    Type 1 = a 3M candle; Type 2 = an engulfing candle in the direction of bias; both only on the
@@ -254,7 +270,11 @@ settled, and the right move now is to rebuild on the corrected model rather than
 0-V6. ~~LATCH THE VALIDATION TOO~~ — **DONE. PF 1.77 on 10 trades. Mechanism correct, sample far too small.**
 0-V7. ~~MEASURE WHICH GATE IS BINDING~~ — **DONE. My gates were NOT binding; the source conjunction is.**
 0-V8. ~~SETTLE THE SPECIFICATION~~ — **DONE 2026-09-02. The engulfing candle CREATES the zone.**
-0-V9-NEXT. **REBUILD ON THE CORRECTED MODEL (top priority, supersedes everything below).**
+0-V9. ~~REBUILD ON THE CORRECTED MODEL~~ — **DONE. Model correct, 3 trades, single-slot is the limit.**
+0-V10-NEXT. **KEEP THE DEEPEST ZONE, NOT THE MOST RECENT (top priority).** One-line change: a new
+    engulf replaces the tracked zone only if it is deeper (lower bottom for demand, higher top for
+    supply) or the tracked zone is dead. This is what "deepest unmitigated zone" means and it should
+    restore frequency without adding anything the source does not contain. Superseded v9 text:
     (a) Detect engulfing candles on the structure timeframe; each one creates a zone spanning that
         candle plus one extra candle. Non-engulfing candles create nothing.
     (b) Track each zone as unmitigated until mitigated, applying the ONE CANDLE RULE: the first

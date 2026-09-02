@@ -499,5 +499,34 @@
       "verifiedAt": "2026-09-02T09:36:21Z"
     },
     "notes": "REVERTED, AND THE AUTHOR PREDICTED IT. PF 1.69->0.52, win rate 56.3%->34.6%, trades 32->26. Requiring the singularity removed six trades and the survivors were much worse, the same anti-selective signature as E14. What makes this one satisfying is that he says so himself: 'if you got it on the one, you got double clarity, BUT DON'T WAIT FOR THAT.' The data agrees with his caveat rather than with his enthusiasm. Waiting for the bonus costs more than the bonus is worth. Queue item 5 closed; the Oracle implementation queue is now fully worked."
+  },
+  {
+    "id": "war-formation-e17-rfloor-compliant",
+    "name": "WF E17 champion with a LESSON 3 compliant R floor",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "passed",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "The v6 long-only champion with the minimum risk input raised from 0.15% to 0.80% of price, bringing it into compliance with HARD LESSON 3. Exactly one input changed. Long-only.",
+    "metrics": {
+      "netProfitPct": 7.8388076,
+      "profitFactor": 1.68623784,
+      "maxDrawdownPct": 3.10289714,
+      "totalTrades": 32,
+      "winRatePct": 56.25,
+      "avgTradePct": 0.24496274
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GQYHZ9MNEZ1CGM4RZ43RMC",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GQYHZ94F1QPS3HFR8641NB",
+      "verifiedAt": "2026-09-02T09:42:06Z"
+    },
+    "notes": "IDENTICAL TO THE CHAMPION TO NINE SIGNIFICANT FIGURES -- PF 1.68623784, net +7.8388076%, DD 3.10289714%, 32 trades, 56.25% win rate. Raising the floor from 0.15% to 0.80% changed NOTHING, which means the floor never bound: the structural stop distance to the 15m low plus buffer is always at least 0.80% of price on this timeframe. THE CHAMPION WAS ALREADY LESSON 3 COMPLIANT IN BEHAVIOUR. Every pre-run audit that flagged this as a deviation was true of the INPUT and false of the strategy. The 0.80% value is adopted as the documented config because it now states the true risk floor, at zero cost to results. Correcting the audit habit: check whether a constraint BINDS before reporting it as a deviation."
   }
 ]

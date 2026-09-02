@@ -7,6 +7,8 @@ experiment; take the next open question, run it, record the real result, move it
 
 ## Current champion
 **v6 — HA cascade, LONG ONLY.** BTCUSDT 1m, 2025-12-16 → 2026-05-03.
+*(Config updated 2026-09-02 after E17: `minRpct` is now 0.80%, not 0.15%. Behaviour is unchanged to
+nine significant figures — the floor never bound — but the code now states its true risk floor.)*
 `+7.8% · PF 1.69 · win rate 56.3% · Sharpe 2.19 · max DD 3.10% · 32 trades` — status **testing**.
 
 Pine: `war-formation/pine/war-formation-ha.pine` (long-only variant; short leg removed).
@@ -54,6 +56,7 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E14 | Queue item 3: counter-move weakening trigger on the v6 long champion (>=2 red HA 3m candles with decreasing range, latched 5 candles) | **REVERTED.** PF 1.69->0.73, win 56.3%->45.0%, trades 32->20, DD 3.10%->1.36%. The gate removed disproportionately GOOD trades -- redundant with the 3m coil, which already measures a move losing force. [report](https://mcp-api.trader.dev/backtest/01M1GPMTPZ146ZY2KJVDVKQF8G) |
 | E15 | Queue item 4: Oracle COLOUR-FLIP exit replacing the fixed 2R TP (stop still fixed) | **REVERTED.** PF 1.69->0.31, win 56.3%->20.0%, trades 32->35, hold 12.8 bars. Exits on the first red 3m HA candle, which inside an uptrend is noise. [report](https://mcp-api.trader.dev/backtest/01M1GQ6PQPVP1T3JNZ74JWZYT7) |
 | E16 | Queue item 5: require the SINGULARITY (last completed 1h HA candle green too) | **REVERTED.** PF 1.69->0.52, win 56.3%->34.6%, trades 32->26. He said don't wait for it, and he was right · [report](https://mcp-api.trader.dev/backtest/01M1GQM0TYEWM41J1DPAYB0HT2) |
+| E17 | Raise the R floor 0.15% -> 0.80% (HARD LESSON 3 compliance) | **IDENTICAL RESULTS.** PF 1.68623784, DD 3.10289714%, 32 trades, 56.25% -- the floor never bound. 0.80% adopted as the documented config · [report](https://mcp-api.trader.dev/backtest/01M1GQYHZ94F1QPS3HFR8641NB) |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -210,3 +213,20 @@ was the valuable part. **That is the durable lesson for mining any trader's mate
 **Champion is unchanged and now stands on a fully explored queue: v6, long-only, PF 1.69, DD 3.10%,
 32 trades.** The binding constraint remains sample size — 1m coverage is still only 2025-12-16 to
 2026-05-03. Future cycles need a new source of questions, not more items from this list.
+
+
+## E17 LESSON — CHECK WHETHER A CONSTRAINT *BINDS* BEFORE CALLING IT A DEVIATION
+Every pre-run audit in this lab carried the same warning: the champion runs a 0.15% risk floor
+against HARD LESSON 3's 0.8%. Raising it produced results **identical to nine significant figures** —
+PF 1.68623784, net +7.8388076%, DD 3.10289714%, 32 trades, 56.25% win rate.
+
+**The floor never bound.** The structural stop — the distance to the current 15m low plus a 0.25×ATR30
+buffer — is always at least 0.80% of price on this timeframe. The champion was Lesson 3 compliant in
+behaviour the whole time; only the *input* looked non-compliant.
+
+Two things follow, and the second matters more than the first:
+1. The 0.80% value is adopted as the documented config. Zero cost, and the code now states its real
+   risk floor instead of a number that never applied.
+2. **The audit habit needed fixing.** Reporting a parameter as a deviation without checking whether
+   it ever engages is reporting on the source code rather than on the strategy. Cheap to check —
+   plot the raw versus applied value — and it would have retired this warning several cycles ago.
