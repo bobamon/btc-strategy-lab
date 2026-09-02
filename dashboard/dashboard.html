@@ -1043,9 +1043,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T11:09:25Z"
     },
     "notes": "THE MIRROR BEATS THE OWN-GEOMETRY SHORT DECISIVELY, WHICH CORRECTS A RULE THIS LAB HAD BEEN APPLYING. PF 0.7413 on 273 trades against the fade construction's 0.5506 on 17 -- better profit factor AND sixteen times the sample. The no-mirror doctrine steered this lab toward a 17-trade fade when a 273-trade symmetric leg was available and better. STILL NOT VIABLE at PF 0.74, and the drawdown is severe at 34.4%. The trade profile is also unlike the long's: 17.58% win rate with a 3.47 payoff ratio, so the short takes many small losses and a few large wins, where the long runs 38-41% at a 1.5 payoff. That asymmetry is real information -- the same mechanism does not produce the same trade shape on each side, which is worth knowing before any attempt to run them together. Recorded as testing because it is the best short on record and the basis for the bidirectional build, not because it is usable."
+  },
+  {
+    "id": "vwm-bidirectional",
+    "name": "VWM bidirectional, regime picks the side",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "One strategy, the regime picks the side. Long when VWAP is rising and price is above the 600 EMA, short when both are inverted, same pullback-continuation mechanics either way, with the VWAP-cross flip rule standing the strategy down for 60 bars in both directions. Both legs reported separately.",
+    "metrics": {
+      "netProfitPct": -20.41553382,
+      "profitFactor": 0.88794387,
+      "maxDrawdownPct": 37.33436256,
+      "totalTrades": 422,
+      "winRatePct": 24.64454976,
+      "avgTradePct": -0.04837804
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GXAMEBQ2M980P37Q209JJZ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GXAMEADVBY5AM88ZMWF22Q",
+      "verifiedAt": "2026-09-02T11:16:05Z"
+    },
+    "notes": "THE STRUCTURE IS RIGHT AND THE SHORT LEG BLEEDS. Combined PF 0.8879 with a 37.3% drawdown, against 1.0202 for the long alone. Longs 128 trades, 53 wins, +$374.27. Shorts 294 trades, 51 wins, -$2,415.82. THE LONG COUNT IS UNCHANGED AT 128, so the two legs barely block one another under pyramiding 1 -- the interaction question this run was built to answer is settled, and the answer is that there is almost no interaction. The short is simply a large net drag. This build satisfies the standing both-directions requirement structurally but fails it substantively: a strategy is not bidirectional in any useful sense when one side loses 2.4x the account's starting equity in gross terms. Adding a losing leg to a break-even leg produces a worse system, not a more complete one."
   }
 ];
-const BUILT = "2026-09-02 05:09";
+const BUILT = "2026-09-02 05:17";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

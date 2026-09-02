@@ -579,3 +579,35 @@ count first with a counter build before interpreting any profit factor.
 
 **This build is now the base for bidirectional work** even though it does not beat the champion,
 because the champion cannot satisfy the standing both-directions requirement and this can.
+
+
+# ██ THE BOTH-DIRECTIONS REQUIREMENT: STRUCTURE BUILT, SUBSTANCE MISSING (2026-09-02)
+
+Both labs now have a bidirectional build. **Both are worse than their long-only versions, and for the
+same reason: the short leg has no edge in either.**
+
+| Lab | Long leg | Short leg | Combined | vs long-only |
+|---|---|---|---|---|
+| BTC 5m | 128 trades, +$374 | **294 trades, −$2,416** | PF 0.888, DD 37.3% | worse than 1.020 |
+| War Formation 1m | 32 trades, +$786 | **10 trades, 1 win, −$329** | PF 1.303, DD 5.02% | worse than 1.686 |
+
+**What has been established, and it is not nothing:**
+- The structure works. A single strategy that reads the regime and takes either side is built, running
+  and measured in both labs, with a mechanical flip rule on each.
+- The legs barely interact. BTC's long count is identical (128) whether the short is present or not,
+  so `pyramiding=1` blocking is not the problem.
+- **Raising short frequency does not help.** War Formation's shorts went 6 → 10 and the loss grew five
+  times while wins stayed at one. Sampling a negative expectancy more often just costs more.
+
+**What is NOT established: any short leg with an edge.** Across two labs and eight distinct short
+constructions — mirrored, own-geometry fade, near-touch rejection, sweep-and-reject, with and without
+a cycle-position gate, at 1R, 1.5R and 2R targets — **not one has reached a profit factor of 1.0.**
+The best is E13's 0.749.
+
+**The honest position on the requirement:** the labs can produce a bidirectional *structure* on demand.
+Neither can yet produce a bidirectional *edge*, because no short leg works. Adding a losing leg to a
+break-even leg makes the system worse, not more complete — so shipping a bidirectional build now would
+be worse than shipping nothing.
+
+**The right next work is on the short side alone**, judged on its own profit factor, until one clears
+1.0. Everything else is premature.
