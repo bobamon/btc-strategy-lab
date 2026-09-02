@@ -655,3 +655,35 @@ interpreting after it.**
 3. **Separate what is damaged from what survives.** E34 destroyed the claim that v6 has an edge; it
    did NOT destroy E32's finding that the coil is load-bearing, which holds at every threshold. Being
    precise about the boundary is what keeps a negative result useful.
+
+
+---
+
+## ██ HARD LESSON 18 — A TERM CAN LOOK INERT BECAUSE A REDUNDANT PARTNER IS COVERING FOR IT
+
+**Earned:** BTC Attacks 13, 19 and 20, 2026-09-02.
+
+| Removed from the base | Trades admitted | PF cost |
+|---|---|---|
+| `trendOk` alone (Attack 13) | +6 | −0.009 |
+| `vwUp` alone (Attack 19) | +10 | −0.027 |
+| **both together (Attack 20)** | **+42** | **−0.108** |
+
+Two separate tests each concluded a term "barely binds". Removing both showed the requirement they
+share is worth **0.108 of profit factor** — four times what either measured alone.
+
+**Why:** when two terms encode the same information through different instruments, removing one
+leaves the other to exclude nearly everything the first would have. The measured effect of each is
+then not the term's contribution but the *residual* not already covered by its partner.
+
+**How to apply:**
+- **HARD LESSON 12 needs this qualifier.** A low removal count means one of two things — the term
+  does nothing, **or** something else is already doing it. The count cannot distinguish them.
+- **Before concluding a term is inert, ask what else in the conjunction encodes the same idea.** Two
+  trend measures, two volatility measures, two location measures. If a candidate partner exists, the
+  "inert" reading is provisional until they are removed together.
+- **Removing a redundant SET is one change, not several.** The attributable question is about the
+  requirement, not the individual terms, and testing them separately is what produced the two wrong
+  verdicts in the first place.
+- **The reverse also holds:** a term that looks load-bearing may only be so because it is standing in
+  for a partner that was deleted earlier. Re-check surviving terms after any removal.

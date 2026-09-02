@@ -1033,3 +1033,46 @@ meaningful trend requirement and two of its seven terms are decoration.
 change rather than a violation of the one-thing rule — they are one requirement expressed twice.
 
 **Base unchanged: PF 1.15252596, DD 16.54214281%, 166 trades, long-only. No champion.**
+
+
+## ██ ATTACK 20 — THE TREND REQUIREMENT IS REAL, AND TWO EARLIER VERDICTS WERE ARTIFACTS (2026-09-02)
+
+Both trend terms removed together, because Attack 19 showed they are one requirement expressed twice
+and shared information is not attributable to either alone.
+
+| | Base (Attack 15) | Neither trend term |
+|---|---|---|
+| Profit factor | **1.15252596** | 1.04432441 |
+| Max drawdown | 16.54214281% | **15.91706953%** |
+| Trades | 166 | **208** |
+| Win rate | 44.58% | 41.83% |
+
+**REVERTED** — the ratchet needs profit factor to improve and it fell 0.108. Drawdown improved
+0.63pp, which is not enough alone.
+
+### THE ARITHMETIC IS THE FINDING
+| Removed | Trades admitted | PF cost |
+|---|---|---|
+| `vwUp` alone (Attack 19) | +10 | −0.027 |
+| **both together (Attack 20)** | **+42** | **−0.108** |
+
+**The pair excludes four times as many trades together as `vwUp` does alone, and costs four times as
+much profit factor.** That is the quantitative signature of shared information: each term looks small
+because the other is covering for it, and the true size of the requirement only appears when both go.
+
+### TWO CORRECTIONS TO THE BOARD
+1. **Attack 13's "inert" verdict on `trendOk` must be re-scoped.** It measured *trendOk given vwUp*,
+   not the trend requirement. The term is not inert; it is redundant with a term that was doing the
+   same job.
+2. **The suspicion that the base carried decoration here was wrong.** Neither trend term is free to
+   delete. The trend requirement carries roughly 0.11 of profit factor, and the base needs it.
+
+### AND A SHARPENING OF HARD LESSON 12
+The lesson said a half-sample verdict travels only as far as the gate fails to bind, and that the
+**trade count** tells you how far. Attack 20 adds the failure mode that count alone misses:
+**a gate can appear not to bind because a REDUNDANT PARTNER is binding in its place.** A low removal
+count is therefore ambiguous — it means either the term does nothing, or something else is already
+doing it. Distinguishing them requires removing the candidate partners together, and until that is
+done a "does not bind" reading is provisional.
+
+**Base unchanged: PF 1.15252596, DD 16.54214281%, 166 trades, long-only. No champion.**

@@ -1478,9 +1478,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T20:41:18Z"
     },
     "notes": "THE REDUNDANCY HYPOTHESIS IS CONFIRMED. Base PF 1.15252596 / DD 16.54214281% / 166 trades; without vwUp PF 1.12540646 / DD 15.17443126% / 176 trades. REVERTED -- the ratchet requires profit factor to IMPROVE and it fell 0.027, even though drawdown improved 1.37pp. THE TRADE COUNT IS THE FINDING: removing vwUp admits only TEN extra trades out of 176. A 150-bar VWAP slope requirement that excludes 10 candidates is barely binding, and it explains Attack 13 exactly -- trendOk was found nearly inert (6 trades of 134) because vwUp had already excluded almost everything it would have. The base carries a DUPLICATED trend requirement: two instruments, one piece of information, each looking inert because the other is doing the work. Neither can be judged alone; the open question is whether the trend requirement is load-bearing AT ALL, which needs both removed together."
+  },
+  {
+    "id": "vwm-attack20-no-trend-at-all",
+    "name": "VWM Attack20 no trend requirement at all",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "Both trend terms removed together -- vwUp (150-bar VWAP slope) and trendOk (600-bar EMA). One coherent change, because Attack 19 showed they are one requirement expressed twice and information shared between two terms is not attributable to either alone. Both still computed so the deviation stays visible.",
+    "metrics": {
+      "netProfitPct": 5.95494103,
+      "profitFactor": 1.04432441,
+      "maxDrawdownPct": 15.91706953,
+      "totalTrades": 208,
+      "winRatePct": 41.82692308,
+      "avgTradePct": 0.02862952
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1HY8M40KX570QCN14SRP317",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HY8M40Q905BXD576FC7NTQ",
+      "verifiedAt": "2026-09-02T20:51:42Z"
+    },
+    "notes": "THE TREND REQUIREMENT IS LOAD-BEARING, AND BOTH EARLIER 'INERT' VERDICTS WERE ARTIFACTS. Base PF 1.15252596 / DD 16.54214281% / 166 trades; without either trend term PF 1.04432441 / DD 15.91706953% / 208 trades. REVERTED -- the ratchet needs PF to improve and it fell 0.108, though drawdown did improve 0.63pp. THE ARITHMETIC IS THE FINDING: removing vwUp alone admitted 10 trades and cost 0.027 of PF; removing BOTH admits 42 trades and costs 0.108. The pair excludes far more together than either does alone, which is the quantitative signature of shared information. So the trend requirement genuinely carries part of this edge, and Attack 13's verdict that trendOk is 'inert' must be re-scoped: it measured trendOk GIVEN vwUp, not the trend requirement itself. Neither term is free to delete -- the earlier reading that the base carried decoration here was wrong."
   }
 ];
-const BUILT = "2026-09-02 14:43";
+const BUILT = "2026-09-02 14:52";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
