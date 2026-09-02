@@ -50,6 +50,8 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E10 | Diagnostic: long the whole bear episode | PF 0.83, −12.6%, 125 episodes — bear label is SOUND |
 | E11 | Diagnostic: short the whole bear episode | PF 0.50, −17.6%, 11.1% win rate — **both directions lose** |
 | E12 | ORACLE-RULES item 1: direction = 2+ consecutive same-colour REAL 6h candles (long only) | PF 1.35, DD 2.48%, 12 trades — **rejected, does not beat champion; sample collapsed 32→12** |
+| E13 | ORACLE-RULES item 2: 3m cycle-position gate, short leg alone, cyclePos >= 0.7 | PF 0.00, 2 trades — **sample collapse, gate too tight to judge** |
+| E13b | Same short leg, cyclePos threshold loosened 0.7 → 0.5 | PF 0.63, 12 trades, 16.7% win rate, 3.15:1 payoff — **rejected; same E9/E9b shape, gate did not fix the short leg** |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -83,17 +85,19 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
         the War Formation is actually his *3-minute cycle drill-down*. Name kept for continuity.
     Implement items 2-5 at the bottom of ORACLE-RULES.md, one per cycle, in order. Item 2 (the 3m
     cycle-position gate) is next — see 0f below, which already specifies it.
-0f. **THE 3-MINUTE CYCLE POSITION GATE.** Read `ORACLE-RULES.md` first; it is
-    decoded from the author's own videos and it names the exact defect in every short built so far.
-    His rule: direction comes from the 6h and 1h, but **direction alone does not permit an entry —
-    position inside the 3-minute cycle does.** "Even if you had direction to short you can wreck an
-    absolutely perfect trade... do you want to short down here?" Every short this project has built
-    entered AFTER price had already fallen, i.e. at the bottom of the cycle, which is exactly what he
-    says destroys the trade. That fits E9/E9b perfectly: healthy payoff, ~20% win rate.
-    **Implement:** reconstruct the 3m cycle from 1m bars (3 x 1m, same technique already used for
-    15m/1h/6h). Compute `cyclePos = (close - cycleLow) / (cycleHigh - cycleLow)` over a rolling
-    window of 3m candles. Then gate: **shorts only when cyclePos is HIGH, longs only when cyclePos is
-    LOW.** Test the short leg alone first, judged on its own profit factor.
+0f. ~~THE 3-MINUTE CYCLE POSITION GATE~~ — **DONE (E13/E13b), rejected.** Added a rolling-window
+    `cyclePos = (close - cycleLow) / (cycleHigh - cycleLow)` gate (computed via ta.highest/ta.lowest
+    over 30x 1m bars, mathematically equal to a rolling max/min over reconstructed 3m candles — arrays
+    are forbidden so no literal candle storage was needed) on top of the unchanged bear-regime short
+    cascade. At threshold 0.7 (top 30% of range) the sample collapsed to 2 trades — too tight to
+    judge. Loosened to 0.5 (upper half): 12 trades, PF 0.63, 16.7% win rate, 3.15:1 payoff —
+    **the same E9/E9b shape.** The gate did not fix the short leg. Diagnosis: this gate only
+    constrains the *setup window*, not where the *trigger bar* lands inside it — the crossunder
+    trigger still fires only once price is already reversing down through the 15m high, so the entry
+    can land after most of the favourable move is gone even while cyclePos was technically "high"
+    somewhere earlier in the window. **Location alone is not the fix; the trigger itself needs to
+    change.** This sharpens 0g below rather than replacing it — 0g (the counter-move-weakening
+    trigger) is the next thing to test on the short leg, not another location gate.
 0g. **THEN: require the retrace ("wait for the pump").** "All this is, is waiting." A short should
     additionally require a green push against the bear regime first — N consecutive green 3m candles,
     or a retrace of X% of the prior leg. Test as a separate change so it is attributable.
@@ -132,6 +136,19 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 5. **Time-of-day breakdown.** The Oracle map (witching 1–4am, AM waves 7–8, 9:30 open, 11–1 midday,
    4pm close, 8pm end-of-day) is currently plotted but not traded. Does entry hour predict outcome?
 6. **`maxBars` sensitivity** {360, 720, 1440} — is the 12h cap helping or truncating winners?
+
+0h. **AUDIT: does the champion's committed Pine actually honor the 0.80% R floor it claims?**
+    While building E13, `minRpct` in the committed `war-formation-ha.pine` (and in every stored
+    `pineSource` for v5/v6/the ablation run, checked by grep) reads `input.float(0.15, ...)`, not
+    0.80 — yet every note from E5 onward says the floor was raised 0.15% → 0.80% per LESSON 3. Either
+    the stored `pineSource` text is a stale snapshot that doesn't match what was actually sent to
+    `quick_backtest` at run time (a HARD LESSON 8-style record-keeping bug — the numbers could still
+    be real, just the archived source wrong), or the R floor was never actually 0.80% and the champion
+    result was produced at a 0.15% floor. This is a measurement question, not a backtest: diff the
+    committed `war-formation-ha.pine` against each `results/backtests.json` `pineSource` field and
+    determine which is true before leaning on the champion numbers further. Not spent this cycle (0f
+    was already the chosen item); take this next if it is unblocked and no result has re-run the
+    champion baseline to settle it directly.
 
 ## Rules for this loop
 - **One experiment per cycle.** Record the real result before starting another.
