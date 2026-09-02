@@ -19,6 +19,13 @@ Pine: `war-formation/pine/war-formation-ha.pine` (long-only variant; short leg r
    that failed. A reclaim of support in an uptrend and a failed bounce into resistance in a
    downtrend are different events with different geometry, speed and follow-through. The short side
    must be **rebuilt from its own logic** and judged on its own numbers. Never mirror again.
+3. **This cascade (6h/1h/15m/3m HA vetoes + a reclaim/rejection/acceleration trigger) is a
+   LONG-ONLY edge on this data — settled at E15 (0d).** Five independently-designed short
+   constructions on top of this cascade (mirrored, rejection-at-resistance, location-gated,
+   trigger-gated pump-weakening, acceleration) all land on the same shape: decent-to-good payoff,
+   low win rate, net negative — E15's 313-trade sample confirms it isn't noise. Stop attaching a
+   short leg to this cascade; the both-directions objective needs an independently-designed short
+   strategy (0i), not a sixth variant of this one.
 
 ## The open problem
 **The edge is concentrated in time.** Same code, same parameters:
@@ -54,6 +61,7 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E13b | Same short leg, cyclePos threshold loosened 0.7 → 0.5 | PF 0.63, 12 trades, 16.7% win rate, 3.15:1 payoff — **rejected; same E9/E9b shape, gate did not fix the short leg** |
 | E14 | ORACLE-RULES item 3 / queue 0g: short leg requires ≥2 consecutive shrinking-range GREEN 3m candles ("wait for the pump weakening") before the reversal trigger, cyclePos gate removed | 2 trades, 0 winners, PF 0.00 — **sample collapse, same shape as E13** |
 | E14b | Same trigger, loosened minGreenN 2 → 1 (just the last 3m candle must be green) | 9 trades, PF 0.83, win rate 11.1%, payoff 6.66:1 — **rejected; the fourth structurally distinct short construction lands on the same shape** |
+| E15 | 0d option (i): crash-timing short — bear regime + acceleration trigger (range >= 1.5x atr30, down bar, close in bottom 35% of range, already extended below prior 15m low), no reversal/pullback requirement | 313 trades, PF 0.65, win rate 15.7%, net −29.4%, max DD 29.4%, payoff 3.51:1 — **rejected; fifth short construction, same shape, now at a sample large enough to settle it** |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -115,13 +123,30 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
     tried gating on acceleration/range-expansion (0d option (i): the crash-timing short) rather than
     on reversal-after-a-pullback. 0d is now unblocked and is the next thing to test before
     concluding (per 0d option (ii)) that this cascade is long-only on this data.
-0d. **Decide the short question honestly — NOW UNBLOCKED (0f and 0g both tested and rejected).**
-    Given 0c, there are two options and the data should pick, not preference: (i) build a short that
-    targets the crash specifically — require the bear regime PLUS an acceleration trigger (range
-    expansion, or a break with the session already extended), accepting a low win rate and a large
-    payoff; or (ii) accept that this cascade is a LONG-ONLY edge on this data and meet the
-    both-directions requirement with a separate strategy. Test (i) once; if it fails, take (ii) and
-    record it as settled. This is the top unblocked item for the next cycle.
+0d. ~~Decide the short question honestly~~ — **DONE (E15), ANSWERED.** Option (i) — bear regime +
+    acceleration/range-expansion trigger, no reversal/pullback requirement, targeting the crash
+    directly — was tested once at full scale: 313 trades, PF 0.65, win rate 15.7%, net −29.4%, max DD
+    29.4%, payoff 3.51:1. This is the **fifth** structurally distinct short construction on this
+    cascade (mirrored sweep-reclaim, rejection-at-resistance, location-gated, trigger-gated
+    pump-weakening, now acceleration) and it lands on the exact same shape as the other four —
+    healthy-to-good payoff, low win rate, net negative — but this time at a sample 4-30x larger than
+    any prior attempt, large enough to call it settled rather than noisy. Extended-session bars are
+    common, so the trigger fired often; most fires were false-crash snapbacks (avgBarsLosing 56.2 vs
+    avgBarsWinning 275.8, losers dying ~5x faster). **SETTLED: this cascade (6h/1h/15m/3m HA vetoes,
+    reclaim/rejection or acceleration trigger, structural stop) is a LONG-ONLY edge on this data.**
+    Taking option (ii): the both-directions standing objective must be met by a **separately-designed
+    strategy** for the short side, not another leg bolted onto this cascade. That separate-strategy
+    design is now open item 0i below.
+0i. **BUILD AN INDEPENDENT SHORT STRATEGY (not a leg on this cascade).** Five short constructions on
+    the War Formation cascade have failed identically (E9, E9b, E13, E13b, E14, E14b, E15 — mirrored,
+    rejection, location-gated, trigger-gated, and acceleration triggers all tested). Per E15/0d, stop
+    iterating on this cascade's short leg entirely. The 6h HA green-count regime label marks CRASH
+    RISK, not downtrend (established at 0c/E10-E11), so any short built on top of it inherits that
+    mislabel. Start over: design a short-only strategy from different primitives (e.g. a genuine
+    downtrend filter — realized volatility regime, a moving-average slope condition, or the
+    consecutive-red-6h-candle rule from ORACLE-RULES item 1 but tuned for shorts specifically) rather
+    than reusing the champion's bull-designed regime detector. This satisfies the standing
+    both-directions objective without touching the long-only champion.
 0e. (was 0c) **DIAGNOSE THE BEAR REGIME ITSELF (superseded).** Two structurally different short
     constructions have now failed: the mirrored failed-breakout (v5, 2 of 15) and
     rejection-at-resistance (E9b, 14 of 69, PF 0.68). Both had healthy payoff ratios and losing win
