@@ -405,5 +405,34 @@
    "verifiedAt": "2026-09-02T11:19:49Z"
   },
   "notes": "2,711 ENGULFS VERSUS 10. Dropping the gap clause multiplied the population by 271x: 1,325 bullish and 1,386 bearish across 4.7 years, near-perfectly balanced, roughly 28% of all 4H candles. The old definition was not selective, it was BROKEN -- an equities rule requiring a gap, applied to a 24/7 market where an aggregated candle's open equals the previous close. Every zero-and-three-trade run from v16 on was starved by this one clause. The validation gate can now be restored on a real population."
+ },
+ {
+  "id": "3m-elite-v21-corrected-engulf-zones",
+  "name": "3M ELITE v21 corrected engulf zones",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "both",
+  "status": "testing",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "specPath": "three-m-elite/SYSTEM.md",
+  "description": "v15's exact recovered source with one change: the engulf definition corrected to body containment. v15 still carried the gap-requiring form, so every zone this lab has ever created -- including the v3 reference base -- was built from the population of ten that v20 proved broken. This is the zone CREATION step running on a real population for the first time, deliberately before any validation gate.",
+  "metrics": {
+   "netProfitPct": 2.289468,
+   "profitFactor": 1.02389497,
+   "maxDrawdownPct": 10.57791331,
+   "totalTrades": 185,
+   "winRatePct": 24.86486486,
+   "avgTradePct": 0.0123755
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GXYHSFWTRM1T6VB6S1EDND",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GXYHSEMAS3J7ABRE3V169G",
+   "verifiedAt": "2026-09-02T11:26:57Z"
+  },
+  "notes": "BEST 3M RESULT ON RECORD, WITH A DISCLOSED ANOMALY. PF 0.3626 -> 1.0239, trades 24 -> 185, DD 15.53% -> 10.58%. Longs 56 (21W, +$652.14); shorts 129 (25W, -$423.19) -- the long leg carries it and the short leg loses, matching both sister labs. THE ANOMALY: the last trade exits 2025-10-06 but the window runs to 2026-09-01, so roughly eleven months produced no entries at all. Suspected cause is the deepest-zone rule -- in a rising market a live demand zone can never be replaced by a shallower one, so it persists untouched and blocks demand entries indefinitely. NOT PROMOTED past reference until that is measured. PF 1.02 is break-even plus noise regardless."
  }
 ]

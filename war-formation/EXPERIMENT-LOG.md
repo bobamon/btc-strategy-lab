@@ -530,6 +530,7 @@ then reclaims it. Applying that same mechanism at a high produced the worst shor
 | E13 — near-touch of resistance, then reject | **0.7490** | 23.08% | 39 |
 | E27 — genuine break above, then reject | 0.2531 | 10.53% | 19 |
 | E28 — E13 plus the coil | 0.4904 | 17.65% | 17 |
+| E29 — breakdown continuation, no level | 0.5549 | 17.86% | 336 |
 | v11 | BIDIRECTIONAL: one cascade, 6h picks the side, cycle gate on the short only | PF 1.5689, DD 3.382%, 38 trades. **Longs 32 (18W, +$786), shorts 6 (1W, -$65).** Champion unchanged; the short leg drags · [report](https://mcp-api.trader.dev/backtest/01M1GX436Q7TQ71K66BDNEYAWF) |
 
 **Requiring price to actually clear resistance makes shorts markedly worse; requiring it merely to
@@ -653,3 +654,48 @@ to the anatomy of the setup it is placed on.** Symmetry of *components* is not s
 attempts are now well past the point where the honest reading is that the failure is not in any
 individual gate. Every construction has entered on a *level* — a 15m high, near-touched or broken.
 The open question for the next cycle is whether the short should be entering on a level at all.
+
+
+---
+
+## ██ E29 — THE LEVEL WAS NEVER THE PROBLEM
+
+E28's conclusion pointed here: if a short does not want the coil, perhaps it does not want a *level*
+either, since both are the anatomy of a reversal and the long already owns the reversal side. So E29
+inverted the geometry — instead of entering where price meets the previous 15m high, it enters where
+price genuinely **breaks the previous 15m low and continues**, with the stop on the far side of the
+range. No coil (E28), no cycle-position gate (it exists to stop shorting after a fall, which this
+design does deliberately).
+
+| | E13 (level) | E29 (continuation) |
+|---|---|---|
+| Profit factor | **0.74897196** | 0.55494237 |
+| Win rate | 23.08% | 17.86% |
+| Trades | 39 | **336** |
+| Max drawdown | 7.74972875% | 40.26425864% |
+
+**REVERTED, and the sample makes it decisive.** 336 trades is by a wide margin the largest short
+sample this lab has produced — nearly nine times E13's — so this cannot be dismissed as noise the
+way a 17-trade result can. Removing the level requirement multiplied frequency 8.6x and made every
+individual trade worse.
+
+**So the hypothesis is falsified cleanly: entering at a level is not what has been breaking the
+shorts.** The level-based constructions are the *better* half of the record, and E13 remains the best
+short after ten attempts.
+
+### THE TEN-CONSTRUCTION SUMMARY, STATED PLAINLY
+| Approach | Best PF |
+|---|---|
+| Level-based (near-touch, break-and-reject, fade, +/- cycle gate, 1R/1.5R/2R) | **0.749** |
+| Continuation (no level) | 0.555 |
+| With a volatility coil | 0.490 |
+
+**Ten constructions, three distinct geometries, and not one above 1.0.** The variation between them
+is real but small next to the gap to break-even. The honest reading is no longer "the right short
+construction has not been found" — it is that **on this instrument, under this regime label, a
+mechanical short entry of this family does not have an edge**, and further variations of entry
+geometry are unlikely to be what changes that.
+
+**The next cycle should stop proposing short geometries.** The open question worth a credit is the
+one the log has never answered: what makes the bear-labelled periods themselves different, given E10
+and E11 already showed *both* directions lose across bear bars.

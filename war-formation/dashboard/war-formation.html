@@ -1160,9 +1160,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T11:19:39Z"
     },
     "notes": "THE COIL REMOVED THE GOOD SHORTS. E13 0.74897196 on 39 trades -> 0.49037037 on 17. The gate cut 22 of 39 trades and profit factor fell by a third, so what it removed was disproportionately the winners. This is E14 in mirror image: there the weakening gate removed good longs because it duplicated the coil; here the coil itself removes good shorts. The contraction that precedes a long reclaim is not the state that precedes a short break -- the long waits for stillness before a spring, the short needs the move already going. Ninth short construction, still no PF above 1.0. REVERTED."
+  },
+  {
+    "id": "war-formation-e29-breakdown-continuation",
+    "name": "WF E29 breakdown continuation short",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "short",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "description": "The first short in this lab that does not enter at a level. Bear regime, a genuine break of the previous 15m low, a momentum trigger extending the break, stop above the previous 15m high. Deliberately no coil (E28 measured it removing winners) and no cycle-position gate (it exists to prevent shorting after a fall, which this design does on purpose). Short-only.",
+    "metrics": {
+      "netProfitPct": -40.21417238,
+      "profitFactor": 0.55494237,
+      "maxDrawdownPct": 40.26425864,
+      "totalTrades": 336,
+      "winRatePct": 17.85714286,
+      "avgTradePct": -0.11968504
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GY17T4JABP9XJK2GGB3XPJ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GY17T4BBTRDGRTRE8STXV1",
+      "verifiedAt": "2026-09-02T11:28:25Z"
+    },
+    "notes": "CONTINUATION IS WORSE THAN REVERSAL, AND IT IS NOT CLOSE. PF 0.5549 against E13's 0.7490, on 336 trades versus 39 -- the largest short sample this lab has ever produced, so the verdict is not a sample-size question. Removing the level requirement multiplied frequency 8.6x and made every trade worse. Tenth short construction, still nothing above 1.0. The level was never the problem. REVERTED."
   }
 ];
-const BUILT = "2026-09-02 05:21";
+const BUILT = "2026-09-02 05:29";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

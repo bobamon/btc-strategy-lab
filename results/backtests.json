@@ -1,850 +1,879 @@
 [
-  {
-    "id": "002-vrs-btcusdt-15m",
-    "name": "VRS-1 Variance-Ratio Regime Switch",
-    "symbol": "BTCUSDT",
-    "timeframe": "15m",
-    "direction": "both",
-    "status": "rejected",
-    "createdDate": "2026-09-01",
-    "lastTestedDate": "2026-09-01",
-    "description": "Lo-MacKinlay variance ratio VR = Var(q-bar move) / (q * Var(1-bar move)) classifies the regime each bar. VR >= 1.15 (trending) takes 20-bar Donchian breakouts; VR <= 0.85 (mean-reverting) fades Bollinger band crossbacks; between the two it stands aside. Stop and target are both fixed at entry from ATR(14) -- trend 1.2/2.4x, reversion 1.0/1.2x -- plus a 48-bar max-hold flatten. No trailing stop.",
-    "backtestStart": "2022-01-01",
-    "backtestEnd": "2026-09-01",
-    "metrics": {
-      "netProfitPct": -99.37868825,
-      "profitFactor": 0.5998069,
-      "maxDrawdownPct": 99.38527621,
-      "totalTrades": 4645,
-      "winRatePct": 37.93326157,
-      "avgTradePct": -0.02139477
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1EFPXCXSVWC6BKN5FTN5580",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1EFPXCXKHH6YWHMBRAQ7Y9T",
-      "verifiedAt": "2026-09-01T12:41:18Z"
-    },
-    "pineSource": "//@version=6\n// VRS-1 \"Variance-Ratio Regime Switch\" \u2014 crypto port (24/7, no session filter)\n// KEPT: Lo-MacKinlay variance-ratio regime classification; Donchian breakout in TREND;\n//       Bollinger band-fade in REVERT; fixed ATR stop + target set at entry; max-hold flatten.\n// REFUSED/DROPPED: nothing forbidden was requested. No trailing stop (fixed SL/TP by design),\n//       no pyramiding, no cross-symbol data, no martingale or averaging down.\nstrategy(\"VRS-1 Variance-Ratio Regime Switch\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\n// ---- inputs ----\nq       = input.int(5,     \"VR horizon q\")\nL       = input.int(120,   \"VR lookback\")\nvrHi    = input.float(1.15, \"Trend threshold\")\nvrLo    = input.float(0.85, \"Revert threshold\")\ndcLen   = input.int(20,    \"Donchian length\")\nbbLen   = input.int(20,    \"BB length\")\nbbMult  = input.float(2.0, \"BB mult\")\natrLen  = input.int(14,    \"ATR length\")\ntSL     = input.float(1.2, \"Trend SL xATR\")\ntTP     = input.float(2.4, \"Trend TP xATR\")\nrSL     = input.float(1.0, \"Revert SL xATR\")\nrTP     = input.float(1.2, \"Revert TP xATR\")\nmaxBars = input.int(48,    \"Max bars in trade\")\n\n// ---- variance ratio: VR = Var(q-bar move) / (q * Var(1-bar move)) ----\nr1 = close - close[1]\nrq = close - close[q]\nv1 = ta.variance(r1, L)\nvq = ta.variance(rq, L)\nvr = v1 > 0 ? vq / (q * v1) : na\n\n// ---- signal series ----\natr = ta.atr(atrLen)\n[bbMid, bbUp, bbLo] = ta.bb(close, bbLen, bbMult)\nhh = ta.highest(high, dcLen)[1]\nll = ta.lowest(low, dcLen)[1]\n\ntrendRegime  = not na(vr) and vr >= vrHi\nrevertRegime = not na(vr) and vr <= vrLo\n\nlongTrend  = trendRegime  and ta.crossover(close, hh)\nshortTrend = trendRegime  and ta.crossunder(close, ll)\nlongRev    = revertRegime and ta.crossover(close, bbLo)\nshortRev   = revertRegime and ta.crossunder(close, bbUp)\n\n// ---- state ----\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\n// ---- entries: stop and target are both computed at the moment of entry ----\nif flat and longTrend\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - atr * tSL\n    tpPx   := close + atr * tTP\n    barsIn := 0\nelse if flat and shortTrend\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + atr * tSL\n    tpPx   := close - atr * tTP\n    barsIn := 0\nelse if flat and longRev\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - atr * rSL\n    tpPx   := close + atr * rTP\n    barsIn := 0\nelse if flat and shortRev\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + atr * rSL\n    tpPx   := close - atr * rTP\n    barsIn := 0\n\n// ---- exits: fixed bracket re-issued each bar at the SAME prices set on entry ----\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\n// ---- max-hold flatten (time stop, not a trailing stop) ----\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(vr, title=\"VarianceRatio\")\nplot(trendRegime ? 1 : revertRegime ? -1 : 0, title=\"Regime\")\n",
-    "specPath": "strategies/002-vrs-variance-ratio-regime-switch.md",
-    "notes": "REJECTED. The regime switch has no edge at this trade frequency: average trade is roughly -0.02%, and commission at 0.05% consumes 36-53% of gross profit across both symbols. Note the engine's forced parity profile sizes every trade at 100% of equity, which is NOT the spec's 0.5%-risk sizing -- so this tests the signal, not the spec's risk management. The signal is what failed. The ETH run also raised an 'oversized_position_sizing' warning from the engine. Commission paid $7,937 against $14,895 gross profit."
+ {
+  "id": "002-vrs-btcusdt-15m",
+  "name": "VRS-1 Variance-Ratio Regime Switch",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "both",
+  "status": "rejected",
+  "createdDate": "2026-09-01",
+  "lastTestedDate": "2026-09-01",
+  "description": "Lo-MacKinlay variance ratio VR = Var(q-bar move) / (q * Var(1-bar move)) classifies the regime each bar. VR >= 1.15 (trending) takes 20-bar Donchian breakouts; VR <= 0.85 (mean-reverting) fades Bollinger band crossbacks; between the two it stands aside. Stop and target are both fixed at entry from ATR(14) -- trend 1.2/2.4x, reversion 1.0/1.2x -- plus a 48-bar max-hold flatten. No trailing stop.",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "metrics": {
+   "netProfitPct": -99.37868825,
+   "profitFactor": 0.5998069,
+   "maxDrawdownPct": 99.38527621,
+   "totalTrades": 4645,
+   "winRatePct": 37.93326157,
+   "avgTradePct": -0.02139477
   },
-  {
-    "id": "002-vrs-ethusdt-15m",
-    "name": "VRS-1 Variance-Ratio Regime Switch",
-    "symbol": "ETHUSDT",
-    "timeframe": "15m",
-    "direction": "both",
-    "status": "rejected",
-    "createdDate": "2026-09-01",
-    "lastTestedDate": "2026-09-01",
-    "description": "Lo-MacKinlay variance ratio VR = Var(q-bar move) / (q * Var(1-bar move)) classifies the regime each bar. VR >= 1.15 (trending) takes 20-bar Donchian breakouts; VR <= 0.85 (mean-reverting) fades Bollinger band crossbacks; between the two it stands aside. Stop and target are both fixed at entry from ATR(14) -- trend 1.2/2.4x, reversion 1.0/1.2x -- plus a 48-bar max-hold flatten. No trailing stop.",
-    "backtestStart": "2022-01-01",
-    "backtestEnd": "2026-09-01",
-    "metrics": {
-      "netProfitPct": -99.67673142,
-      "profitFactor": 0.74558347,
-      "maxDrawdownPct": 99.67934933,
-      "totalTrades": 6397,
-      "winRatePct": 37.9865562,
-      "avgTradePct": -0.01558179
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1EFRCH30TDRY0JMQ0T5T56K",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1EFRCH390SNMFKHSCEM2TH8",
-      "verifiedAt": "2026-09-01T12:41:18Z"
-    },
-    "pineSource": "//@version=6\n// VRS-1 \"Variance-Ratio Regime Switch\" \u2014 crypto port (24/7, no session filter)\n// KEPT: Lo-MacKinlay variance-ratio regime classification; Donchian breakout in TREND;\n//       Bollinger band-fade in REVERT; fixed ATR stop + target set at entry; max-hold flatten.\n// REFUSED/DROPPED: nothing forbidden was requested. No trailing stop (fixed SL/TP by design),\n//       no pyramiding, no cross-symbol data, no martingale or averaging down.\nstrategy(\"VRS-1 Variance-Ratio Regime Switch\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\n// ---- inputs ----\nq       = input.int(5,     \"VR horizon q\")\nL       = input.int(120,   \"VR lookback\")\nvrHi    = input.float(1.15, \"Trend threshold\")\nvrLo    = input.float(0.85, \"Revert threshold\")\ndcLen   = input.int(20,    \"Donchian length\")\nbbLen   = input.int(20,    \"BB length\")\nbbMult  = input.float(2.0, \"BB mult\")\natrLen  = input.int(14,    \"ATR length\")\ntSL     = input.float(1.2, \"Trend SL xATR\")\ntTP     = input.float(2.4, \"Trend TP xATR\")\nrSL     = input.float(1.0, \"Revert SL xATR\")\nrTP     = input.float(1.2, \"Revert TP xATR\")\nmaxBars = input.int(48,    \"Max bars in trade\")\n\n// ---- variance ratio: VR = Var(q-bar move) / (q * Var(1-bar move)) ----\nr1 = close - close[1]\nrq = close - close[q]\nv1 = ta.variance(r1, L)\nvq = ta.variance(rq, L)\nvr = v1 > 0 ? vq / (q * v1) : na\n\n// ---- signal series ----\natr = ta.atr(atrLen)\n[bbMid, bbUp, bbLo] = ta.bb(close, bbLen, bbMult)\nhh = ta.highest(high, dcLen)[1]\nll = ta.lowest(low, dcLen)[1]\n\ntrendRegime  = not na(vr) and vr >= vrHi\nrevertRegime = not na(vr) and vr <= vrLo\n\nlongTrend  = trendRegime  and ta.crossover(close, hh)\nshortTrend = trendRegime  and ta.crossunder(close, ll)\nlongRev    = revertRegime and ta.crossover(close, bbLo)\nshortRev   = revertRegime and ta.crossunder(close, bbUp)\n\n// ---- state ----\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\n// ---- entries: stop and target are both computed at the moment of entry ----\nif flat and longTrend\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - atr * tSL\n    tpPx   := close + atr * tTP\n    barsIn := 0\nelse if flat and shortTrend\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + atr * tSL\n    tpPx   := close - atr * tTP\n    barsIn := 0\nelse if flat and longRev\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - atr * rSL\n    tpPx   := close + atr * rTP\n    barsIn := 0\nelse if flat and shortRev\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + atr * rSL\n    tpPx   := close - atr * rTP\n    barsIn := 0\n\n// ---- exits: fixed bracket re-issued each bar at the SAME prices set on entry ----\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\n// ---- max-hold flatten (time stop, not a trailing stop) ----\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(vr, title=\"VarianceRatio\")\nplot(trendRegime ? 1 : revertRegime ? -1 : 0, title=\"Regime\")\n",
-    "specPath": "strategies/002-vrs-variance-ratio-regime-switch.md",
-    "notes": "REJECTED. The regime switch has no edge at this trade frequency: average trade is roughly -0.02%, and commission at 0.05% consumes 36-53% of gross profit across both symbols. Note the engine's forced parity profile sizes every trade at 100% of equity, which is NOT the spec's 0.5%-risk sizing -- so this tests the signal, not the spec's risk management. The signal is what failed. The ETH run also raised an 'oversized_position_sizing' warning from the engine. Commission paid $10,462 against $29,211 gross profit."
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1EFPXCXSVWC6BKN5FTN5580",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1EFPXCXKHH6YWHMBRAQ7Y9T",
+   "verifiedAt": "2026-09-01T12:41:18Z"
   },
-  {
-    "id": "003-lcr-btcusdt-15m",
-    "name": "LCR-1 Liquidation Cascade Reclaim",
-    "symbol": "BTCUSDT",
-    "timeframe": "15m",
-    "direction": "both",
-    "status": "rejected",
-    "createdDate": "2026-09-01",
-    "lastTestedDate": "2026-09-01",
-    "description": "Detects a liquidation cascade bar (range > 2.5x ATR50 AND volume > 3x its 50-bar average AND a new 50-bar extreme), then lets the close position inside that bar pick the side. A down-cascade closing in the upper half means the forced sellers are cleared, so fade it long; one closing on its low means the chain is still running, so follow it short. Mirrored for up-cascades. Stop beyond the cascade wick, target at 2R, both fixed at entry, risk floored at 1.2% of price so commission stays a small fraction of R.",
-    "backtestStart": "2022-01-01",
-    "backtestEnd": "2026-09-01",
-    "metrics": {
-      "netProfitPct": -95.46637531,
-      "profitFactor": 0.69193166,
-      "maxDrawdownPct": 96.16425581,
-      "totalTrades": 1532,
-      "winRatePct": 29.17754569,
-      "avgTradePct": -0.06231487
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1EK4Z2MF25C77J6SAM79336",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1EK4Z2KX71XSJSMRXYZMQXY",
-      "verifiedAt": "2026-09-01T13:40:16Z"
-    },
-    "pineSource": "//@version=6\n// LCR-1 \"Liquidation Cascade Reclaim\" \u2014 BTCUSDT, 15m and 5m.\n// Detect a cascade bar (range expansion + volume spike + new 50-bar extreme), then let the CLOSE\n// POSITION inside that bar decide the side: a rejected flush is faded, a flush that closes on its\n// low is followed. Stop and target both fixed at entry; risk floored at 1.2% so the round-trip fee\n// stays a small fraction of R (HARD LESSON 3).\n// No trailing stop, no pyramiding, no averaging down, no martingale.\nstrategy(\"LCR-1 Liquidation Cascade Reclaim\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\nlenN     = input.int(50,    \"Lookback for ATR / volume / extremes\")\nrangeK   = input.float(2.5, \"Cascade: range > K x ATR\")\nvolK     = input.float(3.0, \"Cascade: volume > K x average\")\nrevLo    = input.float(0.55,\"Down cascade: closePos at/above this = reversion long\")\ncontLo   = input.float(0.25,\"Down cascade: closePos at/below this = continuation short\")\nrevHi    = input.float(0.45,\"Up cascade: closePos at/below this = reversion short\")\ncontHi   = input.float(0.75,\"Up cascade: closePos at/above this = continuation long\")\nbufK     = input.float(0.2, \"Stop buffer beyond the cascade extreme, x ATR\")\nrr       = input.float(2.0, \"Reward:risk\")\nminRpct  = input.float(1.20,\"Min risk as % of price\")\nmaxRpct  = input.float(4.00,\"Max risk as % of price\")\nmaxBars  = input.int(96,    \"Max bars in trade\")\n\natrN   = ta.atr(lenN)\nvolAvg = ta.sma(volume, lenN)\nrng    = high - low\n\n// ---- cascade detection ----\nbigRange = not na(atrN) and atrN > 0 and rng > rangeK * atrN\nbigVol   = not na(volAvg) and volAvg > 0 and volume > volK * volAvg\ncascade  = bigRange and bigVol\n\nnewLow  = low  <= ta.lowest(low,  lenN)[1]\nnewHigh = high >= ta.highest(high, lenN)[1]\n\ndownCascade = cascade and newLow\nupCascade   = cascade and newHigh\n\nclosePos = rng > 0 ? (close - low) / rng : 0.5\n\n// ---- the regime switch: where the close sits decides the side ----\nrevLong   = downCascade and closePos >= revLo\ncontShort = downCascade and closePos <= contLo\nrevShort  = upCascade   and closePos <= revHi\ncontLong  = upCascade   and closePos >= contHi\n\n// ---- risk, floored so commission stays a small fraction of R ----\nbuf  = na(atrN) ? 0.0 : atrN * bufK\nminR = close * minRpct / 100\nmaxR = close * maxRpct / 100\n\nrawLongR  = close - (low - buf)\nrawShortR = (high + buf) - close\nlongR     = math.min(math.max(rawLongR,  minR), maxR)\nshortR    = math.min(math.max(rawShortR, minR), maxR)\n\ngoLong  = revLong  or contLong\ngoShort = revShort or contShort\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goLong and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - longR\n    tpPx   := close + longR * rr\n    barsIn := 0\nelse if flat and goShort and shortR > 0\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + shortR\n    tpPx   := close - shortR * rr\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(cascade ? 1 : 0,   title=\"CascadeBar\")\nplot(closePos,          title=\"ClosePos\")\nplot(revLong or revShort ? 1 : contLong or contShort ? -1 : 0, title=\"ReversionVsContinuation\")\n",
-    "specPath": "strategies/003-lcr-liquidation-cascade-reclaim.md",
-    "notes": "Ladder stopped at rung A: PF 0.69 < 0.95, so no 5m run and no sensitivity sweep. 1 credit spent. THE PRE-REGISTERED ESTIMATE WAS WRONG BY 4-10x: I predicted 150-400 trades, the strategy took 1,532. 'Cascade' bars at 2.5x ATR + 3x volume + new 50-bar extreme fire on roughly 1% of bars, not the 0.1-0.3% I assumed. The risk floor DID work as designed -- avgWin/avgLoss came in at 1.68 -- but at that payoff ratio the strategy needs a ~37% win rate to break even and only achieved 29.2%. So the closePos regime switch did not select the right side. Commission was $3,604 on $21,442 gross (17%), meaningful but not the primary cause this time; the primary cause is that the signal is wrong."
+  "pineSource": "//@version=6\n// VRS-1 \"Variance-Ratio Regime Switch\" \u2014 crypto port (24/7, no session filter)\n// KEPT: Lo-MacKinlay variance-ratio regime classification; Donchian breakout in TREND;\n//       Bollinger band-fade in REVERT; fixed ATR stop + target set at entry; max-hold flatten.\n// REFUSED/DROPPED: nothing forbidden was requested. No trailing stop (fixed SL/TP by design),\n//       no pyramiding, no cross-symbol data, no martingale or averaging down.\nstrategy(\"VRS-1 Variance-Ratio Regime Switch\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\n// ---- inputs ----\nq       = input.int(5,     \"VR horizon q\")\nL       = input.int(120,   \"VR lookback\")\nvrHi    = input.float(1.15, \"Trend threshold\")\nvrLo    = input.float(0.85, \"Revert threshold\")\ndcLen   = input.int(20,    \"Donchian length\")\nbbLen   = input.int(20,    \"BB length\")\nbbMult  = input.float(2.0, \"BB mult\")\natrLen  = input.int(14,    \"ATR length\")\ntSL     = input.float(1.2, \"Trend SL xATR\")\ntTP     = input.float(2.4, \"Trend TP xATR\")\nrSL     = input.float(1.0, \"Revert SL xATR\")\nrTP     = input.float(1.2, \"Revert TP xATR\")\nmaxBars = input.int(48,    \"Max bars in trade\")\n\n// ---- variance ratio: VR = Var(q-bar move) / (q * Var(1-bar move)) ----\nr1 = close - close[1]\nrq = close - close[q]\nv1 = ta.variance(r1, L)\nvq = ta.variance(rq, L)\nvr = v1 > 0 ? vq / (q * v1) : na\n\n// ---- signal series ----\natr = ta.atr(atrLen)\n[bbMid, bbUp, bbLo] = ta.bb(close, bbLen, bbMult)\nhh = ta.highest(high, dcLen)[1]\nll = ta.lowest(low, dcLen)[1]\n\ntrendRegime  = not na(vr) and vr >= vrHi\nrevertRegime = not na(vr) and vr <= vrLo\n\nlongTrend  = trendRegime  and ta.crossover(close, hh)\nshortTrend = trendRegime  and ta.crossunder(close, ll)\nlongRev    = revertRegime and ta.crossover(close, bbLo)\nshortRev   = revertRegime and ta.crossunder(close, bbUp)\n\n// ---- state ----\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\n// ---- entries: stop and target are both computed at the moment of entry ----\nif flat and longTrend\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - atr * tSL\n    tpPx   := close + atr * tTP\n    barsIn := 0\nelse if flat and shortTrend\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + atr * tSL\n    tpPx   := close - atr * tTP\n    barsIn := 0\nelse if flat and longRev\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - atr * rSL\n    tpPx   := close + atr * rTP\n    barsIn := 0\nelse if flat and shortRev\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + atr * rSL\n    tpPx   := close - atr * rTP\n    barsIn := 0\n\n// ---- exits: fixed bracket re-issued each bar at the SAME prices set on entry ----\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\n// ---- max-hold flatten (time stop, not a trailing stop) ----\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(vr, title=\"VarianceRatio\")\nplot(trendRegime ? 1 : revertRegime ? -1 : 0, title=\"Regime\")\n",
+  "specPath": "strategies/002-vrs-variance-ratio-regime-switch.md",
+  "notes": "REJECTED. The regime switch has no edge at this trade frequency: average trade is roughly -0.02%, and commission at 0.05% consumes 36-53% of gross profit across both symbols. Note the engine's forced parity profile sizes every trade at 100% of equity, which is NOT the spec's 0.5%-risk sizing -- so this tests the signal, not the spec's risk management. The signal is what failed. The ETH run also raised an 'oversized_position_sizing' warning from the engine. Commission paid $7,937 against $14,895 gross profit."
+ },
+ {
+  "id": "002-vrs-ethusdt-15m",
+  "name": "VRS-1 Variance-Ratio Regime Switch",
+  "symbol": "ETHUSDT",
+  "timeframe": "15m",
+  "direction": "both",
+  "status": "rejected",
+  "createdDate": "2026-09-01",
+  "lastTestedDate": "2026-09-01",
+  "description": "Lo-MacKinlay variance ratio VR = Var(q-bar move) / (q * Var(1-bar move)) classifies the regime each bar. VR >= 1.15 (trending) takes 20-bar Donchian breakouts; VR <= 0.85 (mean-reverting) fades Bollinger band crossbacks; between the two it stands aside. Stop and target are both fixed at entry from ATR(14) -- trend 1.2/2.4x, reversion 1.0/1.2x -- plus a 48-bar max-hold flatten. No trailing stop.",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "metrics": {
+   "netProfitPct": -99.67673142,
+   "profitFactor": 0.74558347,
+   "maxDrawdownPct": 99.67934933,
+   "totalTrades": 6397,
+   "winRatePct": 37.9865562,
+   "avgTradePct": -0.01558179
   },
-  {
-    "id": "004-mar-btcusdt-15m",
-    "name": "MAR-1 Moving-Average Retest Fade",
-    "symbol": "BTCUSDT",
-    "timeframe": "15m",
-    "direction": "both",
-    "status": "rejected",
-    "createdDate": "2026-09-01",
-    "lastTestedDate": "2026-09-01",
-    "description": "Mechanized from a charted XBTUSD setup. A sloped EMA200 is the regime switch and the level: when it slopes down it acts as resistance, so price rallying up to tag it and closing back below is a short; mirrored when it slopes up. Stop just beyond the MA, target the opposite Bollinger band measured at entry and never moved, clamped between 1R and 4R. Risk floored at 0.8% of price.",
-    "backtestStart": "2022-01-01",
-    "backtestEnd": "2026-09-01",
-    "metrics": {
-      "netProfitPct": -80.57476879,
-      "profitFactor": 0.64849595,
-      "maxDrawdownPct": 82.69834933,
-      "totalTrades": 844,
-      "winRatePct": 23.81516588,
-      "avgTradePct": -0.09546774
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1EKX92W5HG1R4814N8HMTPJ",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1EKX92WXVZ51J7WC8H1PE2W",
-      "verifiedAt": "2026-09-01T13:54:11Z"
-    },
-    "pineSource": "//@version=6\n// MAR-1 \"Moving-Average Retest Fade\" \u2014 BTCUSDT.\n// From a charted setup: a slow MA sloping down acts as resistance. Price rallies up, TAGS the MA,\n// and rejects back below it -> short. Target is the opposite band of a volatility channel.\n// Mirrored for an up-sloping MA. The MA slope IS the regime switch.\n// Stop and target both fixed at entry. No trailing stop, no pyramiding, no averaging down.\nstrategy(\"MAR-1 Moving-Average Retest Fade\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\nslowLen  = input.int(200,   \"Slow MA length (the blue line)\")\nslopeLen = input.int(20,    \"Bars used to measure MA slope\")\nslopeMin = input.float(0.10,\"Min MA slope over that span, % of price\")\nbbLen    = input.int(20,    \"Band length\")\nbbMult   = input.float(2.0, \"Band multiplier\")\nbufK     = input.float(0.25,\"Stop buffer beyond the MA, x ATR\")\natrLen   = input.int(14,    \"ATR length\")\nminRpct  = input.float(0.80,\"Min risk as % of price\")\nmaxRpct  = input.float(3.00,\"Max risk as % of price\")\nminRR    = input.float(1.0, \"Target floor, in R\")\nmaxRR    = input.float(4.0, \"Target cap, in R\")\nmaxBars  = input.int(96,    \"Max bars in trade\")\n\nslowMA = ta.ema(close, slowLen)\natr    = ta.atr(atrLen)\n[bbMid, bbUp, bbLo] = ta.bb(close, bbLen, bbMult)\n\n// ---- regime: the slope of the slow MA ----\nslopeAbs = slowMA - slowMA[slopeLen]\nslopePct = close > 0 ? slopeAbs / close * 100 : 0.0\ndownTrend = not na(slowMA[slopeLen]) and slopePct <= -slopeMin\nupTrend   = not na(slowMA[slopeLen]) and slopePct >=  slopeMin\n\n// ---- the retest: price reaches the MA this bar, then closes back on the trend side ----\ntagFromBelow = high >= slowMA and close < slowMA and close < open\ntagFromAbove = low  <= slowMA and close > slowMA and close > open\n\ngoShort = downTrend and tagFromBelow\ngoLong  = upTrend   and tagFromAbove\n\n// ---- risk: stop beyond the MA that just rejected price ----\nbuf  = na(atr) ? 0.0 : atr * bufK\nminR = close * minRpct / 100\nmaxR = close * maxRpct / 100\n\nrawShortR = (slowMA + buf) - close\nrawLongR  = close - (slowMA - buf)\nshortR    = math.min(math.max(rawShortR, minR), maxR)\nlongR     = math.min(math.max(rawLongR,  minR), maxR)\n\n// ---- target: the opposite band, measured AT ENTRY and then never moved, clamped in R ----\nrawShortTP = bbLo\nrawLongTP  = bbUp\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goShort and shortR > 0\n    strategy.entry(\"S\", strategy.short)\n    slPx := close + shortR\n    tgt   = math.min(math.max(rawShortTP, close - shortR * maxRR), close - shortR * minRR)\n    tpPx := tgt\n    barsIn := 0\nelse if flat and goLong and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx := close - longR\n    tgt   = math.max(math.min(rawLongTP, close + longR * maxRR), close + longR * minRR)\n    tpPx := tgt\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(slowMA, title=\"SlowMA\")\nplot(slopePct, title=\"SlopePct\")\nplot(downTrend ? -1 : upTrend ? 1 : 0, title=\"Regime\")\n",
-    "specPath": "strategies/004-mar-moving-average-retest-fade.md",
-    "notes": "Ladder stopped at rung A: PF 0.65 < 0.95. 1 credit. The payoff ratio was FINE at 2.07:1 -- the risk geometry worked. Break-even at that ratio needs a ~33% win rate; it delivered 23.8%. The tell is avgBarsWinning 27.1 vs avgBarsLosing 12.3: losers die in half the time winners take, which is the signature of a stop sitting inside the noise. Entry was AT the MA and the stop a fraction of an ATR BEYOND it -- but price oscillates around a moving average by construction, so the stop was planted in the noisiest spot on the chart. Trade-count estimate was 500-1500 and actual was 844, a much better calibration than 003. Two untested fixes are written into the spec: require a confirmed rejection rather than the first tag, and place the stop above the swing structure instead of just above the MA."
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1EFRCH30TDRY0JMQ0T5T56K",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1EFRCH390SNMFKHSCEM2TH8",
+   "verifiedAt": "2026-09-01T12:41:18Z"
   },
-  {
-    "id": "005-crx-btcusdt-15m",
-    "name": "CRX-1 Compression Release Volume Verdict",
-    "symbol": "BTCUSDT",
-    "timeframe": "15m",
-    "direction": "both",
-    "status": "rejected",
-    "createdDate": "2026-09-01",
-    "lastTestedDate": "2026-09-01",
-    "description": "A 48-bar range compresses below 3x ATR(100) and holds for five bars; price then breaks out and VOLUME delivers the verdict. Volume at or above 2x its 50-bar average means follow the break; below 1x means fade it; anything between is a dead band with no trade. Follow stops sit at the far side of the box, fade stops beyond the breakout bar's extreme, target 1.8R, all fixed at entry, risk clamped to 0.8-3.0% of price.",
-    "backtestStart": "2022-01-01",
-    "backtestEnd": "2026-09-01",
-    "metrics": {
-      "netProfitPct": -16.94009564,
-      "profitFactor": 0.52006686,
-      "maxDrawdownPct": 21.43547436,
-      "totalTrades": 93,
-      "winRatePct": 18.27956989,
-      "avgTradePct": -0.18215157
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1G9V7Q6161P3Z69QH1PNH3Q",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1G9V7Q6G86HEN77GPFMXV83",
-      "verifiedAt": "2026-09-02T05:36:41Z"
-    },
-    "pineSource": "//@version=6\n// CRX-1 \"Compression Release, Volume Verdict\" \u2014 BTCUSDT, 15m and 5m.\n// A range compresses; price breaks out; VOLUME decides whether the break is real.\n// Heavy volume -> follow the break. Thin volume -> fade it. In between -> no trade.\n// Stops sit beyond STRUCTURE (the opposite side of the box, or beyond the breakout extreme),\n// never just beyond the trigger level -- HARD LESSON 5.\n// SL and TP both fixed at entry. No trailing stop, no pyramiding, no averaging down, no martingale.\nstrategy(\"CRX-1 Compression Release Volume Verdict\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\nboxLen   = input.int(48,    \"Compression box length\")\natrLong  = input.int(100,   \"ATR length for the compression yardstick\")\ntightK   = input.float(3.0, \"Compressed if box width < K x ATR\")\nholdBars = input.int(5,     \"Bars the box must stay compressed\")\nvolLen   = input.int(50,    \"Volume average length\")\nvolHi    = input.float(2.0, \"Follow the break if volume >= K x average\")\nvolLo    = input.float(1.0, \"Fade the break if volume < K x average\")\nbufK     = input.float(0.25,\"Structural stop buffer, x ATR14\")\nrr       = input.float(1.8, \"Reward:risk\")\nminRpct  = input.float(0.80,\"Min risk as % of price\")\nmaxRpct  = input.float(3.00,\"Max risk as % of price\")\nmaxBars  = input.int(96,    \"Max bars in trade\")\n\natrL   = ta.atr(atrLong)\natrS   = ta.atr(14)\nvolAvg = ta.sma(volume, volLen)\n\n// ---- the box, measured BEFORE this bar so the breakout bar cannot widen it ----\nboxHi = ta.highest(high, boxLen)[1]\nboxLo = ta.lowest(low,  boxLen)[1]\nboxW  = boxHi - boxLo\n\ntight = not na(atrL) and atrL > 0 and boxW < atrL * tightK\n// compression must have been sustained, not a one-bar accident\nheld  = tight[1] and tight[2] and tight[3] and tight[4] and tight[5]\n\n// ---- the release ----\nbreakUp = ta.crossover(close, boxHi)\nbreakDn = ta.crossunder(close, boxLo)\n\n// ---- the verdict: volume decides follow vs fade. Between the thresholds is a dead band. ----\nheavy = not na(volAvg) and volAvg > 0 and volume >= volAvg * volHi\nthin  = not na(volAvg) and volAvg > 0 and volume <  volAvg * volLo\n\nfollowLong  = held and breakUp and heavy\nfollowShort = held and breakDn and heavy\nfadeShort   = held and breakUp and thin\nfadeLong    = held and breakDn and thin\n\n// ---- structural risk ----\nbuf  = na(atrS) ? 0.0 : atrS * bufK\nminR = close * minRpct / 100\nmaxR = close * maxRpct / 100\n\n// follow: stop at the far side of the box. fade: stop beyond the breakout bar's extreme.\nrawFollowLongR  = close - (boxLo - buf)\nrawFollowShortR = (boxHi + buf) - close\nrawFadeShortR   = (high + buf) - close\nrawFadeLongR    = close - (low - buf)\n\ngoLong  = followLong or fadeLong\ngoShort = followShort or fadeShort\nrawLongR  = followLong  ? rawFollowLongR  : rawFadeLongR\nrawShortR = followShort ? rawFollowShortR : rawFadeShortR\nlongR     = math.min(math.max(rawLongR,  minR), maxR)\nshortR    = math.min(math.max(rawShortR, minR), maxR)\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goLong and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - longR\n    tpPx   := close + longR * rr\n    barsIn := 0\nelse if flat and goShort and shortR > 0\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + shortR\n    tpPx   := close - shortR * rr\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(boxW,                       title=\"BoxWidth\")\nplot(held ? 1 : 0,               title=\"CompressionHeld\")\nplot(heavy ? 1 : thin ? -1 : 0,  title=\"VolumeVerdict\")\n",
-    "specPath": "strategies/005-crx-compression-release-volume-verdict.md",
-    "notes": "Ladder stopped at rung A: PF 0.52 < 0.95. 1 credit. Payoff ratio was healthy at 2.33:1 (break-even ~30%) but the win rate was 18.3% -- WORSE than the ~37% the literature reports for UNFILTERED breakouts, so the volume verdict was not just unhelpful, it selected a worse subset. I also violated HARD LESSON 5 on the fade leg without noticing: the follow leg got a proper structural stop at the far side of the box, but the fade leg's stop sat just beyond the breakout bar's extreme, inside the noise. Thin-volume bars are far more common than 2x-volume bars, so fades likely dominated the sample. Same diagnostic as 004: avgBarsWinning 75.6 vs avgBarsLosing 31.7. Frequency estimate was 200-600 and actual was 93 -- missed LOW by ~2x, the opposite direction from 003's miss."
+  "pineSource": "//@version=6\n// VRS-1 \"Variance-Ratio Regime Switch\" \u2014 crypto port (24/7, no session filter)\n// KEPT: Lo-MacKinlay variance-ratio regime classification; Donchian breakout in TREND;\n//       Bollinger band-fade in REVERT; fixed ATR stop + target set at entry; max-hold flatten.\n// REFUSED/DROPPED: nothing forbidden was requested. No trailing stop (fixed SL/TP by design),\n//       no pyramiding, no cross-symbol data, no martingale or averaging down.\nstrategy(\"VRS-1 Variance-Ratio Regime Switch\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\n// ---- inputs ----\nq       = input.int(5,     \"VR horizon q\")\nL       = input.int(120,   \"VR lookback\")\nvrHi    = input.float(1.15, \"Trend threshold\")\nvrLo    = input.float(0.85, \"Revert threshold\")\ndcLen   = input.int(20,    \"Donchian length\")\nbbLen   = input.int(20,    \"BB length\")\nbbMult  = input.float(2.0, \"BB mult\")\natrLen  = input.int(14,    \"ATR length\")\ntSL     = input.float(1.2, \"Trend SL xATR\")\ntTP     = input.float(2.4, \"Trend TP xATR\")\nrSL     = input.float(1.0, \"Revert SL xATR\")\nrTP     = input.float(1.2, \"Revert TP xATR\")\nmaxBars = input.int(48,    \"Max bars in trade\")\n\n// ---- variance ratio: VR = Var(q-bar move) / (q * Var(1-bar move)) ----\nr1 = close - close[1]\nrq = close - close[q]\nv1 = ta.variance(r1, L)\nvq = ta.variance(rq, L)\nvr = v1 > 0 ? vq / (q * v1) : na\n\n// ---- signal series ----\natr = ta.atr(atrLen)\n[bbMid, bbUp, bbLo] = ta.bb(close, bbLen, bbMult)\nhh = ta.highest(high, dcLen)[1]\nll = ta.lowest(low, dcLen)[1]\n\ntrendRegime  = not na(vr) and vr >= vrHi\nrevertRegime = not na(vr) and vr <= vrLo\n\nlongTrend  = trendRegime  and ta.crossover(close, hh)\nshortTrend = trendRegime  and ta.crossunder(close, ll)\nlongRev    = revertRegime and ta.crossover(close, bbLo)\nshortRev   = revertRegime and ta.crossunder(close, bbUp)\n\n// ---- state ----\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\n// ---- entries: stop and target are both computed at the moment of entry ----\nif flat and longTrend\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - atr * tSL\n    tpPx   := close + atr * tTP\n    barsIn := 0\nelse if flat and shortTrend\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + atr * tSL\n    tpPx   := close - atr * tTP\n    barsIn := 0\nelse if flat and longRev\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - atr * rSL\n    tpPx   := close + atr * rTP\n    barsIn := 0\nelse if flat and shortRev\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + atr * rSL\n    tpPx   := close - atr * rTP\n    barsIn := 0\n\n// ---- exits: fixed bracket re-issued each bar at the SAME prices set on entry ----\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\n// ---- max-hold flatten (time stop, not a trailing stop) ----\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(vr, title=\"VarianceRatio\")\nplot(trendRegime ? 1 : revertRegime ? -1 : 0, title=\"Regime\")\n",
+  "specPath": "strategies/002-vrs-variance-ratio-regime-switch.md",
+  "notes": "REJECTED. The regime switch has no edge at this trade frequency: average trade is roughly -0.02%, and commission at 0.05% consumes 36-53% of gross profit across both symbols. Note the engine's forced parity profile sizes every trade at 100% of equity, which is NOT the spec's 0.5%-risk sizing -- so this tests the signal, not the spec's risk management. The signal is what failed. The ETH run also raised an 'oversized_position_sizing' warning from the engine. Commission paid $10,462 against $29,211 gross profit."
+ },
+ {
+  "id": "003-lcr-btcusdt-15m",
+  "name": "LCR-1 Liquidation Cascade Reclaim",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "both",
+  "status": "rejected",
+  "createdDate": "2026-09-01",
+  "lastTestedDate": "2026-09-01",
+  "description": "Detects a liquidation cascade bar (range > 2.5x ATR50 AND volume > 3x its 50-bar average AND a new 50-bar extreme), then lets the close position inside that bar pick the side. A down-cascade closing in the upper half means the forced sellers are cleared, so fade it long; one closing on its low means the chain is still running, so follow it short. Mirrored for up-cascades. Stop beyond the cascade wick, target at 2R, both fixed at entry, risk floored at 1.2% of price so commission stays a small fraction of R.",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "metrics": {
+   "netProfitPct": -95.46637531,
+   "profitFactor": 0.69193166,
+   "maxDrawdownPct": 96.16425581,
+   "totalTrades": 1532,
+   "winRatePct": 29.17754569,
+   "avgTradePct": -0.06231487
   },
-  {
-    "id": "006-vts-btcusdt-15m",
-    "name": "VTS-1 Volatility Term-Structure Regime",
-    "symbol": "BTCUSDT",
-    "timeframe": "15m",
-    "direction": "both",
-    "status": "rejected",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "description": "Bitcoin shows inverted volatility asymmetry -- vol reacts more to positive returns than negative ones -- so the legs are built differently rather than mirrored. vts = ATR(5)/ATR(50) is the term structure: above 1.40 is expansion, below 0.75 compression. LONG takes a 50-bar high breakout during vol EXPANSION (BTC's real up-moves arrive loud); SHORT takes a 50-bar low breakdown during vol COMPRESSION (distribution arrives quiet). Flip signal is the regime value changing, which stands the strategy down for 20 bars. Stops sit beyond the 20-bar swing extreme on each side, floored at 0.8% of price, target 2R, all fixed at entry.",
-    "backtestStart": "2022-01-01",
-    "backtestEnd": "2026-09-01",
-    "metrics": {
-      "netProfitPct": 0.47522758,
-      "profitFactor": 1.0373682,
-      "maxDrawdownPct": 7.90214813,
-      "totalTrades": 44,
-      "winRatePct": 18.18181818,
-      "avgTradePct": 0.01080063
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GCKBYJQQ84Z8M0X9ZGER7K",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GCKBYJQ6E12PE9RTSJ510B",
-      "verifiedAt": "2026-09-02T06:25:39Z"
-    },
-    "pineSource": "//@version=6\n// VTS-1 \"Volatility Term-Structure Regime\" \u2014 BTCUSDT, 15m and 5m.\n// Bitcoin shows INVERTED volatility asymmetry: vol reacts more to positive returns than negative\n// ones, the opposite of equities. So the two legs are built differently, not mirrored:\n//   LONG  = breakout WITH vol expansion   (BTC's real up-moves arrive loud)\n//   SHORT = breakdown WITH vol compression (BTC's distribution arrives quiet)\n// Flip signal: the term-structure ratio crossing either threshold. On a flip, stand down for\n// coolBars bars -- the regime is in transition and neither leg's premise holds.\n// SL and TP fixed at entry. Stops sit beyond STRUCTURE (swing extremes), never beyond the trigger.\nstrategy(\"VTS-1 Volatility Term-Structure Regime\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\nfastLen  = input.int(5,     \"Fast ATR (short horizon)\")\nslowLen  = input.int(50,    \"Slow ATR (long horizon)\")\nhiK      = input.float(1.40,\"Expansion if fast/slow >= K\")\nloK      = input.float(0.75,\"Compression if fast/slow <= K\")\nbrkLen   = input.int(50,    \"Breakout lookback\")\nswgLen   = input.int(20,    \"Swing lookback for the structural stop\")\ncoolBars = input.int(20,    \"Bars to stand down after a regime flip\")\nbufK     = input.float(0.25,\"Stop buffer beyond the swing, x ATR14\")\nrr       = input.float(2.0, \"Reward:risk\")\nminRpct  = input.float(0.80,\"Min risk as % of price\")\nmaxRpct  = input.float(3.00,\"Max risk as % of price\")\nmaxBars  = input.int(96,    \"Max bars in trade\")\n\natrFast = ta.atr(fastLen)\natrSlow = ta.atr(slowLen)\natrStop = ta.atr(14)\n\n// ---- the term structure ----\nvts = (not na(atrSlow) and atrSlow > 0) ? atrFast / atrSlow : na\n\nexpansion   = not na(vts) and vts >= hiK\ncompression = not na(vts) and vts <= loK\n\n// ---- FLIP DETECTION: the regime changing, in either direction ----\nregime     = expansion ? 1 : compression ? -1 : 0\nflipped    = regime != regime[1] and not na(vts) and not na(vts[1])\nvar int sinceFlip = 9999\nsinceFlip := flipped ? 0 : sinceFlip + 1\ncoolingOff = sinceFlip < coolBars\n\n// ---- levels ----\nbrkHi = ta.highest(high, brkLen)[1]\nbrkLo = ta.lowest(low,  brkLen)[1]\nswgHi = ta.highest(high, swgLen)[1]\nswgLo = ta.lowest(low,  swgLen)[1]\n\n// ---- LONG leg: the loud breakout. Needs vol EXPANSION. ----\ngoLong = expansion and not coolingOff and ta.crossover(close, brkHi)\n\n// ---- SHORT leg: the quiet breakdown. Needs vol COMPRESSION. Different premise entirely. ----\ngoShort = compression and not coolingOff and ta.crossunder(close, brkLo)\n\n// ---- risk: each leg stops beyond its OWN structure, floored so fees stay small vs R ----\nbuf  = na(atrStop) ? 0.0 : atrStop * bufK\nminR = close * minRpct / 100\nmaxR = close * maxRpct / 100\n\nrawLongR  = close - (swgLo - buf)\nrawShortR = (swgHi + buf) - close\nlongR     = math.min(math.max(rawLongR,  minR), maxR)\nshortR    = math.min(math.max(rawShortR, minR), maxR)\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goLong and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - longR\n    tpPx   := close + longR * rr\n    barsIn := 0\nelse if flat and goShort and shortR > 0\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + shortR\n    tpPx   := close - shortR * rr\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(vts,                  title=\"VolTermStructure\")\nplot(regime,               title=\"Regime\")\nplot(flipped ? 1 : 0,      title=\"FlipEvent\")\nplot(coolingOff ? 1 : 0,   title=\"CoolingOff\")\n",
-    "specPath": "strategies/006-vts-volatility-term-structure-regime.md",
-    "notes": "Rung A: FIRST strategy to clear the 0.95 threshold (PF 1.04). But +0.5% over 4.7 years is statistically indistinguishable from zero. LEG SPLIT, which is exactly why the standing objective exists: longs 4 trades (2 winners, +$309), shorts 40 trades (6 winners, -$261). The long leg's sample is unusable and the short leg loses; the blended 1.04 concealed both. The expansion gate at 1.40 plus a 50-bar breakout let longs fire only 4 times in 4.7 years."
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1EK4Z2MF25C77J6SAM79336",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1EK4Z2KX71XSJSMRXYZMQXY",
+   "verifiedAt": "2026-09-01T13:40:16Z"
   },
-  {
-    "id": "006-vts-btcusdt-5m",
-    "name": "VTS-1 Volatility Term-Structure Regime",
-    "symbol": "BTCUSDT",
-    "timeframe": "5m",
-    "direction": "both",
-    "status": "rejected",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "description": "Bitcoin shows inverted volatility asymmetry -- vol reacts more to positive returns than negative ones -- so the legs are built differently rather than mirrored. vts = ATR(5)/ATR(50) is the term structure: above 1.40 is expansion, below 0.75 compression. LONG takes a 50-bar high breakout during vol EXPANSION (BTC's real up-moves arrive loud); SHORT takes a 50-bar low breakdown during vol COMPRESSION (distribution arrives quiet). Flip signal is the regime value changing, which stands the strategy down for 20 bars. Stops sit beyond the 20-bar swing extreme on each side, floored at 0.8% of price, target 2R, all fixed at entry.",
-    "backtestStart": "2024-06-08",
-    "backtestEnd": "2026-09-01",
-    "metrics": {
-      "netProfitPct": -20.17368834,
-      "profitFactor": 0.3598653,
-      "maxDrawdownPct": 22.89873946,
-      "totalTrades": 77,
-      "winRatePct": 23.37662338,
-      "avgTradePct": -0.26199595
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GCMPTR83SSKW6FM4HVJTMZ",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GCMPTQNPNGM74SSYHTMJM0",
-      "verifiedAt": "2026-09-02T06:25:39Z"
-    },
-    "pineSource": "//@version=6\n// VTS-1 \"Volatility Term-Structure Regime\" \u2014 BTCUSDT, 15m and 5m.\n// Bitcoin shows INVERTED volatility asymmetry: vol reacts more to positive returns than negative\n// ones, the opposite of equities. So the two legs are built differently, not mirrored:\n//   LONG  = breakout WITH vol expansion   (BTC's real up-moves arrive loud)\n//   SHORT = breakdown WITH vol compression (BTC's distribution arrives quiet)\n// Flip signal: the term-structure ratio crossing either threshold. On a flip, stand down for\n// coolBars bars -- the regime is in transition and neither leg's premise holds.\n// SL and TP fixed at entry. Stops sit beyond STRUCTURE (swing extremes), never beyond the trigger.\nstrategy(\"VTS-1 Volatility Term-Structure Regime\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\nfastLen  = input.int(5,     \"Fast ATR (short horizon)\")\nslowLen  = input.int(50,    \"Slow ATR (long horizon)\")\nhiK      = input.float(1.40,\"Expansion if fast/slow >= K\")\nloK      = input.float(0.75,\"Compression if fast/slow <= K\")\nbrkLen   = input.int(50,    \"Breakout lookback\")\nswgLen   = input.int(20,    \"Swing lookback for the structural stop\")\ncoolBars = input.int(20,    \"Bars to stand down after a regime flip\")\nbufK     = input.float(0.25,\"Stop buffer beyond the swing, x ATR14\")\nrr       = input.float(2.0, \"Reward:risk\")\nminRpct  = input.float(0.80,\"Min risk as % of price\")\nmaxRpct  = input.float(3.00,\"Max risk as % of price\")\nmaxBars  = input.int(96,    \"Max bars in trade\")\n\natrFast = ta.atr(fastLen)\natrSlow = ta.atr(slowLen)\natrStop = ta.atr(14)\n\n// ---- the term structure ----\nvts = (not na(atrSlow) and atrSlow > 0) ? atrFast / atrSlow : na\n\nexpansion   = not na(vts) and vts >= hiK\ncompression = not na(vts) and vts <= loK\n\n// ---- FLIP DETECTION: the regime changing, in either direction ----\nregime     = expansion ? 1 : compression ? -1 : 0\nflipped    = regime != regime[1] and not na(vts) and not na(vts[1])\nvar int sinceFlip = 9999\nsinceFlip := flipped ? 0 : sinceFlip + 1\ncoolingOff = sinceFlip < coolBars\n\n// ---- levels ----\nbrkHi = ta.highest(high, brkLen)[1]\nbrkLo = ta.lowest(low,  brkLen)[1]\nswgHi = ta.highest(high, swgLen)[1]\nswgLo = ta.lowest(low,  swgLen)[1]\n\n// ---- LONG leg: the loud breakout. Needs vol EXPANSION. ----\ngoLong = expansion and not coolingOff and ta.crossover(close, brkHi)\n\n// ---- SHORT leg: the quiet breakdown. Needs vol COMPRESSION. Different premise entirely. ----\ngoShort = compression and not coolingOff and ta.crossunder(close, brkLo)\n\n// ---- risk: each leg stops beyond its OWN structure, floored so fees stay small vs R ----\nbuf  = na(atrStop) ? 0.0 : atrStop * bufK\nminR = close * minRpct / 100\nmaxR = close * maxRpct / 100\n\nrawLongR  = close - (swgLo - buf)\nrawShortR = (swgHi + buf) - close\nlongR     = math.min(math.max(rawLongR,  minR), maxR)\nshortR    = math.min(math.max(rawShortR, minR), maxR)\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goLong and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - longR\n    tpPx   := close + longR * rr\n    barsIn := 0\nelse if flat and goShort and shortR > 0\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + shortR\n    tpPx   := close - shortR * rr\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(vts,                  title=\"VolTermStructure\")\nplot(regime,               title=\"Regime\")\nplot(flipped ? 1 : 0,      title=\"FlipEvent\")\nplot(coolingOff ? 1 : 0,   title=\"CoolingOff\")\n",
-    "specPath": "strategies/006-vts-volatility-term-structure-regime.md",
-    "notes": "Rung C: FAILED. Same rules, different timeframe, PF 0.36 and -20.2%. Both legs lose here -- longs 24 trades (5 winners, -$1,163), shorts 53 trades (13 winners, -$854). This settles the 15m result: PF 1.04 there was noise, not edge. Note 5m coverage starts 2024-06-08, not 2022, so this window is 2.2 years rather than 4.7."
+  "pineSource": "//@version=6\n// LCR-1 \"Liquidation Cascade Reclaim\" \u2014 BTCUSDT, 15m and 5m.\n// Detect a cascade bar (range expansion + volume spike + new 50-bar extreme), then let the CLOSE\n// POSITION inside that bar decide the side: a rejected flush is faded, a flush that closes on its\n// low is followed. Stop and target both fixed at entry; risk floored at 1.2% so the round-trip fee\n// stays a small fraction of R (HARD LESSON 3).\n// No trailing stop, no pyramiding, no averaging down, no martingale.\nstrategy(\"LCR-1 Liquidation Cascade Reclaim\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\nlenN     = input.int(50,    \"Lookback for ATR / volume / extremes\")\nrangeK   = input.float(2.5, \"Cascade: range > K x ATR\")\nvolK     = input.float(3.0, \"Cascade: volume > K x average\")\nrevLo    = input.float(0.55,\"Down cascade: closePos at/above this = reversion long\")\ncontLo   = input.float(0.25,\"Down cascade: closePos at/below this = continuation short\")\nrevHi    = input.float(0.45,\"Up cascade: closePos at/below this = reversion short\")\ncontHi   = input.float(0.75,\"Up cascade: closePos at/above this = continuation long\")\nbufK     = input.float(0.2, \"Stop buffer beyond the cascade extreme, x ATR\")\nrr       = input.float(2.0, \"Reward:risk\")\nminRpct  = input.float(1.20,\"Min risk as % of price\")\nmaxRpct  = input.float(4.00,\"Max risk as % of price\")\nmaxBars  = input.int(96,    \"Max bars in trade\")\n\natrN   = ta.atr(lenN)\nvolAvg = ta.sma(volume, lenN)\nrng    = high - low\n\n// ---- cascade detection ----\nbigRange = not na(atrN) and atrN > 0 and rng > rangeK * atrN\nbigVol   = not na(volAvg) and volAvg > 0 and volume > volK * volAvg\ncascade  = bigRange and bigVol\n\nnewLow  = low  <= ta.lowest(low,  lenN)[1]\nnewHigh = high >= ta.highest(high, lenN)[1]\n\ndownCascade = cascade and newLow\nupCascade   = cascade and newHigh\n\nclosePos = rng > 0 ? (close - low) / rng : 0.5\n\n// ---- the regime switch: where the close sits decides the side ----\nrevLong   = downCascade and closePos >= revLo\ncontShort = downCascade and closePos <= contLo\nrevShort  = upCascade   and closePos <= revHi\ncontLong  = upCascade   and closePos >= contHi\n\n// ---- risk, floored so commission stays a small fraction of R ----\nbuf  = na(atrN) ? 0.0 : atrN * bufK\nminR = close * minRpct / 100\nmaxR = close * maxRpct / 100\n\nrawLongR  = close - (low - buf)\nrawShortR = (high + buf) - close\nlongR     = math.min(math.max(rawLongR,  minR), maxR)\nshortR    = math.min(math.max(rawShortR, minR), maxR)\n\ngoLong  = revLong  or contLong\ngoShort = revShort or contShort\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goLong and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - longR\n    tpPx   := close + longR * rr\n    barsIn := 0\nelse if flat and goShort and shortR > 0\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + shortR\n    tpPx   := close - shortR * rr\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(cascade ? 1 : 0,   title=\"CascadeBar\")\nplot(closePos,          title=\"ClosePos\")\nplot(revLong or revShort ? 1 : contLong or contShort ? -1 : 0, title=\"ReversionVsContinuation\")\n",
+  "specPath": "strategies/003-lcr-liquidation-cascade-reclaim.md",
+  "notes": "Ladder stopped at rung A: PF 0.69 < 0.95, so no 5m run and no sensitivity sweep. 1 credit spent. THE PRE-REGISTERED ESTIMATE WAS WRONG BY 4-10x: I predicted 150-400 trades, the strategy took 1,532. 'Cascade' bars at 2.5x ATR + 3x volume + new 50-bar extreme fire on roughly 1% of bars, not the 0.1-0.3% I assumed. The risk floor DID work as designed -- avgWin/avgLoss came in at 1.68 -- but at that payoff ratio the strategy needs a ~37% win rate to break even and only achieved 29.2%. So the closePos regime switch did not select the right side. Commission was $3,604 on $21,442 gross (17%), meaningful but not the primary cause this time; the primary cause is that the signal is wrong."
+ },
+ {
+  "id": "004-mar-btcusdt-15m",
+  "name": "MAR-1 Moving-Average Retest Fade",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "both",
+  "status": "rejected",
+  "createdDate": "2026-09-01",
+  "lastTestedDate": "2026-09-01",
+  "description": "Mechanized from a charted XBTUSD setup. A sloped EMA200 is the regime switch and the level: when it slopes down it acts as resistance, so price rallying up to tag it and closing back below is a short; mirrored when it slopes up. Stop just beyond the MA, target the opposite Bollinger band measured at entry and never moved, clamped between 1R and 4R. Risk floored at 0.8% of price.",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "metrics": {
+   "netProfitPct": -80.57476879,
+   "profitFactor": 0.64849595,
+   "maxDrawdownPct": 82.69834933,
+   "totalTrades": 844,
+   "winRatePct": 23.81516588,
+   "avgTradePct": -0.09546774
   },
-  {
-    "id": "007-vwm-btcusdt-15m",
-    "name": "VWM-1 VWAP Value Migration",
-    "symbol": "BTCUSDT",
-    "timeframe": "15m",
-    "direction": "both",
-    "status": "rejected",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "description": "VWAP with 2-sigma bands as the fair-value frame, trading two DIFFERENT events rather than a mirrored pair. LONG is accepted value: price stretched to +2 sigma recently, then pulls back to VWAP and holds above it while VWAP rises. SHORT is rejected value: a wick through +2 sigma that closes back inside the bands while VWAP falls, with no pullback involved. The flip signal is close crossing VWAP, which stands the strategy down for 20 bars and then arms the opposite leg. Stops sit beyond the 20-bar swing extreme on each side, floored at 0.8% of price, target 2R, fixed at entry.",
-    "backtestStart": "2022-01-01",
-    "backtestEnd": "2026-09-01",
-    "metrics": {
-      "netProfitPct": -31.74583211,
-      "profitFactor": 0.89192159,
-      "maxDrawdownPct": 39.2426703,
-      "totalTrades": 564,
-      "winRatePct": 33.68794326,
-      "avgTradePct": -0.05628694
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GG05ACZSF1DR2A1DP4M1PG",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GG05ACYAQ0D61AATXTJW92",
-      "verifiedAt": "2026-09-02T07:24:03Z"
-    },
-    "specPath": "strategies/007-vwm-vwap-value-migration.md",
-    "notes": "Ladder stopped at rung A: PF 0.89. Leg split: longs 457 trades (175 winners, 38.3%, -$2,310), shorts 107 (15 winners, 14.0%, -$865) -- BOTH legs lose, with the short leg the weaker half as in every short tested on this project. Payoff geometry was fine at 1.76:1 (break-even ~36%) and longs reached 38.3% before costs, but 564 trades at 18% fee drag ($4,661 of $26,198 gross) turns a marginal edge negative. FREQUENCY ESTIMATE: predicted 400-1200, actual 564 -- the FIRST estimate to land inside its range. Notable that pullback-to-VWAP is the most conventional idea tried and it still fails at this cost level on BTC perps."
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1EKX92W5HG1R4814N8HMTPJ",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1EKX92WXVZ51J7WC8H1PE2W",
+   "verifiedAt": "2026-09-01T13:54:11Z"
   },
-  {
-    "symbol": "BTCUSDT",
-    "timeframe": "15m",
-    "direction": "long",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2022-01-01",
-    "backtestEnd": "2026-09-01",
-    "specPath": "CHAMPION-BOARD.md",
-    "id": "vwm-base-longonly",
-    "name": "VWM base long-only (ratchet baseline)",
-    "status": "rejected",
-    "description": "The ratchet BASELINE for the BTC lab. 007's VWAP accepted-value pullback, long leg in isolation: price stretched to +2 sigma within the last 50 bars, then pulls back to within 0.5 sigma of VWAP and closes back above it while VWAP is rising over 50 bars. Stop at the 20-bar swing low minus 0.25x ATR14 (structure, not the signal level), floored at 0.8% of price, target 2R, both fixed at entry. Flip signal is close crossing VWAP, which stands the strategy down for 20 bars.",
-    "metrics": {
-      "netProfitPct": -29.42846861,
-      "profitFactor": 0.89343314,
-      "maxDrawdownPct": 34.97306874,
-      "totalTrades": 468,
-      "winRatePct": 37.60683761,
-      "avgTradePct": -0.06288134
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GK9XYYD9NBR4KY3WBHDMK9",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GK9XYY7S1ZACMVE07JGSK9",
-      "verifiedAt": "2026-09-02T08:22:20Z"
-    },
-    "notes": "Measured standalone because 007's long-leg PF and drawdown were only ever known from inside a combined run. This is the number every future ratchet cycle is compared against. Long-only by design; the short rebuild stays on the attack list rather than being bolted on early."
+  "pineSource": "//@version=6\n// MAR-1 \"Moving-Average Retest Fade\" \u2014 BTCUSDT.\n// From a charted setup: a slow MA sloping down acts as resistance. Price rallies up, TAGS the MA,\n// and rejects back below it -> short. Target is the opposite band of a volatility channel.\n// Mirrored for an up-sloping MA. The MA slope IS the regime switch.\n// Stop and target both fixed at entry. No trailing stop, no pyramiding, no averaging down.\nstrategy(\"MAR-1 Moving-Average Retest Fade\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\nslowLen  = input.int(200,   \"Slow MA length (the blue line)\")\nslopeLen = input.int(20,    \"Bars used to measure MA slope\")\nslopeMin = input.float(0.10,\"Min MA slope over that span, % of price\")\nbbLen    = input.int(20,    \"Band length\")\nbbMult   = input.float(2.0, \"Band multiplier\")\nbufK     = input.float(0.25,\"Stop buffer beyond the MA, x ATR\")\natrLen   = input.int(14,    \"ATR length\")\nminRpct  = input.float(0.80,\"Min risk as % of price\")\nmaxRpct  = input.float(3.00,\"Max risk as % of price\")\nminRR    = input.float(1.0, \"Target floor, in R\")\nmaxRR    = input.float(4.0, \"Target cap, in R\")\nmaxBars  = input.int(96,    \"Max bars in trade\")\n\nslowMA = ta.ema(close, slowLen)\natr    = ta.atr(atrLen)\n[bbMid, bbUp, bbLo] = ta.bb(close, bbLen, bbMult)\n\n// ---- regime: the slope of the slow MA ----\nslopeAbs = slowMA - slowMA[slopeLen]\nslopePct = close > 0 ? slopeAbs / close * 100 : 0.0\ndownTrend = not na(slowMA[slopeLen]) and slopePct <= -slopeMin\nupTrend   = not na(slowMA[slopeLen]) and slopePct >=  slopeMin\n\n// ---- the retest: price reaches the MA this bar, then closes back on the trend side ----\ntagFromBelow = high >= slowMA and close < slowMA and close < open\ntagFromAbove = low  <= slowMA and close > slowMA and close > open\n\ngoShort = downTrend and tagFromBelow\ngoLong  = upTrend   and tagFromAbove\n\n// ---- risk: stop beyond the MA that just rejected price ----\nbuf  = na(atr) ? 0.0 : atr * bufK\nminR = close * minRpct / 100\nmaxR = close * maxRpct / 100\n\nrawShortR = (slowMA + buf) - close\nrawLongR  = close - (slowMA - buf)\nshortR    = math.min(math.max(rawShortR, minR), maxR)\nlongR     = math.min(math.max(rawLongR,  minR), maxR)\n\n// ---- target: the opposite band, measured AT ENTRY and then never moved, clamped in R ----\nrawShortTP = bbLo\nrawLongTP  = bbUp\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goShort and shortR > 0\n    strategy.entry(\"S\", strategy.short)\n    slPx := close + shortR\n    tgt   = math.min(math.max(rawShortTP, close - shortR * maxRR), close - shortR * minRR)\n    tpPx := tgt\n    barsIn := 0\nelse if flat and goLong and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx := close - longR\n    tgt   = math.max(math.min(rawLongTP, close + longR * maxRR), close + longR * minRR)\n    tpPx := tgt\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(slowMA, title=\"SlowMA\")\nplot(slopePct, title=\"SlopePct\")\nplot(downTrend ? -1 : upTrend ? 1 : 0, title=\"Regime\")\n",
+  "specPath": "strategies/004-mar-moving-average-retest-fade.md",
+  "notes": "Ladder stopped at rung A: PF 0.65 < 0.95. 1 credit. The payoff ratio was FINE at 2.07:1 -- the risk geometry worked. Break-even at that ratio needs a ~33% win rate; it delivered 23.8%. The tell is avgBarsWinning 27.1 vs avgBarsLosing 12.3: losers die in half the time winners take, which is the signature of a stop sitting inside the noise. Entry was AT the MA and the stop a fraction of an ATR BEYOND it -- but price oscillates around a moving average by construction, so the stop was planted in the noisiest spot on the chart. Trade-count estimate was 500-1500 and actual was 844, a much better calibration than 003. Two untested fixes are written into the spec: require a confirmed rejection rather than the first tag, and place the stop above the swing structure instead of just above the MA."
+ },
+ {
+  "id": "005-crx-btcusdt-15m",
+  "name": "CRX-1 Compression Release Volume Verdict",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "both",
+  "status": "rejected",
+  "createdDate": "2026-09-01",
+  "lastTestedDate": "2026-09-01",
+  "description": "A 48-bar range compresses below 3x ATR(100) and holds for five bars; price then breaks out and VOLUME delivers the verdict. Volume at or above 2x its 50-bar average means follow the break; below 1x means fade it; anything between is a dead band with no trade. Follow stops sit at the far side of the box, fade stops beyond the breakout bar's extreme, target 1.8R, all fixed at entry, risk clamped to 0.8-3.0% of price.",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "metrics": {
+   "netProfitPct": -16.94009564,
+   "profitFactor": 0.52006686,
+   "maxDrawdownPct": 21.43547436,
+   "totalTrades": 93,
+   "winRatePct": 18.27956989,
+   "avgTradePct": -0.18215157
   },
-  {
-    "symbol": "BTCUSDT",
-    "timeframe": "15m",
-    "direction": "long",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2022-01-01",
-    "backtestEnd": "2026-09-01",
-    "specPath": "CHAMPION-BOARD.md",
-    "id": "vwm-attack1-ema200",
-    "name": "VWM base + EMA200 trend filter",
-    "status": "testing",
-    "description": "Attack 1 on the base: ONE change, require close above the 200-period EMA before a pullback entry is allowed. Everything else identical to the baseline.",
-    "metrics": {
-      "netProfitPct": -22.98318616,
-      "profitFactor": 0.91209453,
-      "maxDrawdownPct": 28.78010104,
-      "totalTrades": 433,
-      "winRatePct": 38.33718245,
-      "avgTradePct": -0.05307895
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GKB5GCNRDA6V28QNZZ9HYQ",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GKB5GC6R80WGMZ8MH2YQGJ",
-      "verifiedAt": "2026-09-02T08:22:20Z"
-    },
-    "notes": "KEPT by the ratchet: profit factor improved 0.89 -> 0.91 AND max drawdown improved 35.0% -> 28.8%. Net went -29.4% -> -23.0%. Only 35 trades were removed (468 -> 433, 7.5%) yet drawdown fell 6.2 points and net improved 6.4 points, so the filter removed disproportionately BAD trades rather than trimming at random -- that is what a filter earning its place looks like. NOT promoted to champion: PF 0.91 is still below the 0.95 ladder threshold, so no 5m run. This becomes the new base for attack 2."
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1G9V7Q6161P3Z69QH1PNH3Q",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1G9V7Q6G86HEN77GPFMXV83",
+   "verifiedAt": "2026-09-02T05:36:41Z"
   },
-  {
-    "id": "vwm-attack2-shallow-pullback",
-    "name": "VWM base + EMA200 + shallow pullback",
-    "symbol": "BTCUSDT",
-    "timeframe": "15m",
-    "direction": "long",
-    "status": "rejected",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2022-01-01",
-    "backtestEnd": "2026-09-01",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "Attack 2 on the base: ONE change, require the pullback to be SHALLOW -- the bar low must hold above VWAP rather than dipping through it. Hypothesis was that a deep retrace through VWAP in an 'accepted' uptrend signals the acceptance has failed. Everything else identical to the base, which already includes the EMA200 trend filter.",
-    "metrics": {
-      "netProfitPct": -29.02732264,
-      "profitFactor": 0.85230776,
-      "maxDrawdownPct": 32.61976613,
-      "totalTrades": 342,
-      "winRatePct": 38.01169591,
-      "avgTradePct": -0.08487521
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GNECC76MR00BHXWFYNZ8ZH",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GNECC6AK0RYWFYRM83PC7S",
-      "verifiedAt": "2026-09-02T08:58:52Z"
-    },
-    "notes": "REVERTED by the ratchet: profit factor WORSENED 0.91 -> 0.85 and max drawdown WORSENED 28.8% -> 32.6%. Both terms failed, so there is no trade-off to weigh. The filter removed 91 trades (21%) and made results worse on both axes, which means the DEEP pullbacks it excluded were disproportionately GOOD trades -- the exact opposite of attack 1's EMA200 filter, which removed disproportionately bad ones. The hypothesis is contradicted: in this system the edge lives in the deep retrace through VWAP, not the shallow one. Long-only; no short leg exists yet."
+  "pineSource": "//@version=6\n// CRX-1 \"Compression Release, Volume Verdict\" \u2014 BTCUSDT, 15m and 5m.\n// A range compresses; price breaks out; VOLUME decides whether the break is real.\n// Heavy volume -> follow the break. Thin volume -> fade it. In between -> no trade.\n// Stops sit beyond STRUCTURE (the opposite side of the box, or beyond the breakout extreme),\n// never just beyond the trigger level -- HARD LESSON 5.\n// SL and TP both fixed at entry. No trailing stop, no pyramiding, no averaging down, no martingale.\nstrategy(\"CRX-1 Compression Release Volume Verdict\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\nboxLen   = input.int(48,    \"Compression box length\")\natrLong  = input.int(100,   \"ATR length for the compression yardstick\")\ntightK   = input.float(3.0, \"Compressed if box width < K x ATR\")\nholdBars = input.int(5,     \"Bars the box must stay compressed\")\nvolLen   = input.int(50,    \"Volume average length\")\nvolHi    = input.float(2.0, \"Follow the break if volume >= K x average\")\nvolLo    = input.float(1.0, \"Fade the break if volume < K x average\")\nbufK     = input.float(0.25,\"Structural stop buffer, x ATR14\")\nrr       = input.float(1.8, \"Reward:risk\")\nminRpct  = input.float(0.80,\"Min risk as % of price\")\nmaxRpct  = input.float(3.00,\"Max risk as % of price\")\nmaxBars  = input.int(96,    \"Max bars in trade\")\n\natrL   = ta.atr(atrLong)\natrS   = ta.atr(14)\nvolAvg = ta.sma(volume, volLen)\n\n// ---- the box, measured BEFORE this bar so the breakout bar cannot widen it ----\nboxHi = ta.highest(high, boxLen)[1]\nboxLo = ta.lowest(low,  boxLen)[1]\nboxW  = boxHi - boxLo\n\ntight = not na(atrL) and atrL > 0 and boxW < atrL * tightK\n// compression must have been sustained, not a one-bar accident\nheld  = tight[1] and tight[2] and tight[3] and tight[4] and tight[5]\n\n// ---- the release ----\nbreakUp = ta.crossover(close, boxHi)\nbreakDn = ta.crossunder(close, boxLo)\n\n// ---- the verdict: volume decides follow vs fade. Between the thresholds is a dead band. ----\nheavy = not na(volAvg) and volAvg > 0 and volume >= volAvg * volHi\nthin  = not na(volAvg) and volAvg > 0 and volume <  volAvg * volLo\n\nfollowLong  = held and breakUp and heavy\nfollowShort = held and breakDn and heavy\nfadeShort   = held and breakUp and thin\nfadeLong    = held and breakDn and thin\n\n// ---- structural risk ----\nbuf  = na(atrS) ? 0.0 : atrS * bufK\nminR = close * minRpct / 100\nmaxR = close * maxRpct / 100\n\n// follow: stop at the far side of the box. fade: stop beyond the breakout bar's extreme.\nrawFollowLongR  = close - (boxLo - buf)\nrawFollowShortR = (boxHi + buf) - close\nrawFadeShortR   = (high + buf) - close\nrawFadeLongR    = close - (low - buf)\n\ngoLong  = followLong or fadeLong\ngoShort = followShort or fadeShort\nrawLongR  = followLong  ? rawFollowLongR  : rawFadeLongR\nrawShortR = followShort ? rawFollowShortR : rawFadeShortR\nlongR     = math.min(math.max(rawLongR,  minR), maxR)\nshortR    = math.min(math.max(rawShortR, minR), maxR)\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goLong and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - longR\n    tpPx   := close + longR * rr\n    barsIn := 0\nelse if flat and goShort and shortR > 0\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + shortR\n    tpPx   := close - shortR * rr\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(boxW,                       title=\"BoxWidth\")\nplot(held ? 1 : 0,               title=\"CompressionHeld\")\nplot(heavy ? 1 : thin ? -1 : 0,  title=\"VolumeVerdict\")\n",
+  "specPath": "strategies/005-crx-compression-release-volume-verdict.md",
+  "notes": "Ladder stopped at rung A: PF 0.52 < 0.95. 1 credit. Payoff ratio was healthy at 2.33:1 (break-even ~30%) but the win rate was 18.3% -- WORSE than the ~37% the literature reports for UNFILTERED breakouts, so the volume verdict was not just unhelpful, it selected a worse subset. I also violated HARD LESSON 5 on the fade leg without noticing: the follow leg got a proper structural stop at the far side of the box, but the fade leg's stop sat just beyond the breakout bar's extreme, inside the noise. Thin-volume bars are far more common than 2x-volume bars, so fades likely dominated the sample. Same diagnostic as 004: avgBarsWinning 75.6 vs avgBarsLosing 31.7. Frequency estimate was 200-600 and actual was 93 -- missed LOW by ~2x, the opposite direction from 003's miss."
+ },
+ {
+  "id": "006-vts-btcusdt-15m",
+  "name": "VTS-1 Volatility Term-Structure Regime",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "both",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "description": "Bitcoin shows inverted volatility asymmetry -- vol reacts more to positive returns than negative ones -- so the legs are built differently rather than mirrored. vts = ATR(5)/ATR(50) is the term structure: above 1.40 is expansion, below 0.75 compression. LONG takes a 50-bar high breakout during vol EXPANSION (BTC's real up-moves arrive loud); SHORT takes a 50-bar low breakdown during vol COMPRESSION (distribution arrives quiet). Flip signal is the regime value changing, which stands the strategy down for 20 bars. Stops sit beyond the 20-bar swing extreme on each side, floored at 0.8% of price, target 2R, all fixed at entry.",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "metrics": {
+   "netProfitPct": 0.47522758,
+   "profitFactor": 1.0373682,
+   "maxDrawdownPct": 7.90214813,
+   "totalTrades": 44,
+   "winRatePct": 18.18181818,
+   "avgTradePct": 0.01080063
   },
-  {
-    "id": "vwm-attack3-witching-ban",
-    "name": "VWM base + EMA200 + witching ban",
-    "symbol": "BTCUSDT",
-    "timeframe": "15m",
-    "direction": "long",
-    "status": "rejected",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2022-01-01",
-    "backtestEnd": "2026-09-01",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "Attack 3 on the base: ONE change, block long entries during the 1-4am ET witching window identified in the Oracle material as the overnight dump window. Everything else identical to the base, which already includes the EMA200 trend filter.",
-    "metrics": {
-      "netProfitPct": -15.47901705,
-      "profitFactor": 0.94053487,
-      "maxDrawdownPct": 28.84365743,
-      "totalTrades": 420,
-      "winRatePct": 38.57142857,
-      "avgTradePct": -0.0368548
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GNSNY6623691ZJQ5TR5NQ0",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GNSNY6Z44PC2ZX6HTEAHR7",
-      "verifiedAt": "2026-09-02T09:05:16Z"
-    },
-    "notes": "REVERTED, but the CLOSEST CALL SO FAR and worth revisiting. Profit factor improved 0.9121 -> 0.9405, the largest single gain of any attack and the nearest approach to the 0.95 ladder threshold. Net improved -23.0% -> -15.5%. But max drawdown worsened by 0.064 percentage points (28.780% -> 28.844%), and the ratchet requires drawdown NOT to worsen, so the rule was applied as written rather than bent. Only 13 trades were removed (433 -> 420) for that PF gain, meaning the witching window contained a small number of disproportionately bad trades -- the Oracle's claim about that window looks directionally right. FLAGGED FOR THE USER: this is the first case where a strict reading of the ratchet discards a change that looks genuinely good. A tolerance band (allow drawdown to worsen by up to ~0.5pp when PF improves by more than 0.02) would have kept it. That is a rule change, not my call to make unilaterally."
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GCKBYJQQ84Z8M0X9ZGER7K",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GCKBYJQ6E12PE9RTSJ510B",
+   "verifiedAt": "2026-09-02T06:25:39Z"
   },
-  {
-    "id": "vwm-attack4-rfloor-1p2",
-    "name": "VWM base + EMA200 + R floor 1.2%",
-    "symbol": "BTCUSDT",
-    "timeframe": "15m",
-    "direction": "long",
-    "status": "rejected",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2022-01-01",
-    "backtestEnd": "2026-09-01",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "Attack 4 on the base: ONE change, raise the minimum risk floor from 0.8% to 1.2% of price so the fixed 0.10% round-trip commission becomes a smaller fraction of every R. Everything else identical to the base, which already includes the EMA200 trend filter.",
-    "metrics": {
-      "netProfitPct": -30.77754244,
-      "profitFactor": 0.88454549,
-      "maxDrawdownPct": 36.57081963,
-      "totalTrades": 413,
-      "winRatePct": 40.1937046,
-      "avgTradePct": -0.07452189
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GP2DGBH5Y1V0ZFZQQ38QD4",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GP2DGB37N1TZANFQS26ZJQ",
-      "verifiedAt": "2026-09-02T09:09:55Z"
-    },
-    "notes": "REVERTED: profit factor worsened 0.912 -> 0.885 and max drawdown worsened badly, 28.8% -> 36.6%. The mechanism is instructive. Fee drag DID fall as intended ($3,954 -> $3,490) and the win rate ROSE 38.3% -> 40.2%, because a wider stop is hit less often. But avgWin/avgLoss fell 1.498 -> 1.316: every loss is now bigger, and that outweighed both gains. REFINES HARD LESSON 3: widening R cuts fee drag but enlarges each loss, so there is an OPTIMUM, not a monotonic improvement. LESSON 3's floor of ~0.8% (8x the round-trip fee) is a MINIMUM, not a target to exceed. For this strategy 0.8% sits closer to the optimum than 1.2% does. Long-only; no short leg exists yet."
+  "pineSource": "//@version=6\n// VTS-1 \"Volatility Term-Structure Regime\" \u2014 BTCUSDT, 15m and 5m.\n// Bitcoin shows INVERTED volatility asymmetry: vol reacts more to positive returns than negative\n// ones, the opposite of equities. So the two legs are built differently, not mirrored:\n//   LONG  = breakout WITH vol expansion   (BTC's real up-moves arrive loud)\n//   SHORT = breakdown WITH vol compression (BTC's distribution arrives quiet)\n// Flip signal: the term-structure ratio crossing either threshold. On a flip, stand down for\n// coolBars bars -- the regime is in transition and neither leg's premise holds.\n// SL and TP fixed at entry. Stops sit beyond STRUCTURE (swing extremes), never beyond the trigger.\nstrategy(\"VTS-1 Volatility Term-Structure Regime\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\nfastLen  = input.int(5,     \"Fast ATR (short horizon)\")\nslowLen  = input.int(50,    \"Slow ATR (long horizon)\")\nhiK      = input.float(1.40,\"Expansion if fast/slow >= K\")\nloK      = input.float(0.75,\"Compression if fast/slow <= K\")\nbrkLen   = input.int(50,    \"Breakout lookback\")\nswgLen   = input.int(20,    \"Swing lookback for the structural stop\")\ncoolBars = input.int(20,    \"Bars to stand down after a regime flip\")\nbufK     = input.float(0.25,\"Stop buffer beyond the swing, x ATR14\")\nrr       = input.float(2.0, \"Reward:risk\")\nminRpct  = input.float(0.80,\"Min risk as % of price\")\nmaxRpct  = input.float(3.00,\"Max risk as % of price\")\nmaxBars  = input.int(96,    \"Max bars in trade\")\n\natrFast = ta.atr(fastLen)\natrSlow = ta.atr(slowLen)\natrStop = ta.atr(14)\n\n// ---- the term structure ----\nvts = (not na(atrSlow) and atrSlow > 0) ? atrFast / atrSlow : na\n\nexpansion   = not na(vts) and vts >= hiK\ncompression = not na(vts) and vts <= loK\n\n// ---- FLIP DETECTION: the regime changing, in either direction ----\nregime     = expansion ? 1 : compression ? -1 : 0\nflipped    = regime != regime[1] and not na(vts) and not na(vts[1])\nvar int sinceFlip = 9999\nsinceFlip := flipped ? 0 : sinceFlip + 1\ncoolingOff = sinceFlip < coolBars\n\n// ---- levels ----\nbrkHi = ta.highest(high, brkLen)[1]\nbrkLo = ta.lowest(low,  brkLen)[1]\nswgHi = ta.highest(high, swgLen)[1]\nswgLo = ta.lowest(low,  swgLen)[1]\n\n// ---- LONG leg: the loud breakout. Needs vol EXPANSION. ----\ngoLong = expansion and not coolingOff and ta.crossover(close, brkHi)\n\n// ---- SHORT leg: the quiet breakdown. Needs vol COMPRESSION. Different premise entirely. ----\ngoShort = compression and not coolingOff and ta.crossunder(close, brkLo)\n\n// ---- risk: each leg stops beyond its OWN structure, floored so fees stay small vs R ----\nbuf  = na(atrStop) ? 0.0 : atrStop * bufK\nminR = close * minRpct / 100\nmaxR = close * maxRpct / 100\n\nrawLongR  = close - (swgLo - buf)\nrawShortR = (swgHi + buf) - close\nlongR     = math.min(math.max(rawLongR,  minR), maxR)\nshortR    = math.min(math.max(rawShortR, minR), maxR)\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goLong and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - longR\n    tpPx   := close + longR * rr\n    barsIn := 0\nelse if flat and goShort and shortR > 0\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + shortR\n    tpPx   := close - shortR * rr\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(vts,                  title=\"VolTermStructure\")\nplot(regime,               title=\"Regime\")\nplot(flipped ? 1 : 0,      title=\"FlipEvent\")\nplot(coolingOff ? 1 : 0,   title=\"CoolingOff\")\n",
+  "specPath": "strategies/006-vts-volatility-term-structure-regime.md",
+  "notes": "Rung A: FIRST strategy to clear the 0.95 threshold (PF 1.04). But +0.5% over 4.7 years is statistically indistinguishable from zero. LEG SPLIT, which is exactly why the standing objective exists: longs 4 trades (2 winners, +$309), shorts 40 trades (6 winners, -$261). The long leg's sample is unusable and the short leg loses; the blended 1.04 concealed both. The expansion gate at 1.40 plus a 50-bar breakout let longs fire only 4 times in 4.7 years."
+ },
+ {
+  "id": "006-vts-btcusdt-5m",
+  "name": "VTS-1 Volatility Term-Structure Regime",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "both",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "description": "Bitcoin shows inverted volatility asymmetry -- vol reacts more to positive returns than negative ones -- so the legs are built differently rather than mirrored. vts = ATR(5)/ATR(50) is the term structure: above 1.40 is expansion, below 0.75 compression. LONG takes a 50-bar high breakout during vol EXPANSION (BTC's real up-moves arrive loud); SHORT takes a 50-bar low breakdown during vol COMPRESSION (distribution arrives quiet). Flip signal is the regime value changing, which stands the strategy down for 20 bars. Stops sit beyond the 20-bar swing extreme on each side, floored at 0.8% of price, target 2R, all fixed at entry.",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2026-09-01",
+  "metrics": {
+   "netProfitPct": -20.17368834,
+   "profitFactor": 0.3598653,
+   "maxDrawdownPct": 22.89873946,
+   "totalTrades": 77,
+   "winRatePct": 23.37662338,
+   "avgTradePct": -0.26199595
   },
-  {
-    "id": "vwm-attack5-volume-confirm",
-    "name": "VWM base + volume confirmation on the reclaim",
-    "symbol": "BTCUSDT",
-    "timeframe": "15m",
-    "direction": "long",
-    "status": "rejected",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2022-01-01",
-    "backtestEnd": "2026-09-01",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "Attack 5. Exactly one change from the base (VWM + EMA200 trend filter): the pullback-hold bar must trade above its own 50-bar average volume, so participation has to return as price reclaims VWAP. Long only; the short rebuild remains unattempted.",
-    "metrics": {
-      "netProfitPct": -25.3839511,
-      "profitFactor": 0.83915848,
-      "maxDrawdownPct": 26.88635455,
-      "totalTrades": 241,
-      "winRatePct": 37.7593361,
-      "avgTradePct": -0.1053276
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GPTCCXC4591VVCQGTCWXM7",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GPTCCX63DSH29ECJH5PH3X",
-      "verifiedAt": "2026-09-02T09:22:21Z"
-    },
-    "notes": "REVERTED on the ratchet: PF 0.9121->0.8392. Drawdown did improve (28.78%->26.89%) but PF is the binding term. THE IMPORTANT PART IS WHY. The gate cut trades 433->241, a 44% reduction, and halved the commission bill from $3,954 to $2,078 -- exactly the fee saving the attack list was designed to capture. Net return still got WORSE, -23.0%->-25.4%. The trades it removed were net positive contributors. Win rate barely moved (38.3%->37.8%) but the payoff ratio fell 1.498->1.383, so the low-volume reclaims were the ones producing the larger wins. This falsifies the fee-drag thesis as the lab's primary diagnosis."
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GCMPTR83SSKW6FM4HVJTMZ",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GCMPTQNPNGM74SSYHTMJM0",
+   "verifiedAt": "2026-09-02T06:25:39Z"
   },
-  {
-    "id": "vwm-attack7-3r-target",
-    "name": "VWM base + 3R target (exit attack)",
-    "symbol": "BTCUSDT",
-    "timeframe": "15m",
-    "direction": "long",
-    "status": "rejected",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2022-01-01",
-    "backtestEnd": "2026-09-01",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "Attack 7, the first attack on the EXIT rather than the entry. Exactly one input changes from the base (VWM + EMA200): the reward:risk target rises from 2.0R to 3.0R. Long only; the short rebuild remains unattempted and unmirrored.",
-    "metrics": {
-      "netProfitPct": -23.02267811,
-      "profitFactor": 0.90999946,
-      "maxDrawdownPct": 32.96370421,
-      "totalTrades": 409,
-      "winRatePct": 33.7408313,
-      "avgTradePct": -0.05629017
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GPZEGM5PCKFH48RPZSZCJR",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GPZEGMF3QFKCM6GMZS8Z4C",
-      "verifiedAt": "2026-09-02T09:25:07Z"
-    },
-    "notes": "REVERTED: PF 0.9121->0.9100 (flat) and DD 28.78%->32.96% (worse). THE CLEANEST RESULT THIS LAB HAS PRODUCED. The change did exactly what it was designed to do -- avgWin/avgLoss rose 1.498->1.787, a 19% gain in payoff -- and the win rate fell 38.3%->33.7% by almost precisely the amount needed to cancel it. Net return was -23.02% against the base's -23.0%: identical to two decimal places. The 2R and 3R points sit on the SAME iso-profit-factor curve, which means moving along the risk-reward axis is neutral for this signal. Combined with the entry-filter falsification, both halves of the trade -- entry selection and exit target -- have now been shown not to be the lever."
+  "pineSource": "//@version=6\n// VTS-1 \"Volatility Term-Structure Regime\" \u2014 BTCUSDT, 15m and 5m.\n// Bitcoin shows INVERTED volatility asymmetry: vol reacts more to positive returns than negative\n// ones, the opposite of equities. So the two legs are built differently, not mirrored:\n//   LONG  = breakout WITH vol expansion   (BTC's real up-moves arrive loud)\n//   SHORT = breakdown WITH vol compression (BTC's distribution arrives quiet)\n// Flip signal: the term-structure ratio crossing either threshold. On a flip, stand down for\n// coolBars bars -- the regime is in transition and neither leg's premise holds.\n// SL and TP fixed at entry. Stops sit beyond STRUCTURE (swing extremes), never beyond the trigger.\nstrategy(\"VTS-1 Volatility Term-Structure Regime\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\nfastLen  = input.int(5,     \"Fast ATR (short horizon)\")\nslowLen  = input.int(50,    \"Slow ATR (long horizon)\")\nhiK      = input.float(1.40,\"Expansion if fast/slow >= K\")\nloK      = input.float(0.75,\"Compression if fast/slow <= K\")\nbrkLen   = input.int(50,    \"Breakout lookback\")\nswgLen   = input.int(20,    \"Swing lookback for the structural stop\")\ncoolBars = input.int(20,    \"Bars to stand down after a regime flip\")\nbufK     = input.float(0.25,\"Stop buffer beyond the swing, x ATR14\")\nrr       = input.float(2.0, \"Reward:risk\")\nminRpct  = input.float(0.80,\"Min risk as % of price\")\nmaxRpct  = input.float(3.00,\"Max risk as % of price\")\nmaxBars  = input.int(96,    \"Max bars in trade\")\n\natrFast = ta.atr(fastLen)\natrSlow = ta.atr(slowLen)\natrStop = ta.atr(14)\n\n// ---- the term structure ----\nvts = (not na(atrSlow) and atrSlow > 0) ? atrFast / atrSlow : na\n\nexpansion   = not na(vts) and vts >= hiK\ncompression = not na(vts) and vts <= loK\n\n// ---- FLIP DETECTION: the regime changing, in either direction ----\nregime     = expansion ? 1 : compression ? -1 : 0\nflipped    = regime != regime[1] and not na(vts) and not na(vts[1])\nvar int sinceFlip = 9999\nsinceFlip := flipped ? 0 : sinceFlip + 1\ncoolingOff = sinceFlip < coolBars\n\n// ---- levels ----\nbrkHi = ta.highest(high, brkLen)[1]\nbrkLo = ta.lowest(low,  brkLen)[1]\nswgHi = ta.highest(high, swgLen)[1]\nswgLo = ta.lowest(low,  swgLen)[1]\n\n// ---- LONG leg: the loud breakout. Needs vol EXPANSION. ----\ngoLong = expansion and not coolingOff and ta.crossover(close, brkHi)\n\n// ---- SHORT leg: the quiet breakdown. Needs vol COMPRESSION. Different premise entirely. ----\ngoShort = compression and not coolingOff and ta.crossunder(close, brkLo)\n\n// ---- risk: each leg stops beyond its OWN structure, floored so fees stay small vs R ----\nbuf  = na(atrStop) ? 0.0 : atrStop * bufK\nminR = close * minRpct / 100\nmaxR = close * maxRpct / 100\n\nrawLongR  = close - (swgLo - buf)\nrawShortR = (swgHi + buf) - close\nlongR     = math.min(math.max(rawLongR,  minR), maxR)\nshortR    = math.min(math.max(rawShortR, minR), maxR)\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goLong and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - longR\n    tpPx   := close + longR * rr\n    barsIn := 0\nelse if flat and goShort and shortR > 0\n    strategy.entry(\"S\", strategy.short)\n    slPx   := close + shortR\n    tpPx   := close - shortR * rr\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\nif strategy.position_size < 0\n    strategy.exit(\"SX\", from_entry=\"S\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(vts,                  title=\"VolTermStructure\")\nplot(regime,               title=\"Regime\")\nplot(flipped ? 1 : 0,      title=\"FlipEvent\")\nplot(coolingOff ? 1 : 0,   title=\"CoolingOff\")\n",
+  "specPath": "strategies/006-vts-volatility-term-structure-regime.md",
+  "notes": "Rung C: FAILED. Same rules, different timeframe, PF 0.36 and -20.2%. Both legs lose here -- longs 24 trades (5 winners, -$1,163), shorts 53 trades (13 winners, -$854). This settles the 15m result: PF 1.04 there was noise, not edge. Note 5m coverage starts 2024-06-08, not 2022, so this window is 2.2 years rather than 4.7."
+ },
+ {
+  "id": "007-vwm-btcusdt-15m",
+  "name": "VWM-1 VWAP Value Migration",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "both",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "description": "VWAP with 2-sigma bands as the fair-value frame, trading two DIFFERENT events rather than a mirrored pair. LONG is accepted value: price stretched to +2 sigma recently, then pulls back to VWAP and holds above it while VWAP rises. SHORT is rejected value: a wick through +2 sigma that closes back inside the bands while VWAP falls, with no pullback involved. The flip signal is close crossing VWAP, which stands the strategy down for 20 bars and then arms the opposite leg. Stops sit beyond the 20-bar swing extreme on each side, floored at 0.8% of price, target 2R, fixed at entry.",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "metrics": {
+   "netProfitPct": -31.74583211,
+   "profitFactor": 0.89192159,
+   "maxDrawdownPct": 39.2426703,
+   "totalTrades": 564,
+   "winRatePct": 33.68794326,
+   "avgTradePct": -0.05628694
   },
-  {
-    "id": "vwm-regime-highvol",
-    "name": "VWM base restricted to the high-volatility regime",
-    "symbol": "BTCUSDT",
-    "timeframe": "15m",
-    "direction": "long",
-    "status": "testing",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2022-01-01",
-    "backtestEnd": "2026-09-01",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "Regime decomposition, half 1 of 2. The base (VWM + EMA200) restricted to bars where ATR14/close sits above its own 200-bar average. Run as a measurement of whether the base PF of 0.9121 is uniform or an average over two market states. Long only; short rebuild still unattempted.",
-    "metrics": {
-      "netProfitPct": -12.66044947,
-      "profitFactor": 0.93211241,
-      "maxDrawdownPct": 23.43165898,
-      "totalTrades": 279,
-      "winRatePct": 38.70967742,
-      "avgTradePct": -0.04537796
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GQDB3SYPRMQCGFZ3DKCC76",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GQDB3SAACXCM1FTKY03VP4",
-      "verifiedAt": "2026-09-02T09:33:22Z"
-    },
-    "notes": "KEPT ON THE RATCHET -- only the second change ever kept. PF 0.9121->0.9321 AND max drawdown 28.780%->23.432%, so both terms moved the right way with no tolerance needed. Crucially this is NOT the pruning pattern that killed attacks 2 and 5: trade count fell only 36% (433->279) while PF ROSE and the win rate held at 38.7%. Net loss more than halved, -23.0%->-12.7%. The complement -- the low-volatility half -- is therefore implied to be materially worse than the 0.9121 aggregate, and runs next cycle to complete the decomposition. PF is still below 1.0, so this is a better description of where the signal lives, not yet a profitable system."
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GG05ACZSF1DR2A1DP4M1PG",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GG05ACYAQ0D61AATXTJW92",
+   "verifiedAt": "2026-09-02T07:24:03Z"
   },
-  {
-    "id": "vwm-regime-lowvol",
-    "name": "VWM base restricted to the low-volatility regime",
-    "symbol": "BTCUSDT",
-    "timeframe": "15m",
-    "direction": "long",
-    "status": "rejected",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2022-01-01",
-    "backtestEnd": "2026-09-01",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "Regime decomposition, half 2 of 2. The VWM + EMA200 signal restricted to bars where ATR14/close is at or below its own 200-bar average -- the exact complement of the kept high-volatility half. Run as a measurement to complete the split. Long only.",
-    "metrics": {
-      "netProfitPct": -15.48445255,
-      "profitFactor": 0.87505903,
-      "maxDrawdownPct": 23.11687389,
-      "totalTrades": 230,
-      "winRatePct": 38.69565217,
-      "avgTradePct": -0.06732371
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GQSBZBN2JC49RWPTMTGJ9B",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GQSBZBQNA31WGWARPCMKE8",
-      "verifiedAt": "2026-09-02T09:39:16Z"
-    },
-    "notes": "THE COMPLEMENT, AND IT SIZES THE REGIME EFFECT HONESTLY. PF 0.8751 against the high-vol half's 0.9321, a real gap of 0.057 -- but BOTH halves lose, so regime conditioning improves the description without rescuing the signal. The most striking detail is that the win rate is identical to two decimal places, 38.70% vs 38.71%. The entire difference sits in the payoff ratio, 1.386 vs 1.476: volatility does not change how often this signal is right, only how far price travels before the fixed 2R target or the 96-bar time stop resolves the trade. CAVEAT ON THE ARITHMETIC: the halves total 509 trades against the mixed base's 433, because each half runs independently and can take signals the mixed run was already in a position for. The split is therefore approximate, not a strict partition."
+  "specPath": "strategies/007-vwm-vwap-value-migration.md",
+  "notes": "Ladder stopped at rung A: PF 0.89. Leg split: longs 457 trades (175 winners, 38.3%, -$2,310), shorts 107 (15 winners, 14.0%, -$865) -- BOTH legs lose, with the short leg the weaker half as in every short tested on this project. Payoff geometry was fine at 1.76:1 (break-even ~36%) and longs reached 38.3% before costs, but 564 trades at 18% fee drag ($4,661 of $26,198 gross) turns a marginal edge negative. FREQUENCY ESTIMATE: predicted 400-1200, actual 564 -- the FIRST estimate to land inside its range. Notable that pullback-to-VWAP is the most conventional idea tried and it still fails at this cost level on BTC perps."
+ },
+ {
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "long",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "id": "vwm-base-longonly",
+  "name": "VWM base long-only (ratchet baseline)",
+  "status": "rejected",
+  "description": "The ratchet BASELINE for the BTC lab. 007's VWAP accepted-value pullback, long leg in isolation: price stretched to +2 sigma within the last 50 bars, then pulls back to within 0.5 sigma of VWAP and closes back above it while VWAP is rising over 50 bars. Stop at the 20-bar swing low minus 0.25x ATR14 (structure, not the signal level), floored at 0.8% of price, target 2R, both fixed at entry. Flip signal is close crossing VWAP, which stands the strategy down for 20 bars.",
+  "metrics": {
+   "netProfitPct": -29.42846861,
+   "profitFactor": 0.89343314,
+   "maxDrawdownPct": 34.97306874,
+   "totalTrades": 468,
+   "winRatePct": 37.60683761,
+   "avgTradePct": -0.06288134
   },
-  {
-    "id": "vwm-attack3-witching-on-highvol",
-    "name": "VWM high-vol base + witching-hour ban",
-    "symbol": "BTCUSDT",
-    "timeframe": "15m",
-    "direction": "long",
-    "status": "testing",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2022-01-01",
-    "backtestEnd": "2026-09-01",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "Attack 3 re-tested against the new high-volatility base: entries banned in the 1-4am ET witching window. Exactly one change. Long only; the short rebuild remains unattempted and unmirrored.",
-    "metrics": {
-      "netProfitPct": -6.53529745,
-      "profitFactor": 0.96401358,
-      "maxDrawdownPct": 22.61240725,
-      "totalTrades": 271,
-      "winRatePct": 39.11439114,
-      "avgTradePct": -0.02411549
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GR5VZFDVNFB1DW7NR9AHNM",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GR5VZFK7PGHEQ5D9Q343VX",
-      "verifiedAt": "2026-09-02T09:46:06Z"
-    },
-    "notes": "KEPT, AND IT RESOLVES THE OPEN TOLERANCE QUESTION BY MAKING IT UNNECESSARY. PF 0.9321->0.9640 and max drawdown 23.432%->22.612%: both ratchet terms improved strictly, on the strictest possible reading. Against the OLD mixed base this identical change cost 0.064pp of drawdown and was reverted; against the high-volatility base it IMPROVES drawdown. The two changes are complementary rather than competing, and only 8 trades were removed. Best profit factor this lab has recorded, and the first to clear 0.95 -- so 5m and parameter sensitivity are owed next cycle. Still below 1.0: this is the best description of the signal yet, not a profitable system."
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GK9XYYD9NBR4KY3WBHDMK9",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GK9XYY7S1ZACMVE07JGSK9",
+   "verifiedAt": "2026-09-02T08:22:20Z"
   },
-  {
-    "id": "vwm-base-5m-confirmation",
-    "name": "VWM base 5m confirmation run",
-    "symbol": "BTCUSDT",
-    "timeframe": "5m",
-    "direction": "long",
-    "status": "rejected",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2024-06-08",
-    "backtestEnd": "2026-09-01",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "Owed confirmation run after the 15m base cleared PF 0.95. Identical code, nothing reoptimised, only the timeframe changed. Long only.",
-    "metrics": {
-      "netProfitPct": -38.57377753,
-      "profitFactor": 0.70657441,
-      "maxDrawdownPct": 41.00293602,
-      "totalTrades": 356,
-      "winRatePct": 38.76404494,
-      "avgTradePct": -0.10835331
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GRGNS2XSAY88H1WHBDYGTQ",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GRGNS2X9FF48HYEYV50ZW0",
-      "verifiedAt": "2026-09-02T09:52:00Z"
-    },
-    "notes": "FAILS ON 5m -- BUT THE TEST IS CONFOUNDED AND I AM NOT CLAIMING MORE THAN IT SUPPORTS. PF 0.9640 -> 0.7066, DD 22.61% -> 41.00%, net -38.6%. The win rate is essentially unchanged (39.11% -> 38.76%) while the payoff ratio collapses 1.501 -> 1.116, which is the signature of trades running out of time rather than out of edge. THE CONFOUND: every bar-denominated parameter means three times less wall-clock on 5m -- maxBars 96 is 8 hours here against 24 hours on 15m, and sdLen, slopeLen, pushLook, coolBars, swgLen, trendLen and volLen are all similarly compressed. This is therefore NOT a clean timeframe-transfer test. The honest reading is inconclusive and leaning negative. A properly scaled re-run (maxBars 288, lookbacks x3) is owed before the 15m result is either trusted or discarded."
+  "notes": "Measured standalone because 007's long-leg PF and drawdown were only ever known from inside a combined run. This is the number every future ratchet cycle is compared against. Long-only by design; the short rebuild stays on the attack list rather than being bolted on early."
+ },
+ {
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "long",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "id": "vwm-attack1-ema200",
+  "name": "VWM base + EMA200 trend filter",
+  "status": "testing",
+  "description": "Attack 1 on the base: ONE change, require close above the 200-period EMA before a pullback entry is allowed. Everything else identical to the baseline.",
+  "metrics": {
+   "netProfitPct": -22.98318616,
+   "profitFactor": 0.91209453,
+   "maxDrawdownPct": 28.78010104,
+   "totalTrades": 433,
+   "winRatePct": 38.33718245,
+   "avgTradePct": -0.05307895
   },
-  {
-    "id": "vwm-base-5m-scaled",
-    "name": "VWM base 5m, properly scaled",
-    "symbol": "BTCUSDT",
-    "timeframe": "5m",
-    "direction": "long",
-    "status": "testing",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2024-06-08",
-    "backtestEnd": "2026-09-01",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "The current base on 5m with every bar-denominated parameter multiplied by 3 so each window covers the same wall-clock span as the 15m version: sdLen 300, slopeLen 150, pushLook 150, coolBars 60, swgLen 60, maxBars 288, trendLen 600, volLen 600, ATR 42. Price-denominated inputs unchanged, nothing reoptimised. Long only.",
-    "metrics": {
-      "netProfitPct": 1.60248604,
-      "profitFactor": 1.02024675,
-      "maxDrawdownPct": 16.68203271,
-      "totalTrades": 128,
-      "winRatePct": 41.40625,
-      "avgTradePct": 0.01251942
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GSZ5D9ZJJT2G28SQ69ZV11",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GSZ5D9581JM0BAKEB5NC8F",
-      "verifiedAt": "2026-09-02T10:17:23Z"
-    },
-    "notes": "FIRST PROFIT FACTOR ABOVE 1.0 IN THIS LAB, AND IT SURVIVES A CONTROLLED COMPARISON. PF 1.0202, DD 16.68%, 128 trades. The unscaled 5m attempt gave 0.7066 and was recorded as confounded; scaling every bar-denominated parameter by the timeframe ratio was the whole difference, which vindicates that diagnosis. The like-for-like control matters more than the headline: the 15m base run over this SAME window gives PF 0.9615 and DD 21.33%, so 5m beats 15m on both ratchet terms over identical data, and the 15m result is itself stable across periods (0.9640 on 2022-2026 against 0.9615 on 2024-2026). The timeframe is doing the work, not the sample. HONEST LIMIT: PF 1.02 on 128 trades is break-even plus noise, and net +1.60% over 2.2 years is not an economically meaningful return. This is the first evidence of a real edge, not a tradeable system."
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GKB5GCNRDA6V28QNZZ9HYQ",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GKB5GC6R80WGMZ8MH2YQGJ",
+   "verifiedAt": "2026-09-02T08:22:20Z"
   },
-  {
-    "id": "vwm-base-15m-period-control",
-    "name": "VWM base 15m, period control",
-    "symbol": "BTCUSDT",
-    "timeframe": "15m",
-    "direction": "long",
-    "status": "rejected",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2024-06-08",
-    "backtestEnd": "2026-09-01",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "Control run: the unchanged 15m base restricted to the 5m data window, to isolate whether the scaled 5m result comes from the timeframe or from the shorter, more recent period. Long only.",
-    "metrics": {
-      "netProfitPct": -2.79635364,
-      "profitFactor": 0.96146689,
-      "maxDrawdownPct": 21.33249808,
-      "totalTrades": 113,
-      "winRatePct": 40.7079646,
-      "avgTradePct": -0.02474649
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GT0HY9KDX2WS7NK67DJQH2",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GT0HY9PBF8DSE5Z3H6S8Y7",
-      "verifiedAt": "2026-09-02T10:18:09Z"
-    },
-    "notes": "THE CONTROL THAT MAKES THE 5m RESULT MEAN SOMETHING. PF 0.9615 on the same window where 5m scored 1.0202, with worse drawdown (21.33% against 16.68%). It also shows the 15m signal is stable across periods -- 0.9640 over 2022-2026 against 0.9615 over 2024-2026 -- so the recent window is not unusually kind. Both together isolate the timeframe as the cause. Recorded as rejected because it is superseded as the base, not because the run failed."
+  "notes": "KEPT by the ratchet: profit factor improved 0.89 -> 0.91 AND max drawdown improved 35.0% -> 28.8%. Net went -29.4% -> -23.0%. Only 35 trades were removed (468 -> 433, 7.5%) yet drawdown fell 6.2 points and net improved 6.4 points, so the filter removed disproportionately BAD trades rather than trimming at random -- that is what a filter earning its place looks like. NOT promoted to champion: PF 0.91 is still below the 0.95 ladder threshold, so no 5m run. This becomes the new base for attack 2."
+ },
+ {
+  "id": "vwm-attack2-shallow-pullback",
+  "name": "VWM base + EMA200 + shallow pullback",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "Attack 2 on the base: ONE change, require the pullback to be SHALLOW -- the bar low must hold above VWAP rather than dipping through it. Hypothesis was that a deep retrace through VWAP in an 'accepted' uptrend signals the acceptance has failed. Everything else identical to the base, which already includes the EMA200 trend filter.",
+  "metrics": {
+   "netProfitPct": -29.02732264,
+   "profitFactor": 0.85230776,
+   "maxDrawdownPct": 32.61976613,
+   "totalTrades": 342,
+   "winRatePct": 38.01169591,
+   "avgTradePct": -0.08487521
   },
-  {
-    "id": "vwm-base-1m-scaled",
-    "name": "VWM base 1m, scaled x15",
-    "symbol": "BTCUSDT",
-    "timeframe": "1m",
-    "direction": "long",
-    "status": "rejected",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2025-12-16",
-    "backtestEnd": "2026-05-03",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "Third point on the timeframe curve. The original 15m base with every bar-denominated parameter multiplied by 15 so each window matches in wall-clock: sdLen 1500, slopeLen 750, pushLook 750, coolBars 300, swgLen 300, maxBars 1440, trendLen 3000, volLen 3000, ATR 210. Nothing reoptimised. Long only.",
-    "metrics": {
-      "netProfitPct": -2.16087153,
-      "profitFactor": 0.75210908,
-      "maxDrawdownPct": 6.73262425,
-      "totalTrades": 16,
-      "winRatePct": 37.5,
-      "avgTradePct": -0.13505447
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GTW42X0D1QQ9C7P2A7WPP7",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GTW42XFTFRS3D7XYDA4A7X",
-      "verifiedAt": "2026-09-02T10:33:12Z"
-    },
-    "notes": "REVERTED. PF 0.7521 against the 5m base's 0.8753 on the SAME window, so faster is not uniformly better and the timeframe curve has an interior optimum at 5m. 16 trades is a thin sample -- 1m coverage is only 4.6 months -- but the control makes the comparison valid rather than relying on the headline number."
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GNECC76MR00BHXWFYNZ8ZH",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GNECC6AK0RYWFYRM83PC7S",
+   "verifiedAt": "2026-09-02T08:58:52Z"
   },
-  {
-    "id": "vwm-5m-1mwindow-control",
-    "name": "VWM 5m base, 1m-window control",
-    "symbol": "BTCUSDT",
-    "timeframe": "5m",
-    "direction": "long",
-    "status": "rejected",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2025-12-16",
-    "backtestEnd": "2026-05-03",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "Control for the 1m run: the unchanged 5m base restricted to the 1m data window, isolating timeframe from period. Long only.",
-    "metrics": {
-      "netProfitPct": -1.08265403,
-      "profitFactor": 0.8753355,
-      "maxDrawdownPct": 6.63250015,
-      "totalTrades": 17,
-      "winRatePct": 41.17647059,
-      "avgTradePct": -0.06368553
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GTY4149TAKKQJHG5TYDQTQ",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GTY414EDY7B9NQG4VPJ83F",
-      "verifiedAt": "2026-09-02T10:34:18Z"
-    },
-    "notes": "THIS CONTROL DOES TWO JOBS. First, it beats 1m on identical data (0.8753 against 0.7521), which is what rejects the 1m build. Second, and less comfortable: the 5m base scores 0.8753 here against 1.0202 over its full 2.2 years, so the December-to-May window is materially harder than the 5m average and THE HEADLINE 1.02 IS NOT UNIFORM ACROSS TIME. That is the same shape as the War Formation lab's unexplained time-concentration, now appearing in the BTC lab too, and it is a caution against reading 1.02 as a stable property of the signal."
+  "notes": "REVERTED by the ratchet: profit factor WORSENED 0.91 -> 0.85 and max drawdown WORSENED 28.8% -> 32.6%. Both terms failed, so there is no trade-off to weigh. The filter removed 91 trades (21%) and made results worse on both axes, which means the DEEP pullbacks it excluded were disproportionately GOOD trades -- the exact opposite of attack 1's EMA200 filter, which removed disproportionately bad ones. The hypothesis is contradicted: in this system the edge lives in the deep retrace through VWAP, not the shallow one. Long-only; no short leg exists yet."
+ },
+ {
+  "id": "vwm-attack3-witching-ban",
+  "name": "VWM base + EMA200 + witching ban",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "Attack 3 on the base: ONE change, block long entries during the 1-4am ET witching window identified in the Oracle material as the overnight dump window. Everything else identical to the base, which already includes the EMA200 trend filter.",
+  "metrics": {
+   "netProfitPct": -15.47901705,
+   "profitFactor": 0.94053487,
+   "maxDrawdownPct": 28.84365743,
+   "totalTrades": 420,
+   "winRatePct": 38.57142857,
+   "avgTradePct": -0.0368548
   },
-  {
-    "id": "vwm-5m-firsthalf-decomposition",
-    "name": "VWM 5m base, first-half period decomposition",
-    "symbol": "BTCUSDT",
-    "timeframe": "5m",
-    "direction": "long",
-    "status": "rejected",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2024-06-08",
-    "backtestEnd": "2025-07-20",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "Period decomposition of the 5m base. Unchanged code, window narrowed to the first half of the 5m sample. A measurement completing the calendar picture, not a ratchet candidate. Long only.",
-    "metrics": {
-      "netProfitPct": 14.63590295,
-      "profitFactor": 1.35522034,
-      "maxDrawdownPct": 9.99054777,
-      "totalTrades": 67,
-      "winRatePct": 52.23880597,
-      "avgTradePct": 0.21844631
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GV9WSZ7A74QA0MH6V9ETQG",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GV9WSZQH486A6V7N173261",
-      "verifiedAt": "2026-09-02T10:40:44Z"
-    },
-    "notes": "THE EDGE IS HEAVILY FRONT-LOADED, AND THIS SHOULD TEMPER THE HEADLINE. PF 1.3552 with a 52.24% win rate and +14.64% net across 67 trades in the first half, against 1.0202 over the full 2.2 years and 0.8753 over Dec 2025 to May 2026. The remaining roughly 61 trades must therefore be break-even or worse to drag the total from 1.36 down to 1.02. The 5m base's profit factor above 1.0 is carried by June 2024 to July 2025; the most recent fourteen months are weak. Combined with the War Formation champion degrading in the same recent window on a completely different mechanism, this looks like edge decay in the current regime rather than a property of either strategy. Recorded as rejected because it is a measurement, not a configuration."
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GNSNY6623691ZJQ5TR5NQ0",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GNSNY6Z44PC2ZX6HTEAHR7",
+   "verifiedAt": "2026-09-02T09:05:16Z"
   },
-  {
-    "id": "vwm-5m-secondhalf-decomposition",
-    "name": "VWM 5m base, second-half (out-of-sample)",
-    "symbol": "BTCUSDT",
-    "timeframe": "5m",
-    "direction": "long",
-    "status": "rejected",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2025-07-20",
-    "backtestEnd": "2026-09-01",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "Period decomposition of the 5m base, second half. Unchanged code, window 2025-07-20 to 2026-09-01. The closest thing to an out-of-sample read this lab has, since nothing was ever tuned against this window. A measurement, not a ratchet candidate. Long only.",
-    "metrics": {
-      "netProfitPct": -11.36382815,
-      "profitFactor": 0.65655726,
-      "maxDrawdownPct": 15.29119477,
-      "totalTrades": 61,
-      "winRatePct": 29.50819672,
-      "avgTradePct": -0.18629226
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GVM2J26NQCJTV52F8NMVBP",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GVM2J1ZQMG4XNP2ST6548D",
-      "verifiedAt": "2026-09-02T10:46:17Z"
-    },
-    "notes": "THE DECISIVE RESULT, AND IT UNDERCUTS THE HEADLINE. PF 0.6566, win rate 29.51%, net -11.36% across 61 trades. The split is exact -- 67 trades in the first half plus 61 here equals the full sample's 128 -- so this is a clean partition, not an approximation. First half PF 1.3552, second half 0.6566, full 1.0202. THE 5m BASE DOES NOT HAVE A PERSISTENT EDGE: the full-sample profit factor above 1.0 is an average of one good year and one bad one, and the more recent year is decisively negative. Either the edge decayed or the first half was luck; on 67 and 61 trades this data cannot separate those. What it does settle is that PF 1.02 must never again be quoted as a property of this signal. The two changes KEPT earlier -- the high-volatility regime split and the witching ban -- were both measured on the full mixed sample and should be regarded as unvalidated on the recent half."
+  "notes": "REVERTED, but the CLOSEST CALL SO FAR and worth revisiting. Profit factor improved 0.9121 -> 0.9405, the largest single gain of any attack and the nearest approach to the 0.95 ladder threshold. Net improved -23.0% -> -15.5%. But max drawdown worsened by 0.064 percentage points (28.780% -> 28.844%), and the ratchet requires drawdown NOT to worsen, so the rule was applied as written rather than bent. Only 13 trades were removed (433 -> 420) for that PF gain, meaning the witching window contained a small number of disproportionately bad trades -- the Oracle's claim about that window looks directionally right. FLAGGED FOR THE USER: this is the first case where a strict reading of the ratchet discards a change that looks genuinely good. A tolerance band (allow drawdown to worsen by up to ~0.5pp when PF improves by more than 0.02) would have kept it. That is a rule change, not my call to make unilaterally."
+ },
+ {
+  "id": "vwm-attack4-rfloor-1p2",
+  "name": "VWM base + EMA200 + R floor 1.2%",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "Attack 4 on the base: ONE change, raise the minimum risk floor from 0.8% to 1.2% of price so the fixed 0.10% round-trip commission becomes a smaller fraction of every R. Everything else identical to the base, which already includes the EMA200 trend filter.",
+  "metrics": {
+   "netProfitPct": -30.77754244,
+   "profitFactor": 0.88454549,
+   "maxDrawdownPct": 36.57081963,
+   "totalTrades": 413,
+   "winRatePct": 40.1937046,
+   "avgTradePct": -0.07452189
   },
-  {
-    "id": "vwm-short-own-geometry",
-    "name": "VWM short leg, own geometry",
-    "symbol": "BTCUSDT",
-    "timeframe": "5m",
-    "direction": "short",
-    "status": "rejected",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2024-06-08",
-    "backtestEnd": "2026-09-01",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "The first short leg in this lab, built from its own geometry rather than mirrored. The long buys a pullback continuing an uptrend; this fades an extreme -- a rally reaching the upper 2 sigma band that fails, closing back below it on a down bar, with VWAP falling and price under the 600-bar EMA. Stop above the 60-bar swing high. Run SHORT-ONLY so it is judged alone.",
-    "metrics": {
-      "netProfitPct": -2.62143398,
-      "profitFactor": 0.55064867,
-      "maxDrawdownPct": 2.66677054,
-      "totalTrades": 17,
-      "winRatePct": 17.64705882,
-      "avgTradePct": -0.154202
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GW0ZYQCRFWT7N4GJ8JGKQE",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GW0ZYPEWED0C85DEBHQJXX",
-      "verifiedAt": "2026-09-02T10:53:20Z"
-    },
-    "notes": "REJECTED ON ITS OWN NUMBERS, WHICH IS THE POINT OF JUDGING IT ALONE. PF 0.5506, win rate 17.65%, 3 winners from 17 trades. It IS a genuine own-geometry construction rather than a mirror -- the long requires a pullback to exist, this requires an extension -- so the standing rule was honoured, and that rule is not what failed here. Two observations for the next attempt: the trigger is RARE, only 17 occurrences in 2.2 years, so the band-rejection condition is too restrictive to build on; and the shape is odd, with avgBarsWinning 254.7 against avgBarsLosing 32.6, meaning the few winners grind for days while losers resolve in hours. That asymmetry suggests the 2R target is too far for a fade and the losers are being stopped by ordinary noise on the way. A fade probably wants a nearer target and a wider stop -- the opposite configuration from the trend-following long."
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GP2DGBH5Y1V0ZFZQQ38QD4",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GP2DGB37N1TZANFQS26ZJQ",
+   "verifiedAt": "2026-09-02T09:09:55Z"
   },
-  {
-    "id": "vwm-short-1r-target",
-    "name": "VWM short leg with a 1R target",
-    "symbol": "BTCUSDT",
-    "timeframe": "5m",
-    "direction": "short",
-    "status": "rejected",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2024-06-08",
-    "backtestEnd": "2026-09-01",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "The own-geometry short leg with one input changed: target 1R instead of 2R. Source is the exact Pine of the previous run rather than a reconstruction. Short-only.",
-    "metrics": {
-      "netProfitPct": -2.19279427,
-      "profitFactor": 0.58157892,
-      "maxDrawdownPct": 3.02997113,
-      "totalTrades": 17,
-      "winRatePct": 29.41176471,
-      "avgTradePct": -0.1289879
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GWEHG93YBGJ7ECZN4CPRTZ",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GWEHG8PXKSS72WWRBQBC2K",
-      "verifiedAt": "2026-09-02T11:00:44Z"
-    },
-    "notes": "A CLEAN SINGLE-VARIABLE TEST, AND THE TRADE COUNT PROVES IT: 17 in both runs, because the entry was untouched. PF 0.5506 -> 0.5816 and win rate 17.65% -> 29.41%, with avgBarsWinning falling from 254.7. THE FADE HYPOTHESIS IS DIRECTIONALLY CONFIRMED for this leg -- a target set for a trend continuation is too far for a trade that fades an extreme. Still nowhere near viable at PF 0.58 on 17 trades, so this is a lesson about trade-type-appropriate exits rather than a usable leg. Note the contrast with War Formation E26, where the identical change on that lab's short made things WORSE (0.749 -> 0.692): the exit convention has to follow the mechanism, and there is no universal answer."
+  "notes": "REVERTED: profit factor worsened 0.912 -> 0.885 and max drawdown worsened badly, 28.8% -> 36.6%. The mechanism is instructive. Fee drag DID fall as intended ($3,954 -> $3,490) and the win rate ROSE 38.3% -> 40.2%, because a wider stop is hit less often. But avgWin/avgLoss fell 1.498 -> 1.316: every loss is now bigger, and that outweighed both gains. REFINES HARD LESSON 3: widening R cuts fee drag but enlarges each loss, so there is an OPTIMUM, not a monotonic improvement. LESSON 3's floor of ~0.8% (8x the round-trip fee) is a MINIMUM, not a target to exceed. For this strategy 0.8% sits closer to the optimum than 1.2% does. Long-only; no short leg exists yet."
+ },
+ {
+  "id": "vwm-attack5-volume-confirm",
+  "name": "VWM base + volume confirmation on the reclaim",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "Attack 5. Exactly one change from the base (VWM + EMA200 trend filter): the pullback-hold bar must trade above its own 50-bar average volume, so participation has to return as price reclaims VWAP. Long only; the short rebuild remains unattempted.",
+  "metrics": {
+   "netProfitPct": -25.3839511,
+   "profitFactor": 0.83915848,
+   "maxDrawdownPct": 26.88635455,
+   "totalTrades": 241,
+   "winRatePct": 37.7593361,
+   "avgTradePct": -0.1053276
   },
-  {
-    "id": "vwm-short-mirrored-mechanism",
-    "name": "VWM short side, mirrored mechanism",
-    "symbol": "BTCUSDT",
-    "timeframe": "5m",
-    "direction": "short",
-    "status": "testing",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2024-06-08",
-    "backtestEnd": "2026-09-01",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "The short side of the base mechanism, symmetric with the long: price stretches to minus 2 sigma, retraces up toward VWAP, then loses it again, with VWAP falling and price below the 600 EMA. Continuation after pullback, not a fade. Run short-only so the leg is judged on its own profit factor.",
-    "metrics": {
-      "netProfitPct": -25.69154813,
-      "profitFactor": 0.74125302,
-      "maxDrawdownPct": 34.41201829,
-      "totalTrades": 273,
-      "winRatePct": 17.58241758,
-      "avgTradePct": -0.09410823
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GWYDNDFTRC56JD3NKG4P9F",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GWYDNC1TFEFRKJZ3D02TZG",
-      "verifiedAt": "2026-09-02T11:09:25Z"
-    },
-    "notes": "THE MIRROR BEATS THE OWN-GEOMETRY SHORT DECISIVELY, WHICH CORRECTS A RULE THIS LAB HAD BEEN APPLYING. PF 0.7413 on 273 trades against the fade construction's 0.5506 on 17 -- better profit factor AND sixteen times the sample. The no-mirror doctrine steered this lab toward a 17-trade fade when a 273-trade symmetric leg was available and better. STILL NOT VIABLE at PF 0.74, and the drawdown is severe at 34.4%. The trade profile is also unlike the long's: 17.58% win rate with a 3.47 payoff ratio, so the short takes many small losses and a few large wins, where the long runs 38-41% at a 1.5 payoff. That asymmetry is real information -- the same mechanism does not produce the same trade shape on each side, which is worth knowing before any attempt to run them together. Recorded as testing because it is the best short on record and the basis for the bidirectional build, not because it is usable."
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GPTCCXC4591VVCQGTCWXM7",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GPTCCX63DSH29ECJH5PH3X",
+   "verifiedAt": "2026-09-02T09:22:21Z"
   },
-  {
-    "id": "vwm-bidirectional",
-    "name": "VWM bidirectional, regime picks the side",
-    "symbol": "BTCUSDT",
-    "timeframe": "5m",
-    "direction": "both",
-    "status": "rejected",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2024-06-08",
-    "backtestEnd": "2026-09-01",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "One strategy, the regime picks the side. Long when VWAP is rising and price is above the 600 EMA, short when both are inverted, same pullback-continuation mechanics either way, with the VWAP-cross flip rule standing the strategy down for 60 bars in both directions. Both legs reported separately.",
-    "metrics": {
-      "netProfitPct": -20.41553382,
-      "profitFactor": 0.88794387,
-      "maxDrawdownPct": 37.33436256,
-      "totalTrades": 422,
-      "winRatePct": 24.64454976,
-      "avgTradePct": -0.04837804
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1GXAMEBQ2M980P37Q209JJZ",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GXAMEADVBY5AM88ZMWF22Q",
-      "verifiedAt": "2026-09-02T11:16:05Z"
-    },
-    "notes": "THE STRUCTURE IS RIGHT AND THE SHORT LEG BLEEDS. Combined PF 0.8879 with a 37.3% drawdown, against 1.0202 for the long alone. Longs 128 trades, 53 wins, +$374.27. Shorts 294 trades, 51 wins, -$2,415.82. THE LONG COUNT IS UNCHANGED AT 128, so the two legs barely block one another under pyramiding 1 -- the interaction question this run was built to answer is settled, and the answer is that there is almost no interaction. The short is simply a large net drag. This build satisfies the standing both-directions requirement structurally but fails it substantively: a strategy is not bidirectional in any useful sense when one side loses 2.4x the account's starting equity in gross terms. Adding a losing leg to a break-even leg produces a worse system, not a more complete one."
-  }
+  "notes": "REVERTED on the ratchet: PF 0.9121->0.8392. Drawdown did improve (28.78%->26.89%) but PF is the binding term. THE IMPORTANT PART IS WHY. The gate cut trades 433->241, a 44% reduction, and halved the commission bill from $3,954 to $2,078 -- exactly the fee saving the attack list was designed to capture. Net return still got WORSE, -23.0%->-25.4%. The trades it removed were net positive contributors. Win rate barely moved (38.3%->37.8%) but the payoff ratio fell 1.498->1.383, so the low-volume reclaims were the ones producing the larger wins. This falsifies the fee-drag thesis as the lab's primary diagnosis."
+ },
+ {
+  "id": "vwm-attack7-3r-target",
+  "name": "VWM base + 3R target (exit attack)",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "Attack 7, the first attack on the EXIT rather than the entry. Exactly one input changes from the base (VWM + EMA200): the reward:risk target rises from 2.0R to 3.0R. Long only; the short rebuild remains unattempted and unmirrored.",
+  "metrics": {
+   "netProfitPct": -23.02267811,
+   "profitFactor": 0.90999946,
+   "maxDrawdownPct": 32.96370421,
+   "totalTrades": 409,
+   "winRatePct": 33.7408313,
+   "avgTradePct": -0.05629017
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GPZEGM5PCKFH48RPZSZCJR",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GPZEGMF3QFKCM6GMZS8Z4C",
+   "verifiedAt": "2026-09-02T09:25:07Z"
+  },
+  "notes": "REVERTED: PF 0.9121->0.9100 (flat) and DD 28.78%->32.96% (worse). THE CLEANEST RESULT THIS LAB HAS PRODUCED. The change did exactly what it was designed to do -- avgWin/avgLoss rose 1.498->1.787, a 19% gain in payoff -- and the win rate fell 38.3%->33.7% by almost precisely the amount needed to cancel it. Net return was -23.02% against the base's -23.0%: identical to two decimal places. The 2R and 3R points sit on the SAME iso-profit-factor curve, which means moving along the risk-reward axis is neutral for this signal. Combined with the entry-filter falsification, both halves of the trade -- entry selection and exit target -- have now been shown not to be the lever."
+ },
+ {
+  "id": "vwm-regime-highvol",
+  "name": "VWM base restricted to the high-volatility regime",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "long",
+  "status": "testing",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "Regime decomposition, half 1 of 2. The base (VWM + EMA200) restricted to bars where ATR14/close sits above its own 200-bar average. Run as a measurement of whether the base PF of 0.9121 is uniform or an average over two market states. Long only; short rebuild still unattempted.",
+  "metrics": {
+   "netProfitPct": -12.66044947,
+   "profitFactor": 0.93211241,
+   "maxDrawdownPct": 23.43165898,
+   "totalTrades": 279,
+   "winRatePct": 38.70967742,
+   "avgTradePct": -0.04537796
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GQDB3SYPRMQCGFZ3DKCC76",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GQDB3SAACXCM1FTKY03VP4",
+   "verifiedAt": "2026-09-02T09:33:22Z"
+  },
+  "notes": "KEPT ON THE RATCHET -- only the second change ever kept. PF 0.9121->0.9321 AND max drawdown 28.780%->23.432%, so both terms moved the right way with no tolerance needed. Crucially this is NOT the pruning pattern that killed attacks 2 and 5: trade count fell only 36% (433->279) while PF ROSE and the win rate held at 38.7%. Net loss more than halved, -23.0%->-12.7%. The complement -- the low-volatility half -- is therefore implied to be materially worse than the 0.9121 aggregate, and runs next cycle to complete the decomposition. PF is still below 1.0, so this is a better description of where the signal lives, not yet a profitable system."
+ },
+ {
+  "id": "vwm-regime-lowvol",
+  "name": "VWM base restricted to the low-volatility regime",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "Regime decomposition, half 2 of 2. The VWM + EMA200 signal restricted to bars where ATR14/close is at or below its own 200-bar average -- the exact complement of the kept high-volatility half. Run as a measurement to complete the split. Long only.",
+  "metrics": {
+   "netProfitPct": -15.48445255,
+   "profitFactor": 0.87505903,
+   "maxDrawdownPct": 23.11687389,
+   "totalTrades": 230,
+   "winRatePct": 38.69565217,
+   "avgTradePct": -0.06732371
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GQSBZBN2JC49RWPTMTGJ9B",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GQSBZBQNA31WGWARPCMKE8",
+   "verifiedAt": "2026-09-02T09:39:16Z"
+  },
+  "notes": "THE COMPLEMENT, AND IT SIZES THE REGIME EFFECT HONESTLY. PF 0.8751 against the high-vol half's 0.9321, a real gap of 0.057 -- but BOTH halves lose, so regime conditioning improves the description without rescuing the signal. The most striking detail is that the win rate is identical to two decimal places, 38.70% vs 38.71%. The entire difference sits in the payoff ratio, 1.386 vs 1.476: volatility does not change how often this signal is right, only how far price travels before the fixed 2R target or the 96-bar time stop resolves the trade. CAVEAT ON THE ARITHMETIC: the halves total 509 trades against the mixed base's 433, because each half runs independently and can take signals the mixed run was already in a position for. The split is therefore approximate, not a strict partition."
+ },
+ {
+  "id": "vwm-attack3-witching-on-highvol",
+  "name": "VWM high-vol base + witching-hour ban",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "long",
+  "status": "testing",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "Attack 3 re-tested against the new high-volatility base: entries banned in the 1-4am ET witching window. Exactly one change. Long only; the short rebuild remains unattempted and unmirrored.",
+  "metrics": {
+   "netProfitPct": -6.53529745,
+   "profitFactor": 0.96401358,
+   "maxDrawdownPct": 22.61240725,
+   "totalTrades": 271,
+   "winRatePct": 39.11439114,
+   "avgTradePct": -0.02411549
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GR5VZFDVNFB1DW7NR9AHNM",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GR5VZFK7PGHEQ5D9Q343VX",
+   "verifiedAt": "2026-09-02T09:46:06Z"
+  },
+  "notes": "KEPT, AND IT RESOLVES THE OPEN TOLERANCE QUESTION BY MAKING IT UNNECESSARY. PF 0.9321->0.9640 and max drawdown 23.432%->22.612%: both ratchet terms improved strictly, on the strictest possible reading. Against the OLD mixed base this identical change cost 0.064pp of drawdown and was reverted; against the high-volatility base it IMPROVES drawdown. The two changes are complementary rather than competing, and only 8 trades were removed. Best profit factor this lab has recorded, and the first to clear 0.95 -- so 5m and parameter sensitivity are owed next cycle. Still below 1.0: this is the best description of the signal yet, not a profitable system."
+ },
+ {
+  "id": "vwm-base-5m-confirmation",
+  "name": "VWM base 5m confirmation run",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "Owed confirmation run after the 15m base cleared PF 0.95. Identical code, nothing reoptimised, only the timeframe changed. Long only.",
+  "metrics": {
+   "netProfitPct": -38.57377753,
+   "profitFactor": 0.70657441,
+   "maxDrawdownPct": 41.00293602,
+   "totalTrades": 356,
+   "winRatePct": 38.76404494,
+   "avgTradePct": -0.10835331
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GRGNS2XSAY88H1WHBDYGTQ",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GRGNS2X9FF48HYEYV50ZW0",
+   "verifiedAt": "2026-09-02T09:52:00Z"
+  },
+  "notes": "FAILS ON 5m -- BUT THE TEST IS CONFOUNDED AND I AM NOT CLAIMING MORE THAN IT SUPPORTS. PF 0.9640 -> 0.7066, DD 22.61% -> 41.00%, net -38.6%. The win rate is essentially unchanged (39.11% -> 38.76%) while the payoff ratio collapses 1.501 -> 1.116, which is the signature of trades running out of time rather than out of edge. THE CONFOUND: every bar-denominated parameter means three times less wall-clock on 5m -- maxBars 96 is 8 hours here against 24 hours on 15m, and sdLen, slopeLen, pushLook, coolBars, swgLen, trendLen and volLen are all similarly compressed. This is therefore NOT a clean timeframe-transfer test. The honest reading is inconclusive and leaning negative. A properly scaled re-run (maxBars 288, lookbacks x3) is owed before the 15m result is either trusted or discarded."
+ },
+ {
+  "id": "vwm-base-5m-scaled",
+  "name": "VWM base 5m, properly scaled",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "testing",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "The current base on 5m with every bar-denominated parameter multiplied by 3 so each window covers the same wall-clock span as the 15m version: sdLen 300, slopeLen 150, pushLook 150, coolBars 60, swgLen 60, maxBars 288, trendLen 600, volLen 600, ATR 42. Price-denominated inputs unchanged, nothing reoptimised. Long only.",
+  "metrics": {
+   "netProfitPct": 1.60248604,
+   "profitFactor": 1.02024675,
+   "maxDrawdownPct": 16.68203271,
+   "totalTrades": 128,
+   "winRatePct": 41.40625,
+   "avgTradePct": 0.01251942
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GSZ5D9ZJJT2G28SQ69ZV11",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GSZ5D9581JM0BAKEB5NC8F",
+   "verifiedAt": "2026-09-02T10:17:23Z"
+  },
+  "notes": "FIRST PROFIT FACTOR ABOVE 1.0 IN THIS LAB, AND IT SURVIVES A CONTROLLED COMPARISON. PF 1.0202, DD 16.68%, 128 trades. The unscaled 5m attempt gave 0.7066 and was recorded as confounded; scaling every bar-denominated parameter by the timeframe ratio was the whole difference, which vindicates that diagnosis. The like-for-like control matters more than the headline: the 15m base run over this SAME window gives PF 0.9615 and DD 21.33%, so 5m beats 15m on both ratchet terms over identical data, and the 15m result is itself stable across periods (0.9640 on 2022-2026 against 0.9615 on 2024-2026). The timeframe is doing the work, not the sample. HONEST LIMIT: PF 1.02 on 128 trades is break-even plus noise, and net +1.60% over 2.2 years is not an economically meaningful return. This is the first evidence of a real edge, not a tradeable system."
+ },
+ {
+  "id": "vwm-base-15m-period-control",
+  "name": "VWM base 15m, period control",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "Control run: the unchanged 15m base restricted to the 5m data window, to isolate whether the scaled 5m result comes from the timeframe or from the shorter, more recent period. Long only.",
+  "metrics": {
+   "netProfitPct": -2.79635364,
+   "profitFactor": 0.96146689,
+   "maxDrawdownPct": 21.33249808,
+   "totalTrades": 113,
+   "winRatePct": 40.7079646,
+   "avgTradePct": -0.02474649
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GT0HY9KDX2WS7NK67DJQH2",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GT0HY9PBF8DSE5Z3H6S8Y7",
+   "verifiedAt": "2026-09-02T10:18:09Z"
+  },
+  "notes": "THE CONTROL THAT MAKES THE 5m RESULT MEAN SOMETHING. PF 0.9615 on the same window where 5m scored 1.0202, with worse drawdown (21.33% against 16.68%). It also shows the 15m signal is stable across periods -- 0.9640 over 2022-2026 against 0.9615 over 2024-2026 -- so the recent window is not unusually kind. Both together isolate the timeframe as the cause. Recorded as rejected because it is superseded as the base, not because the run failed."
+ },
+ {
+  "id": "vwm-base-1m-scaled",
+  "name": "VWM base 1m, scaled x15",
+  "symbol": "BTCUSDT",
+  "timeframe": "1m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2025-12-16",
+  "backtestEnd": "2026-05-03",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "Third point on the timeframe curve. The original 15m base with every bar-denominated parameter multiplied by 15 so each window matches in wall-clock: sdLen 1500, slopeLen 750, pushLook 750, coolBars 300, swgLen 300, maxBars 1440, trendLen 3000, volLen 3000, ATR 210. Nothing reoptimised. Long only.",
+  "metrics": {
+   "netProfitPct": -2.16087153,
+   "profitFactor": 0.75210908,
+   "maxDrawdownPct": 6.73262425,
+   "totalTrades": 16,
+   "winRatePct": 37.5,
+   "avgTradePct": -0.13505447
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GTW42X0D1QQ9C7P2A7WPP7",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GTW42XFTFRS3D7XYDA4A7X",
+   "verifiedAt": "2026-09-02T10:33:12Z"
+  },
+  "notes": "REVERTED. PF 0.7521 against the 5m base's 0.8753 on the SAME window, so faster is not uniformly better and the timeframe curve has an interior optimum at 5m. 16 trades is a thin sample -- 1m coverage is only 4.6 months -- but the control makes the comparison valid rather than relying on the headline number."
+ },
+ {
+  "id": "vwm-5m-1mwindow-control",
+  "name": "VWM 5m base, 1m-window control",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2025-12-16",
+  "backtestEnd": "2026-05-03",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "Control for the 1m run: the unchanged 5m base restricted to the 1m data window, isolating timeframe from period. Long only.",
+  "metrics": {
+   "netProfitPct": -1.08265403,
+   "profitFactor": 0.8753355,
+   "maxDrawdownPct": 6.63250015,
+   "totalTrades": 17,
+   "winRatePct": 41.17647059,
+   "avgTradePct": -0.06368553
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GTY4149TAKKQJHG5TYDQTQ",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GTY414EDY7B9NQG4VPJ83F",
+   "verifiedAt": "2026-09-02T10:34:18Z"
+  },
+  "notes": "THIS CONTROL DOES TWO JOBS. First, it beats 1m on identical data (0.8753 against 0.7521), which is what rejects the 1m build. Second, and less comfortable: the 5m base scores 0.8753 here against 1.0202 over its full 2.2 years, so the December-to-May window is materially harder than the 5m average and THE HEADLINE 1.02 IS NOT UNIFORM ACROSS TIME. That is the same shape as the War Formation lab's unexplained time-concentration, now appearing in the BTC lab too, and it is a caution against reading 1.02 as a stable property of the signal."
+ },
+ {
+  "id": "vwm-5m-firsthalf-decomposition",
+  "name": "VWM 5m base, first-half period decomposition",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2025-07-20",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "Period decomposition of the 5m base. Unchanged code, window narrowed to the first half of the 5m sample. A measurement completing the calendar picture, not a ratchet candidate. Long only.",
+  "metrics": {
+   "netProfitPct": 14.63590295,
+   "profitFactor": 1.35522034,
+   "maxDrawdownPct": 9.99054777,
+   "totalTrades": 67,
+   "winRatePct": 52.23880597,
+   "avgTradePct": 0.21844631
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GV9WSZ7A74QA0MH6V9ETQG",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GV9WSZQH486A6V7N173261",
+   "verifiedAt": "2026-09-02T10:40:44Z"
+  },
+  "notes": "THE EDGE IS HEAVILY FRONT-LOADED, AND THIS SHOULD TEMPER THE HEADLINE. PF 1.3552 with a 52.24% win rate and +14.64% net across 67 trades in the first half, against 1.0202 over the full 2.2 years and 0.8753 over Dec 2025 to May 2026. The remaining roughly 61 trades must therefore be break-even or worse to drag the total from 1.36 down to 1.02. The 5m base's profit factor above 1.0 is carried by June 2024 to July 2025; the most recent fourteen months are weak. Combined with the War Formation champion degrading in the same recent window on a completely different mechanism, this looks like edge decay in the current regime rather than a property of either strategy. Recorded as rejected because it is a measurement, not a configuration."
+ },
+ {
+  "id": "vwm-5m-secondhalf-decomposition",
+  "name": "VWM 5m base, second-half (out-of-sample)",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2025-07-20",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "Period decomposition of the 5m base, second half. Unchanged code, window 2025-07-20 to 2026-09-01. The closest thing to an out-of-sample read this lab has, since nothing was ever tuned against this window. A measurement, not a ratchet candidate. Long only.",
+  "metrics": {
+   "netProfitPct": -11.36382815,
+   "profitFactor": 0.65655726,
+   "maxDrawdownPct": 15.29119477,
+   "totalTrades": 61,
+   "winRatePct": 29.50819672,
+   "avgTradePct": -0.18629226
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GVM2J26NQCJTV52F8NMVBP",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GVM2J1ZQMG4XNP2ST6548D",
+   "verifiedAt": "2026-09-02T10:46:17Z"
+  },
+  "notes": "THE DECISIVE RESULT, AND IT UNDERCUTS THE HEADLINE. PF 0.6566, win rate 29.51%, net -11.36% across 61 trades. The split is exact -- 67 trades in the first half plus 61 here equals the full sample's 128 -- so this is a clean partition, not an approximation. First half PF 1.3552, second half 0.6566, full 1.0202. THE 5m BASE DOES NOT HAVE A PERSISTENT EDGE: the full-sample profit factor above 1.0 is an average of one good year and one bad one, and the more recent year is decisively negative. Either the edge decayed or the first half was luck; on 67 and 61 trades this data cannot separate those. What it does settle is that PF 1.02 must never again be quoted as a property of this signal. The two changes KEPT earlier -- the high-volatility regime split and the witching ban -- were both measured on the full mixed sample and should be regarded as unvalidated on the recent half."
+ },
+ {
+  "id": "vwm-short-own-geometry",
+  "name": "VWM short leg, own geometry",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "short",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "The first short leg in this lab, built from its own geometry rather than mirrored. The long buys a pullback continuing an uptrend; this fades an extreme -- a rally reaching the upper 2 sigma band that fails, closing back below it on a down bar, with VWAP falling and price under the 600-bar EMA. Stop above the 60-bar swing high. Run SHORT-ONLY so it is judged alone.",
+  "metrics": {
+   "netProfitPct": -2.62143398,
+   "profitFactor": 0.55064867,
+   "maxDrawdownPct": 2.66677054,
+   "totalTrades": 17,
+   "winRatePct": 17.64705882,
+   "avgTradePct": -0.154202
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GW0ZYQCRFWT7N4GJ8JGKQE",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GW0ZYPEWED0C85DEBHQJXX",
+   "verifiedAt": "2026-09-02T10:53:20Z"
+  },
+  "notes": "REJECTED ON ITS OWN NUMBERS, WHICH IS THE POINT OF JUDGING IT ALONE. PF 0.5506, win rate 17.65%, 3 winners from 17 trades. It IS a genuine own-geometry construction rather than a mirror -- the long requires a pullback to exist, this requires an extension -- so the standing rule was honoured, and that rule is not what failed here. Two observations for the next attempt: the trigger is RARE, only 17 occurrences in 2.2 years, so the band-rejection condition is too restrictive to build on; and the shape is odd, with avgBarsWinning 254.7 against avgBarsLosing 32.6, meaning the few winners grind for days while losers resolve in hours. That asymmetry suggests the 2R target is too far for a fade and the losers are being stopped by ordinary noise on the way. A fade probably wants a nearer target and a wider stop -- the opposite configuration from the trend-following long."
+ },
+ {
+  "id": "vwm-short-1r-target",
+  "name": "VWM short leg with a 1R target",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "short",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "The own-geometry short leg with one input changed: target 1R instead of 2R. Source is the exact Pine of the previous run rather than a reconstruction. Short-only.",
+  "metrics": {
+   "netProfitPct": -2.19279427,
+   "profitFactor": 0.58157892,
+   "maxDrawdownPct": 3.02997113,
+   "totalTrades": 17,
+   "winRatePct": 29.41176471,
+   "avgTradePct": -0.1289879
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GWEHG93YBGJ7ECZN4CPRTZ",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GWEHG8PXKSS72WWRBQBC2K",
+   "verifiedAt": "2026-09-02T11:00:44Z"
+  },
+  "notes": "A CLEAN SINGLE-VARIABLE TEST, AND THE TRADE COUNT PROVES IT: 17 in both runs, because the entry was untouched. PF 0.5506 -> 0.5816 and win rate 17.65% -> 29.41%, with avgBarsWinning falling from 254.7. THE FADE HYPOTHESIS IS DIRECTIONALLY CONFIRMED for this leg -- a target set for a trend continuation is too far for a trade that fades an extreme. Still nowhere near viable at PF 0.58 on 17 trades, so this is a lesson about trade-type-appropriate exits rather than a usable leg. Note the contrast with War Formation E26, where the identical change on that lab's short made things WORSE (0.749 -> 0.692): the exit convention has to follow the mechanism, and there is no universal answer."
+ },
+ {
+  "id": "vwm-short-mirrored-mechanism",
+  "name": "VWM short side, mirrored mechanism",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "short",
+  "status": "testing",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "The short side of the base mechanism, symmetric with the long: price stretches to minus 2 sigma, retraces up toward VWAP, then loses it again, with VWAP falling and price below the 600 EMA. Continuation after pullback, not a fade. Run short-only so the leg is judged on its own profit factor.",
+  "metrics": {
+   "netProfitPct": -25.69154813,
+   "profitFactor": 0.74125302,
+   "maxDrawdownPct": 34.41201829,
+   "totalTrades": 273,
+   "winRatePct": 17.58241758,
+   "avgTradePct": -0.09410823
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GWYDNDFTRC56JD3NKG4P9F",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GWYDNC1TFEFRKJZ3D02TZG",
+   "verifiedAt": "2026-09-02T11:09:25Z"
+  },
+  "notes": "THE MIRROR BEATS THE OWN-GEOMETRY SHORT DECISIVELY, WHICH CORRECTS A RULE THIS LAB HAD BEEN APPLYING. PF 0.7413 on 273 trades against the fade construction's 0.5506 on 17 -- better profit factor AND sixteen times the sample. The no-mirror doctrine steered this lab toward a 17-trade fade when a 273-trade symmetric leg was available and better. STILL NOT VIABLE at PF 0.74, and the drawdown is severe at 34.4%. The trade profile is also unlike the long's: 17.58% win rate with a 3.47 payoff ratio, so the short takes many small losses and a few large wins, where the long runs 38-41% at a 1.5 payoff. That asymmetry is real information -- the same mechanism does not produce the same trade shape on each side, which is worth knowing before any attempt to run them together. Recorded as testing because it is the best short on record and the basis for the bidirectional build, not because it is usable."
+ },
+ {
+  "id": "vwm-bidirectional",
+  "name": "VWM bidirectional, regime picks the side",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "both",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "One strategy, the regime picks the side. Long when VWAP is rising and price is above the 600 EMA, short when both are inverted, same pullback-continuation mechanics either way, with the VWAP-cross flip rule standing the strategy down for 60 bars in both directions. Both legs reported separately.",
+  "metrics": {
+   "netProfitPct": -20.41553382,
+   "profitFactor": 0.88794387,
+   "maxDrawdownPct": 37.33436256,
+   "totalTrades": 422,
+   "winRatePct": 24.64454976,
+   "avgTradePct": -0.04837804
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GXAMEBQ2M980P37Q209JJZ",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GXAMEADVBY5AM88ZMWF22Q",
+   "verifiedAt": "2026-09-02T11:16:05Z"
+  },
+  "notes": "THE STRUCTURE IS RIGHT AND THE SHORT LEG BLEEDS. Combined PF 0.8879 with a 37.3% drawdown, against 1.0202 for the long alone. Longs 128 trades, 53 wins, +$374.27. Shorts 294 trades, 51 wins, -$2,415.82. THE LONG COUNT IS UNCHANGED AT 128, so the two legs barely block one another under pyramiding 1 -- the interaction question this run was built to answer is settled, and the answer is that there is almost no interaction. The short is simply a large net drag. This build satisfies the standing both-directions requirement structurally but fails it substantively: a strategy is not bidirectional in any useful sense when one side loses 2.4x the account's starting equity in gross terms. Adding a losing leg to a break-even leg produces a worse system, not a more complete one."
+ },
+ {
+  "id": "vwm-short-15m-timeframe-axis",
+  "name": "VWM short leg at 15m, params scaled /3",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "short",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "The timeframe axis -- the only axis that ever moved the long -- applied to the short leg for the first time. One change from the recovered mirrored-short source: 5m to 15m with every bar-denominated parameter divided by 3. Window matched to the 5m run so the comparison is like-for-like on period. Short-only.",
+  "metrics": {
+   "netProfitPct": -42.25034891,
+   "profitFactor": 0.59953518,
+   "maxDrawdownPct": 50.59926724,
+   "totalTrades": 270,
+   "winRatePct": 14.81481481,
+   "avgTradePct": -0.15648277
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GY1MW4RZNTEE850GEW8BYF",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GY1MW4MBEHXDGKM621ZFKM",
+   "verifiedAt": "2026-09-02T11:28:39Z"
+  },
+  "notes": "THE SHORT'S TIMEFRAME CURVE RUNS THE OTHER WAY. 5m PF 0.7413 / DD 34.40% / 273 trades -> 15m PF 0.5995 / DD 50.60% / 270 trades. Trade count barely moved (273 vs 270) so this is not a sampling artifact -- the same signal is simply worse when read slower. The long improved going 15m->5m; the short degrades going 5m->15m, which is consistent with both legs preferring FASTER, not with the two legs sharing an optimum. REVERTED on both ratchet terms."
+ }
 ]

@@ -137,6 +137,7 @@ should be rejected without spending a credit on it.
 | Attack 4 | Raise R floor 0.8% → 1.2% | PF 0.912→0.885, DD 28.8%→36.6%, win rate 38.3%→40.2% | **REVERTED** — wider stops mean bigger losses |
 | Attack 5 | Require volume above the 50-bar average on the reclaim | PF 0.912→0.839, DD 28.8%→26.9%, trades 433→241, commission $3,954→$2,078 | **REVERTED** — fee saving realised, edge lost with it |
 | Attack 7 | Raise the target 2R → 3R | PF 0.9121→0.9100, DD 28.8%→33.0%, payoff 1.498→1.787, win rate 38.3%→33.7% | **REVERTED** — payoff gain exactly cancelled by win-rate loss |
+| Attack 8 | Short leg 5m → 15m, every bar parameter /3 | PF 0.7413→0.5995, DD 34.40%→50.60%, trades 273→270 | **REVERTED** — the short's timeframe curve runs the OTHER way |
 
 7. ~~Attack the EXIT, not the entry~~ — **DONE, REVERTED.** See the frontier note below.
 8. **Attack the EXIT, original text:** Every attack so far has been an entry filter. The system lives
@@ -576,3 +577,37 @@ be worse than shipping nothing.
 
 **The right next work is on the short side alone**, judged on its own profit factor, until one clears
 1.0. Everything else is premature.
+
+
+## ██ ATTACK 8 — THE TIMEFRAME AXIS DOES NOT GENERALISE ACROSS LEGS (2026-09-02)
+
+The timeframe axis is the only thing that has ever moved this system: seven entry and exit filters
+left the long at PF 0.91, and going 15m -> 5m with every bar parameter scaled took it to 1.02. **The
+short had never been tested on that axis** — every short construction ran at 5m because that is
+where the long had landed.
+
+| Short leg | 5m (base) | 15m, params /3 |
+|---|---|---|
+| Profit factor | **0.74125302** | 0.59953518 |
+| Max drawdown | 34.40% | **50.60%** |
+| Trades | 273 | 270 |
+| Win rate | 17.6% | 14.8% |
+| Payoff ratio | ~3.5 | 3.447 |
+
+**REVERTED — worse on both ratchet terms.**
+
+**The trade count is the informative number: 273 versus 270.** Slowing the timeframe by 3x barely
+changed how often the signal fires, so this is not a sampling artifact. The *same* signal, on the
+*same* period, is simply worse when read slower — the payoff ratio held at ~3.4 while the win rate
+fell 2.8pp, and the drawdown got half again as deep.
+
+**What this settles and what it does not.** It settles that the two legs do not share a timeframe
+optimum in the way I assumed when scaling both to 5m. The long has an interior optimum at 5m; the
+short degrades as far as it has been measured, so **both legs point faster, not toward each other.**
+It does NOT establish where the short's optimum is — 1m is the untested direction, and that is
+sample-limited to Dec 2025 onward.
+
+**More importantly, it is the tenth negative short result across this lab and War Formation.** The
+axis that rescued the long did nothing for the short, exactly as the seven filters did nothing for
+the long. **Each leg has now had one axis that moves it and a long list that does not, and the
+short's has not been found.**

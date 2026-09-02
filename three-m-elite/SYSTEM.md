@@ -303,6 +303,7 @@ so the code genuinely behaves differently. **But the count stayed at 3.**
 | v18 | Arming candle exempted from mitigation | **0 TRADES.** Third consecutive zero on this gate · [report](https://mcp-api.trader.dev/backtest/01M1GWQMNTR2YC3YY3YFBWDM42) |
 | v19 | Count 4H engulfing candles alone | **TEN in 4.7 years** (5 bull, 5 bear) out of ~9,800 candles. The engulf definition assumes GAPS · [report](https://mcp-api.trader.dev/backtest/01M1GX4DEVQGF6R39CE7FJWRC9) |
 | v20 | The SAME counter with the gap clause removed — body containment only | **2,711 ENGULFS** (1,325 bull, 1,386 bear). 271x the old count, ~28% of all 4H candles · [report](https://mcp-api.trader.dev/backtest/01M1GXHFTDY20ZA3GP2HBDW7J6) |
+| v21 | v15's source with the corrected engulf — the lifecycle's first real population | **PF 1.0239, DD 10.58%, 185 trades** (56 long 21W +$652 / 129 short 25W -$423). Best on record; 11-month trade gap disclosed · [report](https://mcp-api.trader.dev/backtest/01M1GXYHSEMAS3J7ABRE3V169G) |
 
 **When three independent corrections land on the same trade count, the binding constraint is upstream
 of all of them.** I have now spent three cycles fixing things that were genuinely wrong and none of
@@ -543,7 +544,15 @@ never been in the thing being tested — they have been in the assumptions under
 0-V19. ~~COUNT THE MISSING TERM~~ — **DONE, and it was the ENGULF, not arming. Ten in 4.7 years.**
 0-V20. ~~REDEFINE THE ENGULF WITHOUT A GAP REQUIREMENT~~ — **DONE. 10 became 2,711.** The clause was
     the whole problem. The population is real and balanced; the validation gate can now be tested.
-0-V21-NEXT. **RESTORE THE TYPE 2 VALIDATION GATE ON THE CORRECTED ENGULF (top priority).** This is
+0-V21. ~~CORRECT THE ENGULF IN THE LIFECYCLE ITSELF~~ — **DONE. PF 0.363 -> 1.024 on 185 trades.**
+    v15 still carried the gap clause, so zone CREATION was the binding step, upstream of the gate.
+0-V22-NEXT. **EXPLAIN THE ELEVEN-MONTH TRADE GAP (top priority, diagnostic).** v21's last trade exits
+    2025-10-06 on a window running to 2026-09-01. Suspected cause: the deepest-zone rule — a live
+    demand zone can only be replaced by a DEEPER one, so in a rising market it persists untouched
+    and blocks demand entries indefinitely. Counter-build it: fire on dzLive alone with a one-bar
+    exit and read the trade distribution across time. Do NOT tune anything until this is measured; a
+    result computed on two thirds of its window is not the result it appears to be.
+0-V23. **THEN restore the Type 2 validation gate on the corrected engulf.** Superseded text: RESTORE THE TYPE 2 VALIDATION GATE ON THE CORRECTED ENGULF. This is
     v16's build with one term replaced: the engulf now uses body containment, no gap. v16 returned 0
     trades on a population of 10; the same conjunction now draws on 2,711. If it still returns a
     handful, the constraint is the zone lifecycle after all and the next counter measures LIVE ZONES.
@@ -684,3 +693,42 @@ equities concept. This market never closes.
 
 ~28% is a *permissive* term, not a selective one — so the engulf is no longer a candidate explanation
 for a low trade count. Whatever binds next is elsewhere, and v21 will say where.
+
+
+---
+
+## ██ v21 — THE BEST RESULT THIS LAB HAS PRODUCED, AND THE ANOMALY THAT QUALIFIES IT
+
+Recovering v15's source (never the description) showed it **still carried the gap-requiring engulf**.
+So the correction v20 measured had never actually reached the strategy: every zone this lab has ever
+created — v9, v10, v11, v15, and the **v3 reference base** — was built from the population of ten.
+
+One change. Body containment, no gap. Everything else byte-identical to v15.
+
+| | v3 (old reference) | v15 | **v21** |
+|---|---|---|---|
+| Profit factor | 0.64 | 0.36258373 | **1.02389497** |
+| Trades | 94 | 24 | **185** |
+| Max drawdown | — | 15.53% | **10.58%** |
+| Win rate | — | 8.33% | 24.86% |
+
+**Long 56 trades, 21 wins, +$652.14. Short 129 trades, 25 wins, -$423.19.** The long carries it and
+the short loses — the same shape as both sister labs, from a completely different mechanism. That
+consistency is itself a finding.
+
+### THE ANOMALY, DISCLOSED RATHER THAN BURIED
+**The last trade exits 2025-10-06. The window runs to 2026-09-01.** Roughly eleven months — about a
+third of the sample — produced no entries at all.
+
+The likely cause is structural, not market: the **deepest-zone rule** only replaces a live demand
+zone with a *deeper* one. In a rising market every new engulf low is higher, so the incumbent zone is
+never replaced, and if price never returns to close inside it, it never mitigates either. It simply
+sits there forever, blocking demand entries.
+
+**So v21 is recorded as `testing`, not promoted, and PF 1.0239 is break-even plus noise even at face
+value.** A profit factor computed over two thirds of its window is not the number it appears to be,
+and the same rule that produces the gap would also have distorted v15 and v3. Measuring it is v22.
+
+**The method held, though, and that is worth stating:** v19 counted a term, v20 counted the fix, v21
+applied it to the lifecycle — and the trade count went 24 -> 185 exactly as the counter predicted.
+The number that had never been measured was the one that mattered.
