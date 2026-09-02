@@ -115,5 +115,34 @@
       "verifiedAt": "2026-09-02T09:29:40Z"
     },
     "notes": "FIRST POSITIVE RESULT IN THIS LAB, AND EXPLICITLY NOT YET EVIDENCE. PF 1.77, net +3.10%, longs 5 (2 wins, +$297.97), shorts 5 (1 win, +$12.05) -- both legs positive, the short essentially flat. The mechanism finally behaves as the source describes: zero trades at v2 and v4, 2 at v5, 10 here. But TEN TRADES IN 4.7 YEARS IS NOT A SAMPLE. This lab has already been burned by exactly this: v1 showed PF 0.91 on 20 trades and the same cascade on a proper sample gave PF 0.64 on 94. The honest reading is that the mechanism is now correctly implemented and the frequency is still far too low to test it. Do NOT promote this over v3 as the reference base on these numbers."
+  },
+  {
+    "id": "3m-elite-v7-source-only",
+    "name": "3M ELITE v7 source rules only",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Queue item 0-V7, run as a measurement. The four lab-invented gates (MA-spread test, break counters, MA slope test, Keltner overextension check) are removed, leaving only the author's own rules: 2D bias, 12H zone, 4H structure, the latched tap and the Type 2 validation. Tests whether the 10-trade frequency of v6 was caused by my additions.",
+    "metrics": {
+      "netProfitPct": 1.80462678,
+      "profitFactor": 1.32219251,
+      "maxDrawdownPct": 3.89956087,
+      "totalTrades": 10,
+      "winRatePct": 30.0,
+      "avgTradePct": 0.18046268
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GQE5ZSVC8RBJACHM8AF0B2",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GQE5ZSFMXKVQK5NTYAVY8F",
+      "verifiedAt": "2026-09-02T09:33:10Z"
+    },
+    "notes": "THE MEASUREMENT ANSWERED, AND THE ANSWER WAS NOT WHAT I EXPECTED. Removing four gates left the trade count at exactly 10, unchanged from v6 (still 5 long, 5 short). My additions were NOT binding. The frequency ceiling comes from the SOURCE-derived conjunction itself -- 2D bias, 12H zone and 4H structure all having to rise together while a tap and a validation are both live. PF fell 1.77->1.32 on the same tiny sample, which is noise either way and is not a reason to keep the invented gates. The next question is therefore a specification question, not a tuning one: requiring bias, zone AND structure to agree may be my reading of 'direction' rather than his, and the latched tap plus validation may already encode the location those three were meant to establish."
   }
 ]

@@ -53,6 +53,7 @@ The board is open.
 | Attack 4 — R floor 0.8% → 1.2% | 0.9121 | 28.8% | 0.8845 | 36.6% | **REVERTED** |
 | Attack 5 — volume confirmation | 0.9121 | 28.8% | 0.8392 | **26.9%** | **REVERTED** — PF is the binding term |
 | Attack 7 — target 2R → 3R | 0.9121 | 28.8% | 0.9100 | 33.0% | **REVERTED** — PF flat, DD worse |
+| **Regime split — high-vol only** | 0.9121 | 28.8% | **0.9321** | **23.4%** | **KEPT** — both terms improved |
 
 ## CURRENT BASE — what cycle 008 starts from
 **007's LONG leg.** It has the best raw hit rate of anything tested in this lab: **38.3%** across 457
@@ -62,14 +63,15 @@ trades before costs, against a break-even of ~36% at its 1.76:1 payoff. It faile
 That makes it the right raw material: a signal that is nearly good enough, failing for a reason we
 know how to attack.
 
-**Base definition (updated after Attack 1):** VWAP with 2σ bands. Long only for now. Price stretched
+**Base definition (updated after the high-volatility regime split, 2026-09-02):** VWAP with 2σ bands. Long only for now. Price stretched
 to +2σ within the last 50 bars, then pulls back to within 0.5σ of VWAP and closes back above it,
-while VWAP is rising over 50 bars, **and close is above the 200-period EMA**. Stop at the 20-bar
+while VWAP is rising over 50 bars, **close is above the 200-period EMA, and ATR14/close is above its own 200-bar average
+(the high-volatility regime)**. Stop at the 20-bar
 swing low − 0.25×ATR14, floored at 0.8% of price, target 2R, both fixed at entry. Flip signal: close
 crossing VWAP, stand down 20 bars.
 
-**Current base numbers:** PF 0.91 · max DD 28.8% · 433 trades · win rate 38.3% · net −23.0%
-(BTCUSDT 15m, 2022-01-01 → 2026-09-01).
+**Current base numbers:** PF 0.9321 · max DD 23.43% · 279 trades · win rate 38.7% · net −12.7%
+(BTCUSDT 15m, 2022-01-01 → 2026-09-01). Previous base was PF 0.9121 / DD 28.78% / 433 trades.
 
 ## ⚠️ THE FEE-DRAG THESIS IS FALSIFIED (2026-09-02, after Attack 5)
 This list was built on one diagnosis: *the base loses to fee drag, so cut trade count without cutting
@@ -163,3 +165,33 @@ funded. What remains genuinely untried is a *different source of return*:
 - **regime conditioning** — the same signal may have PF well above 1 in one market state and well
   below in another, which the 4.7-year aggregate would hide. That is a measurement, not a filter,
   and it is the one question the lab has never asked of this base.
+
+
+## THE REGIME SPLIT — THE FIRST THING TO WORK SINCE ATTACK 1 (2026-09-02)
+Restricting the base to bars where ATR14/close is above its own 200-bar average:
+
+| | Base | High-vol only |
+|---|---|---|
+| Profit factor | 0.9121 | **0.9321** |
+| Max drawdown | 28.78% | **23.43%** |
+| Trades | 433 | 279 |
+| Win rate | 38.3% | 38.7% |
+| Net return | −23.0% | **−12.7%** |
+
+**KEPT — both ratchet terms improved, no tolerance needed.** Only the second change ever kept.
+
+**Why this is not the pruning that killed attacks 2 and 5.** Those cut trades and the profit factor
+fell in proportion. This cut 36% of trades and the profit factor *rose* while the win rate held.
+The difference is the kind of thing being removed: a bar-level filter prunes individual signals out
+of a population that is uniformly marginal, whereas a regime split separates two populations that
+were never the same to begin with. **The 0.9121 aggregate was hiding a mix.**
+
+By construction the low-volatility complement must then be materially worse than 0.9121. It runs
+next cycle to close the decomposition and put a number on it.
+
+**Honest limit:** 0.9321 is still below 1.0. This is a better description of *where* the signal
+lives, not yet a profitable system. It does, however, reopen a question the falsification had
+closed: the earlier attacks were all measured against a base that mixed two regimes, so a filter
+that failed on the mixture is not necessarily a filter that fails inside the high-vol regime. The
+reverted list stands, but **re-testing the single best of them against the new base is legitimate**
+once the decomposition is complete.

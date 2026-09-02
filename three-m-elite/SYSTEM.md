@@ -116,6 +116,7 @@ lower bound on the system, not a verdict on it.**
 | v4 | 0a re-test: Type 2 gate (engulfing 4H in bias, `valLife` 3) on the **v3 15m base** | **0 TRADES** · [report](https://mcp-api.trader.dev/backtest/01M1GP6D1N4V36G2M6T7CR6BQ4) |
 | v5 | Latched tap + zone invalidation + Type 2 gate (0a+0b merged) | **2 trades**, both losses, PF 0 -- latch fixed, but validation is still an instant · [report](https://mcp-api.trader.dev/backtest/01M1GQ0RFWSXSK5XM54A3DSXT0) |
 | v6 | Latch BOTH the tap and the Type 2 validation; both die on a 12H body close beyond the zone | **PF 1.77, +3.10%, 10 trades** (longs 5/2W +$298, shorts 5/1W +$12), DD 2.49% -- first positive result, but 10 trades is not a sample · [report](https://mcp-api.trader.dev/backtest/01M1GQ7S426QJBAXE07YRFW2VW) |
+| v7 | Remove the four LAB-INVENTED gates, keep only the source's rules | **Still exactly 10 trades** (5 long, 5 short). PF 1.32. My gates were never binding · [report](https://mcp-api.trader.dev/backtest/01M1GQE5ZSFMXKVQK5NTYAVY8F) |
 
 **v3 lesson — v1's PF 0.91 was noise.** The same cascade measured on 4.7 years instead of 4.6 months
 gives PF 0.64 across 94 trades. The larger sample is the trustworthy one. This is the sample-size fix
@@ -204,13 +205,36 @@ additions, not the author's rules. Those are the candidates to relax first, and 
 gate to reach a testable sample is not curve-fitting; it is removing something that was never in the
 system being tested.
 
+## v7 — THE MEASUREMENT ANSWERED, AND I WAS WRONG ABOUT THE CAUSE
+I expected removing the MA-spread test, the break counters, the slope test and the Keltner check to
+raise the trade count. **It stayed at exactly 10, still 5 long and 5 short.** Those four gates were
+never binding. The frequency ceiling is produced by the SOURCE-derived conjunction itself: 2D bias,
+12H zone and 4H structure all having to rise together while a tap and a validation are both live.
+
+PF fell 1.77 -> 1.32 on the same ten-trade sample, which is noise in both directions and is not a
+reason to reinstate the invented gates. They should stay out on principle: they were never part of
+the system under test.
+
+**So the next question is a SPECIFICATION question, not a tuning one.** Two candidates, and the
+video material should decide between them rather than a backtest:
+1. Requiring bias, zone AND structure to all be rising may be my reading of "direction". The author
+   may treat the higher timeframe as establishing bias only, with the zone providing location -- in
+   which case demanding all three agree is a triple-counting of one idea.
+2. The 12H zone defined as the previous candle's high/low may be far too narrow. A zone in the
+   source is a region drawn from a range, not a single prior extreme.
+
+Do not spend another credit on this until one of those is settled from the transcripts.
+
 ## Open queue
 0. ~~Get definitions for Type 1/Type 2~~ — **DONE 2026-09-02, see VOCABULARY.md.**
    Type 1 = a 3M candle; Type 2 = an engulfing candle in the direction of bias; both only on the
    STRUCTURE timeframe (48m for this variant), inside the tapped zone.
 0-V5. ~~LATCHED TAP + VALIDATION~~ — **DONE (v5). Latch works; 2 trades. See the v5 lesson.**
 0-V6. ~~LATCH THE VALIDATION TOO~~ — **DONE. PF 1.77 on 10 trades. Mechanism correct, sample far too small.**
-0-V7-NEXT. **MEASURE WHICH GATE IS BINDING (top priority).** Count how often each condition blocks an
+0-V7. ~~MEASURE WHICH GATE IS BINDING~~ — **DONE. My gates were NOT binding; the source conjunction is.**
+0-V8-NEXT. **SETTLE THE SPECIFICATION FROM THE TRANSCRIPTS, NOT FROM A BACKTEST.** Decide (1) whether
+    bias/zone/structure must all agree or whether the higher timeframe sets bias alone, and (2) whether
+    a zone is a prior candle extreme or a region drawn from a range. Original v7 text: Count how often each condition blocks an
     otherwise-complete setup, then relax the LAB-INVENTED gates (maSpreadOk, break counters, slope,
     Keltner extension) -- never the source's own rules -- until the trade count is large enough to
     judge. Original v6 text: Both the tap and the Type 2 validation become
