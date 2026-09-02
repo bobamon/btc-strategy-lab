@@ -721,3 +721,33 @@ every point was a real reading and $2,000 sat on an actual curve. Here the upper
   seven-trade PF of 2.30 from being read as the best result ever produced.
 - **A degenerate upper bound is a queue item, not a closed question.** The fix is a finer grid on the
   measurable side (90, 150), which can still distinguish a broad peak from a narrow one.
+
+
+---
+
+## ██ HARD LESSON 20 — AN AGGREGATE RATCHET CANNOT SEE A DISTRIBUTIONAL CHANGE
+
+*(BTC Attacks 25–27, 2026-09-02)*
+
+The ratchet keeps a change if whole-sample profit factor improves and whole-sample drawdown does not
+worsen. Attack 26 satisfied both — PF 1.3038 → 1.3499, DD 8.12% → 7.14% — and in doing so **widened
+the H1/H2 spread from 0.0016 to 0.2566**, undoing the single most valuable property the strategy had.
+
+**Why:** both ratchet terms are aggregates over the whole sample. A change that adds five good trades
+to the strong regime and three bad ones to the weak regime improves both aggregates while making the
+strategy *less* uniform. The rule cannot express the difference, so it silently prefers the version
+that is better on average over the version that is better everywhere.
+
+**How to apply:**
+- **A metric measured on a base is void when the base changes.** Attack 25's spread was quoted for two
+  cycles after the configuration it described had been replaced. Re-measure headline claims after any
+  KEPT change, not only after ones that look relevant — Attack 26 deleted the LEAST binding term in
+  the strategy and still moved the spread by 0.25.
+- **HARD LESSON 12 extends to regimes:** an aggregate count says nothing about distribution. Attack
+  26's 8 trades split 5/3, almost proportionally, while their effect split +0.151/−0.105.
+- **A suspiciously exact agreement is evidence of noise, not of structure.** The 0.0016 was recorded
+  with that suspicion already attached, and the suspicion proved correct. Write the doubt down at the
+  time; it is worth far more than restating it afterwards.
+- **When a rule fails to capture something that matters, surface it as a rule question rather than
+  quietly applying a better rule.** Changing the ratchet mid-experiment would make every prior KEPT
+  and REVERTED verdict incomparable.

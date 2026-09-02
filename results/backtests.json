@@ -1484,5 +1484,63 @@
    "verifiedAt": "2026-09-02T21:22:00Z"
   },
   "notes": "KEPT -- the THIRD change ever kept in this lab, and it passes both ratchet terms while BUYING BACK SAMPLE. Base PF 1.30380521 / DD 8.12167991% / 77 trades; without close > open PF 1.34992461 / DD 7.14265422% / 85 trades / +16.75% return. THE REDUNDANCY HYPOTHESIS WAS RIGHT: the term excluded only 8 of 85 candidates, 9.4%, making it by a wide margin the LEAST binding term in the base -- against coolingOff at 60%, pulledBack at 43% and the trend pair at 20%. And the 8 it blocked were net positive, so it was a mild NEGATIVE filter, not decoration. pulledBack already requires close > vw; the green-bar test was largely restating it, exactly the pattern Attack 20 found for the trend pair. THIS MATTERS BEYOND THE RATCHET: Attack 25 closed the regime gap but left 77 trades as the binding constraint, and this is the first change to relieve that constraint rather than tighten it. ALL SEVEN ORIGINAL SIGNAL TERMS HAVE NOW BEEN BINDING-TESTED. The base is six terms and nothing in it is untested."
+ },
+ {
+  "id": "vwm-attack27a-h1-a26base",
+  "name": "VWM Attack27a H1 a26base",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "research",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2025-07-20",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "Re-validating Attack 25's regime closure on the Attack 26 base. The board's largest claim -- the H1/H2 spread collapsing from 0.773 to 0.0016 -- was measured BEFORE Attack 26 removed close > open and added 8 trades, so it was attached to a configuration that no longer exists. Period split only, no code change.",
+  "metrics": {
+   "netProfitPct": 12.7966538,
+   "profitFactor": 1.45604347,
+   "maxDrawdownPct": 5.40424672,
+   "totalTrades": 50,
+   "winRatePct": 52.0,
+   "avgTradePct": 0.25593308
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1J02S4N78TKS7D6KXXCT2KG",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1J02S4NSB2WFYV2QRJKG3WG",
+   "verifiedAt": "2026-09-02T21:28:00Z"
+  },
+  "notes": "H1 ROSE from 1.30542369 to 1.45604347 on the Attack 26 base -- the reverse of what happened when coolBars went to 120, where H1 fell. Only interpretable against 27b: H2 fell from 1.30384915 to 1.19944618, so the spread went from 0.0016 to 0.25659729. 50 + 35 = 85 reconciles against the whole-sample run. Window 2024-06-08 to 2025-07-20, matching Attack 16 and Attack 25 exactly."
+ },
+ {
+  "id": "vwm-attack27b-h2-a26base",
+  "name": "VWM Attack27b H2 a26base",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "research",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2025-07-20",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "The H2 half on the Attack 26 base -- the half where the strategy historically fails and where Attack 17 found 13.6% more VWAP flips. Registered before the run: if the spread reopens, Attack 25's closure was configuration-specific and the board's largest claim is downgraded.",
+  "metrics": {
+   "netProfitPct": 3.50284047,
+   "profitFactor": 1.19944618,
+   "maxDrawdownPct": 6.85975646,
+   "totalTrades": 35,
+   "winRatePct": 42.85714286,
+   "avgTradePct": 0.10008116
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1J03EYXCQA8W903JG3J834Q",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1J03EYXXZ440NJ8R34C6MXX",
+   "verifiedAt": "2026-09-02T21:28:00Z"
+  },
+  "notes": "THE SPREAD REOPENED, AND THE REGISTERED CONSEQUENCE IS HONOURED: ATTACK 25'S CLOSURE IS DOWNGRADED. Three measurements on the same 2025-07-20 split: coolBars 60 + green bar gives H1 1.55157635 / H2 0.77846786, spread 0.773; coolBars 120 + green bar gives 1.30542369 / 1.30384915, spread 0.0016; coolBars 120 without the green bar gives 1.45604347 / 1.19944618, spread 0.25659729. WHAT HAPPENED: Attack 26's 8 admitted trades split roughly proportionally, 5 to H1 and 3 to H2, but their EFFECT was heavily skewed -- H1 +0.151, H2 -0.105. Attack 26 bought its whole-sample gain by improving the good half and degrading the bad one. THE HONEST READING IS NOT 'CLOSED THEN REOPENED': when Attack 25 was recorded I wrote that a number agreeing this precisely on 45 and 32 trades deserves suspicion on its own terms, and this run is evidence that suspicion was warranted. Both measurements are noisy at this sample size; the spread sits somewhere in 0 to 0.3 and 35 trades cannot pin it down further. THE STRUCTURAL FINDING: the ratchet is BLIND TO REGIME DISTRIBUTION. Attack 26 passed both ratchet terms while undoing the property that made the prior state valuable. Whole-sample profit factor and drawdown cannot see a change that improves one regime and degrades another. That is a rule question and the board reserves rule questions for the user, so Attack 26 stands as written and the choice is flagged rather than taken."
  }
 ]

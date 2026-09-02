@@ -1332,3 +1332,59 @@ All seven original signal terms have been binding-tested:
 
 **NEW BASE: PF 1.34992461, DD 7.14265422%, 85 trades, 48.23% win, long-only, `coolBars` 120, no
 green-bar requirement. Still no champion** — 85 trades is a direction.
+
+
+---
+
+## ██ ATTACK 27 — THE REGIME CLOSURE DID NOT SURVIVE. CLAIM DOWNGRADED. (2026-09-02)
+
+Attack 25 produced the largest claim ever made on this board. Attack 26 then changed the term set.
+This run re-measured the claim on the base that actually exists, and **registered the downgrade as an
+outcome before running it.**
+
+| Configuration | H1 | H2 | Spread |
+|---|---|---|---|
+| `coolBars` 60 + green bar | 1.55157635 | 0.77846786 | 0.773 |
+| `coolBars` 120 + green bar (Attack 25) | 1.30542369 | 1.30384915 | **0.0016** |
+| **`coolBars` 120, no green bar (Attack 26 base)** | **1.45604347** | **1.19944618** | **0.25659729** |
+
+50 + 35 = 85 reconciles. **THE SPREAD REOPENED. ATTACK 25's CLOSURE IS DOWNGRADED.**
+
+### WHAT ACTUALLY HAPPENED
+Attack 26's 8 admitted trades split roughly proportionally — 5 to H1, 3 to H2. Their **effect** did
+not: **H1 +0.151, H2 −0.105.** Attack 26 bought its whole-sample improvement by making the good half
+better and the bad half worse.
+
+### THE HONEST READING IS NOT "CLOSED, THEN REOPENED"
+When Attack 25 was recorded, the note attached to it read: *"a single number agreeing this precisely
+on 45 and 32 trades also deserves suspicion on its own terms."* **This run is evidence that suspicion
+was warranted.** The truthful summary is that **both measurements are noisy at this sample size** —
+the spread sits somewhere between 0 and 0.3, and 35 trades cannot resolve it further. The exact-zero
+was partly luck, and treating it as a discovered property was the error, not the later change.
+
+**What survives from Attack 25:** `coolBars` 120 took H2 from 0.778 to well above break-even, and it
+has stayed above break-even across both term sets. **That is real and it is the durable part.**
+**What does not survive:** the claim that the regimes were made equal.
+
+### THE STRUCTURAL FINDING — THE RATCHET IS BLIND TO REGIME DISTRIBUTION
+**Attack 26 passed both ratchet terms while undoing the property that made the prior state valuable.**
+Whole-sample profit factor and drawdown cannot see a change that improves one regime and degrades
+another; the two numbers are aggregates and this is a distributional effect.
+
+> **OPEN RULE QUESTION #2 (raised by Attack 27, 2026-09-02).** Should the ratchet carry a third term
+> — that a change must not widen the H1/H2 spread? Attack 26 would have FAILED such a rule despite
+> improving both current terms, and Attack 25 would have passed it emphatically. This is the second
+> rule question on this board and, like the Attack 3 tolerance band, **it is the user's decision, not
+> a cycle's.** Until then the strict two-term ratchet stands and **Attack 26 remains the base.**
+
+### QUEUE
+1. **`coolBars` 90 and 150 on the current base** — the finer grid, both sides together. Deferred this
+   cycle because one side cannot distinguish a plateau from a spike and the two-run allowance was
+   spent on the higher-priority re-validation.
+2. **The sample problem is now unavoidable.** Every regime claim in this lab rests on 35–50 trades per
+   half, and two separate spread measurements on the same strategy differ by 0.25. No term deletion
+   remains to buy more sample. **Extending the window backwards is the only lever left**, and 5m data
+   begins 2024-06-08 — so the honest options are a different timeframe or a different instrument.
+
+**BASE UNCHANGED: PF 1.34992461, DD 7.14265422%, 85 trades, `coolBars` 120, no green-bar requirement.
+No champion.**
