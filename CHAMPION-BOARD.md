@@ -1209,3 +1209,61 @@ the strongest available falsification and it is cheap — two runs on the halves
 **NEW BASE: PF 1.30380521, DD 8.12167991%, 77 trades, 48.05% win, long-only, `coolBars` 120.**
 **Still no champion** — a champion needs a validated result, and a 77-trade profit factor is a
 direction.
+
+
+---
+
+## ██ ATTACK 25 — THE REGISTERED FALSIFICATION HELD. THE REGIME GAP IS GONE. (2026-09-02)
+
+Last cycle promoted `coolBars` 120 and registered this test **before** running it, as HARD LESSON 17
+requires: *if the promotion is really a chop fix, the H1/H2 spread should narrow — and if it does not,
+the promotion is a whole-sample coincidence and I will say so.*
+
+| Half | Old base (`coolBars` 60) | **New base (`coolBars` 120)** | Change |
+|---|---|---|---|
+| H1 · 2024-06-08 → 2025-07-20 | 1.55157635 | 1.30542369 | **−0.246** |
+| H2 · 2025-07-20 → 2026-09-01 | 0.77846786 | 1.30384915 | **+0.525** |
+| **Spread** | **0.773** | **0.0016** | **−99.8%** |
+
+**The gap did not merely narrow. It effectively closed** — the two halves now sit within 0.0016 of
+each other, and they moved in exactly the predicted direction: the choppier half rose the most.
+45 + 32 = 77 reconciles against the whole-sample run.
+
+**This is the first regime-stable result this project has produced**, across all three labs. Every
+prior candidate here was a blend of a good period and a bad one — Attack 16 said so explicitly, and
+Attack 15 *widened* the spread while improving both halves.
+
+### WHAT THIS COSTS, SAID PLAINLY
+**It was a trade, not a free gain.** H1 — the half that already worked — gave up 0.246 of profit
+factor. The whole-sample number still improved (1.153 → 1.304), so the trade paid, but a strategy that
+is uniformly mediocre is not automatically better than one that is excellent half the time; **it is
+better only because the bad half was losing money and now is not.** That is the actual argument, and
+it should not be dressed up as a pure improvement.
+
+### THE QUALIFICATION THAT KEEPS THIS HONEST
+**The halves reach the same profit factor by different routes.**
+
+| Half | Profit factor | Win rate | Payoff ratio |
+|---|---|---|---|
+| H1 | 1.30542369 | 51.11% | 1.24866614 |
+| H2 | 1.30384915 | 43.75% | 1.67637748 |
+
+Near-identical PF, **7.4pp apart on win rate.** H1 wins more often and smaller; H2 wins less often and
+bigger. So the equality is real at the level of profit factor and **not** at the level of behaviour —
+the strategy is not doing the same thing in both regimes, it is arriving at the same score two ways.
+A single number agreeing this precisely on 45 and 32 trades also deserves suspicion on its own terms.
+
+### SAMPLE FLOOR HONOURED
+45 and 32 trades are below the floor enforced on Attack 24, when a 7-trade PF of 2.30 was refused.
+**The DIRECTION of the spread is what is read here; neither half is quoted as a standalone result.**
+
+### QUEUE
+1. **`close > open`** — still the last untested signal term, now against the new base.
+2. **`coolBars` 90 and 150** — a finer grid. The 60/120/240 grid cannot tell a broad peak from a
+   narrow one, and Attack 24's upper bound was degeneracy rather than a measured worse value
+   (HARD LESSON 19).
+3. **The thin-sample problem is now the binding constraint on this lab**, not the profit factor.
+   77 trades is the cost of the fix that worked.
+
+**BASE: PF 1.30380521, DD 8.12167991%, 77 trades, `coolBars` 120, long-only. Still no champion** —
+but for the first time the obstacle is sample size rather than a broken half.

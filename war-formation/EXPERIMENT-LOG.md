@@ -1434,3 +1434,58 @@ neighbourhood behind it instead of a bare number.
    *that build* rather than the strategy.
 2. **Position sizing.** DD 10.83% is a 1x figure; at the ~50x this shield implies it is far past
    total loss. Unchanged as the largest unsolved problem, and better profit factors do not touch it.
+
+
+---
+
+# ██ E42 — THE COIL SURVIVES THE EXIT CORRECTION, AND IT IS A SHORT-LEG FILTER
+
+E32 found the coil load-bearing and E33/E34 found its threshold one point wide, which demoted v6.
+**All three measured it against the structural stop the user corrected as wrong.** That mattered more
+for this term than any other: a volatility-compression filter predicts a small immediate range, which
+is exactly what decides whether a NARROW stop survives the next few bars. With a $2,000 shield — twice
+the widest stop those runs allowed — that interaction might simply not exist, and the coil's measured
+value might have been stop-survival wearing an edge's clothing.
+
+One change from E38: `coilPrev` removed from **both** conjunctions — one requirement, not two changes.
+
+| | E38 (with coil) | E42 (no coil) |
+|---|---|---|
+| Profit factor | **1.50193294** | 0.64544502 |
+| Max drawdown | **10.82866633%** | 22.95213930% |
+| Trades | 21 | **68** |
+| Win rate | — | 20.58823529% |
+
+**REVERTED.** This is outcome 1 of the three registered before the run: count explodes, profit factor
+collapses. **The coil is load-bearing under BOTH exit models**, so v6's demotion was about `coilK`'s
+threshold and never about the term itself. E32's finding transfers intact.
+
+## THE LEG SPLIT IS THE ACTUAL FINDING, AND IT IS NEW
+| Leg | Trades | Wins | Win rate | Net |
+|---|---|---|---|---|
+| Long | 25 | 13 | **52.0%** | −$210.86 |
+| Short | 43 | **1** | **2.3%** | **−$1,212.97** |
+
+**Without the coil the long leg is close to scratch and the short leg wins one trade in forty-three.**
+The coil is not a general edge filter — **it is doing almost all of its work on the short side.**
+
+Set that against this lab's record: **thirteen short constructions have failed here**, and the running
+explanation has been "a mechanical short of this family has no edge on this instrument". E42 sharpens
+it considerably — the shorts are not merely weak, they are **unfiltered**, and the coil is the only
+thing that has ever made them survivable. The long leg does not depend on it nearly as much.
+
+## WHAT THIS DOES AND DOES NOT CHANGE
+- **E38 stands** as the best ALCM configuration: PF 1.50193294, DD 10.82866633%, 21 trades.
+- **The sample ceiling is a property of the ENTRY, not of the coil.** Removing the coil did lift the
+  count to 68 — so trades ARE available — but they are overwhelmingly losing shorts. There is no
+  version of this that is both well-sampled and profitable, which is the same tension E38–E41 recorded
+  for the shield and is now confirmed from a second direction.
+- **21 trades remains below the interpretability threshold. There is still no champion.**
+
+## QUEUE
+1. **Test the coil on the LONG LEG ONLY.** E42 says the long survives without it (52% win rate on 25
+   trades). If the long leg genuinely does not need the coil, the two legs want different filters —
+   and this lab has never built them asymmetrically. That is the first genuinely new structural idea
+   here in many cycles.
+2. **Position sizing.** DD 10.83% is a 1x figure; at the ~50x a $2,000 shield implies it is far past
+   total loss. Still the largest unsolved problem, and better profit factors do not touch it.

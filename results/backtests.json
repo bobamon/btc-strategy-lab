@@ -1397,5 +1397,92 @@
    "verifiedAt": "2026-09-02T21:10:00Z"
   },
   "notes": "REJECTED AS UNINTERPRETABLE, NOT AS WORSE -- and the distinction is the finding. PF 2.30230986 and DD 1.99887631% look like the best numbers in the lab, but they rest on SEVEN trades, and I registered before the run that below roughly 30 I would report the count and not the ratio. The 7 trades span 2024-09-26 to 2025-07-04: nothing at all in the final fourteen months. THE COLLAPSE IS THE INFORMATIVE PART AND IT WAS FASTER THAN PREDICTED. I wrote that 240 would land near 40; it landed at 7. Trade decay runs 231 / 166 / 77 / 7, that is -28%, -54%, then -91%. A super-exponential fall means the median gap between VWAP flips sits well below 240 bars, so at 240 the rule stops filtering chop and starts requiring a rare 20-hour flip-free stretch -- a different and much rarer condition, not more of the same one. So coolBars 120 is bounded above by DEGENERACY rather than by a measured worse value, which is a weaker bound than the shield sweep achieved in E40/E41 and is recorded as such."
+ },
+ {
+  "id": "vwm-attack25a-h1-newbase",
+  "name": "VWM Attack25a H1 newbase",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "research",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2025-07-20",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "The registered falsification of the coolBars 120 promotion, H1 half. Attack 16 measured the OLD base at H1 1.55157635 / H2 0.77846786, spread 0.773. The chop-defence account predicts the spread NARROWS, because H2 is the choppier half and chop is what the longer stand-down removes. Period split only -- no code change.",
+  "metrics": {
+   "netProfitPct": 7.70450191,
+   "profitFactor": 1.30542369,
+   "maxDrawdownPct": 5.59537204,
+   "totalTrades": 45,
+   "winRatePct": 51.11111111,
+   "avgTradePct": 0.17121115
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1HZFP69QPECFPRKQCAG4X9E",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HZFP684FS8AK8N9CFRF0RD",
+   "verifiedAt": "2026-09-02T21:16:00Z"
+  },
+  "notes": "H1 FELL from 1.55157635 to 1.30542369 on the new base. Read alone this looks like a loss, and it is one -- the promotion cost 0.246 of profit factor in the half that already worked. It is only interpretable against 25b: H2 rose from 0.77846786 to 1.30384915, so the spread went from 0.773 to 0.0016. Window 2024-06-08 to 2025-07-20, matching Attack 16 exactly. 45 + 32 = 77 reconciles against the whole-sample run."
+ },
+ {
+  "id": "vwm-attack25b-h2-newbase",
+  "name": "VWM Attack25b H2 newbase",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "research",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "The registered falsification, H2 half -- the half the hypothesis is actually about. H2 is where the base fails and where Attack 17 found 13.6% more VWAP flips per bar, so the chop-defence account predicts H2 improves MOST. Period split only -- no code change.",
+  "metrics": {
+   "netProfitPct": 4.6555192,
+   "profitFactor": 1.30384915,
+   "maxDrawdownPct": 6.43211036,
+   "totalTrades": 32,
+   "winRatePct": 43.75,
+   "avgTradePct": 0.14548498
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1HZHFEKW464ZQDHSZEDDMGB",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HZHFEKW23Z567TTKEKXGNH",
+   "verifiedAt": "2026-09-02T21:16:00Z"
+  },
+  "notes": "THE PREDICTION HELD, AND THE SPREAD EFFECTIVELY CLOSED. Old base H1 1.55157635 / H2 0.77846786, spread 0.773. New base H1 1.30542369 / H2 1.30384915, spread 0.0016 -- a 99.8% reduction, and it happened in the predicted DIRECTION: H2 rose 0.525 while H1 gave back 0.246. This was registered before the runs, not fitted after. HONEST QUALIFICATIONS: (1) the gain was a TRADE, not free -- edge in the trending half was given up to fix the choppy half, though whole-sample PF still went 1.153 to 1.304; (2) the halves reach the same profit factor by DIFFERENT ROUTES -- H1 wins 51.11% with payoff 1.249, H2 wins 43.75% with payoff 1.676 -- so near-identical PF conceals visibly different composition; (3) 45 and 32 trades are below the interpretability floor enforced on Attack 24, so the DIRECTION of the spread is read and neither half is quoted as a standalone result."
+ },
+ {
+  "id": "wf-e42-no-coil-alcm",
+  "name": "WF E42 no coil under ALCM",
+  "symbol": "BTCUSDT",
+  "timeframe": "1m",
+  "direction": "both",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2025-12-16",
+  "backtestEnd": "2026-05-03",
+  "specPath": "war-formation/ORACLE-RULES.md",
+  "description": "The coil binding test under the CORRECTED A.L.C.M. exit. E32 found the coil load-bearing and E33/E34 found its threshold knife-edged, but all three measured it against the structural stop the user corrected as wrong. One change from E38 (2000 dollar shield, rr 2.0, maxBars 4320): coilPrev removed from BOTH conjunctions, one requirement rather than two changes.",
+  "metrics": {
+   "netProfitPct": -14.2382622,
+   "profitFactor": 0.64544502,
+   "maxDrawdownPct": 22.9521393,
+   "totalTrades": 68,
+   "winRatePct": 20.58823529,
+   "avgTradePct": -0.20938621
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1HZMJAD51S1T379K1FPYZ4K",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HZMJADP40M9NAVPMSAC29W",
+   "verifiedAt": "2026-09-02T21:16:00Z"
+  },
+  "notes": "REVERTED -- and the coil SURVIVES the exit correction, which was the first of three outcomes registered before the run. E38 PF 1.50193294 / DD 10.82866633% / 21 trades; without the coil PF 0.64544502 / DD 22.95213930% / 68 trades. Count triples, profit factor collapses, drawdown doubles. So v6's demotion was about coilK's THRESHOLD, not about the coil, and the term is genuinely load-bearing under both exit models. THE LEG SPLIT IS THE NEW FINDING: long 25 trades, 13 wins (52.0%), -$210.86; short 43 trades, ONE win (2.3%), -$1,212.97. The coil does almost all of its work on the SHORT leg -- without it the long side is near scratch while the short side takes 43 trades and wins one. Against thirteen failed short constructions in this lab, that is the most specific account yet of why the shorts fail: they are unfiltered without the coil. Note also E32 removed the coil on a different window and got 67 trades against E42's 68."
  }
 ]
