@@ -306,6 +306,7 @@ so the code genuinely behaves differently. **But the count stayed at 3.**
 | v21 | v15's source with the corrected engulf — the lifecycle's first real population | **PF 1.0239, DD 10.58%, 185 trades** (56 long 21W +$652 / 129 short 25W -$423). Best on record; 11-month trade gap disclosed · [report](https://mcp-api.trader.dev/backtest/01M1GXYHSEMAS3J7ABRE3V169G) |
 | v22 | Count ZONE CREATION — the engulf AND the deepest-zone condition | **71 creations from 2,711 engulfs** (29 demand, 42 supply). Last creation 2025-10-07. The rule discards 97.4% then locks up · [report](https://mcp-api.trader.dev/backtest/01M1GYGFHTD06PZWQS0FQF8JQG) |
 | v23 | Most-recent zone replaces deepest zone | **PF 0.7363, DD 89.27%, 1,792 trades** (749 long 275W / 1,043 short 184W), spanning the full window. The lock-up is fixed and the edge went with it · [report](https://mcp-api.trader.dev/backtest/01M1GYTGY7YZSNAP6QNCAMFP4A) |
+| v24 | Long leg alone | **PF 0.8945, DD 42.50%, 833 trades**, win rate 36.61%, payoff 1.548. Best honest number this lab has produced, still under 1.0 · [report](https://mcp-api.trader.dev/backtest/01M1GZ8DM3Q20JQDX3AKSP1XQV) |
 
 **When three independent corrections land on the same trade count, the binding constraint is upstream
 of all of them.** I have now spent three cycles fixing things that were genuinely wrong and none of
@@ -552,7 +553,18 @@ never been in the thing being tested — they have been in the assumptions under
     71 zone creations from 2,711 engulfs; last creation 2025-10-07. It is a lock-up, not a market.
 0-V23. ~~REPLACE THE DEEPEST-ZONE RULE WITH MOST-RECENT~~ — **DONE. The lock-up is fixed; PF 1.024
     -> 0.736 on 1,792 trades. v21's edge WAS the lock-up.** v23 is the new reference base.
-0-V24-NEXT. **RESTORE THE TYPE 2 VALIDATION GATE, now on a working lifecycle (top priority).** For
+0-V24. ~~ISOLATE THE LONG LEG~~ — **DONE. PF 0.7363 combined -> 0.8945 long-only on 833 trades.**
+    The short side is not underperforming; it is the entire deficit.
+0-V25-NEXT. **THE EXIT, not the entry (top priority).** The long leg wins 36.61% with a payoff of
+    1.548, which needs ~39.2% to break even -- it is 2.6 percentage points short, and every cycle so
+    far has attacked entries. Test ONE exit change against v24: the 2R target moved to 2.5R, or the
+    96-bar time stop, chosen and run as a single variable. This is the untouched half of the system.
+0-V26. **THE TYPE 2 GATE IS DEFERRED, NOT FORGOTTEN, AND HERE IS WHY.** It requires "an engulfing
+    candle in the direction of BIAS", and VOCABULARY.md records that this bias is the
+    model/structural bias computed by a closed-source TradingView indicator we do not have. Building
+    it means inventing a definition and then testing MY invention while calling it SPENNYFX -- the
+    E25 error exactly. It can only be run if the bias is first given a definition the user confirms.
+    Superseded text: RESTORE THE TYPE 2 VALIDATION GATE, now on a working lifecycle. For
     the first time the gate can be tested against a strategy that is neither starved (v16-v18) nor
     blind (v21). One change from v23: entries require an engulf in the direction of the 2D bias
     inside the live zone, latched in sequence. If PF rises above 0.736 the gate is doing real work;
@@ -827,3 +839,35 @@ against a lifecycle that is neither starved nor blind.
 v19 counted a term and found it empty. v20 counted the fix. v22 counted the term one level down and
 found the blocker. v23 removed it and found the edge was the blocker all along. **Every diagnostic in
 this sequence paid, and every one of them paid by deleting a belief rather than adding a feature.**
+
+
+---
+
+## ██ v24 — THE LONG LEG IS THE WHOLE SYSTEM
+
+One change from v23: short entries removed, so the demand side is judged alone (LESSON 6).
+
+| | v23 (both legs) | **v24 (long alone)** |
+|---|---|---|
+| Profit factor | 0.73626670 | **0.89445064** |
+| Win rate | 25.61% | **36.61%** |
+| Payoff ratio | 2.138 | 1.548 |
+| Trades | 1,792 | 833 |
+| Max drawdown | 89.27% | 42.50% |
+
+**PF 0.894 is the best honest number this lab has produced on a real sample** — and it is still below
+1.0, and a 42.5% drawdown is not tradeable. But the shape of the problem has changed: this is no
+longer a broken mechanism, it is a mechanism that is **close** and losing on one side.
+
+### A DETAIL THAT CONTRADICTS THE SISTER LAB
+Trade count rose from **749 to 833** when the short leg was removed. The shorts were *blocking* demand
+entries under `pyramiding=1` — so here the two legs are **not** independent. In the BTC lab the long
+count was identical (128) with and without the short, and I generalised from that. **That
+generalisation was wrong for this system**, and any future combined build here has to account for
+84 demand entries that only exist when the short leg is absent.
+
+### WHERE THE REMAINING GAP IS, PRECISELY
+36.61% win rate at a 1.548 payoff needs **~39.2%** to break even. **The long leg is 2.6 percentage
+points of win rate away from break-even** — and every cycle in this lab so far has attacked entries.
+The exit has never been touched since v15 set the 2R target, which makes it the obvious next target
+and the reason v25 is an exit test rather than another filter.

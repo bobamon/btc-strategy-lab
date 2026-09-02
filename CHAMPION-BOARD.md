@@ -140,6 +140,7 @@ should be rejected without spending a credit on it.
 | Attack 8 | Short leg 5m → 15m, every bar parameter /3 | PF 0.7413→0.5995, DD 34.40%→50.60%, trades 273→270 | **REVERTED** — the short's timeframe curve runs the OTHER way |
 | Attack 9 | Remove the EMA200 filter, measured in H2 alone | PF 0.65656→0.66177, DD 12.66%→16.06%, trades 61→64 | **REVERTED** — but the filter is nearly INERT in H2 |
 | Attack 10 | Remove the highVol split, measured in H2 alone | PF 0.65656→**0.76511**, DD 12.66%→19.59%, trades 61→103 | **REVERTED** on drawdown — but the gate is COSTING profit factor |
+| Attack 11 | Remove the witching ban, measured in H2 alone | PF 0.65656→0.62814, DD 12.66%→16.54%, trades 61→62 | **REVERTED** — and this one genuinely EARNS its place |
 
 7. ~~Attack the EXIT, not the entry~~ — **DONE, REVERTED.** See the frontier note below.
 8. **Attack the EXIT, original text:** Every attack so far has been an entry filter. The system lives
@@ -681,3 +682,35 @@ improvements". It is the mechanism plus one gate that does nothing and one that 
 to flatter the drawdown. **The PF 1.0202 headline on the full sample is now doubly qualified**: it
 was measured on a mixed sample, and two of its components fail re-validation on the failing half.
 The remaining unvalidated term is the witching ban, and it should be checked the same way.
+
+
+## ██ THE RE-VALIDATION SWEEP IS COMPLETE — ONE GATE OF THREE SURVIVES (2026-09-02)
+
+Every KEPT change on this board was accepted on the full sample, and the decomposition showed that
+sample is not homogeneous. Three cycles have now re-tested all three surviving gates in H2 alone, the
+half where the system loses money, each against the same control (PF 0.65655726, DD 12.66%, 61 trades).
+
+| Gate | Trades removed in H2 | Effect on PF when removed | Verdict |
+|---|---|---|---|
+| EMA200 trend filter | 3 of 64 | +0.005 — noise | **INERT** |
+| highVol regime split | 42 of 103 | **+0.109 — removing it HELPS** | **HARMFUL** |
+| Witching ban (1–4am ET) | 1 of 62 | −0.028, and drawdown worsens too | **EARNS ITS PLACE** |
+
+**Only the witching ban passes.** It is also the one that was REVERTED on the 15m base back in Attack
+3 and entered the 5m base without separate justification — so the gate with the weakest paper trail
+is the only one that holds up, and the two that were credited with lifting the system either do
+nothing or actively cost profit factor.
+
+### A MECHANICAL POINT WORTH KEEPING
+The witching ban admits **one** extra trade and profit factor falls 0.028. That looks contradictory
+until you remember the sizing: at `percent_of_equity` 100, **a single early loss rescales every
+subsequent position**, so one bad trade propagates through the entire curve. **Small trade-count
+differences in this lab are not automatically noise** — that assumption should not be made again
+without checking where in the sequence the difference falls.
+
+### WHAT THE BOARD NOW SAYS ABOUT THE BASE
+The 5m base is not "the mechanism plus three validated improvements". It is **the mechanism, plus one
+gate that does nothing, one that suppresses winners to flatter drawdown, and one that works.** The
+PF 1.0202 headline was measured on a mixed sample with two of its three components failing
+re-validation. **The honest description of this lab's state is that it has a well-mapped mechanism
+with no demonstrated edge**, and the next cycle should stop attacking gates and say so on the board.

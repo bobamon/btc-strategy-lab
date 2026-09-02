@@ -933,5 +933,34 @@
    "verifiedAt": "2026-09-02T11:41:01Z"
   },
   "notes": "THE OPPOSITE PATHOLOGY TO ATTACK 9. Control PF 0.65655726 / DD 12.66% / 61 trades; without highVol PF 0.76510562 / DD 19.59% / 103 trades. This gate BINDS HARD -- it removes 42 of 103 trades, where trendOk removed 3 of 64 -- and removing it RAISES profit factor by 0.109 while win rate climbs 29.7% to 34.0%. So the volatility split is not inert, it is actively costing profit factor in H2 and paying for that only in drawdown. REVERTED strictly by the ratchet: PF improved but DD worsened 12.66% to 19.59%. Two KEPT gates, two different diseases -- one does nothing, one does harm."
+ },
+ {
+  "id": "vwm-attack11-no-witching-h2",
+  "name": "VWM Attack11 no witching ban in H2",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2025-07-20",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "The third and last unvalidated gate, completing the re-validation sweep. One change from the 5m scaled base: the 1-4am ET witching ban removed from the entry conjunction, still computed so the deviation stays visible. H2 alone; the H2 decomposition run is the control and already exists.",
+  "metrics": {
+   "netProfitPct": -12.71351252,
+   "profitFactor": 0.62814328,
+   "maxDrawdownPct": 16.54259001,
+   "totalTrades": 62,
+   "winRatePct": 29.03225806,
+   "avgTradePct": -0.20505665
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GZ5ZGRM2E5EPC7CGCDDF4F",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GZ5ZGQ6PM21GZBGZ996PGP",
+   "verifiedAt": "2026-09-02T11:48:29Z"
+  },
+  "notes": "THE ONLY GATE OF THE THREE THAT EARNS ITS PLACE. Control PF 0.65655726 / DD 12.66% / 61 trades; without the ban PF 0.62814328 / DD 16.54% / 62 trades. Removing it makes BOTH terms worse, so the ban stays -- the first re-validation this base has passed. Note the mechanism: it admits ONE extra trade and profit factor falls 0.028. That is not a contradiction, it is compounding -- at percent_of_equity 100 a single early loss rescales every subsequent position, so one bad trade propagates through the whole curve. Worth remembering before reading any small trade-count difference in this lab as noise."
  }
 ]

@@ -1021,5 +1021,34 @@
    "verifiedAt": "2026-09-02T11:41:47Z"
   },
   "notes": "THE COLLAPSE IS THE TIMEFRAME, NOT THE PERIOD -- AND THIS CORRECTS E30's WRITTEN CONCLUSION. On the champion's own window the 5m port scores PF 0.39362758 on 9 trades against v6's 1.68623784 on 32. E30 (2.2 years) scored 0.32887930 and E31 (4.5 months) scores 0.39362758: essentially the same number on wildly different periods, so period explains nothing and timeframe explains everything. Trade frequency falls 32 to 9 on an identical window, which means the 1m trigger simply does not survive aggregation to 5m. CONSEQUENCE: E30 did NOT test whether the champion holds up on a longer sample, and my conclusion there that PF 1.686 was probably a small-sample artifact was an overreach. That question is still open, and the 5m route to answering it is now closed."
+ },
+ {
+  "id": "war-formation-950-1-population-counter",
+  "name": "WF 950-1 population counter (diagnostic)",
+  "symbol": "BTCUSDT",
+  "timeframe": "1m",
+  "direction": "both",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2025-12-16",
+  "backtestEnd": "2026-05-03",
+  "specPath": "war-formation/ORACLE-RULES.md",
+  "description": "A COUNTER, NOT A STRATEGY. Step one of the user-supplied 950 Rule queue: measure the population before building. Long entries fire on each 950 signal (price within 50 of a whole thousand, both directions), short entries on each take of that whole number, one-bar exits. So longTrades is the signal count, shortTrades the take count, and their ratio is the hit rate. P&L meaningless by construction.",
+  "metrics": {
+   "netProfitPct": -98.74475723,
+   "profitFactor": 0.04523727,
+   "maxDrawdownPct": 98.74480194,
+   "totalTrades": 4686,
+   "winRatePct": 7.6184379,
+   "avgTradePct": -0.02107229
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GZ594XZ85AFKMP0XRN4BD3",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GZ594XJJDHNFA5PSJSQ2F0",
+   "verifiedAt": "2026-09-02T11:48:06Z"
+  },
+  "notes": "THE POPULATION IS LARGE; THE HIT RATE IS A COIN FLIP. 3,097 signals produced 1,589 takes within 24 hours -- 51.3%. The rule states the whole number WILL be taken. Measured at a tradeable horizon it is 51%. TWO CAVEATS, BOTH MINE AND BOTH REAL: (1) the rule says time does not matter and I imposed a 1,440-bar expiry, so this tests the rule AT A HORIZON, not as stated; with no expiry the rate would approach 100% but would not be tradeable with a fixed stop. (2) an armed level blocks re-arming until it resolves or expires, so a stale arm can suppress later signals -- this depresses both counts and the ratio is the robust output. Frequency is not the problem here; certainty is."
  }
 ]

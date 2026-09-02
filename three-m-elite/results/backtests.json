@@ -492,5 +492,34 @@
    "verifiedAt": "2026-09-02T11:42:14Z"
   },
   "notes": "THE LOCK-UP IS FIXED AND THE EDGE WAS THE LOCK-UP. Trades 185 to 1792 and they now span the whole window to 2026-08 instead of stopping in 2025-10, so the fix works exactly as v22 predicted. But profit factor falls 1.02389497 to 0.73626670. Longs 749 (275W, -$1,814.86); shorts 1043 (184W, -$7,081.71). v21's 1.02 was not an edge -- it was an accidental filter, a frozen zone that happened to sit in a favourable place while the strategy was blind to everything else. This is the FIRST undistorted measurement of the SPENNYFX mechanism on this engine, and it says 0.736. Recorded as the reference base on correctness grounds despite the lower number. DD 89% -- not tradeable."
+ },
+ {
+  "id": "3m-elite-v24-long-leg-alone",
+  "name": "3M ELITE v24 long leg alone",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "long",
+  "status": "testing",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "specPath": "three-m-elite/SYSTEM.md",
+  "description": "One change from v23: short entries removed, so the demand side is judged on its own profit factor (LESSON 6). The queue's Type 2 gate item was deliberately deferred because the bias term it needs comes from a closed-source indicator, and reconstructing it would test an invention rather than the system.",
+  "metrics": {
+   "netProfitPct": -42.40305706,
+   "profitFactor": 0.89445064,
+   "maxDrawdownPct": 42.49990566,
+   "totalTrades": 833,
+   "winRatePct": 36.61464586,
+   "avgTradePct": -0.05090403
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GZ8DM3PFSNNHF3CG93ARC5",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GZ8DM3Q20JQDX3AKSP1XQV",
+   "verifiedAt": "2026-09-02T11:49:49Z"
+  },
+  "notes": "THE LONG LEG IS THE WHOLE SYSTEM. PF 0.73626670 combined becomes 0.89445064 long-only, win rate 25.61% becomes 36.61%, payoff 1.548. This is the best honest number this lab has produced on a real sample and it is still below 1.0. Trade count rises 749 to 833 because the short leg was blocking demand entries under pyramiding=1, so the legs were NOT independent here -- unlike the BTC lab where the long count was identical with and without the short. Drawdown 42.5% is not tradeable. The finding stands: the short side is not underperforming, it is the entire deficit."
  }
 ]

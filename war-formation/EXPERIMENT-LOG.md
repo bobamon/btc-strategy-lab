@@ -803,3 +803,43 @@ Full decode in `ORACLE-RULES.md`, which now opens with it. Short version:
 **And the E14 redundancy check is mandatory:** the champion's `inMiddle` filter already encodes a
 whole-number geography, so the 950 gate must be tested with `inMiddle` REMOVED or the result cannot be
 attributed.
+
+
+---
+
+## ██ 950-1 — THE POPULATION IS LARGE. THE CERTAINTY IS NOT.
+
+Step one of the user-supplied 950 Rule queue, run before anything is built, per HARD LESSON 10.
+
+| Measured on 1m, 2025-12-16 → 2026-05-03 | Count |
+|---|---|
+| **950 signals** (within $50 of a whole thousand, both directions) | **3,097** |
+| **Takes** of that whole number within 24 hours | **1,589** |
+| **Hit rate** | **51.3%** |
+
+**Frequency is not the problem — 3,097 signals is a rich population.** The problem is the claim
+resting on it. The rule states that once price reaches x950, the whole number *will* be taken. At a
+tradeable horizon it is taken **51.3%** of the time, which is what a random walk near a level gives.
+
+### TWO CAVEATS, BOTH MINE, AND THE FIRST ONE IS SERIOUS
+1. **The rule explicitly says "time doesn't matter", and I imposed a 24-hour expiry.** So this tests
+   the rule *at a horizon*, not as stated. With no expiry the hit rate would climb toward 100% —
+   because given enough time price revisits almost any nearby level — but **that version is not
+   tradeable**: a position with a fixed stop cannot wait indefinitely, and "it will happen eventually"
+   is not a signal, it is a description of a random walk. The horizon is not a distortion of the rule;
+   it is what makes the rule testable at all. That distinction should be stated whenever this number
+   is quoted.
+2. An armed level blocks re-arming until it resolves or expires, so a stale arm can suppress later
+   signals. This depresses both counts, so **the ratio is the robust output, not the absolute counts.**
+
+### WHAT THIS DOES AND DOES NOT KILL
+**It does not kill the 950 Rule.** The rule's actual proposal is step 3 — read the VELOCITY of the
+break — and that is untouched by this result. What it kills is **step 1 as a standalone edge**: the
+approach to a whole number is not a prediction, so nothing should be built on "950 means it's going".
+
+**It also reframes the queue.** If takes are a coin flip, then the interesting question is no longer
+*whether* the level breaks but *what happens after it does* — which is exactly where the velocity
+test lives. **950-2 (define velocity, count the strong/weak split) is now the load-bearing step**, and
+if that split is also near 50/50 with no difference in outcome, the rule has nothing left.
+
+**Champion unchanged — this is a counter, not a challenger.**
