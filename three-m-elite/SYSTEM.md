@@ -107,11 +107,35 @@ lower bound on the system, not a verdict on it.**
 - **Max-loss-per-session rule not implemented** in v1 — it is a session-level risk control, not a
   signal, and it cannot change whether the signal has an edge.
 
+## EXPERIMENT LOG
+| # | Change | Result |
+|---|---|---|
+| v1 | Full cascade, no validation gate | PF 0.91, 20 trades, longs 6 of 8 · [report](https://mcp-api.trader.dev/backtest/01M1GGX4RQ707R9HHX2KFP471E) |
+| v2 | + Type 2 validation gate (engulfing 48m in bias, `valLife` 3) | **0 TRADES** · [report](https://mcp-api.trader.dev/backtest/01M1GNBA7TRRHRYK61KXZADD4F) |
+
+**v2 lesson — the gate needs a lifetime, not a timer.** v1 made only 20 trades in 4.6 months.
+Requiring an engulfing 48m candle within 3 structure candles of entry removed every one of them.
+`valLife = 3` was an arbitrary stand-in for logic that does not exist yet: in the source, a
+validation stays live **until the zone invalidates**, not for a fixed number of candles.
+
+> "If the next candle right after this just is a body closed down here, then that immediately
+> invalidates it. And then we just need a new triple M or a new engulfing candle."
+
+So the queue order was wrong. **Zone invalidation (0b) must be built before the validation gate (0a)**,
+because invalidation is what gives validation its lifetime. Reordered below.
+
+This result is NOT on the dashboard: `build_dashboard.py` correctly rejects any record with zero
+trades ("a run with no trades is not a backtest"). It is recorded here instead.
+
 ## Open queue
 0. ~~Get definitions for Type 1/Type 2~~ — **DONE 2026-09-02, see VOCABULARY.md.**
    Type 1 = a 3M candle; Type 2 = an engulfing candle in the direction of bias; both only on the
    STRUCTURE timeframe (48m for this variant), inside the tapped zone.
-0a. **IMPLEMENT THE VALIDATION GATE (top priority).** The current Pine has NO validation gate at all.
+0b-FIRST. **IMPLEMENT ZONE INVALIDATION BEFORE THE GATE (new top priority).** A candle BODY closing
+    beyond the zone kills the zone, judged on the ZONE's own timeframe (3H here). A body close
+    immediately after a validation voids that validation. Once this exists, a Type 2 validation can
+    persist until invalidated rather than expiring on an arbitrary counter — which is what killed v2.
+0a. **THEN RE-TEST THE VALIDATION GATE with a proper lifetime.** The current Pine has NO validation gate at all.
     Add: after a zone tap, require an engulfing candle in the direction of bias on the 48m
     reconstruction before an entry is allowed (that is Type 2, fully specifiable). Type 1 needs the
     3M candle anatomy, which is still unknown — implement Type 2 alone first and label it as such.
