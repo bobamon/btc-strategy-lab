@@ -728,9 +728,68 @@ const DATA = [
     },
     "specPath": "strategies/pine/011-vwm-r-floor.pine",
     "notes": "REJECTED for generalization, and this time it is worse than the base it was cut from, not merely flat: PF 0.7883 (010's 5m) -> 0.7769, max DD 52.22% -> 57.02%. Raising the R floor was supposed to help fee drag per HARD LESSON 3/9 -- instead it hurt 5m on both metrics. Likely mechanism: 5m's tighter swing-based rawR is more often floor-bound than 15m's, so a higher floor inflates nominal risk per trade disproportionately more on 5m, amplifying drawdown instead of just diluting fees. See STRATEGY-LEDGER.md HARD LESSON 10."
+  },
+  {
+    "id": "012-vwm-vol-confirm-btcusdt-15m",
+    "name": "012 -- VWM base + ET filter + R floor + volume confirm (long) -- 15m",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "description": "ONE change from base 011: require volume confirmation on the pullback-hold bar (volume >= 20-bar SMA of volume) before entry. Everything else -- VWAP pullback, EMA200 trend filter, ET witching-hour ban, 1.2% R floor, stop/target geometry, flip/cooldown -- is byte-for-byte the 011 base. Long only.",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "metrics": {
+      "netProfitPct": 5.85480992,
+      "profitFactor": 1.02374157,
+      "maxDrawdownPct": 21.9502846,
+      "totalTrades": 343,
+      "winRatePct": 43.44023324,
+      "avgTradePct": 0.01706942
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1J6D69Z907Q5K6RHD3PH6EB",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1J6D69ZS59XTKZ0QTC74X99",
+      "verifiedAt": "2026-09-02T23:00:00Z"
+    },
+    "pineSource": "//@version=6\n// 012 — ONE change from the base (011-vwm-r-floor.pine): require volume confirmation\n// on the pullback-hold bar. Everything else -- VWAP pullback, EMA200 trend filter, ET\n// witching-hour ban, 1.2% R floor, stop/target geometry, flip/cooldown -- is byte-for-byte\n// the 011 base.\n// Rationale (attack list item 1, CHAMPION-BOARD.md): the base loses to 5m fee drag via\n// trade frequency/quality (HARD LESSON 3/9), and HARD LESSON 10 showed a flat R-floor\n// change resizes every trade's risk and can backfire on the tighter timeframe. Volume\n// confirmation instead PRUNES bars -- it requires participation returning as price\n// reclaims VWAP, filtering out low-conviction pullback holds -- so it should not carry\n// the same 5m-specific side effect cycle 011 exposed.\nstrategy(\"012-VWM base + ET filter + R floor + volume confirm (long)\", overlay=true,\n     pyramiding=1, process_orders_on_close=true,\n     commission_type=strategy.commission.percent, commission_value=0.05,\n     initial_capital=10000,\n     default_qty_type=strategy.percent_of_equity, default_qty_value=100,\n     margin_long=100, margin_short=100)\n\ndevLen       = input.int(50,    \"Stdev window for VWAP bands\")\nbandK        = input.float(2.0, \"Band multiple (sigma)\")\npullbackK    = input.float(0.5, \"Pullback proximity, x sigma\")\nstretchLen   = input.int(50,    \"Bars to look back for the +2sigma stretch\")\nvwapSlopeLen = input.int(50,    \"Bars back to confirm VWAP rising\")\nswgLen       = input.int(20,    \"Swing lookback for the structural stop\")\ncoolBars     = input.int(20,    \"Bars to stand down after a VWAP flip\")\nbufK         = input.float(0.25,\"Stop buffer beyond the swing, x ATR14\")\nrr           = input.float(2.0, \"Reward:risk\")\nminRpct      = input.float(1.20,\"Min risk as % of price\")\nmaxRpct      = input.float(3.00,\"Max risk as % of price\")\nmaxBars      = input.int(96,    \"Max bars in trade\")\ntrendLen     = input.int(200,   \"Trend-filter EMA length\")\netOffset     = input.int(-4,    \"ET offset from UTC, hours (default -4 = EDT)\")\nvolLen       = input.int(20,    \"Volume average window\")\n\nvwapVal   = ta.vwap(close)\ndev       = ta.stdev(close - vwapVal, devLen)\nupperBand = vwapVal + bandK * dev\natr14     = ta.atr(14)\nema200    = ta.ema(close, trendLen)\navgVol    = ta.sma(volume, volLen)\n\nbs           = ta.barssince(high >= upperBand)\nwasStretched = not na(bs) and bs <= stretchLen\npullback     = close >= vwapVal and close <= vwapVal + pullbackK * dev\nvwapRising   = vwapVal > vwapVal[vwapSlopeLen]\ntrendUp      = close > ema200\nvolConfirm   = volume >= avgVol\n\nutcHour  = math.floor(time / 3600000) % 24\netHour   = (utcHour + etOffset + 24) % 24\nwitching = etHour >= 1 and etHour < 4\n\nflipped = ta.cross(close, vwapVal)\nvar int sinceFlip = 9999\nsinceFlip := flipped ? 0 : sinceFlip + 1\ncoolingOff = sinceFlip < coolBars\n\ngoLong = wasStretched and pullback and vwapRising and trendUp and not coolingOff and not witching and volConfirm\n\nswgLo = ta.lowest(low, swgLen)[1]\nbuf   = na(atr14) ? 0.0 : atr14 * bufK\nminR  = close * minRpct / 100\nmaxR  = close * maxRpct / 100\nrawR  = close - (swgLo - buf)\nlongR = math.min(math.max(rawR, minR), maxR)\n\nvar float slPx   = na\nvar float tpPx   = na\nvar int   barsIn = 0\n\nflat = strategy.position_size == 0\n\nif flat and goLong and longR > 0\n    strategy.entry(\"L\", strategy.long)\n    slPx   := close - longR\n    tpPx   := close + longR * rr\n    barsIn := 0\n\nif strategy.position_size > 0\n    strategy.exit(\"LX\", from_entry=\"L\", stop=slPx, limit=tpPx)\n    barsIn := barsIn + 1\n\nif barsIn >= maxBars and strategy.position_size != 0\n    strategy.close_all()\n    barsIn := 0\n\nplot(vwapVal,              title=\"VWAP\")\nplot(ema200,               title=\"EMA200\")\nplot(goLong ? 1 : 0,       title=\"LongSignal\")\nplot(volConfirm ? 1 : 0,   title=\"VolConfirm\")\n",
+    "specPath": "strategies/pine/012-vwm-vol-confirm.pine",
+    "notes": "KEPT as base on the 15m ratchet vs 011: PF 1.0211->1.0237 (improved), max DD 40.67%->21.95% (improved sharply -- the best DD result in this base line's history). All longs, 0 shorts (base is still long-only). Trade count dropped 598->343, consistent with the filter pruning bars rather than resizing risk (as intended, unlike cycle 011's R-floor change). See 012-vwm-vol-confirm-btcusdt-5m for rung C."
+  },
+  {
+    "id": "012-vwm-vol-confirm-btcusdt-5m",
+    "name": "012 -- VWM base + ET filter + R floor + volume confirm (long) -- 5m confirmation",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "description": "Same exact Pine source as 012-vwm-vol-confirm-btcusdt-15m, run on 5m to check whether the 15m ratchet pass (PF 1.0237) generalizes. HARD LESSON 7: a single-timeframe pass is not evidence.",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "metrics": {
+      "netProfitPct": -41.81950517,
+      "profitFactor": 0.75438146,
+      "maxDrawdownPct": 47.78083816,
+      "totalTrades": 466,
+      "winRatePct": 43.13304721,
+      "avgTradePct": -0.08974143
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1J6EB2KZ2D5DZCT92X66PQK",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1J6EB2KGZSJ9N0NS5N4Q7WE",
+      "verifiedAt": "2026-09-02T23:00:00Z"
+    },
+    "specPath": "strategies/pine/012-vwm-vol-confirm.pine",
+    "notes": "REJECTED for generalization -- fails rung C (PF 0.7544 < 0.95). Mixed vs 011's own 5m run: max DD improved (57.02%->47.78%) and net loss shrank (-49.83%->-41.82%), but PF actually dipped slightly (0.7769->0.7544) and avgTradePct got worse (-0.0801->-0.0897). Volume confirmation pruned trades on 5m too (622->466) but did not fix the underlying fee-drag/quality problem HARD LESSON 3/9 diagnosed -- it shrank the loss without fixing the edge. Still KEPT as base per 15m ratchet (see 012-vwm-vol-confirm-btcusdt-15m); not promoted to champion."
   }
 ];
-const BUILT = "2026-09-02 22:15";
+const BUILT = "2026-09-02 23:15";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

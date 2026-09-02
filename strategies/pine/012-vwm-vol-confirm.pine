@@ -1,0 +1,90 @@
+//@version=6
+// 012 — ONE change from the base (011-vwm-r-floor.pine): require volume confirmation
+// on the pullback-hold bar. Everything else -- VWAP pullback, EMA200 trend filter, ET
+// witching-hour ban, 1.2% R floor, stop/target geometry, flip/cooldown -- is byte-for-byte
+// the 011 base.
+// Rationale (attack list item 1, CHAMPION-BOARD.md): the base loses to 5m fee drag via
+// trade frequency/quality (HARD LESSON 3/9), and HARD LESSON 10 showed a flat R-floor
+// change resizes every trade's risk and can backfire on the tighter timeframe. Volume
+// confirmation instead PRUNES bars -- it requires participation returning as price
+// reclaims VWAP, filtering out low-conviction pullback holds -- so it should not carry
+// the same 5m-specific side effect cycle 011 exposed.
+strategy("012-VWM base + ET filter + R floor + volume confirm (long)", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+devLen       = input.int(50,    "Stdev window for VWAP bands")
+bandK        = input.float(2.0, "Band multiple (sigma)")
+pullbackK    = input.float(0.5, "Pullback proximity, x sigma")
+stretchLen   = input.int(50,    "Bars to look back for the +2sigma stretch")
+vwapSlopeLen = input.int(50,    "Bars back to confirm VWAP rising")
+swgLen       = input.int(20,    "Swing lookback for the structural stop")
+coolBars     = input.int(20,    "Bars to stand down after a VWAP flip")
+bufK         = input.float(0.25,"Stop buffer beyond the swing, x ATR14")
+rr           = input.float(2.0, "Reward:risk")
+minRpct      = input.float(1.20,"Min risk as % of price")
+maxRpct      = input.float(3.00,"Max risk as % of price")
+maxBars      = input.int(96,    "Max bars in trade")
+trendLen     = input.int(200,   "Trend-filter EMA length")
+etOffset     = input.int(-4,    "ET offset from UTC, hours (default -4 = EDT)")
+volLen       = input.int(20,    "Volume average window")
+
+vwapVal   = ta.vwap(close)
+dev       = ta.stdev(close - vwapVal, devLen)
+upperBand = vwapVal + bandK * dev
+atr14     = ta.atr(14)
+ema200    = ta.ema(close, trendLen)
+avgVol    = ta.sma(volume, volLen)
+
+bs           = ta.barssince(high >= upperBand)
+wasStretched = not na(bs) and bs <= stretchLen
+pullback     = close >= vwapVal and close <= vwapVal + pullbackK * dev
+vwapRising   = vwapVal > vwapVal[vwapSlopeLen]
+trendUp      = close > ema200
+volConfirm   = volume >= avgVol
+
+utcHour  = math.floor(time / 3600000) % 24
+etHour   = (utcHour + etOffset + 24) % 24
+witching = etHour >= 1 and etHour < 4
+
+flipped = ta.cross(close, vwapVal)
+var int sinceFlip = 9999
+sinceFlip := flipped ? 0 : sinceFlip + 1
+coolingOff = sinceFlip < coolBars
+
+goLong = wasStretched and pullback and vwapRising and trendUp and not coolingOff and not witching and volConfirm
+
+swgLo = ta.lowest(low, swgLen)[1]
+buf   = na(atr14) ? 0.0 : atr14 * bufK
+minR  = close * minRpct / 100
+maxR  = close * maxRpct / 100
+rawR  = close - (swgLo - buf)
+longR = math.min(math.max(rawR, minR), maxR)
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong and longR > 0
+    strategy.entry("L", strategy.long)
+    slPx   := close - longR
+    tpPx   := close + longR * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(vwapVal,              title="VWAP")
+plot(ema200,               title="EMA200")
+plot(goLong ? 1 : 0,       title="LongSignal")
+plot(volConfirm ? 1 : 0,   title="VolConfirm")

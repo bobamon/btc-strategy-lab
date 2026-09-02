@@ -240,6 +240,27 @@ differ a lot too, in a direction that isn't obvious from the fee math alone. A v
 floor (e.g. a multiple of ATR%, not a flat % of price) is the natural fix and is now on the attack
 list.
 
+## HARD LESSON 11 — a selectivity filter can shrink the loss without fixing the edge (from cycle 012, 2026-09-02)
+Cycle 012 added a volume-confirmation gate (current volume >= its 20-bar SMA) to the pullback-hold
+bar, predicting per HARD LESSON 9 that pruning bars (rather than resizing risk, as 011's R-floor did)
+would avoid 011's 5m regression. It delivered the best 15m result this base line has ever posted — PF
+1.0211→1.0237, max DD 40.67%→21.95%, a ~19pp drawdown improvement — and did shrink 5m's damage: max DD
+57.02%→47.78%, net loss −49.83%→−41.82%, trades 622→466.
+
+But 5m profit factor did **not** clear 0.95, and it did not even fully recover to pre-011 levels:
+0.7769 (011's 5m) → 0.7544 (012's 5m). avgTradePct got slightly worse (−0.0801%→−0.0897%). The filter
+removed low-conviction bars roughly proportionally across both win and loss buckets — smaller book,
+similar edge quality — rather than disproportionately removing losers.
+
+**Rule:** a change that measurably improves drawdown and shrinks total loss is not the same as a
+change that fixes the underlying edge. Judge rung C strictly on PF crossing 0.95, not on "moved in
+the right direction." The 5m failure mode (HARD LESSON 3/9: fee drag interacting with how R is sized
+relative to structural stop distance) has now survived two different attack types — a risk-resizing
+change (011) and a bar-pruning selectivity change (012) — without being fixed. The next candidate
+should target the R-sizing mechanism directly (a volatility-relative floor, attack list item 1) rather
+than another selectivity filter, since selectivity alone has now been tried and holds the loss steady
+without moving PF.
+
 ## Platform constraints — trader.dev engine
 - Pine **//@version=6**, allowlist of 65 `ta.*` indicators.
 - **FORBIDDEN:** `request.security` (no cross-symbol), arrays/maps, `strategy.cancel`,
