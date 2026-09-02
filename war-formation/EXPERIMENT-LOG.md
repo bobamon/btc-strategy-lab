@@ -62,6 +62,7 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E20 | Timeframe translation to 5m, parameters scaled x5 | **REVERTED.** PF 1.621, DD 2.73%, but trades 32->5 · [report](https://mcp-api.trader.dev/backtest/01M1GTNK25PJC0J19WKQ6GKQXK) |
 | E20b | CONTROL: same, but the coil keeps its 1:10 RATIO instead of wall-clock | **REVERTED.** Trades 5->9, so the coil was part of it -- but PF fell to 0.951 and 9 is still far below 32 · [report](https://mcp-api.trader.dev/backtest/01M1GTQ6BGVNPYGKX1AQAHQA39) |
 | E21 | Macro trend filter: close above a 14400-bar EMA (~10 days) | **REVERTED.** PF 1.686->1.043, win 56.25%->38.89%, trades 32->18. Macro trend does NOT explain the concentration · [report](https://mcp-api.trader.dev/backtest/01M1GV425K3361APZQJ6BR9K24) |
+| E22 | SENSITIVITY: coilK 0.85 -> 0.95 | **Degrades gracefully.** PF 1.686->1.300, win 56.25%->48.78%, trades 32->41, DD 3.10%->4.72%. Second parameter, second graceful result · [report](https://mcp-api.trader.dev/backtest/01M1GVATYA8Z4TR2VB58V9XHTT) |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -335,5 +336,30 @@ at a property of either strategy — and it means the question has been framed w
 probe is a **calendar decomposition** of the champion (month by month, and both labs side by side),
 which is a measurement, not another filter. Every filter tried so far has failed for the same reason:
 filters select on a *proxy*, and no proxy has matched whatever the calendar is actually marking.
+
+**Champion unchanged: v6, long-only, PF 1.68623784, DD 3.10289714%, 32 trades.**
+
+
+## E22 — THE CHAMPION HAS NOW SURVIVED TWO INDEPENDENT PERTURBATIONS
+
+| Parameter | Champion | Perturbed | PF | Trades |
+|---|---|---|---|---|
+| greenBull (E19) | 4 | 3 | 1.686 → 1.282 | 32 → 42 |
+| coilK (E22) | 0.85 | 0.95 | 1.686 → 1.300 | 32 → 41 |
+
+Both degrade gracefully and both stay clearly above 1.0 on larger samples. **coilK matters more than
+greenBull did**, because 0.85 was *chosen* rather than derived — it is the most arbitrary number in
+the build, and a fitted artefact would have been most fragile exactly there.
+
+This is the strongest evidence the champion has, and it is the right kind: with the sample fixed at
+32 trades by the 1m coverage limit (E20 proved the timeframe cannot be changed to fix that),
+**robustness under perturbation is the only defence available.** `velK` is the remaining untested
+parameter.
+
+**The concentration question, meanwhile, has moved out of this lab.** The BTC lab's period
+decomposition this hour found its own base runs PF 1.36 in Jun 2024 – Jul 2025 against 0.88 in
+Dec 2025 – May 2026. Two unrelated mechanisms decaying in the same window points at the market, not
+at either strategy — which is why E18's volatility filter and E21's trend filter both failed. Stop
+looking for a filter that explains it.
 
 **Champion unchanged: v6, long-only, PF 1.68623784, DD 3.10289714%, 32 trades.**

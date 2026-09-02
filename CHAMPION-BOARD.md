@@ -362,3 +362,40 @@ unexplained edge concentration, now appearing here too.
 base is trusted any further, the next diagnostic worth running is a period decomposition of the 5m
 base — split its 2.2 years into halves or quarters and see whether the edge is spread or concentrated.
 That is a measurement, and it should come before any further attack on the entry or exit.
+
+
+# ⚠️ THE PERIOD DECOMPOSITION IS IN, AND IT TEMPERS EVERYTHING ABOVE (2026-09-02)
+
+| Window | PF | Win rate | Trades | Net |
+|---|---|---|---|---|
+| Jun 2024 – Jul 2025 | **1.3552** | 52.24% | 67 | **+14.64%** |
+| Full, Jun 2024 – Sep 2026 | 1.0202 | 41.41% | 128 | +1.60% |
+| Dec 2025 – May 2026 | 0.8753 | 41.18% | 17 | −1.08% |
+
+**The edge is heavily front-loaded.** The first half carries essentially all of it; the remaining
+~61 trades must be break-even or worse to drag 1.36 down to 1.02.
+
+**So the headline PF 1.02 is not a stable property of this signal — it is an average over a good
+period and a poor one.** That is a materially weaker claim than "the first profit factor above 1.0",
+and the board should read that way from here on.
+
+### The cross-lab observation is now hard to dismiss
+Two unrelated strategies degrade in the same recent window:
+
+| Lab | Mechanism | Early period | Recent period |
+|---|---|---|---|
+| BTC | 5m VWAP mean-reversion, long only | PF 1.36 (Jun 24 – Jul 25) | PF 0.88 (Dec 25 – May 26) |
+| War Formation | 1m momentum cascade, long only | PF 3.80 (Dec – Feb) | PF 0.89 (Feb – May) |
+
+Different timeframes, different mechanisms, different entry logic — same shape. **This looks like
+edge decay in the current regime rather than a flaw in either strategy**, and it explains why every
+filter aimed at the War Formation concentration has failed: filters select on a proxy, and no proxy
+matches a market-wide change.
+
+### What this changes about priorities
+1. **Do not tune against the recent window.** Anything optimised on Dec 2025 – May 2026 is being
+   fitted to the weakest data in the sample.
+2. **Walk-forward is now the honest test**, not another attack. Fit on the first half, measure on the
+   second, and quote both.
+3. The short leg remains genuinely untried and is the only route to a return stream that does not
+   depend on this long signal's decaying edge.

@@ -899,9 +899,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T10:37:32Z"
     },
     "notes": "REVERTED, AND IT ELIMINATES THE SECOND HYPOTHESIS. PF 1.686->1.043, win rate 56.25%->38.89%, trades 32->18, DD 3.10%->3.89%. The filter cut nearly half the trades and the survivors were markedly worse -- the anti-selective signature seen in E14 and E16. So a ten-day trend does NOT select the good period. VOLATILITY (E18) AND MACRO TREND (E21) ARE NOW BOTH RULED OUT, and the edge concentration remains unexplained. Worth noting the same shape has just appeared in the BTC lab, whose 5m base scores 1.0202 over 2.2 years but 0.8753 over this identical Dec-May window. Two unrelated strategies degrading in the same window points at something in the market during that period rather than at either strategy, which makes a calendar decomposition -- not another filter -- the right next probe."
+  },
+  {
+    "id": "war-formation-e22-coilk-095",
+    "name": "WF E22 sensitivity, coilK 0.95",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "description": "Parameter sensitivity on the champion: the 3m coil threshold loosened from 0.85 to 0.95, admitting shallower coils. Run as a robustness check on a 32-trade champion, not as an improvement attempt. Long-only.",
+    "metrics": {
+      "netProfitPct": 4.96220959,
+      "profitFactor": 1.2997206,
+      "maxDrawdownPct": 4.71912787,
+      "totalTrades": 41,
+      "winRatePct": 48.7804878,
+      "avgTradePct": 0.1210295
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GVATYARG8X2GB49DFRVQPC",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GVATYA8Z4TR2VB58V9XHTT",
+      "verifiedAt": "2026-09-02T10:41:15Z"
+    },
+    "notes": "SECOND PARAMETER PERTURBED, SECOND GRACEFUL DEGRADATION. PF 1.686->1.300, win rate 56.25%->48.78%, trades 32->41, DD 3.10%->4.72%. Clearly profitable at the neighbouring value on a 28% larger sample, which is what a real edge looks like under perturbation. coilK matters because 0.85 was chosen rather than derived -- it is the most arbitrary number in the build -- so its insensitivity is worth more than greenBull's was. Together with E19 the champion has now survived perturbation on two independent parameters. It keeps coilK 0.85 because that is better on both ratchet terms, but confidence in the 32-trade result is higher again. velK remains untested."
   }
 ];
-const BUILT = "2026-09-02 04:38";
+const BUILT = "2026-09-02 04:41";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

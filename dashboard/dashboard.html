@@ -898,9 +898,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T10:34:18Z"
     },
     "notes": "THIS CONTROL DOES TWO JOBS. First, it beats 1m on identical data (0.8753 against 0.7521), which is what rejects the 1m build. Second, and less comfortable: the 5m base scores 0.8753 here against 1.0202 over its full 2.2 years, so the December-to-May window is materially harder than the 5m average and THE HEADLINE 1.02 IS NOT UNIFORM ACROSS TIME. That is the same shape as the War Formation lab's unexplained time-concentration, now appearing in the BTC lab too, and it is a caution against reading 1.02 as a stable property of the signal."
+  },
+  {
+    "id": "vwm-5m-firsthalf-decomposition",
+    "name": "VWM 5m base, first-half period decomposition",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2025-07-20",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "Period decomposition of the 5m base. Unchanged code, window narrowed to the first half of the 5m sample. A measurement completing the calendar picture, not a ratchet candidate. Long only.",
+    "metrics": {
+      "netProfitPct": 14.63590295,
+      "profitFactor": 1.35522034,
+      "maxDrawdownPct": 9.99054777,
+      "totalTrades": 67,
+      "winRatePct": 52.23880597,
+      "avgTradePct": 0.21844631
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GV9WSZ7A74QA0MH6V9ETQG",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GV9WSZQH486A6V7N173261",
+      "verifiedAt": "2026-09-02T10:40:44Z"
+    },
+    "notes": "THE EDGE IS HEAVILY FRONT-LOADED, AND THIS SHOULD TEMPER THE HEADLINE. PF 1.3552 with a 52.24% win rate and +14.64% net across 67 trades in the first half, against 1.0202 over the full 2.2 years and 0.8753 over Dec 2025 to May 2026. The remaining roughly 61 trades must therefore be break-even or worse to drag the total from 1.36 down to 1.02. The 5m base's profit factor above 1.0 is carried by June 2024 to July 2025; the most recent fourteen months are weak. Combined with the War Formation champion degrading in the same recent window on a completely different mechanism, this looks like edge decay in the current regime rather than a property of either strategy. Recorded as rejected because it is a measurement, not a configuration."
   }
 ];
-const BUILT = "2026-09-02 04:35";
+const BUILT = "2026-09-02 04:41";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
