@@ -62,6 +62,7 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E14 | ORACLE-RULES item 3 / queue 0g: short leg requires ≥2 consecutive shrinking-range GREEN 3m candles ("wait for the pump weakening") before the reversal trigger, cyclePos gate removed | 2 trades, 0 winners, PF 0.00 — **sample collapse, same shape as E13** |
 | E14b | Same trigger, loosened minGreenN 2 → 1 (just the last 3m candle must be green) | 9 trades, PF 0.83, win rate 11.1%, payoff 6.66:1 — **rejected; the fourth structurally distinct short construction lands on the same shape** |
 | E15 | 0d option (i): crash-timing short — bear regime + acceleration trigger (range >= 1.5x atr30, down bar, close in bottom 35% of range, already extended below prior 15m low), no reversal/pullback requirement | 313 trades, PF 0.65, win rate 15.7%, net −29.4%, max DD 29.4%, payoff 3.51:1 — **rejected; fifth short construction, same shape, now at a sample large enough to settle it** |
+| E16 | 0i: independent short strategy, different primitives — EMA50<EMA200 + EMA200 slope-down regime (not HA colour count), "sell the failed rip" RSI(14) 55→50 crossunder trigger (not reversal-at-a-level), stop beyond last confirmed pivot high (not the cascade's 15m level) | 587 trades, PF 0.5866, win rate 15.84%, net −58.43%, max DD 58.72%, payoff 3.116:1 — **rejected; sixth structurally distinct short construction, same shape, this time with zero shared primitives with the cascade** |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -137,16 +138,30 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
     Taking option (ii): the both-directions standing objective must be met by a **separately-designed
     strategy** for the short side, not another leg bolted onto this cascade. That separate-strategy
     design is now open item 0i below.
-0i. **BUILD AN INDEPENDENT SHORT STRATEGY (not a leg on this cascade).** Five short constructions on
-    the War Formation cascade have failed identically (E9, E9b, E13, E13b, E14, E14b, E15 — mirrored,
-    rejection, location-gated, trigger-gated, and acceleration triggers all tested). Per E15/0d, stop
-    iterating on this cascade's short leg entirely. The 6h HA green-count regime label marks CRASH
-    RISK, not downtrend (established at 0c/E10-E11), so any short built on top of it inherits that
-    mislabel. Start over: design a short-only strategy from different primitives (e.g. a genuine
-    downtrend filter — realized volatility regime, a moving-average slope condition, or the
-    consecutive-red-6h-candle rule from ORACLE-RULES item 1 but tuned for shorts specifically) rather
-    than reusing the champion's bull-designed regime detector. This satisfies the standing
-    both-directions objective without touching the long-only champion.
+0i. ~~BUILD AN INDEPENDENT SHORT STRATEGY (not a leg on this cascade)~~ — **DONE (E16), rejected.**
+    Built a short-only strategy from primitives sharing NOTHING with the cascade: EMA50<EMA200 +
+    EMA200-slope-down regime (not HA colour count), an RSI(14) 55→50 "failed rip" crossunder trigger
+    (not reversal-at-a-swept-level), a stop beyond the last confirmed `ta.pivothigh` (not the
+    cascade's 15m structural level). Result: 587 trades, PF 0.5866, win rate 15.84%, net −58.43%, max
+    DD 58.72%, payoff 3.116:1 (breakeven win rate ~24.3%, actual 15.8%) — **the sixth structurally
+    distinct short construction on this dataset, and it lands on the identical shape as the five
+    cascade-leg attempts** (healthy-to-excellent payoff, low win rate, net negative), this time with
+    zero shared machinery. This is materially stronger evidence than 0c/E10-E11 that the failure is
+    not about regime-detector choice or entry geometry — it points at something about this symbol and
+    window (BTCUSDT Dec 2025 – May 2026) itself: a persistent bullish skew that runs over
+    counter-trend positions faster than it lets them pay off at 2:1 R:R. See new open item 0j below.
+0j. **TEST WHETHER THE R:R ITSELF, NOT THE CONSTRUCTION, IS WHAT'S FAILING SHORTS.** Six independently
+    designed short constructions (E9, E9b, E13, E13b, E14, E14b, E15, E16) all land on the same shape:
+    healthy-to-excellent payoff ratio (2.68:1 to 6.66:1), win rate 11-20%, net negative. Every one used
+    rr=2.0 and a structural stop. The unexamined variable is the reward:risk itself — a persistent
+    payoff-vs-win-rate shape this consistent across six unrelated entry/regime designs suggests the
+    stop distance or target distance (not the trigger) may be miscalibrated for how BTC actually snaps
+    back against short positions in this window. Before concluding (as 0i's result invites) that shorts
+    are simply unprofitable here, run E16's exact construction at a tighter rr (e.g. 1.2 or 1.5) or a
+    volatility-scaled target instead of a flat rr=2.0 multiple, and see whether win rate rises enough
+    to compensate. If it still fails at every rr tested, that is much stronger grounds to call the
+    both-directions objective genuinely unmeetable on this symbol/window and document it as such on
+    the CHAMPION-BOARD-equivalent status for this lab.
 0e. (was 0c) **DIAGNOSE THE BEAR REGIME ITSELF (superseded).** Two structurally different short
     constructions have now failed: the mirrored failed-breakout (v5, 2 of 15) and
     rejection-at-resistance (E9b, 14 of 69, PF 0.68). Both had healthy payoff ratios and losing win
