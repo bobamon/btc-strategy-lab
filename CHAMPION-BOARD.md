@@ -28,6 +28,12 @@ Each cycle takes the current **base** and changes **exactly one thing**: add a f
 filter, or alter one parameter. Then it runs the ladder and decides on evidence.
 
 **A change is KEPT only if it improves profit factor AND does not worsen max drawdown.**
+
+> **OPEN RULE QUESTION (raised by Attack 3, 2026-09-02).** Attack 3 improved PF 0.9121→0.9405 — the
+> largest gain of any attack — but worsened drawdown by **0.064 percentage points**, so a strict
+> reading reverted it. A tolerance band (allow DD to worsen by up to ~0.5pp when PF improves by more
+> than 0.02) would have kept it. Changing the ratchet is a decision for the user, not for a cycle to
+> make on its own. Until then the strict rule stands.
 Anything else is reverted and recorded as tried. This is the ratchet that makes the lab get better
 instead of merely different.
 
@@ -43,6 +49,7 @@ The board is open.
 |---|---|---|---|---|---|
 | Attack 1 — EMA200 trend filter | 0.89 | 35.0% | **0.91** | **28.8%** | **KEPT** |
 | Attack 2 — shallow pullback | 0.91 | 28.8% | 0.85 | 32.6% | **REVERTED** |
+| Attack 3 — witching-hour ban | 0.9121 | 28.780% | **0.9405** | 28.844% | **REVERTED** — borderline, see note |
 
 ## CURRENT BASE — what cycle 008 starts from
 **007's LONG leg.** It has the best raw hit rate of anything tested in this lab: **38.3%** across 457
@@ -67,8 +74,9 @@ The base loses to fee drag, so the first moves must **cut trade count without cu
 1. ~~Add a trend filter (EMA200)~~ — **DONE, KEPT.** PF 0.89→0.91, DD 35.0%→28.8%. Now part of the base.
 2. ~~Require the pullback to be shallow~~ — **DONE, REVERTED.** PF 0.91→0.85, DD 28.8%→32.6%.
    The deep retrace is where the edge lives; excluding it removed good trades.
-3. **Add the time-of-day filter** from the Oracle material (`war-formation/WAR-FORMATION.md`) —
-   ban the 1–4am ET witching window, which has a documented downside bias.
+3. ~~Add the time-of-day filter (1–4am ET witching ban)~~ — **DONE, REVERTED on a technicality.**
+   PF 0.9121→0.9405 (best gain yet) but DD 28.780%→28.844%, a 0.064pp worsening. Worth re-running
+   if the user approves a drawdown tolerance band.
 4. **Raise the R floor** from 0.8% to 1.2%. HARD LESSON 3 says fees scale against R; the base spent
    18% of gross on fees, and a wider stop directly attacks that.
 5. **Require volume confirmation on the pullback hold** — participation returning as price reclaims.
@@ -82,3 +90,4 @@ The base loses to fee drag, so the first moves must **cut trade count without cu
 |---|---|---|---|
 | Attack 1 | Require close above EMA200 | PF 0.89→0.91, DD 35.0%→28.8%, trades 468→433 | **KEPT** |
 | Attack 2 | Require shallow pullback (low holds above VWAP) | PF 0.91→0.85, DD 28.8%→32.6%, trades 433→342 | **REVERTED** — worse on both terms |
+| Attack 3 | Ban entries in the 1–4am ET witching window | PF 0.9121→0.9405, DD 28.780%→28.844%, trades 433→420 | **REVERTED** — PF up, DD worse by 0.064pp |

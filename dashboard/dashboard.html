@@ -550,9 +550,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T08:58:52Z"
     },
     "notes": "REVERTED by the ratchet: profit factor WORSENED 0.91 -> 0.85 and max drawdown WORSENED 28.8% -> 32.6%. Both terms failed, so there is no trade-off to weigh. The filter removed 91 trades (21%) and made results worse on both axes, which means the DEEP pullbacks it excluded were disproportionately GOOD trades -- the exact opposite of attack 1's EMA200 filter, which removed disproportionately bad ones. The hypothesis is contradicted: in this system the edge lives in the deep retrace through VWAP, not the shallow one. Long-only; no short leg exists yet."
+  },
+  {
+    "id": "vwm-attack3-witching-ban",
+    "name": "VWM base + EMA200 + witching ban",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "Attack 3 on the base: ONE change, block long entries during the 1-4am ET witching window identified in the Oracle material as the overnight dump window. Everything else identical to the base, which already includes the EMA200 trend filter.",
+    "metrics": {
+      "netProfitPct": -15.47901705,
+      "profitFactor": 0.94053487,
+      "maxDrawdownPct": 28.84365743,
+      "totalTrades": 420,
+      "winRatePct": 38.57142857,
+      "avgTradePct": -0.0368548
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GNSNY6623691ZJQ5TR5NQ0",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GNSNY6Z44PC2ZX6HTEAHR7",
+      "verifiedAt": "2026-09-02T09:05:16Z"
+    },
+    "notes": "REVERTED, but the CLOSEST CALL SO FAR and worth revisiting. Profit factor improved 0.9121 -> 0.9405, the largest single gain of any attack and the nearest approach to the 0.95 ladder threshold. Net improved -23.0% -> -15.5%. But max drawdown worsened by 0.064 percentage points (28.780% -> 28.844%), and the ratchet requires drawdown NOT to worsen, so the rule was applied as written rather than bent. Only 13 trades were removed (433 -> 420) for that PF gain, meaning the witching window contained a small number of disproportionately bad trades -- the Oracle's claim about that window looks directionally right. FLAGGED FOR THE USER: this is the first case where a strict reading of the ratchet discards a change that looks genuinely good. A tolerance band (allow drawdown to worsen by up to ~0.5pp when PF improves by more than 0.02) would have kept it. That is a rule change, not my call to make unilaterally."
   }
 ];
-const BUILT = "2026-09-02 02:58";
+const BUILT = "2026-09-02 03:05";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
