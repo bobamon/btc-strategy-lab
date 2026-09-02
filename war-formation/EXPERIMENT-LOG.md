@@ -47,6 +47,8 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E8 | Split-half stability | 3.80 vs 0.89 — edge concentrated in first half |
 | E9 | Short rebuild, rejection-at-resistance, strict gates | 5 trades — inconclusive, sample too small to test |
 | E9b | Same short, gates loosened for sample size | PF 0.68, 69 trades, win rate 20.3% — **short side fails again** |
+| E10 | Diagnostic: long the whole bear episode | PF 0.83, −12.6%, 125 episodes — bear label is SOUND |
+| E11 | Diagnostic: short the whole bear episode | PF 0.50, −17.6%, 11.1% win rate — **both directions lose** |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -59,7 +61,34 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 
 ## OPEN QUEUE — take the top unblocked item each cycle
 0a. ~~REBUILD THE SHORT SIDE PROPERLY~~ — **DONE (E9/E9b), failed.** See the new 0c below.
-0c. **DIAGNOSE THE BEAR REGIME ITSELF (new top priority).** Two structurally different short
+0c. ~~DIAGNOSE THE BEAR REGIME ITSELF~~ — **DONE (E10/E11). ANSWERED.**
+    Long through bear episodes loses 12.6% (PF 0.83); shorting them loses 17.6% (PF 0.50). **Both
+    directions lose on the same bars.** That is only possible if bear-labelled periods carry no
+    consistent drift: they drift slightly UP most of the time (112 of 126 shorts lost small) and fall
+    hard occasionally (14 shorts won big, 3.99:1 payoff). **The 6h HA bear label marks CRASH RISK,
+    not downtrend.** This explains every short failure so far — E9b's 20% win rate at 2.68:1 is the
+    same shape. A short here cannot work by "being short during bear"; it must time the crash.
+0f. **NEW TOP PRIORITY — THE 3-MINUTE CYCLE POSITION GATE.** Read `ORACLE-RULES.md` first; it is
+    decoded from the author's own videos and it names the exact defect in every short built so far.
+    His rule: direction comes from the 6h and 1h, but **direction alone does not permit an entry —
+    position inside the 3-minute cycle does.** "Even if you had direction to short you can wreck an
+    absolutely perfect trade... do you want to short down here?" Every short this project has built
+    entered AFTER price had already fallen, i.e. at the bottom of the cycle, which is exactly what he
+    says destroys the trade. That fits E9/E9b perfectly: healthy payoff, ~20% win rate.
+    **Implement:** reconstruct the 3m cycle from 1m bars (3 x 1m, same technique already used for
+    15m/1h/6h). Compute `cyclePos = (close - cycleLow) / (cycleHigh - cycleLow)` over a rolling
+    window of 3m candles. Then gate: **shorts only when cyclePos is HIGH, longs only when cyclePos is
+    LOW.** Test the short leg alone first, judged on its own profit factor.
+0g. **THEN: require the retrace ("wait for the pump").** "All this is, is waiting." A short should
+    additionally require a green push against the bear regime first — N consecutive green 3m candles,
+    or a retrace of X% of the prior leg. Test as a separate change so it is attributable.
+0d. **Decide the short question honestly (deferred until 0f/0g are tested).** Given 0c, there are two options and
+    the data should pick, not preference: (i) build a short that targets the crash specifically —
+    require the bear regime PLUS an acceleration trigger (range expansion, or a break with the
+    session already extended), accepting a low win rate and a large payoff; or (ii) accept that this
+    cascade is a LONG-ONLY edge on this data and meet the both-directions requirement with a separate
+    strategy. Test (i) once; if it fails, take (ii) and record it as settled.
+0e. (was 0c) **DIAGNOSE THE BEAR REGIME ITSELF (superseded).** Two structurally different short
     constructions have now failed: the mirrored failed-breakout (v5, 2 of 15) and
     rejection-at-resistance (E9b, 14 of 69, PF 0.68). Both had healthy payoff ratios and losing win
     rates. **Geometry is not the problem, so stop iterating on geometry.** Test the regime label

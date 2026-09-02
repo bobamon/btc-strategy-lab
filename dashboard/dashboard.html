@@ -463,9 +463,67 @@ const DATA = [
     },
     "specPath": "strategies/007-vwm-vwap-value-migration.md",
     "notes": "Ladder stopped at rung A: PF 0.89. Leg split: longs 457 trades (175 winners, 38.3%, -$2,310), shorts 107 (15 winners, 14.0%, -$865) -- BOTH legs lose, with the short leg the weaker half as in every short tested on this project. Payoff geometry was fine at 1.76:1 (break-even ~36%) and longs reached 38.3% before costs, but 564 trades at 18% fee drag ($4,661 of $26,198 gross) turns a marginal edge negative. FREQUENCY ESTIMATE: predicted 400-1200, actual 564 -- the FIRST estimate to land inside its range. Notable that pullback-to-VWAP is the most conventional idea tried and it still fails at this cost level on BTC perps."
+  },
+  {
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "id": "vwm-base-longonly",
+    "name": "VWM base long-only (ratchet baseline)",
+    "status": "rejected",
+    "description": "The ratchet BASELINE for the BTC lab. 007's VWAP accepted-value pullback, long leg in isolation: price stretched to +2 sigma within the last 50 bars, then pulls back to within 0.5 sigma of VWAP and closes back above it while VWAP is rising over 50 bars. Stop at the 20-bar swing low minus 0.25x ATR14 (structure, not the signal level), floored at 0.8% of price, target 2R, both fixed at entry. Flip signal is close crossing VWAP, which stands the strategy down for 20 bars.",
+    "metrics": {
+      "netProfitPct": -29.42846861,
+      "profitFactor": 0.89343314,
+      "maxDrawdownPct": 34.97306874,
+      "totalTrades": 468,
+      "winRatePct": 37.60683761,
+      "avgTradePct": -0.06288134
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GK9XYYD9NBR4KY3WBHDMK9",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GK9XYY7S1ZACMVE07JGSK9",
+      "verifiedAt": "2026-09-02T08:22:20Z"
+    },
+    "notes": "Measured standalone because 007's long-leg PF and drawdown were only ever known from inside a combined run. This is the number every future ratchet cycle is compared against. Long-only by design; the short rebuild stays on the attack list rather than being bolted on early."
+  },
+  {
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "id": "vwm-attack1-ema200",
+    "name": "VWM base + EMA200 trend filter",
+    "status": "testing",
+    "description": "Attack 1 on the base: ONE change, require close above the 200-period EMA before a pullback entry is allowed. Everything else identical to the baseline.",
+    "metrics": {
+      "netProfitPct": -22.98318616,
+      "profitFactor": 0.91209453,
+      "maxDrawdownPct": 28.78010104,
+      "totalTrades": 433,
+      "winRatePct": 38.33718245,
+      "avgTradePct": -0.05307895
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GKB5GCNRDA6V28QNZZ9HYQ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GKB5GC6R80WGMZ8MH2YQGJ",
+      "verifiedAt": "2026-09-02T08:22:20Z"
+    },
+    "notes": "KEPT by the ratchet: profit factor improved 0.89 -> 0.91 AND max drawdown improved 35.0% -> 28.8%. Net went -29.4% -> -23.0%. Only 35 trades were removed (468 -> 433, 7.5%) yet drawdown fell 6.2 points and net improved 6.4 points, so the filter removed disproportionately BAD trades rather than trimming at random -- that is what a filter earning its place looks like. NOT promoted to champion: PF 0.91 is still below the 0.95 ladder threshold, so no 5m run. This becomes the new base for attack 2."
   }
 ];
-const BUILT = "2026-09-02 01:24";
+const BUILT = "2026-09-02 02:22";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

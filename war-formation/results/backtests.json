@@ -296,5 +296,63 @@
     },
     "specPath": "war-formation/EXPERIMENT-LOG.md",
     "notes": "E9b, gates loosened ONLY to reach a testable sample (wick 0.8 to 0.4x ATR, under-resistance requirement dropped, near-touch tolerance added). 69 trades, PF 0.68, win rate 20.3%. The payoff geometry was fine at 2.68:1 -- break-even needs ~27% and it delivered 20.3%. CONCLUSION: the short side now fails on TWO structurally different constructions -- the mirrored failed-breakout (v5: 2 winners in 15) and rejection-at-resistance (14 in 69). Geometry is not the problem. The leading remaining hypothesis is the bear-regime definition itself, or that Dec 2025 - May 2026 simply had no tradeable downside."
+  },
+  {
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "id": "war-formation-e10-bear-drift-long",
+    "name": "WF DIAGNOSTIC bear regime drift (long probe)",
+    "direction": "long",
+    "status": "rejected",
+    "description": "DIAGNOSTIC PROBE, not a strategy candidate. Goes long for the entire duration of every bear-regime episode and flat otherwise, so its net return measures BTC's actual drift across exactly the bars the 6h HA green-count labels BEAR. A 10% catastrophic stop exists only to honour the no-unlimited-loss rule. A loss means the label is sound; a gain would mean it is broken.",
+    "metrics": {
+      "netProfitPct": -12.59480297,
+      "profitFactor": 0.82904504,
+      "maxDrawdownPct": 27.88009962,
+      "totalTrades": 125,
+      "winRatePct": 53.6,
+      "avgTradePct": -0.10075842
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GJMXWMZS1E5MWAHDNNC2A9",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GJMXWK2CE04V9MGTYWMDJF",
+      "verifiedAt": "2026-09-02T08:11:11Z"
+    },
+    "notes": "125 bear episodes. Being long through them LOSES 12.6%, so the bear label is NOT mislabelling rising periods. Win rate 53.6% but avgWin $91 vs avgLoss $127 -- more winners than losers, yet the losers are much bigger. That is negative skew, not steady downtrend."
+  },
+  {
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "id": "war-formation-e11-bear-drift-short",
+    "name": "WF DIAGNOSTIC bear regime drift (short probe)",
+    "direction": "short",
+    "status": "rejected",
+    "description": "DIAGNOSTIC PROBE, mirror of E10. Shorts the entire bear-regime episode with NO entry timing at all. Tests whether the bear drift is large enough to beat the 0.10% round trip unaided.",
+    "metrics": {
+      "netProfitPct": -17.56502623,
+      "profitFactor": 0.49815766,
+      "maxDrawdownPct": 18.14578668,
+      "totalTrades": 126,
+      "winRatePct": 11.11111111,
+      "avgTradePct": -0.13940497
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GJPJ5QG1NQE210HC40DDJT",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GJPJ5Q7G8NEKDCQC0Y79Y8",
+      "verifiedAt": "2026-09-02T08:11:11Z"
+    },
+    "notes": "Shorting the whole bear episode ALSO loses, -17.6%, PF 0.50. Win rate 11.1% with a 3.99:1 payoff -- 112 small losers and 14 large winners. TOGETHER WITH E10 THIS IS THE ANSWER: both directions lose on the same bars, which is only possible if bear-labelled periods have NO consistent drift. They drift slightly UP most of the time and fall hard occasionally. The label marks CRASH RISK, not downtrend."
   }
 ]

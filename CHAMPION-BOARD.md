@@ -35,7 +35,13 @@ Every cycle must still satisfy the standing objectives (both directions built se
 regime-flip response, legs reported separately) and every hard lesson in `STRATEGY-LEDGER.md`.
 
 ## CURRENT CHAMPION
-**None yet.** Nothing has cleared the ladder. The board is open.
+**None yet.** Nothing has cleared the ladder (PF >= 0.95 on 15m, then 5m, then sensitivity).
+The board is open.
+
+## RATCHET PROGRESS
+| Cycle | Base PF | Base DD | New PF | New DD | Verdict |
+|---|---|---|---|---|---|
+| Attack 1 — EMA200 trend filter | 0.89 | 35.0% | **0.91** | **28.8%** | **KEPT** |
 
 ## CURRENT BASE — what cycle 008 starts from
 **007's LONG leg.** It has the best raw hit rate of anything tested in this lab: **38.3%** across 457
@@ -45,17 +51,19 @@ trades before costs, against a break-even of ~36% at its 1.76:1 payoff. It faile
 That makes it the right raw material: a signal that is nearly good enough, failing for a reason we
 know how to attack.
 
-**Base definition:** VWAP with 2σ bands. Long only for now. Price stretched to +2σ within the last 50
-bars, then pulls back to within 0.5σ of VWAP and closes back above it, while VWAP is rising over 50
-bars. Stop at the 20-bar swing low − 0.25×ATR14, floored at 0.8% of price, target 2R, both fixed at
-entry. Flip signal: close crossing VWAP, stand down 20 bars.
-Source: `strategies/pine/007-vwm.pine`.
+**Base definition (updated after Attack 1):** VWAP with 2σ bands. Long only for now. Price stretched
+to +2σ within the last 50 bars, then pulls back to within 0.5σ of VWAP and closes back above it,
+while VWAP is rising over 50 bars, **and close is above the 200-period EMA**. Stop at the 20-bar
+swing low − 0.25×ATR14, floored at 0.8% of price, target 2R, both fixed at entry. Flip signal: close
+crossing VWAP, stand down 20 bars.
+
+**Current base numbers:** PF 0.91 · max DD 28.8% · 433 trades · win rate 38.3% · net −23.0%
+(BTCUSDT 15m, 2022-01-01 → 2026-09-01).
 
 ## THE ATTACK — ranked, one per cycle
 The base loses to fee drag, so the first moves must **cut trade count without cutting edge**:
 
-1. **Add a trend filter.** Only take the pullback when a slow anchor agrees (e.g. price above a
-   200-period EMA). Should remove counter-trend pullbacks, which are the likely losers.
+1. ~~Add a trend filter (EMA200)~~ — **DONE, KEPT.** PF 0.89→0.91, DD 35.0%→28.8%. Now part of the base.
 2. **Require the pullback to be shallow.** A deep retrace to VWAP in an "accepted" uptrend may signal
    the acceptance failed. Test requiring the low to hold above VWAP entirely.
 3. **Add the time-of-day filter** from the Oracle material (`war-formation/WAR-FORMATION.md`) —
@@ -71,4 +79,4 @@ The base loses to fee drag, so the first moves must **cut trade count without cu
 
 | Cycle | Change to the base | Result | Kept? |
 |---|---|---|---|
-| — | — | — | — |
+| Attack 1 | Require close above EMA200 | PF 0.89→0.91, DD 35.0%→28.8%, trades 468→433 | **KEPT** |
