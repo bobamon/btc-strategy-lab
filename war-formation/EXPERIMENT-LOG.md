@@ -67,6 +67,7 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E24 | velK 0.6 variant measured on the WEAK half only | **No rescue.** PF 0.8745 on 25 trades against the champion's own 0.8930 on 15. Loosening buys trades, not edge · [report](https://mcp-api.trader.dev/backtest/01M1GVTAJEFTNTP0EHED3XMF1N) |
 | E25 | Rejection short + cycle gate, target 1R instead of 2R | **PF 0.489, 24 trades. COMPARISON CONFOUNDED** -- E13 made 39 trades, so the entry differs; E13 was rebuilt from prose, not source · [report](https://mcp-api.trader.dev/backtest/01M1GW8GZXNDHCXCAED1G87A17) |
 | E26 | E13's EXACT source, one input changed: rr 1.5 -> 1.0 | **REVERTED.** PF 0.7490->0.6922, win 23.08%->27.03%, trades 39->37. Nearer target HURTS this short · [report](https://mcp-api.trader.dev/backtest/01M1GWGDZ6NDSF9H66YF7S7HZP) |
+| E27 | Sweep-and-reject short: genuine BREAK above the 15m high, then close back below | **REVERTED.** PF 0.2531, win 10.53%, 19 trades, against E13's 0.7490 on 39. The sweep is WORSE than the near-touch · [report](https://mcp-api.trader.dev/backtest/01M1GWQ2NSQ5SBP1PDP4ZDC739) |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -517,3 +518,34 @@ construction. Meeting this requirement means changing the systems, not tuning th
 
 **3M Elite is the closest in structure**, because supply and demand zones are inherently two-sided —
 its problem is that the entry does not work yet in either direction, not that it is one-sided.
+
+
+## E27 — A REAL ASYMMETRY BETWEEN THE TWO SIDES
+The long's whole edge is the failure of a GENUINE breakdown: price takes out the previous 15m low,
+then reclaims it. Applying that same mechanism at a high produced the worst short yet.
+
+| Short construction | PF | Win rate | Trades |
+|---|---|---|---|
+| E13 — near-touch of resistance, then reject | **0.7490** | 23.08% | 39 |
+| E27 — genuine break above, then reject | 0.2531 | 10.53% | 19 |
+
+**Requiring price to actually clear resistance makes shorts markedly worse; requiring it merely to
+approach makes them better.** A plausible reading: in a downtrend, price clearing resistance is more
+often continuation than exhaustion, while failing to reach it is the mark of a weak rally. Whatever
+the cause, the two sides are not symmetric in this respect, and E13's near-touch stands.
+
+## ██ DESIGN CLARIFICATION FROM THE USER — WAR FORMATION IS ONE BIDIRECTIONAL STRATEGY
+**"It all depends on the higher time frames. That's what makes the entries longs or shorts."**
+
+The 6h/1h cascade decides the SIDE; the 15m/3m/1m mechanics execute in that direction. **The v6
+champion is long-only and is therefore an INCOMPLETE implementation, not a finished strategy** — the
+log will describe it that way from now on.
+
+Every short experiment so far treated the short as a separate system to design. Under this framing
+that was the wrong approach. The reconciliation with the no-mirror rule is recorded in
+ORACLE-RULES.md: the rule is downgraded from *never symmetric* to **never symmetric without solving
+location for the short side**, because E13 showed the cycle-position gate is exactly what the short
+needs and the long gets for free.
+
+**Next build: ONE strategy, long when the 6h is bullish, short when it is bearish, cycle-position gate
+on the short side, both legs reported separately.**

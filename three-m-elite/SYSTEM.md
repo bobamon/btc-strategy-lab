@@ -300,6 +300,7 @@ so the code genuinely behaves differently. **But the count stayed at 3.**
 | v15 | Unreachable ATR target replaced with a fixed 2R, still no filters | **PF 0.363, win rate 8.33%, 24 trades** (5 long 1W, 19 short 1W). Target fix confirmed; entries are worse than chance · [report](https://mcp-api.trader.dev/backtest/01M1GVV0F20WJY72GZSQWM2VJX) |
 | v16 | Type 2 validation restored, latched setup + later trigger | **0 TRADES.** Sequencing was correct; the four-way conjunction at firing is what kills it · [report](https://mcp-api.trader.dev/backtest/01M1GW1PWQ2YY4ZX0AFCMBCCYM) |
 | v17 | Counter build for the validation gate, 2D bias DROPPED | **0 TRADES.** The bias was not the binding term -- arming and mitigation race, and mitigation wins · [report](https://mcp-api.trader.dev/backtest/01M1GW9BZV25S3MC76DK784RBE) |
+| v18 | Arming candle exempted from mitigation | **0 TRADES.** Third consecutive zero on this gate · [report](https://mcp-api.trader.dev/backtest/01M1GWQMNTR2YC3YY3YFBWDM42) |
 
 **When three independent corrections land on the same trade count, the binding constraint is upstream
 of all of them.** I have now spent three cycles fixing things that were genuinely wrong and none of
@@ -467,6 +468,25 @@ That is also closer to the source, which treats mitigation as what happens when 
 
 **Not on the dashboard** — a zero-trade run is not a backtest, and `build_dashboard.py` refuses it.
 
+## v18 — THIRD ZERO IN A ROW, AND I SKIPPED THE MORE BASIC QUESTION THREE TIMES
+v16, v17 and v18 have all returned zero trades on the validation gate. Each fixed a real defect —
+sequencing, then the bias term, then the arming/mitigation conflict — and none of them changed the
+outcome.
+
+**The mistake is one this lab already named and then repeated.** Every one of those runs counted
+`armed AND engulf`. **Not one of them counted `armed` on its own.** I have been measuring a
+conjunction three times without ever confirming that its first term occurs at all — which is exactly
+the "filtering a population without measuring its size" error that v12 was created to fix.
+
+**v19: count ARMING EVENTS ALONE.** Entry = a zone is live and price has just entered it, one-bar
+exit, nothing else. If arming is frequent, the fault is the engulf term or its timing. If arming is
+rare or absent, the zone geometry still does not permit re-entry and everything downstream is moot.
+
+Three credits have gone to this gate on the strength of an unverified assumption. That is the cost of
+skipping the cheapest measurement.
+
+**Not on the dashboard** — zero-trade runs are refused by the provenance gate.
+
 ## Open queue
 0. ~~Get definitions for Type 1/Type 2~~ — **DONE 2026-09-02, see VOCABULARY.md.**
    Type 1 = a 3M candle; Type 2 = an engulfing candle in the direction of bias; both only on the
@@ -484,7 +504,10 @@ That is also closer to the source, which treats mitigation as what happens when 
 0-V15. ~~FIX THE TAKE PROFIT~~ — **DONE. Confirmed broken and fixed; entries are worse than chance without validation.**
 0-V16. ~~RESTORE THE TYPE 2 VALIDATION~~ — **0 trades. Sequencing correct; the firing conjunction is too narrow.**
 0-V17. ~~COUNTER-BUILD THE VALIDATION GATE~~ — **DONE. Bias exonerated; arming and mitigation conflict.**
-0-V18-NEXT. **THE ARMING CANDLE MUST NOT COUNT TOWARD MITIGATION (top priority).** Only closes inside
+0-V18. ~~ARMING CANDLE EXEMPT FROM MITIGATION~~ — **0 trades. Third consecutive zero. See the v18 lesson.**
+0-V19-NEXT. **COUNT ARMING EVENTS ALONE (top priority).** Entry = zone live AND price just entered it.
+    Nothing else. Confirm the first term of the conjunction exists before testing the conjunction
+    again. Superseded text: Only closes inside
     the zone on candles AFTER the one that first brought price into it should increment the touch
     counter. Re-run the v17 counter to confirm the gate can now fire. Superseded text: Entry = armed zone AND engulf, with
     a one-bar exit, so totalTrades is the hit count. Then relax the narrowest term. Do NOT rely on

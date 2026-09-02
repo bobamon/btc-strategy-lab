@@ -1,3 +1,39 @@
+# ██ DESIGN CLARIFICATION FROM THE USER, 2026-09-02 — READ THIS FIRST
+
+**"War formation should be any direction, it all depends on the higher time frames. That's what makes
+the entries longs or shorts."**
+
+**This is ONE bidirectional strategy, not a long strategy with a short bolted on.** The 6h/1h cascade
+decides the SIDE; the 15m/3m/1m mechanics then execute in whichever direction the higher timeframes
+indicate. That is the author's own framing — *"The six hour is the God of direction"* and *"We do not
+short a long direction."*
+
+**What this changes about how this lab has been working:**
+- The v6 champion is **long-only, and is therefore an INCOMPLETE implementation**, not a finished
+  strategy. It should be described that way everywhere.
+- Every short experiment (E9, E9b, E13, E25, E26, E27) treated the short as a *separate system to be
+  designed*. Under this clarification that framing was wrong: the short is the same cascade with the
+  6h regime pointing down.
+
+**AND THERE IS A REAL TENSION TO RESOLVE, STATED HONESTLY:**
+The lab's standing rule is *never mirror the short off the long* — earned from E9/E9b, where mirrored
+shorts went 2 winners in 15 and 14 in 69. **But the user's design IS a symmetric cascade**, which is
+close to what "mirroring" meant here.
+
+The evidence says the concept is not the problem, the *location* is. E13 added the 3m cycle-position
+gate to a mirrored short and lifted it from PF 0.68 to 0.75 — the single best short result — because
+it stopped the strategy shorting after price had already fallen. Longs get that location filter
+implicitly (a reclaim only happens after a sweep down); shorts had to be given it explicitly.
+
+**So the reconciliation is:** build the symmetric cascade the user describes, but the short side needs
+an explicit location gate that the long side gets for free. The no-mirror rule is downgraded from
+"never symmetric" to **"never symmetric WITHOUT solving location for the short side."**
+
+**The next build should be a single strategy that takes longs when the 6h is bullish and shorts when
+it is bearish, with the cycle-position gate on the short side, reported with both legs split out.**
+
+---
+
 # The Oracle's rules — decoded from his own videos
 
 Sources: three local recordings (`transcripts/*.txt`) and three YouTube lessons

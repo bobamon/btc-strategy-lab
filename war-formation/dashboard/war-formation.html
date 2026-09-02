@@ -1044,9 +1044,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T11:01:46Z"
     },
     "notes": "THE PROPERLY CONTROLLED VERSION OF E25, AND IT REVERSES THE ANSWER. PF 0.7490 -> 0.6922 with the win rate rising 23.08% -> 27.03%: more winners, smaller ones, net worse. The nearer target HURTS this short. TWO THINGS THE SOURCE RECOVERY CAUGHT: E13 used rr 1.5, not the 2.0 that E25's write-up claimed, and E25's entry was a reconstruction that made only 24 trades against E13's 39. Here the count comes back at 37 -- close to 39, with the small difference explained by a 1R trade closing at a different moment and blocking or unblocking a few later signals, which is exactly what a genuine exit-only change looks like. THIRD CROSS-LAB NON-TRANSFER: the identical change improved the BTC short (0.5506 -> 0.5816) and worsened this one. Exit convention follows the mechanism; there is no universal answer. Champion unchanged."
+  },
+  {
+    "id": "war-formation-e27-sweep-reject",
+    "name": "WF E27 sweep-and-reject short",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "short",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "description": "A short requiring a genuine BREAK above the previous 15m high followed by a close back below it with velocity -- the long's own sweep-and-fail mechanism applied at a high. All previous shorts used a near-touch of resistance instead. Retains E13's 3m cycle-position gate. Short-only.",
+    "metrics": {
+      "netProfitPct": -3.89599074,
+      "profitFactor": 0.25313319,
+      "maxDrawdownPct": 4.32726634,
+      "totalTrades": 19,
+      "winRatePct": 10.52631579,
+      "avgTradePct": -0.20505214
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GWQ2NS4DXTXHJ3EM8MF7S1",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GWQ2NSQ5SBP1PDP4ZDC739",
+      "verifiedAt": "2026-09-02T11:05:24Z"
+    },
+    "notes": "THE SWEEP IS WORSE THAN THE NEAR-TOUCH, WHICH IS THE OPPOSITE OF THE LONG. PF 0.2531 with a 10.53% win rate on 19 trades, against E13's 0.7490 on 39. Requiring price to genuinely TAKE OUT the previous 15m high before rejecting produces far worse shorts than requiring it merely to approach that high. This is a real asymmetry with the long leg, whose entire edge is the failure of a genuine breakdown. A plausible reading: when price actually clears resistance in a downtrend, that is more often continuation than exhaustion, whereas failing to reach resistance is the sign of a weak rally. E13's near-touch remains the best short this lab has. Champion unchanged."
   }
 ];
-const BUILT = "2026-09-02 05:02";
+const BUILT = "2026-09-02 05:06";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
