@@ -930,3 +930,53 @@ that has not been measured, and it is the one the rule actually rests on.
 
 **Champion unchanged — v6, PF 1.68623784, DD 3.10289714%, 32 trades. These are counters, not
 challengers.**
+
+
+---
+
+## ██ 950-3 — STRONG BREAKS DO NOT CONTINUE
+
+The first real strategy built from the user's 950 Rule, and a direct test of the claim the rule rests
+on. Continuation leg only, both directions, legs split by direction.
+
+| | Longs (strong up-breaks) | Shorts (strong down-breaks) | Combined |
+|---|---|---|---|
+| Trades | 338 | 268 | 606 |
+| Win rate | **42.01%** | 19.40% | 32.01% |
+| Net | −$3,996.05 | −$2,879.84 | −$6,875.89 |
+| Profit factor | — | — | **0.60548046** |
+| Max drawdown | — | — | 72.41% |
+
+**Both legs lose and neither is close. REVERTED.**
+
+### WHAT THIS ACTUALLY SETTLES, STATED CAREFULLY
+The 950 queue has now separated three claims that were bundled together in the infographic:
+
+| Claim | Status |
+|---|---|
+| Reaching x950 means the whole number gets taken | **TRUE — 95.0%** (950-1b) |
+| Break velocity is a real, balanced distinction | **TRUE — 48/52 split** (950-2) |
+| **Strong breaks continue to the next whole number** | **FALSE — PF 0.605** (950-3) |
+| Weak breaks fade back below | **UNTESTED** |
+
+**The label discriminates but does not predict — on this half.** That is a meaningful and specific
+result: the rule's descriptive machinery is sound and its *continuation* prescription is not.
+
+### THE ASYMMETRY IS THE MOST INTERESTING NUMBER
+Upward strong breaks win **42.01%**; downward strong breaks win **19.40%**. Same rule, same
+velocity definition, same geometry, opposite direction — and a 22-point spread in hit rate. **The
+long side is far healthier than the short even though both lose**, which is the same pattern every
+mechanism in these labs has shown: BTC (long +$374 / short −$2,416), War Formation v6 (long-only
+champion, ten failed shorts), 3M Elite (long −$1,815 / short −$7,082).
+
+**Four unrelated mechanisms, one asymmetry.** That is no longer a property of any single strategy —
+it is a property of this instrument over these windows, and it deserves recording as such rather than
+being rediscovered a fifth time.
+
+### QUEUE
+**950-4 (next): the WEAK-break fade, judged alone.** It is the last untested claim in the rule, and
+the infographic's own emphasis ("we SHORT above the whole number") suggests the author considers it
+the higher-conviction half. It is also the only remaining construction in this lab that could produce
+a working short.
+
+**Champion unchanged — v6, PF 1.68623784, DD 3.10289714%, 32 trades.**

@@ -1334,9 +1334,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T11:59:41Z"
     },
     "notes": "THE RULE'S PREMISE IS VINDICATED AND MY COIN-FLIP CLAIM WAS WRONG. 5,119 signals (2,576 up, 2,543 down) against 4,864 takes from 950-2 = a 95.0% hit rate within 24 hours, not 51.3%. The user's rule says the whole number WILL be taken and at this horizon it essentially is. BUT THE INFORMATION CONTENT IS LOW AND THAT MATTERS MORE: the signal fires when price is already within $50 of the level, and on 1m BTC a $50 move inside 24 hours is close to free. A near-certain prediction of a nearly-certain event is not an edge. The rule's value has to come from step 3, the velocity read, which 950-2 showed splits 48/52 and is therefore a real discriminator."
+  },
+  {
+    "id": "war-formation-950-3-strong-continuation",
+    "name": "WF 950-3 strong-break continuation",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "The first real strategy built from the user's 950 Rule, and the test of its load-bearing claim: does the velocity label predict? Continuation leg only -- a STRONG break of a whole number is followed toward the next one, longs on upward breaks and shorts on downward, so the legs split cleanly by direction. Target is the next whole number and the stop is the 60-bar swing, both from the rule's own geography rather than an invented R multiple.",
+    "metrics": {
+      "netProfitPct": -68.75891436,
+      "profitFactor": 0.60548046,
+      "maxDrawdownPct": 72.40882528,
+      "totalTrades": 606,
+      "winRatePct": 32.01320132,
+      "avgTradePct": -0.11346356
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1H060Q49Z1KSABVSB3FRNRT",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1H060Q4QDT2JGF94VBB1VRN",
+      "verifiedAt": "2026-09-02T12:05:59Z"
+    },
+    "notes": "STRONG BREAKS DO NOT CONTINUE. PF 0.60548046 on 606 trades. Longs 338 (142W, 42.01% win, -$3,996.05); shorts 268 (52W, 19.40% win, -$2,879.84). Both legs lose and neither is close. The velocity label DISCRIMINATES -- 950-2 measured a 48/52 split -- but on the continuation half it does not PREDICT. Note the asymmetry: upward strong breaks win 42.0% against 19.4% for downward, so the long side of this rule is far healthier than the short even though both lose, which matches every other result in these labs. This kills the continuation claim only; the weak-break fade is a separate claim and is untested. REVERTED."
   }
 ];
-const BUILT = "2026-09-02 06:01";
+const BUILT = "2026-09-02 06:07";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

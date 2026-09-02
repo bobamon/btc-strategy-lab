@@ -143,6 +143,7 @@ should be rejected without spending a credit on it.
 | Attack 11 | Remove the witching ban, measured in H2 alone | PF 0.65656→0.62814, DD 12.66%→16.54%, trades 61→62 | **REVERTED** — and this one genuinely EARNS its place |
 | Attack 12 | Remove highVol, **full sample** (ratchet test of Attack 10) | PF 1.02025→0.91514, DD 16.68%→23.51%, trades 128→207 | **REVERTED** — the gate is regime-dependent, not harmful |
 | Attack 13 | Remove EMA200, **full sample** (ratchet test of Attack 9) | PF 1.02025→1.01094, DD 16.68%→17.47%, trades 128→134 | **REVERTED** — genuinely inert, removes 6 trades in 2.2 years |
+| Attack 14 | Remove the witching ban, **full sample** | PF 1.02025→0.96113, DD 16.68%→17.92%, trades 128→130 | **REVERTED** — earns its place, and HARD LESSON 12 called it in advance |
 
 7. ~~Attack the EXIT, not the entry~~ — **DONE, REVERTED.** See the frontier note below.
 8. **Attack the EXIT, original text:** Every attack so far has been an entry filter. The system lives
@@ -788,3 +789,36 @@ and better rule than "always re-test on the full sample", and it is now the stan
 PF 1.0202 on 128 trades, long-only, no champion. Of its three accepted gates: **one is inert, one is
 regime-dependent and load-bearing, one is untested on the full sample.** Nothing has ever been KEPT
 by this ratchet. The mechanism is thoroughly mapped and has no demonstrated edge.
+
+
+## ██ THE SWEEP IS COMPLETE, AND HARD LESSON 12 IS 3 FOR 3 (2026-09-02)
+
+All three accepted gates have now been tested in H2 and on the full sample.
+
+| Gate | Trades removed (full) | H2 verdict | Full-sample verdict | Travelled? |
+|---|---|---|---|---|
+| Witching ban | **2 of 130** | earns its place | **earns its place** | ✅ |
+| EMA200 trend | **6 of 134** | inert | **inert** | ✅ |
+| highVol split | **79 of 207** | harmful | **load-bearing** | ❌ inverted |
+
+**HARD LESSON 12 made a forward prediction and it held.** The lesson says a half-sample verdict
+travels only as far as the gate fails to bind. The witching ban removes **two trades in 2.2 years** —
+the least binding gate in the base — so its H2 verdict should have generalised, and it did:
+PF 1.02025 → 0.96113 without it, worse on both terms, exactly as H2 said.
+
+**Three for three.** The two gates that barely bind both generalised; the one that re-selects a third
+of the sample inverted. The rule is not a post-hoc accommodation of two results — it now has
+predictive content.
+
+### THE COMPOUNDING POINT, AGAIN
+**Two extra trades move profit factor by 0.059.** At `percent_of_equity` 100 a single early loss
+rescales every later position, so a change of two trades near the start of the curve is not a small
+change. This has now shown up three times (Attacks 11, 13, 14) and it is why trade-count deltas in
+this lab must never be dismissed as noise without checking *where* they fall.
+
+### THE BASE, FINAL DESCRIPTION AFTER THE SWEEP
+**PF 1.0202, DD 16.68%, 128 trades, long-only, no champion.** Of its three gates: one is inert
+ballast, one is load-bearing but regime-dependent, one earns its place on two trades. **Nothing has
+ever been KEPT by this ratchet in fourteen attacks.** The mechanism is now more thoroughly documented
+than it is profitable, and the board should stop funding gate work: the honest remaining questions
+are about the *signal*, not its filters.
