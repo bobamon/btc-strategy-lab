@@ -701,5 +701,34 @@
       "verifiedAt": "2026-09-02T10:40:44Z"
     },
     "notes": "THE EDGE IS HEAVILY FRONT-LOADED, AND THIS SHOULD TEMPER THE HEADLINE. PF 1.3552 with a 52.24% win rate and +14.64% net across 67 trades in the first half, against 1.0202 over the full 2.2 years and 0.8753 over Dec 2025 to May 2026. The remaining roughly 61 trades must therefore be break-even or worse to drag the total from 1.36 down to 1.02. The 5m base's profit factor above 1.0 is carried by June 2024 to July 2025; the most recent fourteen months are weak. Combined with the War Formation champion degrading in the same recent window on a completely different mechanism, this looks like edge decay in the current regime rather than a property of either strategy. Recorded as rejected because it is a measurement, not a configuration."
+  },
+  {
+    "id": "vwm-5m-secondhalf-decomposition",
+    "name": "VWM 5m base, second-half (out-of-sample)",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-07-20",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "Period decomposition of the 5m base, second half. Unchanged code, window 2025-07-20 to 2026-09-01. The closest thing to an out-of-sample read this lab has, since nothing was ever tuned against this window. A measurement, not a ratchet candidate. Long only.",
+    "metrics": {
+      "netProfitPct": -11.36382815,
+      "profitFactor": 0.65655726,
+      "maxDrawdownPct": 15.29119477,
+      "totalTrades": 61,
+      "winRatePct": 29.50819672,
+      "avgTradePct": -0.18629226
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GVM2J26NQCJTV52F8NMVBP",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GVM2J1ZQMG4XNP2ST6548D",
+      "verifiedAt": "2026-09-02T10:46:17Z"
+    },
+    "notes": "THE DECISIVE RESULT, AND IT UNDERCUTS THE HEADLINE. PF 0.6566, win rate 29.51%, net -11.36% across 61 trades. The split is exact -- 67 trades in the first half plus 61 here equals the full sample's 128 -- so this is a clean partition, not an approximation. First half PF 1.3552, second half 0.6566, full 1.0202. THE 5m BASE DOES NOT HAVE A PERSISTENT EDGE: the full-sample profit factor above 1.0 is an average of one good year and one bad one, and the more recent year is decisively negative. Either the edge decayed or the first half was luck; on 67 and 61 trades this data cannot separate those. What it does settle is that PF 1.02 must never again be quoted as a property of this signal. The two changes KEPT earlier -- the high-volatility regime split and the witching ban -- were both measured on the full mixed sample and should be regarded as unvalidated on the recent half."
   }
 ]

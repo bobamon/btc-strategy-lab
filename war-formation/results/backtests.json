@@ -702,5 +702,34 @@
       "verifiedAt": "2026-09-02T10:41:15Z"
     },
     "notes": "SECOND PARAMETER PERTURBED, SECOND GRACEFUL DEGRADATION. PF 1.686->1.300, win rate 56.25%->48.78%, trades 32->41, DD 3.10%->4.72%. Clearly profitable at the neighbouring value on a 28% larger sample, which is what a real edge looks like under perturbation. coilK matters because 0.85 was chosen rather than derived -- it is the most arbitrary number in the build -- so its insensitivity is worth more than greenBull's was. Together with E19 the champion has now survived perturbation on two independent parameters. It keeps coilK 0.85 because that is better on both ratchet terms, but confidence in the 32-trade result is higher again. velK remains untested."
+  },
+  {
+    "id": "war-formation-e23-velk-06",
+    "name": "WF E23 sensitivity, velK 0.6",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "description": "Parameter sensitivity on the champion: the velocity threshold loosened from 0.8 to 0.6 times atr(30), admitting weaker reclaims. The last untested parameter, completing the suite after E19 and E22. A robustness check, not an improvement attempt. Long-only.",
+    "metrics": {
+      "netProfitPct": 8.45321393,
+      "profitFactor": 1.45791922,
+      "maxDrawdownPct": 5.58449081,
+      "totalTrades": 46,
+      "winRatePct": 50.0,
+      "avgTradePct": 0.18376552
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GVMZZQ98M2ZEC053QWWQ9F",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GVMZZQ8JPNCPD7XV07WNYC",
+      "verifiedAt": "2026-09-02T10:46:47Z"
+    },
+    "notes": "THIRD PERTURBATION, THIRD GRACEFUL DEGRADATION, AND THE STRONGEST OF THE THREE. PF 1.686->1.458, win rate 56.25%->50.00%, trades 32->46, DD 3.10%->5.58%, Sharpe 2.07. The sensitivity suite is now complete: greenBull 3 gave PF 1.282 on 42 trades, coilK 0.95 gave 1.300 on 41, velK 0.6 gives 1.458 on 46. EVERY parameter perturbation stays clearly above 1.0 while enlarging the sample by 28 to 44 percent, which is what a real edge looks like and not what a curve fit does. This is the strongest evidence the champion has, and it is the only kind available: the sample is fixed at 32 trades by 1m coverage and E20 proved the timeframe cannot be changed to grow it. Champion keeps velK 0.8, better on both ratchet terms."
   }
 ]

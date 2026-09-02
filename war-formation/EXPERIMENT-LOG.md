@@ -63,6 +63,7 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E20b | CONTROL: same, but the coil keeps its 1:10 RATIO instead of wall-clock | **REVERTED.** Trades 5->9, so the coil was part of it -- but PF fell to 0.951 and 9 is still far below 32 · [report](https://mcp-api.trader.dev/backtest/01M1GTQ6BGVNPYGKX1AQAHQA39) |
 | E21 | Macro trend filter: close above a 14400-bar EMA (~10 days) | **REVERTED.** PF 1.686->1.043, win 56.25%->38.89%, trades 32->18. Macro trend does NOT explain the concentration · [report](https://mcp-api.trader.dev/backtest/01M1GV425K3361APZQJ6BR9K24) |
 | E22 | SENSITIVITY: coilK 0.85 -> 0.95 | **Degrades gracefully.** PF 1.686->1.300, win 56.25%->48.78%, trades 32->41, DD 3.10%->4.72%. Second parameter, second graceful result · [report](https://mcp-api.trader.dev/backtest/01M1GVATYA8Z4TR2VB58V9XHTT) |
+| E23 | SENSITIVITY: velK 0.8 -> 0.6 | **Degrades gracefully, best of the three.** PF 1.686->1.458, win 56.25%->50.00%, trades 32->46, Sharpe 2.07 · [report](https://mcp-api.trader.dev/backtest/01M1GVMZZQ8JPNCPD7XV07WNYC) |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -361,5 +362,30 @@ decomposition this hour found its own base runs PF 1.36 in Jun 2024 – Jul 2025
 Dec 2025 – May 2026. Two unrelated mechanisms decaying in the same window points at the market, not
 at either strategy — which is why E18's volatility filter and E21's trend filter both failed. Stop
 looking for a filter that explains it.
+
+**Champion unchanged: v6, long-only, PF 1.68623784, DD 3.10289714%, 32 trades.**
+
+
+## THE SENSITIVITY SUITE IS COMPLETE — AND THE CHAMPION PASSES ALL THREE
+
+| Parameter | Champion | Perturbed | PF | Trades | Sample change |
+|---|---|---|---|---|---|
+| greenBull (E19) | 4 | 3 | 1.686 → 1.282 | 32 → 42 | +31% |
+| coilK (E22) | 0.85 | 0.95 | 1.686 → 1.300 | 32 → 41 | +28% |
+| velK (E23) | 0.8 | 0.6 | 1.686 → **1.458** | 32 → 46 | +44% |
+
+**Every parameter perturbation stays clearly above 1.0 while enlarging the sample by 28–44%.** That is
+what a real edge looks like under perturbation; a curve fit collapses at its neighbours, and this
+does not. It is also the only evidence available — the sample is fixed at 32 trades by 1m coverage,
+and E20 proved the timeframe cannot be changed to grow it.
+
+**Put this beside what just happened in the BTC lab.** Its base scored PF 1.36 in the first half of
+its sample and **0.66 in the second**, so its full-sample 1.02 was an average of a good year and a
+bad one. That is exactly the failure mode this champion has NOT been tested against, because 1m
+coverage is only 4.6 months and cannot be split meaningfully.
+
+**So the honest position on the champion is:** robust to parameter perturbation, unproven across
+time, and untestable across time with the data available. Those are three different statements and
+the log should keep them apart.
 
 **Champion unchanged: v6, long-only, PF 1.68623784, DD 3.10289714%, 32 trades.**

@@ -399,3 +399,47 @@ matches a market-wide change.
    second, and quote both.
 3. The short leg remains genuinely untried and is the only route to a return stream that does not
    depend on this long signal's decaying edge.
+
+
+# ■ THE DECOMPOSITION IS COMPLETE, AND THE BASE FAILS OUT OF SAMPLE (2026-09-02)
+
+| Window | PF | Win rate | Trades | Net |
+|---|---|---|---|---|
+| Jun 2024 – Jul 2025 | 1.3552 | 52.24% | 67 | +14.64% |
+| **Jul 2025 – Sep 2026** | **0.6566** | 29.51% | 61 | **−11.36%** |
+| Full, Jun 2024 – Sep 2026 | 1.0202 | 41.41% | 128 | +1.60% |
+
+**The split is exact — 67 + 61 = 128 — so this is a clean partition, not an approximation.**
+
+## What this means, stated without hedging
+**The 5m base does not have a persistent edge.** The full-sample PF of 1.0202 is an average of one
+good year and one bad one, and the more recent year is decisively negative. Either the edge decayed
+or the first half was luck; on 67 and 61 trades this data cannot separate those two. What it does
+settle is that **PF 1.02 must never again be quoted as a property of this signal.**
+
+Earlier this session it was described as "the first profit factor above 1.0 in this lab." That was
+accurate as a full-sample number and misleading as a claim about the strategy. The correction stands
+on the record.
+
+## What this invalidates
+Both changes KEPT this session — the **high-volatility regime split** and the **witching-hour ban** —
+were measured on the full mixed sample. They cleared the ratchet against a benchmark that we now know
+averages a good period with a bad one, so **neither is validated on the recent half.** They stay in
+the base because reverting them is not justified either, but they are now marked unvalidated rather
+than proven.
+
+## What survives
+- The **timeframe finding** (5m beats 15m and 1m) was measured with like-for-like controls on
+  identical windows, so it survives as a statement about relative ordering.
+- The **method** survives, and produced this result: measure, control, decompose. The period
+  decomposition cost two credits and overturned the session's headline claim. That is the machinery
+  working, not failing.
+
+## Where the lab goes next
+1. **Stop improving this long signal.** Seven filters, one exit change, three timeframes and two
+   regime conditions have been tried; the honest verdict is that the underlying VWAP-reclaim edge is
+   not durable on BTCUSDT.
+2. **The short leg is now the only unexplored return source** and must be built from its own
+   geometry, never mirrored.
+3. **Any future candidate must pass a period split before being called an edge.** Full-sample metrics
+   have now misled this lab once; make the split mandatory, not optional.
