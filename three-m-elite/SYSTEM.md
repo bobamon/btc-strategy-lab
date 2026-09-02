@@ -311,6 +311,7 @@ so the code genuinely behaves differently. **But the count stayed at 3.**
 | v26 | Time stop 96 -> 48 bars | **REVERTED.** PF 0.8945->0.8204, DD 42.50%->58.85%, trades 833->915. Win rate rose to 40.33% but payoff fell to 1.214 · [report](https://mcp-api.trader.dev/backtest/01M1GZPAKD9H3HC2R8BA4BNPX8) |
 | v27 | Target 2R -> 2.5R | **REVERTED.** PF 0.8945->0.8804, DD 42.50%->45.88%, trades 833->803. Payoff +12.3%, win rate -3.0pp -- the iso-PF trade again · [report](https://mcp-api.trader.dev/backtest/01M1H00SH71Q3T0K3EBPF04E9S) |
 | v28a | Walk-forward, FIRST half 2022-01 to 2024-05 | **PF 0.9220, DD 27.59%, 410 trades**, win 36.59% -- against the full sample's 0.8945 and 36.61%. Halves look consistent; H2 pending · [report](https://mcp-api.trader.dev/backtest/01M1H0CFPW1HKNYQT9HYDEDAD4) |
+| v28b | Walk-forward, SECOND half 2024-05 to 2026-09 | **PF 0.8612, DD 36.26%, 423 trades**, win 36.64%. THE HALVES AGREE -- spread 0.061, win rates within 0.05pp · [report](https://mcp-api.trader.dev/backtest/01M1H0HYT2RJTJTEPVMMY6CTET) |
 
 **When three independent corrections land on the same trade count, the binding constraint is upstream
 of all of them.** I have now spent three cycles fixing things that were genuinely wrong and none of
@@ -567,7 +568,16 @@ never been in the thing being tested — they have been in the assumptions under
     THE EXIT AXIS IS FULLY CLOSED: time stop up, time stop down and target further are all worse.
 0-V28a. ~~WALK-FORWARD, FIRST HALF~~ — **DONE. PF 0.92199683 on 410 trades, win rate 36.59%.**
     Encouraging but NOT a conclusion: one half cannot settle stability.
-0-V28b-NEXT. **WALK-FORWARD, SECOND HALF 2024-05-01 to 2026-09-01 (top priority).** Same byte-identical
+0-V28b. ~~WALK-FORWARD, SECOND HALF~~ — **DONE. PF 0.86121615 on 423 trades at 36.64% win.**
+    THE HALVES AGREE. v24's 0.894 is a real, stable number and every v25-v27 conclusion stands.
+0-V29-NEXT. **THE ENTRY — and take the BTC lab's Attack 15 lesson (top priority).** That lab spent
+    fifteen cycles attacking FILTERS and found its only improvement by removing a term from the
+    SIGNAL ITSELF -- the one the strategy was named for, which turned out to be costing money. This
+    lab has never applied the binding test to its own signal terms either. The v24 entry is a
+    conjunction: dzLive, dzAge >= 1, dzTouch < 2, low <= dzTop, close > dzBot. Remove ONE and read
+    the trade count. Start with `dzTouch < 2`, the One Candle Rule mitigation cap, because it is the
+    term inherited most directly from the source material and never independently measured.
+    Superseded text: WALK-FORWARD, SECOND HALF 2024-05-01 to 2026-09-01. Same byte-identical
     v24 source, only the window changes. This is the run that decides whether 0.894 is a real property
     or a blend. Do not draw the conclusion from H1 plus arithmetic -- HARD LESSON 11 says measure the
     term, do not estimate it, and an implied H2 is an estimate.
@@ -1063,3 +1073,39 @@ sub-periods when position size compounds. **v28b runs the second half next cycle
 waits for it.**
 
 **Best config unchanged: v24, long-only, PF 0.894 on 833 trades.**
+
+
+---
+
+## ██ v28b — THE HALVES AGREE. v24 IS A REAL NUMBER.
+
+| | H1 (2022-01 → 2024-05) | H2 (2024-05 → 2026-09) | Full sample |
+|---|---|---|---|
+| Profit factor | 0.92199683 | 0.86121615 | 0.89445064 |
+| **Win rate** | **36.59%** | **36.64%** | **36.61%** |
+| Trades | 410 | 423 | 833 |
+| Max drawdown | 27.59% | 36.26% | 42.50% |
+
+**Profit-factor spread: 0.061. Win-rate spread: 0.05 percentage points.**
+
+### THE CONTRAST THAT MAKES THIS MEANINGFUL
+| Lab | H1 | H2 | Spread |
+|---|---|---|---|
+| BTC base | 1.3552 | 0.6566 | **0.699** |
+| **3M v24** | **0.9220** | **0.8612** | **0.061** |
+
+The BTC base was an average of a good period and a bad one, and three gate verdicts earned on that
+blend had to be re-scoped. **v24 is the opposite case.** H1 is a bear market and a recovery; H2 is a
+sustained bull run. Two completely different markets, and the win rate — **the term this system is
+short on** — matches to within 0.05 of a percentage point.
+
+### WHAT THIS BUYS
+1. **v24's 0.894 is a property of the mechanism**, not an artifact of averaging.
+2. **The v25-v27 exit conclusions stand as measured.** The time-stop optimum at 96 bars and the
+   closed risk-reward axis were established on a homogeneous sample, so they do not need re-scoping.
+3. **The 2.6-point win-rate deficit is a real, stable target.** It is the same deficit in both halves,
+   which means it is a property of the entry and not of any particular market.
+
+That last point is what makes the next cycle worth spending: **there is a specific, stable thing to
+fix**, which is more than this lab has had at any previous point. The BTC lab's Attack 15 just showed
+where to look — not at the filters, but at the terms of the signal itself.

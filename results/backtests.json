@@ -1049,5 +1049,34 @@
    "verifiedAt": "2026-09-02T12:06:26Z"
   },
   "notes": "HARD LESSON 12 PREDICTED THIS CORRECTLY. Base PF 1.02024675 / DD 16.68% / 128 trades; without the ban PF 0.96112746 / DD 17.92% / 130 trades. Worse on both, so the gate stays -- exactly what the H2 diagnostic said, and the lesson predicted the verdict would travel because the gate barely binds. THE SWEEP IS NOW 3 FOR 3 ON THAT RULE: the two gates that barely bind (EMA200 6 trades, witching 2 trades) both generalised; the one that binds hard (highVol, 79 trades) inverted. Note again that TWO extra trades move profit factor by 0.059, because at percent_of_equity 100 an early loss rescales every later position. REVERTED."
+ },
+ {
+  "id": "vwm-attack15-no-stretch",
+  "name": "VWM Attack15 no stretch requirement (NEW BASE)",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "testing",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "The binding test applied to a SIGNAL term rather than a gate. One change from the 5m scaled base: reachedUpper removed -- the +2 sigma excursion the strategy is named for. Band and excursion still computed so the deviation stays visible. THE FIRST CHANGE EVER KEPT BY THIS RATCHET.",
+  "metrics": {
+   "netProfitPct": 16.10287273,
+   "profitFactor": 1.15252596,
+   "maxDrawdownPct": 16.54214281,
+   "totalTrades": 166,
+   "winRatePct": 44.57831325,
+   "avgTradePct": 0.09700526
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1H0K2R9QZ6ACS57KPFSHZRS",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1H0K2R9653860BZ4K2A778R",
+   "verifiedAt": "2026-09-02T12:13:07Z"
+  },
+  "notes": "KEPT -- BOTH RATCHET TERMS IMPROVED, THE FIRST TIME IN FIFTEEN ATTACKS. PF 1.02024675 -> 1.15252596 and drawdown 16.68% -> 16.54%, on 128 -> 166 trades with the win rate up 39.13% to 44.58%. THE STRETCH WAS COSTING MONEY. Requiring a +2 sigma excursion within 150 bars removed 38 trades that were net POSITIVE, so the premise the strategy was named for was not selective, it was harmful. This is not a VWAP mean-reversion-from-extension system and never was: it is a VWAP pullback-continuation system that had a sigma-band costume bolted on. Every description of this strategy on the board before today was wrong. NOT a champion -- 1.15 on 166 trades still needs a period decomposition, and the old base looked like 1.02 until it split 1.3552 / 0.6566."
  }
 ]

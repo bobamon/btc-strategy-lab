@@ -144,6 +144,7 @@ should be rejected without spending a credit on it.
 | Attack 12 | Remove highVol, **full sample** (ratchet test of Attack 10) | PF 1.02025→0.91514, DD 16.68%→23.51%, trades 128→207 | **REVERTED** — the gate is regime-dependent, not harmful |
 | Attack 13 | Remove EMA200, **full sample** (ratchet test of Attack 9) | PF 1.02025→1.01094, DD 16.68%→17.47%, trades 128→134 | **REVERTED** — genuinely inert, removes 6 trades in 2.2 years |
 | Attack 14 | Remove the witching ban, **full sample** | PF 1.02025→0.96113, DD 16.68%→17.92%, trades 128→130 | **REVERTED** — earns its place, and HARD LESSON 12 called it in advance |
+| **Attack 15** | **Remove `reachedUpper`, the +2σ stretch — a SIGNAL term, not a gate** | **PF 1.02025→1.15253, DD 16.68%→16.54%, trades 128→166** | ✅ **KEPT — the first change this ratchet has ever accepted** |
 
 7. ~~Attack the EXIT, not the entry~~ — **DONE, REVERTED.** See the frontier note below.
 8. **Attack the EXIT, original text:** Every attack so far has been an entry filter. The system lives
@@ -822,3 +823,53 @@ ballast, one is load-bearing but regime-dependent, one earns its place on two tr
 ever been KEPT by this ratchet in fourteen attacks.** The mechanism is now more thoroughly documented
 than it is profitable, and the board should stop funding gate work: the honest remaining questions
 are about the *signal*, not its filters.
+
+
+# ██ ATTACK 15 — THE FIRST CHANGE EVER KEPT, AND THE STRATEGY IS NOT WHAT IT SAYS IT IS
+
+Fourteen attacks had been reverted. Seven entry filters, three exit changes, two timeframe ports,
+three gate re-validations. **Attack 15 is the first to pass the ratchet on both terms.**
+
+| | Base | **Attack 15 (new base)** |
+|---|---|---|
+| Profit factor | 1.02024675 | **1.15252596** |
+| Max drawdown | 16.68% | **16.54214281%** |
+| Trades | 128 | **166** |
+| Win rate | 39.13% | **44.57831325%** |
+| Net return | +2.0% | **+16.10%** |
+
+**The one change: `reachedUpper` removed** — the requirement that price reached +2σ within the last
+150 bars. **The term the strategy is named for.**
+
+## WHY THIS WORKED, AND WHY IT MATTERS MORE THAN THE NUMBER
+The stretch requirement was **removing 38 trades that were net positive.** It was not selective; it
+was harmful. And the reason the sweep never found this is that **every one of the fifteen attacks
+before it targeted a FILTER.** The signal's own terms were treated as the thing being filtered, and
+therefore never questioned.
+
+**So this system is not a VWAP mean-reversion-from-extension strategy and never was.** It is a **VWAP
+pullback-continuation** strategy — VWAP rising, price above trend, pull back toward VWAP, resume —
+with a sigma-band costume bolted on that cost money for fifteen cycles. **Every description of this
+strategy on this board before today was wrong**, including the ones I wrote.
+
+## THE METHOD LESSON
+HARD LESSON 12 said to read the trade count to learn how much a term binds. That was developed on
+gates. **Applied to a signal term it found the only improvement this lab has ever produced.** The
+generalisation: *the binding test belongs on every term in a conjunction, not only the ones you think
+of as filters.* A strategy's name is a hypothesis about which term carries it, and it should be
+tested like any other.
+
+## WHAT THIS IS NOT
+**It is not a champion, and PF 1.15 on 166 trades is not a validated edge.** The old base looked like
+1.0202 right up until it decomposed into **1.3552 early / 0.6566 late**. The new base has never been
+split, and until it is, 1.15 is a full-sample average of unknown composition.
+
+## THE QUEUE, RESET
+1. **DECOMPOSE THE NEW BASE.** H1/H2 split of Attack 15, same halves used before. This is the only
+   thing that turns 1.15 into a claim.
+2. **Test the remaining unexamined SIGNAL terms the same way** — `pulledBack`, `vwUp`, `coolingOff`,
+   `close > open`. One found a +0.13; the others have never been asked.
+3. **Re-test the three gates against the NEW base.** Their verdicts were earned against a base whose
+   signal has now changed, and the ratchet's own rule says re-testing a reverted change against a
+   genuinely changed base is allowed and must be labelled as such. `highVol` in particular was
+   load-bearing on a signal that no longer exists in the same form.

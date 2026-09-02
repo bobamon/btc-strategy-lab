@@ -488,3 +488,32 @@ Oracle's cycle-position diagnostic was.
 
 **Corollary:** a source whose observations FAIL is a different matter, and should be dropped quickly.
 Neither of these two has failed that test.
+
+
+---
+
+## ██ HARD LESSON 15 — THE BINDING TEST BELONGS ON THE SIGNAL, NOT ONLY ON THE FILTERS
+
+**Earned:** BTC Attack 15, 2026-09-02 — the first change ever KEPT by that lab's ratchet.
+
+Fifteen attacks. Seven entry filters, three exit changes, two timeframe ports, three gate
+re-validations — **all reverted.** Attack 15 removed `reachedUpper`, the +2σ excursion requirement
+**the strategy is named for**, and both ratchet terms improved: PF **1.02025 → 1.15253**, drawdown
+**16.68% → 16.54%**, trades 128 → 166, win rate 39.13% → 44.58%.
+
+**The stretch requirement was deleting 38 net-positive trades.** It was not selective; it was
+harmful.
+
+**Why fifteen cycles missed it:** every attack targeted something classified as a *filter*. The
+signal's own terms were treated as the thing being filtered and were therefore never questioned. The
+strategy's name functioned as an unexamined assumption about which term carried the edge.
+
+**How to apply:**
+- **A strategy's name is a hypothesis, not a description.** Test it like any other term.
+- Enumerate every term in the entry conjunction and apply the E17 binding test to **all** of them —
+  signal terms included — reading the trade count to see how much each one does (HARD LESSON 12).
+- When a lab has reverted many changes in a row, the fault is more likely in what it has declined to
+  question than in the changes it keeps trying.
+- **After a signal term changes, previously settled filter verdicts are no longer valid.** They were
+  measured against a different signal, and the ratchet's own rule permits re-testing a reverted change
+  against a genuinely changed base.
