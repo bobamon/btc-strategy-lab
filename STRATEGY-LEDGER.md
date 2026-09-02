@@ -253,3 +253,37 @@ invalidation path with the same care as the trigger path.
 
 **And use the counter build to check it** — gate as entry, one-bar exit, `totalTrades` is the hit
 count — because this engine returns no plot values.
+
+
+# ██ STANDING REQUIREMENT — BOTH DIRECTIONS, ALL REGIMES (user directive, 2026-09-02)
+
+**The user's words: every strategy must work in bull markets, bear markets, AND on market flips.
+Both directions. This binds all three labs and overrides any convenience of building long-only.**
+
+A build is only finished when all four hold:
+1. **A LONG leg** that stands on its own profit factor.
+2. **A SHORT leg** that stands on its own profit factor — built from its OWN geometry, never mirrored
+   (that has failed four times across two labs and the rule is not negotiable).
+3. **A mechanical FLIP response** — a defined rule for what happens when the regime changes, not an
+   implicit one. Standing down is a valid response; having no rule is not.
+4. **Evidence in BOTH regimes.** A period split that shows the system in a rising market and a falling
+   one. A number averaged across both is not evidence for either.
+
+**Long-only is now an INTERIM state, never a finished result.** Any cycle reporting a long-only
+configuration must say explicitly that the short leg and the regime evidence are outstanding.
+
+## HONEST STATUS AGAINST THIS REQUIREMENT — NONE OF THE THREE MEET IT TODAY
+
+| Lab | Long | Short | Flip rule | Both regimes | Meets it? |
+|---|---|---|---|---|---|
+| BTC | yes, but PF 1.36 early / 0.66 late | built, PF 0.58, fails | yes — VWAP cross, stand down 60 bars | no — the base REQUIRES close above the 600 EMA, so it only trades bull conditions | **NO** |
+| War Formation | yes, PF 1.69 full / 0.89 recent | four attempts, best PF 0.75 | yes — 6h regime recomputes each block | no — requires 4+ green HA 1h candles, so bull conditions only | **NO** |
+| 3M Elite | broken | broken | yes — zone invalidation on a body close | symmetric BY DESIGN (demand and supply zones) but no working entry yet | **NO — but the only one built symmetric from the start** |
+
+**The blunt version: two of the three labs are structurally bull-only.** The BTC base gates on price
+above a long EMA and War Formation gates on green Heikin Ashi hourly candles — those are not filters
+that happen to favour uptrends, they are conditions that make a downtrend un-tradeable by
+construction. Meeting this requirement means changing the systems, not tuning them.
+
+**3M Elite is the closest in structure**, because supply and demand zones are inherently two-sided —
+its problem is that the entry does not work yet in either direction, not that it is one-sided.

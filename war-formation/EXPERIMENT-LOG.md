@@ -66,6 +66,7 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E23 | SENSITIVITY: velK 0.8 -> 0.6 | **Degrades gracefully, best of the three.** PF 1.686->1.458, win 56.25%->50.00%, trades 32->46, Sharpe 2.07 · [report](https://mcp-api.trader.dev/backtest/01M1GVMZZQ8JPNCPD7XV07WNYC) |
 | E24 | velK 0.6 variant measured on the WEAK half only | **No rescue.** PF 0.8745 on 25 trades against the champion's own 0.8930 on 15. Loosening buys trades, not edge · [report](https://mcp-api.trader.dev/backtest/01M1GVTAJEFTNTP0EHED3XMF1N) |
 | E25 | Rejection short + cycle gate, target 1R instead of 2R | **PF 0.489, 24 trades. COMPARISON CONFOUNDED** -- E13 made 39 trades, so the entry differs; E13 was rebuilt from prose, not source · [report](https://mcp-api.trader.dev/backtest/01M1GW8GZXNDHCXCAED1G87A17) |
+| E26 | E13's EXACT source, one input changed: rr 1.5 -> 1.0 | **REVERTED.** PF 0.7490->0.6922, win 23.08%->27.03%, trades 39->37. Nearer target HURTS this short · [report](https://mcp-api.trader.dev/backtest/01M1GWGDZ6NDSF9H66YF7S7HZP) |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -451,3 +452,68 @@ experiment, recover that experiment's **SOURCE**, never its description. A trade
 between the two is the tell that the claim is false — check it before interpreting anything.
 
 **Champion unchanged: v6, long-only, PF 1.68623784, DD 3.10289714%, 32 trades.**
+
+
+## E26 — THE SOURCE-RECOVERY RULE PAID FOR ITSELF IMMEDIATELY
+Recovering E13's Pine with `get_strategy` instead of rebuilding it caught **two** errors in E25 that
+had gone unnoticed:
+
+1. **E13 used `rr = 1.5`, not 2.0.** E25's write-up asserted 2.0, so even its stated baseline was wrong.
+2. **E25's reconstructed entry made 24 trades against E13's 39.** The entry was never the same.
+
+**The trade-count check is the discriminator, and it works.** E26 returns 37 against E13's 39 — close,
+with the small gap explained by a 1R trade closing at a different moment and blocking or unblocking a
+few later signals. That is what a genuine exit-only change looks like. A 38% count collapse is not.
+
+### The result itself
+| | E13 (rr 1.5) | E26 (rr 1.0) |
+|---|---|---|
+| Profit factor | **0.7490** | 0.6922 |
+| Win rate | 23.08% | 27.03% |
+| Trades | 39 | 37 |
+
+More winners, smaller ones, net worse. **The nearer target hurts this short**, and E13's 1.5 stays the
+best short configuration this lab has.
+
+### THIRD CROSS-LAB NON-TRANSFER
+The identical change — target 2R/1.5R down to 1R — **improved** the BTC lab's short leg (0.5506 to
+0.5816, win rate 17.65% to 29.41%) and **worsened** this one. Added to E18's volatility filter and
+E20's timeframe translation, that is three for three: **nothing has ever transferred between these
+labs.** Exit convention follows the mechanism, and a finding from one strategy is a hypothesis for
+another, never an inheritance.
+
+**Champion unchanged: v6, long-only, PF 1.68623784, DD 3.10289714%, 32 trades.**
+
+
+# ██ STANDING REQUIREMENT — BOTH DIRECTIONS, ALL REGIMES (user directive, 2026-09-02)
+
+**The user's words: every strategy must work in bull markets, bear markets, AND on market flips.
+Both directions. This binds all three labs and overrides any convenience of building long-only.**
+
+A build is only finished when all four hold:
+1. **A LONG leg** that stands on its own profit factor.
+2. **A SHORT leg** that stands on its own profit factor — built from its OWN geometry, never mirrored
+   (that has failed four times across two labs and the rule is not negotiable).
+3. **A mechanical FLIP response** — a defined rule for what happens when the regime changes, not an
+   implicit one. Standing down is a valid response; having no rule is not.
+4. **Evidence in BOTH regimes.** A period split that shows the system in a rising market and a falling
+   one. A number averaged across both is not evidence for either.
+
+**Long-only is now an INTERIM state, never a finished result.** Any cycle reporting a long-only
+configuration must say explicitly that the short leg and the regime evidence are outstanding.
+
+## HONEST STATUS AGAINST THIS REQUIREMENT — NONE OF THE THREE MEET IT TODAY
+
+| Lab | Long | Short | Flip rule | Both regimes | Meets it? |
+|---|---|---|---|---|---|
+| BTC | yes, but PF 1.36 early / 0.66 late | built, PF 0.58, fails | yes — VWAP cross, stand down 60 bars | no — the base REQUIRES close above the 600 EMA, so it only trades bull conditions | **NO** |
+| War Formation | yes, PF 1.69 full / 0.89 recent | four attempts, best PF 0.75 | yes — 6h regime recomputes each block | no — requires 4+ green HA 1h candles, so bull conditions only | **NO** |
+| 3M Elite | broken | broken | yes — zone invalidation on a body close | symmetric BY DESIGN (demand and supply zones) but no working entry yet | **NO — but the only one built symmetric from the start** |
+
+**The blunt version: two of the three labs are structurally bull-only.** The BTC base gates on price
+above a long EMA and War Formation gates on green Heikin Ashi hourly candles — those are not filters
+that happen to favour uptrends, they are conditions that make a downtrend un-tradeable by
+construction. Meeting this requirement means changing the systems, not tuning them.
+
+**3M Elite is the closest in structure**, because supply and demand zones are inherently two-sided —
+its problem is that the entry does not work yet in either direction, not that it is one-sided.

@@ -1015,9 +1015,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T10:57:27Z"
     },
     "notes": "THE COMPARISON IS CONFOUNDED AND THE FAULT IS MINE. This was described as a one-variable change from E13 (target 2R -> 1R), but E13 made 39 trades and this made 24. AN EXIT CHANGE CANNOT MOVE THE ENTRY COUNT BY THAT MUCH, so the entry logic differs -- I rebuilt E13's entry from its written description instead of pulling its exact Pine source with get_strategy. The rr hypothesis is therefore UNTESTED, and PF 0.4894 stands only as its own data point. THE SAME ERROR WAS CAUGHT AND AVOIDED EARLIER THIS SESSION on the BTC 007 base, where the exact source was recovered rather than reconstructed from prose; the tool existed and was not used here. Standing rule for this lab from now on: when a run claims to be a single-variable change from an earlier experiment, recover that experiment's SOURCE, never its description. Champion unchanged."
+  },
+  {
+    "id": "war-formation-e26-e13-rr1",
+    "name": "WF E26 E13 source with rr 1.0",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "short",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "description": "E13's exact Pine source recovered via get_strategy, with one input changed: reward:risk 1.5 to 1.0. Replaces the confounded E25. Short-only, judged alone.",
+    "metrics": {
+      "netProfitPct": -3.03111304,
+      "profitFactor": 0.69222923,
+      "maxDrawdownPct": 5.3572341,
+      "totalTrades": 37,
+      "winRatePct": 27.02702703,
+      "avgTradePct": -0.08192197
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GWGDZ6SFC56XRB6DNHZTAK",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GWGDZ6NDSF9H66YF7S7HZP",
+      "verifiedAt": "2026-09-02T11:01:46Z"
+    },
+    "notes": "THE PROPERLY CONTROLLED VERSION OF E25, AND IT REVERSES THE ANSWER. PF 0.7490 -> 0.6922 with the win rate rising 23.08% -> 27.03%: more winners, smaller ones, net worse. The nearer target HURTS this short. TWO THINGS THE SOURCE RECOVERY CAUGHT: E13 used rr 1.5, not the 2.0 that E25's write-up claimed, and E25's entry was a reconstruction that made only 24 trades against E13's 39. Here the count comes back at 37 -- close to 39, with the small difference explained by a 1R trade closing at a different moment and blocking or unblocking a few later signals, which is exactly what a genuine exit-only change looks like. THIRD CROSS-LAB NON-TRANSFER: the identical change improved the BTC short (0.5506 -> 0.5816) and worsened this one. Exit convention follows the mechanism; there is no universal answer. Champion unchanged."
   }
 ];
-const BUILT = "2026-09-02 04:58";
+const BUILT = "2026-09-02 05:02";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

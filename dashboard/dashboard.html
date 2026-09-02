@@ -985,9 +985,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T10:53:20Z"
     },
     "notes": "REJECTED ON ITS OWN NUMBERS, WHICH IS THE POINT OF JUDGING IT ALONE. PF 0.5506, win rate 17.65%, 3 winners from 17 trades. It IS a genuine own-geometry construction rather than a mirror -- the long requires a pullback to exist, this requires an extension -- so the standing rule was honoured, and that rule is not what failed here. Two observations for the next attempt: the trigger is RARE, only 17 occurrences in 2.2 years, so the band-rejection condition is too restrictive to build on; and the shape is odd, with avgBarsWinning 254.7 against avgBarsLosing 32.6, meaning the few winners grind for days while losers resolve in hours. That asymmetry suggests the 2R target is too far for a fade and the losers are being stopped by ordinary noise on the way. A fade probably wants a nearer target and a wider stop -- the opposite configuration from the trend-following long."
+  },
+  {
+    "id": "vwm-short-1r-target",
+    "name": "VWM short leg with a 1R target",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "short",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "The own-geometry short leg with one input changed: target 1R instead of 2R. Source is the exact Pine of the previous run rather than a reconstruction. Short-only.",
+    "metrics": {
+      "netProfitPct": -2.19279427,
+      "profitFactor": 0.58157892,
+      "maxDrawdownPct": 3.02997113,
+      "totalTrades": 17,
+      "winRatePct": 29.41176471,
+      "avgTradePct": -0.1289879
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GWEHG93YBGJ7ECZN4CPRTZ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GWEHG8PXKSS72WWRBQBC2K",
+      "verifiedAt": "2026-09-02T11:00:44Z"
+    },
+    "notes": "A CLEAN SINGLE-VARIABLE TEST, AND THE TRADE COUNT PROVES IT: 17 in both runs, because the entry was untouched. PF 0.5506 -> 0.5816 and win rate 17.65% -> 29.41%, with avgBarsWinning falling from 254.7. THE FADE HYPOTHESIS IS DIRECTIONALLY CONFIRMED for this leg -- a target set for a trend continuation is too far for a trade that fades an extreme. Still nowhere near viable at PF 0.58 on 17 trades, so this is a lesson about trade-type-appropriate exits rather than a usable leg. Note the contrast with War Formation E26, where the identical change on that lab's short made things WORSE (0.749 -> 0.692): the exit convention has to follow the mechanism, and there is no universal answer."
   }
 ];
-const BUILT = "2026-09-02 04:54";
+const BUILT = "2026-09-02 05:02";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
