@@ -57,6 +57,7 @@ The board is open.
 | Regime split — low-vol complement | 0.9121 | 28.8% | 0.8751 | 23.1% | measurement only, not a candidate |
 | **Attack 3 re-test — witching ban on high-vol base** | 0.9321 | 23.43% | **0.9640** | **22.61%** | **KEPT** — both terms strictly improved |
 | **Move the base to 5m (scaled)** | 0.9615 | 21.33% | **1.0202** | **16.68%** | **KEPT** — like-for-like, both terms improved |
+| Move the base to 1m (scaled x15) | 0.8753 | 6.63% | 0.7521 | 6.73% | **REVERTED** — worse than 5m on identical data |
 
 ## CURRENT BASE — what cycle 008 starts from
 **007's LONG leg.** It has the best raw hit rate of anything tested in this lab: **38.3%** across 457
@@ -331,3 +332,33 @@ find out whether this is a trend or a 5m coincidence. Only the War Formation lab
 and its coverage limit (2025-12-16 onward) applies here too, so that run will be sample-limited.
 
 Then the short leg, still unattempted and still never to be mirrored.
+
+
+## THE TIMEFRAME CURVE HAS AN INTERIOR OPTIMUM AT 5m (2026-09-02)
+Faster is not monotonically better. Each comparison below is like-for-like — the same window, only
+the timeframe differing — because the raw numbers across different windows are not comparable.
+
+| Comparison (identical window) | Slower | Faster | Winner |
+|---|---|---|---|
+| 15m vs 5m, Jun 2024 – Sep 2026 | 0.9615 | **1.0202** | 5m |
+| 5m vs 1m, Dec 2025 – May 2026 | **0.8753** | 0.7521 | 5m |
+
+**5m wins both comparisons, so the curve turns over and the base stays at 5m.** 1m is REVERTED.
+
+The mechanism is plausible and matches the War Formation result from the other direction: this signal
+needs price to *travel* to a fixed 2R target within a bounded time. Coarser bars than 5m give fewer,
+lower-quality pullback entries; finer bars than 5m add noise to the entry without adding distance.
+War Formation, whose edge depends on catching a reclaim precisely at a level, prefers 1m for exactly
+the opposite reason. **Timeframe preference is a property of the mechanism, not of the market.**
+
+## ⚠️ AND THE CONTROL SURFACED SOMETHING UNCOMFORTABLE ABOUT THE 5m BASE
+The 5m base scores **1.0202 over its full 2.2 years but only 0.8753 over Dec 2025 – May 2026.**
+
+The recent window is materially harder than the 5m average, which means **the headline 1.02 is not a
+stable property of the signal across time.** That is the same shape as the War Formation lab's
+unexplained edge concentration, now appearing here too.
+
+**Consequence: the 1.02 should be quoted with its window attached, never on its own.** Before this
+base is trusted any further, the next diagnostic worth running is a period decomposition of the 5m
+base — split its 2.2 years into halves or quarters and see whether the edge is spread or concentrated.
+That is a measurement, and it should come before any further attack on the entry or exit.

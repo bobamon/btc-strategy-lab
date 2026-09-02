@@ -294,6 +294,7 @@ so the code genuinely behaves differently. **But the count stayed at 3.**
 | v9 | latched tap, engulf creates the zone | 3 |
 | v10 | keep the deepest zone, not the most recent | 3 |
 | v11 | zone is the base, not the whole candle | 3 |
+| v12 | DIAGNOSTIC: entry stripped to "zone live and price inside it", 1-bar exits, to COUNT opportunities | **15 opportunities in 4.7 years** (6 long, 9 short). Ignore the P&L -- it is an instrument · [report](https://mcp-api.trader.dev/backtest/01M1GTWJTF7K07205ZD8P4EM5Y) |
 
 **When three independent corrections land on the same trade count, the binding constraint is upstream
 of all of them.** I have now spent three cycles fixing things that were genuinely wrong and none of
@@ -307,6 +308,30 @@ returns hundreds, the bias and direction gates are doing the killing and the lif
 **The general error is worth naming: I have been filtering a population without ever measuring its
 size.** That is what produced v9, v10 and v11.
 
+## v12 — THE MEASUREMENT IS IN, AND THE FILTERS WERE NEVER THE PROBLEM
+**15 opportunities in 4.7 years.** With every gate removed — no bias, no direction, no candle colour —
+price enters a live zone only fifteen times. With all gates on it was 3.
+
+So the bias and direction conditions do cut 15 down to 3, but **15 was never enough to begin with.**
+The zone lifecycle is the binding constraint, which is exactly what this diagnostic was built to
+determine, and it settles three cycles of guessing.
+
+**Prime suspect, and it is specific: the mitigation test counts WICKS.**
+`dzTouch` increments whenever a completed 4H candle's LOW dips below the zone top. A single wick
+therefore counts as a touch, and two wicks kill the zone — typically within eight hours of creation.
+Almost no zone survives long enough for price to return to it.
+
+**The source does not work that way.** Invalidation is judged on the BODY (a candle closing beyond the
+zone), and the One Candle Rule is about candles closing back INTO it:
+
+> "this one candle does not mitigate the zone yet ... the second one is what makes the zone mitigated"
+
+A candle that merely wicks through is not a candle that has mitigated anything.
+
+**v13: require a BODY inside the zone to count as mitigation** — for demand, `close <= dzTop`, not
+`low <= dzTop`. Re-run the v12 counter afterwards to confirm the opportunity population actually grew
+before putting any filter back on.
+
 ## Open queue
 0. ~~Get definitions for Type 1/Type 2~~ — **DONE 2026-09-02, see VOCABULARY.md.**
    Type 1 = a 3M candle; Type 2 = an engulfing candle in the direction of bias; both only on the
@@ -318,7 +343,10 @@ size.** That is what produced v9, v10 and v11.
 0-V9. ~~REBUILD ON THE CORRECTED MODEL~~ — **DONE. Model correct, 3 trades, single-slot is the limit.**
 0-V10. ~~KEEP THE DEEPEST ZONE~~ — **DONE. Identical to v9; the rule never fires. See the v10 lesson.**
 0-V11. ~~FIX THE ZONE GEOMETRY~~ — **DONE. Real change, still 3 trades. Not the binding constraint.**
-0-V12-NEXT. **DIAGNOSTIC RUN, NOT A FIX (top priority).** Entry = zone live AND price inside it.
+0-V12. ~~DIAGNOSTIC RUN~~ — **DONE. 15 opportunities in 4.7 years. The zone lifecycle is the constraint.**
+0-V13-NEXT. **MITIGATION MUST BE JUDGED ON THE BODY, NOT THE WICK (top priority).** Change dzTouch /
+    szTouch to increment on a CLOSE inside the zone rather than a low/high touching it. Then re-run
+    the v12 counter to verify the population grew before restoring any filter. Superseded text: Entry = zone live AND price inside it.
     Nothing else. Count the opportunities before filtering them. Superseded text: A demand zone is the
     BASE beneath the impulse -- [low, open] of the engulfing candle -- not its whole range. Supply is
     [open, high]. With the top set at the impulse high, price is inside the zone at creation and the

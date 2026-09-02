@@ -614,5 +614,63 @@
       "verifiedAt": "2026-09-02T10:18:09Z"
     },
     "notes": "THE CONTROL THAT MAKES THE 5m RESULT MEAN SOMETHING. PF 0.9615 on the same window where 5m scored 1.0202, with worse drawdown (21.33% against 16.68%). It also shows the 15m signal is stable across periods -- 0.9640 over 2022-2026 against 0.9615 over 2024-2026 -- so the recent window is not unusually kind. Both together isolate the timeframe as the cause. Recorded as rejected because it is superseded as the base, not because the run failed."
+  },
+  {
+    "id": "vwm-base-1m-scaled",
+    "name": "VWM base 1m, scaled x15",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "Third point on the timeframe curve. The original 15m base with every bar-denominated parameter multiplied by 15 so each window matches in wall-clock: sdLen 1500, slopeLen 750, pushLook 750, coolBars 300, swgLen 300, maxBars 1440, trendLen 3000, volLen 3000, ATR 210. Nothing reoptimised. Long only.",
+    "metrics": {
+      "netProfitPct": -2.16087153,
+      "profitFactor": 0.75210908,
+      "maxDrawdownPct": 6.73262425,
+      "totalTrades": 16,
+      "winRatePct": 37.5,
+      "avgTradePct": -0.13505447
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GTW42X0D1QQ9C7P2A7WPP7",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GTW42XFTFRS3D7XYDA4A7X",
+      "verifiedAt": "2026-09-02T10:33:12Z"
+    },
+    "notes": "REVERTED. PF 0.7521 against the 5m base's 0.8753 on the SAME window, so faster is not uniformly better and the timeframe curve has an interior optimum at 5m. 16 trades is a thin sample -- 1m coverage is only 4.6 months -- but the control makes the comparison valid rather than relying on the headline number."
+  },
+  {
+    "id": "vwm-5m-1mwindow-control",
+    "name": "VWM 5m base, 1m-window control",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "Control for the 1m run: the unchanged 5m base restricted to the 1m data window, isolating timeframe from period. Long only.",
+    "metrics": {
+      "netProfitPct": -1.08265403,
+      "profitFactor": 0.8753355,
+      "maxDrawdownPct": 6.63250015,
+      "totalTrades": 17,
+      "winRatePct": 41.17647059,
+      "avgTradePct": -0.06368553
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GTY4149TAKKQJHG5TYDQTQ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GTY414EDY7B9NQG4VPJ83F",
+      "verifiedAt": "2026-09-02T10:34:18Z"
+    },
+    "notes": "THIS CONTROL DOES TWO JOBS. First, it beats 1m on identical data (0.8753 against 0.7521), which is what rejects the 1m build. Second, and less comfortable: the 5m base scores 0.8753 here against 1.0202 over its full 2.2 years, so the December-to-May window is materially harder than the 5m average and THE HEADLINE 1.02 IS NOT UNIFORM ACROSS TIME. That is the same shape as the War Formation lab's unexplained time-concentration, now appearing in the BTC lab too, and it is a caution against reading 1.02 as a stable property of the signal."
   }
 ]

@@ -457,9 +457,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T09:52:43Z"
     },
     "notes": "THE GEOMETRY FIX WAS REAL BUT IT WAS NOT THE BINDING CONSTRAINT. Still 3 trades, though the composition changed (1 long 2 short, against v10's 2 long 1 short), which confirms the code genuinely behaves differently. THREE SUCCESSIVE STRUCTURAL FIXES HAVE NOW ALL LANDED ON ROUGHLY THREE TRADES -- v9 the latched model, v10 the deepest-zone rule, v11 the base geometry. When three independent corrections produce the same trade count, the limiting factor is upstream of all of them. STOP GUESSING AND MEASURE: v12 must be a DIAGNOSTIC that strips the entry to nothing but 'a zone is live and price is inside it', with no bias, no direction and no candle-colour condition, purely to count how many opportunities exist at all. Filtering a population before knowing its size is what produced these last three cycles."
+  },
+  {
+    "id": "3m-elite-v12-opportunity-counter",
+    "name": "3M ELITE v12 opportunity counter (diagnostic)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "A COUNTER, NOT A STRATEGY. Entry stripped to one condition -- a zone is live and price has just entered it -- with no bias, direction or candle-colour requirement, and every position closed after one bar so the trade count equals the opportunity count. Only totalTrades, longTrades and shortTrades carry information; the P&L is meaningless by construction.",
+    "metrics": {
+      "netProfitPct": -1.57011422,
+      "profitFactor": 0.27980393,
+      "maxDrawdownPct": 1.71053824,
+      "totalTrades": 15,
+      "winRatePct": 26.66666667,
+      "avgTradePct": -0.10467428
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GTWJTFP5KX5JXKW3MGJ7AH",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GTWJTF7K07205ZD8P4EM5Y",
+      "verifiedAt": "2026-09-02T10:33:27Z"
+    },
+    "notes": "THE MEASUREMENT: 15 OPPORTUNITIES IN 4.7 YEARS. 6 long, 9 short. Do not read the profit factor -- exits are forced after one bar, so the P&L is an artefact of the instrument. THE ANSWER IS DECISIVE AND IT IS NOT THE FILTERS. With every gate removed the population is 15; with all gates on it was 3. So the bias and direction conditions cut 15 to 3, but 15 was never enough to begin with. THE ZONE LIFECYCLE IS THE BINDING CONSTRAINT, exactly as the diagnostic was designed to determine. Prime suspect is the mitigation test: dzTouch increments whenever a 4H candle's LOW dips below the zone top, so a single wick counts as a touch and two wicks kill the zone, typically within eight hours of creation. The source judges invalidation on the BODY, and the One Candle Rule is about candles closing back into the zone. v13 should require a BODY inside the zone to count as mitigation."
   }
 ];
-const BUILT = "2026-09-02 03:53";
+const BUILT = "2026-09-02 04:35";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
