@@ -1031,3 +1031,72 @@ both halves of the 950 rule). It is a property of BTCUSDT over these windows, no
 
 **Twelfth short construction in this project. Best remains E13 at 0.74897196, which 950-4 does not
 beat. Champion unchanged — v6, PF 1.68623784, DD 3.10289714%, 32 trades.**
+
+
+---
+
+## ██ E32 — THE COIL IS THE EDGE. THE EXACT MIRROR OF BTC's ATTACK 15.
+
+The BTC lab had just produced its first KEPT change in fifteen attacks by deleting `reachedUpper`,
+the +2σ stretch **that strategy was named for**, which turned out to be removing 38 net-positive
+trades. HARD LESSON 15 came out of it: a strategy's name is a hypothesis, not a description, and the
+binding test belongs on signal terms and not only on filters.
+
+Thirty-one experiments here had never asked which of the CHAMPION'S OWN terms carries it. E32 asks.
+
+| | v6 champion | E32 (no coil) |
+|---|---|---|
+| Profit factor | **1.68623784** | 0.61133755 |
+| Win rate | **56.25%** | 35.82% |
+| Trades | 32 | **67** |
+| Max drawdown | **3.10289714%** | 5.17183158% |
+
+**REVERTED, and emphatically.** Removing the coil more than doubles the trade count and destroys the
+edge. It is filtering out **35 of 67 candidates and they are overwhelmingly losers** — a 20-point
+win-rate collapse.
+
+### THE SAME TEST, OPPOSITE ANSWERS, AND THAT IS THE POINT
+| Lab | Named term | Trades without it | Verdict |
+|---|---|---|---|
+| BTC | `reachedUpper`, the +2σ stretch | 128 → 166 | **decoration that cost money** |
+| **War Formation** | `coilPrev`, the 3m contraction | 32 → 67 | **the edge itself** |
+
+**HARD LESSON 15 is about the QUESTION, not the answer.** It would have been easy to read Attack 15
+as "the named term is usually decoration" and carry that across as a prior — which is precisely the
+cross-lab inheritance error this project has now made five times. The transferable part is the test.
+The answer is a property of each mechanism and has to be measured separately every time.
+
+### WHAT IT SETTLES ABOUT THIS CHAMPION
+The Oracle queue scored 1 of 5 and his stated rules mostly failed. But his central OBSERVATION —
+*"candles get smaller, the move gets shorter, the move gets weaker"* — mechanised as the 3m coil, is
+now measured as **the single most load-bearing term in the only profitable configuration this project
+has.** That is HARD LESSON 14 in its strongest form yet: the observation survived, the prescriptions
+did not.
+
+**Champion unchanged — v6, PF 1.68623784, DD 3.10289714%, 32 trades.**
+
+### RECONSTRUCTION NOTE
+The declared caveat resolved favourably. Removing a term from a conjunction can only ADD trades, and
+67 > 32 is consistent with a faithful rebuild. It is not proof, but the one direction that could have
+falsified it did not.
+
+
+---
+
+## ██ LEVERAGE NOTE — THIS CHAMPION'S NUMBERS ARE 1x (2026-09-02)
+
+The user has confirmed War Formation is traded leveraged, **around 86x**. Full analysis is in
+`STRATEGY-LEDGER.md`. The parts that bind on this lab:
+
+- **Every War Formation backtest ran at 1x.** The engine forces `margin_long/short = 100` and logs
+  the override on every run; leverage cannot be set here.
+- **PF 1.68623784 and the 56.25% win rate are unaffected by leverage** — they are ratios. The
+  champion's edge is what it is at any leverage.
+- **DD 3.10289714% is a 1x figure.** At 86x it is approximately **267%**.
+- **`maxRpct` is 1.50% of price. Liquidation at 86x is ~1.163%.** So the champion's widest permitted
+  stop is wider than the account. A single trade running to full stop distance at 86x with
+  full-equity sizing does not stop out — it liquidates first.
+
+**This does not change any experimental conclusion in this log.** It changes what "3.10% drawdown"
+means when the strategy is actually traded, and it means position sizing has to be solved before any
+configuration here is treated as deployable.

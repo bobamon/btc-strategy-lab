@@ -517,3 +517,74 @@ strategy's name functioned as an unexamined assumption about which term carried 
 - **After a signal term changes, previously settled filter verdicts are no longer valid.** They were
   measured against a different signal, and the ratchet's own rule permits re-testing a reverted change
   against a genuinely changed base.
+
+
+---
+
+# ██ LEVERAGE: WHAT EVERY BACKTEST IN THIS PROJECT ASSUMED (user note, 2026-09-02)
+
+The user raised that War Formation is traded **leveraged, around 86x**. That was never stated before
+and it changes how these numbers must be read. Recording it properly because it affects all three
+labs.
+
+## WHAT THE ENGINE ACTUALLY RAN
+Every run in this project carries the same forced parity profile, visible in each result's
+`parityAdjustments`:
+
+```
+margin_long = 100, margin_short = 100      -> 100% margin = 1x. NO LEVERAGE.
+default_qty_type = percent_of_equity, 100  -> position notional = 100% of equity
+```
+
+**The engine OVERRIDES whatever the Pine asks for** — the adjustment is logged as
+`mcp_parity_profile_margin_100` on every single backtest. So leverage cannot be set here, and every
+result in all three labs is **1x**. That is a constraint of the tool, not a choice I made, and it
+cannot be worked around by editing the strategy declaration.
+
+## WHAT LEVERAGE DOES AND DOES NOT CHANGE
+
+**UNCHANGED — these are ratios, so they are leverage-invariant:**
+- **Profit factor.** Gross profit / gross loss. Multiply every trade's P&L by 86 and the ratio is
+  identical. **Every edge conclusion in this project therefore still stands at any leverage.**
+- **Win rate, payoff ratio, trade count, the ranking of one config against another.**
+
+**SCALES ROUGHLY LINEARLY:**
+- **Return and drawdown.** Both are multiplied by the leverage factor.
+
+**So the ratchet's verdicts are all still valid.** A configuration with PF 0.61 does not become
+profitable at 86x — **it loses money 86 times faster.** Leverage is a magnifier, never a source of
+edge, and nothing in this project's conclusions changes because of it.
+
+## THE ARITHMETIC THAT DOES MATTER, AT 86x
+
+Liquidation occurs at roughly a **1/86 = 1.163%** adverse move against the position, before fees and
+maintenance margin — so in practice sooner.
+
+| Champion v6 parameter | Value at 1x | At 86x, sized 100% of equity |
+|---|---|---|
+| Min stop distance (`minRpct`) | 0.15% of price | **12.9% of equity per loss** |
+| Max stop distance (`maxRpct`) | 1.50% of price | **129% of equity — liquidated** |
+| Max drawdown | 3.10289714% | **~267% — account gone** |
+
+**The champion's own maximum stop distance exceeds the liquidation threshold.** At 86x with
+full-equity sizing, a single trade that runs to its widest permitted stop wipes the account before
+the stop is ever reached. And the observed 3.10% drawdown — which is genuinely excellent at 1x —
+becomes an impossible ~267%.
+
+## WHAT THIS MEANS PRACTICALLY
+
+**Leverage and position size are the same dial, and only one of them can be at maximum.** The
+backtests size at 100% of equity because that is what the parity profile forces. At 86x, the position
+*fraction* has to come down by the same order for the risk per trade to stay survivable — 86x on 1%
+of equity is the same risk as 1x on 86%. Used that way, leverage is a capital-efficiency choice
+(less margin tied up for the same exposure), not a returns multiplier.
+
+**How to read every number in this project from now on:**
+- **Profit factor, win rate, payoff — take at face value.** Leverage-invariant.
+- **Return and drawdown percentages — these are 1x figures.** Multiply by the leverage actually used,
+  and check the result against 100% before treating any configuration as tradeable.
+- **A drawdown that looks small may not be.** v6's 3.10% is the best in the project at 1x and is
+  fatal at 86x with this sizing.
+
+**This is arithmetic about the backtests, not advice about what to trade.** The sizing decision is
+the user's; what this lab can say is what the numbers mean at each leverage.

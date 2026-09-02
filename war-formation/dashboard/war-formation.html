@@ -1392,9 +1392,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T12:09:10Z"
     },
     "notes": "THE FADE BEATS THE CONTINUATION AND STILL LOSES. PF 0.73240142 on 533 trades against 950-3's 0.60548046 on 606. Shorts 250 (38W, 15.20% win, -$3,142.77); longs 283 (117W, 41.34% win, -$1,741.49). So the velocity label does carry SOME directional information -- fading a weak break is meaningfully better than following a strong one -- but neither prescription clears 1.0. THE LONG/SHORT ASYMMETRY REPEATS EXACTLY: 41.34% versus 15.20% here, 42.01% versus 19.40% in 950-3. Twelfth short construction in this project; best remains E13 at 0.74897196, which this does not beat. REVERTED."
+  },
+  {
+    "id": "war-formation-e32-no-coil",
+    "name": "WF E32 no coil (signal-term binding test)",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "description": "HARD LESSON 15 applied to this lab: the binding test on a SIGNAL term rather than a filter. One change from v6: coilPrev removed -- the 3m volatility contraction, the mechanisation of the Oracle's central observation, present in every build since v1 and never once removed from the long side. E14 checked in advance: nothing else in the conjunction measures volatility contraction.",
+    "metrics": {
+      "netProfitPct": -4.84786579,
+      "profitFactor": 0.61133755,
+      "maxDrawdownPct": 5.17183158,
+      "totalTrades": 67,
+      "winRatePct": 35.82089552,
+      "avgTradePct": -0.07235621
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1H0SKJQ9TEFJSEWA9PM5ST8",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1H0SKJQ2NTHBRPMG63HT4FV",
+      "verifiedAt": "2026-09-02T12:16:41Z"
+    },
+    "notes": "THE COIL IS THE MOST LOAD-BEARING TERM IN THE CHAMPION, AND THIS IS THE MIRROR IMAGE OF BTC's ATTACK 15. Removing it takes trades 32 to 67 and profit factor 1.68623784 to 0.61133755, with the win rate collapsing 56.25% to 35.82%. So it removes 35 of 67 candidates and they are overwhelmingly losers. Where BTC's named term was decoration that cost money, this lab's named term IS the edge. The reconstruction is also validated in the only direction it can be: removing a term can only ADD trades, and 67 > 32 is consistent. REVERTED; champion unchanged."
   }
 ];
-const BUILT = "2026-09-02 06:10";
+const BUILT = "2026-09-02 06:18";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
