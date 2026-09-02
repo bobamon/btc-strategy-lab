@@ -1379,3 +1379,58 @@ enough that the trade is unfavourable.
 2. **Re-test the coil under the corrected exit** — E32 measured it on the wrong exit model.
 3. **Position sizing.** DD 10.83% is a 1x figure; at ~50x it is far past total loss. Still the
    largest unsolved problem, and improving profit factor does not touch it.
+
+
+---
+
+# ██ E40 / E41 — THE GRADIENT TURNED, AND IT TURNED INSIDE THE ALCM RANGE
+
+| Shield | Effective leverage | Profit factor | Max drawdown | Trades |
+|---|---|---|---|---|
+| $1,000 (E41) | ~100x — **past the boundary** | 1.28571366 | **10.60316412%** | **27** |
+| $1,500 (E40) | ~67x | 1.46618983 | 11.31035598% | 23 |
+| **$2,000 (E38)** | **~50x** | **1.50193294** | 10.82866633% | 21 |
+| $3,000 (E36) | ~33x | 1.19181730 | 14.02869041% | 20 |
+| $4,000 (E39) | ~25x | 0.91843873 | 19.92763110% | 19 |
+
+**$2,000 is a genuine interior optimum with measured neighbours on both sides.** That is the
+strongest of the three outcomes named before the runs, and it is the first parameter in this project
+to earn it.
+
+## COMPARE THE SHAPE TO THE ONE THAT DEMOTED v6
+| Parameter | Peak | Left neighbour | Right neighbour |
+|---|---|---|---|
+| `coilK` (v6) | 1.686 | **0.749** | **0.414** |
+| **shield (E38)** | **1.502** | **1.466** | **1.192** |
+
+**coilK collapsed on both sides — a spike. The shield declines gently — a curve.** Falling 0.036 to
+the left and 0.310 to the right across a 2x parameter range is what a real effect looks like.
+HARD LESSON 16 is now satisfied for this parameter, which is the requirement whose omission cost v6
+its championship.
+
+## THE BOUNDARY CASE VINDICATES THE SPECIFICATION
+E41's $1,000 shield is ~1% of price and **~100x effective leverage** — past the 58x the source
+material names. The log declared in advance that at this width the shield is an ordinary tight stop,
+not an ALCM gap, and that **a win here would undercut the shield premise rather than support it.**
+
+**It came in at 1.286 — worse than both $1,500 and $2,000.** The optimum sits well inside the ALCM
+range, away from the tight-stop boundary. **The shield concept holds on its own terms**, which is a
+stronger result for the specification than E38's number alone.
+
+## AN HONEST TENSION WORTH RECORDING
+**Trade count rises monotonically as the shield tightens: 19 / 20 / 21 / 23 / 27.** Sample size is
+this lab's binding constraint — and the only lever that increases it costs profit factor. There is no
+configuration here that is both well-sampled and best-performing, and no amount of tuning creates one.
+
+## WHAT HAS NOT CHANGED
+**21 trades at the optimum. The ~20–30 ceiling stands**, and PF 1.502 remains a direction rather than
+a validated result. What HAS changed is that it is now a direction with a measured, well-shaped
+neighbourhood behind it instead of a bare number.
+
+## QUEUE
+1. **Re-test the coil under the corrected exit.** E32 found it load-bearing and E33/E34 found its
+   threshold knife-edged — but all three measured it against the wrong exit model. With the shield in
+   place the coil may behave completely differently, and the v6 demotion was explicitly scoped to
+   *that build* rather than the strategy.
+2. **Position sizing.** DD 10.83% is a 1x figure; at the ~50x this shield implies it is far past
+   total loss. Unchanged as the largest unsolved problem, and better profit factors do not touch it.

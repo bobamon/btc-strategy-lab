@@ -1624,9 +1624,67 @@ const DATA = [
       "verifiedAt": "2026-09-02T20:54:52Z"
     },
     "notes": "REVERTED, AND PARTIALLY UNINTERPRETABLE FOR A REASON FLAGGED BEFORE THE RUN. PF 0.91843873, DD 19.9276311%, 19 trades. avgBarsWinning is 4321.00 against a maxBars cap of 4320 -- winners pin to the cap EXACTLY, so with an $8,000 target none of them resolve and this measures a 3-day hold rather than the $4,000 shield. The Pine said to check that before reading the profit factor, so the number is a lower bound rather than a clean measurement. The DIRECTION is still usable because it is consistent with the monotone gradient E38 establishes. Worth noting the source material calls $4,000 the safer setting; on this data it is the worst of the three."
+  },
+  {
+    "id": "war-formation-e40-shield-1500",
+    "name": "WF E40 ALCM $1,500 shield",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Extending the shield gradient inward. One change from E38: shieldUsd 2000 to 1500. Paired with E41 ($1,000) because a turning point cannot be located from one new point.",
+    "metrics": {
+      "netProfitPct": 9.91677631,
+      "profitFactor": 1.46618983,
+      "maxDrawdownPct": 11.31035598,
+      "totalTrades": 23,
+      "winRatePct": 47.82608696,
+      "avgTradePct": 0.43116419
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1HYR7MM3QY8B0BKM9J9NSP4",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HYR7MM1YHJF17TBZKAV4VQ",
+      "verifiedAt": "2026-09-02T21:00:13Z"
+    },
+    "notes": "THE TURN. PF 1.46618983 against E38's 1.50193294 -- slightly WORSE, which means the monotone run has ended and $2,000 is a genuine interior optimum rather than merely the last point measured. DD 11.31035598% on 23 trades, Sharpe 1.13. The falloff on this side is GENTLE (1.502 -> 1.466, a drop of 0.036) against the wide side's 1.502 -> 1.192. REVERTED against E38, but its real value is as the left-hand neighbour that makes E38's peak interpretable."
+  },
+  {
+    "id": "war-formation-e41-shield-1000",
+    "name": "WF E41 ALCM $1,000 shield (identity boundary)",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "The gradient's far end and the declared identity boundary: ~1% of price and ~100x effective leverage, past the 58x the source material names. At this width the shield is an ordinary tight stop rather than an ALCM gap. One change from E38: shieldUsd 2000 to 1000.",
+    "metrics": {
+      "netProfitPct": 6.74362889,
+      "profitFactor": 1.28571366,
+      "maxDrawdownPct": 10.60316412,
+      "totalTrades": 27,
+      "winRatePct": 44.44444444,
+      "avgTradePct": 0.24976403
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1HYS3GYVR7MSNAYWT7P8S3H",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HYS3GY2EZ4Q4CS7C1B4E85",
+      "verifiedAt": "2026-09-02T21:00:42Z"
+    },
+    "notes": "THE BOUNDARY CASE, AND IT VINDICATES THE SPECIFICATION RATHER THAN UNDERCUTTING IT. PF 1.28571366, DD 10.60316412% (the lowest of the series), 27 trades (the largest sample of the series). Worse than both $1,500 and $2,000 on profit factor. THAT IS THE IMPORTANT PART: the pre-registered risk was that a tight stop would outperform every ALCM width, which would have meant this entry simply prefers a conventional stop and the shield premise is decorative. It did not happen. The optimum sits at $2,000, INSIDE the ALCM range and well away from the ~100x tight-stop boundary, so the shield concept holds on its own terms. Also worth noting the trade count rises monotonically as the shield tightens (19/20/21/23/27), which is the sample-size lever this lab needs -- but buying sample by tightening the shield costs profit factor."
   }
 ];
-const BUILT = "2026-09-02 14:55";
+const BUILT = "2026-09-02 15:01";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
