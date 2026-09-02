@@ -666,5 +666,34 @@
    "verifiedAt": "2026-09-02T12:12:30Z"
   },
   "notes": "THE HALVES AGREE. v24 IS A STABLE NUMBER. H1 PF 0.92199683 on 410 trades at 36.59% win; H2 PF 0.86121615 on 423 trades at 36.64% win; full sample 0.89445064 on 833 at 36.61%. The profit-factor spread is 0.061 and the WIN RATES MATCH TO WITHIN 0.05 PERCENTAGE POINTS across two completely different markets -- a bear and recovery in H1, a bull run in H2. Contrast the BTC base, which split 1.3552 / 0.6566, a spread of 0.699. So v24's 0.894 is a real property of the mechanism, the v25-v27 exit conclusions stand as measured, and the 2.6-point win-rate deficit is a genuine stable target rather than an averaging artifact."
+ },
+ {
+  "id": "3m-elite-v29-no-zone-touch",
+  "name": "3M ELITE v29 no zone touch",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "specPath": "three-m-elite/SYSTEM.md",
+  "description": "HARD LESSON 15 applied here: the binding test on a SIGNAL term. One change from v24: low <= dzTop removed, the actual zone TOUCH, the condition a supply/demand system is named for. dzAge >= 1 retained so sequencing survives.",
+  "metrics": {
+   "netProfitPct": -25.53263099,
+   "profitFactor": 0.97210749,
+   "maxDrawdownPct": 61.44912875,
+   "totalTrades": 1076,
+   "winRatePct": 39.86988848,
+   "avgTradePct": -0.02372921
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1H129W878HP0DKC5PRJFMSC",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1H129W70K75KKCQBD5EPC3S",
+   "verifiedAt": "2026-09-02T12:21:26Z"
+  },
+  "notes": "THE ZONE TOUCH IS NOT DOING THE WORK -- THE BTC PATTERN, NOT THE WAR FORMATION ONE. PF 0.89445064 -> 0.97210749, the closest to 1.0 this lab has ever been, and the win rate rose 36.61% -> 39.87% on 833 -> 1,076 trades. The 243 extra trades are net accretive. REVERTED STRICTLY ON DRAWDOWN, which worsened 42.50% -> 61.45%, and the ratchet is both terms or nothing. But the finding stands: the condition this system is NAMED for -- price trading back into the zone -- is not what carries it. What remains is 'a demand zone is live and price is above its base', which is closer to a trend condition than a zone condition. FREE E14 FINDING, no credit: dzTouch < 2 in the entry is redundant with the lifecycle's own dzLive kill."
  }
 ]

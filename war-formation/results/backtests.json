@@ -1195,5 +1195,34 @@
    "verifiedAt": "2026-09-02T12:16:41Z"
   },
   "notes": "THE COIL IS THE MOST LOAD-BEARING TERM IN THE CHAMPION, AND THIS IS THE MIRROR IMAGE OF BTC's ATTACK 15. Removing it takes trades 32 to 67 and profit factor 1.68623784 to 0.61133755, with the win rate collapsing 56.25% to 35.82%. So it removes 35 of 67 candidates and they are overwhelmingly losers. Where BTC's named term was decoration that cost money, this lab's named term IS the edge. The reconstruction is also validated in the only direction it can be: removing a term can only ADD trades, and 67 > 32 is consistent. REVERTED; champion unchanged."
+ },
+ {
+  "id": "war-formation-e33-coilk-075",
+  "name": "WF E33 coilK 0.75",
+  "symbol": "BTCUSDT",
+  "timeframe": "1m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2025-12-16",
+  "backtestEnd": "2026-05-03",
+  "specPath": "war-formation/EXPERIMENT-LOG.md",
+  "description": "Sensitivity of coilK, chosen because E32 established the coil is the champion's load-bearing term. One change from v6: coilK 0.85 to 0.75, a stricter contraction. The equivalent of E19's greenBull test, run on the term that actually carries the strategy.",
+  "metrics": {
+   "netProfitPct": -0.83716236,
+   "profitFactor": 0.74926984,
+   "maxDrawdownPct": 1.67476869,
+   "totalTrades": 23,
+   "winRatePct": 43.47826087,
+   "avgTradePct": -0.03639836
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1H11MGHESJ7GSS6ZBDZ8PJW",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1H11MGHP1T40TZ9RP1D4MQ0",
+   "verifiedAt": "2026-09-02T12:21:04Z"
+  },
+  "notes": "THE WORST-CASE OUTCOME, AND IT IS THE STRONGEST NEGATIVE EVIDENCE ABOUT THE CHAMPION TO DATE. coilK 0.85 -> 0.75: PF 1.68623784 -> 0.74926984, win rate 56.25% -> 43.48%, trades 32 -> 23. Combined with E32, the profile around 0.85 is: remove the coil entirely 0.611, coilK 0.75 gives 0.749, coilK 0.85 gives 1.686. Steep falloff on BOTH sides of a single setting, on a 32-trade sample. That is the signature of a FITTED parameter, not a robust one, and it contrasts sharply with E19 where greenBull 4 -> 3 degraded gracefully to 1.28 on 42 trades. The champion's headline number now has to be read with this attached. REVERTED."
  }
 ]

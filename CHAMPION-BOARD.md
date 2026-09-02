@@ -873,3 +873,46 @@ split, and until it is, 1.15 is a full-sample average of unknown composition.
    signal has now changed, and the ratchet's own rule says re-testing a reverted change against a
    genuinely changed base is allowed and must be labelled as such. `highVol` in particular was
    load-bearing on a signal that no longer exists in the same form.
+
+
+## ██ ATTACK 16 — THE NEW BASE IS BETTER IN BOTH REGIMES AND STILL A BLEND (2026-09-02)
+
+When Attack 15 was kept I wrote that PF 1.15252596 is "a full-sample average of unknown composition"
+and refused to call it a champion. The decomposition confirms that caution.
+
+| Identical windows | OLD base | **NEW base (Attack 15)** | Change |
+|---|---|---|---|
+| H1 · 2024-06-08 → 2025-07-20 | 1.3552 | **1.55157635** | **+0.196** |
+| H2 · 2025-07-20 → 2026-09-01 | 0.6566 | **0.77846786** | **+0.122** |
+| **Spread** | 0.699 | **0.773** | **wider** |
+
+**Two things are true at once and both matter.**
+
+**Removing the stretch genuinely improved the mechanism in both regimes** — +0.196 in the good half
+and +0.122 in the bad one. That is not an artifact of averaging: the change helped everywhere, which
+is the strongest form of evidence a single change can produce.
+
+**And it did not fix the real problem.** The spread got *wider*, H2 still loses money at 0.778 with a
+33.75% win rate, and the full-sample 1.15 remains a blend of a profitable period and an unprofitable
+one. H1 alone would look like a strategy — PF 1.55, 54.65% win, Sharpe 1.83, 8.92% drawdown. H2 is a
+different animal.
+
+### WHAT THIS MEANS FOR THE BOARD
+**Still no champion, and the reason is now precise rather than cautious.** The system does not have a
+modest edge everywhere; it has a real edge in one regime and none in the other, and Attack 15 shifted
+both up without changing that shape.
+
+**So the productive question is no longer "which term to remove".** It is: **what distinguishes H1
+from H2?** That is the same question the War Formation lab has been carrying as its biggest open item,
+and neither lab has answered it. What is known here: it is not volatility (`highVol` is load-bearing
+in aggregate but did not close the gap), not the trend filter (inert), not the clock (2 trades). The
+untested candidates are market-structure descriptors that no build has ever computed — realised
+trend persistence, autocorrelation of returns, or the ratio of directional to ranging bars.
+
+### QUEUE
+1. **Characterise H1 versus H2 directly** with a counter build, not another entry filter. Measure a
+   structural property of each window and see whether it separates them.
+2. **The remaining signal terms** — `pulledBack`, `vwUp`, `coolingOff`, `close > open` — still
+   untested for binding. Attack 15 found +0.13 in that family.
+3. **Re-test the three gates against the new base.** Their verdicts were earned against a signal that
+   has changed.

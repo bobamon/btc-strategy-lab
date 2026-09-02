@@ -1304,9 +1304,67 @@ const DATA = [
       "verifiedAt": "2026-09-02T12:13:07Z"
     },
     "notes": "KEPT -- BOTH RATCHET TERMS IMPROVED, THE FIRST TIME IN FIFTEEN ATTACKS. PF 1.02024675 -> 1.15252596 and drawdown 16.68% -> 16.54%, on 128 -> 166 trades with the win rate up 39.13% to 44.58%. THE STRETCH WAS COSTING MONEY. Requiring a +2 sigma excursion within 150 bars removed 38 trades that were net POSITIVE, so the premise the strategy was named for was not selective, it was harmful. This is not a VWAP mean-reversion-from-extension system and never was: it is a VWAP pullback-continuation system that had a sigma-band costume bolted on. Every description of this strategy on the board before today was wrong. NOT a champion -- 1.15 on 166 trades still needs a period decomposition, and the old base looked like 1.02 until it split 1.3552 / 0.6566."
+  },
+  {
+    "id": "vwm-attack16a-newbase-h1",
+    "name": "VWM Attack16a new base H1",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2025-07-20",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "First half of the decomposition of the NEW base (Attack 15). Byte-identical source, only the window changes, using the same split point as the old base's decomposition so the two are directly comparable.",
+    "metrics": {
+      "netProfitPct": 28.15530052,
+      "profitFactor": 1.55157635,
+      "maxDrawdownPct": 8.92496762,
+      "totalTrades": 86,
+      "winRatePct": 54.65116279,
+      "avgTradePct": 0.32738722
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1H0ZRTVM5XSRC0MJNWWRRR1",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1H0ZRTVSHYM5XZ7QMF2Y5CX",
+      "verifiedAt": "2026-09-02T12:20:03Z"
+    },
+    "notes": "The strong half. PF 1.55157635 on 86 trades, 54.65% win, Sharpe 1.83, drawdown 8.92%. Against the OLD base's 1.3552 on the identical window, so Attack 15 lifted the good half too. Meaningless alone -- see Attack 16b."
+  },
+  {
+    "id": "vwm-attack16b-newbase-h2",
+    "name": "VWM Attack16b new base H2",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-07-20",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "Second half of the decomposition of the NEW base, and the control that makes 16a interpretable. Byte-identical source, only the window changes.",
+    "metrics": {
+      "netProfitPct": -9.41861405,
+      "profitFactor": 0.77846786,
+      "maxDrawdownPct": 15.4182416,
+      "totalTrades": 80,
+      "winRatePct": 33.75,
+      "avgTradePct": -0.11773268
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1H10EY602QHHMAEC1RWB0XK",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1H10EY68CYFFTX4V1RFPQ4N",
+      "verifiedAt": "2026-09-02T12:20:26Z"
+    },
+    "notes": "ATTACK 15 RAISED BOTH HALVES AND WIDENED THE SPREAD. New base H1 1.55157635 / H2 0.77846786, spread 0.773. Old base on the identical windows: 1.3552 / 0.6566, spread 0.699. So removing the stretch genuinely improved both regimes -- +0.196 early and +0.122 late -- but it did NOT make the strategy consistent, and H2 still loses money at 0.778 with a 33.75% win rate. PF 1.15252596 on the full sample remains a BLEND, and the caution recorded when Attack 15 was kept was correct. No champion."
   }
 ];
-const BUILT = "2026-09-02 06:14";
+const BUILT = "2026-09-02 06:23";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

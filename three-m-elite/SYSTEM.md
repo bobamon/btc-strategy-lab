@@ -570,7 +570,17 @@ never been in the thing being tested — they have been in the assumptions under
     Encouraging but NOT a conclusion: one half cannot settle stability.
 0-V28b. ~~WALK-FORWARD, SECOND HALF~~ — **DONE. PF 0.86121615 on 423 trades at 36.64% win.**
     THE HALVES AGREE. v24's 0.894 is a real, stable number and every v25-v27 conclusion stands.
-0-V29-NEXT. **THE ENTRY — and take the BTC lab's Attack 15 lesson (top priority).** That lab spent
+0-V29. ~~THE ENTRY: BINDING TEST ON A SIGNAL TERM~~ — **DONE. Removing the zone TOUCH raised PF
+    0.89445064 -> 0.97210749 on 833 -> 1,076 trades, but drawdown went 42.50% -> 61.45%. REVERTED on
+    the ratchet. The touch is NOT what carries this system.**
+0-V30-NEXT. **RECOVER v29's PROFIT FACTOR WITHOUT ITS DRAWDOWN (top priority).** v29 is the closest
+    this lab has come to 1.0 and it failed on one term only. The drawdown came from 243 extra trades
+    compounding at percent_of_equity 100, not from worse trades -- the win rate ROSE. Test v29 with
+    the entry re-narrowed by a DIFFERENT term than the touch, so frequency comes down without
+    reinstating the condition that was not working. First candidate: require the zone to be fresh
+    (dzAge <= some bound), which is a recency condition rather than a location one.
+0-V31. **Then the remaining signal terms**: close > dzBot, and dzAge >= 1 itself.
+    Superseded text: THE ENTRY -- and take the BTC lab's Attack 15 lesson. That lab spent
     fifteen cycles attacking FILTERS and found its only improvement by removing a term from the
     SIGNAL ITSELF -- the one the strategy was named for, which turned out to be costing money. This
     lab has never applied the binding test to its own signal terms either. The v24 entry is a
@@ -1109,3 +1119,43 @@ short on** — matches to within 0.05 of a percentage point.
 That last point is what makes the next cycle worth spending: **there is a specific, stable thing to
 fix**, which is more than this lab has had at any previous point. The BTC lab's Attack 15 just showed
 where to look — not at the filters, but at the terms of the signal itself.
+
+
+---
+
+## ██ v29 — THE ZONE TOUCH IS NOT WHAT CARRIES THIS SYSTEM
+
+| | v24 | **v29 (no touch)** |
+|---|---|---|
+| Profit factor | 0.89445064 | **0.97210749** |
+| Win rate | 36.61% | **39.87%** |
+| Trades | 833 | **1,076** |
+| Max drawdown | **42.50%** | 61.45% |
+
+**REVERTED strictly on drawdown** — the ratchet is both terms or nothing, and 42.50% → 61.45% fails
+it. But **PF 0.972 is the closest to break-even this lab has ever been**, and the win rate rose while
+the trade count grew by 243, which means the extra trades are *better* than the average of the ones
+already there.
+
+### WHAT IT ESTABLISHES
+**The condition this system is named for — price trading back INTO the zone — is not what makes it
+work.** Remove it and the strategy improves. What remains is "a demand zone is live and price is
+above its base", which is much closer to a trend-participation condition than a zone condition.
+
+### THREE LABS, ONE TEST, TWO ANSWERS
+| Lab | Named term | Verdict |
+|---|---|---|
+| BTC | +2σ stretch | **decoration — removing it improved both halves** |
+| **3M Elite** | **zone touch** | **decoration — removing it raised PF 0.089** |
+| War Formation | 3m coil | **the edge — removing it cost 1.075 of PF** |
+
+**Two of three named mechanisms are decoration.** HARD LESSON 15 is now measured three times, and the
+split is what makes it valuable: the *test* is what transfers, never the answer.
+
+### WHY THE DRAWDOWN BLEW UP, AND WHY THAT IS FIXABLE
+The losing trades did not get worse — the win rate improved. **The drawdown grew because 30% more
+trades compound at `percent_of_equity` 100**, so a bad run has more positions to work through at full
+size. That is a frequency-and-sizing problem, not a signal problem, which is why v30 attacks
+frequency with a *different* term rather than putting the touch back.
+
+**Best config unchanged: v24, long-only, PF 0.894 on 833 trades.**

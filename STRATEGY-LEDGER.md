@@ -588,3 +588,37 @@ of equity is the same risk as 1x on 86%. Used that way, leverage is a capital-ef
 
 **This is arithmetic about the backtests, not advice about what to trade.** The sizing decision is
 the user's; what this lab can say is what the numbers mean at each leverage.
+
+
+---
+
+## ██ HARD LESSON 16 — A LOAD-BEARING TERM WITH A NARROW OPTIMUM IS A CURVE-FIT WARNING
+
+**Earned:** War Formation E32 + E33, 2026-09-02.
+
+E32 showed the 3m coil is the term that carries the champion: remove it and PF goes 1.686 → 0.611.
+E33 then varied its threshold for the first time: coilK 0.85 → 0.75 gives **0.749**.
+
+| coilK | Profit factor | Trades |
+|---|---|---|
+| removed | 0.611 | 67 |
+| 0.75 | 0.749 | 23 |
+| **0.85** | **1.686** | **32** |
+
+**Steep falloff on both sides of one setting, on a 32-trade sample.**
+
+**Why this pairing is the diagnostic, not either result alone.** A term that barely binds can sit on
+a narrow optimum harmlessly — it is not doing much either way. A term that carries the strategy AND
+sits on a narrow optimum means the strategy's entire result depends on one number being exactly
+right, which is what curve-fitting produces.
+
+**How to apply:**
+1. **After establishing a term is load-bearing, immediately test its threshold in both directions.**
+   The two tests are a pair and neither is complete alone.
+2. **Graceful degradation is the evidence you want.** War Formation E19 found greenBull 4 → 3 held at
+   PF 1.28 — that is what a robust parameter looks like, and it is why E19 was the champion's best
+   evidence until now.
+3. **Report the sensitivity profile alongside the headline number**, not in a footnote. A profit
+   factor without its parameter neighbourhood is an unqualified claim.
+4. **One intermediate point resolves it.** Testing the other side of the peak distinguishes a plateau
+   edge from a spike, and it is cheaper than any new construction.

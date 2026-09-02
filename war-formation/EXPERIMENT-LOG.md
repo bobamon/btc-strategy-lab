@@ -1100,3 +1100,43 @@ The user has confirmed War Formation is traded leveraged, **around 86x**. Full a
 **This does not change any experimental conclusion in this log.** It changes what "3.10% drawdown"
 means when the strategy is actually traded, and it means position sizing has to be solved before any
 configuration here is treated as deployable.
+
+
+---
+
+## ██ E33 — coilK IS A NARROW PEAK. THIS IS THE STRONGEST NEGATIVE EVIDENCE ABOUT THE CHAMPION.
+
+E32 established the coil is the load-bearing term. So its threshold is the most important number in
+the strategy, and E33 varied it for the first time.
+
+| Configuration | Profit factor | Win rate | Trades |
+|---|---|---|---|
+| Coil removed entirely (E32) | 0.61133755 | 35.82% | 67 |
+| **coilK 0.75 — stricter (E33)** | **0.74926984** | **43.48%** | **23** |
+| **coilK 0.85 — the champion** | **1.68623784** | **56.25%** | **32** |
+
+**Steep falloff on BOTH sides of a single setting.** Loosen it to nothing and profit factor is 0.61;
+tighten it by 0.10 and it is 0.75. Only 0.85 produces 1.686.
+
+### THIS HAS TO BE SAID PLAINLY
+**That is the signature of a fitted parameter, not a robust one** — and it is measured on 32 trades.
+Compare E19, which was the champion's best robustness evidence: greenBull 4 → 3 degraded *gracefully*
+to PF 1.28 on 42 trades. The coil does not degrade gracefully in either direction.
+
+**The champion's PF 1.68623784 must now be read with this attached.** Two facts sit together:
+- The coil is the term that carries the strategy (E32).
+- The coil's threshold sits on a narrow peak on a small sample (E33).
+
+**A load-bearing term with a narrow optimum on 32 trades is the textbook description of a curve-fit.**
+That does not prove v6 is fitted — one intermediate point would tell us far more — but it is the most
+serious qualification this champion has received, and it belongs on the board rather than in a
+footnote.
+
+### WHAT WOULD SETTLE IT
+**One run at coilK 0.90 or 0.95** — the loose side, between 0.85 and removal. If the curve is smooth
+on that side, 0.85 is a plateau edge rather than a spike, which is a very different picture. If it
+also collapses, the peak is one point wide and the champion should be demoted from "champion" to
+"best fitted result on a 32-trade sample". **That is the next cycle, and it is worth more than any
+new construction.**
+
+**Champion unchanged for now — v6, PF 1.68623784, DD 3.10289714%, 32 trades — but flagged.**
