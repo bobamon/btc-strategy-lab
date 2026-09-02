@@ -295,5 +295,34 @@
       "verifiedAt": "2026-09-02T08:22:20Z"
     },
     "notes": "KEPT by the ratchet: profit factor improved 0.89 -> 0.91 AND max drawdown improved 35.0% -> 28.8%. Net went -29.4% -> -23.0%. Only 35 trades were removed (468 -> 433, 7.5%) yet drawdown fell 6.2 points and net improved 6.4 points, so the filter removed disproportionately BAD trades rather than trimming at random -- that is what a filter earning its place looks like. NOT promoted to champion: PF 0.91 is still below the 0.95 ladder threshold, so no 5m run. This becomes the new base for attack 2."
+  },
+  {
+    "id": "vwm-attack2-shallow-pullback",
+    "name": "VWM base + EMA200 + shallow pullback",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "Attack 2 on the base: ONE change, require the pullback to be SHALLOW -- the bar low must hold above VWAP rather than dipping through it. Hypothesis was that a deep retrace through VWAP in an 'accepted' uptrend signals the acceptance has failed. Everything else identical to the base, which already includes the EMA200 trend filter.",
+    "metrics": {
+      "netProfitPct": -29.02732264,
+      "profitFactor": 0.85230776,
+      "maxDrawdownPct": 32.61976613,
+      "totalTrades": 342,
+      "winRatePct": 38.01169591,
+      "avgTradePct": -0.08487521
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GNECC76MR00BHXWFYNZ8ZH",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GNECC6AK0RYWFYRM83PC7S",
+      "verifiedAt": "2026-09-02T08:58:52Z"
+    },
+    "notes": "REVERTED by the ratchet: profit factor WORSENED 0.91 -> 0.85 and max drawdown WORSENED 28.8% -> 32.6%. Both terms failed, so there is no trade-off to weigh. The filter removed 91 trades (21%) and made results worse on both axes, which means the DEEP pullbacks it excluded were disproportionately GOOD trades -- the exact opposite of attack 1's EMA200 filter, which removed disproportionately bad ones. The hypothesis is contradicted: in this system the edge lives in the deep retrace through VWAP, not the shallow one. Long-only; no short leg exists yet."
   }
 ]

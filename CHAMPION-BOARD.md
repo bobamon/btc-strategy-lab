@@ -42,6 +42,7 @@ The board is open.
 | Cycle | Base PF | Base DD | New PF | New DD | Verdict |
 |---|---|---|---|---|---|
 | Attack 1 — EMA200 trend filter | 0.89 | 35.0% | **0.91** | **28.8%** | **KEPT** |
+| Attack 2 — shallow pullback | 0.91 | 28.8% | 0.85 | 32.6% | **REVERTED** |
 
 ## CURRENT BASE — what cycle 008 starts from
 **007's LONG leg.** It has the best raw hit rate of anything tested in this lab: **38.3%** across 457
@@ -64,8 +65,8 @@ crossing VWAP, stand down 20 bars.
 The base loses to fee drag, so the first moves must **cut trade count without cutting edge**:
 
 1. ~~Add a trend filter (EMA200)~~ — **DONE, KEPT.** PF 0.89→0.91, DD 35.0%→28.8%. Now part of the base.
-2. **Require the pullback to be shallow.** A deep retrace to VWAP in an "accepted" uptrend may signal
-   the acceptance failed. Test requiring the low to hold above VWAP entirely.
+2. ~~Require the pullback to be shallow~~ — **DONE, REVERTED.** PF 0.91→0.85, DD 28.8%→32.6%.
+   The deep retrace is where the edge lives; excluding it removed good trades.
 3. **Add the time-of-day filter** from the Oracle material (`war-formation/WAR-FORMATION.md`) —
    ban the 1–4am ET witching window, which has a documented downside bias.
 4. **Raise the R floor** from 0.8% to 1.2%. HARD LESSON 3 says fees scale against R; the base spent
@@ -80,3 +81,4 @@ The base loses to fee drag, so the first moves must **cut trade count without cu
 | Cycle | Change to the base | Result | Kept? |
 |---|---|---|---|
 | Attack 1 | Require close above EMA200 | PF 0.89→0.91, DD 35.0%→28.8%, trades 468→433 | **KEPT** |
+| Attack 2 | Require shallow pullback (low holds above VWAP) | PF 0.91→0.85, DD 28.8%→32.6%, trades 433→342 | **REVERTED** — worse on both terms |
