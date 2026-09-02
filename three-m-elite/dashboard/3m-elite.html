@@ -602,9 +602,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T11:12:41Z"
     },
     "notes": "TEN ENGULFING CANDLES IN 4.7 YEARS -- 5 bullish, 5 bearish, across roughly 9,800 four-hour candles. That is 0.1%, and it explains every zero-trade run from v16 onward: the conjunction could never fire because the engulf term is essentially non-existent. THE CAUSE IS A DEFINITION THAT ASSUMES GAPS, IN A MARKET THAT HAS NONE. The test carried since v9 is `close > prevOpen AND open < prevClose`. In a 24/7 market the open of one aggregated candle equals the close of the previous one almost exactly, so `open < prevClose` is decided by tick noise rather than by structure and is effectively never true. That condition is imported from equities, where overnight gaps make it meaningful. THE FIX for v20 is a body-containment definition with no gap requirement: a bullish engulf is a bullish candle whose CLOSE exceeds the previous candle's OPEN, with the previous candle bearish. Drop the open-versus-previous-close term entirely. This is the fourth carried-from-v1 error this lab has found, after the inverted zone model, wick-based mitigation and the unreachable target."
+  },
+  {
+    "id": "3m-elite-v20-engulf-counter-fixed",
+    "name": "3M ELITE v20 corrected engulf counter (diagnostic)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "A COUNTER, NOT A STRATEGY. The corrected engulf definition -- body containment only, no gap requirement -- fired with no other condition and a one-bar exit, so totalTrades is the engulf count and the long/short split separates bullish from bearish. P&L meaningless by construction.",
+    "metrics": {
+      "netProfitPct": -95.24852383,
+      "profitFactor": 0.28627235,
+      "maxDrawdownPct": 95.25736067,
+      "totalTrades": 2711,
+      "winRatePct": 23.16488381,
+      "avgTradePct": -0.03513409
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GXHFTD00SKZCV70MCBK473",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GXHFTDY20ZA3GP2HBDW7J6",
+      "verifiedAt": "2026-09-02T11:19:49Z"
+    },
+    "notes": "2,711 ENGULFS VERSUS 10. Dropping the gap clause multiplied the population by 271x: 1,325 bullish and 1,386 bearish across 4.7 years, near-perfectly balanced, roughly 28% of all 4H candles. The old definition was not selective, it was BROKEN -- an equities rule requiring a gap, applied to a 24/7 market where an aggregated candle's open equals the previous close. Every zero-and-three-trade run from v16 on was starved by this one clause. The validation gate can now be restored on a real population."
   }
 ];
-const BUILT = "2026-09-02 05:13";
+const BUILT = "2026-09-02 05:21";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

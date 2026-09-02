@@ -68,6 +68,7 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E25 | Rejection short + cycle gate, target 1R instead of 2R | **PF 0.489, 24 trades. COMPARISON CONFOUNDED** -- E13 made 39 trades, so the entry differs; E13 was rebuilt from prose, not source · [report](https://mcp-api.trader.dev/backtest/01M1GW8GZXNDHCXCAED1G87A17) |
 | E26 | E13's EXACT source, one input changed: rr 1.5 -> 1.0 | **REVERTED.** PF 0.7490->0.6922, win 23.08%->27.03%, trades 39->37. Nearer target HURTS this short · [report](https://mcp-api.trader.dev/backtest/01M1GWGDZ6NDSF9H66YF7S7HZP) |
 | E27 | Sweep-and-reject short: genuine BREAK above the 15m high, then close back below | **REVERTED.** PF 0.2531, win 10.53%, 19 trades, against E13's 0.7490 on 39. The sweep is WORSE than the near-touch · [report](https://mcp-api.trader.dev/backtest/01M1GWQ2NSQ5SBP1PDP4ZDC739) |
+| E28 | E13's EXACT source + the 3m COIL on the prior bar — the one gate the long has always had and the short never did | **REVERTED.** PF 0.7490->0.4904, win 23.08%->17.65%, trades 39->17. The coil cut 22 of 39 trades and removed disproportionately the WINNERS · [report](https://mcp-api.trader.dev/backtest/01M1GXH5A5AVDQ9NAF9X6SQD7F) |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -528,6 +529,7 @@ then reclaims it. Applying that same mechanism at a high produced the worst shor
 |---|---|---|---|
 | E13 — near-touch of resistance, then reject | **0.7490** | 23.08% | 39 |
 | E27 — genuine break above, then reject | 0.2531 | 10.53% | 19 |
+| E28 — E13 plus the coil | 0.4904 | 17.65% | 17 |
 | v11 | BIDIRECTIONAL: one cascade, 6h picks the side, cycle gate on the short only | PF 1.5689, DD 3.382%, 38 trades. **Longs 32 (18W, +$786), shorts 6 (1W, -$65).** Champion unchanged; the short leg drags · [report](https://mcp-api.trader.dev/backtest/01M1GX436Q7TQ71K66BDNEYAWF) |
 
 **Requiring price to actually clear resistance makes shorts markedly worse; requiring it merely to
@@ -611,3 +613,43 @@ be worse than shipping nothing.
 
 **The right next work is on the short side alone**, judged on its own profit factor, until one clears
 1.0. Everything else is premature.
+
+
+---
+
+## ██ E28 — THE COIL IS A LONG-SIDE GATE, AND THIS IS WHY THE SHORTS KEEP FAILING
+
+Recovering E13's source (never trusting the description — the standing rule) surfaced an asymmetry
+that had been sitting in plain sight through nine short builds: **the long has required a volatility
+contraction since v1, and not one short has ever included it.** E13's short gates on regime, time,
+the 1h, a near-touch, a rejection wick, HA colour, the whole-number band and cycle position — but
+never on the coil.
+
+That looked like an oversight worth correcting. It was not an oversight. It was correct.
+
+| | E13 | E28 = E13 + coil |
+|---|---|---|
+| Profit factor | 0.74897196 | **0.49037037** |
+| Win rate | 23.08% | 17.65% |
+| Trades | 39 | 17 |
+| Max drawdown | 7.74972875% | 3.53780197% |
+
+**The gate removed 22 of 39 trades and profit factor fell by a third — so what it cut was
+disproportionately the winners.** A filter that removes more than half a population and makes the
+remainder worse is not filtering noise; it is selecting against the signal.
+
+**THE REASON, AND IT GENERALISES.** A coil is stillness before a spring. The long is a *reclaim* —
+price sweeps a low, goes quiet, then snaps back up — so stillness is genuinely part of that setup's
+anatomy. The short here is a *rejection at resistance*, and a rejection happens while the market is
+already in motion. Demanding quiet immediately before it selects for the rallies that arrive
+exhausted, which are exactly the ones that keep grinding up instead of turning.
+
+**This is E14 in mirror image.** There, the weakening-run gate removed good longs because it
+duplicated the coil. Here the coil itself removes good shorts because it contradicts them. Same
+lesson from both directions: **a gate is not good or bad in isolation — it is good or bad relative
+to the anatomy of the setup it is placed on.** Symmetry of *components* is not symmetry of *logic*.
+
+**Ninth short construction. Still nothing above PF 1.0.** Best remains E13 at 0.749, and the
+attempts are now well past the point where the honest reading is that the failure is not in any
+individual gate. Every construction has entered on a *level* — a 15m high, near-touched or broken.
+The open question for the next cycle is whether the short should be entering on a level at all.

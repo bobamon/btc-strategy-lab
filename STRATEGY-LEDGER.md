@@ -338,3 +338,45 @@ be worse than shipping nothing.
 
 **The right next work is on the short side alone**, judged on its own profit factor, until one clears
 1.0. Everything else is premature.
+
+
+---
+
+## ██ HARD LESSON 9 — A GATE IS ONLY GOOD RELATIVE TO THE ANATOMY OF ITS SETUP
+
+**Earned:** War Formation E28, 2026-09-02, and confirmed against E14 which is its mirror image.
+
+Nine short constructions into War Formation, recovering E13's source revealed that the **long has
+required a volatility coil since v1 and no short had ever included it.** Adding it looked like
+correcting an oversight. It cut 22 of 39 trades and dropped profit factor from **0.749 to 0.490** —
+removing disproportionately the winners.
+
+**Why:** a coil is stillness before a spring. The long is a *reclaim* — sweep a low, go quiet, snap
+back — so stillness is part of that setup's anatomy. The short is a *rejection at resistance*, which
+happens while the market is already moving. Demanding quiet first selects for rallies arriving
+exhausted, which are exactly the ones that keep grinding instead of turning.
+
+**E14 is the same lesson from the other side:** there a weakening-run gate removed good *longs*
+because it duplicated the coil. Here the coil removes good *shorts* because it contradicts them.
+
+**How to apply:** before porting a component between legs, systems or labs, ask what the setup is
+*physically doing* and whether the gate describes a state that setup passes through. **Symmetry of
+components is not symmetry of logic.** This is now the fifth cross-inheritance failure in these labs
+— see the no-mirror rule, E18's volatility-filter transfer, and the BTC location rule.
+
+---
+
+## ██ HARD LESSON 10 — MEASURE THE TERMS BEFORE TESTING THE CONJUNCTION
+
+**Earned:** 3M Elite v19/v20, 2026-09-02.
+
+Four cycles were spent filtering a population whose size had never been measured. v16, v17 and v18
+each fixed something genuinely wrong and each returned **0 trades**; v9, v10 and v11 each landed on
+exactly **3**. The binding constraint was one clause in the engulf definition — `open < prevClose`, a
+gap requirement — which is meaningful in equities and meaningless in a market that never closes.
+Removing it took the population from **10 to 2,711** across 4.7 years.
+
+**How to apply:** when an entry is a conjunction of N terms, **count each term alone before testing
+them together** — a counter build with a one-bar exit, since this engine returns no plot values. And
+when a definition is inherited from another market, check that its *preconditions* exist here. When
+successive independent fixes produce the same trade count, stop fixing and start counting.

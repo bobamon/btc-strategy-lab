@@ -1131,9 +1131,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T11:16:37Z"
     },
     "notes": "MORE SHORTS, SAME SINGLE WINNER, FIVE TIMES THE LOSS. Shorts went 6 to 10 while wins stayed at 1, and the short leg's loss grew from -$65.03 to -$328.77. Combined PF fell 1.5689 to 1.3026 and drawdown rose 3.382% to 5.021%. The long leg is untouched at 32 trades with 18 wins and +$785.70, which confirms the change was isolated to the bear regime as intended. THE SHORT LEG IS NOT MERELY RARE, IT IS BAD: one winner in ten. Loosening frequency does not help a leg with no edge, it just samples the same negative expectancy more often -- which is the honest answer to the frequency question raised by v11. Champion unchanged."
+  },
+  {
+    "id": "war-formation-e28-short-coil",
+    "name": "WF E28 short leg + the coil",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "short",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "description": "E13's exact recovered source with exactly one addition: the 3m coil (atr3 < atr30 * 0.85) read on the prior bar. Recovering E13 showed its short has never had the volatility-contraction gate the long has required since v1. Not a mirror -- a component the long has always had and the short was never given. Short-only, judged alone.",
+    "metrics": {
+      "netProfitPct": -2.5611076,
+      "profitFactor": 0.49037037,
+      "maxDrawdownPct": 3.53780197,
+      "totalTrades": 17,
+      "winRatePct": 17.64705882,
+      "avgTradePct": -0.15065339
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GXH5A5BYN57XDGFXWG6945",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GXH5A5AVDQ9NAF9X6SQD7F",
+      "verifiedAt": "2026-09-02T11:19:39Z"
+    },
+    "notes": "THE COIL REMOVED THE GOOD SHORTS. E13 0.74897196 on 39 trades -> 0.49037037 on 17. The gate cut 22 of 39 trades and profit factor fell by a third, so what it removed was disproportionately the winners. This is E14 in mirror image: there the weakening gate removed good longs because it duplicated the coil; here the coil itself removes good shorts. The contraction that precedes a long reclaim is not the state that precedes a short break -- the long waits for stillness before a spring, the short needs the move already going. Ninth short construction, still no PF above 1.0. REVERTED."
   }
 ];
-const BUILT = "2026-09-02 05:17";
+const BUILT = "2026-09-02 05:21";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

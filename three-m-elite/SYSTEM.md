@@ -302,6 +302,7 @@ so the code genuinely behaves differently. **But the count stayed at 3.**
 | v17 | Counter build for the validation gate, 2D bias DROPPED | **0 TRADES.** The bias was not the binding term -- arming and mitigation race, and mitigation wins · [report](https://mcp-api.trader.dev/backtest/01M1GW9BZV25S3MC76DK784RBE) |
 | v18 | Arming candle exempted from mitigation | **0 TRADES.** Third consecutive zero on this gate · [report](https://mcp-api.trader.dev/backtest/01M1GWQMNTR2YC3YY3YFBWDM42) |
 | v19 | Count 4H engulfing candles alone | **TEN in 4.7 years** (5 bull, 5 bear) out of ~9,800 candles. The engulf definition assumes GAPS · [report](https://mcp-api.trader.dev/backtest/01M1GX4DEVQGF6R39CE7FJWRC9) |
+| v20 | The SAME counter with the gap clause removed — body containment only | **2,711 ENGULFS** (1,325 bull, 1,386 bear). 271x the old count, ~28% of all 4H candles · [report](https://mcp-api.trader.dev/backtest/01M1GXHFTDY20ZA3GP2HBDW7J6) |
 
 **When three independent corrections land on the same trade count, the binding constraint is upstream
 of all of them.** I have now spent three cycles fixing things that were genuinely wrong and none of
@@ -540,7 +541,14 @@ never been in the thing being tested — they have been in the assumptions under
 0-V17. ~~COUNTER-BUILD THE VALIDATION GATE~~ — **DONE. Bias exonerated; arming and mitigation conflict.**
 0-V18. ~~ARMING CANDLE EXEMPT FROM MITIGATION~~ — **0 trades. Third consecutive zero. See the v18 lesson.**
 0-V19. ~~COUNT THE MISSING TERM~~ — **DONE, and it was the ENGULF, not arming. Ten in 4.7 years.**
-0-V20-NEXT. **REDEFINE THE ENGULF WITHOUT A GAP REQUIREMENT (top priority).** Bullish engulf = previous
+0-V20. ~~REDEFINE THE ENGULF WITHOUT A GAP REQUIREMENT~~ — **DONE. 10 became 2,711.** The clause was
+    the whole problem. The population is real and balanced; the validation gate can now be tested.
+0-V21-NEXT. **RESTORE THE TYPE 2 VALIDATION GATE ON THE CORRECTED ENGULF (top priority).** This is
+    v16's build with one term replaced: the engulf now uses body containment, no gap. v16 returned 0
+    trades on a population of 10; the same conjunction now draws on 2,711. If it still returns a
+    handful, the constraint is the zone lifecycle after all and the next counter measures LIVE ZONES.
+    If it returns a workable number, the system finally has a testable entry. Keep the 2R target from
+    v15 and the deepest-zone rule from v10. Superseded text: Bullish engulf = previous
     candle bearish, this candle bullish, close above the previous open. Body containment only. Re-run
     the counter to confirm frequency, THEN restore the validation gate. Superseded text: Entry = zone live AND price just entered it.
     Nothing else. Confirm the first term of the conjunction exists before testing the conjunction
@@ -640,3 +648,39 @@ construction. Meeting this requirement means changing the systems, not tuning th
 
 **3M Elite is the closest in structure**, because supply and demand zones are inherently two-sided —
 its problem is that the entry does not work yet in either direction, not that it is one-sided.
+
+
+---
+
+## ██ v20 — TEN BECAME 2,711. THE DEFINITION WAS BROKEN, NOT SELECTIVE.
+
+Removing one clause — `open < prevClose`, the gap requirement — multiplied the engulf population by
+**271x**.
+
+| | v19 (gap required) | v20 (body containment) |
+|---|---|---|
+| Engulfs in 4.7 years | 10 | **2,711** |
+| Bullish | 5 | 1,325 |
+| Bearish | 5 | 1,386 |
+| Share of ~9,800 4H candles | 0.1% | **~28%** |
+
+*(P&L on both runs is meaningless by construction — one-bar exits. Only the counts are evidence.)*
+
+**The balance is the proof.** 1,325 versus 1,386 across a period containing a bull run, a bear leg
+and several reversals is what an unbiased structural pattern looks like. The old count — five and
+five — was not a rare pattern being found; it was tick noise deciding whether a 24/7 candle's open
+sat a hair below the previous close.
+
+**WHAT THIS RETIRES.** Every zero-trade run from v16 onward, and the three-trade plateau of v9, v10
+and v11, was starved by this single clause. The structural corrections in those builds — the latched
+engulf-created zone, the deepest-zone rule, the base geometry — were never disproven. **They were
+never given a population to act on.** They go back on the table unmodified.
+
+**THE METHOD LESSON, NOW EARNED TWICE IN THIS LAB.** v19 measured a term and found it empty; v20
+measured the fix before building on it. Four cycles were spent filtering a population whose size had
+never been checked. **Measure the terms of a conjunction before testing the conjunction** — and when
+a definition is imported from another market, check that its preconditions exist here. A gap is an
+equities concept. This market never closes.
+
+~28% is a *permissive* term, not a selective one — so the engulf is no longer a candidate explanation
+for a low trade count. Whatever binds next is elsewhere, and v21 will say where.

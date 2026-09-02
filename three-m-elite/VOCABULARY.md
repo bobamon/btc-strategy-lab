@@ -203,3 +203,18 @@ candle's open equals the previous close almost exactly and that clause is never 
 **Measured cost of getting this wrong:** the gap-requiring definition produced **10 engulfing candles
 in 4.7 years** out of ~9,800 four-hour candles, silently disabling the validation gate in v16, v17 and
 v18 — three zero-trade runs and three credits spent chasing the wrong terms.
+
+
+---
+
+## ENGULFING CANDLE — CORRECTED DEFINITION (v20, measured)
+
+**Bullish engulf** = the previous candle is bearish, this candle is bullish, and this candle's close
+is above the previous candle's open. **Bearish engulf** mirrors it. **Body containment only.**
+
+**There is NO gap requirement.** The textbook form also demands this candle's open be below the
+previous close, which presumes an overnight gap. Crypto trades 24/7: an aggregated candle's open
+equals the previous close to within a tick, so that clause is decided by noise. With it, 10 engulfs
+in 4.7 years. Without it, 2,711 — about 28% of all 4H candles.
+
+An engulf **CREATES** a zone; it does not validate one. See [[3m-zone-lifecycle]].
