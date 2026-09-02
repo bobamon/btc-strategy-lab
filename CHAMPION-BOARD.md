@@ -505,3 +505,42 @@ construction. Meeting this requirement means changing the systems, not tuning th
 
 **3M Elite is the closest in structure**, because supply and demand zones are inherently two-sided —
 its problem is that the entry does not work yet in either direction, not that it is one-sided.
+
+
+# ██ THE MIRROR BEATS THE OWN-GEOMETRY SHORT — A RULE CORRECTED (2026-09-02)
+
+| BTC short construction | PF | Trades | Win rate | Payoff |
+|---|---|---|---|---|
+| Own-geometry fade — rally into the upper band that fails | 0.5506 | 17 | 17.65% | 2.57 |
+| **Mirrored mechanism — stretch to −2σ, retrace, lose VWAP** | **0.7413** | **273** | 17.58% | 3.47 |
+
+**Better profit factor and sixteen times the sample.** The no-mirror doctrine sent this lab to a
+17-trade fade when a 273-trade symmetric leg was available and better. That doctrine was inherited
+from the War Formation lab's E9/E9b failures and applied here without ever being tested on this
+mechanism — which is precisely the cross-lab inheritance error this session has now recorded four
+times.
+
+**What the rule should say, corrected:** a mirror is a legitimate first construction. What fails is a
+mirror that ignores LOCATION — E9b's short entered after price had already fallen, and adding a
+cycle-position gate lifted it from 0.68 to 0.75. Test the symmetric mechanism first, then fix
+location; do not assume the short must be a different animal.
+
+**Still not viable.** PF 0.74 with a 34.4% drawdown is not tradeable, and the leg is recorded as
+`testing` because it is the best short on record and the basis for a bidirectional build, not because
+it works.
+
+### The two sides have genuinely different trade shapes
+| | Long | Short |
+|---|---|---|
+| Win rate | 38–41% | 17.6% |
+| Payoff ratio | ~1.5 | ~3.5 |
+
+**The same mechanism does not produce the same trade shape on each side.** The short takes many small
+losses and a few large wins; the long is far more balanced. That matters before running them
+together — position sizing and expectancy behave differently, and a combined equity curve will be
+driven by the short's tail rather than its hit rate.
+
+### Standing position after this cycle
+- Long: PF 1.02 full sample, but 1.36 early against 0.66 late. No persistent edge.
+- Short: PF 0.74 on a real 273-trade sample. Best yet, still losing.
+- **Neither side works. The lab has an honest map of the mechanism and no tradeable system.**

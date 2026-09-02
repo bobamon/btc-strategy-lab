@@ -287,3 +287,22 @@ construction. Meeting this requirement means changing the systems, not tuning th
 
 **3M Elite is the closest in structure**, because supply and demand zones are inherently two-sided —
 its problem is that the entry does not work yet in either direction, not that it is one-sided.
+
+
+### THE NO-MIRROR RULE, CORRECTED — 2026-09-02
+The original rule, from War Formation E9/E9b: *never mirror the short off the long.*
+
+**Tested directly in the BTC lab and found too strong.** The mirrored mechanism scored PF 0.7413 on
+273 trades; the deliberately non-mirrored "own geometry" fade scored 0.5506 on 17. The rule steered
+the lab away from the better construction.
+
+**Corrected rule: BUILD THE MIRROR FIRST, THEN FIX LOCATION.**
+A symmetric mechanism is a legitimate starting point and usually the higher-frequency one. What
+actually failed in E9/E9b was a short that entered *after price had already fallen* — a location
+error, not a symmetry error. E13 proved this by adding a cycle-position gate to a mirrored short and
+lifting it from 0.68 to 0.75.
+
+**And note how the error propagated:** the rule was earned in one lab and applied in another without
+being tested there. That is the fourth cross-lab inheritance failure this session, after the
+volatility filter, the timeframe translation and the exit-target hypothesis. **A finding from one
+strategy is a hypothesis for another, never an inheritance — including this lab's own rules.**

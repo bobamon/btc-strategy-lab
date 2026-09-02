@@ -1014,9 +1014,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T11:00:44Z"
     },
     "notes": "A CLEAN SINGLE-VARIABLE TEST, AND THE TRADE COUNT PROVES IT: 17 in both runs, because the entry was untouched. PF 0.5506 -> 0.5816 and win rate 17.65% -> 29.41%, with avgBarsWinning falling from 254.7. THE FADE HYPOTHESIS IS DIRECTIONALLY CONFIRMED for this leg -- a target set for a trend continuation is too far for a trade that fades an extreme. Still nowhere near viable at PF 0.58 on 17 trades, so this is a lesson about trade-type-appropriate exits rather than a usable leg. Note the contrast with War Formation E26, where the identical change on that lab's short made things WORSE (0.749 -> 0.692): the exit convention has to follow the mechanism, and there is no universal answer."
+  },
+  {
+    "id": "vwm-short-mirrored-mechanism",
+    "name": "VWM short side, mirrored mechanism",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "short",
+    "status": "testing",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "The short side of the base mechanism, symmetric with the long: price stretches to minus 2 sigma, retraces up toward VWAP, then loses it again, with VWAP falling and price below the 600 EMA. Continuation after pullback, not a fade. Run short-only so the leg is judged on its own profit factor.",
+    "metrics": {
+      "netProfitPct": -25.69154813,
+      "profitFactor": 0.74125302,
+      "maxDrawdownPct": 34.41201829,
+      "totalTrades": 273,
+      "winRatePct": 17.58241758,
+      "avgTradePct": -0.09410823
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GWYDNDFTRC56JD3NKG4P9F",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GWYDNC1TFEFRKJZ3D02TZG",
+      "verifiedAt": "2026-09-02T11:09:25Z"
+    },
+    "notes": "THE MIRROR BEATS THE OWN-GEOMETRY SHORT DECISIVELY, WHICH CORRECTS A RULE THIS LAB HAD BEEN APPLYING. PF 0.7413 on 273 trades against the fade construction's 0.5506 on 17 -- better profit factor AND sixteen times the sample. The no-mirror doctrine steered this lab toward a 17-trade fade when a 273-trade symmetric leg was available and better. STILL NOT VIABLE at PF 0.74, and the drawdown is severe at 34.4%. The trade profile is also unlike the long's: 17.58% win rate with a 3.47 payoff ratio, so the short takes many small losses and a few large wins, where the long runs 38-41% at a 1.5 payoff. That asymmetry is real information -- the same mechanism does not produce the same trade shape on each side, which is worth knowing before any attempt to run them together. Recorded as testing because it is the best short on record and the basis for the bidirectional build, not because it is usable."
   }
 ];
-const BUILT = "2026-09-02 05:02";
+const BUILT = "2026-09-02 05:09";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
