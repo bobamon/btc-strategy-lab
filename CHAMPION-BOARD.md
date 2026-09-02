@@ -50,6 +50,7 @@ The board is open.
 | Attack 1 — EMA200 trend filter | 0.89 | 35.0% | **0.91** | **28.8%** | **KEPT** |
 | Attack 2 — shallow pullback | 0.91 | 28.8% | 0.85 | 32.6% | **REVERTED** |
 | Attack 3 — witching-hour ban | 0.9121 | 28.780% | **0.9405** | 28.844% | **REVERTED** — borderline, see note |
+| Attack 4 — R floor 0.8% → 1.2% | 0.9121 | 28.8% | 0.8845 | 36.6% | **REVERTED** |
 
 ## CURRENT BASE — what cycle 008 starts from
 **007's LONG leg.** It has the best raw hit rate of anything tested in this lab: **38.3%** across 457
@@ -77,8 +78,9 @@ The base loses to fee drag, so the first moves must **cut trade count without cu
 3. ~~Add the time-of-day filter (1–4am ET witching ban)~~ — **DONE, REVERTED on a technicality.**
    PF 0.9121→0.9405 (best gain yet) but DD 28.780%→28.844%, a 0.064pp worsening. Worth re-running
    if the user approves a drawdown tolerance band.
-4. **Raise the R floor** from 0.8% to 1.2%. HARD LESSON 3 says fees scale against R; the base spent
-   18% of gross on fees, and a wider stop directly attacks that.
+4. ~~Raise the R floor from 0.8% to 1.2%~~ — **DONE, REVERTED.** PF 0.912→0.885, DD 28.8%→36.6%.
+   Fee drag fell and win rate rose, but every loss got bigger and that dominated. 0.8% is nearer the
+   optimum than 1.2%.
 5. **Require volume confirmation on the pullback hold** — participation returning as price reclaims.
 6. **Then, and only then, rebuild a short leg** on whatever survives, judged on its own profit factor
    (the mistake in 005 and E9 was bolting on a second leg before the first was sound).
@@ -91,3 +93,4 @@ The base loses to fee drag, so the first moves must **cut trade count without cu
 | Attack 1 | Require close above EMA200 | PF 0.89→0.91, DD 35.0%→28.8%, trades 468→433 | **KEPT** |
 | Attack 2 | Require shallow pullback (low holds above VWAP) | PF 0.91→0.85, DD 28.8%→32.6%, trades 433→342 | **REVERTED** — worse on both terms |
 | Attack 3 | Ban entries in the 1–4am ET witching window | PF 0.9121→0.9405, DD 28.780%→28.844%, trades 433→420 | **REVERTED** — PF up, DD worse by 0.064pp |
+| Attack 4 | Raise R floor 0.8% → 1.2% | PF 0.912→0.885, DD 28.8%→36.6%, win rate 38.3%→40.2% | **REVERTED** — wider stops mean bigger losses |

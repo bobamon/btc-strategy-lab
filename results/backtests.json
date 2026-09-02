@@ -353,5 +353,34 @@
       "verifiedAt": "2026-09-02T09:05:16Z"
     },
     "notes": "REVERTED, but the CLOSEST CALL SO FAR and worth revisiting. Profit factor improved 0.9121 -> 0.9405, the largest single gain of any attack and the nearest approach to the 0.95 ladder threshold. Net improved -23.0% -> -15.5%. But max drawdown worsened by 0.064 percentage points (28.780% -> 28.844%), and the ratchet requires drawdown NOT to worsen, so the rule was applied as written rather than bent. Only 13 trades were removed (433 -> 420) for that PF gain, meaning the witching window contained a small number of disproportionately bad trades -- the Oracle's claim about that window looks directionally right. FLAGGED FOR THE USER: this is the first case where a strict reading of the ratchet discards a change that looks genuinely good. A tolerance band (allow drawdown to worsen by up to ~0.5pp when PF improves by more than 0.02) would have kept it. That is a rule change, not my call to make unilaterally."
+  },
+  {
+    "id": "vwm-attack4-rfloor-1p2",
+    "name": "VWM base + EMA200 + R floor 1.2%",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "Attack 4 on the base: ONE change, raise the minimum risk floor from 0.8% to 1.2% of price so the fixed 0.10% round-trip commission becomes a smaller fraction of every R. Everything else identical to the base, which already includes the EMA200 trend filter.",
+    "metrics": {
+      "netProfitPct": -30.77754244,
+      "profitFactor": 0.88454549,
+      "maxDrawdownPct": 36.57081963,
+      "totalTrades": 413,
+      "winRatePct": 40.1937046,
+      "avgTradePct": -0.07452189
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GP2DGBH5Y1V0ZFZQQ38QD4",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GP2DGB37N1TZANFQS26ZJQ",
+      "verifiedAt": "2026-09-02T09:09:55Z"
+    },
+    "notes": "REVERTED: profit factor worsened 0.912 -> 0.885 and max drawdown worsened badly, 28.8% -> 36.6%. The mechanism is instructive. Fee drag DID fall as intended ($3,954 -> $3,490) and the win rate ROSE 38.3% -> 40.2%, because a wider stop is hit less often. But avgWin/avgLoss fell 1.498 -> 1.316: every loss is now bigger, and that outweighed both gains. REFINES HARD LESSON 3: widening R cuts fee drag but enlarges each loss, so there is an OPTIMUM, not a monotonic improvement. LESSON 3's floor of ~0.8% (8x the round-trip fee) is a MINIMUM, not a target to exceed. For this strategy 0.8% sits closer to the optimum than 1.2% does. Long-only; no short leg exists yet."
   }
 ]
