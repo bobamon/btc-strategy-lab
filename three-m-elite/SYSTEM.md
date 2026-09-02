@@ -309,6 +309,7 @@ so the code genuinely behaves differently. **But the count stayed at 3.**
 | v24 | Long leg alone | **PF 0.8945, DD 42.50%, 833 trades**, win rate 36.61%, payoff 1.548. Best honest number this lab has produced, still under 1.0 · [report](https://mcp-api.trader.dev/backtest/01M1GZ8DM3Q20JQDX3AKSP1XQV) |
 | v25 | Time stop 96 -> 192 bars (first exit test) | **REVERTED.** PF 0.8945->0.8578, DD 42.50%->53.38%, trades 833->797. The cap was cutting LOSERS, not winners · [report](https://mcp-api.trader.dev/backtest/01M1GZGBXAJB8SVFHF3Y41XVGN) |
 | v26 | Time stop 96 -> 48 bars | **REVERTED.** PF 0.8945->0.8204, DD 42.50%->58.85%, trades 833->915. Win rate rose to 40.33% but payoff fell to 1.214 · [report](https://mcp-api.trader.dev/backtest/01M1GZPAKD9H3HC2R8BA4BNPX8) |
+| v27 | Target 2R -> 2.5R | **REVERTED.** PF 0.8945->0.8804, DD 42.50%->45.88%, trades 833->803. Payoff +12.3%, win rate -3.0pp -- the iso-PF trade again · [report](https://mcp-api.trader.dev/backtest/01M1H00SH71Q3T0K3EBPF04E9S) |
 
 **When three independent corrections land on the same trade count, the binding constraint is upstream
 of all of them.** I have now spent three cycles fixing things that were genuinely wrong and none of
@@ -561,7 +562,17 @@ never been in the thing being tested — they have been in the assumptions under
     The cap was cutting losers loose, not truncating winners. v24 stands.
 0-V26. ~~TIGHTEN the time stop: 96 -> 48~~ — **REVERTED. PF 0.8945 -> 0.8204, DD 42.50% -> 58.85%.**
     Both directions on the time axis are worse, so 96 is an interior optimum and THE AXIS IS CLOSED.
-0-V27-NEXT. **THE TARGET: 2R -> 2.5R (top priority, and expectations are low).** The last untouched
+0-V27. ~~THE TARGET: 2R -> 2.5R~~ — **REVERTED. PF 0.8945 -> 0.8804, DD 42.50% -> 45.88%.**
+    THE EXIT AXIS IS FULLY CLOSED: time stop up, time stop down and target further are all worse.
+0-V28-NEXT. **WALK-FORWARD SPLIT OF v24 (top priority).** PF 0.894 has never been split across time,
+    and the BTC base looked like 1.02 until it decomposed into 1.36 early and 0.66 late. Two runs on
+    the same source, halves of 2022-01-01 -> 2026-09-01, nothing else changed. If the halves agree,
+    0.894 is a real number about the mechanism. If they diverge, this lab has been optimising an
+    average of two different systems and the entry work has to be re-scoped.
+0-V29. **ONLY AFTER v28: the entry.** Every exit parameter is exhausted and the long leg is 2.6
+    points of win rate short. If the halves agree, the remaining lever is entry selectivity -- but
+    pick the term from the trade-count evidence, not from another rule import.
+    Superseded text: THE TARGET: 2R -> 2.5R. The last untouched
     exit parameter. Stated in advance: the BTC lab found 2R and 3R sit on the SAME iso-profit-factor
     curve, and War Formation's E26 found a nearer target actively hurt. If 2.5R also lands within
     noise of 0.894, the exit is exhausted and the lab should say so rather than keep poking it.
@@ -963,3 +974,46 @@ to close it, not more.
 **After that the exit is exhausted, and the more valuable question is whether PF 0.894 is even a
 stable number** — the BTC base looked like 1.02 until it was split into 1.36 and 0.66. v24 has never
 been split. That is v28, and it matters more than any remaining parameter.
+
+
+---
+
+## ██ v27 — THE EXIT AXIS IS CLOSED. ALL THREE DIRECTIONS ARE WORSE.
+
+| Change from v24 | Profit factor | Max drawdown | Trades |
+|---|---|---|---|
+| Time stop 96 → 192 (v25) | 0.85781046 | 53.38% | 797 |
+| Time stop 96 → 48 (v26) | 0.82035131 | 58.85% | 915 |
+| Target 2R → 2.5R (v27) | 0.88039828 | 45.88% | 803 |
+| **v24, unchanged** | **0.89445064** | **42.50%** | **833** |
+
+**Three exit parameters, three directions, all worse. v24 sits on a local optimum in exit space and
+the axis is finished.**
+
+### THE ISO-PF TRADE, FOR THE THIRD TIME IN THREE MECHANISMS
+v27 did exactly what the risk-reward axis does: payoff rose **1.548 → 1.738 (+12.3%)** and win rate
+fell **36.61% → 33.62% (−3.0pp)**. Break-even moved from 39.2% to 36.5%, and the actual win rate fell
+further than that, so the gap to profitability widened from 2.6 points to **2.9**.
+
+| Lab | Mechanism | Target change | Result |
+|---|---|---|---|
+| BTC | VWAP mean-reversion | 2R → 3R | PF 0.9121 → 0.9100 — **neutral** |
+| War Formation | HA cascade reclaim | 1.5R → 1R | PF 0.7490 → 0.6922 — **negative** |
+| 3M Elite | Supply/demand zones | 2R → 2.5R | PF 0.8945 → 0.8804 — **negative** |
+
+**Three unrelated mechanisms, one regularity: moving the target buys payoff and sells win rate at
+roughly par, and pays commission for the privilege.** This is now strong enough to be a standing
+prior rather than a per-lab finding — it belongs in the ledger, and future cycles should not spend
+credits on the risk-reward axis without a specific reason to think this system is different.
+
+### BOTH FORWARD PREDICTIONS CONFIRMED
+Stated before the run: (1) the axis would not help, and (2) trade count would **fall** because a
+further target lengthens holds and held positions block entries under `pyramiding=1`. Trades went
+833 → 803. **That is the exit/entry coupling predicted correctly for the second consecutive cycle**,
+which is now the best-verified mechanical fact in this lab.
+
+### WHERE THE SYSTEM ACTUALLY STANDS
+v24: **PF 0.894, 833 trades, long-only, 42.5% drawdown, 2.6 points of win rate short of break-even.**
+Entries have absorbed nine cycles and exits are now exhausted in every direction. **The next credit
+should not buy another parameter — it should ask whether 0.894 is a real number at all**, because
+the BTC base looked like 1.02 right up until it split into 1.36 and 0.66.

@@ -427,3 +427,32 @@ differently in another regime, so its half-sample verdict travels. A gate that b
 Few trades removed → the verdict is probably general. Many removed → assume it is regime-specific
 until a full-sample run says otherwise. This is cheaper than re-running everything on the full sample
 and it explains, rather than just accommodates, both outcomes.
+
+
+---
+
+## ██ HARD LESSON 13 — THE RISK-REWARD AXIS IS NEUTRAL AT BEST. STOP SPENDING CREDITS ON IT.
+
+**Earned:** three independent mechanisms, 2026-09-02.
+
+| Lab | Mechanism | Target change | Result |
+|---|---|---|---|
+| BTC | VWAP mean-reversion | 2R → 3R | PF 0.9121 → 0.9100 — neutral |
+| War Formation | HA cascade reclaim | 1.5R → 1R | PF 0.7490 → 0.6922 — negative |
+| 3M Elite | Supply/demand zones | 2R → 2.5R | PF 0.8945 → 0.8804 — negative |
+
+**Why:** moving a fixed target trades payoff against win rate at close to par. A further target
+raises `avgWin/avgLoss` and lowers the hit rate by an offsetting amount; a nearer one does the
+reverse. The two effects cancel to within noise, and what does not cancel is **commission**, which is
+paid on every trade regardless. So the axis is neutral in principle and slightly negative in
+practice.
+
+**How to apply:** treat the risk-reward multiple as **already set** unless there is a specific,
+stated reason to think a given system is off its own frontier — for example a target that is
+physically unreachable, which is what v14 found and v15 fixed. That is a different failure (a broken
+parameter) from tuning along a frontier (a neutral one). **Do not spend a credit moving R:R by 25%
+and hoping.**
+
+**Corollary, from 3M v25-v27:** the same logic applies to time stops once an interior optimum is
+found in both directions. When up and down are both worse, the parameter is done — record it and
+move to a different kind of question.

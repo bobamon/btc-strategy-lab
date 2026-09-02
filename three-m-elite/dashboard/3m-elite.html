@@ -805,9 +805,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T11:57:25Z"
     },
     "notes": "THE TIME STOP HAS AN INTERIOR OPTIMUM AND v24 IS SITTING ON IT. 48 bars: PF 0.82035131, DD 58.85%, 915 trades. 96 bars (v24): PF 0.89445064, DD 42.50%, 833. 192 bars (v25): PF 0.85781046, DD 53.38%, 797. Both directions are worse, so 96 is a local maximum on this axis and the axis is closed. THE PREDICTION WAS HALF RIGHT AND THAT IS THE USEFUL PART: win rate rose exactly as expected, 36.61% to 40.33%, because the cap cuts losers earlier -- but payoff collapsed 1.548 to 1.214, so break-even moved from 39.2% to 45.2% and the gap WIDENED from 2.6 points to 4.9. Trade count rose 833 to 915, confirming v25's coupling finding by prediction rather than hindsight. REVERTED; v24 stands."
+  },
+  {
+    "id": "3m-elite-v27-25r-target",
+    "name": "3M ELITE v27 2.5R target",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "The last untouched exit parameter. One change from v24: rr 2.0 to 2.5. Entries, stops, the 96-bar time stop and the zone lifecycle byte-identical. Run to close the axis rather than in expectation of a gain -- two sister labs had already found the risk-reward axis neutral once and negative once.",
+    "metrics": {
+      "netProfitPct": -45.79295125,
+      "profitFactor": 0.88039828,
+      "maxDrawdownPct": 45.88409978,
+      "totalTrades": 803,
+      "winRatePct": 33.62391034,
+      "avgTradePct": -0.05702734
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1H00SH779YX4843DVK1W0ZW",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1H00SH71Q3T0K3EBPF04E9S",
+      "verifiedAt": "2026-09-02T12:03:08Z"
+    },
+    "notes": "THE EXIT AXIS IS NOW FULLY CLOSED. PF 0.89445064 to 0.88039828, DD 42.50% to 45.88%. Payoff rose 1.548 to 1.738 (+12.3%) and win rate fell 36.61% to 33.62% (-3.0pp) -- almost exactly the iso-profit-factor trade the BTC lab found at 2R vs 3R, with a small net loss. Break-even moved 39.2% to 36.5% while actual fell to 33.62%, so the gap widened 2.6 to 2.9 points. BOTH FORWARD PREDICTIONS CONFIRMED: the axis would not help, and trade count would fall (833 to 803) because a further target lengthens holds and held positions block entries. Third instance across three mechanisms of the risk-reward axis being neutral-to-negative. REVERTED; v24 stands."
   }
 ];
-const BUILT = "2026-09-02 05:58";
+const BUILT = "2026-09-02 06:04";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
