@@ -307,6 +307,7 @@ so the code genuinely behaves differently. **But the count stayed at 3.**
 | v22 | Count ZONE CREATION — the engulf AND the deepest-zone condition | **71 creations from 2,711 engulfs** (29 demand, 42 supply). Last creation 2025-10-07. The rule discards 97.4% then locks up · [report](https://mcp-api.trader.dev/backtest/01M1GYGFHTD06PZWQS0FQF8JQG) |
 | v23 | Most-recent zone replaces deepest zone | **PF 0.7363, DD 89.27%, 1,792 trades** (749 long 275W / 1,043 short 184W), spanning the full window. The lock-up is fixed and the edge went with it · [report](https://mcp-api.trader.dev/backtest/01M1GYTGY7YZSNAP6QNCAMFP4A) |
 | v24 | Long leg alone | **PF 0.8945, DD 42.50%, 833 trades**, win rate 36.61%, payoff 1.548. Best honest number this lab has produced, still under 1.0 · [report](https://mcp-api.trader.dev/backtest/01M1GZ8DM3Q20JQDX3AKSP1XQV) |
+| v25 | Time stop 96 -> 192 bars (first exit test) | **REVERTED.** PF 0.8945->0.8578, DD 42.50%->53.38%, trades 833->797. The cap was cutting LOSERS, not winners · [report](https://mcp-api.trader.dev/backtest/01M1GZGBXAJB8SVFHF3Y41XVGN) |
 
 **When three independent corrections land on the same trade count, the binding constraint is upstream
 of all of them.** I have now spent three cycles fixing things that were genuinely wrong and none of
@@ -555,7 +556,13 @@ never been in the thing being tested — they have been in the assumptions under
     -> 0.736 on 1,792 trades. v21's edge WAS the lock-up.** v23 is the new reference base.
 0-V24. ~~ISOLATE THE LONG LEG~~ — **DONE. PF 0.7363 combined -> 0.8945 long-only on 833 trades.**
     The short side is not underperforming; it is the entire deficit.
-0-V25-NEXT. **THE EXIT, not the entry (top priority).** The long leg wins 36.61% with a payoff of
+0-V25. ~~THE EXIT: WIDEN THE TIME STOP~~ — **REVERTED. PF 0.8945 -> 0.8578, DD 42.50% -> 53.38%.**
+    The cap was cutting losers loose, not truncating winners. v24 stands.
+0-V26-NEXT. **TIGHTEN the time stop instead: 96 -> 48 bars (top priority).** v25 established the
+    direction of the gradient -- more time is worse -- so the untested question is whether less time
+    is better. avgBarsLosing is 27.26 against avgBarsWinning 48.83, so a 48-bar cap cuts most losers
+    while leaving the average winner room. Single variable, same base.
+0-V27. **THEN the target**, 2R -> 2.5R, and only if v26 settles the time axis. Superseded text: THE EXIT, not the entry. The long leg wins 36.61% with a payoff of
     1.548, which needs ~39.2% to break even -- it is 2.6 percentage points short, and every cycle so
     far has attacked entries. Test ONE exit change against v24: the 2R target moved to 2.5R, or the
     96-bar time stop, chosen and run as a single variable. This is the untouched half of the system.
@@ -871,3 +878,38 @@ generalisation was wrong for this system**, and any future combined build here h
 points of win rate away from break-even** — and every cycle in this lab so far has attacked entries.
 The exit has never been touched since v15 set the 2R target, which makes it the obvious next target
 and the reason v25 is an exit test rather than another filter.
+
+
+---
+
+## ██ v25 — THE TIME STOP WAS CUTTING LOSERS, NOT WINNERS
+
+The first exit test this lab has run. One change from v24: `maxBars` 96 → 192.
+
+**The hypothesis was reasonable and wrong.** v24's winners averaged 48.83 bars against a 96-bar cap,
+which looked like a truncated right tail. If that were true, widening the cap should let winners run.
+
+| | v24 (96 bars) | v25 (192 bars) |
+|---|---|---|
+| Profit factor | **0.89445064** | 0.85781046 |
+| Max drawdown | **42.50%** | 53.38% |
+| Trades | **833** | 797 |
+| avgBarsWinning | 48.83 | 53.64 |
+| avgBarsLosing | 27.26 | **33.14** |
+
+**REVERTED — worse on both terms.** And the reason is in the last two rows: doubling the cap moved
+the average winner by **4.8 bars** and the average loser by **5.9**. The extra room went
+disproportionately to trades that were going to lose anyway. **The cap was not truncating the right
+tail; it was cutting losers loose**, which is the opposite of what its own statistics suggested.
+
+### A COUPLING NOBODY IN THIS LAB HAD ACCOUNTED FOR
+**Trade count FELL, 833 → 797.** A wider time stop means positions are held longer, and under
+`pyramiding=1` a held position blocks every new entry that arrives while it is open. **The exit and
+the entry frequency are coupled** — so an exit change is never purely an exit change here, and any
+future exit test has to read the trade count as part of the result rather than as a side effect.
+
+### WHAT IT BUYS
+The gradient now has a direction: **more time is worse.** That makes the untested question whether
+*less* time is better, and v24's own numbers make it plausible — losers average 27.26 bars against
+winners' 48.83, so a 48-bar cap would cut most losers while leaving the average winner room. That is
+v26, and it is a genuinely informed test rather than another guess.

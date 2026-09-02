@@ -1276,9 +1276,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T11:48:06Z"
     },
     "notes": "THE POPULATION IS LARGE; THE HIT RATE IS A COIN FLIP. 3,097 signals produced 1,589 takes within 24 hours -- 51.3%. The rule states the whole number WILL be taken. Measured at a tradeable horizon it is 51%. TWO CAVEATS, BOTH MINE AND BOTH REAL: (1) the rule says time does not matter and I imposed a 1,440-bar expiry, so this tests the rule AT A HORIZON, not as stated; with no expiry the rate would approach 100% but would not be tradeable with a fixed stop. (2) an armed level blocks re-arming until it resolves or expires, so a stale arm can suppress later signals -- this depresses both counts and the ratio is the robust output. Frequency is not the problem here; certainty is."
+  },
+  {
+    "id": "war-formation-950-2-velocity-split",
+    "name": "WF 950-2 velocity split counter (diagnostic)",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "A COUNTER, NOT A STRATEGY. Step two of the 950 Rule queue: define velocity numerically and measure whether it discriminates. STRONG = body at least 0.60 of candle range AND range at least 1.0x atr(30); WEAK is everything else. Long entries fire on strong takes, short entries on weak takes, so longTrades/shortTrades is the split. Also fixes 950-1's stale-arm defect. P&L meaningless by construction.",
+    "metrics": {
+      "netProfitPct": -98.89780033,
+      "profitFactor": 0.05343745,
+      "maxDrawdownPct": 98.89780033,
+      "totalTrades": 4864,
+      "winRatePct": 7.93585526,
+      "avgTradePct": -0.02033261
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GZES1KBAG1DE66TT8WW96B",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GZES1K105E3XHF388MJP5E",
+      "verifiedAt": "2026-09-02T11:53:18Z"
+    },
+    "notes": "THE VELOCITY LABEL DISCRIMINATES: 2,347 strong (48.3%) against 2,517 weak (51.7%) out of 4,864 takes. Balanced, so it is a usable discriminator rather than a label that tags everything one way -- step 2 passes. BUT IT ALSO INVALIDATES 950-1's HIT RATE. The stale-arm fix took the take count from 1,589 to 4,864, which is more than 950-1 counted as SIGNALS, so that run's 51.3% was computed on a broken arm counter and must not be quoted. The hit-rate question is reopened and needs a clean re-run. What survives from 950-1 is only that the population is large."
   }
 ];
-const BUILT = "2026-09-02 05:51";
+const BUILT = "2026-09-02 05:55";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

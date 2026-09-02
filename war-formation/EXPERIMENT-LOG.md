@@ -843,3 +843,46 @@ test lives. **950-2 (define velocity, count the strong/weak split) is now the lo
 if that split is also near 50/50 with no difference in outcome, the rule has nothing left.
 
 **Champion unchanged — this is a counter, not a challenger.**
+
+
+---
+
+## ██ 950-2 — THE VELOCITY LABEL WORKS. AND IT BREAKS 950-1's NUMBER.
+
+Step two of the 950 queue: define velocity numerically, then measure whether it *discriminates*
+before asking whether it *predicts*.
+
+**STRONG** = body ≥ 0.60 of the candle range **and** range ≥ 1.0 × atr(30). **WEAK** = everything
+else. Thresholds declared, not tuned — no search has been run over them.
+
+| Out of 4,864 takes | Count | Share |
+|---|---|---|
+| **STRONG** | 2,347 | **48.3%** |
+| **WEAK** | 2,517 | **51.7%** |
+
+**Step 2 passes.** A near-even split is exactly what a usable discriminator looks like — the failure
+mode was a label that tags 95% of breaks one way, and that is not what happened. The 950 Rule's
+central claim is now testable on real terms.
+
+### AND A CORRECTION I HAVE TO MAKE ABOUT 950-1
+**950-1's 51.3% hit rate must not be quoted again.** That run had a declared defect — an armed level
+blocked re-arming until it resolved or expired — and I judged it would depress both counts roughly
+alike. **It did not.** With the fix in place, this run counts **4,864 takes**, which is more than
+950-1 counted as *signals* (3,097). The bug was suppressing events on a scale I underestimated, so
+the ratio built from those counts is meaningless.
+
+**What survives from 950-1:** the population is large. **What does not:** the hit rate, and therefore
+the conclusion that step 1 is "a coin flip". That question is reopened and needs a clean re-run with
+the fixed arming logic.
+
+**I should have re-run 950-1 with the fix before drawing a conclusion from it** — declaring a defect
+is not the same as bounding it, and I treated a stated caveat as if it were a measured one.
+
+### THE QUEUE, REORDERED
+**950-1b (next): re-count signals and takes with the fixed arming.** One credit, and it restores the
+number the whole rule rests on.
+**950-3/4 (after): does the strong/weak label PREDICT?** Now worth running, because the label is
+balanced — strong takes continuing toward the next whole number, weak takes fading back below it,
+each judged alone.
+
+**Champion unchanged — this is a counter, not a challenger.**

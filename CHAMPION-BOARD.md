@@ -141,6 +141,7 @@ should be rejected without spending a credit on it.
 | Attack 9 | Remove the EMA200 filter, measured in H2 alone | PF 0.65656→0.66177, DD 12.66%→16.06%, trades 61→64 | **REVERTED** — but the filter is nearly INERT in H2 |
 | Attack 10 | Remove the highVol split, measured in H2 alone | PF 0.65656→**0.76511**, DD 12.66%→19.59%, trades 61→103 | **REVERTED** on drawdown — but the gate is COSTING profit factor |
 | Attack 11 | Remove the witching ban, measured in H2 alone | PF 0.65656→0.62814, DD 12.66%→16.54%, trades 61→62 | **REVERTED** — and this one genuinely EARNS its place |
+| Attack 12 | Remove highVol, **full sample** (ratchet test of Attack 10) | PF 1.02025→0.91514, DD 16.68%→23.51%, trades 128→207 | **REVERTED** — the gate is regime-dependent, not harmful |
 
 7. ~~Attack the EXIT, not the entry~~ — **DONE, REVERTED.** See the frontier note below.
 8. **Attack the EXIT, original text:** Every attack so far has been an entry filter. The system lives
@@ -714,3 +715,40 @@ gate that does nothing, one that suppresses winners to flatter drawdown, and one
 PF 1.0202 headline was measured on a mixed sample with two of its three components failing
 re-validation. **The honest description of this lab's state is that it has a well-mapped mechanism
 with no demonstrated edge**, and the next cycle should stop attacking gates and say so on the board.
+
+
+## ██ ATTACK 12 — A CORRECTION TO WHAT I WROTE AFTER ATTACK 10 (2026-09-02)
+
+Attack 10 removed `highVol` in H2 and profit factor rose 0.65656 → 0.76511. I wrote on this board
+that the base "carries a gate that suppresses winners to flatter the drawdown." **That conclusion was
+drawn from a half-sample diagnostic and it does not survive the full-sample test.**
+
+| Full 5m sample, 2024-06-08 → 2026-09-01 | Base (with highVol) | Without |
+|---|---|---|
+| Profit factor | **1.02024675** | 0.91514233 |
+| Max drawdown | **16.68%** | 23.51% |
+| Trades | 128 | 207 |
+| Win rate | — | 39.13% |
+
+**Worse on both terms. REVERTED, and the gate keeps its place properly this time.**
+
+**What is actually true:** removing highVol admits **79 extra trades**, and across the whole sample
+those trades are net negative — even though in H2 alone the same gate was cutting winners. **The
+filter is regime-dependent, not bad.** It earns its keep in the first half and costs in the second,
+and the aggregate is what the ratchet judges.
+
+### THE METHOD LESSON, AND IT APPLIES TO THE WHOLE SWEEP
+**A half-sample diagnostic tells you where a gate behaves differently. It does not tell you whether
+to keep it.** I ran three of these (Attacks 9, 10, 11) and let the H2 verdicts stand as statements
+about the gates themselves. Only Attack 12 asked the question the ratchet actually answers.
+
+**So the sweep's conclusions are now correctly scoped:**
+| Gate | H2 behaviour | Full-sample verdict |
+|---|---|---|
+| EMA200 trend | inert (3 of 64 trades) | untested on the full sample |
+| highVol split | harmful (removing adds 0.109) | **KEEPS its place — removing costs 0.105** |
+| Witching ban | earns its place | untested on the full sample |
+
+**Two of the three still lack a full-sample test**, and until they have one the honest description is
+that their H2 behaviour is *interesting*, not that they are inert or harmful. The base remains
+PF 1.0202 on 128 trades — break-even plus noise, and no champion.

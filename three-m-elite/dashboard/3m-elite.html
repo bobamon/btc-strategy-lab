@@ -747,9 +747,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T11:49:49Z"
     },
     "notes": "THE LONG LEG IS THE WHOLE SYSTEM. PF 0.73626670 combined becomes 0.89445064 long-only, win rate 25.61% becomes 36.61%, payoff 1.548. This is the best honest number this lab has produced on a real sample and it is still below 1.0. Trade count rises 749 to 833 because the short leg was blocking demand entries under pyramiding=1, so the legs were NOT independent here -- unlike the BTC lab where the long count was identical with and without the short. Drawdown 42.5% is not tradeable. The finding stands: the short side is not underperforming, it is the entire deficit."
+  },
+  {
+    "id": "3m-elite-v25-wider-time-stop",
+    "name": "3M ELITE v25 wider time stop",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "The first exit test this lab has run. One change from v24: maxBars 96 to 192, widening the time stop from 24 to 48 hours at 15m. Entries, stops, target and zone lifecycle byte-identical. Motivated by v24's own statistics -- winners averaged 48.83 bars against a 96-bar cap, so the cap was suspected of truncating the right tail.",
+    "metrics": {
+      "netProfitPct": -53.29870679,
+      "profitFactor": 0.85781046,
+      "maxDrawdownPct": 53.37723448,
+      "totalTrades": 797,
+      "winRatePct": 33.8770389,
+      "avgTradePct": -0.06687416
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GZGBXA27BECGM238AFSNHQ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GZGBXAJB8SVFHF3Y41XVGN",
+      "verifiedAt": "2026-09-02T11:54:10Z"
+    },
+    "notes": "THE CAP WAS CUTTING LOSERS, NOT WINNERS. PF 0.89445064 to 0.85781046 and drawdown 42.50% to 53.38% -- worse on both. The hypothesis was that a 96-bar cap truncated winners averaging 48.83 bars; the opposite is true. Widening it moved avgBarsWinning only 48.83 to 53.64 while avgBarsLosing rose 27.26 to 33.14, so the extra room went mostly to losing trades. Trade count also FELL 833 to 797, because longer holds block new entries under pyramiding=1 -- the exit and the entry frequency are coupled, which no cycle here had accounted for. REVERTED; v24 stands."
   }
 ];
-const BUILT = "2026-09-02 05:51";
+const BUILT = "2026-09-02 05:55";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

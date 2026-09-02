@@ -962,5 +962,34 @@
    "verifiedAt": "2026-09-02T11:48:29Z"
   },
   "notes": "THE ONLY GATE OF THE THREE THAT EARNS ITS PLACE. Control PF 0.65655726 / DD 12.66% / 61 trades; without the ban PF 0.62814328 / DD 16.54% / 62 trades. Removing it makes BOTH terms worse, so the ban stays -- the first re-validation this base has passed. Note the mechanism: it admits ONE extra trade and profit factor falls 0.028. That is not a contradiction, it is compounding -- at percent_of_equity 100 a single early loss rescales every subsequent position, so one bad trade propagates through the whole curve. Worth remembering before reading any small trade-count difference in this lab as noise."
+ },
+ {
+  "id": "vwm-attack12-no-highvol-fullsample",
+  "name": "VWM Attack12 no highVol, full sample",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "The full-sample ratchet test of Attack 10, which was an H2-only diagnostic. One change from the 5m scaled base: highVol removed from the entry conjunction, still computed so the deviation stays visible. Measured on the sample the base itself is measured on, which makes this a legitimate ratchet decision rather than a diagnostic.",
+  "metrics": {
+   "netProfitPct": -9.82228658,
+   "profitFactor": 0.91514233,
+   "maxDrawdownPct": 23.50924641,
+   "totalTrades": 207,
+   "winRatePct": 39.13043478,
+   "avgTradePct": -0.04745066
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GZFRTB4HTJ89N8KFP31W5S",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GZFRTBXCK8KWVTBPVWJE69",
+   "verifiedAt": "2026-09-02T11:53:50Z"
+  },
+  "notes": "THE GATE IS REGIME-DEPENDENT, NOT HARMFUL -- AND THIS CORRECTS THE BOARD. Base PF 1.02024675 / DD 16.68% / 128 trades; without highVol PF 0.91514233 / DD 23.51% / 207 trades. Worse on BOTH terms, so it stays. Attack 10 showed removing it HELPED in H2 (0.65656 to 0.76511), and I wrote on the board that the base carries a gate which suppresses winners. That was true of H2 and false of the sample as a whole: the gate admits 79 extra trades when removed and they are net negative overall. A filter can be load-bearing in one regime and costly in another, and the aggregate is what the ratchet judges. REVERTED."
  }
 ]
