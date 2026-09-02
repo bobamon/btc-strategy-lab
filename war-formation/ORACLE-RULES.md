@@ -113,8 +113,10 @@ that this "wrecks an absolutely perfect trade" even when the direction is right.
    **redundant with the 3m coil**, which already measures a move losing force. His observation is
    sound and already implemented under a different name. Do not re-run as an additive gate; the only
    open variant is weakening-run *instead of* the coil, head to head.
-4. **Replace the exit** with the colour rule: hold while the 3m candle colour matches the trade;
-   exit on colour flip. (This conflicts with the project's fixed-TP requirement — test it as a
-   variant and report both.)
+4. ~~Replace the exit with the colour rule~~ — **TESTED (E15), REVERTED.** PF 1.69->0.31, win rate
+   56.3%->20.0%, average hold 12.8 bars. The flip fires on the first red 3m HA candle, which inside
+   an uptrend is noise, so winners are cut at twenty minutes while losers run to the stop. **The
+   fixed 2R target is load-bearing.** His rule presumes a human judging whether a flip means
+   anything; taken literally it is not mechanisable at this resolution.
 5. Optional: require the **singularity** (6h and 1h agreeing) and measure whether it improves results,
    since he calls it a bonus rather than a requirement.

@@ -115,6 +115,7 @@ lower bound on the system, not a verdict on it.**
 | v3 | Same cascade ported to a 15m base (4H/12H/2D), 4.7 years | PF 0.64, 94 trades, longs 10/35, shorts 5/59 · [report](https://mcp-api.trader.dev/backtest/01M1GNPDBWJD63TBCV11SYY30H) |
 | v4 | 0a re-test: Type 2 gate (engulfing 4H in bias, `valLife` 3) on the **v3 15m base** | **0 TRADES** · [report](https://mcp-api.trader.dev/backtest/01M1GP6D1N4V36G2M6T7CR6BQ4) |
 | v5 | Latched tap + zone invalidation + Type 2 gate (0a+0b merged) | **2 trades**, both losses, PF 0 -- latch fixed, but validation is still an instant · [report](https://mcp-api.trader.dev/backtest/01M1GQ0RFWSXSK5XM54A3DSXT0) |
+| v6 | Latch BOTH the tap and the Type 2 validation; both die on a 12H body close beyond the zone | **PF 1.77, +3.10%, 10 trades** (longs 5/2W +$298, shorts 5/1W +$12), DD 2.49% -- first positive result, but 10 trades is not a sample · [report](https://mcp-api.trader.dev/backtest/01M1GQ7S426QJBAXE07YRFW2VW) |
 
 **v3 lesson — v1's PF 0.91 was noise.** The same cascade measured on 4.7 years instead of 4.6 months
 gives PF 0.64 across 94 trades. The larger sample is the trustworthy one. This is the sample-size fix
@@ -185,12 +186,34 @@ LESSON 8 again, one level down: I latched the setup and left the trigger as a co
 a 12H body close kills the zone; entry fires on the first bar where both are live and the
 trend/extension gates permit. Then, and only then, is the mechanism a fair test of the system.
 
+## v6 — THE MECHANISM IS NOW CORRECT. THE FREQUENCY IS NOT.
+Latching both states finished the repair: **0 trades (v2, v4) -> 2 (v5) -> 10 (v6)**, and for the
+first time the lab is in profit, PF 1.77 on +3.10%, with both legs positive (longs +$297.97 on 5,
+shorts +$12.05 on 5).
+
+**This is not yet evidence, and the lab has already been burned by exactly this shape.** v1 showed
+PF 0.91 on 20 trades; the same cascade measured properly gave PF 0.64 on 94. Ten trades across 4.7
+years is thinner still. **v3 remains the reference base.** v6 is marked `testing`, not `passed`, and
+must not be promoted on these numbers.
+
+**The real finding is the frequency.** Ten entries in 4.7 years means the gate stack is far too
+restrictive to test the system at all. The next cycle is a MEASUREMENT, not a change: find which gate
+is binding. Note which of the current gates actually come from the source and which are mine --
+`maSpreadOk`, the break counters, the MA slope test and the Keltner extension check are all lab
+additions, not the author's rules. Those are the candidates to relax first, and relaxing an invented
+gate to reach a testable sample is not curve-fitting; it is removing something that was never in the
+system being tested.
+
 ## Open queue
 0. ~~Get definitions for Type 1/Type 2~~ — **DONE 2026-09-02, see VOCABULARY.md.**
    Type 1 = a 3M candle; Type 2 = an engulfing candle in the direction of bias; both only on the
    STRUCTURE timeframe (48m for this variant), inside the tapped zone.
 0-V5. ~~LATCHED TAP + VALIDATION~~ — **DONE (v5). Latch works; 2 trades. See the v5 lesson.**
-0-V6-NEXT. **LATCH THE VALIDATION TOO (top priority).** Both the tap and the Type 2 validation become
+0-V6. ~~LATCH THE VALIDATION TOO~~ — **DONE. PF 1.77 on 10 trades. Mechanism correct, sample far too small.**
+0-V7-NEXT. **MEASURE WHICH GATE IS BINDING (top priority).** Count how often each condition blocks an
+    otherwise-complete setup, then relax the LAB-INVENTED gates (maSpreadOk, break counters, slope,
+    Keltner extension) -- never the source's own rules -- until the trade count is large enough to
+    judge. Original v6 text: Both the tap and the Type 2 validation become
     persistent states that die with the zone. Entry on the first bar both are live. Original v5 text:
     A zone tap sets `tapLive := true`. It stays live until the zone invalidates (a BODY close beyond
     the zone on the zone's own timeframe). While it is live, the FIRST engulfing 4H candle in the

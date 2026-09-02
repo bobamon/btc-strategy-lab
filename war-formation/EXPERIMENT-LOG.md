@@ -52,6 +52,7 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E12 | v7: Oracle's direction rule (2+ consecutive green HA 6h) | PF 1.14 vs champion 1.69, DD 4.19% vs 3.10% — **REVERTED** |
 | E13 | Short + 3m cycle-position gate (Oracle item 2) | PF 0.68→**0.75**, WR 20.3%→23.1%, net −5.9%→−3.0% — **gate helps, still unprofitable** |
 | E14 | Queue item 3: counter-move weakening trigger on the v6 long champion (>=2 red HA 3m candles with decreasing range, latched 5 candles) | **REVERTED.** PF 1.69->0.73, win 56.3%->45.0%, trades 32->20, DD 3.10%->1.36%. The gate removed disproportionately GOOD trades -- redundant with the 3m coil, which already measures a move losing force. [report](https://mcp-api.trader.dev/backtest/01M1GPMTPZ146ZY2KJVDVKQF8G) |
+| E15 | Queue item 4: Oracle COLOUR-FLIP exit replacing the fixed 2R TP (stop still fixed) | **REVERTED.** PF 1.69->0.31, win 56.3%->20.0%, trades 32->35, hold 12.8 bars. Exits on the first red 3m HA candle, which inside an uptrend is noise. [report](https://mcp-api.trader.dev/backtest/01M1GQ6PQPVP1T3JNZ74JWZYT7) |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -159,3 +160,24 @@ improvement that arrives with a large drop in trade count is not a risk improvem
 
 **Queue item 3 is answered and closed. Do not re-run it as an additive gate.** The open variant, if
 it is ever wanted, is weakening-run *instead of* the coil, judged head to head.
+
+
+## E15 LESSON — THE FIXED TAKE-PROFIT IS LOAD-BEARING, AND HIS EXIT IS A JUDGEMENT
+Replacing the 2R target with his colour-flip rule cut the profit factor from 1.69 to 0.31. The
+diagnostic is in the hold times: **12.8 bars average, winners 24.7, losers 9.8.** The flip fires on
+the first red 3m Heikin Ashi candle, and inside a 1m uptrend that is ordinary noise -- so winners get
+closed after roughly twenty minutes at small profits while losers still run the full distance to the
+stop. Thirty-five tiny trades paid $344 in commission.
+
+**Both halves of the champion's exit turn out to matter.** The 2R target is not an arbitrary default:
+it is what lets a winning trade run past the noise that the colour rule reacts to.
+
+**This is queue item 1's lesson repeating.** His stated direction rule underperformed the lab's HA
+count; his stated exit rule collapses when mechanised literally. In both cases the words describe how
+a person READS a chart, with a human deciding whether a given flip means anything. Reading is not a
+rule. What survived from his material was the part that was diagnostic rather than prescriptive --
+the cycle-position insight in E13, which explained a failure the lab could not otherwise explain.
+
+**Queue item 4 is answered and closed.** If it is ever revisited, the flip must be qualified (two
+consecutive counter candles, or a close beyond the entry-side structure), and that is a different
+experiment, not this one.

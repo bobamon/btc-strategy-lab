@@ -667,9 +667,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T09:19:19Z"
     },
     "notes": "REVERTED, AND THE REASON IS REDUNDANCY. The gate cut 32 trades to 20 and the survivors were WORSE, not better: win rate fell 56.3%->45.0% and PF 1.69->0.73. Drawdown did improve (3.10%->1.36%) but only because there was less activity. This is the exact opposite of E13, where the cycle-position gate removed disproportionately bad trades. Diagnosis: the v6 base ALREADY contains a weakening condition -- the 3m coil, atr(3) < atr(30)*0.85, is itself a measure of a move losing force. Adding the shrinking-red-run rule double-counts the same information and selects a narrower, worse subset. The Oracle's weakening observation is already in this build; it just wears a different name."
+  },
+  {
+    "id": "war-formation-v9-colour-flip",
+    "name": "WF v9 long + Oracle colour-flip exit",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Oracle queue item 4, tested as a variant. The v6 long-only champion with the fixed 2R take-profit replaced by his stated exit: hold while the 3m HA candle is still your colour, close when it flips. The protective stop remains fixed at entry, so downside stays bounded and this is not a trailing stop. Long-only.",
+    "metrics": {
+      "netProfitPct": -2.59106982,
+      "profitFactor": 0.30825718,
+      "maxDrawdownPct": 2.62454216,
+      "totalTrades": 35,
+      "winRatePct": 20.0,
+      "avgTradePct": -0.07403057
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GQ6PQPPR054AT4MXYCHM8H",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GQ6PQPVP1T3JNZ74JWZYT7",
+      "verifiedAt": "2026-09-02T09:29:05Z"
+    },
+    "notes": "REVERTED, and it identifies the fixed TP as load-bearing. PF 1.69->0.31, win rate 56.3%->20.0%. Average time in trade collapsed to 12.8 bars, with winners held 24.7 and losers 9.8. The flip exit fires on the FIRST red 3m candle, and inside a 1m uptrend a single red Heikin Ashi 3m candle is ordinary noise -- so it cuts winners off in about twenty minutes at small profits while losers still run the full distance to the stop. Commission was $344 across 35 tiny trades. HIS RULE ASSUMES A HUMAN JUDGING WHETHER THE FLIP MEANS ANYTHING. Taken literally at this resolution it is not mechanisable, which is the same lesson as queue item 1: his words describe how he READS a chart, and reading is not the same as a rule."
   }
 ];
-const BUILT = "2026-09-02 03:19";
+const BUILT = "2026-09-02 03:30";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
