@@ -556,5 +556,63 @@
       "verifiedAt": "2026-09-02T09:52:00Z"
     },
     "notes": "FAILS ON 5m -- BUT THE TEST IS CONFOUNDED AND I AM NOT CLAIMING MORE THAN IT SUPPORTS. PF 0.9640 -> 0.7066, DD 22.61% -> 41.00%, net -38.6%. The win rate is essentially unchanged (39.11% -> 38.76%) while the payoff ratio collapses 1.501 -> 1.116, which is the signature of trades running out of time rather than out of edge. THE CONFOUND: every bar-denominated parameter means three times less wall-clock on 5m -- maxBars 96 is 8 hours here against 24 hours on 15m, and sdLen, slopeLen, pushLook, coolBars, swgLen, trendLen and volLen are all similarly compressed. This is therefore NOT a clean timeframe-transfer test. The honest reading is inconclusive and leaning negative. A properly scaled re-run (maxBars 288, lookbacks x3) is owed before the 15m result is either trusted or discarded."
+  },
+  {
+    "id": "vwm-base-5m-scaled",
+    "name": "VWM base 5m, properly scaled",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "The current base on 5m with every bar-denominated parameter multiplied by 3 so each window covers the same wall-clock span as the 15m version: sdLen 300, slopeLen 150, pushLook 150, coolBars 60, swgLen 60, maxBars 288, trendLen 600, volLen 600, ATR 42. Price-denominated inputs unchanged, nothing reoptimised. Long only.",
+    "metrics": {
+      "netProfitPct": 1.60248604,
+      "profitFactor": 1.02024675,
+      "maxDrawdownPct": 16.68203271,
+      "totalTrades": 128,
+      "winRatePct": 41.40625,
+      "avgTradePct": 0.01251942
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GSZ5D9ZJJT2G28SQ69ZV11",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GSZ5D9581JM0BAKEB5NC8F",
+      "verifiedAt": "2026-09-02T10:17:23Z"
+    },
+    "notes": "FIRST PROFIT FACTOR ABOVE 1.0 IN THIS LAB, AND IT SURVIVES A CONTROLLED COMPARISON. PF 1.0202, DD 16.68%, 128 trades. The unscaled 5m attempt gave 0.7066 and was recorded as confounded; scaling every bar-denominated parameter by the timeframe ratio was the whole difference, which vindicates that diagnosis. The like-for-like control matters more than the headline: the 15m base run over this SAME window gives PF 0.9615 and DD 21.33%, so 5m beats 15m on both ratchet terms over identical data, and the 15m result is itself stable across periods (0.9640 on 2022-2026 against 0.9615 on 2024-2026). The timeframe is doing the work, not the sample. HONEST LIMIT: PF 1.02 on 128 trades is break-even plus noise, and net +1.60% over 2.2 years is not an economically meaningful return. This is the first evidence of a real edge, not a tradeable system."
+  },
+  {
+    "id": "vwm-base-15m-period-control",
+    "name": "VWM base 15m, period control",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "Control run: the unchanged 15m base restricted to the 5m data window, to isolate whether the scaled 5m result comes from the timeframe or from the shorter, more recent period. Long only.",
+    "metrics": {
+      "netProfitPct": -2.79635364,
+      "profitFactor": 0.96146689,
+      "maxDrawdownPct": 21.33249808,
+      "totalTrades": 113,
+      "winRatePct": 40.7079646,
+      "avgTradePct": -0.02474649
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GT0HY9KDX2WS7NK67DJQH2",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GT0HY9PBF8DSE5Z3H6S8Y7",
+      "verifiedAt": "2026-09-02T10:18:09Z"
+    },
+    "notes": "THE CONTROL THAT MAKES THE 5m RESULT MEAN SOMETHING. PF 0.9615 on the same window where 5m scored 1.0202, with worse drawdown (21.33% against 16.68%). It also shows the 15m signal is stable across periods -- 0.9640 over 2022-2026 against 0.9615 over 2024-2026 -- so the recent window is not unusually kind. Both together isolate the timeframe as the cause. Recorded as rejected because it is superseded as the base, not because the run failed."
   }
 ]

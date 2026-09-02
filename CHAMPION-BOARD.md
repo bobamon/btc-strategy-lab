@@ -56,6 +56,7 @@ The board is open.
 | **Regime split — high-vol only** | 0.9121 | 28.8% | **0.9321** | **23.4%** | **KEPT** — both terms improved |
 | Regime split — low-vol complement | 0.9121 | 28.8% | 0.8751 | 23.1% | measurement only, not a candidate |
 | **Attack 3 re-test — witching ban on high-vol base** | 0.9321 | 23.43% | **0.9640** | **22.61%** | **KEPT** — both terms strictly improved |
+| **Move the base to 5m (scaled)** | 0.9615 | 21.33% | **1.0202** | **16.68%** | **KEPT** — like-for-like, both terms improved |
 
 ## CURRENT BASE — what cycle 008 starts from
 **007's LONG leg.** It has the best raw hit rate of anything tested in this lab: **38.3%** across 457
@@ -291,3 +292,42 @@ lookback tripled — is owed before the 15m result is either trusted or discarde
 
 **Rule for this lab going forward:** when changing timeframe, scale every bar-denominated parameter
 by the timeframe ratio, or the test measures the parameters rather than the signal.
+
+
+# ★ THE BASE MOVES TO 5m — AND CLEARS 1.0 FOR THE FIRST TIME (2026-09-02)
+
+**New base: the same signal on 5m, every bar-denominated parameter scaled x3.**
+`sdLen 300 · slopeLen 150 · pushLook 150 · coolBars 60 · swgLen 60 · maxBars 288 · trendLen 600 ·
+volLen 600 · ATR 42`. Price-denominated inputs unchanged. **Nothing was reoptimised** — this is the
+15m base translated, not a new fit.
+
+**PF 1.0202 · max DD 16.68% · 128 trades · win 41.41% · net +1.60%** (BTCUSDT 5m, 2024-06-08 → 2026-09-01).
+
+### Why this is believable rather than a lucky window
+Three runs, and the control is the one that matters:
+
+| | PF | Max DD | Trades | Window |
+|---|---|---|---|---|
+| 5m, unscaled | 0.7066 | 41.00% | 356 | 2024-06 → 2026-09 |
+| **5m, scaled** | **1.0202** | **16.68%** | 128 | 2024-06 → 2026-09 |
+| 15m base, same window | 0.9615 | 21.33% | 113 | 2024-06 → 2026-09 |
+| 15m base, full window | 0.9640 | 22.61% | 271 | 2022-01 → 2026-09 |
+
+- **5m beats 15m on identical data**, on both ratchet terms. Not a period artefact.
+- **The 15m signal is stable across periods** (0.9640 vs 0.9615), so the recent window is not unusually kind.
+- **Scaling was the entire difference** on 5m: 0.7066 → 1.0202. The confound diagnosis was right, and
+  the unscaled run really was measuring the parameters instead of the signal.
+
+### What it does NOT mean
+**PF 1.02 on 128 trades is break-even plus noise, and +1.60% over 2.2 years is not an economically
+meaningful return.** This is the first evidence that the signal has a real edge at all — it is not a
+tradeable system, and no champion is being declared on it. Naming a champion is the user's call and
+should require more than clearing 1.0 by two points.
+
+### What this opens
+The timeframe axis was never on the attack list, and it turned out to matter more than any of the
+seven filters that were. **1m should be tested next**, scaled the same way (x15 from the 15m base), to
+find out whether this is a trend or a 5m coincidence. Only the War Formation lab has used 1m so far,
+and its coverage limit (2025-12-16 onward) applies here too, so that run will be sample-limited.
+
+Then the short leg, still unattempted and still never to be mirrored.
