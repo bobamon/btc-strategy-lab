@@ -52,6 +52,8 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E12 | ORACLE-RULES item 1: direction = 2+ consecutive same-colour REAL 6h candles (long only) | PF 1.35, DD 2.48%, 12 trades — **rejected, does not beat champion; sample collapsed 32→12** |
 | E13 | ORACLE-RULES item 2: 3m cycle-position gate, short leg alone, cyclePos >= 0.7 | PF 0.00, 2 trades — **sample collapse, gate too tight to judge** |
 | E13b | Same short leg, cyclePos threshold loosened 0.7 → 0.5 | PF 0.63, 12 trades, 16.7% win rate, 3.15:1 payoff — **rejected; same E9/E9b shape, gate did not fix the short leg** |
+| E14 | ORACLE-RULES item 3 / queue 0g: short leg requires ≥2 consecutive shrinking-range GREEN 3m candles ("wait for the pump weakening") before the reversal trigger, cyclePos gate removed | 2 trades, 0 winners, PF 0.00 — **sample collapse, same shape as E13** |
+| E14b | Same trigger, loosened minGreenN 2 → 1 (just the last 3m candle must be green) | 9 trades, PF 0.83, win rate 11.1%, payoff 6.66:1 — **rejected; the fourth structurally distinct short construction lands on the same shape** |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -98,15 +100,28 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
     somewhere earlier in the window. **Location alone is not the fix; the trigger itself needs to
     change.** This sharpens 0g below rather than replacing it — 0g (the counter-move-weakening
     trigger) is the next thing to test on the short leg, not another location gate.
-0g. **THEN: require the retrace ("wait for the pump").** "All this is, is waiting." A short should
-    additionally require a green push against the bear regime first — N consecutive green 3m candles,
-    or a retrace of X% of the prior leg. Test as a separate change so it is attributable.
-0d. **Decide the short question honestly (deferred until 0f/0g are tested).** Given 0c, there are two options and
-    the data should pick, not preference: (i) build a short that targets the crash specifically —
-    require the bear regime PLUS an acceleration trigger (range expansion, or a break with the
-    session already extended), accepting a low win rate and a large payoff; or (ii) accept that this
-    cascade is a LONG-ONLY edge on this data and meet the both-directions requirement with a separate
-    strategy. Test (i) once; if it fails, take (ii) and record it as settled.
+0g. ~~THEN: require the retrace ("wait for the pump")~~ — **DONE (E14/E14b), rejected.** Added a
+    reconstructed-3m counter-move-weakening gate (≥2 shrinking-range green 3m candles required
+    before the reversal trigger) on top of the unchanged bear-regime cascade. Tight form (minGreenN=2):
+    2 trades, sample collapse. Loosened (minGreenN=1, just "last 3m candle was green"): 9 trades,
+    PF 0.83, win rate 11.1%, payoff 6.66:1 — **the same E9/E9b/E13b shape.** This is now the
+    **fourth** structurally distinct short construction (mirrored sweep-reclaim, rejection-at-
+    resistance, location-gated, trigger-gated pump-weakening) landing on identical statistics:
+    healthy-to-excellent payoff, single-digit-to-low-teens win rate, net negative. Changing WHERE in
+    the range the trigger sits (0f) and WHAT immediately precedes the trigger (0g) both moved which
+    bar the entry fires on without moving the outcome distribution at all. **The remaining
+    un-tested lever is WHAT the entry is triggering ON** — every construction so far fires on a
+    variant of "price crosses back through a recent extreme with velocity/rejection." None have
+    tried gating on acceleration/range-expansion (0d option (i): the crash-timing short) rather than
+    on reversal-after-a-pullback. 0d is now unblocked and is the next thing to test before
+    concluding (per 0d option (ii)) that this cascade is long-only on this data.
+0d. **Decide the short question honestly — NOW UNBLOCKED (0f and 0g both tested and rejected).**
+    Given 0c, there are two options and the data should pick, not preference: (i) build a short that
+    targets the crash specifically — require the bear regime PLUS an acceleration trigger (range
+    expansion, or a break with the session already extended), accepting a low win rate and a large
+    payoff; or (ii) accept that this cascade is a LONG-ONLY edge on this data and meet the
+    both-directions requirement with a separate strategy. Test (i) once; if it fails, take (ii) and
+    record it as settled. This is the top unblocked item for the next cycle.
 0e. (was 0c) **DIAGNOSE THE BEAR REGIME ITSELF (superseded).** Two structurally different short
     constructions have now failed: the mirrored failed-breakout (v5, 2 of 15) and
     rejection-at-resistance (E9b, 14 of 69, PF 0.68). Both had healthy payoff ratios and losing win
