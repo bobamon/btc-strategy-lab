@@ -301,6 +301,7 @@ so the code genuinely behaves differently. **But the count stayed at 3.**
 | v16 | Type 2 validation restored, latched setup + later trigger | **0 TRADES.** Sequencing was correct; the four-way conjunction at firing is what kills it · [report](https://mcp-api.trader.dev/backtest/01M1GW1PWQ2YY4ZX0AFCMBCCYM) |
 | v17 | Counter build for the validation gate, 2D bias DROPPED | **0 TRADES.** The bias was not the binding term -- arming and mitigation race, and mitigation wins · [report](https://mcp-api.trader.dev/backtest/01M1GW9BZV25S3MC76DK784RBE) |
 | v18 | Arming candle exempted from mitigation | **0 TRADES.** Third consecutive zero on this gate · [report](https://mcp-api.trader.dev/backtest/01M1GWQMNTR2YC3YY3YFBWDM42) |
+| v19 | Count 4H engulfing candles alone | **TEN in 4.7 years** (5 bull, 5 bear) out of ~9,800 candles. The engulf definition assumes GAPS · [report](https://mcp-api.trader.dev/backtest/01M1GX4DEVQGF6R39CE7FJWRC9) |
 
 **When three independent corrections land on the same trade count, the binding constraint is upstream
 of all of them.** I have now spent three cycles fixing things that were genuinely wrong and none of
@@ -487,6 +488,39 @@ skipping the cheapest measurement.
 
 **Not on the dashboard** — zero-trade runs are refused by the provenance gate.
 
+## ██ v19 — THE ANSWER. THE ENGULF DEFINITION ASSUMES GAPS, AND CRYPTO HAS NONE.
+**Ten engulfing candles in 4.7 years.** Five bullish, five bearish, out of roughly 9,800 four-hour
+candles — 0.1%. Every zero-trade run from v16 onward is explained: the conjunction could never fire
+because one of its terms essentially never occurs.
+
+**The definition carried since v9:**
+```
+bullEng = close > prevOpen AND open < prevClose
+```
+**In a 24/7 market the open of one aggregated candle equals the close of the previous one almost
+exactly.** So `open < prevClose` is decided by tick noise, not by structure, and is effectively never
+true. That condition comes from equities, where overnight gaps make it meaningful. It was imported
+without being questioned and has silently disabled the validation gate in every build that used it.
+
+**v20 — the fix, and it is a definition change, not a tuning change:**
+```
+bullEng = prev candle bearish AND this candle bullish AND close > prevOpen
+```
+Body containment, no gap requirement. Then re-run the v19 counter to confirm the population is
+sensible before restoring the gate.
+
+### This is the FOURTH error carried from v1
+| # | Error | Found in |
+|---|---|---|
+| 1 | The engulfing candle CREATES the zone, it does not validate one | v9 |
+| 2 | Mitigation judged on the wick instead of the body | v13 |
+| 3 | The take profit was unreachable at 12 x ATR14 | v14 |
+| 4 | **The engulf definition requires a gap that cannot occur** | **v19** |
+
+Every one was a parameter or definition inherited early and never examined, while attention stayed on
+the layer above. **The pattern is now unmistakable and worth stating: in this lab, the failures have
+never been in the thing being tested — they have been in the assumptions underneath it.**
+
 ## Open queue
 0. ~~Get definitions for Type 1/Type 2~~ — **DONE 2026-09-02, see VOCABULARY.md.**
    Type 1 = a 3M candle; Type 2 = an engulfing candle in the direction of bias; both only on the
@@ -505,7 +539,10 @@ skipping the cheapest measurement.
 0-V16. ~~RESTORE THE TYPE 2 VALIDATION~~ — **0 trades. Sequencing correct; the firing conjunction is too narrow.**
 0-V17. ~~COUNTER-BUILD THE VALIDATION GATE~~ — **DONE. Bias exonerated; arming and mitigation conflict.**
 0-V18. ~~ARMING CANDLE EXEMPT FROM MITIGATION~~ — **0 trades. Third consecutive zero. See the v18 lesson.**
-0-V19-NEXT. **COUNT ARMING EVENTS ALONE (top priority).** Entry = zone live AND price just entered it.
+0-V19. ~~COUNT THE MISSING TERM~~ — **DONE, and it was the ENGULF, not arming. Ten in 4.7 years.**
+0-V20-NEXT. **REDEFINE THE ENGULF WITHOUT A GAP REQUIREMENT (top priority).** Bullish engulf = previous
+    candle bearish, this candle bullish, close above the previous open. Body containment only. Re-run
+    the counter to confirm frequency, THEN restore the validation gate. Superseded text: Entry = zone live AND price just entered it.
     Nothing else. Confirm the first term of the conjunction exists before testing the conjunction
     again. Superseded text: Only closes inside
     the zone on candles AFTER the one that first brought price into it should increment the touch

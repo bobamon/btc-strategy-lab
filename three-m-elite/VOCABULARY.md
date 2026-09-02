@@ -186,3 +186,20 @@ closes: the first close inside does not mitigate, the second does.
 
 Measured effect: counting wicks as touches left **15** opportunities in 4.7 years; counting bodies
 left **40**. Wick-counting was killing most zones within about eight hours of creation.
+
+
+## ENGULFING — CORRECTED 2026-09-02 (v19), AND THIS ONE WAS COSTLY
+An engulfing candle, for a 24/7 market, is defined by **body containment alone**:
+
+- **Bullish engulf** — the previous candle is bearish, this candle is bullish, and this close is above
+  the previous open.
+- **Bearish engulf** — the previous candle is bullish, this candle is bearish, and this close is below
+  the previous open.
+
+**There is NO gap requirement.** The equities definition also asks that this candle's open be beyond
+the previous close, which requires an overnight gap. Crypto trades continuously, so an aggregated
+candle's open equals the previous close almost exactly and that clause is never meaningfully true.
+
+**Measured cost of getting this wrong:** the gap-requiring definition produced **10 engulfing candles
+in 4.7 years** out of ~9,800 four-hour candles, silently disabling the validation gate in v16, v17 and
+v18 — three zero-trade runs and three credits spent chasing the wrong terms.

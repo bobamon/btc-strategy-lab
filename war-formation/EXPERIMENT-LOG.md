@@ -528,6 +528,7 @@ then reclaims it. Applying that same mechanism at a high produced the worst shor
 |---|---|---|---|
 | E13 — near-touch of resistance, then reject | **0.7490** | 23.08% | 39 |
 | E27 — genuine break above, then reject | 0.2531 | 10.53% | 19 |
+| v11 | BIDIRECTIONAL: one cascade, 6h picks the side, cycle gate on the short only | PF 1.5689, DD 3.382%, 38 trades. **Longs 32 (18W, +$786), shorts 6 (1W, -$65).** Champion unchanged; the short leg drags · [report](https://mcp-api.trader.dev/backtest/01M1GX436Q7TQ71K66BDNEYAWF) |
 
 **Requiring price to actually clear resistance makes shorts markedly worse; requiring it merely to
 approach makes them better.** A plausible reading: in a downtrend, price clearing resistance is more
@@ -549,3 +550,32 @@ needs and the long gets for free.
 
 **Next build: ONE strategy, long when the 6h is bullish, short when it is bearish, cycle-position gate
 on the short side, both legs reported separately.**
+
+
+## v11 — THE BIDIRECTIONAL STRUCTURE EXISTS. THE SHORT LEG IS TOO RARE TO JUDGE.
+The user's design is now built: one cascade, the 6h regime decides the side, identical 15m
+sweep-and-reverse mechanics either way, with the cycle-position gate on the short side only.
+
+| | Champion v6 (long-only) | v11 bidirectional |
+|---|---|---|
+| Profit factor | **1.6862** | 1.5689 |
+| Max drawdown | **3.103%** | 3.382% |
+| Trades | 32 | 38 |
+
+**Champion unchanged — v11 loses on both ratchet terms.** But the split is what matters:
+
+| Leg | Trades | Wins | Net |
+|---|---|---|---|
+| Long | 32 | 18 | **+$786.08** |
+| Short | 6 | 1 | −$65.03 |
+
+**The long side is untouched** — 32 trades, exactly the champion's count. **The entire shortfall is the
+short leg**, and six trades across 4.6 months is not a sample. The bear regime (2 or fewer green HA 1h
+candles) combined with the cycle-position gate is far too restrictive to contribute anything.
+
+**So the next question on the short side is FREQUENCY, not quality.** With six trades there is nothing
+to judge. Candidates: loosen `greenBear` from 2 to 3, or lower the cycle gate from 0.60. Measure the
+count first with a counter build before interpreting any profit factor.
+
+**This build is now the base for bidirectional work** even though it does not beat the champion,
+because the champion cannot satisfy the standing both-directions requirement and this can.

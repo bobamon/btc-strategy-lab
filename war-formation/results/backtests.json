@@ -847,5 +847,34 @@
       "verifiedAt": "2026-09-02T11:05:24Z"
     },
     "notes": "THE SWEEP IS WORSE THAN THE NEAR-TOUCH, WHICH IS THE OPPOSITE OF THE LONG. PF 0.2531 with a 10.53% win rate on 19 trades, against E13's 0.7490 on 39. Requiring price to genuinely TAKE OUT the previous 15m high before rejecting produces far worse shorts than requiring it merely to approach that high. This is a real asymmetry with the long leg, whose entire edge is the failure of a genuine breakdown. A plausible reading: when price actually clears resistance in a downtrend, that is more often continuation than exhaustion, whereas failing to reach resistance is the sign of a weak rally. E13's near-touch remains the best short this lab has. Champion unchanged."
+  },
+  {
+    "id": "war-formation-v11-bidirectional",
+    "name": "WF v11 bidirectional, 6h picks the side",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "both",
+    "status": "testing",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "One bidirectional cascade per the user's design: the 6h regime decides the side, long on 4+ green HA 1h candles and short on 2 or fewer, with the same 15m sweep-and-reverse mechanics either way. E13's 3m cycle-position gate applies to the SHORT side only, as the location fix the long gets for free. Both legs reported separately.",
+    "metrics": {
+      "netProfitPct": 7.21050942,
+      "profitFactor": 1.56893607,
+      "maxDrawdownPct": 3.38215575,
+      "totalTrades": 38,
+      "winRatePct": 50.0,
+      "avgTradePct": 0.18975025
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GX436QZ617ZX6E5B7VQXK0",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GX436Q7TQ71K66BDNEYAWF",
+      "verifiedAt": "2026-09-02T11:12:31Z"
+    },
+    "notes": "THE STRUCTURE THE USER ASKED FOR NOW EXISTS, AND THE SHORT LEG DRAGS. PF 1.5689 against the champion's 1.6862 and DD 3.382% against 3.103%, so it loses on BOTH ratchet terms and the champion is unchanged. THE SPLIT IS THE POINT: longs 32 trades, 18 wins, +$786.08 -- identical count to the champion, so the long side is untouched. Shorts 6 trades, 1 win, -$65.03. The entire shortfall is the short leg, and six trades in 4.6 months means the bear regime plus the cycle gate is far too restrictive to contribute anything. This is the first War Formation build that is bidirectional by construction rather than long-only, so it becomes the base for that work even though it does not beat the champion. The next question is frequency on the short side, not quality: with six trades there is nothing to judge."
   }
 ]

@@ -573,9 +573,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T10:50:04Z"
     },
     "notes": "THE TARGET FIX WORKED AND THE ANSWER IS STILL NO -- BUT THE REASON IS INFORMATIVE. PF 0.290->0.363 and win rate 4.17%->8.33%, with two winners now actually reaching the target (avgBarsWinning 43.5 against maxBars 96), so v14's diagnosis that the exit was unreachable is confirmed. THE DECISIVE COMPARISON IS AGAINST CHANCE: a coin flip with a 2R target and a 1R stop wins about 33% of the time. These entries win 8.33%, a quarter of that, which means they are not merely unpredictive but SYSTEMATICALLY BADLY TIMED -- price is far more likely to continue through the zone than to reverse off it. Longs 5 (1 win), shorts 19 (1 win). THE RIGHT READING IS NOT THAT THE SYSTEM FAILS. It is that entering on the FIRST TOUCH of a zone is premature, and the source never says to do that -- it requires a VALIDATION inside the zone (a 3M candle or an engulfing candle) before entry, which this diagnostic deliberately removed. Being worse than chance without the validation is evidence that the validation is LOAD-BEARING, not optional. v16 restores the Type 2 validation on this corrected lifecycle."
+  },
+  {
+    "id": "3m-elite-v19-engulf-counter",
+    "name": "3M ELITE v19 engulf counter (diagnostic)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "A COUNTER, NOT A STRATEGY. Fires on any 4H engulfing candle with no other condition and a one-bar exit, so totalTrades is the engulf count. Isolates the one term in the validation gate that had never been measured. P&L meaningless by construction.",
+    "metrics": {
+      "netProfitPct": -0.9179133,
+      "profitFactor": 0.1768608,
+      "maxDrawdownPct": 0.9179133,
+      "totalTrades": 10,
+      "winRatePct": 30.0,
+      "avgTradePct": -0.09179133
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GX4DEVNQZWCYFFJVXNFENN",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GX4DEVQGF6R39CE7FJWRC9",
+      "verifiedAt": "2026-09-02T11:12:41Z"
+    },
+    "notes": "TEN ENGULFING CANDLES IN 4.7 YEARS -- 5 bullish, 5 bearish, across roughly 9,800 four-hour candles. That is 0.1%, and it explains every zero-trade run from v16 onward: the conjunction could never fire because the engulf term is essentially non-existent. THE CAUSE IS A DEFINITION THAT ASSUMES GAPS, IN A MARKET THAT HAS NONE. The test carried since v9 is `close > prevOpen AND open < prevClose`. In a 24/7 market the open of one aggregated candle equals the close of the previous one almost exactly, so `open < prevClose` is decided by tick noise rather than by structure and is effectively never true. That condition is imported from equities, where overnight gaps make it meaningful. THE FIX for v20 is a body-containment definition with no gap requirement: a bullish engulf is a bullish candle whose CLOSE exceeds the previous candle's OPEN, with the previous candle bearish. Drop the open-versus-previous-close term entirely. This is the fourth carried-from-v1 error this lab has found, after the inverted zone model, wick-based mitigation and the unreachable target."
   }
 ];
-const BUILT = "2026-09-02 04:55";
+const BUILT = "2026-09-02 05:13";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
