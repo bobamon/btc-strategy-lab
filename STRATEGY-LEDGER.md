@@ -380,3 +380,50 @@ Removing it took the population from **10 to 2,711** across 4.7 years.
 them together** — a counter build with a one-bar exit, since this engine returns no plot values. And
 when a definition is inherited from another market, check that its *preconditions* exist here. When
 successive independent fixes produce the same trade count, stop fixing and start counting.
+
+
+---
+
+## ██ HARD LESSON 11 — DECLARING A CAVEAT IS NOT BOUNDING IT
+
+**Earned:** War Formation 950-1 / 950-2 / 950-1b, 2026-09-02.
+
+950-1 shipped with a stated defect: an armed level blocked re-arming until it resolved or expired. I
+wrote that it "depresses both counts, so the ratio is the robust output" and published a 51.3% hit
+rate. **The fix moved the take count from 1,589 to 4,864** — more than the original run had counted
+as signals — and the true hit rate is **95.0%**. Two conclusions were published off a number that a
+one-credit re-run would have corrected.
+
+**Why:** stating a limitation feels like handling it. It is not. A declared defect with an assumed
+direction and an unmeasured magnitude is still an unmeasured defect, and reasoning about its size is
+exactly the kind of inference the lab exists to avoid.
+
+**How to apply:** when a run has a known defect, **the next run fixes the defect** — it does not
+build on the flawed output and it does not reason about the bias. If the defect is discovered after
+publishing, withdraw the number explicitly rather than footnoting it. See also HARD LESSON 10:
+measure the term, do not estimate it.
+
+---
+
+## ██ HARD LESSON 12 — A HALF-SAMPLE VERDICT TRAVELS ONLY AS FAR AS THE GATE FAILS TO BIND
+
+**Earned:** BTC Attacks 9-13, 2026-09-02.
+
+Three gates were tested on the failing half of the sample, then two were re-tested on the whole.
+
+| Gate | H2 verdict | Full-sample verdict | Trades removed (full) |
+|---|---|---|---|
+| EMA200 trend | inert | **generalised** | 6 of 134 |
+| highVol split | harmful | **inverted — load-bearing** | 79 of 207 |
+
+After the first reversal I wrote that half-sample diagnostics cannot decide anything. **That was an
+overcorrection.** The trendOk verdict generalised exactly.
+
+**The rule that actually fits both results:** a gate that barely binds has almost no room to behave
+differently in another regime, so its half-sample verdict travels. A gate that binds hard is
+*re-selecting the sample*, so what you measured is a property of that regime, not of the gate.
+
+**How to apply:** read the TRADE COUNT before deciding how far a partial-sample result generalises.
+Few trades removed → the verdict is probably general. Many removed → assume it is regime-specific
+until a full-sample run says otherwise. This is cheaper than re-running everything on the full sample
+and it explains, rather than just accommodates, both outcomes.

@@ -886,3 +886,47 @@ balanced — strong takes continuing toward the next whole number, weak takes fa
 each judged alone.
 
 **Champion unchanged — this is a counter, not a challenger.**
+
+
+---
+
+## ██ 950-1b — THE RULE'S PREMISE IS VINDICATED. MY "COIN FLIP" WAS WRONG.
+
+| Measured on 1m, 2025-12-16 → 2026-05-03, identical arming logic | Count |
+|---|---|
+| **950 signals** (950-1b: 2,576 up + 2,543 down) | **5,119** |
+| **Takes** within 24 hours (950-2) | **4,864** |
+| **Hit rate** | **95.0%** |
+
+**Two cycles ago I reported 51.3% and called step 1 "a coin flip". That was wrong**, and it was wrong
+because the run behind it had a defect I declared but did not bound. The corrected number is 95.0%.
+**The user's rule says the whole number WILL be taken, and at a 24-hour horizon it essentially is.**
+
+### BUT THE HIT RATE IS NOT THE POINT, AND THIS IS THE HONEST READING
+**A 95% prediction of an event that is nearly free to predict carries almost no information.** The
+signal fires when price is *already within $50* of the level. On 1m BTC in this window, a $50 move
+inside 24 hours is close to certain regardless of what the level is — the same 95% would show up for
+any arbitrary line drawn $50 from price.
+
+So both of my previous readings were off, in opposite directions:
+- **"51.3%, a coin flip"** — wrong, built on a broken counter.
+- **"the rule's foundation is not a foundation"** — the right conclusion, for the wrong reason. Not
+  because the prediction fails, but because it succeeds at something that needed no predicting.
+
+**What this does NOT damage is the rule's actual proposal.** Step 1 marks *where* to pay attention,
+and it does that reliably. Step 3 — the velocity read — is where the claim lives, and 950-2 showed it
+splits 48.3% / 51.7%, which is a real discriminator on a real population.
+
+### METHOD NOTE, WRITTEN INTO THE LEDGER
+**Declaring a caveat is not bounding it.** 950-1 stated the stale-arm defect and I reasoned it would
+bias both counts alike. It did not — the fix moved the take count from 1,589 to 4,864. **When a run
+has a known defect, the next run fixes it; it does not reason about it.** Two conclusions were
+published off that number before it was checked.
+
+### QUEUE
+**950-3/4 (next): does the strong/weak label PREDICT?** Strong takes continuing toward the next whole
+number, weak takes fading back below it, each leg judged alone. This is now the only step of the rule
+that has not been measured, and it is the one the rule actually rests on.
+
+**Champion unchanged — v6, PF 1.68623784, DD 3.10289714%, 32 trades. These are counters, not
+challengers.**

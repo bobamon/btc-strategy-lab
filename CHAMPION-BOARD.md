@@ -142,6 +142,7 @@ should be rejected without spending a credit on it.
 | Attack 10 | Remove the highVol split, measured in H2 alone | PF 0.65656→**0.76511**, DD 12.66%→19.59%, trades 61→103 | **REVERTED** on drawdown — but the gate is COSTING profit factor |
 | Attack 11 | Remove the witching ban, measured in H2 alone | PF 0.65656→0.62814, DD 12.66%→16.54%, trades 61→62 | **REVERTED** — and this one genuinely EARNS its place |
 | Attack 12 | Remove highVol, **full sample** (ratchet test of Attack 10) | PF 1.02025→0.91514, DD 16.68%→23.51%, trades 128→207 | **REVERTED** — the gate is regime-dependent, not harmful |
+| Attack 13 | Remove EMA200, **full sample** (ratchet test of Attack 9) | PF 1.02025→1.01094, DD 16.68%→17.47%, trades 128→134 | **REVERTED** — genuinely inert, removes 6 trades in 2.2 years |
 
 7. ~~Attack the EXIT, not the entry~~ — **DONE, REVERTED.** See the frontier note below.
 8. **Attack the EXIT, original text:** Every attack so far has been an entry filter. The system lives
@@ -752,3 +753,38 @@ about the gates themselves. Only Attack 12 asked the question the ratchet actual
 **Two of the three still lack a full-sample test**, and until they have one the honest description is
 that their H2 behaviour is *interesting*, not that they are inert or harmful. The base remains
 PF 1.0202 on 128 trades — break-even plus noise, and no champion.
+
+
+## ██ ATTACK 13 — THE SWEEP, PROPERLY SCOPED AT LAST (2026-09-02)
+
+Two cycles ago I ran three H2 diagnostics and let their verdicts stand as statements about the gates.
+Attack 12 showed that was wrong for `highVol`. Attack 13 now closes the second gate on the full
+sample — and the answer is the *opposite* of Attack 12's, which is the interesting part.
+
+| Gate | H2 verdict | Full-sample verdict | Trades it removes (full) |
+|---|---|---|---|
+| EMA200 trend | inert (3 of 64) | **inert — confirmed** | **6 of 134** |
+| highVol split | harmful (removing adds 0.109) | **load-bearing — reversed** | 79 of 207 |
+| Witching ban | earns its place | still untested | 1 of 62 (H2) |
+
+Removing EMA200 on the full sample: PF **1.02025 → 1.01094**, DD **16.68% → 17.47%**, trades 128 →
+134. Both terms marginally worse, so it stays — but it stays as **ballast, not as an edge.** Six
+trades in 2.2 years is a gate that is very nearly a tautology: price sits above a 600-bar EMA almost
+whenever the other six conditions have already aligned.
+
+### THE SHARPER VERSION OF THE LESSON
+After Attack 12 I wrote that a half-sample diagnostic cannot tell you whether to keep a gate. **That
+was too strong.** trendOk's H2 verdict generalised perfectly; highVol's inverted. The difference is
+not the method, it is **how hard the gate binds**:
+
+> **A half-sample verdict is reliable in proportion to how little the gate binds.** A gate that
+> removes 3 of 64 trades has almost no room to behave differently elsewhere. A gate that removes 42
+> of 103 is re-selecting the sample, and its effect is a property of the regime, not of the gate.
+
+**Check the trade count first, and let it tell you how far the verdict travels.** That is a cheaper
+and better rule than "always re-test on the full sample", and it is now the standing guidance here.
+
+### THE BASE, DESCRIBED HONESTLY
+PF 1.0202 on 128 trades, long-only, no champion. Of its three accepted gates: **one is inert, one is
+regime-dependent and load-bearing, one is untested on the full sample.** Nothing has ever been KEPT
+by this ratchet. The mechanism is thoroughly mapped and has no demonstrated edge.

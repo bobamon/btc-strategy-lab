@@ -1305,9 +1305,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T11:53:18Z"
     },
     "notes": "THE VELOCITY LABEL DISCRIMINATES: 2,347 strong (48.3%) against 2,517 weak (51.7%) out of 4,864 takes. Balanced, so it is a usable discriminator rather than a label that tags everything one way -- step 2 passes. BUT IT ALSO INVALIDATES 950-1's HIT RATE. The stale-arm fix took the take count from 1,589 to 4,864, which is more than 950-1 counted as SIGNALS, so that run's 51.3% was computed on a broken arm counter and must not be quoted. The hit-rate question is reopened and needs a clean re-run. What survives from 950-1 is only that the population is large."
+  },
+  {
+    "id": "war-formation-950-1b-signal-recount",
+    "name": "WF 950-1b signal counter (diagnostic)",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "A COUNTER, NOT A STRATEGY. Re-counts the 950 signals with the arming logic fixed in 950-2, restoring the number 950-1 got wrong. Arms only -- longs are upward signals, shorts downward -- so arms never compete with takes for the position slot. Takes come from 950-2, measured with identical arming. P&L meaningless by construction.",
+    "metrics": {
+      "netProfitPct": -98.93629431,
+      "profitFactor": 0.06468002,
+      "maxDrawdownPct": 98.9363322,
+      "totalTrades": 5119,
+      "winRatePct": 8.73217425,
+      "avgTradePct": -0.01932727
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GZTF4Q9118SXJ6QAPW45FM",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GZTF4Q9268XCJSXM4PEJP6",
+      "verifiedAt": "2026-09-02T11:59:41Z"
+    },
+    "notes": "THE RULE'S PREMISE IS VINDICATED AND MY COIN-FLIP CLAIM WAS WRONG. 5,119 signals (2,576 up, 2,543 down) against 4,864 takes from 950-2 = a 95.0% hit rate within 24 hours, not 51.3%. The user's rule says the whole number WILL be taken and at this horizon it essentially is. BUT THE INFORMATION CONTENT IS LOW AND THAT MATTERS MORE: the signal fires when price is already within $50 of the level, and on 1m BTC a $50 move inside 24 hours is close to free. A near-certain prediction of a nearly-certain event is not an edge. The rule's value has to come from step 3, the velocity read, which 950-2 showed splits 48/52 and is therefore a real discriminator."
   }
 ];
-const BUILT = "2026-09-02 05:55";
+const BUILT = "2026-09-02 06:01";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

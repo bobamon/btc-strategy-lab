@@ -1217,9 +1217,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T11:53:50Z"
     },
     "notes": "THE GATE IS REGIME-DEPENDENT, NOT HARMFUL -- AND THIS CORRECTS THE BOARD. Base PF 1.02024675 / DD 16.68% / 128 trades; without highVol PF 0.91514233 / DD 23.51% / 207 trades. Worse on BOTH terms, so it stays. Attack 10 showed removing it HELPED in H2 (0.65656 to 0.76511), and I wrote on the board that the base carries a gate which suppresses winners. That was true of H2 and false of the sample as a whole: the gate admits 79 extra trades when removed and they are net negative overall. A filter can be load-bearing in one regime and costly in another, and the aggregate is what the ratchet judges. REVERTED."
+  },
+  {
+    "id": "vwm-attack13-no-ema200-fullsample",
+    "name": "VWM Attack13 no EMA200, full sample",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "The full-sample ratchet test of Attack 9, closing the second of the three swept gates. One change from the 5m scaled base: trendOk removed from the entry conjunction, still computed so the deviation stays visible.",
+    "metrics": {
+      "netProfitPct": 0.90739953,
+      "profitFactor": 1.01093843,
+      "maxDrawdownPct": 17.46577925,
+      "totalTrades": 134,
+      "winRatePct": 41.79104478,
+      "avgTradePct": 0.00677164
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GZVCZ835M97ZN4K805PQS6",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GZVCZ8XAKHEJQPPXZQB6G0",
+      "verifiedAt": "2026-09-02T12:00:11Z"
+    },
+    "notes": "INERT ON THE FULL SAMPLE TOO -- Attack 9's verdict DOES generalise. Base PF 1.02024675 / DD 16.68% / 128 trades; without trendOk PF 1.01093843 / DD 17.47% / 134 trades. The gate removes only SIX trades across 2.2 years, against 79 for highVol, and profit factor moves 0.009. REVERTED strictly by the ratchet since both terms are marginally worse, but it stays as ballast: it is very nearly a tautology in this conjunction, because price is above a 600-bar EMA almost whenever the other six conditions align. IMPORTANT CONTRAST: highVol's H2 verdict did NOT generalise and trendOk's DID, so half-sample findings are not uniformly unreliable -- they are unreliable in proportion to how hard the gate BINDS."
   }
 ];
-const BUILT = "2026-09-02 05:55";
+const BUILT = "2026-09-02 06:01";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
