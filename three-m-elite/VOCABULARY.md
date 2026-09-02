@@ -10,9 +10,17 @@ read with OpenCV. Quotes are the author's own words.
 ## ✅ TYPE 1 AND TYPE 2 VALIDATION — DECODED
 **Type 2 implemented and tested 2026-09-02** (`3m-elite-v2-validation.pine`, see SYSTEM.md queue 0a).
 Result: PF 0.64 / maxDD 12.1%, worse than v1's PF 0.91 / maxDD 3.47% on both gates — rejected, v1
-stays the best-known config. The loss diagnostic (avgBarsLosing well below avgBarsWinning) points at
-the stop, not the gate — see queue item 0c. Type 1 (the 3M candle itself) is still not implemented;
-its anatomy remains undefined below.
+stays the best-known config. The loss diagnostic (avgBarsLosing well below avgBarsWinning) pointed at
+the stop, not the gate — see queue item 0c.
+
+**The protected low/high stop implemented and tested 2026-09-02** (`3m-elite-v3-protected-stop.pine`,
+see SYSTEM.md queue 0c). On validation, the low (longs) / high (shorts) of the validating 48m candle
+is captured and held as the stop reference instead of the 3H zone edge. Result: PF 0.65 / maxDD
+11.04%, still worse than v1 on both gates — rejected. Marginally better than v2 on every metric, and
+the avgBarsLosing/avgBarsWinning ratio improved from 0.52 to 0.64, so this decoded definition was a
+real (if insufficient) fix — the stop was part of the v2 problem but not the whole problem.
+
+Type 1 (the 3M candle itself) is still not implemented; its anatomy remains undefined below.
 
 Source: `2026-08-09 07-20-21.txt`, a dedicated 10-minute lesson.
 
@@ -43,6 +51,11 @@ That low is the **protected low** (protected high for shorts) — the structural
 ---
 
 ## ✅ ZONE INVALIDATION — DECODED
+**Not yet implemented — SYSTEM.md queue 0d, now the top priority.** Both other decoded-but-
+unimplemented gates (Type 2 validation, protected low/high) have been built and tested; this is the
+last one left, so it is next per the project's rule that a decoded, unimplemented definition
+automatically outranks the rest of the queue.
+
 > "The second that we get a candle that **body closes below the zone**, this entire zone is **invalid**.
 > We can no longer take trades from this zone."
 

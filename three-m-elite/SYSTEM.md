@@ -126,11 +126,29 @@ lower bound on the system, not a verdict on it.**
 0b. **IMPLEMENT ZONE INVALIDATION.** A candle BODY closing beyond the zone kills it, judged on the
     ZONE's own timeframe. Also: if the candle immediately after a validation body-closes beyond,
     the validation is void and a new one is required. Neither is in the current build.
-0c. **IMPLEMENT THE PROTECTED LOW/HIGH (raised priority after 0a).** After validating, mark the
-    structure-timeframe low (for longs) as the protected level and stop beneath it, replacing the
-    3H-zone-edge stop both v1 and v2 use. 0a's result diagnostic (avgBarsLosing far below
-    avgBarsWinning, the same defect HARD LESSONS 5 and 6 both flagged) points straight at this stop
-    as the next thing to fix, ahead of 0b.
+0c. ~~IMPLEMENT THE PROTECTED LOW/HIGH~~ — **DONE 2026-09-02, REJECTED.** Built as
+    `3m-elite-v3-protected-stop.pine`: on validation, the 48m engulfing candle's own low (longs) /
+    high (shorts) is captured and held as the stop reference, replacing the 3H zone edge both v1 and
+    v2 used. Result: PF 0.65 (v1: 0.91), maxDD 11.04% (v1: 3.47%), net -10.49%, 81 trades, WR 34.6%.
+    Still worse than v1 on both gates, so v1 remains the best-known config. Marginally better than v2
+    on every metric (PF 0.65 vs 0.64, maxDD 11.04% vs 12.10%, trades 81 vs 92) — the tighter,
+    structural stop moved in the right direction but did not come close to rescuing the gate.
+    avgBarsLosing/avgBarsWinning improved from 0.52 (v2) to 0.64, so the stop fix partially addressed
+    the HARD LESSON 5/6 diagnostic but did not resolve it: losers still die faster than winners run.
+    Both legs remain net losers (longs -$895.03/22 trades, shorts -$154.20/59 trades), the inverse of
+    v1 where longs alone carried the profit. Full record: `results/backtests.json` id
+    `3m-elite-v3-protected-stop`.
+0d. **IMPLEMENT ZONE INVALIDATION (was 0b).** A candle BODY closing beyond the zone kills it, judged
+    on the ZONE's own timeframe. Also: if the candle immediately after a validation body-closes
+    beyond, the validation is void and a new one is required. This is the last decoded-but-
+    unimplemented VOCABULARY.md gate — the top priority per the project's own rule that a decoded,
+    unimplemented definition automatically outranks the rest of the queue.
+0e. **ISOLATE THE STOP FROM THE GATE.** With both the validation gate (0a) and the protected stop
+    (0c) tested and rejected individually, and the gate not clearly the cause (v1's own zone-edge
+    stop already showed the same avgBarsLosing/avgBarsWinning defect at a smaller sample), test
+    v1's cascade (no validation gate) with the 0c protected-stop swapped in for the 3H zone edge —
+    this isolates whether the stop fix helps even without the gate, since the gate roughly
+    quadrupled trade count and may simply be admitting more low-quality setups than it removes.
 1. Port the cascade to a 15m base (scaling every layer up) to get 4.7 years of data instead of 4.6
    months. Loses 3m entry precision, buys a real sample.
 2. Test the source's BE-at-2RR rule as a variant.
