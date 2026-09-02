@@ -695,9 +695,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T09:33:22Z"
     },
     "notes": "KEPT ON THE RATCHET -- only the second change ever kept. PF 0.9121->0.9321 AND max drawdown 28.780%->23.432%, so both terms moved the right way with no tolerance needed. Crucially this is NOT the pruning pattern that killed attacks 2 and 5: trade count fell only 36% (433->279) while PF ROSE and the win rate held at 38.7%. Net loss more than halved, -23.0%->-12.7%. The complement -- the low-volatility half -- is therefore implied to be materially worse than the 0.9121 aggregate, and runs next cycle to complete the decomposition. PF is still below 1.0, so this is a better description of where the signal lives, not yet a profitable system."
+  },
+  {
+    "id": "vwm-regime-lowvol",
+    "name": "VWM base restricted to the low-volatility regime",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "Regime decomposition, half 2 of 2. The VWM + EMA200 signal restricted to bars where ATR14/close is at or below its own 200-bar average -- the exact complement of the kept high-volatility half. Run as a measurement to complete the split. Long only.",
+    "metrics": {
+      "netProfitPct": -15.48445255,
+      "profitFactor": 0.87505903,
+      "maxDrawdownPct": 23.11687389,
+      "totalTrades": 230,
+      "winRatePct": 38.69565217,
+      "avgTradePct": -0.06732371
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GQSBZBN2JC49RWPTMTGJ9B",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GQSBZBQNA31WGWARPCMKE8",
+      "verifiedAt": "2026-09-02T09:39:16Z"
+    },
+    "notes": "THE COMPLEMENT, AND IT SIZES THE REGIME EFFECT HONESTLY. PF 0.8751 against the high-vol half's 0.9321, a real gap of 0.057 -- but BOTH halves lose, so regime conditioning improves the description without rescuing the signal. The most striking detail is that the win rate is identical to two decimal places, 38.70% vs 38.71%. The entire difference sits in the payoff ratio, 1.386 vs 1.476: volatility does not change how often this signal is right, only how far price travels before the fixed 2R target or the 96-bar time stop resolves the trade. CAVEAT ON THE ARITHMETIC: the halves total 509 trades against the mixed base's 433, because each half runs independently and can take signals the mixed run was already in a position for. The split is therefore approximate, not a strict partition."
   }
 ];
-const BUILT = "2026-09-02 03:34";
+const BUILT = "2026-09-02 03:39";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

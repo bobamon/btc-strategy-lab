@@ -54,6 +54,7 @@ The board is open.
 | Attack 5 — volume confirmation | 0.9121 | 28.8% | 0.8392 | **26.9%** | **REVERTED** — PF is the binding term |
 | Attack 7 — target 2R → 3R | 0.9121 | 28.8% | 0.9100 | 33.0% | **REVERTED** — PF flat, DD worse |
 | **Regime split — high-vol only** | 0.9121 | 28.8% | **0.9321** | **23.4%** | **KEPT** — both terms improved |
+| Regime split — low-vol complement | 0.9121 | 28.8% | 0.8751 | 23.1% | measurement only, not a candidate |
 
 ## CURRENT BASE — what cycle 008 starts from
 **007's LONG leg.** It has the best raw hit rate of anything tested in this lab: **38.3%** across 457
@@ -195,3 +196,38 @@ closed: the earlier attacks were all measured against a base that mixed two regi
 that failed on the mixture is not necessarily a filter that fails inside the high-vol regime. The
 reverted list stands, but **re-testing the single best of them against the new base is legitimate**
 once the decomposition is complete.
+
+
+## THE DECOMPOSITION IS COMPLETE — AND IT SIZES THE EFFECT HONESTLY (2026-09-02)
+
+| | High-vol (kept) | Low-vol | Old mixed base |
+|---|---|---|---|
+| Profit factor | **0.9321** | 0.8751 | 0.9121 |
+| Win rate | 38.71% | 38.70% | 38.3% |
+| avgWin / avgLoss | 1.476 | 1.386 | 1.498 |
+| Trades | 279 | 230 | 433 |
+| Net return | −12.7% | −15.5% | −23.0% |
+
+**The regime effect is real but modest, and it does not rescue the signal.** A 0.057 gap in profit
+factor, with **both halves still below 1.0**. The hypothesis was worth the two credits it cost — it
+produced the only KEPT change since attack 1 — but it does not overturn the frontier conclusion.
+
+**The sharpest detail is the win rate: 38.70% vs 38.71%, identical to two decimal places.** Volatility
+does not change how *often* this signal is right. The entire difference lives in the payoff ratio,
+1.476 vs 1.386 — how far price travels before the fixed 2R target or the 96-bar time stop resolves
+the trade. That is consistent with everything else this lab has measured: **the hit rate of the
+VWAP-reclaim signal is a hard ~38% that nothing has moved**, through five entry filters, one exit
+change and now a regime split.
+
+**Caveat on the arithmetic, stated plainly:** the two halves total 509 trades against the mixed
+base's 433. They are not a strict partition — each half runs independently and can take signals the
+mixed run was already in a position for. The comparison is sound directionally; the trade counts do
+not add up and should not be presented as though they do.
+
+### Where this leaves the lab
+Every lever that acts on *this signal* has now been tried: entry filtering (×5), exit sizing (×1),
+and regime conditioning (×1). The profit factor has never left 0.84–0.94 and the win rate has never
+left ~38%. **The remaining move is the one that adds a different return stream rather than reshaping
+this one — the short leg, rebuilt from its own geometry.** It is now unambiguously the top item, and
+the standing objective that it must never be mirrored off the long leg still binds: that failure has
+been recorded three times in the War Formation lab and once here.
