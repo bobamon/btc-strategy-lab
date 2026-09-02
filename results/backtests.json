@@ -1457,32 +1457,32 @@
   "notes": "THE PREDICTION HELD, AND THE SPREAD EFFECTIVELY CLOSED. Old base H1 1.55157635 / H2 0.77846786, spread 0.773. New base H1 1.30542369 / H2 1.30384915, spread 0.0016 -- a 99.8% reduction, and it happened in the predicted DIRECTION: H2 rose 0.525 while H1 gave back 0.246. This was registered before the runs, not fitted after. HONEST QUALIFICATIONS: (1) the gain was a TRADE, not free -- edge in the trending half was given up to fix the choppy half, though whole-sample PF still went 1.153 to 1.304; (2) the halves reach the same profit factor by DIFFERENT ROUTES -- H1 wins 51.11% with payoff 1.249, H2 wins 43.75% with payoff 1.676 -- so near-identical PF conceals visibly different composition; (3) 45 and 32 trades are below the interpretability floor enforced on Attack 24, so the DIRECTION of the spread is read and neither half is quoted as a standalone result."
  },
  {
-  "id": "wf-e42-no-coil-alcm",
-  "name": "WF E42 no coil under ALCM",
+  "id": "vwm-attack26-no-green-bar",
+  "name": "VWM Attack26 no green bar",
   "symbol": "BTCUSDT",
-  "timeframe": "1m",
-  "direction": "both",
-  "status": "rejected",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "testing",
   "createdDate": "2026-09-02",
   "lastTestedDate": "2026-09-02",
-  "backtestStart": "2025-12-16",
-  "backtestEnd": "2026-05-03",
-  "specPath": "war-formation/ORACLE-RULES.md",
-  "description": "The coil binding test under the CORRECTED A.L.C.M. exit. E32 found the coil load-bearing and E33/E34 found its threshold knife-edged, but all three measured it against the structural stop the user corrected as wrong. One change from E38 (2000 dollar shield, rr 2.0, maxBars 4320): coilPrev removed from BOTH conjunctions, one requirement rather than two changes.",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "The LAST untested signal term. One change from the coolBars 120 base: close > open removed. HARD LESSON 15 -- both KEPT-adjacent findings in this lab came from signal terms rather than filters. Redundancy hypothesis stated first (HARD LESSON 18): pulledBack already requires close > vw, so the green-bar test may be a second statement of the same idea.",
   "metrics": {
-   "netProfitPct": -14.2382622,
-   "profitFactor": 0.64544502,
-   "maxDrawdownPct": 22.9521393,
-   "totalTrades": 68,
-   "winRatePct": 20.58823529,
-   "avgTradePct": -0.20938621
+   "netProfitPct": 16.75038342,
+   "profitFactor": 1.34992461,
+   "maxDrawdownPct": 7.14265422,
+   "totalTrades": 85,
+   "winRatePct": 48.23529412,
+   "avgTradePct": 0.19706333
   },
   "provenance": {
    "source": "trader.dev",
-   "jobId": "adhoc_01M1HZMJAD51S1T379K1FPYZ4K",
-   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HZMJADP40M9NAVPMSAC29W",
-   "verifiedAt": "2026-09-02T21:16:00Z"
+   "jobId": "adhoc_01M1HZTSEC172F86WRPFTCA322",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HZTSECTG1S0770ZWEE3AG5",
+   "verifiedAt": "2026-09-02T21:22:00Z"
   },
-  "notes": "REVERTED -- and the coil SURVIVES the exit correction, which was the first of three outcomes registered before the run. E38 PF 1.50193294 / DD 10.82866633% / 21 trades; without the coil PF 0.64544502 / DD 22.95213930% / 68 trades. Count triples, profit factor collapses, drawdown doubles. So v6's demotion was about coilK's THRESHOLD, not about the coil, and the term is genuinely load-bearing under both exit models. THE LEG SPLIT IS THE NEW FINDING: long 25 trades, 13 wins (52.0%), -$210.86; short 43 trades, ONE win (2.3%), -$1,212.97. The coil does almost all of its work on the SHORT leg -- without it the long side is near scratch while the short side takes 43 trades and wins one. Against thirteen failed short constructions in this lab, that is the most specific account yet of why the shorts fail: they are unfiltered without the coil. Note also E32 removed the coil on a different window and got 67 trades against E42's 68."
+  "notes": "KEPT -- the THIRD change ever kept in this lab, and it passes both ratchet terms while BUYING BACK SAMPLE. Base PF 1.30380521 / DD 8.12167991% / 77 trades; without close > open PF 1.34992461 / DD 7.14265422% / 85 trades / +16.75% return. THE REDUNDANCY HYPOTHESIS WAS RIGHT: the term excluded only 8 of 85 candidates, 9.4%, making it by a wide margin the LEAST binding term in the base -- against coolingOff at 60%, pulledBack at 43% and the trend pair at 20%. And the 8 it blocked were net positive, so it was a mild NEGATIVE filter, not decoration. pulledBack already requires close > vw; the green-bar test was largely restating it, exactly the pattern Attack 20 found for the trend pair. THIS MATTERS BEYOND THE RATCHET: Attack 25 closed the regime gap but left 77 trades as the binding constraint, and this is the first change to relieve that constraint rather than tighten it. ALL SEVEN ORIGINAL SIGNAL TERMS HAVE NOW BEEN BINDING-TESTED. The base is six terms and nothing in it is untested."
  }
 ]

@@ -1489,3 +1489,58 @@ thing that has ever made them survivable. The long leg does not depend on it nea
    here in many cycles.
 2. **Position sizing.** DD 10.83% is a 1x figure; at the ~50x a $2,000 shield implies it is far past
    total loss. Still the largest unsolved problem, and better profit factors do not touch it.
+
+
+---
+
+# ██ E43 — ASYMMETRIC FILTERING FAILS, AND IT CORRECTS WHAT E42 CONCLUDED
+
+E42's leg split suggested the coil was doing nearly all its work on the short side, so E43 required it
+on the short leg only — the first asymmetric build in this lab.
+
+| | E38 | E43 (coil on shorts only) |
+|---|---|---|
+| Profit factor | **1.50193294** | 0.92252113 |
+| Max drawdown | **10.82866633%** | 16.73115958% |
+| Trades | 21 | 39 |
+| Win rate | — | 35.8974359% |
+
+**REVERTED** — worse on both terms, which was the second of the three outcomes registered in advance.
+
+## THE CORRECTION — I OVER-READ E42 AND THE LOG SHOULD SAY SO
+| Leg | Trades | Wins | Win rate | Net |
+|---|---|---|---|---|
+| Long (**no** coil) | 25 | 14 | **56.0%** | **+$219.95** |
+| Short (**with** coil) | 14 | **0** | **0.0%** | −$482.61 |
+
+After E42 I wrote that the coil *"is the only thing that has ever made the shorts survivable."*
+**That is wrong.** Fully coil-filtered shorts went **0-for-14** here. The coil reduces short DAMAGE by
+reducing short COUNT — it does not select winning shorts. The distinction matters because the first
+reading suggests a filter worth tuning, and the second suggests a leg worth deleting.
+
+And the unfiltered LONG leg was **profitable** (+$219.95 on 56% wins), which is not what "the long
+needs the coil too" would predict either. The verdict against E43 is real; the explanation I would
+have given for it was not.
+
+## THE QUESTION THIS RAISES ABOUT E38, WHICH THE LOG CANNOT CURRENTLY ANSWER
+If coil-filtered shorts win nothing, **E38's PF 1.50193294 on 21 trades may rest on roughly seven
+longs.** E38's leg split was never recorded — only its aggregate. The lab's best ALCM configuration
+may therefore be a single-digit-sample long strategy carrying a dead short leg, and nothing in the log
+distinguishes that from the reading it has been given.
+
+**That is a hole in the record of the current best result, and it outranks every other queue item.**
+
+## A CONFOUND WORTH NAMING: THE LEGS ARE NOT INDEPENDENT
+Only one position runs at a time, so a long that fires blocks a short and vice versa. The long leg
+produced **25 trades and −$210.86 in E42** but **25 trades and +$219.95 in E43** — identical count,
+opposite sign, different occupancy. Leg-level numbers from different builds are therefore NOT directly
+comparable, and this qualifies E42's split as well as this one.
+
+## QUEUE
+1. **Re-run E38 and record its LONG/SHORT SPLIT.** The best configuration in this lab has an unrecorded
+   composition and E43 gives specific reason to doubt it. Nothing else should be tuned until this is
+   known.
+2. **Then: E38 long-leg only, shorts deleted entirely.** If the shorts are a dead weight rather than a
+   filterable leg, removing them is the change that follows — and fourteen short constructions would
+   then have a single, simple conclusion.
+3. **Position sizing.** DD 10.83% is a 1x figure; at ~50x it is far past total loss. Unchanged.

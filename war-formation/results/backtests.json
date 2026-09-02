@@ -1456,5 +1456,63 @@
    "verifiedAt": "2026-09-02T21:00:42Z"
   },
   "notes": "THE BOUNDARY CASE, AND IT VINDICATES THE SPECIFICATION RATHER THAN UNDERCUTTING IT. PF 1.28571366, DD 10.60316412% (the lowest of the series), 27 trades (the largest sample of the series). Worse than both $1,500 and $2,000 on profit factor. THAT IS THE IMPORTANT PART: the pre-registered risk was that a tight stop would outperform every ALCM width, which would have meant this entry simply prefers a conventional stop and the shield premise is decorative. It did not happen. The optimum sits at $2,000, INSIDE the ALCM range and well away from the ~100x tight-stop boundary, so the shield concept holds on its own terms. Also worth noting the trade count rises monotonically as the shield tightens (19/20/21/23/27), which is the sample-size lever this lab needs -- but buying sample by tightening the shield costs profit factor."
+ },
+ {
+  "id": "wf-e42-no-coil-alcm",
+  "name": "WF E42 no coil under ALCM",
+  "symbol": "BTCUSDT",
+  "timeframe": "1m",
+  "direction": "both",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2025-12-16",
+  "backtestEnd": "2026-05-03",
+  "specPath": "war-formation/ORACLE-RULES.md",
+  "description": "The coil binding test under the CORRECTED A.L.C.M. exit. E32 found the coil load-bearing and E33/E34 found its threshold knife-edged, but all three measured it against the structural stop the user corrected as wrong. One change from E38 (2000 dollar shield, rr 2.0, maxBars 4320): coilPrev removed from BOTH conjunctions, one requirement rather than two changes.",
+  "metrics": {
+   "netProfitPct": -14.2382622,
+   "profitFactor": 0.64544502,
+   "maxDrawdownPct": 22.9521393,
+   "totalTrades": 68,
+   "winRatePct": 20.58823529,
+   "avgTradePct": -0.20938621
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1HZMJAD51S1T379K1FPYZ4K",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HZMJADP40M9NAVPMSAC29W",
+   "verifiedAt": "2026-09-02T21:16:00Z"
+  },
+  "notes": "REVERTED -- and the coil SURVIVES the exit correction, which was the first of three outcomes registered before the run. E38 PF 1.50193294 / DD 10.82866633% / 21 trades; without the coil PF 0.64544502 / DD 22.95213930% / 68 trades. Count triples, profit factor collapses, drawdown doubles. So v6's demotion was about coilK's THRESHOLD, not about the coil, and the term is genuinely load-bearing under both exit models. THE LEG SPLIT IS THE NEW FINDING: long 25 trades, 13 wins (52.0%), -$210.86; short 43 trades, ONE win (2.3%), -$1,212.97. The coil does almost all of its work on the SHORT leg -- without it the long side is near scratch while the short side takes 43 trades and wins one. Against thirteen failed short constructions in this lab, that is the most specific account yet of why the shorts fail: they are unfiltered without the coil. Note also E32 removed the coil on a different window and got 67 trades against E42's 68."
+ },
+ {
+  "id": "wf-e43-coil-shorts-only",
+  "name": "WF E43 coil on shorts only",
+  "symbol": "BTCUSDT",
+  "timeframe": "1m",
+  "direction": "both",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2025-12-16",
+  "backtestEnd": "2026-05-03",
+  "specPath": "war-formation/ORACLE-RULES.md",
+  "description": "Asymmetric filtering, a first for this lab: coilPrev required on the SHORT leg only, dropped from the long. Motivated by E42's leg split, which showed the coil doing nearly all its work on the short side. One change from E38 (2000 dollar shield, rr 2.0, maxBars 4320).",
+  "metrics": {
+   "netProfitPct": -2.62661347,
+   "profitFactor": 0.92252113,
+   "maxDrawdownPct": 16.73115958,
+   "totalTrades": 39,
+   "winRatePct": 35.8974359,
+   "avgTradePct": -0.06734906
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1HZVX4ZJK4PNVFYG1P13GHY",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HZVX4ZW5TNKKAF2H292EX2",
+   "verifiedAt": "2026-09-02T21:22:00Z"
+  },
+  "notes": "REVERTED -- worse on both terms against E38 (PF 1.50193294 / DD 10.82866633% / 21 trades vs 0.92252113 / 16.73115958% / 39). BUT THE LEG SPLIT CORRECTS WHAT I WROTE LAST CYCLE. Long without the coil: 25 trades, 14 wins (56.0%), +$219.95 -- PROFITABLE. Short WITH the coil: 14 trades, ZERO wins, -$482.61. After E42 I wrote that the coil is the only thing that has ever made the shorts survivable. That is wrong: fully coil-filtered shorts went 0-for-14. The coil reduces short DAMAGE by reducing short COUNT; it does not select winning shorts. THIS RAISES A QUESTION ABOUT E38 THAT THE LOG CANNOT ANSWER: if coil-filtered shorts win nothing, E38's PF 1.502 on 21 trades may rest on roughly seven longs. E38's leg split was never recorded -- that gap is now queue item 1. CONFOUND NAMED: the legs are not independent, because only one position runs at a time. The long leg produced 25 trades and -$210.86 in E42 but 25 trades and +$219.95 in E43, same count, different occupancy."
  }
 ]

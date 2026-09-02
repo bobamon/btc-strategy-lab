@@ -131,6 +131,7 @@ should be rejected without spending a credit on it.
 
 | Cycle | Change to the base | Result | Kept? |
 |---|---|---|---|
+| Attack 26 | Remove `close > open` | PF 1.3038→1.3499, DD 8.12%→7.14%, trades 77→85 | **KEPT — the new base.** A mild NEGATIVE filter |
 | Attack 22 | `coolBars` 60 → 30 | PF 1.1525→1.0034, DD 16.54%→22.52%, trades 166→231 | **REVERTED** — half the stand-down is almost exactly break-even |
 | Attack 23 | `coolBars` 60 → 120 | PF 1.1525→**1.3038**, DD 16.54%→**8.12%**, trades 166→77 | **KEPT — the new base.** Largest ratchet pass in this lab |
 | Attack 24 | `coolBars` 120 → 240 | PF 2.3023, DD 2.00%, **7 trades** | **REJECTED as uninterpretable** — not as worse |
@@ -1267,3 +1268,67 @@ A single number agreeing this precisely on 45 and 32 trades also deserves suspic
 
 **BASE: PF 1.30380521, DD 8.12167991%, 77 trades, `coolBars` 120, long-only. Still no champion** —
 but for the first time the obstacle is sample size rather than a broken half.
+
+
+## ██ ATTACK 26 — THE LAST UNTESTED TERM WAS A MILD NEGATIVE FILTER. KEPT. (2026-09-02)
+
+Seven terms made up `goLong`. Six had been binding-tested across Attacks 12–21. `close > open` — the
+requirement that the entry bar be green — had never been touched.
+
+| | Base (`coolBars` 120) | **Attack 26** |
+|---|---|---|
+| Profit factor | 1.30380521 | **1.34992461** |
+| Max drawdown | 8.12167991% | **7.14265422%** |
+| Trades | 77 | **85** |
+| Win rate | 48.05% | 48.23% |
+| Net return | +12.68% | **+16.75%** |
+
+**KEPT — the third change ever kept here, and it passes both ratchet terms while BUYING BACK SAMPLE.**
+
+### THE REDUNDANCY HYPOTHESIS WAS RIGHT, AND IT WAS STATED BEFORE THE RUN
+`pulledBack` already requires `close > vw` — the bar must close back above VWAP. On a bar that dipped
+to VWAP + 0.5σ and closed back above it, being green is very often implied. The prediction was that
+the count would barely move.
+
+**It excluded 8 of 85 candidates — 9.4%.** The binding table now reads:
+
+| Term | Share of candidates excluded |
+|---|---|
+| `coolingOff` | 60% |
+| `pulledBack` | 43% |
+| trend pair (`vwUp` + `trendOk`) | 20% |
+| **`close > open`** | **9.4%** |
+
+**By a wide margin the least binding term in the base** — and the eight it blocked were net positive,
+so it was not decoration but a mild **negative** filter. Same shape as Attack 20's trend pair: two
+terms encoding one idea, the second adding nothing but cost.
+
+### WHY THIS MATTERS MORE THAN +0.046 OF PROFIT FACTOR
+**Attack 25 closed the regime gap but left 77 trades as this lab's binding constraint.** Attack 26 is
+the first change to RELIEVE that constraint rather than tighten it — every prior keep bought quality
+by spending sample. 85 is still thin, but the direction reversed.
+
+### THE BASE IS NOW FULLY CHARACTERISED
+All seven original signal terms have been binding-tested:
+
+| Term | Verdict |
+|---|---|
+| `reachedUpper` | REMOVED (Attack 15) — decoration that cost money |
+| `close > open` | **REMOVED (Attack 26)** — a mild negative filter |
+| `coolingOff` | The hardest-binding term; a risk control, and `coolBars` 120 closed the regime gap |
+| `pulledBack` | Load-bearing — the term the strategy is actually named for |
+| `highVol` | Load-bearing, regime-dependent |
+| `vwUp` + `trendOk` | One duplicated requirement; load-bearing together, inert apart |
+
+**Six terms, nothing untested.** That is a first for this lab and closes the line of work HARD LESSON
+15 opened.
+
+### QUEUE
+1. **`coolBars` 90 and 150 on the NEW base** — the finer grid. Attack 24's upper bound was degeneracy
+   rather than a measured worse value (HARD LESSON 19), and the base has changed since.
+2. **Re-run the H1/H2 split on the new base** — Attack 25's spread closure was measured before this
+   change and should not be assumed to survive it.
+3. **Sample is still the constraint at 85 trades**, and there are no untested terms left to delete.
+
+**NEW BASE: PF 1.34992461, DD 7.14265422%, 85 trades, 48.23% win, long-only, `coolBars` 120, no
+green-bar requirement. Still no champion** — 85 trades is a direction.
