@@ -1310,5 +1310,92 @@
    "verifiedAt": "2026-09-02T20:57:49Z"
   },
   "notes": "THE HARDEST-BINDING TERM IN THE BASE BY A WIDE MARGIN, AND IT DEFENDS DRAWDOWN RATHER THAN PROFIT FACTOR. Base PF 1.15252596 / DD 16.54214281% / 166 trades; without coolingOff PF 1.07714686 / DD 28.17240888% / 413 trades. REVERTED -- PF fell 0.075 and drawdown nearly DOUBLED. It excludes 247 of 413 candidates, 60% of the population, against 43% for pulledBack and 20% for the trend pair. PRECISE READING: the profit-factor cost is modest and the DRAWDOWN cost is severe, so this term is a RISK control, not an edge term -- the trades it blocks are not much worse on average, they are worse in sequence. That matters because Attack 17 showed H2 is 13.6% choppier and coolingOff is the only term responding to flip frequency, giving the H1/H2 problem a concrete lever: tune coolBars rather than bolt on a chop filter. Also note PF 1.077 on 413 trades is the largest positive-PF sample this lab has produced."
+ },
+ {
+  "id": "vwm-attack22-coolbars-30",
+  "name": "VWM Attack22 coolBars 30",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "The tight side of the coolBars neighbourhood sweep. Attack 21 made this the highest-leverage parameter in the base -- coolingOff binds on 60% of candidates and its threshold had never been varied. One change from the Attack 15 base: coolBars 60 to 30 (2.5 hours of stand-down instead of 5).",
+  "metrics": {
+   "netProfitPct": 0.51993058,
+   "profitFactor": 1.00338859,
+   "maxDrawdownPct": 22.51971852,
+   "totalTrades": 231,
+   "winRatePct": 42.85714286,
+   "avgTradePct": 0.00225078
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1HYYH4F8TV62SB78NXBSG1A",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HYYH4FY71S5WS0967EPWC3",
+   "verifiedAt": "2026-09-02T21:10:00Z"
+  },
+  "notes": "REVERTED -- worse on both ratchet terms. Base PF 1.15252596 / DD 16.54214281% / 166 trades; at coolBars 30 PF 1.00338859 / DD 22.51971852% / 231 trades. Halving the stand-down took the strategy to almost exactly break-even and added 6pp of drawdown. Run as one half of a PAIR with Attack 23 because one side cannot distinguish a plateau from a spike -- the omission that cost the War Formation champion its title in E34."
+ },
+ {
+  "id": "vwm-attack23-coolbars-120",
+  "name": "VWM Attack23 coolBars 120",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "testing",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "The wide side of the coolBars sweep and the direct test of the chop-defence hypothesis assembled across Attacks 17 and 21. One change from the Attack 15 base: coolBars 60 to 120 (10 hours of stand-down after a VWAP flip instead of 5).",
+  "metrics": {
+   "netProfitPct": 12.67945036,
+   "profitFactor": 1.30380521,
+   "maxDrawdownPct": 8.12167991,
+   "totalTrades": 77,
+   "winRatePct": 48.05194805,
+   "avgTradePct": 0.16466819
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1HYZ2AHMQVHXK24CQHN54PE",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HYZ2AH5SZNBHQ36QSS7X3F",
+   "verifiedAt": "2026-09-02T21:10:00Z"
+  },
+  "notes": "KEPT -- the second change ever kept in this lab and by far the largest. Base PF 1.15252596 / DD 16.54214281% / 166 trades / 44.58% win; at coolBars 120 PF 1.30380521 / DD 8.12167991% / 77 trades / 48.05% win. Profit factor +0.151 and drawdown HALVED, against Attack 15's +0.13 PF and -0.14pp DD. Win rate and payoff ratio both improved too, so this is not merely fewer trades: 77 trades returned +12.68% where 231 trades at coolBars 30 returned +0.52%. CONFIRMS THE CHOP-DEFENCE HYPOTHESIS WITH A DIRECTION -- Attack 17 found H2 has 13.6% more VWAP flips, Attack 21 found coolingOff is the only term responding to flip frequency, and standing down longer improves every measured quantity. The answer to the regime gap was a parameter the strategy already had, not a fifteenth filter. CAVEAT CARRIED FORWARD, NOT BURIED: 77 trades is a thin sample and PF 1.30 on it has wide error bars; and the upper bound (Attack 24, coolBars 240) is degenerate rather than measurably worse."
+ },
+ {
+  "id": "vwm-attack24-coolbars-240",
+  "name": "VWM Attack24 coolBars 240",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "Bounding the coolBars gradient upward after Attacks 22 and 23 came back monotone. One change: coolBars 120 to 240 (20 hours). Run because promoting on an unbounded edge is the exact error that cost the War Formation champion its title in E34.",
+  "metrics": {
+   "netProfitPct": 2.39889929,
+   "profitFactor": 2.30230986,
+   "maxDrawdownPct": 1.99887631,
+   "totalTrades": 7,
+   "winRatePct": 71.42857143,
+   "avgTradePct": 0.3426999
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1HZ7HNB0SS6NPQETATE4FZZ",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HZ7HNB5WWDD88G90HSZAZ0",
+   "verifiedAt": "2026-09-02T21:10:00Z"
+  },
+  "notes": "REJECTED AS UNINTERPRETABLE, NOT AS WORSE -- and the distinction is the finding. PF 2.30230986 and DD 1.99887631% look like the best numbers in the lab, but they rest on SEVEN trades, and I registered before the run that below roughly 30 I would report the count and not the ratio. The 7 trades span 2024-09-26 to 2025-07-04: nothing at all in the final fourteen months. THE COLLAPSE IS THE INFORMATIVE PART AND IT WAS FASTER THAN PREDICTED. I wrote that 240 would land near 40; it landed at 7. Trade decay runs 231 / 166 / 77 / 7, that is -28%, -54%, then -91%. A super-exponential fall means the median gap between VWAP flips sits well below 240 bars, so at 240 the rule stops filtering chop and starts requiring a rare 20-hour flip-free stretch -- a different and much rarer condition, not more of the same one. So coolBars 120 is bounded above by DEGENERACY rather than by a measured worse value, which is a weaker bound than the shield sweep achieved in E40/E41 and is recorded as such."
  }
 ]

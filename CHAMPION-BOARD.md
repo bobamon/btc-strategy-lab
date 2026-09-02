@@ -131,6 +131,9 @@ should be rejected without spending a credit on it.
 
 | Cycle | Change to the base | Result | Kept? |
 |---|---|---|---|
+| Attack 22 | `coolBars` 60 → 30 | PF 1.1525→1.0034, DD 16.54%→22.52%, trades 166→231 | **REVERTED** — half the stand-down is almost exactly break-even |
+| Attack 23 | `coolBars` 60 → 120 | PF 1.1525→**1.3038**, DD 16.54%→**8.12%**, trades 166→77 | **KEPT — the new base.** Largest ratchet pass in this lab |
+| Attack 24 | `coolBars` 120 → 240 | PF 2.3023, DD 2.00%, **7 trades** | **REJECTED as uninterpretable** — not as worse |
 | Attack 1 | Require close above EMA200 | PF 0.89→0.91, DD 35.0%→28.8%, trades 468→433 | **KEPT** |
 | Attack 2 | Require shallow pullback (low holds above VWAP) | PF 0.91→0.85, DD 28.8%→32.6%, trades 433→342 | **REVERTED** — worse on both terms |
 | Attack 3 | Ban entries in the 1–4am ET witching window | PF 0.9121→0.9405, DD 28.780%→28.844%, trades 433→420 | **REVERTED** — PF up, DD worse by 0.064pp |
@@ -1128,3 +1131,81 @@ identified, rather than a fifteenth filter.
    wider-population version is not far below break-even-plus.
 
 **Base unchanged: PF 1.15252596, DD 16.54214281%, 166 trades, long-only. No champion.**
+
+
+---
+
+## ██ ATTACKS 22–24 — THE CHOP DEFENCE HAS A DIRECTION, AND THE NEW BASE IS coolBars 120 (2026-09-02)
+
+Attack 21 left `coolingOff` as the hardest-binding term in the base — **60% of candidates**, more than
+double any other term — and the only term that responds to VWAP flip frequency, the single structural
+property Attack 17 found separating H1 from H2. Its threshold had never been varied. Three runs this
+cycle, because HARD LESSON 16 says a parameter is not measured until both sides of it are.
+
+| coolBars | Profit factor | Max drawdown | Trades | Win rate | Net return |
+|---|---|---|---|---|---|
+| 30 (Attack 22) | 1.00338859 | 22.51971852% | 231 | 42.86% | +0.52% |
+| 60 (old base) | 1.15252596 | 16.54214281% | 166 | 44.58% | — |
+| **120 (Attack 23)** | **1.30380521** | **8.12167991%** | **77** | **48.05%** | **+12.68%** |
+| 240 (Attack 24) | 2.30230986 | 1.99887631% | **7** | 71.43% | +2.40% |
+
+### ATTACK 23 IS KEPT — THE SECOND CHANGE EVER, AND BY FAR THE LARGEST
+Profit factor **+0.151** and drawdown **halved** (−8.42pp). For scale, Attack 15 — until now the only
+change ever kept — moved PF +0.13 and drawdown −0.14 percentage points.
+
+**And it is not merely "fewer trades".** Win rate rose 3.47pp and the payoff ratio rose with it. The
+plainest statement of the result: **77 trades returned +12.68%, while 231 trades at `coolBars` 30
+returned +0.52%.** Trading a third as often made more money in absolute terms, not just better ratios.
+
+### THE CHOP-DEFENCE HYPOTHESIS IS CONFIRMED, AND IT NOW HAS A DIRECTION
+The chain took five cycles to assemble and closed here:
+- **Attack 16** — the base scores 1.552 in H1 and 0.778 in H2. The spread is the standing problem.
+- **Attack 17** — the only structural property separating them is flip frequency: **H2 has 13.6% more
+  VWAP flips per bar.** Volatility, trend and clock all failed to explain it.
+- **Attack 21** — `coolingOff` is the only term that responds to flip frequency, it is the most binding
+  term in the base, and its cost profile is drawdown-shaped rather than profit-factor-shaped — the
+  signature of a risk control.
+- **Attacks 22/23** — every measured quantity improves monotonically as the stand-down lengthens.
+
+**The response to the regime gap was a parameter the strategy already had, not a fifteenth filter.**
+That matters against this lab's record: fourteen filter attacks were reverted before this.
+
+### ATTACK 24 IS REJECTED AS UNINTERPRETABLE, NOT AS WORSE — AND THE DISTINCTION IS THE FINDING
+PF 2.30 and a 2.00% drawdown are the best numbers this lab has printed. They rest on **seven trades**,
+spanning 2024-09-26 to 2025-07-04 — **nothing at all in the final fourteen months.** I registered
+before the run that below roughly 30 trades I would report the count and not the ratio, and I am.
+
+**The collapse is the informative part, and it was faster than I predicted.** I wrote that 240 would
+land near 40. It landed at 7. The decay runs **231 / 166 / 77 / 7** — −28%, −54%, then **−91%**.
+A super-exponential fall means the median gap between VWAP flips sits well below 240 bars, so at 240
+the rule stops filtering chop and starts **requiring a rare 20-hour flip-free stretch** — a different
+and much rarer condition, not more of the same one.
+
+### THE HONEST WEAKNESS IN THIS PROMOTION, STATED RATHER THAN BURIED
+Two things qualify the new base and neither should be lost:
+
+1. **77 trades is thin.** PF 1.30 on 77 trades carries wide error bars. The old base had 166.
+2. **120 is bounded above by DEGENERACY, not by a measured worse value.** That is a weaker bound than
+   the sister lab achieved for the $2,000 shield in E40/E41, where both neighbours came back
+   *measurably* worse and drew an actual curve. Here the upper neighbour simply ran out of data.
+
+So `coolBars` 120 is promoted **because it strictly passes the ratchet with both neighbours measured**,
+and it is recorded with those two caveats attached, not despite them.
+
+### THE PREDICTION THAT WOULD VALIDATE THIS — REGISTERED NOW, BEFORE THE TEST
+If `coolBars` 120 genuinely fixes chop, then **the H1/H2 spread should narrow**, because H2 is the
+choppier half and the chop is what the longer stand-down removes. Attack 16 measured that spread on
+the old base: **H1 1.552, H2 0.778, gap 0.773.**
+
+**If the gap does not narrow, the promotion is a whole-sample coincidence and I will say so.** This is
+the strongest available falsification and it is cheap — two runs on the halves.
+
+### QUEUE
+1. **Re-run the H1/H2 split on the NEW base** (the registered prediction above). Two runs, together.
+2. **Then `close > open`** — still the last untested signal term, now against the new base.
+3. **Then re-test `coolBars` 90 and 150** if the sample thinness becomes the binding objection — a
+   finer grid around 120 would tell us whether the peak is broad, which the 60/120/240 grid cannot.
+
+**NEW BASE: PF 1.30380521, DD 8.12167991%, 77 trades, 48.05% win, long-only, `coolBars` 120.**
+**Still no champion** — a champion needs a validated result, and a 77-trade profit factor is a
+direction.

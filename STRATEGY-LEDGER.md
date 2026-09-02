@@ -687,3 +687,37 @@ then not the term's contribution but the *residual* not already covered by its p
   verdicts in the first place.
 - **The reverse also holds:** a term that looks load-bearing may only be so because it is standing in
   for a partner that was deleted earlier. Re-check surviving terms after any removal.
+
+
+---
+
+## ██ HARD LESSON 19 — "BOUNDED BY A WORSE VALUE" AND "BOUNDED BY DEGENERACY" ARE DIFFERENT BOUNDS
+
+*(BTC Attacks 22–24, 2026-09-02, against War Formation E40/E41)*
+
+HARD LESSON 16 says a parameter is not measured until both of its neighbours are. Attacks 22–24 show
+that satisfying it **literally** can still leave a weak result, because there are two ways a
+neighbour can fail and only one of them is evidence about the parameter.
+
+`coolBars` 30 / 60 / 120 / 240 gave PF 1.003 / 1.153 / 1.304 / 2.302 on 231 / 166 / 77 / **7** trades.
+The 240 case has the best ratios in the lab and tells us nothing: seven trades, none in the final
+fourteen months of the window.
+
+**Why:** a neighbour that comes back *measurably worse* is a reading of the response curve — it says
+the parameter has an interior optimum. A neighbour that comes back *degenerate* says only that the
+condition stopped occurring. The first bounds the peak; the second bounds the DATA. Quoting an
+interior optimum on the strength of the second overstates what was measured.
+
+The sister lab's shield sweep is the contrast: $1,000 through $4,000 all produced 19–27 trades, so
+every point was a real reading and $2,000 sat on an actual curve. Here the upper side ran out.
+
+**How to apply:**
+- **Record which kind of bound you have.** "Both neighbours measured" is not sufficient detail; say
+  whether each neighbour was worse or was degenerate.
+- **Watch the trade count's SECOND difference, not just its level.** Decay of −28%, −54%, −91% is not
+  a filter tightening smoothly — a super-exponential fall means the condition has moved into the tail
+  of its own distribution and has become a *different, rarer* condition rather than more of the same.
+- **Set the interpretability floor BEFORE the run and honour it.** The floor is what stops a
+  seven-trade PF of 2.30 from being read as the best result ever produced.
+- **A degenerate upper bound is a queue item, not a closed question.** The fix is a finer grid on the
+  measurable side (90, 150), which can still distinguish a broad peak from a narrow one.
