@@ -114,6 +114,7 @@ lower bound on the system, not a verdict on it.**
 | v2 | + Type 2 validation gate (engulfing 48m in bias, `valLife` 3) | **0 TRADES** · [report](https://mcp-api.trader.dev/backtest/01M1GNBA7TRRHRYK61KXZADD4F) |
 | v3 | Same cascade ported to a 15m base (4H/12H/2D), 4.7 years | PF 0.64, 94 trades, longs 10/35, shorts 5/59 · [report](https://mcp-api.trader.dev/backtest/01M1GNPDBWJD63TBCV11SYY30H) |
 | v4 | 0a re-test: Type 2 gate (engulfing 4H in bias, `valLife` 3) on the **v3 15m base** | **0 TRADES** · [report](https://mcp-api.trader.dev/backtest/01M1GP6D1N4V36G2M6T7CR6BQ4) |
+| v5 | Latched tap + zone invalidation + Type 2 gate (0a+0b merged) | **2 trades**, both losses, PF 0 -- latch fixed, but validation is still an instant · [report](https://mcp-api.trader.dev/backtest/01M1GQ0RFWSXSK5XM54A3DSXT0) |
 
 **v3 lesson — v1's PF 0.91 was noise.** The same cascade measured on 4.7 years instead of 4.6 months
 gives PF 0.64 across 94 trades. The larger sample is the trustworthy one. This is the sample-size fix
@@ -165,11 +166,32 @@ STRATEGY-LEDGER.md as HARD LESSON 8.
 a live flag that persists until the zone invalidates — and entry fires on the engulf that arrives
 *afterwards*. That merges 0b-FIRST and 0a into one coherent mechanism, which is what v5 will be.
 
+## v5 LESSON — THE SAME BUG, ONE LEVEL DOWN
+The latch worked. v2 and v4 produced zero trades; v5 produced trades, so requiring the tap as a
+persistent STATE rather than a same-bar coincidence was the right fix. But only 2 trades in 4.7
+years, which is not a sample and not evidence about the strategy -- it is evidence about the code.
+
+**The validation is still an instant.** `validBull` is true for exactly one bar every four hours,
+the moment a new 4H candle opens behind an engulfing one. Every other gate -- bias, zone, structure,
+slope, extension, break counts -- has to happen to be true on precisely that bar. That is HARD
+LESSON 8 again, one level down: I latched the setup and left the trigger as a coincidence.
+
+**In the source a validation is a STATE, not an event.** It persists until the zone invalidates:
+
+> "If the next candle right after this just is a body closed down here, then that immediately
+> invalidates it. And then we just need a new triple M or a new engulfing candle."
+
+**v6: latch BOTH.** A tap arms the zone; an engulfing candle arms the validation; both persist until
+a 12H body close kills the zone; entry fires on the first bar where both are live and the
+trend/extension gates permit. Then, and only then, is the mechanism a fair test of the system.
+
 ## Open queue
 0. ~~Get definitions for Type 1/Type 2~~ — **DONE 2026-09-02, see VOCABULARY.md.**
    Type 1 = a 3M candle; Type 2 = an engulfing candle in the direction of bias; both only on the
    STRUCTURE timeframe (48m for this variant), inside the tapped zone.
-0-V5-NEXT. **LATCHED TAP + VALIDATION AS ONE MECHANISM (top priority, supersedes 0a and 0b-FIRST).**
+0-V5. ~~LATCHED TAP + VALIDATION~~ — **DONE (v5). Latch works; 2 trades. See the v5 lesson.**
+0-V6-NEXT. **LATCH THE VALIDATION TOO (top priority).** Both the tap and the Type 2 validation become
+    persistent states that die with the zone. Entry on the first bar both are live. Original v5 text:
     A zone tap sets `tapLive := true`. It stays live until the zone invalidates (a BODY close beyond
     the zone on the zone's own timeframe). While it is live, the FIRST engulfing 4H candle in the
     direction of bias fires the entry. Never test tap and engulf on the same bar again — see the v4

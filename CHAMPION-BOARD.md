@@ -52,6 +52,7 @@ The board is open.
 | Attack 3 — witching-hour ban | 0.9121 | 28.780% | **0.9405** | 28.844% | **REVERTED** — borderline, see note |
 | Attack 4 — R floor 0.8% → 1.2% | 0.9121 | 28.8% | 0.8845 | 36.6% | **REVERTED** |
 | Attack 5 — volume confirmation | 0.9121 | 28.8% | 0.8392 | **26.9%** | **REVERTED** — PF is the binding term |
+| Attack 7 — target 2R → 3R | 0.9121 | 28.8% | 0.9100 | 33.0% | **REVERTED** — PF flat, DD worse |
 
 ## CURRENT BASE — what cycle 008 starts from
 **007's LONG leg.** It has the best raw hit rate of anything tested in this lab: **38.3%** across 457
@@ -128,8 +129,37 @@ should be rejected without spending a credit on it.
 | Attack 3 | Ban entries in the 1–4am ET witching window | PF 0.9121→0.9405, DD 28.780%→28.844%, trades 433→420 | **REVERTED** — PF up, DD worse by 0.064pp |
 | Attack 4 | Raise R floor 0.8% → 1.2% | PF 0.912→0.885, DD 28.8%→36.6%, win rate 38.3%→40.2% | **REVERTED** — wider stops mean bigger losses |
 | Attack 5 | Require volume above the 50-bar average on the reclaim | PF 0.912→0.839, DD 28.8%→26.9%, trades 433→241, commission $3,954→$2,078 | **REVERTED** — fee saving realised, edge lost with it |
+| Attack 7 | Raise the target 2R → 3R | PF 0.9121→0.9100, DD 28.8%→33.0%, payoff 1.498→1.787, win rate 38.3%→33.7% | **REVERTED** — payoff gain exactly cancelled by win-rate loss |
 
-7. **Attack the EXIT, not the entry.** Every attack so far has been an entry filter. The system lives
+7. ~~Attack the EXIT, not the entry~~ — **DONE, REVERTED.** See the frontier note below.
+8. **Attack the EXIT, original text:** Every attack so far has been an entry filter. The system lives
    on `avgWin/avgLoss` = 1.50 at a 38% win rate, which needs ~40% to break even. Nothing has yet
    tried to move the payoff ratio on the trades already being taken — a wider target, a partial at
    1R, a time-based exit tuned to the 49-bar average hold. This is the untouched half of the system.
+
+
+## ⚠️ THE SIGNAL SITS ON AN ISO-PF FRONTIER (2026-09-02, after Attack 7)
+Attack 7 raised the target from 2R to 3R. It worked, mechanically and precisely:
+
+| | Base (2R) | 3R target |
+|---|---|---|
+| avgWin / avgLoss | 1.498 | **1.787** (+19%) |
+| Win rate | 38.3% | 33.7% (−4.6pp) |
+| Profit factor | 0.9121 | 0.9100 |
+| Net return | −23.0% | −23.02% |
+
+**The payoff gain and the win-rate loss cancelled to two decimal places.** The 2R and 3R points lie
+on the same iso-profit-factor curve, so moving along the risk-reward axis is *neutral* for this
+signal — there is no target setting that rescues it.
+
+**Put this beside the Attack 5 falsification and the picture closes.** Entry selection has been
+attacked five times and exit sizing once, and the profit factor has never left the 0.84–0.94 band.
+The two halves of a trade are the only two things a parameter can touch. **PF ≈ 0.91 is a property
+of the VWAP-reclaim signal itself, not of how it is filtered or harvested.**
+
+**Therefore: stop tuning this base.** No further parameter change on the VWM long leg should be
+funded. What remains genuinely untried is a *different source of return*:
+- the **short leg**, rebuilt from its own geometry (adds a return stream rather than reshaping one);
+- **regime conditioning** — the same signal may have PF well above 1 in one market state and well
+  below in another, which the 4.7-year aggregate would hide. That is a measurement, not a filter,
+  and it is the one question the lab has never asked of this base.

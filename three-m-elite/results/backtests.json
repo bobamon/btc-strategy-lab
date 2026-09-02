@@ -57,5 +57,34 @@
       "verifiedAt": "2026-09-02T09:03:21Z"
     },
     "notes": "THIS SUPERSEDES v1 AS THE REFERENCE MEASUREMENT, despite the lower profit factor. v1 showed PF 0.91 on 20 trades across 4.6 months; v3 shows PF 0.64 on 94 trades across 4.7 years of the SAME cascade. The larger sample is the trustworthy one, and it says v1's 0.91 was noise. Leg split: longs 35 trades (10 winners, 28.6%, -$576), shorts 59 (5 winners, 8.5%, -$820) -- both lose, shorts much worse, the same pattern as every short in this project. Payoff ratio 3.37:1 needs ~23% wins to break even and delivered 16.0%. This is the sample-size fix doing its job: it did not improve the strategy, it revealed that the earlier number was not evidence. Gates can now be tested against a base with a usable trade count."
+  },
+  {
+    "id": "3m-elite-v5-latched-tap",
+    "name": "3M ELITE v5 latched tap + Type 2 validation",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Queue item 0-V5. The zone tap now LATCHES instead of being required on the entry bar, and the latch lives until the zone invalidates (a completed 12H candle whose body closes beyond it). While the latch is live, an engulfing 4H candle in the direction of bias fires the entry. This merges queue items 0a and 0b into one mechanism and fixes the HARD LESSON 8 defect behind v2 and v4.",
+    "metrics": {
+      "netProfitPct": -1.3695132,
+      "profitFactor": 0.0,
+      "maxDrawdownPct": 3.72092396,
+      "totalTrades": 2,
+      "winRatePct": 0.0,
+      "avgTradePct": -0.6847566
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GQ0RFWAM5QPSYE3YEGAW5G",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GQ0RFWSXSK5XM54A3DSXT0",
+      "verifiedAt": "2026-09-02T09:25:50Z"
+    },
+    "notes": "THE LATCH WORKS BUT A SECOND SIMULTANEITY BUG REMAINS. 2 trades over 4.7 years, both losses -- a meaningless sample, recorded for provenance, NOT evidence about the strategy. The progress is real: v2 and v4 produced zero trades and this produced some, so latching the tap fixed the defect it was meant to fix. The remaining defect is the same shape one level down. validBull is true for exactly ONE bar every four hours, the instant a new 4H candle opens behind an engulfing one, and every other gate (bias, zone, structure, slope, extension, break counts) must happen to be true on that same bar. The VALIDATION must latch too. In the source a validation persists until the zone invalidates -- it is a state, not an instant. v6 latches both."
   }
 ]

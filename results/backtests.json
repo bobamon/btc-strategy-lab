@@ -411,5 +411,34 @@
       "verifiedAt": "2026-09-02T09:22:21Z"
     },
     "notes": "REVERTED on the ratchet: PF 0.9121->0.8392. Drawdown did improve (28.78%->26.89%) but PF is the binding term. THE IMPORTANT PART IS WHY. The gate cut trades 433->241, a 44% reduction, and halved the commission bill from $3,954 to $2,078 -- exactly the fee saving the attack list was designed to capture. Net return still got WORSE, -23.0%->-25.4%. The trades it removed were net positive contributors. Win rate barely moved (38.3%->37.8%) but the payoff ratio fell 1.498->1.383, so the low-volume reclaims were the ones producing the larger wins. This falsifies the fee-drag thesis as the lab's primary diagnosis."
+  },
+  {
+    "id": "vwm-attack7-3r-target",
+    "name": "VWM base + 3R target (exit attack)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "Attack 7, the first attack on the EXIT rather than the entry. Exactly one input changes from the base (VWM + EMA200): the reward:risk target rises from 2.0R to 3.0R. Long only; the short rebuild remains unattempted and unmirrored.",
+    "metrics": {
+      "netProfitPct": -23.02267811,
+      "profitFactor": 0.90999946,
+      "maxDrawdownPct": 32.96370421,
+      "totalTrades": 409,
+      "winRatePct": 33.7408313,
+      "avgTradePct": -0.05629017
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GPZEGM5PCKFH48RPZSZCJR",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GPZEGMF3QFKCM6GMZS8Z4C",
+      "verifiedAt": "2026-09-02T09:25:07Z"
+    },
+    "notes": "REVERTED: PF 0.9121->0.9100 (flat) and DD 28.78%->32.96% (worse). THE CLEANEST RESULT THIS LAB HAS PRODUCED. The change did exactly what it was designed to do -- avgWin/avgLoss rose 1.498->1.787, a 19% gain in payoff -- and the win rate fell 38.3%->33.7% by almost precisely the amount needed to cancel it. Net return was -23.02% against the base's -23.0%: identical to two decimal places. The 2R and 3R points sit on the SAME iso-profit-factor curve, which means moving along the risk-reward axis is neutral for this signal. Combined with the entry-filter falsification, both halves of the trade -- entry selection and exit target -- have now been shown not to be the lever."
   }
 ]
