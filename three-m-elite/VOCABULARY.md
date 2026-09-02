@@ -51,10 +51,15 @@ That low is the **protected low** (protected high for shorts) — the structural
 ---
 
 ## ✅ ZONE INVALIDATION — DECODED
-**Not yet implemented — SYSTEM.md queue 0d, now the top priority.** Both other decoded-but-
-unimplemented gates (Type 2 validation, protected low/high) have been built and tested; this is the
-last one left, so it is next per the project's rule that a decoded, unimplemented definition
-automatically outranks the rest of the queue.
+**Implemented and tested 2026-09-02** (`3m-elite-v4-zone-invalidation.pine`, built on v3, see
+SYSTEM.md queue 0d). Result: PF 0.66 / maxDD 11.11%, worse than v1's PF 0.91 / maxDD 3.47% on both
+gates — rejected, v1 stays the best-known config. Effectively identical to v3's numbers (PF
+0.65→0.66, maxDD 11.04%→11.11%): the gate fired essentially never in this sample, most likely
+because the await window (tap → engulfing validation or bias flip) is usually shorter than a 3H
+bar, leaving little room for a fresh 3H close to breach the captured zone bound first. All three
+decoded-but-previously-unimplemented gates (this one, Type 2 validation, protected low/high) are
+now implemented and tested, individually and stacked, and none rescues the validation-gate
+architecture against v1's plain instant-tap cascade.
 
 > "The second that we get a candle that **body closes below the zone**, this entire zone is **invalid**.
 > We can no longer take trades from this zone."

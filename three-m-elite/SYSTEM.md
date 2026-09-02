@@ -138,17 +138,32 @@ lower bound on the system, not a verdict on it.**
     Both legs remain net losers (longs -$895.03/22 trades, shorts -$154.20/59 trades), the inverse of
     v1 where longs alone carried the profit. Full record: `results/backtests.json` id
     `3m-elite-v3-protected-stop`.
-0d. **IMPLEMENT ZONE INVALIDATION (was 0b).** A candle BODY closing beyond the zone kills it, judged
-    on the ZONE's own timeframe. Also: if the candle immediately after a validation body-closes
-    beyond, the validation is void and a new one is required. This is the last decoded-but-
-    unimplemented VOCABULARY.md gate — the top priority per the project's own rule that a decoded,
-    unimplemented definition automatically outranks the rest of the queue.
-0e. **ISOLATE THE STOP FROM THE GATE.** With both the validation gate (0a) and the protected stop
-    (0c) tested and rejected individually, and the gate not clearly the cause (v1's own zone-edge
-    stop already showed the same avgBarsLosing/avgBarsWinning defect at a smaller sample), test
-    v1's cascade (no validation gate) with the 0c protected-stop swapped in for the 3H zone edge —
-    this isolates whether the stop fix helps even without the gate, since the gate roughly
-    quadrupled trade count and may simply be admitting more low-quality setups than it removes.
+0d. ~~IMPLEMENT ZONE INVALIDATION~~ — **DONE 2026-09-02, REJECTED.** Built as
+    `3m-elite-v4-zone-invalidation.pine` on top of v3 (Type 2 validation + protected stop): a zone
+    tap captures its own 3H price bound at arm time (`zoneLow`/`zoneHigh`); a completed 3H candle
+    whose close breaches that bound — whether await or already-valid — clears the wait, the
+    validation, the protected level and the bound together, judged on the zone's OWN timeframe per
+    the transcript. Result: PF 0.66 (v1: 0.91), maxDD 11.11% (v1: 3.47%), net -10.21%, 82 trades,
+    WR 35.4%. Worse than v1 on both gates, so v1 stays the best-known config. Effectively identical
+    to v3 (PF 0.65→0.66, maxDD 11.04%→11.11%, trades 81→82) — zone invalidation fired essentially
+    never in this sample, most likely because the await window between a tap arming and either a
+    validating engulfing candle or a bias flip is usually shorter than a 3H bar, leaving little
+    room for a fresh 3H close to breach the bound before the state resolves another way first.
+    Longs -$866.34/23 trades, shorts -$154.20/59 trades — same pattern as v2/v3, both legs net
+    losers. avgBarsLosing/avgBarsWinning = 0.64, unchanged from v3. Full record:
+    `results/backtests.json` id `3m-elite-v4-zone-invalidation`. All three decoded-but-previously-
+    unimplemented VOCABULARY.md gates (Type 2 validation, protected stop, zone invalidation) have
+    now been tried, individually and stacked, and none rescues the validation-gate architecture
+    against v1's plain instant-tap cascade.
+0e. **ISOLATE THE STOP FROM THE GATE.** With the validation gate (0a), the protected stop (0c) and
+    zone invalidation (0d) all tested and rejected — individually and now stacked together — and
+    the gate not clearly the cause (v1's own zone-edge stop already showed the same
+    avgBarsLosing/avgBarsWinning defect at a smaller sample), test v1's cascade (no validation gate
+    at all) with the protected-stop swapped in for the 3H zone edge — this isolates whether the
+    stop fix helps even without the gate, since the gate roughly quadrupled trade count and may
+    simply be admitting more low-quality setups than it removes. This is now the top unblocked
+    queue item — all decoded VOCABULARY.md gates are implemented, so no automatic-priority item
+    remains ahead of it.
 1. Port the cascade to a 15m base (scaling every layer up) to get 4.7 years of data instead of 4.6
    months. Loses 3m entry precision, buys a real sample.
 2. Test the source's BE-at-2RR rule as a variant.
