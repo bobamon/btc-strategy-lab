@@ -528,5 +528,34 @@
       "verifiedAt": "2026-09-02T09:42:06Z"
     },
     "notes": "IDENTICAL TO THE CHAMPION TO NINE SIGNIFICANT FIGURES -- PF 1.68623784, net +7.8388076%, DD 3.10289714%, 32 trades, 56.25% win rate. Raising the floor from 0.15% to 0.80% changed NOTHING, which means the floor never bound: the structural stop distance to the 15m low plus buffer is always at least 0.80% of price on this timeframe. THE CHAMPION WAS ALREADY LESSON 3 COMPLIANT IN BEHAVIOUR. Every pre-run audit that flagged this as a deviation was true of the INPUT and false of the strategy. The 0.80% value is adopted as the documented config because it now states the true risk floor, at zero cost to results. Correcting the audit habit: check whether a constraint BINDS before reporting it as a deviation."
+  },
+  {
+    "id": "war-formation-e18-highvol",
+    "name": "WF E18 champion restricted to high volatility",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "description": "Cross-lab transfer: the volatility regime split that was KEPT in the BTC lab, applied to this champion. Entries only when ATR14/close is above its own 1440-bar (one day) average. Tests whether the champion's known time-concentration of edge is really a volatility regime. Long-only.",
+    "metrics": {
+      "netProfitPct": 0.2806549,
+      "profitFactor": 1.10287389,
+      "maxDrawdownPct": 2.44232192,
+      "totalTrades": 7,
+      "winRatePct": 42.85714286,
+      "avgTradePct": 0.04009356
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GR7Q2PVP2P7KHDTRV9N8SJ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GR7Q2PD409YCKNDDQJ2J86",
+      "verifiedAt": "2026-09-02T09:47:06Z"
+    },
+    "notes": "REVERTED, AND IT ANSWERS A STANDING QUESTION IN THE NEGATIVE. PF 1.69->1.10, trades 32->7. The champion's edge concentration -- PF 3.80 from Dec to Feb against 0.89 from Feb to May -- is NOT a volatility regime. The filter kept only 7 of 32 trades and the survivors were worse, so high volatility does not select the good period. WHAT WORKED IN THE BTC LAB DOES NOT TRANSFER HERE, and that is worth recording so a later cycle does not assume it should: the BTC signal is a VWAP mean-reversion that needs travel distance to reach a fixed 2R target, while this one is a multi-timeframe momentum cascade whose edge evidently depends on something else. Whatever makes December to February good remains unexplained."
   }
 ]

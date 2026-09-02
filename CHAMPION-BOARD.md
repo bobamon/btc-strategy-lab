@@ -55,6 +55,7 @@ The board is open.
 | Attack 7 — target 2R → 3R | 0.9121 | 28.8% | 0.9100 | 33.0% | **REVERTED** — PF flat, DD worse |
 | **Regime split — high-vol only** | 0.9121 | 28.8% | **0.9321** | **23.4%** | **KEPT** — both terms improved |
 | Regime split — low-vol complement | 0.9121 | 28.8% | 0.8751 | 23.1% | measurement only, not a candidate |
+| **Attack 3 re-test — witching ban on high-vol base** | 0.9321 | 23.43% | **0.9640** | **22.61%** | **KEPT** — both terms strictly improved |
 
 ## CURRENT BASE — what cycle 008 starts from
 **007's LONG leg.** It has the best raw hit rate of anything tested in this lab: **38.3%** across 457
@@ -67,11 +68,12 @@ know how to attack.
 **Base definition (updated after the high-volatility regime split, 2026-09-02):** VWAP with 2σ bands. Long only for now. Price stretched
 to +2σ within the last 50 bars, then pulls back to within 0.5σ of VWAP and closes back above it,
 while VWAP is rising over 50 bars, **close is above the 200-period EMA, and ATR14/close is above its own 200-bar average
-(the high-volatility regime)**. Stop at the 20-bar
+(the high-volatility regime), and the bar is NOT inside the 1-4am ET witching window**. Stop at the 20-bar
 swing low − 0.25×ATR14, floored at 0.8% of price, target 2R, both fixed at entry. Flip signal: close
 crossing VWAP, stand down 20 bars.
 
-**Current base numbers:** PF 0.9321 · max DD 23.43% · 279 trades · win rate 38.7% · net −12.7%
+**Current base numbers:** PF 0.9640 · max DD 22.61% · 271 trades · win rate 39.11% · net −6.5%
+(updated after attack 3 was re-tested and kept). Previous: PF 0.9321 · DD 23.43% · 279 trades · net −12.7%. Older still:
 (BTCUSDT 15m, 2022-01-01 → 2026-09-01). Previous base was PF 0.9121 / DD 28.78% / 433 trades.
 
 ## ⚠️ THE FEE-DRAG THESIS IS FALSIFIED (2026-09-02, after Attack 5)
@@ -231,3 +233,33 @@ left ~38%. **The remaining move is the one that adds a different return stream r
 this one — the short leg, rebuilt from its own geometry.** It is now unambiguously the top item, and
 the standing objective that it must never be mirrored off the long leg still binds: that failure has
 been recorded three times in the War Formation lab and once here.
+
+
+## THE OPEN TOLERANCE QUESTION IS CLOSED — BY BEING MADE UNNECESSARY (2026-09-02)
+Attack 3 (ban entries 1–4am ET) was reverted earlier in this sprint against the old MIXED base: it
+posted the best PF gain on record, 0.9121 → 0.9405, but worsened drawdown by 0.064 percentage points
+and a strict ratchet killed it. That prompted a standing question to the user about adopting a
+drawdown tolerance band.
+
+**Re-tested against the high-volatility base, it improves BOTH terms strictly:**
+
+| | High-vol base | + witching ban |
+|---|---|---|
+| Profit factor | 0.9321 | **0.9640** |
+| Max drawdown | 23.43% | **22.61%** |
+| Win rate | 38.71% | **39.11%** |
+| avgWin / avgLoss | 1.476 | **1.501** |
+| Trades | 279 | 271 |
+
+**No tolerance is needed. The strict ratchet keeps it on its own terms.**
+
+The lesson is about sequencing, not about thresholds. The witching ban and the volatility split are
+**complementary**: against a base that mixed two regimes, banning the witching window shifted the
+drawdown profile enough to trip the ratchet; against a base already restricted to high volatility,
+the same eight trades were unambiguously bad. **A change that fails against the wrong base is not a
+failed change.** That is the argument for re-testing the reverted list as the base evolves — but only
+the reverted list, and only when the base has genuinely changed, never as a way to relitigate a
+result on the same base.
+
+**This is the first configuration to clear PF 0.95, so 5m and parameter sensitivity are owed next
+cycle.** It remains below 1.0 and is not a profitable system.

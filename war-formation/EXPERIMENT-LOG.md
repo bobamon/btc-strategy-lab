@@ -57,6 +57,7 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E15 | Queue item 4: Oracle COLOUR-FLIP exit replacing the fixed 2R TP (stop still fixed) | **REVERTED.** PF 1.69->0.31, win 56.3%->20.0%, trades 32->35, hold 12.8 bars. Exits on the first red 3m HA candle, which inside an uptrend is noise. [report](https://mcp-api.trader.dev/backtest/01M1GQ6PQPVP1T3JNZ74JWZYT7) |
 | E16 | Queue item 5: require the SINGULARITY (last completed 1h HA candle green too) | **REVERTED.** PF 1.69->0.52, win 56.3%->34.6%, trades 32->26. He said don't wait for it, and he was right · [report](https://mcp-api.trader.dev/backtest/01M1GQM0TYEWM41J1DPAYB0HT2) |
 | E17 | Raise the R floor 0.15% -> 0.80% (HARD LESSON 3 compliance) | **IDENTICAL RESULTS.** PF 1.68623784, DD 3.10289714%, 32 trades, 56.25% -- the floor never bound. 0.80% adopted as the documented config · [report](https://mcp-api.trader.dev/backtest/01M1GQYHZ94F1QPS3HFR8641NB) |
+| E18 | Cross-lab transfer: restrict the champion to the high-volatility regime | **REVERTED.** PF 1.69->1.10, trades 32->7. The edge concentration is NOT a volatility regime · [report](https://mcp-api.trader.dev/backtest/01M1GR7Q2PD409YCKNDDQJ2J86) |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -230,3 +231,22 @@ Two things follow, and the second matters more than the first:
 2. **The audit habit needed fixing.** Reporting a parameter as a deviation without checking whether
    it ever engages is reporting on the source code rather than on the strategy. Cheap to check —
    plot the raw versus applied value — and it would have retired this warning several cycles ago.
+
+
+## E18 LESSON — WHAT WORKED IN THE BTC LAB DOES NOT TRANSFER HERE
+The BTC lab's only KEPT change this sprint was restricting entries to high volatility. Applied to
+this champion it cut PF from 1.69 to 1.10 and kept only 7 of 32 trades.
+
+**So the standing open problem is still open.** The edge concentration — PF 3.80 from December to
+February against 0.89 from February to May — is **not** a volatility regime. High volatility does not
+select the good period.
+
+**Why the transfer failed is the useful part.** The BTC signal is a VWAP mean-reversion with a fixed
+2R target: it needs price to *travel*, so volatility is exactly the variable that decides whether the
+target is reached before the time stop. This one is a multi-timeframe momentum cascade whose entries
+are already gated on a volatility *contraction* (the 3m coil). Asking for high ambient volatility and
+a local coil at the same time is close to the redundancy trap of E14 — and the trade count collapse
+from 32 to 7 is what that looks like.
+
+**Record this so a later cycle does not assume a cross-lab result should carry.** Two strategies that
+both trade BTCUSDT can still have opposite relationships to the same variable.

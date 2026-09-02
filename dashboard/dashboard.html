@@ -724,9 +724,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T09:39:16Z"
     },
     "notes": "THE COMPLEMENT, AND IT SIZES THE REGIME EFFECT HONESTLY. PF 0.8751 against the high-vol half's 0.9321, a real gap of 0.057 -- but BOTH halves lose, so regime conditioning improves the description without rescuing the signal. The most striking detail is that the win rate is identical to two decimal places, 38.70% vs 38.71%. The entire difference sits in the payoff ratio, 1.386 vs 1.476: volatility does not change how often this signal is right, only how far price travels before the fixed 2R target or the 96-bar time stop resolves the trade. CAVEAT ON THE ARITHMETIC: the halves total 509 trades against the mixed base's 433, because each half runs independently and can take signals the mixed run was already in a position for. The split is therefore approximate, not a strict partition."
+  },
+  {
+    "id": "vwm-attack3-witching-on-highvol",
+    "name": "VWM high-vol base + witching-hour ban",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "Attack 3 re-tested against the new high-volatility base: entries banned in the 1-4am ET witching window. Exactly one change. Long only; the short rebuild remains unattempted and unmirrored.",
+    "metrics": {
+      "netProfitPct": -6.53529745,
+      "profitFactor": 0.96401358,
+      "maxDrawdownPct": 22.61240725,
+      "totalTrades": 271,
+      "winRatePct": 39.11439114,
+      "avgTradePct": -0.02411549
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GR5VZFDVNFB1DW7NR9AHNM",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GR5VZFK7PGHEQ5D9Q343VX",
+      "verifiedAt": "2026-09-02T09:46:06Z"
+    },
+    "notes": "KEPT, AND IT RESOLVES THE OPEN TOLERANCE QUESTION BY MAKING IT UNNECESSARY. PF 0.9321->0.9640 and max drawdown 23.432%->22.612%: both ratchet terms improved strictly, on the strictest possible reading. Against the OLD mixed base this identical change cost 0.064pp of drawdown and was reverted; against the high-volatility base it IMPROVES drawdown. The two changes are complementary rather than competing, and only 8 trades were removed. Best profit factor this lab has recorded, and the first to clear 0.95 -- so 5m and parameter sensitivity are owed next cycle. Still below 1.0: this is the best description of the signal yet, not a profitable system."
   }
 ];
-const BUILT = "2026-09-02 03:39";
+const BUILT = "2026-09-02 03:47";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
