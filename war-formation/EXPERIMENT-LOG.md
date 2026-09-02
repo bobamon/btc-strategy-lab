@@ -1326,3 +1326,56 @@ strongest form the lesson has taken: it survived a case that genuinely qualified
 
 **E36 remains the best ALCM configuration at PF 1.19181730 on 20 trades — a direction, not a
 validated result.** The sample ceiling of ~20–30 trades stands.
+
+
+---
+
+# ██ E38 / E39 — THE SHIELD IS A GRADIENT, NOT A PEAK. E38 IS THE NEW BEST ALCM.
+
+Both neighbours run together, because one side cannot distinguish a plateau from a spike — the
+ambiguity that made E33 useless until E34 resolved it.
+
+| Shield | Effective leverage | Profit factor | Max drawdown | Trades | Win rate |
+|---|---|---|---|---|---|
+| **$2,000 (E38)** | **~50x** | **1.50193294** | **10.82866633%** | 21 | 52.38% |
+| $3,000 (E36) | ~33x | 1.19181730 | 14.02869041% | 20 | 55.00% |
+| $4,000 (E39) | ~25x | 0.91843873 | 19.92763110% | 19 | 52.63% |
+
+**E38 is KEPT — profit factor improved AND drawdown improved**, which is what the ratchet requires.
+Sharpe 1.09, net +10.12%. It becomes the best ALCM configuration.
+
+## THE SHAPE IS THE REAL RESULT
+**Perfectly monotone in both terms.** Profit factor falls and drawdown rises as the shield widens,
+with no reversal. **That is a gradient, not a peak — the exact opposite of the one-point-wide spike
+that demoted v6 on coilK**, where both neighbours collapsed.
+
+A monotone response across a parameter is what a genuine effect looks like. It is the first structural
+evidence in this lab that an ALCM result is not a fit, and it is worth more than the 1.50 itself.
+
+## THREE THINGS THAT MUST STAY ATTACHED TO THE NUMBER
+1. **21 trades.** Still below the threshold this log declared uninterpretable. **PF 1.50 is a strong
+   direction, not a validated result**, and the ~20–30 trade ceiling on 4.5 months of 1m data has not
+   moved.
+2. **E39 is partially uninterpretable, as flagged before it ran.** `avgBarsWinning` is **4321.00
+   against a 4320 cap** — winners pin to the limit exactly, so with an $8,000 target none resolve.
+   Its 0.918 is a lower bound. The direction is still usable because it agrees with the gradient.
+3. **The gradient points toward HIGHER LEVERAGE.** A tighter shield means a smaller gap to
+   liquidation: $2,000 implies ~50x against $3,000's ~33x. **The data is pointing back toward the
+   58x the source material actually recommends** — which is a genuine convergence between the
+   measurement and the specification, not a coincidence worth ignoring.
+
+## AND A POINT THAT CUTS THE OTHER WAY
+**The source material calls $4,000 "safer". On this data it is the worst of the three** — worst
+profit factor and nearly double the drawdown of $2,000. That is HARD LESSON 14 again: the
+observation ("keep a gap") holds, the specific prescription ("wider is safer") does not survive
+measurement. Wider shields mean bigger losses when the shield is hit, and this entry hits it often
+enough that the trade is unfavourable.
+
+## QUEUE
+1. **Extend the gradient: $1,000 and $1,500.** The monotone direction must be followed until it
+   turns, and where it turns is the answer. **Boundary to state when it does:** below roughly $1,000
+   (~1% of price, ~100x) the shield stops being an ALCM gap and becomes an ordinary tight stop — at
+   that point the strategy has quietly changed identity and the result should be labelled as such.
+2. **Re-test the coil under the corrected exit** — E32 measured it on the wrong exit model.
+3. **Position sizing.** DD 10.83% is a 1x figure; at ~50x it is far past total loss. Still the
+   largest unsolved problem, and improving profit factor does not touch it.

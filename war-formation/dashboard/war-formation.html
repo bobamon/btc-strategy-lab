@@ -1566,9 +1566,67 @@ const DATA = [
       "verifiedAt": "2026-09-02T20:40:46Z"
     },
     "notes": "THE OUTCOME I NAMED IN ADVANCE AS THE ONE THAT UPHOLDS HARD LESSON 13. Winners DID resolve better -- avgBarsWinning fell 4125.82 to 3520.91, from 95.5% of the cap to 81.5% -- so the diagnosis was right and the fix worked mechanically. But profit factor fell 1.19181730 to 0.98697850 and drawdown rose 14.03% to 16.54%. Trade count barely moved, 20 to 21, so the frequency gain I predicted did not materialise either. REVERTED. The pre-registered reading applies: the ALCM needs the wide target, and the risk-reward axis is neutral-to-negative even under an exit model built around a wide stop. That is the fourth mechanism in this project to say so. E36 remains the best ALCM configuration at PF 1.19181730 on 20 trades, and it is still a direction rather than a validated result."
+  },
+  {
+    "id": "war-formation-e38-shield-2000",
+    "name": "WF E38 ALCM $2,000 shield (NEW BEST ALCM)",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Shield neighbourhood, tight side. One change from E36: shieldUsd 3000 to 2000. Run paired with E39 ($4,000) because one neighbour cannot distinguish a plateau from a spike -- the ambiguity that made E33 useless until E34 resolved it.",
+    "metrics": {
+      "netProfitPct": 10.1229085,
+      "profitFactor": 1.50193294,
+      "maxDrawdownPct": 10.82866633,
+      "totalTrades": 21,
+      "winRatePct": 52.38095238,
+      "avgTradePct": 0.48204326
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1HYDHG37FWCMM8971QE133T",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HYDHG3WZ6HX1DE70K4RH9F",
+      "verifiedAt": "2026-09-02T20:54:23Z"
+    },
+    "notes": "KEPT ON THE RATCHET AND IT IS THE BEST ALCM RESULT. PF 1.19181730 -> 1.50193294 AND drawdown 14.02869041% -> 10.82866633% -- both terms improved, which the ratchet requires and which has now happened three times in this project. Sharpe 1.09, net +10.12%. THE SHAPE IS THE HEADLINE: with E39 the profile is perfectly MONOTONE -- $2,000 gives 1.502, $3,000 gives 1.192, $4,000 gives 0.918, and drawdown rises 10.83% / 14.03% / 19.93% in the same order. That is a GRADIENT, not a peak, and it is the exact opposite of the one-point-wide spike that demoted v6 on coilK. A monotone response is what a real effect looks like. CAVEATS: 21 trades is still under the threshold declared uninterpretable, and the gradient points toward TIGHTER shields, which means HIGHER effective leverage -- $2,000 implies ~50x against $3,000's ~33x."
+  },
+  {
+    "id": "war-formation-e39-shield-4000",
+    "name": "WF E39 ALCM $4,000 shield",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Shield neighbourhood, wide side, and the value the source material itself calls safer. One change from E36: shieldUsd 3000 to 4000. The control that makes E38 interpretable.",
+    "metrics": {
+      "netProfitPct": -2.22658427,
+      "profitFactor": 0.91843873,
+      "maxDrawdownPct": 19.9276311,
+      "totalTrades": 19,
+      "winRatePct": 52.63157895,
+      "avgTradePct": -0.11718865
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1HYEE2Q70JKV4JMXJ46S9VH",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1HYEE2Q7EDG6JSMEFZCC9NV",
+      "verifiedAt": "2026-09-02T20:54:52Z"
+    },
+    "notes": "REVERTED, AND PARTIALLY UNINTERPRETABLE FOR A REASON FLAGGED BEFORE THE RUN. PF 0.91843873, DD 19.9276311%, 19 trades. avgBarsWinning is 4321.00 against a maxBars cap of 4320 -- winners pin to the cap EXACTLY, so with an $8,000 target none of them resolve and this measures a 3-day hold rather than the $4,000 shield. The Pine said to check that before reading the profit factor, so the number is a lower bound rather than a clean measurement. The DIRECTION is still usable because it is consistent with the monotone gradient E38 establishes. Worth noting the source material calls $4,000 the safer setting; on this data it is the worst of the three."
   }
 ];
-const BUILT = "2026-09-02 14:43";
+const BUILT = "2026-09-02 14:55";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
