@@ -112,6 +112,16 @@ lower bound on the system, not a verdict on it.**
 |---|---|---|
 | v1 | Full cascade, no validation gate | PF 0.91, 20 trades, longs 6 of 8 · [report](https://mcp-api.trader.dev/backtest/01M1GGX4RQ707R9HHX2KFP471E) |
 | v2 | + Type 2 validation gate (engulfing 48m in bias, `valLife` 3) | **0 TRADES** · [report](https://mcp-api.trader.dev/backtest/01M1GNBA7TRRHRYK61KXZADD4F) |
+| v3 | Same cascade ported to a 15m base (4H/12H/2D), 4.7 years | PF 0.64, 94 trades, longs 10/35, shorts 5/59 · [report](https://mcp-api.trader.dev/backtest/01M1GNPDBWJD63TBCV11SYY30H) |
+
+**v3 lesson — v1's PF 0.91 was noise.** The same cascade measured on 4.7 years instead of 4.6 months
+gives PF 0.64 across 94 trades. The larger sample is the trustworthy one. This is the sample-size fix
+working as intended: it did not improve the strategy, it revealed that the earlier number was never
+evidence. **v3 is now the reference base** even though its profit factor is lower.
+
+Queue order corrected again: adding gates to a 20-trade base was always going to produce empty runs
+(v2 did exactly that, as did War Formation v1). Widen the base first, then filter. Gates should now
+be tested against v3.
 
 **v2 lesson — the gate needs a lifetime, not a timer.** v1 made only 20 trades in 4.6 months.
 Requiring an engulfing 48m candle within 3 structure candles of entry removed every one of them.
