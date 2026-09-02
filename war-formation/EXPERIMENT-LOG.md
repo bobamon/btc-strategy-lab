@@ -53,6 +53,7 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E13 | Short + 3m cycle-position gate (Oracle item 2) | PF 0.68→**0.75**, WR 20.3%→23.1%, net −5.9%→−3.0% — **gate helps, still unprofitable** |
 | E14 | Queue item 3: counter-move weakening trigger on the v6 long champion (>=2 red HA 3m candles with decreasing range, latched 5 candles) | **REVERTED.** PF 1.69->0.73, win 56.3%->45.0%, trades 32->20, DD 3.10%->1.36%. The gate removed disproportionately GOOD trades -- redundant with the 3m coil, which already measures a move losing force. [report](https://mcp-api.trader.dev/backtest/01M1GPMTPZ146ZY2KJVDVKQF8G) |
 | E15 | Queue item 4: Oracle COLOUR-FLIP exit replacing the fixed 2R TP (stop still fixed) | **REVERTED.** PF 1.69->0.31, win 56.3%->20.0%, trades 32->35, hold 12.8 bars. Exits on the first red 3m HA candle, which inside an uptrend is noise. [report](https://mcp-api.trader.dev/backtest/01M1GQ6PQPVP1T3JNZ74JWZYT7) |
+| E16 | Queue item 5: require the SINGULARITY (last completed 1h HA candle green too) | **REVERTED.** PF 1.69->0.52, win 56.3%->34.6%, trades 32->26. He said don't wait for it, and he was right · [report](https://mcp-api.trader.dev/backtest/01M1GQM0TYEWM41J1DPAYB0HT2) |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -181,3 +182,31 @@ the cycle-position insight in E13, which explained a failure the lab could not o
 **Queue item 4 is answered and closed.** If it is ever revisited, the flip must be qualified (two
 consecutive counter candles, or a close beyond the entry-side structure), and that is a different
 experiment, not this one.
+
+
+## E16 LESSON — THE ORACLE IMPLEMENTATION QUEUE IS NOW FULLY WORKED
+Requiring the singularity cut PF from 1.69 to 0.52 and the win rate from 56.3% to 34.6%. Six trades
+removed and the survivors much worse: the same anti-selective signature as E14.
+
+**The satisfying part is that he predicted it.** His exact words: *"if you got it on the one, you got
+double clarity, **but don't wait for that**."* The data agrees with his caveat, not his enthusiasm.
+Waiting for the bonus costs more than the bonus is worth.
+
+### Final scorecard on his five stated rules
+| Item | His rule | Result |
+|---|---|---|
+| 1 | Direction = consecutive green 6h candles | REVERTED — the lab's HA 1h count beat it |
+| 2 | 3m cycle position | **HELPED** — the only one that improved anything (E13) |
+| 3 | Counter-move weakening | REVERTED — redundant with the 3m coil |
+| 4 | Colour-flip exit | REVERTED — fires on noise; the fixed 2R target is load-bearing |
+| 5 | The singularity | REVERTED — and he told us not to wait for it |
+
+**One of five survived, and it was the DIAGNOSTIC one.** Item 2 was not a rule he gave for entry; it
+was his explanation of *why* entries fail — "don't long the top or short the bottom", "entering the
+enemy's camp." That explained the lab's every failed short when nothing else could. His prescriptive
+rules consistently underperformed the lab's own mechanisations; his description of *why price moves*
+was the valuable part. **That is the durable lesson for mining any trader's material.**
+
+**Champion is unchanged and now stands on a fully explored queue: v6, long-only, PF 1.69, DD 3.10%,
+32 trades.** The binding constraint remains sample size — 1m coverage is still only 2025-12-16 to
+2026-05-03. Future cycles need a new source of questions, not more items from this list.

@@ -118,5 +118,13 @@ that this "wrecks an absolutely perfect trade" even when the direction is right.
    an uptrend is noise, so winners are cut at twenty minutes while losers run to the stop. **The
    fixed 2R target is load-bearing.** His rule presumes a human judging whether a flip means
    anything; taken literally it is not mechanisable at this resolution.
-5. Optional: require the **singularity** (6h and 1h agreeing) and measure whether it improves results,
-   since he calls it a bonus rather than a requirement.
+5. ~~Require the singularity~~ — **TESTED (E16), REVERTED.** PF 1.69->0.52, win rate 56.3%->34.6%,
+   trades 32->26. **He was right and we should have believed him:** "but don't wait for that."
+
+---
+
+## THE QUEUE IS FULLY WORKED. SCORE: 1 OF 5.
+Only item 2, the 3m cycle-position gate, ever improved anything -- and it was the one item that was
+**diagnostic rather than prescriptive**, his explanation of why entries fail rather than a rule for
+taking them. Every rule he stated as a rule underperformed this lab's own mechanisation of the same
+idea. Mine a trader's material for the *why*, not the *what*.

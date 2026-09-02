@@ -126,3 +126,41 @@ about 13 minutes. Nothing is uploaded anywhere.
 Recovers anything shown but not spoken — chart state, drawn zones, indicator settings, title cards.
 
 Both are reproducible: rerun `transcribe.py <folder>` on any new material.
+
+
+---
+
+# ⚠️ MAJOR CORRECTION, 2026-09-02 — THE ENGULFING CANDLE *CREATES* THE ZONE
+Found by re-reading `transcripts/` after v7 showed the frequency ceiling came from the source-derived
+conjunction, not from the lab's added gates. **Every build so far had this backwards.**
+
+## What the source actually says, verbatim
+> "Once the zone gets created **with the engulfing candle**"
+> "You're looking at **the engulfing candle that made the zone**"
+> "you have the engulfing candle that made the zone **and then the one extra candle**"
+> "This candle is a wick, this candle **would need to be an engulfing candle for this to be a zone**"
+> "this candle **can't be a zone because this candle is not engulfing**"
+> "of the zone that **gets created by the engulfing candle**"
+
+## The corrected model
+1. **A zone is CREATED by an engulfing candle.** Its geometry is that engulfing candle plus one extra
+   candle. A non-engulfing candle cannot form a zone at all.
+2. Price later returns to **MITIGATE** the zone. Zones are tracked as mitigated or **unmitigated**,
+   and the target is the **"deepest unmitigated zone"**.
+3. **THE ONE CANDLE RULE IS ABOUT MITIGATION, NOT VALIDATION** — this entry in this file was
+   previously mis-scoped:
+   > "this one candle does not mitigate the zone yet ... We would need a second one ... the second
+   > one is what makes the zone mitigated"
+4. **Validation happens INSIDE the zone and is a separate event:** "need to get a 3M candle from this
+   in the zone on the 15 minute, or an engulfing." That is Type 1 or Type 2, occurring within a zone
+   that already exists.
+5. Zones come in kinds: **S&D zones**, **fractal zones**, and zones from **structural breaks**. The
+   rules are stated to apply to all of them.
+
+## Why this matters more than any parameter
+The builds so far defined a zone as **the previous 12H candle's high or low** and used the engulfing
+candle as the *validation* of a tap on it. That made the engulf and the tap two unrelated events
+required to coincide, which is precisely why v2 and v4 returned zero trades and why v6 and v7 were
+stuck at exactly ten. **In the real model the engulf and the zone are the same event**, separated in
+time from the mitigation that follows. The scarcity was an artefact of my specification, not of the
+system.

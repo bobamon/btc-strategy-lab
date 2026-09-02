@@ -225,6 +225,27 @@ video material should decide between them rather than a backtest:
 
 Do not spend another credit on this until one of those is settled from the transcripts.
 
+## ⚠️ v8 — THE SPECIFICATION IS SETTLED, AND THE MODEL WAS INVERTED
+The v7 queue item said to settle the specification from the transcripts rather than buy another
+backtest. **Done, and the answer is decisive: an engulfing candle CREATES a zone; it does not
+validate one.** Full quotes and the corrected model are in VOCABULARY.md.
+
+This explains the entire failure history of this lab in one stroke:
+
+| Build | Trades | Cause, understood now |
+|---|---|---|
+| v2, v4 | 0 | engulf and 12H tap required on the same bar -- two unrelated events |
+| v5 | 2 | tap latched, but engulf still had to coincide with everything else |
+| v6, v7 | 10 | both latched, but the zone was still the wrong object entirely |
+
+**The scarcity was never the system. It was my definition of a zone.** A zone defined as the previous
+12H candle's extreme is one level per 12 hours that price rarely revisits under all the other
+conditions. A zone defined as *every engulfing candle's range* is a continuously replenished
+population of levels, each with a mitigated/unmitigated state.
+
+**No backtest this cycle** -- v7's queue entry explicitly said not to spend a credit until this was
+settled, and the right move now is to rebuild on the corrected model rather than tune the wrong one.
+
 ## Open queue
 0. ~~Get definitions for Type 1/Type 2~~ — **DONE 2026-09-02, see VOCABULARY.md.**
    Type 1 = a 3M candle; Type 2 = an engulfing candle in the direction of bias; both only on the
@@ -232,7 +253,18 @@ Do not spend another credit on this until one of those is settled from the trans
 0-V5. ~~LATCHED TAP + VALIDATION~~ — **DONE (v5). Latch works; 2 trades. See the v5 lesson.**
 0-V6. ~~LATCH THE VALIDATION TOO~~ — **DONE. PF 1.77 on 10 trades. Mechanism correct, sample far too small.**
 0-V7. ~~MEASURE WHICH GATE IS BINDING~~ — **DONE. My gates were NOT binding; the source conjunction is.**
-0-V8-NEXT. **SETTLE THE SPECIFICATION FROM THE TRANSCRIPTS, NOT FROM A BACKTEST.** Decide (1) whether
+0-V8. ~~SETTLE THE SPECIFICATION~~ — **DONE 2026-09-02. The engulfing candle CREATES the zone.**
+0-V9-NEXT. **REBUILD ON THE CORRECTED MODEL (top priority, supersedes everything below).**
+    (a) Detect engulfing candles on the structure timeframe; each one creates a zone spanning that
+        candle plus one extra candle. Non-engulfing candles create nothing.
+    (b) Track each zone as unmitigated until mitigated, applying the ONE CANDLE RULE: the first
+        candle back into the zone does not mitigate it, the second does.
+    (c) Target the DEEPEST UNMITIGATED zone.
+    (d) Validation (Type 1 3M candle, or Type 2 engulfing) is a separate event occurring INSIDE a
+        live zone -- not the thing that creates it.
+    Pine has no arrays, so zones must be held in a fixed set of `var float` slots; start with the
+    single deepest unmitigated zone per side, which is what the source says to trade anyway.
+    Superseded original text: Decide (1) whether
     bias/zone/structure must all agree or whether the higher timeframe sets bias alone, and (2) whether
     a zone is a prior candle extreme or a region drawn from a range. Original v7 text: Count how often each condition blocks an
     otherwise-complete setup, then relax the LAB-INVENTED gates (maSpreadOk, break counters, slope,
