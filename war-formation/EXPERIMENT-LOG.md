@@ -49,6 +49,7 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E9b | Same short, gates loosened for sample size | PF 0.68, 69 trades, win rate 20.3% — **short side fails again** |
 | E10 | Diagnostic: long the whole bear episode | PF 0.83, −12.6%, 125 episodes — bear label is SOUND |
 | E11 | Diagnostic: short the whole bear episode | PF 0.50, −17.6%, 11.1% win rate — **both directions lose** |
+| E12 | ORACLE-RULES item 1: direction = 2+ consecutive same-colour REAL 6h candles (long only) | PF 1.35, DD 2.48%, 12 trades — **rejected, does not beat champion; sample collapsed 32→12** |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -68,15 +69,20 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
     hard occasionally (14 shorts won big, 3.99:1 payoff). **The 6h HA bear label marks CRASH RISK,
     not downtrend.** This explains every short failure so far — E9b's 20% win rate at 2.68:1 is the
     same shape. A short here cannot work by "being short during bear"; it must time the crash.
-0z. **READ `ORACLE-RULES.md` FIRST — it now contains the author's COMPLETE rule set, quoted from his
-    own audio, and it supersedes several of this lab's design choices.** Three corrections matter:
+0z. ~~READ `ORACLE-RULES.md` FIRST~~ — **item 1 DONE (E12), rejected.** Items 2-5 remain, in order.
     (a) He defines clear direction as **more than one consecutive green (or red) 6h candle** — simpler
         than this lab's "4+ green HA 1h candles in the previous 6h block", and it is what he says.
+        **Tested as E12: requiring 2+ consecutive same-colour REAL 6h candles collapsed the sample
+        from 32 to 12 trades and PF fell 1.69→1.35. The real 6h candle rarely strings two of the same
+        colour in a row; the old HA-1h-count proxy was a much looser (more frequent) condition.** Do
+        not retry this exact formulation without changing something (e.g. minConsec=1, or count HA 6h
+        candles instead of real 6h candles) — that is a new open question, not a re-run.
     (b) He names **"singularity"** as 6h and 1h agreeing in colour, and calls it a bonus, not a
-        requirement: "don't wait for that".
+        requirement: "don't wait for that". (item 5, untested)
     (c) **He states that "war formation has nothing to do with entering here."** What this lab calls
         the War Formation is actually his *3-minute cycle drill-down*. Name kept for continuity.
-    Implement items 1-5 at the bottom of ORACLE-RULES.md, one per cycle, in order.
+    Implement items 2-5 at the bottom of ORACLE-RULES.md, one per cycle, in order. Item 2 (the 3m
+    cycle-position gate) is next — see 0f below, which already specifies it.
 0f. **THE 3-MINUTE CYCLE POSITION GATE.** Read `ORACLE-RULES.md` first; it is
     decoded from the author's own videos and it names the exact defect in every short built so far.
     His rule: direction comes from the 6h and 1h, but **direction alone does not permit an entry —
