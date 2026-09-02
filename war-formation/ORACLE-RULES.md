@@ -103,9 +103,11 @@ that this "wrecks an absolutely perfect trade" even when the direction is right.
    win rate 56.3%→40.9%. His stated rule underperforms this lab's HA 1h green-count on this data.
    His words describe how he *reads* a chart; they are not automatically the best mechanisation of it.
    Sample caveat: 22 vs 32 trades. Keep v6's direction rule.
-2. **Add the 3m cycle-position gate**: reconstruct 3m from 1m bars, compute
-   `cyclePos = (close − cycleLow) / (cycleHigh − cycleLow)`; longs only from the lower part, shorts
-   only from the upper part.
+2. ~~Add the 3m cycle-position gate~~ — **TESTED (E13). IT HELPS.** On the short leg: PF 0.68→0.75,
+   win rate 20.3%→23.1%, net loss halved −5.9%→−3.0%, trades 69→39. The trades it removed were
+   disproportionately bad, which is exactly what he predicts. **His diagnosis is directionally
+   confirmed.** Still PF 0.75 < 1.0, so the short is not yet viable — the gate is necessary but not
+   sufficient. Keep the gate in all future short builds.
 3. **Add the "counter-move weakening" trigger**: require N consecutive counter-colour 3m candles with
    decreasing range before entry.
 4. **Replace the exit** with the colour rule: hold while the 3m candle colour matches the trade;

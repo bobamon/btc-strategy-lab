@@ -50,6 +50,7 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E10 | Diagnostic: long the whole bear episode | PF 0.83, −12.6%, 125 episodes — bear label is SOUND |
 | E11 | Diagnostic: short the whole bear episode | PF 0.50, −17.6%, 11.1% win rate — **both directions lose** |
 | E12 | v7: Oracle's direction rule (2+ consecutive green HA 6h) | PF 1.14 vs champion 1.69, DD 4.19% vs 3.10% — **REVERTED** |
+| E13 | Short + 3m cycle-position gate (Oracle item 2) | PF 0.68→**0.75**, WR 20.3%→23.1%, net −5.9%→−3.0% — **gate helps, still unprofitable** |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
