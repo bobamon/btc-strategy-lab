@@ -382,5 +382,34 @@
       "verifiedAt": "2026-09-02T09:09:55Z"
     },
     "notes": "REVERTED: profit factor worsened 0.912 -> 0.885 and max drawdown worsened badly, 28.8% -> 36.6%. The mechanism is instructive. Fee drag DID fall as intended ($3,954 -> $3,490) and the win rate ROSE 38.3% -> 40.2%, because a wider stop is hit less often. But avgWin/avgLoss fell 1.498 -> 1.316: every loss is now bigger, and that outweighed both gains. REFINES HARD LESSON 3: widening R cuts fee drag but enlarges each loss, so there is an OPTIMUM, not a monotonic improvement. LESSON 3's floor of ~0.8% (8x the round-trip fee) is a MINIMUM, not a target to exceed. For this strategy 0.8% sits closer to the optimum than 1.2% does. Long-only; no short leg exists yet."
+  },
+  {
+    "id": "vwm-attack5-volume-confirm",
+    "name": "VWM base + volume confirmation on the reclaim",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "Attack 5. Exactly one change from the base (VWM + EMA200 trend filter): the pullback-hold bar must trade above its own 50-bar average volume, so participation has to return as price reclaims VWAP. Long only; the short rebuild remains unattempted.",
+    "metrics": {
+      "netProfitPct": -25.3839511,
+      "profitFactor": 0.83915848,
+      "maxDrawdownPct": 26.88635455,
+      "totalTrades": 241,
+      "winRatePct": 37.7593361,
+      "avgTradePct": -0.1053276
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GPTCCXC4591VVCQGTCWXM7",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GPTCCX63DSH29ECJH5PH3X",
+      "verifiedAt": "2026-09-02T09:22:21Z"
+    },
+    "notes": "REVERTED on the ratchet: PF 0.9121->0.8392. Drawdown did improve (28.78%->26.89%) but PF is the binding term. THE IMPORTANT PART IS WHY. The gate cut trades 433->241, a 44% reduction, and halved the commission bill from $3,954 to $2,078 -- exactly the fee saving the attack list was designed to capture. Net return still got WORSE, -23.0%->-25.4%. The trades it removed were net positive contributors. Win rate barely moved (38.3%->37.8%) but the payoff ratio fell 1.498->1.383, so the low-volume reclaims were the ones producing the larger wins. This falsifies the fee-drag thesis as the lab's primary diagnosis."
   }
 ]

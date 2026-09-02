@@ -51,6 +51,7 @@ The board is open.
 | Attack 2 — shallow pullback | 0.91 | 28.8% | 0.85 | 32.6% | **REVERTED** |
 | Attack 3 — witching-hour ban | 0.9121 | 28.780% | **0.9405** | 28.844% | **REVERTED** — borderline, see note |
 | Attack 4 — R floor 0.8% → 1.2% | 0.9121 | 28.8% | 0.8845 | 36.6% | **REVERTED** |
+| Attack 5 — volume confirmation | 0.9121 | 28.8% | 0.8392 | **26.9%** | **REVERTED** — PF is the binding term |
 
 ## CURRENT BASE — what cycle 008 starts from
 **007's LONG leg.** It has the best raw hit rate of anything tested in this lab: **38.3%** across 457
@@ -69,8 +70,37 @@ crossing VWAP, stand down 20 bars.
 **Current base numbers:** PF 0.91 · max DD 28.8% · 433 trades · win rate 38.3% · net −23.0%
 (BTCUSDT 15m, 2022-01-01 → 2026-09-01).
 
+## ⚠️ THE FEE-DRAG THESIS IS FALSIFIED (2026-09-02, after Attack 5)
+This list was built on one diagnosis: *the base loses to fee drag, so cut trade count without cutting
+edge.* **Five attacks in, the evidence says that diagnosis is wrong.** Sort them by how many trades
+they removed:
+
+| Attack | Trades removed | PF effect |
+|---|---|---|
+| 3 — witching ban | 13 (3%) | **0.9121 → 0.9405 (best gain)** |
+| 1 — EMA200 | 35 (7%) | **0.89 → 0.91 (kept)** |
+| 4 — wider R floor | 20 (5%), but enlarged every loss | 0.912 → 0.885 |
+| 2 — shallow pullback | 91 (21%) | 0.91 → 0.85 |
+| 5 — volume confirmation | 192 (44%) | 0.912 → 0.839 |
+
+**The relationship is monotonic and it runs the wrong way.** Small, targeted cuts help; large cuts
+hurt, in proportion to their size. Attack 5 is the decisive case: it delivered precisely the fee
+saving the thesis called for — commission halved, $3,954 → $2,078 — and net return still fell from
+−23.0% to −25.4%. You cannot save your way to an edge here.
+
+**What that means.** The base is **signal-limited, not cost-limited.** Every broad filter prunes
+winners and losers at roughly the same rate (win rate held at ~38% through all five attacks, moving
+less than a point), so it removes gross profit as fast as it removes cost. Fee drag is real, but it
+is a symptom of a signal that is only marginally profitable before costs, not the disease.
+
+**Revised mandate for the next cycles:** stop pruning. The remaining moves must either (a) raise the
+payoff ratio on the trades already taken — the exit, not the entry, since `avgWin/avgLoss` 1.50 is
+what actually carries this system — or (b) add a genuinely uncorrelated second source of return,
+which is what the short rebuild is. Any further proposal whose mechanism is "take fewer trades"
+should be rejected without spending a credit on it.
+
 ## THE ATTACK — ranked, one per cycle
-The base loses to fee drag, so the first moves must **cut trade count without cutting edge**:
+*(Items 1–5 were written under the now-falsified fee-drag thesis. Kept for the record.)*
 
 1. ~~Add a trend filter (EMA200)~~ — **DONE, KEPT.** PF 0.89→0.91, DD 35.0%→28.8%. Now part of the base.
 2. ~~Require the pullback to be shallow~~ — **DONE, REVERTED.** PF 0.91→0.85, DD 28.8%→32.6%.
@@ -81,8 +111,11 @@ The base loses to fee drag, so the first moves must **cut trade count without cu
 4. ~~Raise the R floor from 0.8% to 1.2%~~ — **DONE, REVERTED.** PF 0.912→0.885, DD 28.8%→36.6%.
    Fee drag fell and win rate rose, but every loss got bigger and that dominated. 0.8% is nearer the
    optimum than 1.2%.
-5. **Require volume confirmation on the pullback hold** — participation returning as price reclaims.
-6. **Then, and only then, rebuild a short leg** on whatever survives, judged on its own profit factor
+5. ~~Require volume confirmation on the pullback hold~~ — **DONE, REVERTED.** PF 0.9121→0.8392,
+   DD 28.8%→26.9%. Cut trades 433→241 and halved commission $3,954→$2,078, and net return still got
+   *worse*. The low-volume reclaims were the better trades.
+6. **NOW THE TOP ITEM — rebuild a short leg** (promoted by the falsification above: it adds a return
+   source rather than pruning one) on whatever survives, judged on its own profit factor
    (the mistake in 005 and E9 was bolting on a second leg before the first was sound).
 
 ## TRIED AND REVERTED
@@ -94,3 +127,9 @@ The base loses to fee drag, so the first moves must **cut trade count without cu
 | Attack 2 | Require shallow pullback (low holds above VWAP) | PF 0.91→0.85, DD 28.8%→32.6%, trades 433→342 | **REVERTED** — worse on both terms |
 | Attack 3 | Ban entries in the 1–4am ET witching window | PF 0.9121→0.9405, DD 28.780%→28.844%, trades 433→420 | **REVERTED** — PF up, DD worse by 0.064pp |
 | Attack 4 | Raise R floor 0.8% → 1.2% | PF 0.912→0.885, DD 28.8%→36.6%, win rate 38.3%→40.2% | **REVERTED** — wider stops mean bigger losses |
+| Attack 5 | Require volume above the 50-bar average on the reclaim | PF 0.912→0.839, DD 28.8%→26.9%, trades 433→241, commission $3,954→$2,078 | **REVERTED** — fee saving realised, edge lost with it |
+
+7. **Attack the EXIT, not the entry.** Every attack so far has been an entry filter. The system lives
+   on `avgWin/avgLoss` = 1.50 at a 38% win rate, which needs ~40% to break even. Nothing has yet
+   tried to move the payoff ratio on the trades already being taken — a wider target, a partial at
+   1R, a time-based exit tuned to the 49-bar average hold. This is the untouched half of the system.
