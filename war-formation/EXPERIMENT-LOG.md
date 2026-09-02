@@ -1612,3 +1612,52 @@ run that would answer it is not E38.
 2. **Then re-run the shield sweep against that saved baseline.** E36–E41 have the same defect as E38:
    their sources were never saved either, so the $2,000 optimum rests on the same unverifiable ground.
 3. **Then revisit asymmetric filtering**, which the reproducible evidence now favours.
+
+
+---
+
+# ██ E45 — THE SHORTS SUBTRACT VALUE, AND THE COIL DAMAGES THE LONGS
+
+The short leg was deleted from the anchored reference build. Across the reproducible set the shorts
+had won **2 of 73 trades** (E42 1/43, E43 0/14, E44 1/16), so the question was whether they are a
+filterable leg or dead weight.
+
+## THE CLEAN SUBTRACTION
+**E45's 12 longs are exactly E44's 12 longs** — same filter, same count. The only difference is the
+16 deleted shorts.
+
+| | E44 (with shorts) | E45 (no shorts) |
+|---|---|---|
+| Profit factor | 0.34584164 | **0.39407279** |
+| Trades | 12 long + 16 short | 12 long |
+
+**The shorts subtract value.** That is now established by subtraction rather than inference.
+
+## THE MORE USEFUL FINDING: THE COIL DAMAGES THE LONG LEG
+E45 lands well below E43, and the reproducible set explains why:
+
+| Build | Long leg | Short leg | Profit factor | Trades |
+|---|---|---|---|---|
+| **E43** | **uncoiled (25)** | coiled (14) | **0.92252113** | 39 |
+| E42 | uncoiled | uncoiled | 0.64544502 | 68 |
+| E45 | **coiled (12)** | none | 0.39407279 | 12 |
+| E44 | coiled (12) | coiled (16) | 0.34584164 | 28 |
+
+**The two builds with UNCOILED longs are the two best. The two with coiled longs are the two worst.**
+E32 concluded the coil is the edge; on the corrected exit and an anchored codebase, **it is the edge
+on the short leg and a liability on the long one.**
+
+## THE FLOOR IS HONOURED
+**12 trades. The count is reported and the ratio is not read as a result.** Nothing is promoted, and
+none of these four builds is above 1.0 in any case.
+
+## THE UNTESTED CELL THE EVIDENCE POINTS AT
+Four cells of a 2x2 were needed; three have been measured. **Uncoiled longs with no short leg has
+never been run**, and every piece of reproducible evidence points to it being the best of the four.
+That is the next run, and it is the last obvious structural move this lab has.
+
+## QUEUE
+1. **Uncoiled longs, no shorts.** The missing cell.
+2. **Then re-derive the shield sweep on whatever that produces** — E36–E41's $2,000 optimum was
+   measured on unreproducible code (E44) and must be re-established on the anchor.
+3. **Position sizing.** Unchanged and still the largest unsolved problem.

@@ -1542,5 +1542,63 @@
    "verifiedAt": "2026-09-02T21:28:00Z"
   },
   "notes": "THE SPREAD REOPENED, AND THE REGISTERED CONSEQUENCE IS HONOURED: ATTACK 25'S CLOSURE IS DOWNGRADED. Three measurements on the same 2025-07-20 split: coolBars 60 + green bar gives H1 1.55157635 / H2 0.77846786, spread 0.773; coolBars 120 + green bar gives 1.30542369 / 1.30384915, spread 0.0016; coolBars 120 without the green bar gives 1.45604347 / 1.19944618, spread 0.25659729. WHAT HAPPENED: Attack 26's 8 admitted trades split roughly proportionally, 5 to H1 and 3 to H2, but their EFFECT was heavily skewed -- H1 +0.151, H2 -0.105. Attack 26 bought its whole-sample gain by improving the good half and degrading the bad one. THE HONEST READING IS NOT 'CLOSED THEN REOPENED': when Attack 25 was recorded I wrote that a number agreeing this precisely on 45 and 32 trades deserves suspicion on its own terms, and this run is evidence that suspicion was warranted. Both measurements are noisy at this sample size; the spread sits somewhere in 0 to 0.3 and 35 trades cannot pin it down further. THE STRUCTURAL FINDING: the ratchet is BLIND TO REGIME DISTRIBUTION. Attack 26 passed both ratchet terms while undoing the property that made the prior state valuable. Whole-sample profit factor and drawdown cannot see a change that improves one regime and degrades another. That is a rule question and the board reserves rule questions for the user, so Attack 26 stands as written and the choice is flagged rather than taken."
+ },
+ {
+  "id": "vwm-attack28-coolbars-90",
+  "name": "VWM Attack28 coolBars 90",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "The fine grid below 120, discharging a HARD LESSON 16 obligation on a currently-KEPT parameter whose neighbourhood was only half measured: 60 came back worse but 240 came back degenerate at 7 trades rather than measurably worse.",
+  "metrics": {
+   "netProfitPct": 18.80340316,
+   "profitFactor": 1.22341992,
+   "maxDrawdownPct": 16.6618966,
+   "totalTrades": 145,
+   "winRatePct": 44.13793103,
+   "avgTradePct": 0.12967864
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1J0GK5YHZYZZHPFG4SM5J8M",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1J0GK5YRXWDSZ163DV0HY2B",
+   "verifiedAt": "2026-09-02T21:42:00Z"
+  },
+  "notes": "REVERTED -- worse on both terms than the 120 base (PF 1.34992461 / DD 7.14265422% / 85 trades). But its real value is as the fourth point on a curve that turns out to have NO interior optimum. See Attack 29."
+ },
+ {
+  "id": "vwm-attack29-coolbars-150",
+  "name": "VWM Attack29 coolBars 150",
+  "symbol": "BTCUSDT",
+  "timeframe": "5m",
+  "direction": "long",
+  "status": "testing",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2024-06-08",
+  "backtestEnd": "2026-09-01",
+  "specPath": "CHAMPION-BOARD.md",
+  "description": "The fine grid above 120 -- the side that had never had a real reading, since 240 returned 7 trades and was rejected as degenerate. Together with Attack 28 this completes a six-point curve.",
+  "metrics": {
+   "netProfitPct": 14.32077784,
+   "profitFactor": 1.47184908,
+   "maxDrawdownPct": 6.98569615,
+   "totalTrades": 56,
+   "winRatePct": 51.78571429,
+   "avgTradePct": 0.25572818
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1J0H9HX9NQ3MFD3M7X1Q385",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1J0H9HX31NNBK7WQ92MCD4N",
+   "verifiedAt": "2026-09-02T21:42:00Z"
+  },
+  "notes": "PASSES THE RATCHET (PF 1.34992461 to 1.47184908, DD 7.14265422% to 6.98569615%) AND SIMULTANEOUSLY SHOWS THE RATCHET CANNOT TERMINATE ON THIS PARAMETER. The six measured points are perfectly monotone: coolBars 30/60/90/120/150/240 gives PF 1.00338859 / 1.15252596 / 1.22341992 / 1.34992461 / 1.47184908 / 2.30230986 on 231 / 166 / 145 / 85 / 56 / 7 trades. Profit factor rises and sample falls at EVERY step, with no interior optimum anywhere. coolBars was never an optimum -- it is a monotone trade-off between ratio and sample, and PF rises because fewer, more selective trades survive. THIS REFRAMES THREE EARLIER RESULTS: Attack 23's KEPT verdict, Attack 25's regime closure and this run are all points on one curve rather than discoveries about a peak. The interior-optimum language used at 120 was wrong and is withdrawn. EVERY POINT ON THIS CURVE PASSES THE RATCHET AGAINST THE POINT BELOW IT, so the rule as written will keep walking coolBars upward until the sample degenerates as 240 did at 7 trades. Raised as OPEN RULE QUESTION 3 -- a minimum-sample floor in the ratchet -- and the rule is applied rather than overridden, since rule changes are the user's call."
  }
 ]

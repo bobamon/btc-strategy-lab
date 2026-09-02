@@ -131,6 +131,8 @@ should be rejected without spending a credit on it.
 
 | Cycle | Change to the base | Result | Kept? |
 |---|---|---|---|
+| Attack 28 | `coolBars` 120 → 90 | PF 1.3499→1.2234, DD 7.14%→16.66%, trades 85→145 | **REVERTED** |
+| Attack 29 | `coolBars` 120 → 150 | PF 1.3499→**1.4718**, DD 7.14%→**6.99%**, trades 85→56 | **KEPT by the rule** — see the walk problem |
 | Attack 26 | Remove `close > open` | PF 1.3038→1.3499, DD 8.12%→7.14%, trades 77→85 | **KEPT — the new base.** A mild NEGATIVE filter |
 | Attack 22 | `coolBars` 60 → 30 | PF 1.1525→1.0034, DD 16.54%→22.52%, trades 166→231 | **REVERTED** — half the stand-down is almost exactly break-even |
 | Attack 23 | `coolBars` 60 → 120 | PF 1.1525→**1.3038**, DD 16.54%→**8.12%**, trades 166→77 | **KEPT — the new base.** Largest ratchet pass in this lab |
@@ -1388,3 +1390,62 @@ another; the two numbers are aggregates and this is a distributional effect.
 
 **BASE UNCHANGED: PF 1.34992461, DD 7.14265422%, 85 trades, `coolBars` 120, no green-bar requirement.
 No champion.**
+
+
+---
+
+## ██ ATTACKS 28/29 — coolBars HAS NO OPTIMUM. IT IS A RATIO-FOR-SAMPLE TRADE. (2026-09-02)
+
+The fine grid was run to discharge a HARD LESSON 16 obligation. It discharged something larger.
+
+| coolBars | Profit factor | Max drawdown | Trades |
+|---|---|---|---|
+| 30 | 1.00338859 | 22.51971852% | 231 |
+| 60 | 1.15252596 | 16.54214281% | 166 |
+| 90 | 1.22341992 | 16.66189660% | 145 |
+| 120 | 1.34992461 | 7.14265422% | 85 |
+| **150** | **1.47184908** | **6.98569615%** | **56** |
+| 240 | 2.30230986 | 1.99887631% | 7 |
+
+**Six points, perfectly monotone. Profit factor rises and trade count falls at every single step, and
+there is no interior optimum anywhere on the curve.**
+
+### WHAT THIS WITHDRAWS
+`coolBars` was never an optimum. **It is a monotone trade-off between ratio and sample**, and profit
+factor rises for the plainest possible reason: fewer, more selective trades survive.
+
+Three earlier write-ups need correcting in light of it:
+- **Attack 23's "KEPT"** was not the discovery of a good value; it was one step along a curve.
+- **Attack 25's regime closure** was measured at one point on that curve, which is part of why
+  Attack 27 found it did not travel.
+- **The "interior optimum" language used at 120 was wrong and is withdrawn.** The 60/120/240 grid
+  looked like a peak only because 240 was degenerate, and HARD LESSON 19 already warned that a
+  degenerate neighbour is not a bound.
+
+### THE RULE PROBLEM, STATED PLAINLY
+**Every point on this curve passes the ratchet against the point below it.** Attack 29 improves both
+terms and is therefore KEPT by the rule as written. So will 180. So, probably, will 210 — right up
+until the sample degenerates the way 240 did at seven trades.
+
+**The ratchet has no stopping condition on a parameter that buys ratio with sample.**
+
+> **OPEN RULE QUESTION #3 (raised by Attack 29, 2026-09-02).** Should the ratchet carry a minimum
+> sample floor — a change is rejected if it takes the trade count below some threshold, regardless of
+> what it does to profit factor and drawdown? Without one, this lab's rule mechanically walks every
+> selectivity parameter toward degeneracy. **This is the user's decision, as with the Attack 3
+> tolerance band and Attack 27's regime term.** The rule is APPLIED, not overridden: Attack 29 is the
+> base.
+
+This is the sibling of HARD LESSON 20. There the ratchet was blind to how a change DISTRIBUTED across
+regimes; here it is blind to how much SAMPLE a change spends. Both are properties an aggregate
+two-term rule cannot express.
+
+### QUEUE
+1. **Nothing further on `coolBars` until the rule question is answered.** Testing 180 would only walk
+   the parameter further down a curve already understood.
+2. **The sample problem is now the whole problem.** 56 trades, and the lever that raises PF lowers
+   sample by construction. No term deletion remains. 5m data starts 2024-06-08, so the only honest
+   options are **a different timeframe or a different instrument.**
+
+**BASE: PF 1.47184908, DD 6.98569615%, 56 trades, 51.79% win, `coolBars` 150, long-only. No champion,
+and 56 trades is further from one than 85 was.**

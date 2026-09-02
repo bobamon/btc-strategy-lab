@@ -1769,9 +1769,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T21:35:00Z"
     },
     "notes": "E38 IS NOT REPRODUCIBLE FROM THE LOG, AND THAT IS THE FINDING. This run was intended to be byte-identical to E38 (PF 1.50193294, DD 10.82866633%, 21 trades) purely to read its leg composition. It returned PF 0.34584164, DD 20.39372123%, 28 trades. A different trade count settles it: this is different code. E38's SOURCE WAS NEVER SAVED to pine/ -- the log holds its aggregate metrics and a prose description (2000 dollar shield, rr 2.0, maxBars 4320, v6 entry) but not the program, and a best-faith reconstruction from that prose does not reproduce it. THE DAMAGE EXTENDS BACKWARD: E42 and E43 were built on this same reconstruction, so every claim of the form 'worse than E38' compared my code against a number produced by different code. Those deltas are VOID. WHAT SURVIVES is the internal comparison, since E42/E43/E44 share one reconstruction and are self-consistent -- adding the coil to the long leg takes 39 to 28 trades, removing it from the shorts takes 39 to 68. On that reproducible basis: E43 coil-on-shorts-only PF 0.92252113 / DD 16.73115958% / 39 trades; E42 no coil PF 0.64544502 / DD 22.95213930% / 68; E44 coil both legs PF 0.34584164 / DD 20.39372123% / 28. THAT INVERTS LAST CYCLE'S VERDICT: E43 was reverted for being worse than E38, but against the only baseline that can actually be reproduced it is the BEST of the three by a wide margin. All three remain below 1.0, so none is a candidate, but the ordering reported last cycle was wrong. E38's leg split -- the question this cycle set out to answer -- REMAINS UNANSWERED, because the run that would answer it is not E38. Leg split of this run, recorded for completeness: long 12 trades 3 wins -$1100.20, short 16 trades 1 win -$448.20."
+  },
+  {
+    "id": "wf-e45-long-only",
+    "name": "WF E45 long only",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Delete the short leg entirely from the anchored reference build. Across the reproducible set the shorts had won 2 of 73 trades (E42 1/43, E43 0/14, E44 1/16), so this tests whether they are a filterable leg or dead weight.",
+    "metrics": {
+      "netProfitPct": -11.36550037,
+      "profitFactor": 0.39407279,
+      "maxDrawdownPct": 17.30450691,
+      "totalTrades": 12,
+      "winRatePct": 25.0,
+      "avgTradePct": -0.94712503
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1J0J92DJSTD129S42BYHQFG",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1J0J92DVVB529KMY30C8P22",
+      "verifiedAt": "2026-09-02T21:42:00Z"
+    },
+    "notes": "THE SHORTS ARE CONFIRMED NET NEGATIVE, BY A CLEAN SUBTRACTION. E45's 12 longs are EXACTLY E44's 12 longs -- same filter, same count -- so deleting the 16 shorts is the only difference, and PF moved 0.34584164 to 0.39407279. Shorts subtract value. BUT E45 LANDS WELL BELOW E43 (0.92252113), AND THE REASON IS THE MORE USEFUL FINDING: THE COIL DAMAGES THE LONG LEG. E43's UNCOILED longs number 25 and carry a far better result than these 12 coiled ones, and E42's uncoiled longs behave the same way. Reproducible set, all on pine/alcm-reference.pine: E43 uncoiled longs + coiled shorts 0.92252113 on 39; E42 no coil either leg 0.64544502 on 68; E45 coiled longs only 0.39407279 on 12; E44 coiled both legs 0.34584164 on 28. 12 TRADES IS BELOW THE INTERPRETABILITY FLOOR -- the count is reported and the ratio is not read as a result. Nothing promoted. THE EVIDENCE NOW POINTS AT ONE UNTESTED CELL: uncoiled longs with no shorts. That is the next run."
   }
 ];
-const BUILT = "2026-09-02 15:28";
+const BUILT = "2026-09-02 15:33";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
