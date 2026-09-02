@@ -177,3 +177,12 @@ Using the candle's full high-to-low range puts the zone's proximal edge at the i
 price is inside the zone at the moment of creation and any mitigation rule fires immediately. v9 and
 v10 both made exactly 3 trades for this reason, and their identical results are the proof: the zone
 died before anything downstream could act on it.
+
+
+## MITIGATION IS JUDGED ON THE BODY — CONFIRMED BY MEASUREMENT, 2026-09-02 (v13)
+A zone is mitigated when a completed candle on the zone's own timeframe **CLOSES inside it**. A candle
+that merely wicks through has not mitigated anything. The One Candle Rule then applies to those
+closes: the first close inside does not mitigate, the second does.
+
+Measured effect: counting wicks as touches left **15** opportunities in 4.7 years; counting bodies
+left **40**. Wick-counting was killing most zones within about eight hours of creation.

@@ -644,5 +644,34 @@
       "verifiedAt": "2026-09-02T10:30:31Z"
     },
     "notes": "THE CONTROL SPLITS THE CAUSE, AND MOST OF IT IS THE TIMEFRAME. Fixing the coil approximation took trades from 5 to 9 -- so it WAS suppressing frequency, and naming it before the run was right -- but 9 against the champion's 32 means roughly three quarters of the loss is the timeframe itself, not my approximation. PF also fell to 0.951. THE MECHANISM IS THE ENTRY TRIGGER: the champion enters on ta.crossover(close, p15l), a reclaim of the previous 15m low. On 1m there are fifteen chances per 15m candle to catch that crossover; on 5m there are three. The cascade identifies the level on higher timeframes but the ENTRY needs 1m granularity to catch the reclaim. THIS IS THE OPPOSITE OF THE BTC LAB'S RESULT, where coarsening from 15m to 5m helped -- there the signal needed price to travel to a fixed target, here it needs precision at a level. The sample-size problem is NOT solvable by moving to 5m; 1m coverage from 2025-12-16 remains the binding constraint."
+  },
+  {
+    "id": "war-formation-e21-macro-trend",
+    "name": "WF E21 macro trend filter",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "description": "Tests whether the champion's edge concentration is a macro trend effect. Adds one condition: close above a 14400-bar EMA, about ten days on 1m. The champion has no long-horizon trend filter; its 6h regime carries roughly a day of memory. Long-only.",
+    "metrics": {
+      "netProfitPct": 0.37317648,
+      "profitFactor": 1.04297807,
+      "maxDrawdownPct": 3.89034082,
+      "totalTrades": 18,
+      "winRatePct": 38.88888889,
+      "avgTradePct": 0.02073203
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GV425KN9YEQ0SEPRF96RE7",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GV425K3361APZQJ6BR9K24",
+      "verifiedAt": "2026-09-02T10:37:32Z"
+    },
+    "notes": "REVERTED, AND IT ELIMINATES THE SECOND HYPOTHESIS. PF 1.686->1.043, win rate 56.25%->38.89%, trades 32->18, DD 3.10%->3.89%. The filter cut nearly half the trades and the survivors were markedly worse -- the anti-selective signature seen in E14 and E16. So a ten-day trend does NOT select the good period. VOLATILITY (E18) AND MACRO TREND (E21) ARE NOW BOTH RULED OUT, and the edge concentration remains unexplained. Worth noting the same shape has just appeared in the BTC lab, whose 5m base scores 1.0202 over 2.2 years but 0.8753 over this identical Dec-May window. Two unrelated strategies degrading in the same window points at something in the market during that period rather than at either strategy, which makes a calendar decomposition -- not another filter -- the right next probe."
   }
 ]

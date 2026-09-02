@@ -61,6 +61,7 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E19 | SENSITIVITY: greenBull 4 -> 3 | **Degrades gracefully.** PF 1.686->1.282, win 56.25%->47.62%, trades 32->42, DD 3.10%->4.79%. Still clearly profitable -- not a knife-edge fit · [report](https://mcp-api.trader.dev/backtest/01M1GRHCBX2GY7QQ7NK1N173VB) |
 | E20 | Timeframe translation to 5m, parameters scaled x5 | **REVERTED.** PF 1.621, DD 2.73%, but trades 32->5 · [report](https://mcp-api.trader.dev/backtest/01M1GTNK25PJC0J19WKQ6GKQXK) |
 | E20b | CONTROL: same, but the coil keeps its 1:10 RATIO instead of wall-clock | **REVERTED.** Trades 5->9, so the coil was part of it -- but PF fell to 0.951 and 9 is still far below 32 · [report](https://mcp-api.trader.dev/backtest/01M1GTQ6BGVNPYGKX1AQAHQA39) |
+| E21 | Macro trend filter: close above a 14400-bar EMA (~10 days) | **REVERTED.** PF 1.686->1.043, win 56.25%->38.89%, trades 32->18. Macro trend does NOT explain the concentration · [report](https://mcp-api.trader.dev/backtest/01M1GV425K3361APZQJ6BR9K24) |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -305,5 +306,34 @@ direction.
 timeframe. 1m coverage starting 2025-12-16 is a hard limit, and 32 trades is what this champion gets
 until the engine's history extends. Robustness must therefore come from parameter sensitivity (E19's
 approach) rather than from a bigger sample.
+
+**Champion unchanged: v6, long-only, PF 1.68623784, DD 3.10289714%, 32 trades.**
+
+
+## E21 — HYPOTHESIS TWO ELIMINATED, AND THE MYSTERY GETS MORE INTERESTING
+The champion has no long-horizon trend filter, so a ten-day EMA was genuinely new information rather
+than a redundancy trap. If the edge concentration were a macro uptrend, that filter should have kept
+the December-to-February trades and dropped the February-to-May ones.
+
+It did the opposite: PF 1.686 -> 1.043, win rate 56.25% -> 38.89%, trades 32 -> 18. Nearly half the
+trades removed and the survivors markedly worse — the anti-selective signature of E14 and E16.
+
+**Both hypotheses are now dead:**
+| Hypothesis | Experiment | Verdict |
+|---|---|---|
+| Volatility regime | E18 | Ruled out — PF 1.69 → 1.10, kept only 7 of 32 |
+| Macro trend | E21 | Ruled out — PF 1.69 → 1.04, kept 18 of 32 |
+
+### THE IMPORTANT NEW OBSERVATION — IT MAY NOT BE THIS STRATEGY AT ALL
+The BTC lab measured the same window this hour, on a completely different mechanism, and found the
+same shape: its 5m base scores **1.0202 over 2.2 years but 0.8753 over this identical Dec-May
+window.**
+
+**Two unrelated strategies, one long-only 1m momentum cascade and one 5m VWAP mean-reversion, both
+degrade in the same months.** That points at something in the market during that period rather than
+at a property of either strategy — and it means the question has been framed wrongly. The right next
+probe is a **calendar decomposition** of the champion (month by month, and both labs side by side),
+which is a measurement, not another filter. Every filter tried so far has failed for the same reason:
+filters select on a *proxy*, and no proxy has matched whatever the calendar is actually marking.
 
 **Champion unchanged: v6, long-only, PF 1.68623784, DD 3.10289714%, 32 trades.**

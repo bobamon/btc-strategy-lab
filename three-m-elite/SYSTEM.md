@@ -295,6 +295,7 @@ so the code genuinely behaves differently. **But the count stayed at 3.**
 | v10 | keep the deepest zone, not the most recent | 3 |
 | v11 | zone is the base, not the whole candle | 3 |
 | v12 | DIAGNOSTIC: entry stripped to "zone live and price inside it", 1-bar exits, to COUNT opportunities | **15 opportunities in 4.7 years** (6 long, 9 short). Ignore the P&L -- it is an instrument · [report](https://mcp-api.trader.dev/backtest/01M1GTWJTF7K07205ZD8P4EM5Y) |
+| v13 | Mitigation judged on the BODY (a 4H close inside the zone) instead of a wick, counter form | **Opportunities 15 -> 40** (13 long, 27 short). The fix works · [report](https://mcp-api.trader.dev/backtest/01M1GV4JAZ169SE54YC2AZAVVT) |
 
 **When three independent corrections land on the same trade count, the binding constraint is upstream
 of all of them.** I have now spent three cycles fixing things that were genuinely wrong and none of
@@ -332,6 +333,25 @@ A candle that merely wicks through is not a candle that has mitigated anything.
 `low <= dzTop`. Re-run the v12 counter afterwards to confirm the opportunity population actually grew
 before putting any filter back on.
 
+## v13 — THE LIFECYCLE IS REPAIRED. OPPORTUNITIES 15 -> 40.
+Judging mitigation on the BODY instead of the wick nearly tripled the opportunity population over the
+same 4.7 years: **15 -> 40**, 13 long and 27 short. The diagnosis from v12 was correct — zones were
+being killed by candles that dipped a wick into them without ever closing inside, which the source
+never treats as mitigation.
+
+**This is now the settled rule:** a zone is mitigated when a completed candle on the zone's timeframe
+CLOSES inside it, and the One Candle Rule applies to those closes — the first does not mitigate, the
+second does. Recorded in VOCABULARY.md.
+
+**Do not read v13's profit factor.** Exits are forced after one bar; it is a counter, and its P&L is
+an artefact of the instrument exactly as in v12.
+
+**v14: restore the filters ONE AT A TIME, measuring what each costs.** v9/v10/v11 cut 15 down to 3 by
+switching bias, direction and colour on together, and that ratio applied to 40 would leave about 8 —
+still too few. Turning them on one at a time is the only way to learn which one is expensive. The
+order should be cheapest-information-first: 4H structure, then 12H zone direction, then 2D bias, then
+the candle-colour condition.
+
 ## Open queue
 0. ~~Get definitions for Type 1/Type 2~~ — **DONE 2026-09-02, see VOCABULARY.md.**
    Type 1 = a 3M candle; Type 2 = an engulfing candle in the direction of bias; both only on the
@@ -344,7 +364,10 @@ before putting any filter back on.
 0-V10. ~~KEEP THE DEEPEST ZONE~~ — **DONE. Identical to v9; the rule never fires. See the v10 lesson.**
 0-V11. ~~FIX THE ZONE GEOMETRY~~ — **DONE. Real change, still 3 trades. Not the binding constraint.**
 0-V12. ~~DIAGNOSTIC RUN~~ — **DONE. 15 opportunities in 4.7 years. The zone lifecycle is the constraint.**
-0-V13-NEXT. **MITIGATION MUST BE JUDGED ON THE BODY, NOT THE WICK (top priority).** Change dzTouch /
+0-V13. ~~MITIGATION ON THE BODY~~ — **DONE. Opportunities 15 -> 40. Settled rule.**
+0-V14-NEXT. **RESTORE FILTERS ONE AT A TIME ON THE CORRECTED LIFECYCLE (top priority).** Measure the
+    cost of each gate separately -- 4H structure, then 12H zone direction, then 2D bias, then candle
+    colour -- instead of switching them all on together. Superseded text: Change dzTouch /
     szTouch to increment on a CLOSE inside the zone rather than a low/high touching it. Then re-run
     the v12 counter to verify the population grew before restoring any filter. Superseded text: Entry = zone live AND price inside it.
     Nothing else. Count the opportunities before filtering them. Superseded text: A demand zone is the

@@ -486,9 +486,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T10:33:27Z"
     },
     "notes": "THE MEASUREMENT: 15 OPPORTUNITIES IN 4.7 YEARS. 6 long, 9 short. Do not read the profit factor -- exits are forced after one bar, so the P&L is an artefact of the instrument. THE ANSWER IS DECISIVE AND IT IS NOT THE FILTERS. With every gate removed the population is 15; with all gates on it was 3. So the bias and direction conditions cut 15 to 3, but 15 was never enough to begin with. THE ZONE LIFECYCLE IS THE BINDING CONSTRAINT, exactly as the diagnostic was designed to determine. Prime suspect is the mitigation test: dzTouch increments whenever a 4H candle's LOW dips below the zone top, so a single wick counts as a touch and two wicks kill the zone, typically within eight hours of creation. The source judges invalidation on the BODY, and the One Candle Rule is about candles closing back into the zone. v13 should require a BODY inside the zone to count as mitigation."
+  },
+  {
+    "id": "3m-elite-v13-body-mitigation",
+    "name": "3M ELITE v13 body mitigation (counter)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "A COUNTER, NOT A STRATEGY. Mitigation now requires a completed 4H candle to CLOSE inside the zone rather than merely wick into it. Run in v12 counter form with entry stripped to one condition and one-bar exits, so the trade count is the opportunity count and is directly comparable with v12's 15. P&L is meaningless by construction.",
+    "metrics": {
+      "netProfitPct": -5.0301871,
+      "profitFactor": 0.25326988,
+      "maxDrawdownPct": 5.0301871,
+      "totalTrades": 40,
+      "winRatePct": 25.0,
+      "avgTradePct": -0.12575468
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GV4JAZYPWHSXVYZ1752WA2",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GV4JAZ169SE54YC2AZAVVT",
+      "verifiedAt": "2026-09-02T10:37:49Z"
+    },
+    "notes": "THE FIX WORKS: OPPORTUNITIES 15 -> 40, nearly tripled, over the same 4.7 years. 13 long, 27 short. DO NOT READ THE PROFIT FACTOR -- exits are forced after one bar, so P&L is an artefact of the instrument, exactly as in v12. The wick-counting diagnosis was correct: zones were being killed by candles that dipped a wick into them without ever closing inside, which the source never treats as mitigation. Judging mitigation on the BODY is now the settled rule. 40 in 4.7 years is still thin for a strategy that then applies bias, direction and colour filters -- v9/v10/v11 cut 15 down to 3, so a similar ratio would leave roughly 8 -- so the next cycle should restore the filters ONE at a time onto this corrected lifecycle and measure what each costs, rather than switching them all on at once."
   }
 ];
-const BUILT = "2026-09-02 04:35";
+const BUILT = "2026-09-02 04:38";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
