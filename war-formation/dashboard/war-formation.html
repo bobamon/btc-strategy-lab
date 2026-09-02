@@ -1798,9 +1798,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T21:42:00Z"
     },
     "notes": "THE SHORTS ARE CONFIRMED NET NEGATIVE, BY A CLEAN SUBTRACTION. E45's 12 longs are EXACTLY E44's 12 longs -- same filter, same count -- so deleting the 16 shorts is the only difference, and PF moved 0.34584164 to 0.39407279. Shorts subtract value. BUT E45 LANDS WELL BELOW E43 (0.92252113), AND THE REASON IS THE MORE USEFUL FINDING: THE COIL DAMAGES THE LONG LEG. E43's UNCOILED longs number 25 and carry a far better result than these 12 coiled ones, and E42's uncoiled longs behave the same way. Reproducible set, all on pine/alcm-reference.pine: E43 uncoiled longs + coiled shorts 0.92252113 on 39; E42 no coil either leg 0.64544502 on 68; E45 coiled longs only 0.39407279 on 12; E44 coiled both legs 0.34584164 on 28. 12 TRADES IS BELOW THE INTERPRETABILITY FLOOR -- the count is reported and the ratio is not read as a result. Nothing promoted. THE EVIDENCE NOW POINTS AT ONE UNTESTED CELL: uncoiled longs with no shorts. That is the next run."
+  },
+  {
+    "id": "wf-e46-uncoiled-long-only",
+    "name": "WF E46 uncoiled long only",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "The missing 2x2 cell: uncoiled longs with no short leg. Applies both reproducible findings at once -- E45 showed the shorts subtract value by clean subtraction, and both uncoiled-long builds beat both coiled-long builds. One change from E45 (drop the coil) and equally one change from E43 (delete the shorts): the same point reached from either side.",
+    "metrics": {
+      "netProfitPct": -2.16257588,
+      "profitFactor": 0.92509109,
+      "maxDrawdownPct": 17.69793937,
+      "totalTrades": 25,
+      "winRatePct": 52.0,
+      "avgTradePct": -0.08650304
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1J0V30QFQRKD8DXJBXCPKDR",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1J0V30QJW69DQ7VQEJEKGYB",
+      "verifiedAt": "2026-09-02T21:50:00Z"
+    },
+    "notes": "THE 2x2 IS COMPLETE AND THE ANSWER IS A CLEAN NEGATIVE. Full set on the anchored codebase: E46 uncoiled longs / no shorts 0.92509109 on 25; E43 uncoiled longs / coiled shorts 0.92252113 on 39; E42 uncoiled both 0.64544502 on 68; E45 coiled longs only 0.39407279 on 12; E44 coiled both 0.34584164 on 28. E46 is nominally best but its margin over E43 is 0.0026 -- NOISE, not a result. Registered outcome honoured: best of the five, still below 1.0, so the two findings are real and additive but THE ENTRY ITSELF DOES NOT HAVE AN EDGE ON THIS WINDOW UNDER THE A.L.C.M. EXIT. Five builds spanning the full 2x2 plus one, none above 1.0. That stops the search rather than prolonging it. AND E46 EXPOSES WHY THE EXIT IS NOT WORKING: 52% win rate with a 0.854 payoff on a 2:1 target means winners are SMALLER than losers, and avgBarsWinning is 4022 against the 4320 cap -- 93%. Winners ride to the three-day cap instead of reaching the +$4,000 target. That is E35's failure mode again at a longer cap: the shield exit still does not resolve, and raising maxBars from 720 to 4320 moved the problem rather than fixing it."
   }
 ];
-const BUILT = "2026-09-02 15:33";
+const BUILT = "2026-09-02 17:44";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

@@ -1661,3 +1661,59 @@ That is the next run, and it is the last obvious structural move this lab has.
 2. **Then re-derive the shield sweep on whatever that produces** — E36–E41's $2,000 optimum was
    measured on unreproducible code (E44) and must be re-established on the anchor.
 3. **Position sizing.** Unchanged and still the largest unsolved problem.
+
+
+---
+
+# ██ E46 — THE 2x2 IS COMPLETE. THE ENTRY HAS NO EDGE ON THIS WINDOW.
+
+The missing cell: uncoiled longs, no short leg. It applies both reproducible findings at once, and is
+reachable as one change from either E45 (drop the coil) or E43 (delete the shorts).
+
+| Build | Longs | Shorts | Profit factor | Max drawdown | Trades |
+|---|---|---|---|---|---|
+| **E46** | uncoiled | **none** | **0.92509109** | 17.69793937% | 25 |
+| E43 | uncoiled | coiled | 0.92252113 | 16.73115958% | 39 |
+| E42 | uncoiled | uncoiled | 0.64544502 | 22.95213930% | 68 |
+| E45 | coiled | none | 0.39407279 | 17.30450691% | 12 |
+| E44 | coiled | coiled | 0.34584164 | 20.39372123% | 28 |
+
+**E46 is nominally the best and the margin is 0.0026 over E43 — noise, not a result.**
+
+## THE REGISTERED OUTCOME, HONOURED
+The Pine said in advance: *"best of the five, still below 1.0 -> the two findings are real and
+additive but the entry itself does not have an edge on this window. That is a clean negative and
+worth as much as a win, because it stops the search rather than prolonging it."*
+
+**That is the outcome. Five builds spanning the full 2x2 plus one, and not one above 1.0.** The two
+structural findings both hold — the shorts subtract value, the coil damages the longs — and applying
+both still leaves a losing strategy.
+
+## E46 ALSO EXPOSES WHY THE EXIT IS NOT WORKING, AND THIS IS THE LARGER PROBLEM
+| Metric | Value | What it means |
+|---|---|---|
+| Win rate | 52.0% | more winners than losers |
+| Payoff ratio | **0.85393024** | **and yet winners are SMALLER than losers** |
+| avgBarsWinning | **4022 of a 4320 cap** | **93% of the maximum hold** |
+
+On a 2:1 target a 52% win rate should be comfortably profitable. It is not, because **winners are
+riding to the three-day cap instead of reaching the +$4,000 target.** The trade is being closed at
+market by `maxBars`, not by the shield's own arithmetic.
+
+**This is E35's failure mode again.** E35 found `maxBars = 720` truncated every trade and concluded the
+cap was a narrow-stop leftover; E36 raised it to 4320. **Raising it moved the problem rather than
+fixing it** — at 4320 the winners still pin to the cap.
+
+So every ALCM result in this log, E36 onward, measures **a three-day hold with a shield attached**,
+not the A.L.C.M. as specified. The specification says the position ends at target or at liquidation.
+**No run here has yet let that happen.**
+
+## STATUS
+- **No configuration is promoted. There is no champion and no candidate.**
+- The 2x2 is closed; further filter permutations on this entry are not worth credits.
+
+## QUEUE
+1. **Establish whether the cap or the target is binding.** Either raise `maxBars` until
+   `avgBarsWinning` stops pinning to it, or cut `rr` so the target is reachable inside three days.
+   Until one of them resolves, no ALCM number in this log measures the specified strategy.
+2. **Position sizing.** Unchanged, and still the largest unsolved problem.

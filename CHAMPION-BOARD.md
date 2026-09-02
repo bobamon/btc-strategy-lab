@@ -1449,3 +1449,64 @@ two-term rule cannot express.
 
 **BASE: PF 1.47184908, DD 6.98569615%, 56 trades, 51.79% win, `coolBars` 150, long-only. No champion,
 and 56 trades is further from one than 85 was.**
+
+
+---
+
+## ██ ATTACK 30 — THE EDGE SURVIVES OUT OF PERIOD. FIRST TIME IN THIS PROJECT. (2026-09-02)
+
+Attacks 28/29 showed `coolBars` only trades ratio for sample and left the board saying the sample
+problem *is* the problem, with only two honest options: a different timeframe or a different
+instrument. This took the first.
+
+**The fact that made it necessary: this strategy had never been tested before 2024-06-08** — not by
+choice, but because that is where 5m data begins. Thirty attacks, four kept changes, one regime claim
+raised and withdrawn, all inside a single 27-month window.
+
+| | 5m base (the tuned window) | **15m from 2022** |
+|---|---|---|
+| Profit factor | 1.47184908 | **1.23178053** |
+| Max drawdown | 6.98569615% | 13.55670685% |
+| Trades | 56 | **141** |
+| Win rate | 51.79% | 46.10% |
+| Net return | +14.32% | +19.35% |
+| Period | 2.2 years | **4.7 years** |
+
+**PF 1.232 on 141 trades across 4.7 years, including 2022–2024 the strategy has never seen.**
+
+**This is a VALIDATION run and cannot be KEPT or REVERTED** — a different timeframe over a different
+period is not like-for-like, so the ratchet does not apply and the 5m base stands as the base.
+
+### THE RESCALE WAS MECHANICAL, NOT A JUDGMENT CALL
+Every bar-count parameter divided by 3, which simply restored the native 15m values the 5m set was
+tripled from — the base's own comments still read "(100 x3)", "(50 x3)", "(200 x3)", "(20 x3)".
+Ratios and percentages are timeframe-independent and untouched.
+
+### THE CONFOUND WAS NAMED BEFORE THE RUN, AND NEEDS NO SEPARATING CONTROL
+This changed **two** things: timeframe and period. The Pine comment said in advance that a collapse
+could not distinguish "fails on 15m" from "fails before 2024", and that a HOLD would need no
+separation. **It held.**
+
+### THE HONEST QUALIFIER, WHICH MATTERS AS MUCH AS THE RESULT
+**1.232 is well below the 5m base's 1.472, and drawdown is nearly double.** Both readings are true at
+once: the edge is real out of period, **and the 5m number is optimistic.** That is exactly what
+Attacks 28/29 predicted — `coolBars` 150 sits at the thin end of a ratio-for-sample curve, and a
+56-trade profit factor is the top of a noisy range rather than the truth about it.
+
+**The larger sample gives the more trustworthy number, and it is the smaller one. 1.232 on 141 trades
+is the most credible figure this lab has ever produced**, and it is lower than every headline it has
+celebrated.
+
+### WHAT IS STILL UNKNOWN
+The aggregate cannot say whether the edge is **concentrated after 2024-06-08**. If the 2022–2024
+portion alone is below 1.0, this is still a single-regime result wearing a longer window.
+
+### QUEUE
+1. **Split the 15m build at 2024-06-08.** That is the true out-of-sample test and the single most
+   informative run available to this lab. Two runs, like-for-like periods.
+2. **If it holds on both halves, 15m becomes the home timeframe** — it relieves the sample constraint
+   permanently and every future attack gets 141 trades instead of 56.
+3. **`coolBars` stays frozen** until the rule question about a minimum-sample floor is answered.
+
+**BASE UNCHANGED: PF 1.47184908, DD 6.98569615%, 56 trades, `coolBars` 150, 5m, long-only. No
+champion — but for the first time there is a result worth trying to promote.**

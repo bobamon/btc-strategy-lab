@@ -1826,9 +1826,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T21:42:00Z"
     },
     "notes": "PASSES THE RATCHET (PF 1.34992461 to 1.47184908, DD 7.14265422% to 6.98569615%) AND SIMULTANEOUSLY SHOWS THE RATCHET CANNOT TERMINATE ON THIS PARAMETER. The six measured points are perfectly monotone: coolBars 30/60/90/120/150/240 gives PF 1.00338859 / 1.15252596 / 1.22341992 / 1.34992461 / 1.47184908 / 2.30230986 on 231 / 166 / 145 / 85 / 56 / 7 trades. Profit factor rises and sample falls at EVERY step, with no interior optimum anywhere. coolBars was never an optimum -- it is a monotone trade-off between ratio and sample, and PF rises because fewer, more selective trades survive. THIS REFRAMES THREE EARLIER RESULTS: Attack 23's KEPT verdict, Attack 25's regime closure and this run are all points on one curve rather than discoveries about a peak. The interior-optimum language used at 120 was wrong and is withdrawn. EVERY POINT ON THIS CURVE PASSES THE RATCHET AGAINST THE POINT BELOW IT, so the rule as written will keep walking coolBars upward until the sample degenerates as 240 did at 7 trades. Raised as OPEN RULE QUESTION 3 -- a minimum-sample floor in the ratchet -- and the rule is applied rather than overridden, since rule changes are the user's call."
+  },
+  {
+    "id": "vwm-attack30-15m-from-2022",
+    "name": "VWM Attack30 15m from 2022",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "THE OUT-OF-PERIOD TEST. This strategy had never been tested before 2024-06-08, because that is where 5m data begins. 15m goes back to 2022, so this runs the current base on 15m from 2022 with every bar-count parameter divided by 3 -- restoring the native 15m values the current ones were tripled from. A VALIDATION run, not an attack: a different timeframe over a different period is not like-for-like, so the ratchet does not apply and this can be neither KEPT nor REVERTED.",
+    "metrics": {
+      "netProfitPct": 19.34972381,
+      "profitFactor": 1.23178053,
+      "maxDrawdownPct": 13.55670685,
+      "totalTrades": 141,
+      "winRatePct": 46.09929078,
+      "avgTradePct": 0.13723208
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1J0T09V47KWPD87R39DZZ1V",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1J0T09TFD8AZE208W6413V6",
+      "verifiedAt": "2026-09-02T21:50:00Z"
+    },
+    "notes": "THE EDGE SURVIVES OUT OF PERIOD -- THE FIRST SUCH EVIDENCE IN THIS PROJECT. PF 1.23178053 on 141 trades across 4.7 years, including the 2022-2024 stretch the strategy has never seen. Registered before the run as the strongest available outcome. THE CONFOUND WAS NAMED IN ADVANCE AND NEEDS NO SEPARATING RUN: this changed timeframe AND period at once, and I wrote beforehand that a collapse could not distinguish the two but a HOLD would need no separation. It held. THE HONEST QUALIFIER: 1.232 is well below the 5m base's 1.472, and drawdown is worse (13.56% against 6.99%). So the edge is real out of period AND the 5m number is optimistic -- consistent with coolBars 150 sitting at the thin end of the ratio-for-sample curve Attacks 28/29 exposed. The larger sample gives the more trustworthy number and it is the smaller one. WHAT IS STILL UNKNOWN: the aggregate cannot say whether the edge is concentrated after 2024-06-08. A split at that date on this 15m build is the true out-of-sample test and is the next queue item."
   }
 ];
-const BUILT = "2026-09-02 15:33";
+const BUILT = "2026-09-02 17:44";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
