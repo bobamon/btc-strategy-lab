@@ -298,6 +298,7 @@ so the code genuinely behaves differently. **But the count stayed at 3.**
 | v13 | Mitigation judged on the BODY (a 4H close inside the zone) instead of a wick, counter form | **Opportunities 15 -> 40** (13 long, 27 short). The fix works · [report](https://mcp-api.trader.dev/backtest/01M1GV4JAZ169SE54YC2AZAVVT) |
 | v14 | Repaired lifecycle, NO filters, REAL fixed exits -- does the zone population have an edge? | **PF 0.29, win rate 4.17%, 24 trades** (5 long 0W, 19 short 1W). The TAKE PROFIT IS UNREACHABLE -- no trade ever hit it · [report](https://mcp-api.trader.dev/backtest/01M1GVG1713A1BXSDAF6551N29) |
 | v15 | Unreachable ATR target replaced with a fixed 2R, still no filters | **PF 0.363, win rate 8.33%, 24 trades** (5 long 1W, 19 short 1W). Target fix confirmed; entries are worse than chance · [report](https://mcp-api.trader.dev/backtest/01M1GVV0F20WJY72GZSQWM2VJX) |
+| v16 | Type 2 validation restored, latched setup + later trigger | **0 TRADES.** Sequencing was correct; the four-way conjunction at firing is what kills it · [report](https://mcp-api.trader.dev/backtest/01M1GW1PWQ2YY4ZX0AFCMBCCYM) |
 
 **When three independent corrections land on the same trade count, the binding constraint is upstream
 of all of them.** I have now spent three cycles fixing things that were genuinely wrong and none of
@@ -413,6 +414,32 @@ direction of bias occurring INSIDE a live zone, latched per HARD LESSON 8, with 
 the first build in this lab where the lifecycle, the geometry, the mitigation rule and the exit are
 all correct at the same time.
 
+## v16 — ZERO TRADES, BUT NOT THE OLD BUG. AND A METHOD FAILURE WORTH MORE THAN THE RUN.
+This is not v2/v4/v5 repeating. **The sequencing was right this time:** price entering a live zone
+arms it as a latched setup, and the engulfing candle fires on a later bar. HARD LESSON 8 was obeyed.
+
+What kills it is the **four-way conjunction at the moment of firing** — the zone must still be live,
+still armed, the 2D bias must agree, and a bullish engulf must land on that exact 4H boundary. Each
+condition is individually reasonable; together they never co-occur in 4.7 years.
+
+### The method failure matters more than the result
+I designed this run around plotting the gate counters, which HARD LESSON 8's corollary explicitly
+recommends. **But `quick_backtest` does not return plot values — only trade statistics.** Those plots
+were invisible, so the corollary was unusable, and I had been writing it into run after run without
+noticing it could never pay off. It was carried over from TradingView habits rather than derived from
+this API's actual output.
+
+**The ledger corollary is now corrected.** The technique that genuinely works is the **counter build**
+already proven in v12 and v13: make the gate itself the entry condition and force a one-bar exit, so
+`totalTrades` IS the hit count and the long/short split comes free.
+
+**This result is not on the dashboard.** `build_dashboard.py` rejected it — "a run with no trades is
+not a backtest" — which is the provenance gate working exactly as intended.
+
+**v17: count the armed-plus-engulf occurrences with a counter build before attempting any entry
+logic.** If the count is near zero, the 2D bias is the binding term and should be dropped or widened;
+if it is healthy, the fault is in the entry plumbing.
+
 ## Open queue
 0. ~~Get definitions for Type 1/Type 2~~ — **DONE 2026-09-02, see VOCABULARY.md.**
    Type 1 = a 3M candle; Type 2 = an engulfing candle in the direction of bias; both only on the
@@ -428,7 +455,10 @@ all correct at the same time.
 0-V13. ~~MITIGATION ON THE BODY~~ — **DONE. Opportunities 15 -> 40. Settled rule.**
 0-V14. ~~UNFILTERED EDGE TEST~~ — **RUN, BUT INCONCLUSIVE: the take profit is unreachable. See the v14 lesson.**
 0-V15. ~~FIX THE TAKE PROFIT~~ — **DONE. Confirmed broken and fixed; entries are worse than chance without validation.**
-0-V16-NEXT. **RESTORE THE TYPE 2 VALIDATION (top priority).** An engulfing candle in the direction of
+0-V16. ~~RESTORE THE TYPE 2 VALIDATION~~ — **0 trades. Sequencing correct; the firing conjunction is too narrow.**
+0-V17-NEXT. **COUNTER-BUILD THE VALIDATION GATE (top priority).** Entry = armed zone AND engulf, with
+    a one-bar exit, so totalTrades is the hit count. Then relax the narrowest term. Do NOT rely on
+    plot() -- this engine does not return plot values. Superseded text: An engulfing candle in the direction of
     bias, occurring INSIDE a live zone, latched in sequence with the zone tap. With the 2R target and
     the corrected lifecycle this is the first build where every layer is right at once. Superseded text: Replace
     `tpATR = 12 x ATR14` with a fixed 2R target, then re-run the unfiltered edge test. No filter goes

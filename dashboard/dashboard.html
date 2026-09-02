@@ -956,9 +956,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T10:46:17Z"
     },
     "notes": "THE DECISIVE RESULT, AND IT UNDERCUTS THE HEADLINE. PF 0.6566, win rate 29.51%, net -11.36% across 61 trades. The split is exact -- 67 trades in the first half plus 61 here equals the full sample's 128 -- so this is a clean partition, not an approximation. First half PF 1.3552, second half 0.6566, full 1.0202. THE 5m BASE DOES NOT HAVE A PERSISTENT EDGE: the full-sample profit factor above 1.0 is an average of one good year and one bad one, and the more recent year is decisively negative. Either the edge decayed or the first half was luck; on 67 and 61 trades this data cannot separate those. What it does settle is that PF 1.02 must never again be quoted as a property of this signal. The two changes KEPT earlier -- the high-volatility regime split and the witching ban -- were both measured on the full mixed sample and should be regarded as unvalidated on the recent half."
+  },
+  {
+    "id": "vwm-short-own-geometry",
+    "name": "VWM short leg, own geometry",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "short",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "The first short leg in this lab, built from its own geometry rather than mirrored. The long buys a pullback continuing an uptrend; this fades an extreme -- a rally reaching the upper 2 sigma band that fails, closing back below it on a down bar, with VWAP falling and price under the 600-bar EMA. Stop above the 60-bar swing high. Run SHORT-ONLY so it is judged alone.",
+    "metrics": {
+      "netProfitPct": -2.62143398,
+      "profitFactor": 0.55064867,
+      "maxDrawdownPct": 2.66677054,
+      "totalTrades": 17,
+      "winRatePct": 17.64705882,
+      "avgTradePct": -0.154202
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GW0ZYQCRFWT7N4GJ8JGKQE",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GW0ZYPEWED0C85DEBHQJXX",
+      "verifiedAt": "2026-09-02T10:53:20Z"
+    },
+    "notes": "REJECTED ON ITS OWN NUMBERS, WHICH IS THE POINT OF JUDGING IT ALONE. PF 0.5506, win rate 17.65%, 3 winners from 17 trades. It IS a genuine own-geometry construction rather than a mirror -- the long requires a pullback to exist, this requires an extension -- so the standing rule was honoured, and that rule is not what failed here. Two observations for the next attempt: the trigger is RARE, only 17 occurrences in 2.2 years, so the band-rejection condition is too restrictive to build on; and the shape is odd, with avgBarsWinning 254.7 against avgBarsLosing 32.6, meaning the few winners grind for days while losers resolve in hours. That asymmetry suggests the 2R target is too far for a fade and the losers are being stopped by ordinary noise on the way. A fade probably wants a nearer target and a wider stop -- the opposite configuration from the trend-following long."
   }
 ];
-const BUILT = "2026-09-02 04:47";
+const BUILT = "2026-09-02 04:54";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

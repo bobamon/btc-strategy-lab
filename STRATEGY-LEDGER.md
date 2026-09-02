@@ -224,6 +224,15 @@ never "too strict"; it is almost always two conditions that cannot be true at th
 give it an explicit invalidation rule, and let the trigger fire on a *later* bar while the latch is
 live. Setup and trigger occupy different points in time — code them that way.
 
-**Corollary — how to avoid paying for this discovery.** Before spending a credit on a run that adds a
-gate, `plot()` the gate's own hit count. A gate that never coincides with the base signal shows up as
-a flat zero line and costs nothing to find.
+**Corollary — how to avoid paying for this discovery.** ~~Before spending a credit on a run that adds
+a gate, `plot()` the gate's own hit count.~~
+
+**CORRECTED 2026-09-02 (3M Elite v16).** That corollary does not work on this engine: `plot()` values
+are NOT returned by `quick_backtest`. The response carries trade statistics only, so a plotted gate
+counter is invisible and the advice was unusable — it was written from TradingView habits, not from
+this API's actual output. Three runs were designed around it before the gap was noticed.
+
+**The technique that DOES work is the counter build, proven in v12 and v13:** make the gate itself the
+entry condition and force a one-bar exit, so `totalTrades` becomes the gate's hit count and
+`longTrades`/`shortTrades` split it by side. It costs a credit but returns a real number. Use it
+whenever a gate's frequency is in question, and never trust a plot to answer it.
