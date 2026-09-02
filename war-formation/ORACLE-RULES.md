@@ -99,8 +99,10 @@ that this "wrecks an absolutely perfect trade" even when the direction is right.
 **The defect was never the geometry. It was the location.**
 
 ## IMPLEMENTATION QUEUE (supersedes earlier items)
-1. **Replace the direction rule** with his: more than one consecutive green (or red) 6h candle.
-   Simpler than the current HA green-count and it is what he actually says.
+1. ~~Replace the direction rule with his~~ — **TESTED (v7), REVERTED.** PF 1.69→1.14, DD 3.10%→4.19%,
+   win rate 56.3%→40.9%. His stated rule underperforms this lab's HA 1h green-count on this data.
+   His words describe how he *reads* a chart; they are not automatically the best mechanisation of it.
+   Sample caveat: 22 vs 32 trades. Keep v6's direction rule.
 2. **Add the 3m cycle-position gate**: reconstruct 3m from 1m bars, compute
    `cyclePos = (close − cycleLow) / (cycleHigh − cycleLow)`; longs only from the lower part, shorts
    only from the upper part.
