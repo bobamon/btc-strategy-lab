@@ -308,6 +308,7 @@ so the code genuinely behaves differently. **But the count stayed at 3.**
 | v23 | Most-recent zone replaces deepest zone | **PF 0.7363, DD 89.27%, 1,792 trades** (749 long 275W / 1,043 short 184W), spanning the full window. The lock-up is fixed and the edge went with it · [report](https://mcp-api.trader.dev/backtest/01M1GYTGY7YZSNAP6QNCAMFP4A) |
 | v24 | Long leg alone | **PF 0.8945, DD 42.50%, 833 trades**, win rate 36.61%, payoff 1.548. Best honest number this lab has produced, still under 1.0 · [report](https://mcp-api.trader.dev/backtest/01M1GZ8DM3Q20JQDX3AKSP1XQV) |
 | v25 | Time stop 96 -> 192 bars (first exit test) | **REVERTED.** PF 0.8945->0.8578, DD 42.50%->53.38%, trades 833->797. The cap was cutting LOSERS, not winners · [report](https://mcp-api.trader.dev/backtest/01M1GZGBXAJB8SVFHF3Y41XVGN) |
+| v26 | Time stop 96 -> 48 bars | **REVERTED.** PF 0.8945->0.8204, DD 42.50%->58.85%, trades 833->915. Win rate rose to 40.33% but payoff fell to 1.214 · [report](https://mcp-api.trader.dev/backtest/01M1GZPAKD9H3HC2R8BA4BNPX8) |
 
 **When three independent corrections land on the same trade count, the binding constraint is upstream
 of all of them.** I have now spent three cycles fixing things that were genuinely wrong and none of
@@ -558,7 +559,16 @@ never been in the thing being tested — they have been in the assumptions under
     The short side is not underperforming; it is the entire deficit.
 0-V25. ~~THE EXIT: WIDEN THE TIME STOP~~ — **REVERTED. PF 0.8945 -> 0.8578, DD 42.50% -> 53.38%.**
     The cap was cutting losers loose, not truncating winners. v24 stands.
-0-V26-NEXT. **TIGHTEN the time stop instead: 96 -> 48 bars (top priority).** v25 established the
+0-V26. ~~TIGHTEN the time stop: 96 -> 48~~ — **REVERTED. PF 0.8945 -> 0.8204, DD 42.50% -> 58.85%.**
+    Both directions on the time axis are worse, so 96 is an interior optimum and THE AXIS IS CLOSED.
+0-V27-NEXT. **THE TARGET: 2R -> 2.5R (top priority, and expectations are low).** The last untouched
+    exit parameter. Stated in advance: the BTC lab found 2R and 3R sit on the SAME iso-profit-factor
+    curve, and War Formation's E26 found a nearer target actively hurt. If 2.5R also lands within
+    noise of 0.894, the exit is exhausted and the lab should say so rather than keep poking it.
+0-V28. **IF the exit is exhausted, the honest next move is a WALK-FORWARD split of v24** -- does
+    PF 0.894 hold across 2022-2024 and 2024-2026 separately, or is it another mixed-sample average
+    like the BTC base turned out to be? That question matters more than another parameter.
+    Superseded text: TIGHTEN the time stop instead: 96 -> 48 bars. v25 established the
     direction of the gradient -- more time is worse -- so the untested question is whether less time
     is better. avgBarsLosing is 27.26 against avgBarsWinning 48.83, so a 48-bar cap cuts most losers
     while leaving the average winner room. Single variable, same base.
@@ -913,3 +923,43 @@ The gradient now has a direction: **more time is worse.** That makes the unteste
 *less* time is better, and v24's own numbers make it plausible — losers average 27.26 bars against
 winners' 48.83, so a 48-bar cap would cut most losers while leaving the average winner room. That is
 v26, and it is a genuinely informed test rather than another guess.
+
+
+---
+
+## ██ v26 — THE TIME AXIS IS CLOSED. v24 SITS ON AN INTERIOR OPTIMUM.
+
+| maxBars | Profit factor | Max drawdown | Trades | Win rate | Payoff |
+|---|---|---|---|---|---|
+| 48 (v26) | 0.82035131 | 58.85% | 915 | **40.33%** | 1.214 |
+| **96 (v24)** | **0.89445064** | **42.50%** | 833 | 36.61% | **1.548** |
+| 192 (v25) | 0.85781046 | 53.38% | 797 | — | — |
+
+**Both directions are worse. 96 is a local maximum, and the time-stop axis is finished.**
+
+### THE PREDICTION WAS HALF RIGHT, AND THE HALF THAT FAILED IS THE INTERESTING ONE
+v26 was built on a specific claim: losers average 27.26 bars against winners' 48.83, so a 48-bar cap
+should cut most losers while leaving a typical winner room. **The first half happened exactly as
+predicted — win rate rose 36.61% → 40.33%.** The second half did not: **payoff collapsed 1.548 →
+1.214**, because a 48-bar cap does not leave the average winner room, it closes a large share of
+winners *before* they reach 2R.
+
+Net effect: break-even moved from **39.2%** to **45.2%**, so the gap to profitability **widened from
+2.6 points to 4.9** even though the win rate improved. **A better win rate bought at the price of
+payoff is not an improvement**, and the averages that motivated this test could not have revealed
+that — an average winner taking 48.83 bars says nothing about how many winners take 60 or 80.
+
+### THE COUPLING, CONFIRMED BY PREDICTION
+v25 discovered that exit length and entry frequency are coupled under `pyramiding=1`. v26 **predicted
+in advance** that a tighter cap would raise the trade count, and it did: 833 → 915. That is the
+coupling verified forward rather than explained backward, which is the stronger form.
+
+### WHERE THIS LEAVES THE SYSTEM
+The exit has one parameter left untested — the 2R target — and the prior is poor: the BTC lab found
+2R and 3R on the same iso-profit-factor curve, and War Formation's E26 found a nearer target hurt.
+**Two labs have now found the risk-reward axis to be neutral or negative**, so v27 is worth one credit
+to close it, not more.
+
+**After that the exit is exhausted, and the more valuable question is whether PF 0.894 is even a
+stable number** — the BTC base looked like 1.02 until it was split into 1.36 and 0.66. v24 has never
+been split. That is v28, and it matters more than any remaining parameter.

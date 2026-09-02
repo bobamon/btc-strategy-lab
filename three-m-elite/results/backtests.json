@@ -550,5 +550,34 @@
    "verifiedAt": "2026-09-02T11:54:10Z"
   },
   "notes": "THE CAP WAS CUTTING LOSERS, NOT WINNERS. PF 0.89445064 to 0.85781046 and drawdown 42.50% to 53.38% -- worse on both. The hypothesis was that a 96-bar cap truncated winners averaging 48.83 bars; the opposite is true. Widening it moved avgBarsWinning only 48.83 to 53.64 while avgBarsLosing rose 27.26 to 33.14, so the extra room went mostly to losing trades. Trade count also FELL 833 to 797, because longer holds block new entries under pyramiding=1 -- the exit and the entry frequency are coupled, which no cycle here had accounted for. REVERTED; v24 stands."
+ },
+ {
+  "id": "3m-elite-v26-tighter-time-stop",
+  "name": "3M ELITE v26 tighter time stop",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "specPath": "three-m-elite/SYSTEM.md",
+  "description": "The other direction on the exit axis. One change from v24: maxBars 96 to 48, tightening the time stop from 24 to 12 hours at 15m. Entries, stops, the 2R target and the zone lifecycle byte-identical. Motivated by v25, which established that widening the cap makes both terms worse.",
+  "metrics": {
+   "netProfitPct": -58.78115238,
+   "profitFactor": 0.82035131,
+   "maxDrawdownPct": 58.85046141,
+   "totalTrades": 915,
+   "winRatePct": 40.32786885,
+   "avgTradePct": -0.0642417
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1GZPAKD27VJKXG3AFDA0B5D",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GZPAKD9H3HC2R8BA4BNPX8",
+   "verifiedAt": "2026-09-02T11:57:25Z"
+  },
+  "notes": "THE TIME STOP HAS AN INTERIOR OPTIMUM AND v24 IS SITTING ON IT. 48 bars: PF 0.82035131, DD 58.85%, 915 trades. 96 bars (v24): PF 0.89445064, DD 42.50%, 833. 192 bars (v25): PF 0.85781046, DD 53.38%, 797. Both directions are worse, so 96 is a local maximum on this axis and the axis is closed. THE PREDICTION WAS HALF RIGHT AND THAT IS THE USEFUL PART: win rate rose exactly as expected, 36.61% to 40.33%, because the cap cuts losers earlier -- but payoff collapsed 1.548 to 1.214, so break-even moved from 39.2% to 45.2% and the gap WIDENED from 2.6 points to 4.9. Trade count rose 833 to 915, confirming v25's coupling finding by prediction rather than hindsight. REVERTED; v24 stands."
  }
 ]
