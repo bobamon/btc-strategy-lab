@@ -638,9 +638,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T09:07:39Z"
     },
     "notes": "THE GATE HELPS -- FIRST DIRECTIONAL CONFIRMATION OF THE ORACLE'S DIAGNOSIS. Against E9b (identical short, no gate): profit factor 0.68 -> 0.75, win rate 20.3% -> 23.1%, net loss HALVED from -5.9% to -3.0%. It removed 30 of 69 trades and improved almost everything, so the trades it cut were disproportionately bad -- exactly what the author predicts for shorts taken at the bottom of the cycle. Max drawdown was a fraction worse (7.43% -> 7.75%). BUT PF 0.75 is still well under 1.0, so the short leg remains unprofitable and is NOT adopted. The diagnosis is validated; the remedy is incomplete. Item 3 -- the counter-move-weakening trigger, the other half of his entry rule -- is the natural next test."
+  },
+  {
+    "id": "war-formation-v8-weakening",
+    "name": "WF v8 long + counter-move weakening trigger",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Oracle queue item 3. The v6 long-only champion PLUS the counter-move weakening trigger: a long is permitted only after a run of at least 2 consecutive red HA 3m candles whose real range is DECREASING, latched for 5 further 3m candles so the setup and the trigger are sequential rather than simultaneous (HARD LESSON 8). Mechanises 'this dump is getting weaker... there is your moment.' Long-only.",
+    "metrics": {
+      "netProfitPct": -0.7641924,
+      "profitFactor": 0.73193532,
+      "maxDrawdownPct": 1.36449036,
+      "totalTrades": 20,
+      "winRatePct": 45.0,
+      "avgTradePct": -0.03820962
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GPMTPZX6D1J9DGN6ARBFY2",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GPMTPZ146ZY2KJVDVKQF8G",
+      "verifiedAt": "2026-09-02T09:19:19Z"
+    },
+    "notes": "REVERTED, AND THE REASON IS REDUNDANCY. The gate cut 32 trades to 20 and the survivors were WORSE, not better: win rate fell 56.3%->45.0% and PF 1.69->0.73. Drawdown did improve (3.10%->1.36%) but only because there was less activity. This is the exact opposite of E13, where the cycle-position gate removed disproportionately bad trades. Diagnosis: the v6 base ALREADY contains a weakening condition -- the 3m coil, atr(3) < atr(30)*0.85, is itself a measure of a move losing force. Adding the shrinking-red-run rule double-counts the same information and selects a narrower, worse subset. The Oracle's weakening observation is already in this build; it just wears a different name."
   }
 ];
-const BUILT = "2026-09-02 03:07";
+const BUILT = "2026-09-02 03:19";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

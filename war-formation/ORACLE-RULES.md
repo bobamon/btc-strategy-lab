@@ -108,8 +108,11 @@ that this "wrecks an absolutely perfect trade" even when the direction is right.
    disproportionately bad, which is exactly what he predicts. **His diagnosis is directionally
    confirmed.** Still PF 0.75 < 1.0, so the short is not yet viable — the gate is necessary but not
    sufficient. Keep the gate in all future short builds.
-3. **Add the "counter-move weakening" trigger**: require N consecutive counter-colour 3m candles with
-   decreasing range before entry.
+3. ~~Add the "counter-move weakening" trigger~~ — **TESTED (E14), REVERTED.** PF 1.69->0.73,
+   win rate 56.3%->45.0%, trades 32->20. It removed disproportionately GOOD trades because it is
+   **redundant with the 3m coil**, which already measures a move losing force. His observation is
+   sound and already implemented under a different name. Do not re-run as an additive gate; the only
+   open variant is weakening-run *instead of* the coil, head to head.
 4. **Replace the exit** with the colour rule: hold while the 3m candle colour matches the trade;
    exit on colour flip. (This conflicts with the project's fixed-TP requirement — test it as a
    variant and report both.)

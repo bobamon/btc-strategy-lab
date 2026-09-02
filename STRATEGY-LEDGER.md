@@ -207,3 +207,23 @@ hypothesis to score, never a fact to build on.
 The silent remaps were the real danger: a backtest would have returned **genuine metrics for the
 wrong instrument**. Strategy 001 remains on file as an external-backtest-only spec should an index
 data path ever be added.
+
+### HARD LESSON 8 — A setup and its trigger must be LATCHED IN SEQUENCE, never required on the same bar
+Observed twice, in two different labs, both times as a run with **zero trades**:
+
+- **War Formation v1** demanded a volatility coil (`atr(3) < atr(30)*0.85`) *and* a velocity thrust on
+  the same bar. A coil is low volatility; a thrust is high volatility. Mutually exclusive → 0 trades.
+- **3M Elite v2 and v4** demanded a zone tap (price at the previous 12H low) *and* a bullish engulfing
+  4H candle inside a 12-hour window. A tap is the bottom of a range; an engulf is a surge off it.
+  Near-mutually exclusive → 0 trades on a 163,826-bar, 4.7-year base.
+
+**The tell is a zero-trade run on a base that trades normally without the new gate.** That is almost
+never "too strict"; it is almost always two conditions that cannot be true at the same instant.
+
+**The fix is always the same shape:** latch the setup into a state variable (`var bool tapLive`),
+give it an explicit invalidation rule, and let the trigger fire on a *later* bar while the latch is
+live. Setup and trigger occupy different points in time — code them that way.
+
+**Corollary — how to avoid paying for this discovery.** Before spending a credit on a run that adds a
+gate, `plot()` the gate's own hit count. A gate that never coincides with the base signal shows up as
+a flat zero line and costs nothing to find.

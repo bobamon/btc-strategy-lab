@@ -1,0 +1,231 @@
+//@version=6
+// WAR FORMATION v8 — v6 long-only champion + THE COUNTER-MOVE WEAKENING TRIGGER (queue item 3).
+//
+// The Oracle, verbatim: "So you can see this dump is getting weaker. You're waiting your turn
+// patiently. It's getting weaker... There is your moment." / "So you watch the candles. Candles get
+// smaller. The move gets shorter. The move gets weaker."
+//
+// MECHANISATION: on the 3m reconstruction, track the run of consecutive counter-colour (red) HA
+// candles. A long is permitted only when that run is at least `weakN` candles long AND its real
+// range is DECREASING. Per HARD LESSON 8 this is deliberately LATCHED, not simultaneous: the run is
+// measured on COMPLETED 3m candles that precede the 1m trigger, and the permission survives for
+// `staleK` 3m candles after the run ends, so the entry can fire on the turn rather than having to
+// coincide with the dump it is waiting out.
+//
+// HA POLICY unchanged: HA for direction/colour only; every level, fill, stop and target is a REAL
+// price. Candle SIZE is measured on the real range (high-low) — the physical size of the move
+// rather than a synthetic HA body.
+strategy("War Formation v8 weakening", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+greenBull = input.int(4,     "Green HA 1h candles for BULL")
+skipOpen  = input.int(60,    "Skip first N minutes of 6h block")
+skipClose = input.int(60,    "Skip last N minutes of 6h block")
+coilK     = input.float(0.85,"3m coil: atr(3) < atr(30) * K")
+velK      = input.float(0.8, "Velocity: min reclaim as multiple of atr(30)")
+midLo     = input.float(400, "Whole-number middles low")
+midHi     = input.float(600, "Whole-number middles high")
+etOffset  = input.int(-4,    "ET offset from UTC")
+witchOn   = input.bool(true, "Ban longs in witching hour 1-4am ET")
+bufK      = input.float(0.25,"Stop buffer beyond swept level, x atr(30)")
+rr        = input.float(2.0, "Reward:risk")
+minRpct   = input.float(0.15,"Min risk as % of price")
+maxRpct   = input.float(1.50,"Max risk as % of price")
+maxBars   = input.int(720,   "Max bars in trade")
+weakN     = input.int(2,     "Counter-colour 3m candles required in the weakening run")
+staleK    = input.int(5,     "Permission survives N 3m candles after the run ends")
+
+MS6H = 21600000
+MS1H = 3600000
+MS15 = 900000
+MS3M = 180000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+b15 = math.floor(time / MS15)
+b3m = math.floor(time / MS3M)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+new15 = b15 != b15[1]
+new3m = b3m != b3m[1]
+
+// ---------------- 1-minute Heikin Ashi (computed, not fetched) ----------------
+var float haO = na
+haC   = (open + high + low + close) / 4
+haO  := na(haO[1]) ? (open + close) / 2 : (haO[1] + haC[1]) / 2
+haUp  = haC > haO
+
+// ---------------- 1-hour real OHLC + its Heikin Ashi ----------------
+var float o1   = na
+var float h1   = na
+var float l1   = na
+var float ha1o = na
+var float ha1c = na
+
+var int grnCur  = 0
+var int cntCur  = 0
+var int grnPrev = 0
+var int cntPrev = 0
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    grnCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(o1)
+        c1 = close[1]
+        newC = (o1 + h1 + l1 + c1) / 4
+        newO = na(ha1o) ? (o1 + c1) / 2 : (ha1o + ha1c) / 2
+        ha1o := newO
+        ha1c := newC
+        cntCur := cntCur + 1
+        if ha1c > ha1o
+            grnCur := grnCur + 1
+    o1 := open
+    h1 := high
+    l1 := low
+else
+    h1 := na(h1) ? high : math.max(h1, high)
+    l1 := na(l1) ? low  : math.min(l1, low)
+
+// ---------------- 3-MINUTE reconstruction: HA colour + real range ----------------
+var float o3    = na
+var float h3    = na
+var float l3    = na
+var float ha3o  = na
+var float ha3c  = na
+var float rng3  = na      // range of the most recently COMPLETED 3m candle
+var float rng3p = na      // the one before it
+
+var int  redLen     = 0      // length of the ACTIVE run of red 3m candles
+var bool redShrink  = false  // is that active run shrinking
+var int  lastLen    = 0      // the last COMPLETED red run
+var bool lastShrink = false
+var int  sinceEnd   = 9999   // 3m candles since that run ended
+
+if new3m
+    if not na(o3)
+        c3    = close[1]
+        newC3 = (o3 + h3 + l3 + c3) / 4
+        newO3 = na(ha3o) ? (o3 + c3) / 2 : (ha3o + ha3c) / 2
+        ha3o := newO3
+        ha3c := newC3
+        rng3p := rng3
+        rng3  := h3 - l3
+        if ha3c < ha3o
+            // extend the active red run; weakening means this candle is smaller than the last
+            redLen    := redLen + 1
+            redShrink := redLen >= 2 and not na(rng3p) and rng3 < rng3p
+        else
+            // the run just ended — hand its verdict to the latch
+            if redLen > 0
+                lastLen    := redLen
+                lastShrink := redShrink
+                sinceEnd   := 0
+            redLen    := 0
+            redShrink := false
+    sinceEnd := sinceEnd + 1
+    o3 := open
+    h3 := high
+    l3 := low
+else
+    h3 := na(h3) ? high : math.max(h3, high)
+    l3 := na(l3) ? low  : math.min(l3, low)
+
+// The permission: either the dump is still running but visibly weakening, or it has just ended.
+weakNow  = redLen >= weakN and redShrink
+weakJust = sinceEnd <= staleK and lastLen >= weakN and lastShrink
+weakenOk = weakNow or weakJust
+
+// ---------------- LAYER 1: 6h regime from the previous block's HA 1h colours ----------------
+regimeReady = cntPrev >= 5
+bullRegime  = regimeReady and grnPrev >= greenBull
+
+// ---------------- LAYER 2: time gate inside the 6h block ----------------
+minsIn   = (time - b6 * MS6H) / 60000
+timeGate = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+// ---------------- LAYER 3: the forming 1h must agree ----------------
+liveHaC = na(o1) ? na : (o1 + math.max(h1, high) + math.min(l1, low) + close) / 4
+liveHaO = na(ha1o) ? na : (ha1o + ha1c) / 2
+h1Bull  = not na(liveHaC) and not na(liveHaO) and liveHaC > liveHaO
+
+// ---------------- LAYER 4: previous completed 15m extreme (REAL prices) ----------------
+var float c15h = na
+var float c15l = na
+var float p15h = na
+var float p15l = na
+
+if new15
+    p15h := c15h
+    p15l := c15l
+    c15h := high
+    c15l := low
+else
+    c15h := na(c15h) ? high : math.max(c15h, high)
+    c15l := na(c15l) ? low  : math.min(c15l, low)
+
+brokeBelow = not na(p15l) and c15l < p15l
+
+// ---------------- LAYER 5: 3m coil, read on the PRIOR bar ----------------
+atrFast  = ta.atr(3)
+atrSlow  = ta.atr(30)
+coiled   = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK
+coilPrev = coiled[1]
+velMin   = na(atrSlow) ? na : atrSlow * velK
+
+// ---------------- Oracle overlays ----------------
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+hUTC     = math.floor(time / MS1H) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+longBan  = witchOn and witching
+
+// ---------------- TRIGGER: 1m reclaim, with velocity, on a turning HA candle ----------------
+longTrig = not na(p15l) and not na(velMin) and ta.crossover(close, p15l) and (close - p15l) >= velMin and haUp
+
+baseSig = bullRegime and timeGate and h1Bull and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig
+goLong  = baseSig and weakenOk
+
+// ---------------- structural risk: stop beyond the level that was swept ----------------
+minR = close * minRpct / 100
+maxR = close * maxRpct / 100
+buf  = na(atrSlow) ? 0.0 : atrSlow * bufK
+
+rawLongR = na(c15l) ? na : close - (c15l - buf)
+longR    = na(rawLongR) ? na : math.min(math.max(rawLongR, minR), maxR)
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong and not na(longR) and longR > 0
+    strategy.entry("L", strategy.long)
+    slPx   := close - longR
+    tpPx   := close + longR * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+// HARD LESSON 8 corollary — make the new gate observable so an empty run is diagnosable.
+plot(weakenOk ? 1 : 0, title="WeakeningPermission")
+plot(redLen,           title="ActiveRedRun3m")
+plot(lastLen,          title="LastRedRun3m")
+plot(baseSig ? 1 : 0,  title="BaseSignalBeforeGate")

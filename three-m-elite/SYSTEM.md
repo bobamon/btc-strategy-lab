@@ -113,6 +113,7 @@ lower bound on the system, not a verdict on it.**
 | v1 | Full cascade, no validation gate | PF 0.91, 20 trades, longs 6 of 8 · [report](https://mcp-api.trader.dev/backtest/01M1GGX4RQ707R9HHX2KFP471E) |
 | v2 | + Type 2 validation gate (engulfing 48m in bias, `valLife` 3) | **0 TRADES** · [report](https://mcp-api.trader.dev/backtest/01M1GNBA7TRRHRYK61KXZADD4F) |
 | v3 | Same cascade ported to a 15m base (4H/12H/2D), 4.7 years | PF 0.64, 94 trades, longs 10/35, shorts 5/59 · [report](https://mcp-api.trader.dev/backtest/01M1GNPDBWJD63TBCV11SYY30H) |
+| v4 | 0a re-test: Type 2 gate (engulfing 4H in bias, `valLife` 3) on the **v3 15m base** | **0 TRADES** · [report](https://mcp-api.trader.dev/backtest/01M1GP6D1N4V36G2M6T7CR6BQ4) |
 
 **v3 lesson — v1's PF 0.91 was noise.** The same cascade measured on 4.7 years instead of 4.6 months
 gives PF 0.64 across 94 trades. The larger sample is the trustworthy one. This is the sample-size fix
@@ -137,15 +138,49 @@ because invalidation is what gives validation its lifetime. Reordered below.
 This result is NOT on the dashboard: `build_dashboard.py` correctly rejects any record with zero
 trades ("a run with no trades is not a backtest"). It is recorded here instead.
 
+
+## v4 LESSON — THE SETUP AND THE TRIGGER MUST BE SEQUENTIAL, NOT SIMULTANEOUS
+v2 gave 0 trades on the 1m base and I attributed it to a 20-trade sample. **v4 ran the same gate on
+the v3 15m base — 163,826 bars, 4.7 years, a 94-trade parent — and still returned 0 trades.** That
+kills the sample-size explanation. The conjunction is structurally near-impossible, and here is why:
+
+- `demandTap` requires price to be **at the previous 12H candle's low** — the bottom of the range.
+- A bullish **engulfing 4H candle is a strong up-move** by definition.
+- `valLife = 3` gives them a shared window of only 12 hours.
+
+So the rule asks price to sit at the bottom of the range *at the same time as* having just surged
+off it. Those two states barely coexist, which is why the intersection is empty rather than merely
+rare.
+
+**This is the identical defect that produced War Formation v1's 0 trades** (volatility coil AND
+velocity thrust demanded on the same bar). Twice now, so it is a pattern and is promoted to
+STRATEGY-LEDGER.md as HARD LESSON 8.
+
+**The source describes a sequence, and I coded a coincidence.** In his words the zone is tapped
+*first*, and only *then* do you wait for the validating candle:
+
+> "...that immediately invalidates it. And then we just need a new triple M or a new engulfing candle."
+
+"Then we just need a new" is sequential language. The correct build **latches the tap** — a tap sets
+a live flag that persists until the zone invalidates — and entry fires on the engulf that arrives
+*afterwards*. That merges 0b-FIRST and 0a into one coherent mechanism, which is what v5 will be.
+
 ## Open queue
 0. ~~Get definitions for Type 1/Type 2~~ — **DONE 2026-09-02, see VOCABULARY.md.**
    Type 1 = a 3M candle; Type 2 = an engulfing candle in the direction of bias; both only on the
    STRUCTURE timeframe (48m for this variant), inside the tapped zone.
-0b-FIRST. **IMPLEMENT ZONE INVALIDATION BEFORE THE GATE (new top priority).** A candle BODY closing
+0-V5-NEXT. **LATCHED TAP + VALIDATION AS ONE MECHANISM (top priority, supersedes 0a and 0b-FIRST).**
+    A zone tap sets `tapLive := true`. It stays live until the zone invalidates (a BODY close beyond
+    the zone on the zone's own timeframe). While it is live, the FIRST engulfing 4H candle in the
+    direction of bias fires the entry. Never test tap and engulf on the same bar again — see the v4
+    lesson and HARD LESSON 8. Measure the latch hit-count before adding any further filter.
+0b-FIRST. **IMPLEMENT ZONE INVALIDATION BEFORE THE GATE (folded into v5 above).** A candle BODY closing
     beyond the zone kills the zone, judged on the ZONE's own timeframe (3H here). A body close
     immediately after a validation voids that validation. Once this exists, a Type 2 validation can
     persist until invalidated rather than expiring on an arbitrary counter — which is what killed v2.
-0a. **THEN RE-TEST THE VALIDATION GATE with a proper lifetime.** The current Pine has NO validation gate at all.
+0a. ~~THEN RE-TEST THE VALIDATION GATE~~ — **TESTED (v4) AS A SIMULTANEOUS CONDITION. 0 TRADES.**
+    Re-test only in the latched form described in 0-V5-NEXT.
+    (original wording) **Re-test the validation gate with a proper lifetime.** The current Pine has NO validation gate at all.
     Add: after a zone tap, require an engulfing candle in the direction of bias on the 48m
     reconstruction before an entry is allowed (that is Type 2, fully specifiable). Type 1 needs the
     3M candle anatomy, which is still unknown — implement Type 2 alone first and label it as such.

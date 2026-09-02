@@ -51,6 +51,7 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E11 | Diagnostic: short the whole bear episode | PF 0.50, −17.6%, 11.1% win rate — **both directions lose** |
 | E12 | v7: Oracle's direction rule (2+ consecutive green HA 6h) | PF 1.14 vs champion 1.69, DD 4.19% vs 3.10% — **REVERTED** |
 | E13 | Short + 3m cycle-position gate (Oracle item 2) | PF 0.68→**0.75**, WR 20.3%→23.1%, net −5.9%→−3.0% — **gate helps, still unprofitable** |
+| E14 | Queue item 3: counter-move weakening trigger on the v6 long champion (>=2 red HA 3m candles with decreasing range, latched 5 candles) | **REVERTED.** PF 1.69->0.73, win 56.3%->45.0%, trades 32->20, DD 3.10%->1.36%. The gate removed disproportionately GOOD trades -- redundant with the 3m coil, which already measures a move losing force. [report](https://mcp-api.trader.dev/backtest/01M1GPMTPZ146ZY2KJVDVKQF8G) |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -138,3 +139,23 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 - Every hard lesson from the main `STRATEGY-LEDGER.md` applies here too — especially LESSON 3
   (R >= 8x the round-trip fee), LESSON 5 (stop beyond structure, never beyond the signal level) and
   LESSON 6 (audit every leg separately).
+
+
+## E14 LESSON — CHECK A NEW GATE FOR REDUNDANCY BEFORE PAYING FOR IT
+The Oracle's weakening rule ("candles get smaller, the move gets weaker") is real, and it is
+**already in this build under another name.** The 3m coil, `atr(3) < atr(30) * 0.85`, IS a
+measurement of a move losing force. Adding an explicit shrinking-red-run requirement on top of it
+double-counted the same information and selected a narrower, worse subset of the same signals.
+
+The tell that separates this from an ordinary failed filter: **the survivors got worse.** A filter
+that removes noise raises the win rate on what remains. This one dropped it 56.3% -> 45.0%, so it
+was not removing noise, it was removing signal. Compare E13, where the cycle-position gate cut the
+short leg from 69 trades to 39 and *improved* PF -- that is what a non-redundant filter looks like.
+
+**Rule for future cycles:** before adding a gate, ask which existing condition already measures the
+same property. If one does, the honest experiment is to REPLACE it, not stack on it. Also note the
+drawdown trap here -- DD improved 3.10% -> 1.36% purely because there was less trading. A drawdown
+improvement that arrives with a large drop in trade count is not a risk improvement.
+
+**Queue item 3 is answered and closed. Do not re-run it as an additive gate.** The open variant, if
+it is ever wanted, is weakening-run *instead of* the coil, judged head to head.
