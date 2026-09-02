@@ -68,7 +68,16 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
     hard occasionally (14 shorts won big, 3.99:1 payoff). **The 6h HA bear label marks CRASH RISK,
     not downtrend.** This explains every short failure so far — E9b's 20% win rate at 2.68:1 is the
     same shape. A short here cannot work by "being short during bear"; it must time the crash.
-0f. **NEW TOP PRIORITY — THE 3-MINUTE CYCLE POSITION GATE.** Read `ORACLE-RULES.md` first; it is
+0z. **READ `ORACLE-RULES.md` FIRST — it now contains the author's COMPLETE rule set, quoted from his
+    own audio, and it supersedes several of this lab's design choices.** Three corrections matter:
+    (a) He defines clear direction as **more than one consecutive green (or red) 6h candle** — simpler
+        than this lab's "4+ green HA 1h candles in the previous 6h block", and it is what he says.
+    (b) He names **"singularity"** as 6h and 1h agreeing in colour, and calls it a bonus, not a
+        requirement: "don't wait for that".
+    (c) **He states that "war formation has nothing to do with entering here."** What this lab calls
+        the War Formation is actually his *3-minute cycle drill-down*. Name kept for continuity.
+    Implement items 1-5 at the bottom of ORACLE-RULES.md, one per cycle, in order.
+0f. **THE 3-MINUTE CYCLE POSITION GATE.** Read `ORACLE-RULES.md` first; it is
     decoded from the author's own videos and it names the exact defect in every short built so far.
     His rule: direction comes from the 6h and 1h, but **direction alone does not permit an entry —
     position inside the 3-minute cycle does.** "Even if you had direction to short you can wreck an

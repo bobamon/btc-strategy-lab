@@ -1,99 +1,113 @@
-# War Formation — the Oracle's own rules, from his videos
+# The Oracle's rules — decoded from his own videos
 
-Decoded from transcripts of the recordings in the Oracle folder (`transcripts/*.txt`) plus the
-annotated images. Quotes are verbatim from the audio.
+Sources: three local recordings (`transcripts/*.txt`) and three YouTube lessons
+(`transcripts/youtube/*.txt`), all transcribed locally with faster-whisper, plus the annotated
+images. **Every quote below is verbatim from his audio.**
 
 > Research notes for backtesting. Not trade recommendations.
 
 ---
 
-## THE CENTRAL RULE — the 3-minute cycle is the entry gate
-This is the single most important thing in the new material, and it is the rule the strategy has
-been missing. Direction comes from the 6h and 1h. **But direction alone does not permit an entry —
-position within the 3-minute cycle does.**
+## ⚠️ A NAMING CORRECTION, STATED BY HIM
+> "People at the consultation, **war formation has nothing to do with entering here.** I use it.
+> I'm not going to go into that now."
 
-> "So direction is clearly confirmed on the six hour and the one hour to be short at the moment...
-> **but if you shorted at the bottom of this cycle**... well the size matters, and if not you got
-> caught in this, and **this is where your trade is now against you 60%** — even though you have the
-> right to short."
-
-> "Even if you had direction to short **you can wreck an absolutely perfect trade**. We take direction
-> from here and here. **But before you enter your trade, see where we are here.** Does this look like
-> the bottom of a move? It only goes up and down. Does it look like the top of a move? **Do you want
-> to short down here?**"
-
-**Mechanical statement:** in a bear regime, do NOT short after price has already fallen inside the
-current 3m cycle. Short only from the **upper** part of the cycle. Mirrored for longs.
-
-## WAIT FOR THE PUMP
-> "Down here too low and **you don't wait for this pump to come** — you are going to have the most
-> difficult trade. It's going to go against you heavily."
-> "Look at this pump. **All this is, is waiting.**"
-> "I still want to wait. I want to see some green buying... **I wait, let them buy the dip**, even if
-> you've got to walk away."
-
-The entry is not the signal — the *retrace against the trend* is the entry. Short into strength
-inside a downtrend; do not short into weakness.
-
-## THE 1-MINUTE LIES — this is why the entry timeframe must be gated
-> "Look how **the one minute lures you in**. You see the green candle there, you might want to go
-> long. But look at the three minute — **the three minute says no, wait.** It's a preventative
-> measure. This is exactly what I always tell you: **refer to the three minute before you make a move
-> on the one minute.** It could save your trade."
-
-> "**Shorting at the wrong point of the three minute chart — I don't care what the one minute says —
-> will wreck your trade.**"
-
-## PRICE VERSUS CANDLE
-> "Watch the price go up. **This is called price versus candle.** It is very tempting, very hard —
-> especially when you see this going down like this — to not enter more shorts."
-
-Entering because a candle looks right, rather than because price is in the right *location*, is the
-named failure mode.
-
-## OTHER STATED RULES
-- **"The bigger the candle, the bigger the move."**
-- **A growing tail is a sign of weakness**: "look, this can change, it's growing a tail, it's a sign
-  of weakness."
-- **One green candle at the bottom of the 3m is a stand-down signal**: "there was one green candle on
-  the bottom of the three minute — if you short down here too low..."
-- **Entering late is the recurring sin**: "I enter a trade too late on the three minute because I
-  cannot wait... and then this happens, and many times because of this I have to fight my way out."
-- **Tactical awareness** (secondary, explicitly not primary): stock-market open, the AM pump, and
-  whole numbers — "we just dumped a lot from over the whole number 28". He calls equities "only
-  confirmation of what I know to be the direction here that we follow."
-- **"Singularity"** — used as a 1h condition ("the one hour, the singularity, to short"). Not defined
-  in this material.
-
-## FROM THE ANNOTATED IMAGES
-- `chart.webp` — XBTUSD 1-minute. Three "Short" marks, each at a rally into the thick blue MA;
-  three "TP" marks at the swing lows. (This is the image strategy 004 was built from.)
-- `enter.webp` / `exit_points.webp` — **BitMEX XBTUSD on the 3-minute chart.** Entry arrowed at the
-  base of a run; "CLOSE" arrowed at the first rejection candle after it. Large numbered order
-  markers (2,500 / 14,900 / 10,000 / 9,300) stack as price rises.
-- `WAR_UP.webp` / `war_down.webp` — an exchange order panel with "Buy Order UP" / "Buy Order DOWN"
-  and auto-sell at 200% profit. Platform mechanics, not strategy rules.
+**What this project calls "War Formation" is actually his *3-minute cycle drill-down*.** The real
+"war formation" is a separate thing he uses and does not explain in this material. The lab name is
+kept for continuity, but the strategy being built is the drill-down, not the war formation.
 
 ---
 
-## WHY THIS MATTERS FOR THE STRATEGY — the diagnosis was right, the fix is here
-E10/E11 established that the bear label is sound but that **both** directions lose across bear bars,
-because those periods drift slightly up most of the time and fall hard occasionally. E9/E9b showed
-two different short geometries failing with healthy payoff ratios and ~20% win rates.
+## LAYER 1 — DIRECTION. "The six hour is the God of direction."
+> "**Clear direction is either more than one green bar on the six hour.**"
+> "But if you're lucky enough to get the same thing on the one hour, you got an absolute winner."
+> "Six hour and the one hour. Look the same, same colour. **This is the singularity event.**"
 
-**The Oracle's rule explains exactly that pattern.** Both failed short builds entered *after* price
-had already moved down — shorting into weakness, at the bottom of the cycle — which is precisely
-what he says wrecks the trade. The strategy has had the right direction and the wrong location.
+**Mechanical:**
+- **Clear direction long** = more than one consecutive green 6h candle. Mirrored for short.
+- **Singularity** = 6h and 1h the same colour. A bonus, not a requirement: *"if you got it on the one,
+  you got double clarity, **but don't wait for that**."*
+- **"We do not short a long direction."** Never counter-trend.
 
-**The fix is a cycle-position gate**, not more geometry:
-- Reconstruct the 3-minute cycle from 1m bars (3 × 1m, exactly as the War Formation already
-  reconstructs 15m/1h/6h).
-- Compute where price sits inside the current 3m cycle range.
-- **Shorts only permitted in the upper portion of that range; longs only in the lower portion.**
-- Require the retrace first — a green push against a bear regime before a short is allowed.
+This is simpler and better specified than the current build's "4+ green HA 1h candles inside the
+previous 6h block". **His rule is a straight count of consecutive 6h candles.**
 
-## Open questions this raises
-1. What exactly bounds "the cycle"? A fixed lookback of 3m candles, or a swing-to-swing measure?
-2. What counts as "waiting for the pump" mechanically — N consecutive green 3m candles, or a
-   retrace of X% of the prior leg?
-3. What is the "singularity" on the 1h?
+## LAYER 2 — ENTRY. The 3-minute cycle decides *when*.
+> "How do you enter and exit? **Three minute cycle.**"
+> "**You don't want to enter at the top.** Well, we go down to the three minute and use the cycle."
+> "**Don't long the top or short the bottom.**"
+> "**I don't care what the one minute says**, as long as you've got direction on the six."
+
+**Wait for the counter-move to finish:**
+> "We want to wait for our turn to long. **We must let the Red Army finish.** See, if you go ahead and
+> you long down here... **people who longed here got wrecked. They were guessing.** People who longed
+> here missed the move. They were guessing."
+> "People who have my consultation know about **entering the enemy's camp** and not entering the
+> enemy's camp."
+
+**The trigger is the counter-move weakening:**
+> "**You can see this dump is getting weaker.** You're waiting your turn patiently. It's getting
+> weaker... **There is your moment.** Your moment to long was no other place but here."
+> "So you watch the candles. **Candles get smaller. The move gets shorter. The move gets weaker.**"
+> "**The size of the candles shows you the direction.**"
+
+**Mechanical entry (long):** with 6h direction long, on the 3m chart wait through the red sequence
+until consecutive red candles are **shrinking in range**, then enter as price turns up. Never enter
+while the red candles are still expanding — that is "the enemy's camp".
+
+## LAYER 3 — EXIT. Stay while it is your colour.
+> "It's already starting to slip. That was your last three minute candle. Look at your next one.
+> **It's smaller compared to this one. It's growing a tail. The price is dropping.** But **you stay in
+> the trade because... it's still your colour. You stay.** You're in profit."
+> "Now you would close your trade."
+
+> "**I only use tails on the lower time frames** — like the one minute and three minute."
+> "**A growing tail is a sign of weakness.**"
+
+**Mechanical exit:** hold while the 3m candle colour still matches the trade direction. Shrinking
+candles and a growing tail are *warnings*, not exits. Exit when the colour flips.
+
+## OTHER STATED RULES
+- **"The bigger the candle, the bigger the move."**
+- **"Price versus candle"** — the named failure mode: entering because a candle looks right rather
+  than because price is in the right *location*.
+- **"All this is, is waiting."** · "I wait, let them buy the dip, even if you've got to walk away."
+- **"See where you enter starts the timer."**
+- **"The market can go against you longer than you can be liquid."**
+- One green candle at the bottom of the 3m is a stand-down signal for shorts.
+- **Tactical awareness, explicitly secondary**: stock-market open, the AM pump, whole numbers
+  ("we just dumped a lot from over the whole number 28"). Equities are "only confirmation of what I
+  know to be the direction here that we follow".
+
+## FROM THE ANNOTATED IMAGES
+- `chart.webp` — XBTUSD 1m; three "Short" marks at rallies into the thick blue MA, three "TP" marks
+  at the swing lows. (Strategy 004 was built from this.)
+- `enter.webp` / `exit_points.webp` — **BitMEX XBTUSD 3-minute.** Entry arrowed at the base of a run;
+  "CLOSE" arrowed at the first rejection candle after it.
+- `WAR_UP.webp` / `war_down.webp` — exchange order panel, platform mechanics, not strategy rules.
+
+---
+
+## WHY THIS EXPLAINS EVERY FAILED SHORT
+E10/E11 proved the bear label is sound but that **both** directions lose across bear bars. E9/E9b
+showed two different short geometries failing with healthy payoff ratios and ~20% win rates.
+
+His rule accounts for exactly that. **Every short this project built entered after price had already
+fallen** — the bottom of the cycle, into the enemy's camp, shorting into weakness. He states plainly
+that this "wrecks an absolutely perfect trade" even when the direction is right.
+
+**The defect was never the geometry. It was the location.**
+
+## IMPLEMENTATION QUEUE (supersedes earlier items)
+1. **Replace the direction rule** with his: more than one consecutive green (or red) 6h candle.
+   Simpler than the current HA green-count and it is what he actually says.
+2. **Add the 3m cycle-position gate**: reconstruct 3m from 1m bars, compute
+   `cyclePos = (close − cycleLow) / (cycleHigh − cycleLow)`; longs only from the lower part, shorts
+   only from the upper part.
+3. **Add the "counter-move weakening" trigger**: require N consecutive counter-colour 3m candles with
+   decreasing range before entry.
+4. **Replace the exit** with the colour rule: hold while the 3m candle colour matches the trade;
+   exit on colour flip. (This conflicts with the project's fixed-TP requirement — test it as a
+   variant and report both.)
+5. Optional: require the **singularity** (6h and 1h agreeing) and measure whether it improves results,
+   since he calls it a bonus rather than a requirement.
