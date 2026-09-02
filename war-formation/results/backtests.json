@@ -1282,5 +1282,34 @@
    "verifiedAt": "2026-09-02T12:37:29Z"
   },
   "notes": "INCONCLUSIVE ON THE ALCM ITSELF, AND THE REASON WAS PREDICTED. avgBarsInTrade is 708.39 against a maxBars cap of 720 -- essentially EVERY trade times out at the 12-hour cap instead of reaching either the $6,000 target or the $3,000 shield. So this measures a 12-hour hold, not the ALCM. WHAT IS STILL REAL: win rate 57.14%, the highest this lab has recorded and above v6's 56.25%, on an entry that is byte-identical -- the ENTRY is sound and the exits are what fail. Payoff 0.706 (avgWin $91.98 vs avgLoss $130.29) confirms it. Trades 32 to 28 because 12-hour holds block new entries. THE STRUCTURAL FINDING: a $3,000 shield implies a trade measured in DAYS, and maxBars 720 is a leftover from the narrow-stop model that was never part of the real specification."
+ },
+ {
+  "id": "war-formation-e36-alcm-3day",
+  "name": "WF E36 ALCM $3,000 shield, 3-day cap",
+  "symbol": "BTCUSDT",
+  "timeframe": "1m",
+  "direction": "long",
+  "status": "testing",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2025-12-16",
+  "backtestEnd": "2026-05-03",
+  "specPath": "war-formation/ORACLE-RULES.md",
+  "description": "One change from E35: maxBars 720 to 4320 (three days), to give the ALCM shield room to resolve. E35 was inconclusive because every trade timed out at a 12-hour cap inherited from the narrow-stop model. Entry, shield and rr all byte-identical to E35.",
+  "metrics": {
+   "netProfitPct": 4.87990386,
+   "profitFactor": 1.1918173,
+   "maxDrawdownPct": 14.02869041,
+   "totalTrades": 20,
+   "winRatePct": 55.0,
+   "avgTradePct": 0.24399519
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1H2ARNWWQX5JY4DZ9F4FDPN",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1H2ARNWXXS9P1Y2TNFB8WG7",
+   "verifiedAt": "2026-09-02T12:43:32Z"
+  },
+  "notes": "THE FIRST PROFITABLE ALCM RUN, AND STILL NOT CLEAN. PF 0.94121736 -> 1.19181730, net +4.88%, 55.00% win on 20 trades. The cap no longer pins the AVERAGE trade (3607.4 against 4320) but it still pins the WINNERS: avgBarsWinning 4125.82 is 95.5% of the cap while avgBarsLosing is 2973.78. So losers resolve at the shield and winners are STILL being cut at the time limit before the $6,000 target. Half-fixed, and the honest label is partially inconclusive. TWO CAVEATS I FLAGGED IN ADVANCE: (1) 20 trades is exactly the threshold I said would be uninterpretable, so this is a direction not a result; (2) DD 14.03% is a 1x figure -- at the ~33x the $3,000 shield implies it is far past total loss, so position sizing is unsolved. Next: raise the cap again, or cut the target, and re-read avgBarsWinning."
  }
 ]

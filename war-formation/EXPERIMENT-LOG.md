@@ -1244,3 +1244,48 @@ is not a statement about War Formation as specified.
    neighbourhood before quoting the result, which is exactly what cost v6 its championship).
 3. **Then re-test the coil under the corrected exit.** E32's finding that the coil is load-bearing was
    measured on the wrong exit model and deserves re-checking.
+
+
+---
+
+## ██ E36 — THE FIRST PROFITABLE ALCM RUN, AND STILL NOT A CLEAN ONE
+
+One change from E35: `maxBars` 720 → 4320 (three days).
+
+| | E35 (12h cap) | **E36 (3-day cap)** | v6 (old exit model) |
+|---|---|---|---|
+| Profit factor | 0.94121736 | **1.19181730** | 1.68623784 |
+| Net return | −0.92% | **+4.88%** | — |
+| Win rate | 57.14% | 55.00% | 56.25% |
+| Trades | 28 | **20** | 32 |
+| Max drawdown | 6.72% | 14.03% | 3.10% |
+| avgBarsInTrade | 708.39 / 720 | **3607.40 / 4320** | — |
+
+**The cap no longer pins the average trade — but it still pins the winners.**
+`avgBarsWinning` is **4125.82, which is 95.5% of the 4320 cap**, against `avgBarsLosing` of 2973.78.
+So losers are resolving at the shield and **winners are still being cut at the time limit before the
+$6,000 target.** The exit is half-fixed.
+
+### TWO CAVEATS, BOTH FLAGGED BEFORE THE RUN
+1. **20 trades.** The E36 Pine comment said "if this lands under ~20 trades the result is not
+   interpretable regardless of what the profit factor says". It landed on exactly 20. **This is a
+   direction, not a result**, and PF 1.19 should not be quoted as though it were established.
+2. **Drawdown 14.03% is a 1x figure.** At the ~33x effective leverage a $3,000 shield implies, that
+   is far past total loss. **Position sizing for this exit model is unsolved**, and it is a bigger
+   open problem than the profit factor.
+
+### WHAT IS GENUINELY ENCOURAGING
+The direction is right and it is the first positive number the corrected specification has produced:
+**0.941 → 1.192 from a single change to a parameter that was never part of the real strategy.** The
+entry has now produced 55–57% win rates across both ALCM runs, higher than anything under the old
+exit model, which keeps pointing at the same conclusion — **the entry was never the problem.**
+
+### QUEUE
+1. **E37: raise the cap again (4320 → 8640, six days) OR cut rr from 2.0 to 1.0.** These attack the
+   same defect from opposite ends — winners cannot reach a $6,000 target inside the time allowed.
+   Cutting the target is the better first test because it does not shrink the sample further, and
+   sample size is now the binding constraint.
+2. **Then the shield neighbourhood**, $2,000 and $4,000 (HARD LESSON 16).
+3. **Sample-size reality check:** at ~3 days per trade on 4.5 months of 1m data, this family will
+   never produce more than roughly 20–30 trades. That ceiling should be stated on the board before
+   any ALCM configuration is described as validated.

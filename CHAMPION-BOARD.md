@@ -958,3 +958,41 @@ BTC cycle.
 ### THE BASE, UNCHANGED
 **PF 1.15252596, DD 16.54%, 166 trades, long-only. No champion.** Attacks 17a and 17b were counters;
 they changed nothing and were never candidates.
+
+
+## ██ ATTACK 18 — THE PULLBACK IS THE EDGE, AND THE RENAMING WAS THE REAL RESULT (2026-09-02)
+
+Attack 15 deleted `reachedUpper`, the +2σ stretch, and produced this lab's only KEPT change. It also
+forced a renaming: without the stretch this is not mean-reversion-from-extension, it is **VWAP
+pullback-continuation**. HARD LESSON 15 says a strategy's name is a hypothesis — so the *corrected*
+name deserved the same test the original one failed.
+
+| | Base (Attack 15) | Without `pulledBack` |
+|---|---|---|
+| Profit factor | **1.15252596** | 0.87379592 |
+| Max drawdown | **16.54214281%** | 42.82737208% |
+| Trades | 166 | **290** |
+| Win rate | 44.58% | 41.03% |
+
+**REVERTED.** Removing the pullback admits **124 extra trades** that are heavily net negative and
+**nearly triples the drawdown**.
+
+### WHAT THIS RESOLVES
+| Term | Role in the name | Verdict |
+|---|---|---|
+| `reachedUpper` — the +2σ stretch | the ORIGINAL name | **decoration, and costly** |
+| `pulledBack` — the pullback to VWAP | the CORRECTED name | **the edge** |
+
+**Attack 15 did not merely improve the base — it renamed the strategy correctly.** The old name
+pointed at a term that was costing money; the new name points at the term that carries it. That is a
+stronger result than the +0.13 profit factor, because it means the board's description of this system
+is now load-bearing rather than decorative.
+
+### AND IT SHARPENS HARD LESSON 15
+The lesson said a name is a hypothesis. Attacks 15 and 18 together show the useful version:
+**test the name, and if it fails, the term that survives tells you what to rename it to — then test
+the new name too.** Two of three labs found their named term was decoration; here the *replacement*
+name has now been confirmed load-bearing, which is what closes the loop.
+
+**Base unchanged: PF 1.15252596, DD 16.54214281%, 166 trades, long-only. Still no champion** — the
+H1/H2 spread of 0.773 is the open problem, not the entry terms.
