@@ -1,0 +1,68 @@
+# 2026-08-09 10-54-02
+# duration 300s | language en
+
+[00:01] video we're just gonna be quickly going over what the ATR stop loss rule is so
+[00:06] The ATR stop loss rule is just a rule to determine if your stop loss is too big or not
+[00:11] Okay, when you're placing an entry
+[00:13] So sometimes when you're by stopping a certain range
+[00:18] You guys should all know that our stop losses should be
+[00:21] Behind the most recent pullback, right? So sometimes that most recent pullback is a pretty far away from the high of the range
+[00:28] So that would mean that our stop loss is gonna be extremely big and why is this a bad thing?
+[00:33] If our stop loss is extremely big, I'm not saying this one is extremely big
+[00:37] We'll find out in a second if it is too big, but
+[00:40] When your stop loss is super big then the risk to reward ratio is not worth it to enter a trade
+[00:45] Because at that point if you get tapped into the trade if your stop loss is massive
+[00:49] Then the trade needs to run a significant distance
+[00:52] Even just for you to make one or two RRs
+[00:55] So that's why we did implement a rule into the system to have a maximum stop loss size
+[01:01] So that we are always have at least a good risk to reward
+[01:06] Benefit when we get tapped into the trade. So
+[01:09] What you guys need to do is add the ATR
+[01:12] To your chart so on the three and premium indicator we added everything on there
+[01:16] Just make sure show ATR value is checked off. It's gonna be up here in your
+[01:20] Calculator right there. It's also gonna be down here. So if you have the calculator hidden
+[01:24] Then it's still gonna be down here
+[01:26] and what the ATR is is the ATR is a value for
+[01:32] The current volatility of whatever chart you're looking at on whatever time frame you're looking at
+[01:36] So on the one minute here on GBP USD
+[01:40] The ATR is 0.0201
+[01:43] So if we were to start getting candles that start moving crazy volatile then this ATR would go up and
+[01:50] The opposite if we were to just start getting a bunch of candles that have not much money in them
+[01:54] And we just start going sideways and there's small candles then the ATR would go down. So
+[01:59] When the ATR is higher meaning the chart is more volatile that means that we can have a bigger stop loss potentially because
+[02:07] Because the market is more volatile. It has a higher chance of actually running
+[02:10] Once we get into the trade and giving us a good risk to reward
+[02:14] Whereas if the market is not very volatile then the maximum stop loss size would be smaller
+[02:19] because the ATR is smaller
+[02:21] and then
+[02:25] That would just ensure that when we do get entered into a trade
+[02:28] Our stop loss is not too big and the risk to reward is still beneficial to us. So
+[02:36] What the actual rule is is the ATR you take the ATR value which is down here
+[02:41] So we take 0.00021 and you multiply it by five. Okay, so in this case
+[02:46] I know that this would be 0.00105
+[02:51] I just do mental math there
+[02:53] You may need to use a calculator probably will need to use calculator most of the time
+[02:57] But it takes two seconds
+[02:59] But you multiply this number by five and then if this number right here on your stop loss is bigger than that number
+[03:08] Then your stop loss is too big. Okay, so 0.00108. What did I say? I said 0.00105
+[03:15] So this is actually bigger than 0.00108. All right, let's just double-check
+[03:21] 0.0021 times five is 0.00105. This is 108. So in this case, this stop loss is too big. Okay
+[03:32] If the size of this number is obviously any any smaller than this number times five, then you're fine
+[03:38] So sometimes the price might be down here and the ATR is just slightly or the stop was just slightly too big
+[03:44] But you still need to be watching it because if we get a couple candles that move very aggressively towards the high here
+[03:50] That is actually going to potentially increase the ATR because if we get to like volatile
+[03:56] Super aggressive candles moving up towards the entry then the ATR actually might increase
+[04:00] So you have to be watching it sometimes
+[04:03] So let's see if that actually happens here price makes our way up to the entry and
+[04:07] In this case, we actually do get another smaller pullback here. Okay, so
+[04:12] And the ATR actually did increase so even if we didn't get that pullback. This would be an example
+[04:18] Where 0.0023 now
+[04:22] Times five it's 115 right so now now since the ATR actually went up now
+[04:28] The stop loss is not too big anymore in this specific case
+[04:30] So we actually did get a pullback right here
+[04:32] So you would make your stop loss right there and obviously that's not too big
+[04:36] But that's that's it. It's pretty simple. You just take the ATR and multiply by five
+[04:40] Make sure the stop loss is not bigger than that and that's it
+[04:43] So if your stop loss is too big you just stay out and you and you wait to see if you get a different entry later on
+[04:49] But otherwise it's not worth entering it if your stop loss is super big the risk reward is not there
+[04:54] So that's the ATR rule and I'll see you guys in the next video

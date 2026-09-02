@@ -1,0 +1,167 @@
+# 2026-08-09 05-45-14
+# duration 512s | language en
+
+[00:00] few tips but they're all going to be very helpful for when you actually do start to go
+[00:03] trade in the live markets.
+[00:05] So up to this point, most of you who are watching this video right now have probably not live
+[00:10] traded yet, right, if you're just finishing the course.
+[00:14] First of all, you know, you need to go back test, get your 300 plus trades in your journal,
+[00:18] make sure you fully understand the strategy you can trade by yourself.
+[00:21] This is once we actually start to go live.
+[00:23] So once you guys actually start trading on a live personal account or on your pro-form
+[00:27] accounts, basically you want to be able to optimize how efficiently you are trading and
+[00:33] you want to be able to minimize the chance that you risk any, sorry, minimize the chance
+[00:38] that you miss any trades.
+[00:41] So a few of these tips that I'm going to give you guys are going to be common sense
+[00:44] for some of you guys, but for a lot of you newer people, this is going to be completely
+[00:47] valuable new information.
+[00:49] So first things first is when you're live trading, you're going to come to your
+[00:54] computer obviously at the same time every day to trade a certain session.
+[00:58] Let's say New York session for example, you're going to come to your computer at 8am, right?
+[01:02] So first tip is come to the computer 10 minutes before the session.
+[01:07] So you can look at all your charts and map out everything that you're looking for on
+[01:10] each chart, right?
+[01:11] You can kind of see what kind of zones you're waiting for.
+[01:14] For example, if I go to NAS, I can maybe say, okay, we're waiting for this zone
+[01:17] here.
+[01:19] Map out everything that you're looking for so that when the session starts, you're
+[01:23] ready to take a trade if it's setting up in the first minute of the session.
+[01:26] So if you get to your computer at 8am, and something is setting up on, let's say
+[01:32] I have this big watch this year, and I get to the computer at 8am and I start
+[01:36] looking through these charts one by one, and at 8.02, there's a setup on S&P.
+[01:41] But I'm going to miss that because it's going to be past 8.02, but I tell
+[01:44] my get down to S&P to look at what I'm looking for or look for the setup.
+[01:47] So come to your computer 10, 15 minutes early and look through every single
+[01:52] thing, every single thing on your watch list and figure out what's valid, what
+[01:56] you're looking for, what you're waiting for.
+[01:58] And then further from that, the next step is that you're going to label
+[02:01] each thing on your watch list with colors.
+[02:03] So on trading, you can label these things with any color.
+[02:06] The way that I do it is I will label something green if it is completely
+[02:10] valid for longs.
+[02:12] So let's say you have your zone tap, you have your type 1 validation,
+[02:15] you have your protected low, and we're good to be on the entry
+[02:18] timeframe.
+[02:19] That is valid.
+[02:21] So if you're looking for longs, I'm going to label it green.
+[02:23] If something is completely valid for shorts and I can be looking at the
+[02:25] entry timeframe again for an entry, I'm going to label it red.
+[02:28] If something is still setting up, still needs more time, let's say maybe
+[02:32] we're waiting for a zone, it's not completely valid yet, maybe the
+[02:35] model is not right yet, I'm going to label it blue.
+[02:37] So that this is a constant reminder to you guys.
+[02:41] You're giving yourself a constant reminder every time you look up here,
+[02:43] what you need to be looking at more closely, what you can kind of
+[02:46] forget about for a little bit, and all that stuff so that you're making sure,
+[02:49] keeping a reminder in your head what you need to be watching more closely.
+[02:55] The second thing that I'm going to tell you guys to do is set alerts.
+[02:58] So this is probably the number one most important tip in this whole video,
+[03:02] is the alert system.
+[03:03] And this is, you guys are very privileged that we have our own alert system
+[03:07] in our 3M indicator for you guys that is based on our own strategies, rules.
+[03:11] So all you have to do is go to the top of the chart, click Alert, right?
+[03:14] And then you're going to click the drop down, go to the 3M Elite
+[03:17] indicator, and then you can go to Set and Alert for any of these things here.
+[03:21] So the main ones that I really use are just the bullish and bearish breaks.
+[03:26] And then you can also set alerts for when you're getting a triple M,
+[03:31] getting or any of the models happening.
+[03:34] So, you know, if it's an accumulation, you can set alert for
+[03:37] when it turns to distribution or something.
+[03:40] The main ones I use are just the bullish and bearish breaks though.
+[03:42] I use these all the time.
+[03:44] I use these probably like 50 times a day.
+[03:47] No matter what timeframe I'm looking at, I determine what I want to see
+[03:51] and then I set an alert for it.
+[03:52] So if I need one more break up here on SAP, let's just say for whatever reason,
+[03:57] I need another break up on the 4 minute here before I want to look for trades.
+[04:02] I'm not just going to, you know, try to remember that and
+[04:05] then always have to keep watching the chart all day.
+[04:08] I'm just going to set an alert like this for a bullish break and then boom.
+[04:12] Now I can safely look away from the chart without worrying that it's going to set up
+[04:17] without me because I know that right when it breaks up,
+[04:19] I'm going to get notified on my computer.
+[04:21] I'm also going to get a notification on my phone.
+[04:23] So if I leave my computer, I'm going to turn the ringer off on my phone.
+[04:27] If I'm going to the, you know, a different room or
+[04:29] if I have to leave my house, I'm going to keep my ringer on my phone.
+[04:32] And I'm going to get a notification on my phone for when something breaks up
+[04:34] or down and then I can watch it more closely.
+[04:39] And you can do this for any time frame.
+[04:41] So let's say you're looking at the 32nd, right?
+[04:44] And I don't know what we'd want here.
+[04:45] Let's just say we want a breakdown and then we're looking for a cluster.
+[04:48] Let's say we're looking for stage one short.
+[04:51] Instead of having to watch this chart like a hawk, I'm just going to set an alert.
+[04:54] So you can set an alert.
+[04:56] Whatever time frame you're looking at is what it's going to set it for.
+[04:58] So alert, bearish structure break, boom.
+[05:01] Now I don't need to look at the chart.
+[05:03] I can just wait until I hear the alert go off and then I can start looking at it.
+[05:07] So this is how you can be efficient.
+[05:08] You don't have to waste time looking at charts, staring at them.
+[05:11] You know, scared that you're going to miss something.
+[05:12] You set alerts for absolutely everything you're waiting for.
+[05:15] If I'm waiting for a zone tap, let's say I'm waiting for price to come tap into the zone.
+[05:19] I'm not going to rely on myself to have to watch it the whole time.
+[05:23] I'm just going to go like this, right click the chart, set at alert.
+[05:27] Right? And you can drag this around wherever you want the alert to be.
+[05:30] You put it on the zone.
+[05:31] So if you're waiting for a zone tap, you always put alerts on the zones
+[05:34] so that you get alerted when the zone gets tapped.
+[05:37] So you always want to try to minimize your chances,
+[05:39] like I said, of missing a trade.
+[05:41] So how do you do that?
+[05:41] You set alerts for everything so that you're always on top of it.
+[05:46] The next tip and a lot of you guys already have this, but a lot of you don't.
+[05:51] The last tip I would give to make sure you never miss trades
+[05:54] is getting a second monitor if you don't have one already.
+[05:57] You know, you can look at any electronic site.
+[06:01] Right? And like even on Amazon, you can get monitors for under $100.
+[06:07] You don't need a nice one.
+[06:08] You just need a screen that is going to give you more eyes on the charts.
+[06:11] That's all you need.
+[06:12] So I wouldn't even say that this is a recommendation.
+[06:15] I would say that this is mandatory, in my opinion.
+[06:18] If you actually want to take trading seriously, it is mandatory
+[06:21] to have at least two screens because of course you want to have
+[06:25] the main screen that you're working on and then you want to have another screen,
+[06:29] which is going to look something like this.
+[06:31] I always going to have something like this, just four random charts, right?
+[06:36] On a different screen.
+[06:38] Whatever four charts are the most valid for that day or whatever four charts
+[06:42] I need to look at constantly, I'm going to have it on my.
+[06:45] So this is what my other monitor will look like.
+[06:46] I'm going to have four charts on here.
+[06:48] So it's like you always have eyes on the market.
+[06:50] You always have eyes on everything.
+[06:53] All right.
+[06:54] So on top of the alerts, on top of color coding or watch list,
+[06:57] you want to also have a second screen that just has straight up just
+[07:00] charts on it, four or five charts.
+[07:03] And this is going to guarantee that you pretty much never miss anything.
+[07:06] On any other charts.
+[07:09] Lastly, you know, the last tip I would say for live training is make sure you
+[07:12] understand the contract calculations and you do it very quickly.
+[07:15] Now there's a very, very easy way to calculate contracts, which is in the
+[07:19] course.
+[07:19] There's another video that's separate on this, which is right here.
+[07:22] It's called calculating contracts.
+[07:24] And this is sorry, this is I was just reorganizing the course,
+[07:27] but this is supposed to be chapter 11.
+[07:30] Yeah, this is going to be chapter 11.
+[07:32] Um, chapter 11.
+[07:35] And then this is chapter 12, my bad.
+[07:37] But yeah, so it's going to be in chapter 11, calculating contracts.
+[07:41] Uh, so make sure you watch that video, but that's going to be another way.
+[07:44] How you make sure that your live trading is perfect.
+[07:47] You're not making any mistakes.
+[07:48] You're not doing anything stupid and you're quick, especially if you
+[07:51] train on the 30 second timeframe or even the 15 second, you want to be
+[07:54] able to just calculate contracts real quick.
+[07:56] Boom, boom, boom, enter and all that stuff.
+[07:59] But those other tips that I gave you guys, the watch list, the alert system,
+[08:03] having multiple monitors, that is, you know, I would say all mandatory.
+[08:08] If you guys want to make sure that you are performing the best
+[08:12] of your abilities in the live markets.
+[08:13] So yeah, those are just a few tips for live trading.
+[08:16] And I'll see you guys on the discord.

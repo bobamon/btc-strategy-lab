@@ -1,0 +1,61 @@
+# 2026-08-09 03-24-31
+# duration 269s | language en
+
+[00:00] Making this quick video we're gonna go over what the one candle rule is so this is something that has been a thing for a long time
+[00:06] But it never really had this name. I recently came started calling it this term one candle rule
+[00:12] And this is in regards to
+[00:15] Snds and how they get mitigated. So we're gonna go over this in depth in this quick video
+[00:21] Essentially
+[00:23] This is the case when you get a zone
+[00:25] So there's a perfect example of it right here when you get a zone that is created now
+[00:29] This can be for actual structural breaks. It could also be for fractal zones
+[00:34] It's this is this goes for every type of zone. So when the zone gets created
+[00:39] so in this example we have the breakup here and
+[00:41] immediately you have this would be the
+[00:45] deepest unmitigated zone so
+[00:47] Once the zone gets created with the engulfing candle
+[00:51] When you get a next the next candle tapping into it and also making a new high like we do here
+[00:57] This is called the one candle rule. So this black candle right here would be the one candle in the one candle rule and
+[01:05] The reason that this rule exists is because it basically states that this one candle does not mitigate the zone yet
+[01:13] Okay, so this candle itself does not make the zone mitigated
+[01:17] This is the one candle that would have to be the highest candle and
+[01:21] Then we were still allowed to come down and mitigate we can get a triple M next or if we make a pullback into the zone
+[01:27] We can then get an engulfing candle and get the type 2
+[01:30] So if we get a second candle that continues up right now without being a triple M
+[01:35] And it's not a pullback then that would mitigate the zone
+[01:39] So the second candle after this candle would make the zone mitigated if that makes sense
+[01:46] So in this example, let's see what we get next
+[01:50] We get a triple M next so this would be a valid validation in this s&d zone
+[01:57] Because we had the one candle rule right this was the top candle and now we
+[02:01] Validated inside of the zone so this also goes for fractal zones
+[02:04] So this would be here we have an example where this would be the case with a fractal zone as well
+[02:09] So we have a pullback right here. We would have our FB1
+[02:12] Like
+[02:14] Let's where do we break right there? So again
+[02:18] You're looking at the engulfing candle that made the zone and
+[02:22] Then it can be one candle after the engulfing candle. So this would be our zone
+[02:27] Now the next candle taps the zone and goes higher
+[02:31] So this one candle does not mitigate the zone yet
+[02:34] We would need a second one up and then the second one is what makes the zone mitigated
+[02:38] So we would still be allowed to come down in this zone right now and validate
+[02:41] Let's see what we get here in this case. We get another candle that goes higher. So this so now this zone is considered mitigated and it's not
+[02:51] Valid to get a validation from
+[02:53] All right, so I'm gonna do one last example here because this is gonna be very this is a very short video because this is a
+[02:59] Very simple rule, but it does clear up some things on how zones get mitigated when they get tapped directly after it's made
+[03:07] So this is gonna be one last example. So here we have an FB1
+[03:13] In this case, there is no zone no valid zone for FB1
+[03:16] We get a pullback then we would have our FB2 right here. So the FB2 line gets broken with this candle
+[03:22] So in this case
+[03:24] There is a zone for this FB2 because of the one candle rule. So the one candle rule would be and
+[03:31] This is a little bit of a different example than this one
+[03:35] Or sorry than this one because in this one the engulfing candle is what made the break then we do one more candle
+[03:40] It can also be like this you can also get the one candle
+[03:44] So in this case, this is the engulfing candle and then this is the one candle rule
+[03:49] This one candle can also be the one that made the break and then this candle would be valid for to be a zone
+[03:55] Okay, so you have the engulfing candle that made the zone and then the one extra candle
+[03:58] So now if we were to get a second candle up then this zone isn't valid
+[04:02] But in this case we actually get a triple M next so this would be a
+[04:07] Validation in the zone like this and then continue higher like that
+[04:11] So that is how it works it works with fractal zones structural zones
+[04:15] Just make sure that you understand this rule because obviously it's very important in understanding how zones get mitigated and
+[04:22] This will hopefully clear some things up for you guys. So yeah, that'll be it

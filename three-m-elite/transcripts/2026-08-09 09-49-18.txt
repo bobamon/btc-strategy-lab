@@ -1,0 +1,396 @@
+# 2026-08-09 09-49-18
+# duration 1003s | language en
+
+[00:00] very important video
+[00:01] we're going over moving averages so up until this point
+[00:04] we have not spoken a word about moving averages
+[00:07] but they actually do serve a huge purpose in the strategy okay
+[00:11] but we didn't want to introduce them to you until now because all the other
+[00:15] concepts
+[00:17] you can learn them on their own
+[00:19] everything is individual and we don't want to throw too much stuff at you guys at one point
+[00:24] all at once so
+[00:26] now i'm going to be introducing moving averages to you guys
+[00:28] okay so moving averages are going to help mainly on the 15 minute time frame
+[00:34] and on the one minute okay
+[00:35] don't really pay too much attention on the higher higher time frames
+[00:39] but i'm going to be showing you in this video extensively how we look at them on the one
+[00:43] minute and the 15 minute
+[00:45] and how they help us to know when
+[00:47] to not enter trades when price is too overextended
+[00:50] or when prices
+[00:52] generally moving in a bearish trend if we're trying to take longs
+[00:56] the m a's will help us understand when the trend is going to reverse or when
+[00:59] continue from when we get pullbacks all that stuff
+[01:03] so this is going to be going over that in depth
+[01:07] okay so first of all
+[01:09] we're gonna go over what m a's we use okay so we're gonna just gonna be three m a's
+[01:12] and you guys can add this indicator on your chart
+[01:15] just type in s m a's literally just called s m a by m lou
+[01:20] add that to your chart
+[01:21] it's gonna look like that but we're gonna i'm just gonna show you how to
+[01:23] configure it
+[01:24] so you just go to properties
+[01:27] and we're gonna have three m a's so what a style sorry and then we're gonna have
+[01:30] three m a's on we're gonna have the twenty the fifty and the two hundred so turn
+[01:33] off the ten hundred
+[01:35] and then
+[01:36] turn off this as well
+[01:38] so yeah you just want these three m a's on
+[01:41] you can make these lines uh...
+[01:45] not as thick you can make them thinner make them thinner so
+[01:48] doesn't look too clunky on the screen
+[01:51] and then you can color them however you like so personally
+[01:54] i will have the twenty may as a great
+[01:56] like great
+[01:57] uh... the fifties in the black and then the two hundred is read
+[02:00] okay so that's how i like them configured
+[02:03] this is exactly how i have my configured
+[02:06] okay so first of all it's
+[02:08] it's important to understand how these m a's work
+[02:10] i guess so
+[02:12] one of the first explain to you as well
+[02:14] what they actually are
+[02:15] okay so understanding
+[02:18] how would actually calculated whatever
+[02:19] is not super important but i will just explain to you real quick
+[02:24] for example
+[02:24] the two hundred and they which is a red one here
+[02:27] uh... the higher the number
+[02:29] the harder it is
+[02:30] for price to make these
+[02:32] uh...
+[02:33] to influence these
+[02:34] and it's okay so the twenty may is this great one as you can see it moves
+[02:37] very tightly with price
+[02:39] uh... and it's gonna be an indication of more of the short-term trend
+[02:43] the higher the number so the two hundred is the highest when we use
+[02:45] that's more indication of
+[02:47] the higher the overall trend the higher time for a trend
+[02:51] okay so and how it's actually calculated
+[02:53] is at any given moments
+[02:55] uh... let's say during this candle right here
+[02:57] at any given point in time
+[02:59] the m a's going to represent
+[03:01] the two hundred and they for example would represent
+[03:03] the average price of the last two hundred candles okay so if you take the
+[03:07] last two hundred candles which is probably something like this
+[03:11] maybe a bit more
+[03:13] whatever the last two hundred candles is
+[03:15] you take the average price of all of them you take all of them and then
+[03:18] you take the average of all of them
+[03:20] this
+[03:21] and they is the average price of the last two hundred candles
+[03:25] so the last of the twenty a for example
+[03:27] is right here
+[03:28] that is the average price of the last
+[03:30] twenty candles so that's why it's easier
+[03:32] if we get a sh if we get
+[03:34] price shooting up like this
+[03:35] it's a lot easier
+[03:36] uh... to influence the shorter m a's the smaller m a's
+[03:40] right the twenty a will follow it pretty quickly but the two hundred will only
+[03:43] come up a little bit because it's harder to influence
+[03:45] the last two hundred candles average price in the last twenty
+[03:48] okay so that's how it actually works
+[03:51] it's not too important that you understand fully how that works if you
+[03:54] didn't get that but
+[03:55] all that you need to be able to do is look at them okay
+[04:00] in this video i'm gonna try to explain everything i know about how they work
+[04:03] okay and all the little tips and stuff
+[04:06] uh... about how to look at them correctly and how to know when to enter
+[04:09] trades based on the m a's
+[04:11] so first of all when we are in a bullish trending uh... environments
+[04:15] okay the m a's are going to usually be in the configuration
+[04:19] of
+[04:20] them being one on top of the other so the two hundred is always gonna be on the
+[04:23] bottom
+[04:24] then the fifty then the twenty this is one we're in a bullish environment you can
+[04:27] see as you can very much just clearly see when prices trending downwards it's
+[04:30] the opposite
+[04:31] okay the two hundred is going to be on the top
+[04:34] and then the fifty and then the twenty are all
+[04:36] uh... this is the order that they're in the two hundred fifty and twenty
+[04:39] then when we switch to a bullish environment it's the opposite the two
+[04:42] hundred will be on the bottom
+[04:43] and the fifteen twenty will be above it
+[04:46] so
+[04:47] uh... one thing that it's important to
+[04:49] one good tip is that when the
+[04:51] m a's cross through each other
+[04:53] a lot of the time not every time but a lot of time that is an indication that
+[04:57] the market is going to
+[04:59] switch directions okay at least on this specific time frame okay because when
+[05:02] you switch to a different time frame
+[05:04] the m a's will look different obviously because
+[05:06] disease or the m a's for the
+[05:09] that specific time frame so if i go to the one hour here and is will look
+[05:12] different than if i switched down to the fifteen minute
+[05:14] but when the m a's are trending bearishly
+[05:17] and then they cross through each other so you can see right here
+[05:20] uh... the twenty and the fifty they cross through the two hundred
+[05:23] that is a lot of the time would be an indicator that the market is going to
+[05:26] change directions okay so as you can see here
+[05:28] they cross through and then
+[05:31] they come
+[05:31] they make a pullback here and this is going to be kind of what we call
+[05:36] surfing or like the meeting point of the m a's and then that's usually in
+[05:38] price will continue
+[05:40] so
+[05:41] uh... as you can see right here you know we can just look at a million examples
+[05:44] you'll see it happen a million times over and over again
+[05:46] right we're in a bearish trending environment
+[05:48] and then the m a's they cross through the two hundred there and that's when
+[05:51] price
+[05:52] kind of switches directions
+[05:55] okay you can just go to anywhere on a chart and just analyze how the enemies
+[05:58] work right
+[05:59] like with this big
+[06:00] uh... dump here and then
+[06:03] where does price really start the reversal from
+[06:05] well obviously it's done here but you can see the price the m a's they
+[06:08] cross through two hundred here
+[06:10] and then that's kind of what it's which is directions
+[06:12] they cross back down
+[06:14] down through the two hundred and that's when price dumps
+[06:16] right and then they cross up through the two hundred and that's when it pumps so
+[06:20] when the m a's cross through each other that is going to be one big
+[06:23] pattern they want to be watching
+[06:25] okay this is mainly going to be on the one minute time frame that we care
+[06:28] about m a's crossing all that stuff
+[06:30] that is going to be really when we try to get in on trades
+[06:33] uh... is when this that may start to indicate a reversal okay so
+[06:37] let's say if this is on the one minute time frame and we're tapping into a fifteen
+[06:40] minute demand zone
+[06:41] right
+[06:42] like this
+[06:44] obviously we're gonna have all the model that we're paying attention to and the
+[06:46] stages but that on top of all that
+[06:49] we're also going to be paying attention to the m a's
+[06:51] okay so
+[06:53] uh...
+[06:54] we're gonna be trying to get involved in areas where the m a's are crossing
+[06:56] through the two hundred like that
+[06:58] because that's an indication that that's when prices gonna start running
+[07:02] so yeah we're gonna we're gonna have to be paying attention to all of it out
+[07:04] all at once okay so the next video specifically is going to be going
+[07:07] over
+[07:08] uh... the actual entry methods on the one minute so that's video is going to
+[07:11] include
+[07:12] it's gonna have everything altogether so the stages uh... the model and the m a's
+[07:17] all together
+[07:17] and we're gonna show you the entries that we take on the one minute
+[07:20] this video is just simply going over what at the m a's are
+[07:23] and a few tips about
+[07:25] how they behave so
+[07:28] so another thing is
+[07:30] uh... the topic of surfing
+[07:32] when we when price is pretty much just this we call it surfing the m a's
+[07:36] when prices kind of just turning like this right so it's
+[07:39] prices just making
+[07:40] up moves or if you can also be surfing to the downside but
+[07:44] uh... it's making up moves and it's kind of using m a's support levels right
+[07:47] uh... like this is what we call surfing the m a's and then the m a's can also
+[07:50] serve each other so i mean by that is like
+[07:53] the twenty and the fifty m a
+[07:54] are appear and then when they come down and kind of meet with the two hundred
+[07:57] and continue that's also called
+[07:58] surfing
+[08:00] so this is going to be something that's very common when you're in a
+[08:02] trending environments
+[08:05] when you're in a market that's moving in one direction
+[08:07] uh... the m a's act as
+[08:09] kind of like a support level so when price kind of makes polls but poll backs
+[08:14] uh... the m a's are going to be areas that it wants to continue from so that's
+[08:17] another way that may be very useful
+[08:19] uh...
+[08:20] so when you're on the one minute for example
+[08:23] and you have a re-accumulation happen
+[08:25] and you're looking for an entry
+[08:27] we're gonna be looking for re-accumulation entries when the m a's
+[08:29] are meeting
+[08:30] with the two hundred so something like this right
+[08:34] let's say the m a's
+[08:36] crossed through the two hundred
+[08:38] they make
+[08:38] a distance between and we're gonna go over this a bit more to the next video
+[08:42] uh... but
+[08:43] when they cross through each other and price shoots up they're gonna create a
+[08:46] distance between
+[08:48] these amazons of two hundred
+[08:49] and then where we're gonna want to get into trades
+[08:52] are when price makes a poll back and the m a's kind of meet together again
+[08:55] because that is an area where prices going to continue
+[08:58] because every single time that price
+[09:00] extends away from the m a's
+[09:02] or the m a's extend away from the other m a's like this
+[09:06] uh... it's always going to make a poll back they're always going to come in again
+[09:08] at some point so those are areas where we really want to get involved in trades
+[09:14] like let's say here for example let's say down here right you can see the m a's
+[09:18] they dip under the two hundred and they cross back through it
+[09:20] that's kind of when we get this big
+[09:22] trend
+[09:23] and then where would you want to maybe take trace on my guess i took a
+[09:25] trade here this is on the fifteen minutes on frame but
+[09:28] this is a good area
+[09:31] where you would want to maybe look for
+[09:32] more trades because this is when the m a's are meeting together again
+[09:37] so i'm gonna go more into the one minute in the next video actually but for the
+[09:41] fifteen minutes on frame there's pretty much just two rules
+[09:43] uh... with the m a's okay
+[09:46] if we are looking for a long as a start with the example that we're looking
+[09:49] belongs
+[09:50] the first rule is that price cannot be
+[09:53] overextended
+[09:55] from the twenty m a
+[09:57] so on the fifteen minutes you always have to be paying attention to the
+[10:00] m a's on the fifteen minute
+[10:01] for example i would not take a trade
+[10:03] let's say
+[10:05] appear let's say that something was setting up on the one minute right here
+[10:09] you can see that the twenty m a on the fifteen minute
+[10:13] pretty far away from where price currently is okay
+[10:15] every single time this happens there's a good good good chance that
+[10:19] prices just going to make a pullback okay so if you try to take a set up
+[10:22] here
+[10:22] it's just not gonna work
+[10:24] right it's not going to play out because
+[10:26] you have to see it as like the m a's are always pulling
+[10:29] trying to like pull price closer to it so when price gets a farther way far away
+[10:33] from it
+[10:35] a lot of the time it's gonna just gonna make a pullback okay and then continue
+[10:39] so the first rule in the fifteen minute m a's
+[10:42] i'll just read this down
+[10:44] there's pretty much two rules that's all we pay attention to in the fifteen
+[10:46] minute
+[10:48] first rule is that
+[10:50] price
+[10:50] cannot be
+[10:54] overextended
+[10:56] from the twenty m a
+[10:58] and yes it's just the twenty m a that we really care about
+[11:01] on the fifteen minutes is only on the fifteen minutes really only the twenty m a
+[11:06] the second rule is going to be
+[11:09] and let's say this is an example for longs
+[11:12] let's say
+[11:13] the longs
+[11:17] uh... the m a's
+[11:18] cannot
+[11:19] be fully
+[11:21] bearish okay and then obviously for shorts we can just write the opposite to
+[11:25] uh...
+[11:27] m a's
+[11:28] cannot
+[11:30] be fully bullish if you're looking for shorts
+[11:32] so what i mean by fully bearish is kind of what i explained earlier
+[11:36] uh... when they are all in the configuration like this where the two
+[11:39] hundred
+[11:40] we have
+[11:41] we're pretty much in a bearish trending environment with the two hundred is on
+[11:44] the top
+[11:44] the fifties below it and the twenties below it so if the m a's are fully bearish
+[11:49] they're in this order
+[11:50] we cannot be looking for longs even if we get a valid zone tap even if we
+[11:53] get everything
+[11:54] if the m a's are fully bearish on the fifteen minute we do not take
+[11:57] trades until at least
+[12:00] and they don't have to come cross to the two hundred we at least just need the
+[12:03] twenty to come cross to the fifty because that is at least one sign of
+[12:06] bullishness
+[12:07] so even
+[12:08] you know even let's say in this area right here
+[12:11] we could be taking trades in this area because at least the twenty has
+[12:15] crossed through the fifty
+[12:16] that is at least one sign of bullishness that we have
+[12:19] uh... that would be good for us to take trades
+[12:21] but the main rule is that they cannot be fully bearish so if we were
+[12:24] taking longs
+[12:26] then we wouldn't be taking a trade
+[12:28] in an area like
+[12:29] uh... this right
+[12:31] because they're all fully bullish the twenty fifty two hundred
+[12:34] uh... sorry
+[12:35] two hundred fifty twenty
+[12:38] so those are the two rules with the fifteen minute m a's okay
+[12:42] and then now we're going to go on to one minute briefly explain it but next
+[12:45] video is going to go a lot more in depth on the one minute
+[12:47] uh... i'm just gonna briefly explain the one minute rules for now
+[12:51] alright so on the one minute there's going to be a few things that we want
+[12:54] to
+[12:55] a few rules that we're gonna have the first rule in one minute is we
+[12:57] definitely do not trade take trades
+[13:01] uh...
+[13:02] when the m a's are bearish like i said earlier
+[13:06] no trades
+[13:08] and once again see me for example
+[13:10] example for longs
+[13:11] everything is just
+[13:13] inverted when we're talking about shorts
+[13:15] no trades when m a's
+[13:18] are not
+[13:19] are fully bearish
+[13:25] uh... the next one
+[13:26] uh... is we will not take any trades when the
+[13:29] twenty or fifty m a so no trades
+[13:33] and fifty m a are
+[13:36] overextended from the two hundred
+[13:42] so example of that would be
+[13:45] let's say right here okay let's say down here we have the m a's they cross
+[13:49] from under into two hundred right here so this would be a great area to enter
+[13:52] trade
+[13:53] i don't think there would be
+[13:54] exact entry here but i'm just in m a wise
+[13:57] this would be good area to enter trade
+[13:59] when the m a's are crossing through the two hundred
+[14:05] after they cross the two hundred if price shoots up it's gonna make this big
+[14:07] gap between
+[14:09] the fifty and the two hundred okay usually the fifteen the twenty state
+[14:13] relatively close together
+[14:15] so they're gonna be somewhere up here and they're gonna create this big gap
+[14:18] between them and the two hundred so basically the the rule that i have is
+[14:21] that if the gap between
+[14:24] twenty and the fifty m a
+[14:26] is smaller
+[14:28] if the gap between the fifty and the two hundred m a is bigger than this gap
+[14:32] then
+[14:33] these m a's are overextended and most likely what's gonna happen
+[14:37] is price will make a pullback so that they can come together again
+[14:41] so the rule that i have is
+[14:42] once the twenty and the fifty get overextended from the two hundred we
+[14:45] do not take any trades until
+[14:47] they come meet again
+[14:50] so like for example if there was is like a stage one right here
+[14:54] i would not be trying to enter any recumulations appear this would only
+[14:57] result in a loss
+[14:58] because there's this gap between
+[15:00] the fifty
+[15:01] twenty two hundred
+[15:03] right so whenever you get that gap
+[15:05] it's smart to stay out until price makes a pullback and then give you a setup
+[15:08] later on
+[15:09] when the m a's are
+[15:10] kind of meeting together again
+[15:13] twenty the fifty m a cannot be overextended from the two hundred
+[15:16] and also no trades when it's fully bearish
+[15:20] and then lastly the last rule i have is the m a's cannot just
+[15:24] uh... cannot be super spread apart going sideways okay
+[15:27] select an area like this
+[15:29] although even if you take a specific point in this uh...
+[15:33] you know chart
+[15:35] i guess here you can
+[15:36] you can argue that there's still kind of spread apart
+[15:38] but in this area right here for example
+[15:40] with the m a's are in a bullish form
+[15:43] there are all kind of going sideways and
+[15:46] they're all spread apart and stuff we do not want to enter trades in areas
+[15:49] like this because a lot of time is going to be a lot of back and forth
+[15:52] ups downs ups down it's gonna tap into a trade and then come stop you out and then
+[15:55] do some shit
+[15:56] and then eventually when price
+[15:59] when it messes around sideways for a bit
+[16:01] the m a's start to configure into a
+[16:03] cleaner pattern than that's usually when we get the setup but entering areas
+[16:06] like this
+[16:07] where it's just kind of a lot of sideways up down prices going above
+[16:09] below
+[16:10] kinda just a little those areas too

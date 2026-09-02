@@ -108,8 +108,19 @@ lower bound on the system, not a verdict on it.**
   signal, and it cannot change whether the signal has an edge.
 
 ## Open queue
-0. **Get definitions for Type 1/Type 2, the swing rule, and stage** — the single highest-value input.
-   Everything else is tuning around a partial system.
+0. ~~Get definitions for Type 1/Type 2~~ — **DONE 2026-09-02, see VOCABULARY.md.**
+   Type 1 = a 3M candle; Type 2 = an engulfing candle in the direction of bias; both only on the
+   STRUCTURE timeframe (48m for this variant), inside the tapped zone.
+0a. **IMPLEMENT THE VALIDATION GATE (top priority).** The current Pine has NO validation gate at all.
+    Add: after a zone tap, require an engulfing candle in the direction of bias on the 48m
+    reconstruction before an entry is allowed (that is Type 2, fully specifiable). Type 1 needs the
+    3M candle anatomy, which is still unknown — implement Type 2 alone first and label it as such.
+0b. **IMPLEMENT ZONE INVALIDATION.** A candle BODY closing beyond the zone kills it, judged on the
+    ZONE's own timeframe. Also: if the candle immediately after a validation body-closes beyond,
+    the validation is void and a new one is required. Neither is in the current build.
+0c. **IMPLEMENT THE PROTECTED LOW/HIGH.** After validating, mark the structure-timeframe low (for
+    longs) as the protected level and stop beneath it. The current build stops at the 3H zone edge
+    instead, which is not what the source does.
 1. Port the cascade to a 15m base (scaling every layer up) to get 4.7 years of data instead of 4.6
    months. Loses 3m entry precision, buys a real sample.
 2. Test the source's BE-at-2RR rule as a variant.

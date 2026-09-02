@@ -1,0 +1,233 @@
+# 2026-08-09 04-32-59
+# duration 553s | language en
+
+[00:00] some of you guys have probably heard us talking about
+[00:02] in the Discord.
+[00:03] This has been a thing for a minute now,
+[00:05] but I just haven't made a video on it yet.
+[00:07] So, yo, what is going on guys?
+[00:09] This video is going to be going over basically the new model
+[00:13] that some of you guys have probably heard us talking about
+[00:15] in the Discord.
+[00:17] This has been a thing for a minute now,
+[00:19] but I just haven't made a video on it yet.
+[00:21] So, this is going to be going over the newer model
+[00:24] that is basically a part of the strategy now.
+[00:28] So, it's just kind of a slight difference.
+[00:30] It's a very specific scenario in how we view
+[00:34] a certain order of breaks.
+[00:37] So, basically all it is, first of all,
+[00:40] the name of this model, as you guys will see
+[00:42] in the indicator, it will be sometimes be called
+[00:45] MX Reaccumulation or MX Redistribution.
+[00:48] That's what the name is.
+[00:50] The reason it's called MX is because
+[00:54] when we were creating this model,
+[00:55] we just called it Model X
+[00:57] because we didn't really know a name for it at the time.
+[01:00] So, yeah, it just kind of stuck MX and that's the name of it.
+[01:03] So, basically the rules for this model
+[01:08] are when we are basically in any uptrend
+[01:11] that has at least three breaks
+[01:13] is how this needs to start essentially.
+[01:16] So, obviously we have six breaks up here.
+[01:18] Basically the rule is there just needs to be at least three.
+[01:21] It will not be the case if you only have two.
+[01:24] If there's three or more and then we enter a recumulation
+[01:27] where we only have a singular break up.
+[01:29] So, like right here, basically we have six breaks up.
+[01:32] You can have any amount of breaks down.
+[01:36] Obviously not four breaks down
+[01:38] because that would change it to distribution,
+[01:39] but you can in this case, we have two breaks down.
+[01:42] Then we have a singular break up
+[01:44] and then we have a singular breakdown.
+[01:45] So, this is the model.
+[01:47] Basically whenever you have that recumulation
+[01:49] with one break up and then one break down,
+[01:51] then this model will become MX Reaccumulation.
+[01:56] So, basically we have seen this type of model play out
+[02:02] so many times and actually this is something
+[02:04] that we even created years ago,
+[02:06] but we never actually implemented into the strategy,
+[02:08] but it was kind of just a theory or a concept.
+[02:10] But basically whenever you get that one break down,
+[02:13] a lot of the time when we're in an overall
+[02:14] bullish environment, obviously this is going to also
+[02:16] be an advanced model.
+[02:18] Well, maybe it's not obvious, but this is also
+[02:21] an advanced model.
+[02:22] So, this for example will not be the case
+[02:24] if we are in a bearish market.
+[02:25] If we're in a bearish market and we have
+[02:26] this exact same setup, this is just going to be distribution.
+[02:30] But this is the case when we, if I go to the one hour here,
+[02:32] if we're bullish on the one hour and everything like that,
+[02:35] and by the way, this is for the 15 second timeframe
+[02:37] I'm looking at, this is just an example, the 15 minute.
+[02:42] As long as the higher time frames are bullish here,
+[02:44] then this would be MX Reaccumulation,
+[02:46] meaning even though we have that back and forth
+[02:48] and we're going to break down here,
+[02:50] we're actually going to expect
+[02:51] that the next break is going to be up
+[02:52] and you can start trading from this whole area.
+[02:54] So, if this in this case, you know,
+[02:58] this is the 15 second time frames,
+[02:59] so I'll go on to the four minute
+[03:01] and literally from all the way down here,
+[03:03] I can start trading as long as the four minute
+[03:07] is valid and the four minute model goes bullish,
+[03:09] then we could start taking longs from all the way down here
+[03:12] because we're in the bullish model,
+[03:15] the MX Reaccumulation on the 15 minute, right?
+[03:19] So, the four minute, now that it looks like
+[03:21] the four minute here is probably going to be bearish,
+[03:22] but if the four minute goes bullish,
+[03:26] then we could start riding this
+[03:27] or taking trades on the way up.
+[03:28] And I actually have been trading this
+[03:30] for probably like two months now.
+[03:32] I've been sending signals,
+[03:34] I've been sending wins happening
+[03:37] when we are in MX Reaccumulation, MX Redistribution.
+[03:40] I just haven't actually made a video on it yet,
+[03:42] but so in this case, it doesn't look like
+[03:45] there would be anything
+[03:46] you can actually really trade there.
+[03:48] Maybe right there, maybe once the four minute
+[03:50] goes bullish, now we can start trading it
+[03:52] while the 15 minute is still in this bearish model, right?
+[03:56] So, you can see the 15 minute is still in that model.
+[03:59] Sorry, it's not in a bearish model,
+[04:00] this is a bullish model.
+[04:02] That's the whole point in this video.
+[04:04] But yeah, basically now that the four minute went bullish,
+[04:06] we would be able to start taking longs anywhere in here
+[04:09] because of that 15 minute is in that model, right?
+[04:12] So, and the same thing goes with the four minute.
+[04:15] This model can exist on any timeframe.
+[04:17] So, I think over here,
+[04:20] this is a bearish version of it.
+[04:22] So, for example, you see,
+[04:24] this is actually a couple of days ago
+[04:25] where I took the back to back 10 RR wins on gold.
+[04:29] I didn't actually utilize this model during this trade,
+[04:32] but you can see previously,
+[04:34] there actually might have been a setup.
+[04:36] Now this was in London session,
+[04:37] so I wasn't trading it here,
+[04:39] but you can see that on the 15 minute,
+[04:44] if I go to the 15 minute, we were obviously bearish.
+[04:46] That's why I was taking shorts.
+[04:49] So, the 15 minute is bearish,
+[04:50] and then we go to the four minute.
+[04:53] Yeah, 15 minutes bearish.
+[04:54] We go to the four minute.
+[04:55] As you can see right here,
+[04:56] we have three breaks down on the four minute.
+[05:00] One, two, three.
+[05:01] So that checks off the rule
+[05:03] where we need at least three breaks
+[05:04] in the direction of the bias.
+[05:06] And then we have one break up here
+[05:07] and then one break down.
+[05:09] So that one break down into redis,
+[05:10] and then we have one break up.
+[05:12] So once we get this break up right here,
+[05:13] this would be MX redistribution, right?
+[05:16] So, if I was awake in London session,
+[05:18] I could have been looking for setups here.
+[05:21] So maybe you can grab a fractal break,
+[05:23] like for example, you know,
+[05:25] it will, the indicator's drawing it here.
+[05:27] You see the fractal break,
+[05:28] and you can see up here it says MX redistribution
+[05:30] on the indicator, right?
+[05:32] So, you would maybe be able to look
+[05:35] for some fractal breaks and then look for shorts,
+[05:37] even though we're in, you know, up until this point,
+[05:40] you guys would be viewing this as accumulation right here,
+[05:42] and you would be not taking trades,
+[05:44] but maybe now you would catch some setups in this range.
+[05:49] The thing is, we've just seen this play out so many times.
+[05:53] I just watched this exact same thing happen so many times
+[05:55] where you get that redis or that react,
+[05:57] then you get one break back.
+[06:00] And that one break back is usually not enough
+[06:02] to fully switch the bias, right?
+[06:04] It's a lot of the time it just,
+[06:06] the next break is gonna be down.
+[06:07] So now we're kind of like preemptively trading
+[06:11] in these ranges, expecting the next break
+[06:15] to be in the direction of the bias.
+[06:17] And this is also the case for the one hour.
+[06:19] So for example, right here,
+[06:21] like I said, this can happen on any timeframe.
+[06:23] So let's say, again, I'm still trading
+[06:24] the 15 second timeframe where the one hour
+[06:26] and the two hour are, you know,
+[06:30] timeframes that you look at,
+[06:32] and then the six hour is the highest timeframe.
+[06:35] You would look at the six hour
+[06:36] if the one hour and the two hour are both advanced.
+[06:39] So in this case, the one hour is four breaks up,
+[06:42] one break down, one break up, one break down.
+[06:44] So this would be MX recumulation.
+[06:48] As you can see, it is, says it right there.
+[06:50] Because the six hour is bullish, right?
+[06:53] So this is again, because it's an advanced model,
+[06:55] meaning, you know, the high timeframe
+[06:58] has to be bullish in order for this model to exist.
+[07:01] Otherwise, this would not be MX recumulation.
+[07:04] This would just be distribution.
+[07:05] But basically you can start trading.
+[07:07] You can go into lower timeframes
+[07:08] and be taking longs in this entire area,
+[07:11] which there's probably a decent amount of setups in here
+[07:14] because this is the one hour timeframe.
+[07:16] And you would essentially be able to keep longing this
+[07:19] even though we had that breakdown.
+[07:20] So now there is one exception, or not one exception,
+[07:28] but like one rule to where this model does not exist.
+[07:32] And that's if you have the same amount of breaks down
+[07:35] in the recumulation as you did in the breaks up.
+[07:37] So this is really only ever going to be
+[07:39] one specific example.
+[07:42] Because like I said before, you can't have two breaks up.
+[07:45] This model can't exist when you only have two initial breaks up.
+[07:48] It would have to be minimum three.
+[07:49] So that's one, two, three.
+[07:52] So if you have three up and then three down,
+[07:56] and then one up and then one down,
+[07:57] this is not MX recumulation because this is two back
+[08:00] and forth because this is too much back and forth now.
+[08:04] You need to have less breaks down than you do breaks up.
+[08:07] Okay, so, you know, four breaks up
+[08:10] and then three down, completely fine, right?
+[08:13] Or any amount past that three down is fine.
+[08:16] The only specific setup that it becomes not valid anymore
+[08:20] is going to be when you have three up exactly
+[08:23] and then three down exactly,
+[08:25] and then you get the one up and down.
+[08:26] In this case, we're not going to take that as MX recumulation,
+[08:30] but as long as the breaks down are less than
+[08:33] the breaks up, which is basically in every other,
+[08:36] every other example possible, it's going to be valid
+[08:39] except the three up, three down.
+[08:41] And yeah, that's it.
+[08:43] So go test this in your back testing,
+[08:45] go test it everywhere, you're going to see,
+[08:47] you'll start taking a lot of wins in these ranges
+[08:50] when you're in that one breakdown
+[08:51] and you're expecting, you know,
+[08:53] with the bullish context and everything,
+[08:55] the next break to be up, you can start taking fractal,
+[08:57] look for fractal zones, start looking for trades,
+[09:00] and you're going to notice that this is actually
+[09:02] really powerful model.
+[09:03] So, and yeah, it already is coded
+[09:06] into the three M indicator,
+[09:07] so you guys are chilling on that.
+[09:08] So yeah, that's pretty much it
+[09:11] and I'll see you guys in the next video.

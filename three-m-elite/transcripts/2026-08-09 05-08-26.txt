@@ -1,0 +1,156 @@
+# 2026-08-09 05-08-26
+# duration 904s | language en
+
+[00:00] asking for this one. The new ATRTP method that I've been cooking up for the past couple
+[00:05] weeks here, I'm going to be explaining it in this video. So this is now the new way,
+[00:10] new method that I take profit. I'm no longer going to be trailing and I'm also not going
+[00:16] to be doing set or our profits because I also am not a huge fan of that and I'll
+[00:20] explain why in this video. But I'm going to explain what the ATRTP method is and
+[00:24] it's actually really funny. This method I'm literally live in this
+[00:30] shade, I just called this in the server literally 20 minutes ago or 30 minutes
+[00:35] ago and ATRTP method told us to take profit at 4R on the dot and that is
+[00:41] exactly where price just hit on the dot and it now looks like it's coming back
+[00:46] up and we fully exited 100% at 4R. It's just kind of funny how that just
+[00:51] worked out perfectly right now as I'm making this video but we're going to be
+[00:55] going over that what it is right now. Okay so up until this point the two methods
+[01:02] of taking profit that we have taught you guys in this server, well the main
+[01:06] method is trailing then also you guys are aware that you can obviously
+[01:11] take profit at set or our levels when you're in a trade. This is a
+[01:15] completely new method and it's going to be based on the ATR value at the
+[01:20] time of your entry. So I had to do a lot of testing and data collection here and I
+[01:29] had to do a lot of coding in these Excel sheets and all this stuff. I could
+[01:32] explain this for like two hours what the hell I did here. It's a lot of
+[01:35] bullshit but I did all this and I ended up determining that this ATR
+[01:41] method is just as good if not a little bit better than trailing. Definitely
+[01:47] way better than set or R and it's going to be way way easier than having a trail
+[01:53] because when you're in a trade that's running and you have to trail your
+[01:56] stop loss you have to constantly be monitoring that running trade right you
+[02:02] have to be constantly monitoring the structure breaks and keep moving your
+[02:04] stop loss so if you're trying to go to bed you kind of can't if you
+[02:09] want to actually trail properly. With this method it's literally just a
+[02:13] 100% TP at one target and we're going to go into how to determine what that
+[02:18] target is. So what the rule is is you're going to take the ATR at your time of
+[02:26] entry so let's take this UGA trade that I took this morning live. You take the
+[02:32] you go to your entry, sorry for the error there, go to the ATR at the
+[02:39] candle before you got entered so here we can see I can enter on this
+[02:42] little candle here we're just going to make sure we rewind it to the candle right
+[02:45] before you got entered and you look at the ATR and then you're going to take a
+[02:50] multiple of that ATR because what the ATR is is it's a distance on the chart
+[02:55] 0.022 that's talking about distance on the chart like if you take the measure
+[02:59] tool and you go 0.022 that's what that's talking about so you're going
+[03:03] to take a multiple of that value and that is where you're going to take
+[03:07] profit. So how do you know what multiple is the best? Well for my testing
+[03:12] so far I've tested this on around 200 trades so far and I've determined from
+[03:17] my own data from my own trades in my own journal that the best ATR value for me
+[03:23] the best multiple is 12 times the ATR so I would take the ATR right here 0.022
+[03:32] and you would just quickly when you're entering the trade 0.022 multiply it by
+[03:36] 12 and you get this number 0.264 you're simply going to take this tool
+[03:40] drag this and you're going to pay attention to this number right here so 0.264
+[03:45] you're gonna drag it to that which puts us at for this specific trade 5.18RR
+[03:51] okay so that is where the TP would be for this trade so as you can probably
+[03:58] tell the size of your stop loss does not affect where you're going to take
+[04:01] profit this profit taking strategy is based on distance that price is going
+[04:06] to run it doesn't it doesn't matter if you have a smaller stop loss it will be
+[04:10] better obviously you're gonna make more RR on that trade but this is going to be
+[04:13] about distance of holding the trade not so much RR the reason why I came up
+[04:19] with this this strategy is because with the set our targets it kind of didn't
+[04:24] make sense to me that set RR would be the best because if you're always
+[04:30] taking profit at 5RR for example every time if you end up getting kind of
+[04:33] a shittier entry and have a pretty big stop loss then that means that the
+[04:36] chance that you're gonna hit your target at 5RR is lower because your stop loss
+[04:40] is big so 5RR is going to be farther away and it kind of just seems stupid and
+[04:45] then whenever you have like a very small stop loss if you're able to snipe a
+[04:48] really good entry get a small stop loss and you're taking profit at set RR
+[04:52] then that means that you're gonna have to sell your trade super early so you're
+[04:55] kind of getting like punished not punished but like kind of for having a
+[04:58] small stop loss because that means you're gonna sell super early you're
+[05:00] still gonna make 5RR but it's like you're not gonna you're gonna sell
+[05:05] really early into the actual move so I wanted to think of a way to take profit
+[05:10] that is based on the distance that trades run on average not the RR but even just
+[05:18] taking the distance on average wasn't good enough in my head because
+[05:21] depending on what session you're trading depending on if there's a lot
+[05:26] of news in a certain week or whatever the market is going to be either more
+[05:29] volatile or less volatile if the market is more volatile that means the
+[05:34] handles are going to be bigger there's more money in each candle which means the
+[05:38] distance that a trade will run is going to be bigger on average the distance in
+[05:42] pips is always gonna be bigger when a market is more volatile so if you're
+[05:45] taking trades based on average distance if we enter a time period where the
+[05:49] market's more volatile that means you're gonna end up selling your
+[05:51] trades early because the distance will get hit very easily that makes sense
+[05:57] so the ATR is a value that's based on the volatility of the market so
+[06:02] that's why I thought this was a perfect value to take the multiple of when
+[06:06] you're entering this so if the market is more volatile the ATR is going to be
+[06:09] higher and you're going to be holding your trades for longer distances which
+[06:12] you should be if the markets more volatile if the candles are bigger
+[06:14] okay so I just yapped a lot there but that I just pretty much explained to
+[06:18] you why I came up with this then none of this is important all you need
+[06:23] to know is that I'm gonna be making a sheet for you guys where you can
+[06:27] you're gonna have to be recording the ATR value for all of your trades right
+[06:31] so I do here in this journal I have here ATR value you can be recording and then
+[06:36] you're gonna have a column where you can find out the average multiple of your
+[06:40] ATR that trades run so I took the average multiple of my ATR that trades
+[06:46] ran and I pretty much pasted this into another sheet blank sheet into this
+[06:51] column so that's gonna tell me what the best numbers are so technically it's
+[06:54] actually telling me that 28 times the ATR value is actually the most
+[06:58] profitable but this has only a 20% win rate and I would rather not try to have
+[07:03] a low win rate and try to hold trades super far what I noticed is that 12
+[07:07] down here is actually similar profit to the 28 but it's a much higher win
+[07:16] rate so it's similar gains way higher win rate almost 50% win rate with the
+[07:21] trades that I have recorded which is crazy good so 12 right now is the
+[07:28] number that I've determined so if you guys want to just blindly start doing 12
+[07:32] that should be fine because as long as you're journaling my system following my
+[07:36] rules your results should be pretty much the same but I do recommend you guys to
+[07:41] still get your own data but if you just need if you want to start doing
+[07:46] this right now 12 is the number as of right now that is if you're following
+[07:50] all my rules to a T then 12 should be the best so we can take a look at this
+[07:55] trade right here which literally just this is like literally a picture perfect
+[07:59] trade based on this rule I entered this trade so if I go to the candle before I
+[08:04] got entered so we did just take a loss previously which is fine but then we
+[08:08] got entered on that candle so we're gonna go to the one right behind it
+[08:10] which is this ATR is 2.28 so we're just gonna multiply that by 12 gives
+[08:16] you 27.36 so I dragged the tool down to 27 remember you're looking at this
+[08:23] number here 27.36 which is right pretty much right there pretty much on the dot
+[08:30] on 4r and then literally live as I was starting to make this video this thing
+[08:35] came and tapped it perfectly and yeah otherwise this would have just straight
+[08:40] up in a break even if I was trailing or if I was doing anything else yeah and
+[08:45] then this you did trade like I said the other day the ATR 12 times the
+[08:51] ATR put us at 5.1 rr so that ended up getting hit this trade ended up running
+[08:56] I actually like 10 rr so but if I was trailing it actually worked out I would
+[09:01] have still ended up trailing down here I think keeping the sub-walls under the
+[09:05] 50 we would have made around the same anyways I think ended up trailing
+[09:09] somewhere over here whatever but we can even look at like the the silver
+[09:14] trade I took the other day a couple days ago I took a silver trade down
+[09:18] here so this is more than so this I was still trailing here I made 2.5 rr from
+[09:24] trailing on this trade if I had just done the ATR strategy we can look at look so I
+[09:31] trailed this down at 2.5 rr if I had done the ATR strategy so go to the
+[09:38] channel before 0.018 times 12 is 0.216 so if I had dragged this up to 0.216 which is
+[09:49] right there that's 6 rr that would have actually been a pretty perfect trade as
+[09:55] well look you can see right there 6 rr got tapped we would have exited all
+[10:00] the way up here 100% of the trade 6 rr and we went of we made we would have
+[10:05] a lot more than trailing so this for the main this this strategy does make more
+[10:11] than trailing makes more than set our and it's way easier so this is like a huge
+[10:15] leap I would say in the profit taking strategy of my system everything else about
+[10:21] my system is the exact same literally just changing the way that we take
+[10:23] profits but the way that you take profits in a system is equally as
+[10:27] important as actually entering the trades because if you can enter trades as
+[10:31] perfect as you want but if your profit taking strategy is not optimal
+[10:35] then obviously you're not going to make as much money now the trailing is still
+[10:38] completely completely valid okay it's still really good but I just prefer this
+[10:45] method more the thing that makes the trailing system so good is the odd or
+[10:51] sorry every once in a while you get like a huge win like 10 or 20 or more rr
+[10:56] that's what makes the trailing so good but if you end up missing one of those
+[11:00] for whatever reason one of those some of those big wins then that does
+[11:02] eat into the profitability of the trading method trailing method so this
+[11:07] method is a lot more consistent smaller wins so the wins are gonna be usually
+[11:11] anywhere from three to seven rr so they're all around the same value so if you do
+[11:16] miscalculated or two here or there there's no chance that that's gonna be
+[11:19] the trade that would have like sent your account to infinity or whatever
+[11:23] like like like could happen on the trailing system so anyways yeah so pretty
+[11:30] much in summary it's literally just multiplying the atr at the time of your
+[11:34] entry at the candle before you got entered multiply the atr times 12 drag your
+[11:38] rr drag your tool to that level and then that's what rr you're gonna take
+[11:43] profit at I can't foresee 12 maybe I'm gonna keep getting more trades in this
+[11:49] journal there's a chance that the number could change from 12 if I add
+[11:53] another 200 trades into the journal maybe it'll change to something very
+[11:56] close to 12 but as of right now it's 12 and yep this is strategy and hope you guys
+[12:02] enjoy taking profit with this method

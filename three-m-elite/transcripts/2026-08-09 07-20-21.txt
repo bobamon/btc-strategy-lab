@@ -1,0 +1,208 @@
+# 2026-08-09 07-20-21
+# duration 622s | language en
+
+[00:00] over the type 1 and type 2 validation on the 15 minute time frame.
+[00:03] So you guys have heard me kind of foreshadow this in the previous videos about once we tap
+[00:08] a zone we need one extra little validation before we actually go down to the 1 minute
+[00:12] time frame to take entries.
+[00:14] So I'm going to show you guys what that is.
+[00:16] There's two types of validations that we can have.
+[00:18] So we're just going to go to a random example where we would be tapping a demand
+[00:22] zone.
+[00:24] So let's just go find something random.
+[00:25] Of course there's no good examples here.
+[00:28] Okay, let's just go right here.
+[00:30] Alright guys, so the number one, so the two types of validations, type 1 validation is
+[00:37] just going to be a 3M candle.
+[00:39] Okay, and type 2 is going to be an engulfing candle.
+[00:43] Candle in direction of bias.
+[00:50] Okay, so what I mean by that is obviously the first step is to have a zone to target.
+[00:56] Okay, so once you guys have the zone to target, which is what we've been going over for the
+[01:01] past few videos on how to do that, once you guys do have a zone to target, so in this case
+[01:05] right here, this is the current range you're in.
+[01:07] The deepest unmitigated candle in this current range is this candle.
+[01:11] This is a demand zone.
+[01:13] The deepest untapped demand zone from this range.
+[01:16] Actually in this specific case you could use this outside candle because this completely
+[01:20] engulfs the candles in front of it.
+[01:21] So you actually could extend the zone to this.
+[01:24] The actual zone here is kind of irrelevant.
+[01:26] The point of what I'm showing you is going to be the validation.
+[01:28] So we know that we have this zone to target.
+[01:32] Now after the zone gets tapped, so let's go to when the zone gets tapped.
+[01:36] Okay, we have either one of these validations.
+[01:41] So before we can go down to the one minute timeframe to start taking trades, we either
+[01:46] need to get a 3M candle from this in the zone on the 15 minute or an engulfing
+[01:52] candle in the direction of the bias.
+[01:54] So what I mean by that is if we're looking for longs, we need to get a bullish engulfing
+[01:58] candle in the zone.
+[01:59] If we had a supply zone and we're looking for shorts, we would need to get a bearish
+[02:02] engulfing candle or a red triple-m candle.
+[02:05] If we're looking for longs, we need a green triple-m candle or a bullish engulfing
+[02:10] candle.
+[02:11] So let's just say that this is the zone right here.
+[02:17] So we tap into the zone.
+[02:18] Now before we actually head down to the entry timeframe, we need to wait until
+[02:21] we get either a triple-m candle, a green one, or an engulfing candle, a bullish one.
+[02:27] So we actually get a triple-m candle right there.
+[02:29] So the second we get that, we can draw out our 15 minute low and we are now valid.
+[02:35] Okay?
+[02:36] Now at this point, that's when you can go down to the one minute timeframe and
+[02:39] then we will get into what to look for in the one minute in the following weeks.
+[02:43] But what you need to know is just the actual validation.
+[02:46] So it's either a triple-m candle or a bullish engulfing candle.
+[02:50] That is necessary to have before we go down to the one minute.
+[02:53] And another thing I wanted to explain in this video is, I don't know if I
+[02:57] explained it in the previous two videos, but the second that we get a candle, if you
+[03:03] have a zone like this, the second that we get a candle that body closes below the
+[03:07] zone like this right here, this entire zone is invalid.
+[03:11] Okay?
+[03:12] We can no longer take trades from this zone.
+[03:13] This is fully invalid and we need to find some sort of new zone to target.
+[03:17] Okay?
+[03:18] So in this case, once this zone invalidates, one thing we can do is wait for a fractal
+[03:22] break up and then look for a fractal zone.
+[03:25] Or we can always go to the one hour and look for a zone there if you don't have a
+[03:30] zone in the 15 minute.
+[03:31] But what I'm trying to say right now is, if you ever have a zone drawn out,
+[03:34] okay, a demand zone in this case and a candle body closes below it, that it
+[03:40] fully invalidates the zone, you cannot take trades anymore.
+[03:43] All right.
+[03:46] And another thing guys is, I don't know if I already said it, but this
+[03:49] validation, this type one or type two validation, it is only on the 15 minute.
+[03:54] Okay?
+[03:55] That is the only timeframe we get this validation on and it is necessary to go
+[03:58] down to the one minute.
+[03:59] However, we can get this 15 minute validation inside 15 minute zones or inside
+[04:05] one hour zones.
+[04:06] Okay?
+[04:07] So in this example right here, let's say this is going to be, okay, we do
+[04:11] get a triple in there.
+[04:12] So, and then there is going to be a more advanced invalidation rule.
+[04:17] So after we validate, I'll show you guys.
+[04:19] Next week or in the week after how it invalidates.
+[04:23] Well, you can either directly invalidate by if you get a, so in this case,
+[04:27] we tap into our demands and we get our type one validation, which is a triple
+[04:30] M candle.
+[04:31] If the next candle right after this just is a body closed down here, then
+[04:35] that's immediately invalidates it.
+[04:36] And then we just need a new triple M or a new engulfing candle.
+[04:39] Otherwise, when we start moving up from here, you guys are going to
+[04:44] learn about the swing rule, I think next week, which is a bit more
+[04:48] complicated.
+[04:49] That's why I'm just keeping it to just the validation right now.
+[04:51] And then we'll go into the advanced invalidation next week.
+[04:56] But yeah, so you can get your type one or type two validation in a 15 minute
+[05:00] zone, but you can also get it in a one hour zone.
+[05:02] So if I go to the one hour, if we go to a time where we would have
+[05:07] been in a one hour zone, let's say right here, right?
+[05:13] In this case, we have a one hour break up, meaning we could have
+[05:16] targeted a one hour demand zone.
+[05:19] Right?
+[05:20] Just like that.
+[05:21] So that would have been a one hour break up.
+[05:25] What I'm trying to say is the type one or type two validation is still,
+[05:29] even though it's a one hour zone, the type one or type two validation
+[05:32] that we use is still on the 15 minutes.
+[05:34] So we would look for a 15 minute triple M in the one hour zone.
+[05:39] Okay.
+[05:41] So in this case, we get two triple M's in a row.
+[05:43] It would just be, it would just update to this one.
+[05:46] And that would be our validation.
+[05:47] And then we can go down to the one minute timeframe.
+[05:49] Okay.
+[05:51] So another thing I want to explain
+[05:55] is the invalidation that I explained a few minutes ago, where if we
+[05:58] get a candle that body closes below the zone, that is also
+[06:02] relative to the timeframe you're using.
+[06:04] So in order for this zone to invalidate with a body close below,
+[06:08] since it is a one hour zone, if we get a 15 minute candle, that
+[06:12] body closes below the zone, that does not necessarily make the zone
+[06:16] invalid. The zone only becomes invalid once we get a one hour
+[06:20] candle that closes below the zone.
+[06:21] Okay. So here's a perfect example right here where we have this
+[06:26] big one hour break up, leaving behind this one hour zone as the
+[06:29] deepest candle, the deepest zone to target.
+[06:32] And so we come all the way down and tap into this zone.
+[06:35] Now you can see on the one minute timeframe, we're getting a nice
+[06:37] three M candle in this zone.
+[06:39] Whenever, by the way, also, this is just might be a useful piece
+[06:43] of information. Whenever a candle wicks below a zone and then closes
+[06:46] back in it, that's what we call absorbing, sorry, absorption.
+[06:49] The candle is absorbing that area.
+[06:50] Okay. So that's always going to be a bullish sign.
+[06:53] So there's nothing wrong with what's happening here on the one
+[06:55] hour. We're tapping the zone very nicely and it's giving us a triple M
+[06:57] in the zone. On the 15 minute though, we broke below the zone
+[07:02] with a body close. This does not invalidate the zone.
+[07:05] The zone is still fine because it's a one hour zone.
+[07:09] If this was a 15 minute zone and we brought body close below
+[07:11] it here on the 15 minute, then yeah, the zone is garbage.
+[07:15] But with a one hour zone, all you have to do is just make sure
+[07:17] that the one hour timeframe does not body close below the zone.
+[07:20] So in this case, we tap into our one hour zone and we would need
+[07:23] a 15 minute type one or type two validation in the zone.
+[07:26] So even though we did break below it on the one hour, we
+[07:30] still can look for our type one or type two validation.
+[07:32] So we just need a triple M candle or a engulfing candle.
+[07:35] So we actually get an engulfing candle right there.
+[07:37] So that would be our 15 minute validation.
+[07:42] Sorry, right here. That'd be our 15 minute low.
+[07:45] So let me explain to you guys real quick how the 15 minute engulfing
+[07:48] lows work. So if I go to any zone that we have, let me find an area
+[07:52] where we would have got a 15 minute engulfing and validation.
+[07:55] It would be right here. We get one.
+[07:59] No, sorry, not there.
+[08:03] OK, right here, for example, let's say we are looking for.
+[08:07] Let's say we have this break up and we have this demand zone drawn out
+[08:10] right here. This would be the deepest zone of this range.
+[08:13] And we would have this as a target.
+[08:16] So when price taps into here, like I said, we always we're looking
+[08:19] for the type one or type two validation.
+[08:21] So let's see what happens.
+[08:23] This is going to be example of an engulfing candle.
+[08:25] So we get this first candle that taps in is an auto triple M candle.
+[08:29] So we're still waiting for something.
+[08:30] And the next candle right here is an engulfing candle.
+[08:32] It's a bullish engulfing candle.
+[08:34] So if you're looking for longs and you tap a demand zone,
+[08:36] you need a bullish engulfing candle or a bullish triple M.
+[08:39] In this case, we get a bullish engulfing candle.
+[08:41] So we would put our 15 minute protected low at the bottom.
+[08:44] This is how it works when the engulfing candle forms.
+[08:47] As you guys already know, every time you get an engulfing candle,
+[08:50] it makes the candle behind it a zone.
+[08:52] So the area where we're going to put a 50 minute low is at the bottom
+[08:55] of the zone that gets created by the engulfing candle.
+[08:58] So this is an engulfing candle.
+[09:00] That is our type two validation.
+[09:01] So we would be good to go down to the one minute now.
+[09:04] But just to know where to put your 15 minute low,
+[09:06] you would put it at the bottom of this candle behind it.
+[09:09] You pretty much just put it at the bottom of the candle behind it
+[09:11] to make it simple.
+[09:12] That is a 50 minute low.
+[09:14] So then we know if we get a candle on the body closes below that,
+[09:16] then we are invalid.
+[09:17] We need to revalidate with a new triple M or new engulfing candle.
+[09:21] So that's how the engulfing candle validation works.
+[09:24] So we're just going to quickly go over a short, for example.
+[09:27] So right here, if we were looking for shorts, we would have this breakdown.
+[09:32] Right, this breakdown, which would leave behind this supply zone
+[09:35] as the highest supply zone to target.
+[09:37] Then we eventually come in here, tap it with a triple M candle
+[09:40] and a red triple M candle.
+[09:41] Remember when we're looking for shorts, we need a red triple M
+[09:43] or a bearish engulfing candle.
+[09:45] So we get a red triple M and then we actually come up
+[09:49] and we just come higher, even higher.
+[09:50] So in this case, we get more red triple M.
+[09:52] So we just update to the highest one and that would be our validation.
+[09:55] And that's when we can go down to the one minute
+[09:57] and start looking for our setups for shorts.
+[10:00] OK, so that is a quick video on how the 15 minute validation works.
+[10:04] The type one and type two validation that's very important.
+[10:07] It's essential in order for us to get down to the one minute
+[10:10] where we actually take our entries.
+[10:11] So if you guys have any more questions about that,
+[10:13] you can ask them in the Discord and I'll see you guys in the next video.

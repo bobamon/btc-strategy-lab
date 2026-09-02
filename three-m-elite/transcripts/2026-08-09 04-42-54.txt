@@ -1,0 +1,596 @@
+# 2026-08-09 04-42-54
+# duration 9377s | language en
+
+[00:01] Alright guys, so this video is going to be going over stages. Alright, so up until this point you guys probably have
+[00:07] No, no clue what stages means. Alright, but this is going to be in a very important concept for you guys to learn
+[00:13] especially on the one minute time frame, okay, so
+[00:17] The one minute time frame is going to be the only time frame that we actually pay attention to the stages or
+[00:22] Whatever your entry time frame is if you guys end up wanting to scale up time frames and take your entries in the five minute
+[00:27] Whatever just whatever the entry time frame is this is what we look at the stages on so I'm going to be going over
+[00:32] What stages are and how they cycle and all that stuff so?
+[00:38] All right, so they're going to be five stages that we are always going to be in at any given time
+[00:45] All right, so they're gonna be right here. All right. These are the five stages
+[00:50] Whenever you look at a chart at any point in time. We are always going to be in one of these stages, okay?
+[00:56] so we're gonna go through them one by one and
+[01:00] I'm essentially just gonna start and draw a diagram so you guys can really
+[01:04] Understand how these stages work. So first of all the first thing you guys need to know
+[01:10] last week I taught you guys about clusters, okay and
+[01:15] Clusters are extremely extremely important in determining the stages, okay
+[01:20] The reason why is because the way that we enter stage one is going to be from getting a cluster, okay, so
+[01:28] All right, so a cluster is what puts us into stage one
+[01:32] So you guys will notice when we are in
+[01:36] No, sorry, I also forgot to mention. I guess not at any given moment
+[01:40] We're gonna be in one of these stages sometimes we are in no stage
+[01:42] Okay, sometimes when prices like going back and forth, especially we will we're not in any stage
+[01:47] And then what we're waiting for is a cluster to start the stage one. So let's draw this out
+[01:52] Let's say that prices just going back and forth and as always we're looking at this on the one minute, okay, so
+[01:58] Let's say we're going through some back and forth here, okay, and then we have a break up now with this break up
+[02:05] Not only one from the previous videos you guys should know that we're now in accumulation
+[02:09] But two the first thing we're always gonna be looking for is a cluster to occur, okay?
+[02:14] So when we get this break up, we're always we're gonna have our cluster zone
+[02:18] So the cluster zone as you guys go over taught last week is the deepest zone of any given range that you're in
+[02:23] Okay, so let's say we have this one break up and we would draw out our cluster zone from that break up
+[02:30] Okay, so let's say we have this break up and we have an unmitigated zone. That's down here
+[02:34] Okay, so that zone needs to get tapped and then we need to break up to another high
+[02:39] There's a second high and this break up to this high right here. This right here is what creates a cluster, okay?
+[02:47] I mean we did go over this last week
+[02:49] So you guys should already know what clusters are but when we get a cluster
+[02:53] So this point this break right here is what creates the cluster and it's also what puts us into
+[02:59] Stage one. Okay, so when we get a cluster we are now in stage one
+[03:04] Okay, then let's imagine that we have another couple breaks up whatever no clusters anything. That's completely fun
+[03:11] As long as we have this one cluster within this big set of breaks
+[03:13] This makes this entire thing stage one. All right, then the next thing that we are going to inevitably enter is
+[03:20] Stage one re-accumulation. So when do we enter that? Well, simply we enter that
+[03:25] After we break down at least one time and enter into a re-accumulation model
+[03:29] Then we will enter into stage one re-accumulation. So let's imagine that we have a breakdown now
+[03:34] Or even two breaks down whatever right?
+[03:36] This break down right here is what puts us into stage one re-accumulation. Okay?
+[03:42] When we're in stage one re-accumulation. All right, the next thing that's gonna happen is if the re-accumulation plays out
+[03:49] So let's say we have a break up after this
+[03:52] These couple breaks down we have a break up
+[03:54] This break up is what completes the re-accumulation
+[03:58] Which is what we were talking about in the previous videos and when this re-accumulation gets completed and we break up
+[04:04] That is when we enter stage two. Okay?
+[04:07] All right, and then so on and so forth
+[04:09] Let's say we have a few breaks up in stage two then we break down. We're gonna be in stage two re-accumulation. Okay?
+[04:16] Then
+[04:17] All right, we're gonna explain late stage two a bit later in the video because it's gonna get you confusing right now
+[04:21] But for right now you guys should just understand a cluster puts us into stage one
+[04:29] entering a re-accumulation model
+[04:32] after
+[04:33] stage one puts us
+[04:36] in
+[04:37] stage one re-accumulation
+[04:40] All right, obviously and then
+[04:44] when
+[04:45] the re-accumulation model
+[04:48] plays out and we break up again
+[04:52] We enter stage two and then
+[04:56] Obviously when we re-accumulation after stage two
+[05:01] We enter stage two re-accumulation. So pretty simple so far. Okay?
+[05:07] Pretty simple so far
+[05:10] So as you can probably tell you guys need to become really good at finding at looking at clusters
+[05:14] Which I'm gonna go into depth in clusters in this video because there's some specific examples of clusters where you may not realize their clusters or whatever
+[05:23] But
+[05:24] You guys need to become pros at seeing clusters because that is completely essential in understanding when stage one begins. Okay, so
+[05:32] All right, so why is this important? Why is all this important?
+[05:35] Why do the stages matter because the stages are the criteria?
+[05:40] Well one of the criteria is on the one-minute timeframe for us to enter a trade
+[05:44] We always have to be in one of these four stages not this one
+[05:48] This one is it's important to understand when we're in late stage two, but we do not take entries in late stage two
+[05:54] But we're these four stages are we have to at least be in one of these in order to actually enter a trade
+[06:00] So you need to be able to determine at all times what stage we're in
+[06:04] Okay, so very very simply one of the criteria is that we have which we'll get more into next week the actual entries
+[06:11] But one of the criteria is that we have is we are allowed to buy buy stop the breaks of
+[06:19] Stage one clusters. So what that would mean is let's say we have some back and forth. Let's say we have one break up
+[06:27] Let's say we have the second break up here clusters right second break up cluster one of our entries that we actually do take a lot
+[06:33] Of the time in the one minute is pretty much setting an order at the high of
+[06:38] The cluster delivery so we know that once this one gets tapped if we break up to the next high
+[06:43] That is a cluster that is also the start of stage one and one of our entry criteria
+[06:47] Is it's going to be setting our order a buy stop order, which means we only get entered into the trade of price comes up to this point?
+[06:54] We pretty much enter the trade if this cluster if this cluster occurs
+[06:59] Okay, so that's why it's gonna be important to understand when we enter stage one of the clusters and
+[07:04] Then once we let's say you don't get an entry in stage one
+[07:08] You can wait for the re-accumulation so you can wait for a breakdown and then you can take fractal entries
+[07:14] So you can wait for fractal breaks fractal zones and take fractal entries like this
+[07:20] Okay, or you can wait for price to make it away
+[07:24] Up to the re-accumulation playing out which would be up here right and take your entries like this or
+[07:31] You can wait for stage two to happen and then buy stop the breaks in stage two
+[07:36] So every entry that we have is gonna have something to do with being in the stages, okay?
+[07:42] so we're gonna become pros at
+[07:45] Seeing the stages and then probably the most confusing part about all of this is going to be
+[07:50] understanding how we
+[07:52] Transfer from stage to re-accumulation into late stage two back into a new stage one so how it cycles
+[07:57] That's probably gonna be the most confusing part of this video
+[08:00] So I'm gonna try to explain it clearly
+[08:01] But that is also very important so that you're understanding when we are in a valid stage one or if it's not a valid stage one
+[08:08] And it's actually late stage two. Okay, so we're gonna get into that
+[08:11] You know, I guess we'll go over it right now because I was gonna go into the chart
+[08:15] But let's describe it right now draw the diagram and then we'll get into the chart after so the way that we cycle
+[08:23] From here, let's draw draw this out again. Let's say we're in a stage one
+[08:26] Let's say we have a cluster down here
+[08:28] And by the way the cluster can be at any point the cluster can be on the eighth breakup
+[08:32] If it needs to be it still counts as a stage one beginning
+[08:36] You guys will find out that we will never trade past the fourth break in a stage one
+[08:40] But stage one can still begin from any of the breaks
+[08:43] So let's say we have one two three four five six and then we get a cluster on the sixth break. Okay
+[08:50] Doesn't matter which break it's on we just need a cluster in this set of breaks in order for us to enter into stage one
+[08:56] Okay, so this is stage one this break right here, which is creates the cluster
+[09:00] That's what puts us into stage one. Then let's say we break down. Let's say you break down two times
+[09:05] Let's say you break down three times. Why not? Okay?
+[09:07] So we are currently in stage one re-accumulation, okay?
+[09:12] Pretty simple so far
+[09:14] We know that the next break up that we have is going to put us into stage two. Okay, so stage two and
+[09:20] Why do we separate the stages? What does stage two even mean?
+[09:23] Usually how price usually how things go is the parabolic price movement likes to happen
+[09:29] Once we enter stage two, so we're trying to get we usually try to get involved in stage ones
+[09:33] Pretty early. We try to buy the clusters with the intention that price is going to go up a lot of the time
+[09:38] We will get some sort of cluster
+[09:41] Okay, we got a cluster deliver and then we'll get some sort of re-accumulation and
+[09:46] Then usually one price likes to make that parabolic price move and I just explode and give you those big winners
+[09:51] That is usually
+[09:53] After we get a re-accumulation and we enter into stage two. Okay, so stage two
+[09:57] We usually we're usually trying to get into trades in stage one or in stage one re-accumulation
+[10:02] With the expectation that we enter into stage two and are able to catch that big runner
+[10:07] Okay, so let's say we're in stage one re-accumulation down here
+[10:11] This would be a great area for us to look for things like fractal entries, right?
+[10:16] To try to get into trades down here
+[10:19] Expecting the re-accumulation to play out and us for it to us for and us to enter stage two
+[10:23] Or sometimes you're not always going to get a re-accumulation entry and that's fine
+[10:28] Because you can wait for the break up to happen and us for it and us to enter stage two right?
+[10:32] So let's say we enter stage two with this break up right there
+[10:35] So this would be all stage one over here. This is stage one re-acc
+[10:41] Right during these breaks down and then we break up right there and that's when we enter stage two
+[10:47] Okay, so now we know that there's a good chance
+[10:49] This is when the parabolic price movement likes to happen
+[10:51] So when we're in stage two one of the things you guys are gonna learn as well is that we do not need clusters in stage
+[10:56] Two at all we could just buy stop any breaks in stage two
+[10:59] So this could make a pullback this far or whatever doesn't need to come hit a cluster zone or anything
+[11:03] Once we're in stage two we just wait for pullbacks and we just buy stop the breaks and try to ride it all the way up
+[11:10] But the purpose of this diagram is to show you guys how we cycle from a stage two back into a new stage one
+[11:17] So let's say we enter into stage two first of all if we only have one break up in stage two
+[11:20] And then we break down that resets everything like I said in the previous model videos
+[11:25] You guys should know that if we only if we have a recumulation play out and we only have one break up
+[11:30] And then we break down instantly right after that puts us into distribution
+[11:33] And when the model gets fucked up like that when we switch into a distribution model
+[11:37] Everything gets reset the whole stages get reset everything we're back to ground zero
+[11:41] And then what we would be doing is waiting for a new break up and a new cluster
+[11:46] To enter a new stage one okay
+[11:48] So first of all that's how that would work if we get one break up in stage two only one and then break down instantly
+[11:54] everything gets reset
+[11:56] But if we have more than one break up in stage two like let's say we have three breaks up for example and
+[12:02] Then we get a breakdown then we enter stage two recumulation. Okay
+[12:06] Stage two recumulation. We are also allowed to look for trades now
+[12:10] You guys are gonna find out probably next week the exact criteria to enter the trades in stage two recumulation because it is a lot more
+[12:16] Strict than stage one recumulation
+[12:18] It's a lot more strict because usually stage two recumulation
+[12:21] Is usually when we're higher up on the chart and you just want to be very cautious of entering trades once prices are delivered
+[12:27] So the criteria in stage two recumulation is going to be more strict than stage one
+[12:31] but
+[12:32] To figure out how we cycle into a new stage one. Okay, so let's say this was stage two and now this breakdown
+[12:39] We are now in stage two
+[12:43] React okay
+[12:46] How do we find out when to look for a new stage one when does stage two end when do we enter late stage two?
+[12:50] When does a new stage one start?
+[12:52] Okay, so I'm gonna have to write these things down to there's two rules pretty much and this is straight up another thing
+[12:58] You guys are just gonna have to memorize but once you guys start testing this enough times
+[13:02] It will just become memory, but if stage two
+[13:09] does not
+[13:10] contain clusters
+[13:15] then the first break up
+[13:19] after
+[13:21] The stage two react. Oh shit. Let me uh
+[13:26] Stage two react can be a new stage one
+[13:30] So I'm gonna reread that to you guys in a second if you didn't understand what that meant if stage two does not
+[13:37] contain clusters
+[13:40] then we need a
+[13:43] reset
+[13:45] before
+[13:46] looking for
+[13:48] A new stage one. All right
+[13:51] So first of all, okay if stage two does not contain clusters
+[13:55] So what does that mean does not contain clusters?
+[13:57] You have to look at the breaks up in stage two
+[14:00] Okay, if there are any clusters that occurred in stage two
+[14:03] Well, let's start if there's no clusters if there are no clusters at all on stage two which in this diagram
+[14:08] There are none right because with each breakup each breakup is gonna leave behind a cluster zone
+[14:14] Right and in this case we did not have any clusters. So if stage two does not contain any clusters
+[14:19] Then the next break up after stage two react
+[14:24] So this is stage two react because we're in another react model once we break up out of this react again
+[14:28] We can instantly look for a new stage one
+[14:30] Okay, so we would we get a break up and we can instantly look for a new cluster to enter a new stage one
+[14:36] Okay
+[14:36] So if we broke down if we broke up out of this stage two react and we tap the cluster zone
+[14:40] And then we delivered to the high then right here. This would be the start of a new stage one
+[14:45] But if stage two does not
+[14:50] Contain clusters. Oh, sorry if stage two does contain clusters. Sorry
+[14:57] Then we need a reset before looking for a new stage one. So what is a reset? I'll explain that right now
+[15:04] Okay, so there are two things that are considered a reset
+[15:08] So remember if stage two has a cluster in it. So let's draw this out to where stage two would have a cluster
+[15:14] So let's say in this case stage two clusters on this second break right here
+[15:18] Right. Let's say we cluster on that break
+[15:22] Then once we enter stage two react, we cannot just take the next cluster as a new stage one
+[15:27] We need to see a reset happen before we can look for a new stage one
+[15:31] So what is a reset? There are two things that could be a reset one the model turns bearish and then bullets again
+[15:37] so one form of a
+[15:39] reset would just be
+[15:41] Needing to wait for price to turn bearish the model to turn bearish and then bullish again
+[15:46] So for example, let's say we have these three breaks up in one breakdown
+[15:50] If we had another breakdown and then we have a break up and then a breakdown
+[15:53] We know that this breakdown right here is switching the model to distribution
+[15:58] So the fact that it switches to distribution means it's turning bearish. So then
+[16:02] That right there is what turns a model bearish and then we can wait for a new cluster
+[16:06] So we would wait the next let's say the next break up is a cluster like this
+[16:10] We enter accumulation again and we get a new cluster that would be a valid new stage one right there
+[16:16] Okay
+[16:18] So one is waiting for the model to turn bearish and then bullish again, then you can look for a new stage one a new cluster
+[16:24] The other form of reset is because sometimes
+[16:28] Especially when we're in a very bullish market sometimes the model is not always going to turn bearish on us
+[16:32] It's just gonna stay bullish all the time and in that case. We don't want to still miss out on price
+[16:37] Delivering so the other form of a reset that we can get is waiting
+[16:42] So let's say we have stage one stage two react right here
+[16:45] Let's say we have two breaks down in stage two react and then we need to wait for a new set of breaks to the upside
+[16:52] With no cluster and then get another react. Okay, so that also will count as a reset
+[16:57] So what I mean by that is in this set of breaks up right here. We had a cluster. This was stage two
+[17:02] it had a cluster
+[17:04] We need to wait for if the model doesn't turn bearish
+[17:08] We need to wait for a new set of breaks to the upside
+[17:10] So let's give it say we get two breaks to the upside right like this with no clusters and
+[17:16] Then we get a new react. So another breakdown. So this set of breaks right here has no clusters within it
+[17:23] Right. So and then once we actually break down and enter a new react
+[17:28] Then that counts as a reset. So then we are now good after this happening to wait for to look for a new cluster
+[17:34] So we would need to look for a new break up and a new cluster. Okay
+[17:38] So those are the two types of resets
+[17:41] that we need if
+[17:43] Stage two contains a cluster if stage two does not contain a cluster
+[17:48] I'll remind you again if stage two does not have a cluster then you can simply after getting stage two react
+[17:54] You can simply just wait for a new break up and a new cluster and that's instantly a new stage one. Okay
+[18:00] All right, so you guys are gonna have to remember all this stuff write it all down ask questions if you need to in the discord
+[18:06] Whatever, but this is very important to understand
+[18:09] All right, so now we're gonna go to the chart and
+[18:12] We are going to play through price and just watch how the stages cycle. Okay. Oh
+[18:19] And sorry, so late stage two is what I consider. I forgot to explain that
+[18:24] Late stage two is what I consider when we had a cluster in stage two and then we go into stage two react
+[18:30] And then we're waiting for that reset
+[18:32] So in that case where we have to stay out of price because we're waiting for that reset. That's when we're in late stage two. Okay
+[18:40] So if stage two had a cluster and then we react and then we're waiting for a reset to look for a new stage one
+[18:45] So we're waiting for one of these two things to happen
+[18:47] That is one I consider us in late stage two and we never take entries in late stage two ever, okay
+[18:53] Because we're waiting for that reset so
+[18:56] Let's start looking at price from
+[18:59] Let's start from down here
+[19:02] And we're just gonna go through price for a bit and just go through a bunch of stages
+[19:09] Cycling from stage one to stage two to late stage two and whatever and finding new stage one
+[19:14] So we'll do this for a bit. So you guys see a bunch of examples. All right, so starting from
+[19:18] Let's just start from this area right here because I can fully tell right away
+[19:21] What model are in in this area? Why because we had a three accumulation happen right here one two three drinks down
+[19:27] And then we had one break up and then we have one break down instantly
+[19:29] So I know that we are in distribution right now
+[19:32] Okay, so we're in no stage at all for sure
+[19:35] We're in no stage because I just watched back and forth happen
+[19:37] You it's impossible to be in a stage when your when prices going up down up down, okay?
+[19:41] So what we're looking for here is for price
+[19:47] To give us a cluster which would be the start of a stage one
+[19:50] Okay, so with every break up that you see
+[19:54] We're looking for a cluster, okay
+[20:01] Okay, so we break up one time two times here. I don't see any clusters yet
+[20:06] And I will go actually more in depth
+[20:08] Towards the end of this video on specific clusters. Okay
+[20:13] Because that's gonna be important
+[20:15] But right now we can see that we have one break up to break up three break up four break up
+[20:19] No clusters anywhere. Why because every single one of these breaks is leaving behind an unmitigated zone at the bottom
+[20:25] And these zones need to get tapped in order for us to have a cluster, right?
+[20:28] So none of these zones are getting tapped so when we're looking for clusters
+[20:31] We're looking for these deepest zones to get tapped, right?
+[20:35] So we get another break up this zone will be the cluster zone none of these zones are getting tapped
+[20:39] We get another break up or what one two three four five breaks up now
+[20:44] No cluster yet. So we're still in no stage right now
+[20:47] Okay, now we finally have this fifth break up and what's the deepest zone from this break?
+[20:52] It's this candle right here. Okay, so we know that if this zone gets tapped and then we break up a sixth time
+[20:57] That's going to be a cluster and that is going to be the start of a stage one
+[21:01] So let's see the zone gets tapped and we break up a set six time
+[21:04] So now we are in stage one. Okay, this break right here
+[21:08] This break is what put us into stage one because this created a cluster
+[21:14] So
+[21:16] Now we know that we can continue breaking up a hundred more times whatever we're still gonna be in stage one
+[21:21] We're not gonna enter stage one recumulation until we get a breakdown obviously
+[21:24] So let's see we break up again again again. We're like eight breaks up whatever. We're still in stage one nine breaks up
+[21:31] Okay, finally we break down. Okay, so when we break down right here, we are now in stage one re-accumulation
+[21:36] Okay, so
+[21:38] We can break down another up to another two times here. We can break down once twice three times
+[21:43] We're still gonna be in a recumulation at that point
+[21:50] Let's see what we actually get though so okay, so we end up breaking up
+[21:54] So we delivered the recumulation and what does that put us in that what stage is that put us in that puts us into stage two
+[22:01] Okay
+[22:02] So stage two we break up once we break up twice
+[22:05] Okay, and we break up three times. Okay
+[22:11] What do we also notice from this break up right here this break this break into this break? What is this?
+[22:18] This is a cluster. Okay, so why is this important because this is going to fully
+[22:24] Determine how we see the stages cycle and how we go into a new stage one after this whole setup is done
+[22:31] We have to be attention like I said earlier to if stage two contains any clusters
+[22:35] So this is stage two. We know that we have one break up two breaks up
+[22:39] From this second break up the cluster zone of this second break would be and as always a cluster zone
+[22:45] Is just the deepest zone within a current range?
+[22:48] So the current range is here the deepest zone would be this candle right here. Okay, so
+[22:52] This candle ends up getting tapped and then we break up again. So this is a cluster
+[22:58] Okay, so now we're in stage two and we're we notice that stage two has a cluster
+[23:03] So what do we need to wait for? Well, let's wait until stage two is done
+[23:07] So stage two is one two three four five breaks up
+[23:12] Okay, and then we break down twice. So now we are in stage two recumulation. Okay, I
+[23:18] so
+[23:19] Since stage two had a cluster we cannot just take the next cluster that happens and view that as a new stage one
+[23:26] Remember the rules, right? We need to wait for a reset now because stage two had a cluster
+[23:30] So we're either waiting for the model to turn bearish and then bullish again
+[23:36] Or we need to wait for a set of breaks that contain no cluster and then another react
+[23:43] So let's see if we get either of those happen. So we deliver to the next high now. Okay
+[23:47] We deliver to the next high. So we deliver
+[23:50] Into what we call late stage two late stage two is when the re the stage two react plays out and we deliver and
+[23:58] Then we're waiting for a reset. So we deliver and now we're waiting for a reset
+[24:01] So this is what we would consider late stage two and we do not take any trades in this area until we get a reset
+[24:07] And a new stage one. Okay, so let's see what we get we get a breakdown right there. What is that?
+[24:13] What model are we in now? We are now in distribution
+[24:16] Okay, because we had this react remember the rules guys if we have a react
+[24:22] That breaks up only one time and then we break down instantly
+[24:26] That switches the whole model bearish and that puts us in a distribution and what does that also do that resets the stages
+[24:32] So that gave us our reset
+[24:34] So now if we're looking for a new stage one to take in more trades
+[24:37] All we need to do is wait for the next breakup to happen and get a cluster and then we can take trades
+[24:42] So let's see what we get so we get one break down and two breaks down
+[24:47] Okay, this is all okay, and then we get three breaks down
+[24:51] So we have one break up one two three breaks down and one break up again
+[24:57] All right, so this is
+[24:59] A redistribution model okay, and another thing I want to point out is
+[25:03] Stages and models are completely separate things. Okay, we can enter a stage one
+[25:10] While still being an a bearish model, okay?
+[25:12] So let's let's pretend if this break up right here gave us a cluster. So this is the breakup. This is the cluster zone
+[25:21] We have one break up
+[25:23] one two
+[25:24] Three breaks down
+[25:26] So we know that even if we break up two times here, we're still in redistribution
+[25:30] We're in a bearish model
+[25:32] But we still have to pay attention to where the clusters happen because we can start being in a stage one
+[25:37] While the model is still not valid
+[25:39] So if we were to come down and tap this cluster zone and then break up to the next high right here
+[25:44] That would be a cluster and that would be the start of a stage one
+[25:47] But we would never take an entry off of this because the model is still bearish, okay
+[25:53] But the stages in the models they operate come they operate separately, okay?
+[25:57] We can be in a not valid model, but be in a valid stage
+[26:00] Okay, so we're just we always wait until both of them are valid to take a trade
+[26:04] But do not think that we that if we get a cluster while the model is bearish that it's not a stage one
+[26:09] It fully is a stage one
+[26:10] So let's just see what we get here
+[26:13] Because we tap that zone actually and are we gonna break up or down?
+[26:17] Okay, so actually perfect example and did exactly that it came and tapped our cluster zone and gave us a cluster
+[26:30] But this is never something that we would take a trade from because the model is still bearish, right?
+[26:36] We have one break up and three breaks down and then one break up and then two up
+[26:41] so we're still in a redistribution model here and
+[26:44] Remember the advanced models as well, okay?
+[26:46] If we get a third break up here
+[26:48] This is going to turn the model bullish because of the advanced model, but we're not bullish until that third break
+[26:55] So if we came and tapped the cluster zone from this second break
+[26:58] We came and tapped this then by then buying the third break would be something
+[27:03] That's valid because in stage one we can only ever buy stop clusters
+[27:07] So if this second break clustered
+[27:10] Then we can actually buy that the breakout of the third break because that third break is turning the model bullish
+[27:16] And at the same time it's creating a cluster, okay?
+[27:19] So, but yeah, we are in stage one right now, but the model is still at this moment bearish
+[27:24] So now we get that third break up, okay?
+[27:26] We get that third break up with that little pullback and break
+[27:28] So now the model is bullish and we are still in stage one and let's see what we get next
+[27:34] We get a fourth break up, okay?
+[27:35] And actually this is another cluster happening. So if everything else was valid to take a trade
+[27:41] This would actually be something that's valid
+[27:45] This would be something that's valid by stopping so I'm gonna go more deep into clusters in a minute here
+[27:50] I'm just going over a lot of examples of clusters what is considered cluster was not
+[27:56] But this right here is a cluster
+[27:59] Okay, and we're gonna go into that I'll go into that after this but for now
+[28:02] Let's just focus on the stages so we know we're in stage one
+[28:05] We have four breaks up now or five and now we have two breaks down
+[28:09] All right, so we're in stage one re-accumulation now. What are we waiting for? We have three breaks down
+[28:13] We're still in stage one re-accumulation. We are expecting that price delivers to the next high which completes the re-accumulation
+[28:20] Which puts us in stage two
+[28:22] Let's see if that actually happens though
+[28:24] Okay, so we do enter stage two there
+[28:28] Okay, and all right. Here's a good example stage two so far does not have any clusters
+[28:33] Okay, we have two breaks up in stage two right now right one two
+[28:39] This is the cluster zone from the first break was right there that does not get tapped
+[28:43] Cluster zone from the second break is right here and
+[28:46] Another thing guys is you cannot use outside candles for cluster zones. You cannot do it
+[28:52] Okay, so right here is an outside candle
+[28:55] Anytime that you're drawing out a cluster zone you have to use the inside the smallest inside candle
+[29:00] Okay, outside candles are allowed for 15 minute and one hour zones to target
+[29:05] But when we're looking for clusters it has to be the smallest inside candle that you can find
+[29:11] Okay, so that's the cluster zone for the second break that ends up getting tapped and then we break down
+[29:16] So no clusters happened
+[29:18] So this is the perfect case of
+[29:21] the
+[29:23] Other option which is when stage two does not have any clusters so in the in stage two had two breaks up here with no clusters at all
+[29:31] So that means that we can literally just look for the new stage one on the next break up
+[29:36] If we get a new break up now with a cluster that's good enough for a new stage one
+[29:40] All right, so that is simply how the stages cycle through each other
+[29:44] Yeah, so in this case we break down again, so break down two times, so we're still in stage two recombination here
+[29:52] So we're still just waiting for a break up in a new cluster to enter a new stage one
+[29:56] So we actually enter new stage one right there. Okay, so remember this was stage two over here
+[30:02] This was stage two this was stage two react with these two breaks down
+[30:07] Stage two had no clusters. Remember this was stage one about all the way back here
+[30:12] With this cluster down here that started it this was stage one react
+[30:17] Right this was stage two this is stage two react stage two had no clusters
+[30:21] So what are we looking for now on this new break up? We're looking for a new cluster to enter a new stage one
+[30:26] Okay, so we have this big break up. What's the cluster zone from that break? It's down here
+[30:30] That does not get tapped. We break up a second time. What's the cluster zone from this break?
+[30:35] Well at the time of the break it is this zone
+[30:40] Right so that zone gets tapped and then we break up again a third break up
+[30:45] So this break right here is what puts us into a new stage one
+[30:50] All right, because this is a new cluster new stage one
+[30:54] And then we actually cluster yet again, so you can have multiple clusters in stage one
+[30:58] That's completely fine, but just know that the first one is what actually puts us into stage one
+[31:03] Then we actually get another cluster right there
+[31:05] And we'll go next week we're gonna be going more in deep into the actual entry criteria
+[31:10] Regarding the stages, but for now it's just about understanding how the stages cycle and how they're made and how all that stuff
+[31:17] So we have four breaks at one two three four actually five breaks up in stage one
+[31:22] So this is a new stage one
+[31:24] Then we break down here. So now we're in a new stage one react and then we break up
+[31:34] So we deliver that react pretty quickly. We break up right there
+[31:37] So that puts us into stage two
+[31:41] Now let's see we have one break up in stage two
+[31:43] Two breaks up in stage two and we have a cluster in stage two right there
+[31:49] Right. So at the time of this break up in stage two the cluster zone from this break up is actually
+[31:57] Right here the deepest unmitigated candle from this break up right there is actually this candle
+[32:02] So that candle gets tapped pretty much right away. We make a pullback and we break up again
+[32:06] So that is a cluster in stage two
+[32:08] and
+[32:09] Then we break down. So now we're in a new stage two react
+[32:14] All right, and once again
+[32:17] Stage two had a cluster. So when we deliver this react, we're waiting for a reset
+[32:22] If this react even delivers, we'll see if it does or not. So we break down. Oh, no
+[32:27] Yeah, we break down a second time
+[32:30] And then we actually break down a third time. Okay, so that is a reset because the model has switched to bearish
+[32:36] No matter what now we can look for a new stage one on the next breaks up because the model has just turned bearish
+[32:42] We had two breaks up in stage two one two and then we had one two
+[32:46] Three breaks down in stage two react. So we know that two breaks up and three down is an instant model switch
+[32:53] That makes everything bearish
+[32:54] So now we would take we would not take any trades and we would just wait for the model to turn bullish again
+[32:59] And give us a new cluster for a new stage one
+[33:03] All right, so that is how that stuff works now
+[33:05] We're gonna quickly just go through some clusters some examples of some confusing clusters and all that
+[33:10] Because it is extremely important to understand how clusters work
+[33:13] Because that is obviously the main way that you are
+[33:16] Determining how we enter stage one and all that stuff. So
+[33:20] So for the most part most breaks up
+[33:23] It's pretty easy to tell the cluster zone like you just simply find the deepest unmitigated candle from a breakup
+[33:29] So like this for example this breakup
+[33:32] You know you've just found the deepest candle which is all the way down here. Okay, then we can play this forward
+[33:36] It's usually pretty easy, but sometimes it's not easy to tell if something's a cluster or not. Okay, like even this breakup, right?
+[33:44] What's the deepest candle it's very clearly this candle right here, right? That's unmit it
+[33:49] That's the deepest unmitigated candle of that range. So that would be the cluster zone
+[33:53] Even with this breakup. It's this candle right here
+[33:56] right so and
+[33:58] Then we actually break down there. So
+[34:00] No cluster and keep in mind guys
+[34:02] You can only ever get clusters from breaks up do not draw out fractal zones
+[34:07] Do not draw out fractal zones as cluster zones do not do any of that stuff when we're in a break down
+[34:11] Do not be drawing out any zones for
+[34:14] Clusters you can only have a cluster and this is for bullish clusters ever
+[34:18] Obviously like I said before everything for shorts is the opposite
+[34:21] So if you're looking for clusters taking shorts, you're obviously waiting for breaks down and then finding the supply zones, but
+[34:27] When you're looking for longs you need a break up to have a cluster
+[34:32] You cannot have a cluster from a breakdown or from a fractal zone. So this breakup right here
+[34:37] We know that this candle down here is the zone from that break. So that would be our cluster zone now
+[34:42] With some breaks. It's not quite that obvious
+[34:46] What the cluster zones are but before we go into that one more thing is guys the cluster zone does not sometimes
+[34:53] It's not at the bottom. Sometimes it's like midway up or pretty high up. Okay, so in this case when we break up right here
+[35:00] We break up right there
+[35:01] This would be our cluster zone why because these zones are all mitigated
+[35:04] So this is our deepest unmitigated candle from this current range
+[35:08] And you can see that the zone actually fails here, right? So we're gonna price breaks below the zone like that
+[35:13] Now that is completely fine
+[35:16] For clusters, okay, if we break up here, this is still going to be a cluster
+[35:19] All that needs to happen is that the zone gets tapped. Okay, the zone doesn't need to hold
+[35:25] The only thing that needs to hold is of course the range because obviously if the range doesn't hold them
+[35:29] We're gonna break down
+[35:30] But as long as we stay in the range and the zone gets tapped
+[35:33] It doesn't need to hold we can body close below the zone in this case
+[35:36] This is still going to be considered a cluster when we break up right there. Okay, so that's very something very important to understand
+[35:44] Okay, and finally one last example I wanted to go over guys is
+[35:49] There is not always going to be and there's actually
+[35:54] Yeah, so there is not always going to be an
+[36:00] Unmitigated zone at the bottom of range for you to target
+[36:02] So as we know from the from the supply and demand week when we have a breakup
+[36:07] We're usually looking for the deepest unmitigated zone from that break, right?
+[36:10] But sometimes all the zones are mitigated. So when we have that breakup
+[36:14] Sometimes there actually are no zones to target. All right and when that happens
+[36:19] So let's say we have a breakup
+[36:21] Let's say we have another breakup right here and from the second breakup
+[36:24] We actually cannot find any unmitigated candles within this breakup
+[36:28] So there are no zones no unmitigated zones from this break or in this current range and every candle is fully mitigated
+[36:35] So in this case, there are no cluster zones for us to draw right because a cluster zone is always just the deepest
+[36:42] unmitigated zone so if there are no cluster zones to draw at all
+[36:47] then
+[36:49] You simply just need a pullback and the next break makes it a cluster
+[36:52] Okay, because all that is required for a cluster to be a cluster is that everything gets mitigated in the range and then we break up
+[36:59] So as long as everything is mitigated at the time of the breakup if everything is mitigated and there are no zones
+[37:05] Then in that case, we don't even need to draw to cluster zone
+[37:09] And we just need to wait for a pullback and then get and then the next break makes it a cluster
+[37:13] So an example of that is right here. Let's say in this case, for example
+[37:17] We actually get this breakup
+[37:19] So we have this first breakup and then from this first breakup you would have a cluster zone, which is down here
+[37:26] All right
+[37:26] So obviously that this is not going to get tapped but we make a pullback and then we're gonna break up again
+[37:31] So at this at the time of this breakup right here
+[37:34] right
+[37:36] You can actually notice that we have zero unmitigated candles that we can target every candle here is mitigated at the time of this break
+[37:43] Okay, this black candle is not it is not an unmitigated zone because it's not even a zone
+[37:48] This candle is a wick this candle would need to be an engulfing candle for this to be a zone
+[37:52] So there are zero candles here that are unmitigated at the time of this break
+[37:57] Meaning there's no cluster zones that we can draw from this break
+[38:00] Which means all we need to do is wait for a pullback to happen and then the next breakup makes this whole thing a cluster
+[38:07] so
+[38:08] Let's see we continue up here
+[38:10] And then we're just waiting for a pullback which we get right there. So the break of this high
+[38:15] Right there would make this whole thing a cluster even though there's no cluster zones that we can draw that
+[38:21] Makes this break a cluster. So if we break up which we do right there
+[38:28] This breakup is what creates this whole
+[38:31] Break a cluster. Okay, so this would also be the start of a stage one
+[38:36] And I'm gonna throw in one last thing here, too
+[38:39] There's one final way that we can enter stage one and that is when we get a double break
+[38:45] And we come back to the first zone and then deliver
+[38:49] That is also the start of a stage one
+[38:51] But this is probably gonna confuse you guys for now
+[38:54] So just stick to the normal stuff, but this is important to understand
+[38:57] Sometimes we do get some fire trades from setups like this when you get a double
+[39:01] Double break price comes back to the zone of the first break and then you deliver up here
+[39:07] This break right here is what we also consider this the start of a stage one because we consider this
+[39:13] Model of when you get a double break in the first zone getting tapped
+[39:15] This is also like a more complicated version of a cluster happening
+[39:20] So this is also something that starts a stage one, but we can get into that later on
+[39:26] All right now we're gonna go through two little last examples this one this very last example is probably gonna confuse you
+[39:31] That's how I'm gonna go over it
+[39:33] So let's look down here and see if we see any clusters. Let's start from down here
+[39:36] Let's start from right here. So we have this big break up, okay?
+[39:40] And what would be the deepest unmitigated candle from this big range here?
+[39:44] Well, it would be these are all mitigated mitigated. It would be this candle. Okay, so that's our cluster zone
+[39:51] Does that get tapped? No, it doesn't we just break up again. So no cluster there with this break up
+[39:57] Okay, you always have to start from the candle that actually broke it up
+[40:00] So with this break up, what is the cluster zone? What is the deepest unmitigated candle? It's this one
+[40:05] So does this get tapped it does so since it gets tapped all we need is now a pullback and then another break up for this
+[40:12] To be a cluster so we get that pullback right there and then this break up here is going to create a cluster
+[40:18] Okay
+[40:19] So we get the cluster right there and keep in mind
+[40:22] It can only be a cluster if we get an actual break up these wicks above it
+[40:25] Do not make it a cluster. We have to actually get a body close and a new break up for it to be a cluster
+[40:30] Now we have this new break up. So from this break up for this third break up
+[40:35] What is the deepest candle within this range right here? Well, it's obviously this one
+[40:39] So this is the cluster zone from this third break up
+[40:42] So now if we get if the zone gets tapped which it does right there
+[40:45] Then we need a pullback right because you need a pullback in order to have the next break up
+[40:50] So we're now waiting for a pullback which we get right there and we break up again
+[40:54] So sometimes this stuff is these candles happen very
+[40:57] Um, the stuff is all pretty squished in so it's important to really look at it closely
+[41:02] But we had this third break up right there
+[41:05] We have this cluster zone it gets tapped and then we get the pullback and then we break up a fourth time
+[41:10] This candle body closes above that line. So that's a fourth break now and from this fourth break
+[41:17] What do we actually notice? Okay
+[41:19] When we get this fourth break
+[41:21] What is the current range I'll run the current range is literally this to this it's very small
+[41:26] And there are actually zero zones in this
+[41:28] Range right because this candle can't be a zone because this candle is not engulfing. So in this case there are zero
+[41:35] Unmitigated zones we could draw so there are zero cluster zones that we could draw
+[41:39] Which means all we need is a pullback to happen
+[41:43] And then another break up and this will be a cluster. Okay
+[41:47] So let's see if we actually get that so that's not none of this is a pullback, right? These are all wicks
+[41:51] We're waiting for an actual pullback
+[41:54] Okay, so let's keep playing it forward. Okay, still haven't got a pullback. So this is why I showed you this example
+[41:59] This entire thing right now
+[42:03] Is still all that one break up
+[42:04] We're still this is not a cluster here because we're still waiting for that pullback
+[42:09] So eventually we do get the pullback right there and then break up
+[42:12] So this little break down here
+[42:15] Is still the same all the way up here?
+[42:18] Right this entire thing was all one break
+[42:20] And then we get this pullback and because everything was mitigated at the time of the break
+[42:25] That makes this break up here makes it a cluster. Okay, if that makes sense
+[42:30] You guys can ask more about that on the discord if that confuses you but
+[42:34] Yeah, so that's everything about stages and clusters and all that stuff
+[42:39] Like I said, we're going to be going over this more in depth. Well, that that was pretty damn in depth
+[42:43] But we're going to be going over this more with you guys in the lives and in the discord
+[42:47] So feel free to ask questions and make sure you've done all the quizzes. So yeah, I'll see you guys in the next one

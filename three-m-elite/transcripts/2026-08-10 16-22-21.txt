@@ -1,0 +1,167 @@
+# 2026-08-10 16-22-21
+# duration 704s | language en
+
+[00:09] Alright so today I'm going to be giving you guys a trading view guide.
+[00:12] Basically I'm just going to go through absolutely everything I know about trading view, how to
+[00:17] set it up, to make your chart look clean, all the little shortcuts that you can do
+[00:21] to make things easier for yourself and all that stuff.
+[00:25] So let's get into it.
+[00:27] Okay so to start things off, first of all if you just download a trading view most
+[00:30] likely your chart is not going to look like mine.
+[00:32] Well not most likely.
+[00:33] It will not look like mine in terms of the colors and the indicators and all
+[00:37] that stuff.
+[00:38] So to start off you can just right click on anywhere on the screen, you can go to settings,
+[00:43] you can go to change the colors of your candles, you can change these.
+[00:48] So if you want the up candles to be minor gray you make all of these gray and then the down
+[00:52] candles for me they're black so you make all of these black.
+[00:54] You have to change all three of them because if you only change one of them then just
+[00:59] the body will be one color and not the wicks so you want them to all be the same
+[01:03] color.
+[01:05] So you guys don't have to do the same colors as my chart.
+[01:07] I know some people like dark charts so in that case you can pick lighter colors for your
+[01:12] candles then to change the color of the background you're going to want to go to canvas and then
+[01:17] you can change the color of your background.
+[01:19] So I would put it on solid not gradients and then change the color like that.
+[01:25] And also if there are grid lines on your chart just go to grid lines here and click
+[01:29] none and that will get rid of the grid lines.
+[01:32] So other than the colors I'll show you guys all the indicators that I use.
+[01:36] I just use three different indicators.
+[01:38] The first one is called mentafex structure which is right here so you're just going to
+[01:42] add that to your charts and it will come on with these thick blue lines.
+[01:47] So to make it look like mine just change the line width to one because two is too thick
+[01:51] in my opinion and then change the color to anything you like.
+[01:54] I use gray you can use black, gray, white whatever you want and so that's that
+[01:58] for the structure indicator.
+[02:00] Then for the triple M indicator you're just going to want to go for this other
+[02:04] indicator with the wicks.
+[02:06] You're just going to want to do mentafex triple M and add that to your chart you don't need
+[02:10] to change any settings at all.
+[02:13] And then third I just use three different SMA indicators so simple moving average indicators.
+[02:19] So you're just going to want to type in SMA into your indicators here.
+[02:23] Moving average simple you're just going to want to click it three times add three
+[02:26] of them to your chart.
+[02:29] Then change the length of all three of them.
+[02:31] Add one to twenty, one to fifty and then one to two hundred.
+[02:35] And then obviously you're going to want to change the color of it as well.
+[02:39] For me I just have the twenty as a light gray, the fifty as a darker gray and then the
+[02:44] two hundred as red.
+[02:45] But once again you can make these whatever colors you want just make sure you can see
+[02:49] the difference in them.
+[02:52] And then in terms of adding things to your side here if you guys are completely new
+[02:56] to TradingView just so you know you can make multiple different lists of pairs or
+[03:01] coins or currencies that you want to watch.
+[03:04] For me I have one crypto watch list.
+[03:07] You can add all the things you want just by clicking the plus here adding things to it
+[03:11] just so you guys know if you guys are going to make a watch list I recommend having all
+[03:15] coins on your watch list be under the same broker.
+[03:17] So for example if I type in Bitcoin just CT you're going to see there's Binance,
+[03:23] Bybit, Kucoin, Mexi there's a whole bunch of different stuff.
+[03:27] Just know that when you add every coin to your charts keep it consistent either
+[03:31] add only Binance charts or only Bybit charts.
+[03:34] I recommend Binance or Bybit those are the top two.
+[03:37] I use Bybit personally but you can pick Binance if you want but just keep them all the same.
+[03:44] Once you have a bunch of things under watch list you have this ability here to mark
+[03:49] certain things maybe that like personally I mark everything green that is in very good
+[03:54] context and could set up that day.
+[03:57] Just click the thing here click the color that you want green whatever and then I mark
+[04:02] things blue that are in good context but may not set up in the very near future.
+[04:07] I just want to keep an eye on them but they're not fully ready yet.
+[04:11] You can mark things any color you want you can mark them red if you don't want to
+[04:14] look at them or whatever.
+[04:16] But yeah you can do that and then also if you guys didn't know you guys can
+[04:20] just right click on the screen here and add alerts so you can add alerts at any
+[04:25] point on the chart if I want to add an alert if price taps you know this high I
+[04:29] can right click press add alert you can change all the same speed alert whether
+[04:34] you want it to only trigger once whatever and create it and then you will get
+[04:38] alerted whenever price crosses those lines that's a pretty important feature
+[04:40] that you should be using.
+[04:44] Okay so those are pretty much the very very basics I will now get into doing
+[04:48] drawings on your chart so basically most of the main drawings that I do use
+[04:53] you can find them all on the side here but to make your life very simple you can
+[04:56] click them and press favorite and then it will go on to this bar here so you don't
+[05:00] have to click on the side every single time and click these so the main ones that
+[05:04] I use obviously are the cursor the rectangle rectangle is pretty probably
+[05:09] the most used one so you just click this and you can draw rectangles on the
+[05:13] chart so obviously we use these for supply zones demand zones all that
+[05:17] stuff then also on top of that the main ones I use are trend lines so
+[05:22] these are lines that you can draw I mainly use these to denote structure
+[05:27] breaks like this or fractal structure breaks you know things like this and
+[05:33] then obviously with these you can change the colors of them I don't know why
+[05:36] it's red usually it's black and then also if you for your rectangles and
+[05:41] lines and everything you can double click them you can write you can write
+[05:45] words in them and then if you if the words are going to be something that
+[05:49] you use a lot for example one hour B1 is something I use a lot you can just type
+[05:55] one hour B1 here you can press save as save it as a template so that you don't
+[05:59] have to type it out every time you just click this and click one hour B1 and
+[06:02] it will say it there same with the lines I can just click this click save
+[06:06] as and change it to whatever I want yeah so the other ones that I use are
+[06:12] long positions right so obviously that's pretty self-explanatory those are
+[06:18] long positions and then I have short positions right and then we have the path
+[06:22] so I usually use this one if I'm giving an outlook right I'll just say what I
+[06:26] think it's gonna do which way I think it's gonna go and then obviously we have
+[06:30] the text box so I use this mostly for when I'm back testing if I have a trade
+[06:34] over here and I want to just make a note on the chart of how far the
+[06:38] trade went I'll just write you know like plus six or whatever it was or
+[06:42] break even or whatever other than that I just have the brush so I can draw
+[06:46] stuff on the charts that's pretty much all you guys need you can find all those
+[06:49] on the in the bars here so other than the drawings we're not gonna I'll show you a
+[06:55] bunch of key binds which will make everything a lot quicker and easier for
+[06:59] you so probably the most important key binds are going to be first of all you
+[07:06] have the magnets so if you hold control let's say I'm drawing a zone of
+[07:09] the main zone if I hold control the cursor is going to magnetize to
+[07:15] wherever my cursor goes like in terms of the candle so it will magnetize to the
+[07:19] top or the bottom of the candle so you can know that your zones are exactly at
+[07:23] the top or bottom of my candle right so like this right it's going to magnetize
+[07:29] this and then you can draw it out so hold control for that another important
+[07:34] one is holding shift will straighten out lines so basically let's say I want to
+[07:40] draw a line at the top of this high right here and then extended out
+[07:44] horizontally this way but obviously I want the line to be exactly at the top of
+[07:48] this candle and I want the line and I want it to be exactly horizontally
+[07:52] straight right so you just click the thing hold control it will magnetize to
+[07:55] the top of this candle and then you hold shift and it will automatically
+[08:00] straighten it out for you if you hold shift so basically that makes
+[08:04] everything a lot cleaner and easier to use just like that so control and shift
+[08:09] very important for that regard now other than that we have let's say you have a
+[08:16] bunch of drawings on your chart like this bunch of zones whatever you can have
+[08:20] whole bunch of stuff if you want to delete it all at the same time you can
+[08:24] hold control and then drag your cursor over this and then press control X to
+[08:29] delete and if you want to undo something you can press control Z so
+[08:34] that'll bring it back if you want to delete something on its own you just
+[08:37] click it press control X control Z on does it if you want to copy
+[08:42] something control C control V that's pretty that's pretty normal
+[08:49] another useful thing is if you hold shift and just click your mouse it
+[08:53] will be an automatic measure tool so you can measure the percentage change
+[08:57] let's say if I wanted to measure the percentage change of this dump here
+[08:59] just hold shift and then bring this down and it will say right there
+[09:04] it says minus 2.2% right another one this one you probably won't need to use
+[09:10] but if you want to invert the chart upside down you can hold alt and click I
+[09:14] and that will turn it upside down I mean you can also do that for just right
+[09:19] clicking the side here and pressing invert scale one last thing is if
+[09:24] you're getting into backtesting and journaling where you're going through
+[09:28] replaying the chart and taking trades and recording them and putting them on
+[09:31] the chart sometimes the chart can get pretty messy if you go through it and
+[09:37] then also sometimes it makes your computer a bit laggy if you have all
+[09:39] these charts on the on the screen so you can hold control highlight all of
+[09:44] them and usually I don't like to delete these because sometimes I like to go
+[09:48] back and analyze them but if you don't want them to clutter up your chart
+[09:51] just highlight all of them click the side here this little objectry and
+[09:56] data window and then you're going to click this create a group of drawings
+[10:01] so click that it's going to put them on to a group and then you can hide the
+[10:05] group or unhide it so that's a pretty useful tool if you doing a lot of
+[10:09] testing and you don't want to keep all the trades on your chart but you also
+[10:12] don't want to delete them this just allows you to hide them I think that's
+[10:17] pretty much everything that I can think of right now
+[10:19] oh actually one more thing is if you're on like a high time frame like
+[10:23] this and you go to a low time frame the charts gonna look like this so
+[10:26] instead of needing to do this dragging dragging dragging basically you can do
+[10:30] this so you're on the daily switch to the five minute you just double click the
+[10:34] side here and that like auto zooms it in or auto like sizes it to your screen so
+[10:40] I think that's pretty much everything that I can think of to make your training
+[10:44] view clean and to allow you to use it very easily all the shortcuts key
+[10:48] binds indicators that's all that stuff so yeah there you go guys oh yeah one
+[10:54] last thing I will link this this page to somewhere because this actually does
+[10:59] go over all the key binds just there's some more of that I didn't mention that
+[11:04] are not really too useful but you can go check it out for yourself or check this
+[11:06] if you forget anything and I'll link this somewhere with the video as well so
+[11:10] yeah I'll see you in the next one
