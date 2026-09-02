@@ -515,9 +515,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T10:37:49Z"
     },
     "notes": "THE FIX WORKS: OPPORTUNITIES 15 -> 40, nearly tripled, over the same 4.7 years. 13 long, 27 short. DO NOT READ THE PROFIT FACTOR -- exits are forced after one bar, so P&L is an artefact of the instrument, exactly as in v12. The wick-counting diagnosis was correct: zones were being killed by candles that dipped a wick into them without ever closing inside, which the source never treats as mitigation. Judging mitigation on the BODY is now the settled rule. 40 in 4.7 years is still thin for a strategy that then applies bias, direction and colour filters -- v9/v10/v11 cut 15 down to 3, so a similar ratio would leave roughly 8 -- so the next cycle should restore the filters ONE at a time onto this corrected lifecycle and measure what each costs, rather than switching them all on at once."
+  },
+  {
+    "id": "3m-elite-v14-unfiltered-edge",
+    "name": "3M ELITE v14 unfiltered zone edge",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "v13's repaired lifecycle (engulf-created base zones, deepest-zone rule, body mitigation) with NO bias, direction or candle-colour filter, but with REAL fixed exits instead of the counter's one-bar close. Asks whether the zone population has any edge before restoring filters. Both legs reported separately.",
+    "metrics": {
+      "netProfitPct": -7.50994616,
+      "profitFactor": 0.29015333,
+      "maxDrawdownPct": 9.09965597,
+      "totalTrades": 24,
+      "winRatePct": 4.16666667,
+      "avgTradePct": -0.31291442
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GVG1714EXVTST5X2SBR6H2",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GVG1713A1BXSDAF6551N29",
+      "verifiedAt": "2026-09-02T10:44:05Z"
+    },
+    "notes": "THE EXIT IS BROKEN, AND THAT INVALIDATES THE QUESTION THIS RUN ASKED. Win rate 4.17% -- one winner against twenty-three losers -- with avgWin 306.97 against avgLoss 45.99, a payoff ratio of 6.67. The distribution is the tell: avgBarsWinning is 96, which is EXACTLY maxBars, while avgBarsLosing is 18.5. So the single winner exited at the TIME CAP, not at the target, and NO TRADE IN 4.7 YEARS EVER REACHED THE TAKE PROFIT. tpATR = 12 x ATR14 on 15m is an unreachable target that has been carried unexamined since v1, so the system has been structurally stop-or-timeout the whole time and the reward leg has never paid. THEREFORE DO NOT CONCLUDE THE ZONES ARE UNPREDICTIVE -- that question is still open and this run could not answer it. Long 5 (0 wins), short 19 (1 win); the short skew is itself worth noting once the exit is fixed. v15 must replace the ATR target with a fixed multiple of R, 2R as in the other labs, and re-ask the question."
   }
 ];
-const BUILT = "2026-09-02 04:38";
+const BUILT = "2026-09-02 04:44";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

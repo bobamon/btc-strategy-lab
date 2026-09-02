@@ -296,6 +296,7 @@ so the code genuinely behaves differently. **But the count stayed at 3.**
 | v11 | zone is the base, not the whole candle | 3 |
 | v12 | DIAGNOSTIC: entry stripped to "zone live and price inside it", 1-bar exits, to COUNT opportunities | **15 opportunities in 4.7 years** (6 long, 9 short). Ignore the P&L -- it is an instrument · [report](https://mcp-api.trader.dev/backtest/01M1GTWJTF7K07205ZD8P4EM5Y) |
 | v13 | Mitigation judged on the BODY (a 4H close inside the zone) instead of a wick, counter form | **Opportunities 15 -> 40** (13 long, 27 short). The fix works · [report](https://mcp-api.trader.dev/backtest/01M1GV4JAZ169SE54YC2AZAVVT) |
+| v14 | Repaired lifecycle, NO filters, REAL fixed exits -- does the zone population have an edge? | **PF 0.29, win rate 4.17%, 24 trades** (5 long 0W, 19 short 1W). The TAKE PROFIT IS UNREACHABLE -- no trade ever hit it · [report](https://mcp-api.trader.dev/backtest/01M1GVG1713A1BXSDAF6551N29) |
 
 **When three independent corrections land on the same trade count, the binding constraint is upstream
 of all of them.** I have now spent three cycles fixing things that were genuinely wrong and none of
@@ -352,6 +353,36 @@ still too few. Turning them on one at a time is the only way to learn which one 
 order should be cheapest-information-first: 4H structure, then 12H zone direction, then 2D bias, then
 the candle-colour condition.
 
+## v14 — THE TAKE PROFIT HAS BEEN UNREACHABLE SINCE v1
+The run asked whether the repaired zone population is profitable before any filter. **It could not
+answer, because the exit is broken — and the trade distribution says so unambiguously.**
+
+| | Value | What it means |
+|---|---|---|
+| Win rate | 4.17% (1W / 23L) | Almost nothing resolves in profit |
+| avgWin / avgLoss | 306.97 / 45.99 = 6.67 | The single win was enormous |
+| avgBarsWinning | **96** | Exactly `maxBars` — it exited at the TIME CAP |
+| avgBarsLosing | 18.5 | Losers hit the stop quickly |
+
+**The one winner never reached the target either — it timed out.** So in 4.7 years, across every
+build, **no trade has ever hit the take profit.** `tpATR = 12 x ATR14` on 15m is an unreachable
+distance, and it has been carried unexamined since v1. The system has been structurally
+stop-or-timeout the entire time, with the reward leg never paying.
+
+**Do NOT read this as "the zones are unpredictive."** That question remains open and this run could
+not address it. What has been established is that the *exit* has been silently broken beneath every
+result this lab has produced, including v3's PF 0.64 reference base.
+
+**This is the same error class as the zone-geometry bug: a parameter carried from v1 that was never
+examined because attention was always on the layer above it.** The lab has now found three of these —
+the inverted zone model, the wick-based mitigation, and now the unreachable target.
+
+**v15: replace the ATR target with a fixed multiple of R (2R, as both other labs use) and re-ask the
+v14 question.** Only then do filters go back on, one at a time.
+
+Note also the leg split: 5 long against 19 short. Once the exit is fixed, that skew needs explaining —
+the zone logic is meant to be symmetric.
+
 ## Open queue
 0. ~~Get definitions for Type 1/Type 2~~ — **DONE 2026-09-02, see VOCABULARY.md.**
    Type 1 = a 3M candle; Type 2 = an engulfing candle in the direction of bias; both only on the
@@ -365,7 +396,10 @@ the candle-colour condition.
 0-V11. ~~FIX THE ZONE GEOMETRY~~ — **DONE. Real change, still 3 trades. Not the binding constraint.**
 0-V12. ~~DIAGNOSTIC RUN~~ — **DONE. 15 opportunities in 4.7 years. The zone lifecycle is the constraint.**
 0-V13. ~~MITIGATION ON THE BODY~~ — **DONE. Opportunities 15 -> 40. Settled rule.**
-0-V14-NEXT. **RESTORE FILTERS ONE AT A TIME ON THE CORRECTED LIFECYCLE (top priority).** Measure the
+0-V14. ~~UNFILTERED EDGE TEST~~ — **RUN, BUT INCONCLUSIVE: the take profit is unreachable. See the v14 lesson.**
+0-V15-NEXT. **FIX THE TAKE PROFIT FIRST (top priority, blocks the edge question).** Replace
+    `tpATR = 12 x ATR14` with a fixed 2R target, then re-run the unfiltered edge test. No filter goes
+    back on until the exit can actually pay. Superseded text: Measure the
     cost of each gate separately -- 4H structure, then 12H zone direction, then 2D bias, then candle
     colour -- instead of switching them all on together. Superseded text: Change dzTouch /
     szTouch to increment on a CLOSE inside the zone rather than a low/high touching it. Then re-run
