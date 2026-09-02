@@ -980,3 +980,54 @@ the higher-conviction half. It is also the only remaining construction in this l
 a working short.
 
 **Champion unchanged — v6, PF 1.68623784, DD 3.10289714%, 32 trades.**
+
+
+---
+
+## ██ 950-4 — THE FADE BEATS THE CONTINUATION AND STILL LOSES. THE RULE IS FULLY WORKED.
+
+| | Shorts (weak up-breaks) | Longs (weak down-breaks) | Combined |
+|---|---|---|---|
+| Trades | 250 | 283 | 533 |
+| Win rate | **15.20%** | **41.34%** | 29.08% |
+| Net | −$3,142.77 | −$1,741.49 | −$4,884.25 |
+| Profit factor | — | — | **0.73240142** |
+| Max drawdown | — | — | 51.12% |
+
+**REVERTED.** But the comparison with 950-3 is the finding: **fading a weak break (0.732) is
+meaningfully better than following a strong one (0.605).** The velocity label does carry directional
+information — it just does not carry enough to clear 1.0 in either direction.
+
+### THE 950 RULE, FULLY WORKED. FINAL SCORE: 2 OF 4.
+| Claim | Type | Verdict |
+|---|---|---|
+| Reaching x950 means the whole number is taken | **descriptive** | **TRUE — 95.0%** |
+| Break velocity is a real, balanced distinction | **descriptive** | **TRUE — 48/52** |
+| Strong breaks continue to the next whole number | **prescriptive** | **FALSE — PF 0.605** |
+| Weak breaks fade back below | **prescriptive** | **FALSE — PF 0.732** |
+
+**Both descriptive claims are true. Both prescriptive claims are false.**
+
+### AND THAT IS EXACTLY WHAT HAPPENED WITH THE ORACLE MATERIAL
+The Oracle queue finished **1 of 5**, and the single item that helped was the one that *explained why
+entries fail* rather than telling you when to enter. The 950 Rule now finishes **2 of 4** with the
+same split down the same seam.
+
+**Two independent traders, two bodies of material, one pattern: what they SEE is accurate and what
+they PRESCRIBE is not.** That is a strong enough regularity to be a standing rule for this project —
+mine trading material for its observations, treat its instructions as untested hypotheses, and expect
+the observations to survive and the instructions to fail. It has now been measured 9 times across two
+sources.
+
+### THE LONG/SHORT ASYMMETRY, FOR THE FIFTH TIME
+| Test | Long win rate | Short win rate |
+|---|---|---|
+| 950-3 strong continuation | 42.01% | 19.40% |
+| 950-4 weak fade | 41.34% | 15.20% |
+
+Same rule, same velocity definition, opposite direction, and a 22–26 point gap in hit rate both
+times. **This is now five unrelated mechanisms showing it** (BTC, War Formation v6, 3M Elite, and
+both halves of the 950 rule). It is a property of BTCUSDT over these windows, not of any strategy.
+
+**Twelfth short construction in this project. Best remains E13 at 0.74897196, which 950-4 does not
+beat. Champion unchanged — v6, PF 1.68623784, DD 3.10289714%, 32 trades.**

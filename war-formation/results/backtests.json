@@ -1137,5 +1137,34 @@
    "verifiedAt": "2026-09-02T12:05:59Z"
   },
   "notes": "STRONG BREAKS DO NOT CONTINUE. PF 0.60548046 on 606 trades. Longs 338 (142W, 42.01% win, -$3,996.05); shorts 268 (52W, 19.40% win, -$2,879.84). Both legs lose and neither is close. The velocity label DISCRIMINATES -- 950-2 measured a 48/52 split -- but on the continuation half it does not PREDICT. Note the asymmetry: upward strong breaks win 42.0% against 19.4% for downward, so the long side of this rule is far healthier than the short even though both lose, which matches every other result in these labs. This kills the continuation claim only; the weak-break fade is a separate claim and is untested. REVERTED."
+ },
+ {
+  "id": "war-formation-950-4-weak-fade",
+  "name": "WF 950-4 weak-break fade",
+  "symbol": "BTCUSDT",
+  "timeframe": "1m",
+  "direction": "both",
+  "status": "rejected",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2025-12-16",
+  "backtestEnd": "2026-05-03",
+  "specPath": "war-formation/ORACLE-RULES.md",
+  "description": "The last untested claim in the user's 950 Rule, and the half the infographic emphasises most. A WEAK break of a whole number is faded back toward the previous one: shorts on weak upward breaks, longs on weak downward breaks, so the legs split by direction and each is judged alone. Same geography as 950-3, opposite prescription.",
+  "metrics": {
+   "netProfitPct": -48.84252318,
+   "profitFactor": 0.73240142,
+   "maxDrawdownPct": 51.11904475,
+   "totalTrades": 533,
+   "winRatePct": 29.08067542,
+   "avgTradePct": -0.091637
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1H0BVAR8J43GREHKGZXCYKB",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1H0BVAR9KRYK7XNYHNRT9FX",
+   "verifiedAt": "2026-09-02T12:09:10Z"
+  },
+  "notes": "THE FADE BEATS THE CONTINUATION AND STILL LOSES. PF 0.73240142 on 533 trades against 950-3's 0.60548046 on 606. Shorts 250 (38W, 15.20% win, -$3,142.77); longs 283 (117W, 41.34% win, -$1,741.49). So the velocity label does carry SOME directional information -- fading a weak break is meaningfully better than following a strong one -- but neither prescription clears 1.0. THE LONG/SHORT ASYMMETRY REPEATS EXACTLY: 41.34% versus 15.20% here, 42.01% versus 19.40% in 950-3. Twelfth short construction in this project; best remains E13 at 0.74897196, which this does not beat. REVERTED."
  }
 ]

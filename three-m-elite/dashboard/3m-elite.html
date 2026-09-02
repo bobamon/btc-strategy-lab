@@ -834,9 +834,38 @@ const DATA = [
       "verifiedAt": "2026-09-02T12:03:08Z"
     },
     "notes": "THE EXIT AXIS IS NOW FULLY CLOSED. PF 0.89445064 to 0.88039828, DD 42.50% to 45.88%. Payoff rose 1.548 to 1.738 (+12.3%) and win rate fell 36.61% to 33.62% (-3.0pp) -- almost exactly the iso-profit-factor trade the BTC lab found at 2R vs 3R, with a small net loss. Break-even moved 39.2% to 36.5% while actual fell to 33.62%, so the gap widened 2.6 to 2.9 points. BOTH FORWARD PREDICTIONS CONFIRMED: the axis would not help, and trade count would fall (833 to 803) because a further target lengthens holds and held positions block entries. Third instance across three mechanisms of the risk-reward axis being neutral-to-negative. REVERTED; v24 stands."
+  },
+  {
+    "id": "3m-elite-v28a-firsthalf",
+    "name": "3M ELITE v28a first half (walk-forward)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-05-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "First half of the walk-forward split of v24. The Pine is byte-identical to v24 -- only the window changes. Run to test whether PF 0.894 is a stable property of the mechanism or an average of two different regimes, as the BTC base turned out to be. The second half runs next cycle, since this lab allows one backtest per cycle.",
+    "metrics": {
+      "netProfitPct": -17.07108367,
+      "profitFactor": 0.92199683,
+      "maxDrawdownPct": 27.59355923,
+      "totalTrades": 410,
+      "winRatePct": 36.58536585,
+      "avgTradePct": -0.04163679
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1H0CFPW3Z36BFVZY7T0ZZG6",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1H0CFPW1HKNYQT9HYDEDAD4",
+      "verifiedAt": "2026-09-02T12:09:31Z"
+    },
+    "notes": "PRELIMINARY AND ENCOURAGING, PENDING THE SECOND HALF. H1 PF 0.92199683 on 410 trades against the full sample's 0.89445064 on 833, and the win rates are nearly identical -- 36.59% versus 36.61%. Drawdown is much lower on the half (27.59% vs 42.50%), which is expected when a shorter window has less room to compound a bad run. If the halves prove close, v24's 0.894 is a real property of the mechanism rather than an average of two regimes, which is the opposite of what the BTC base did (1.3552 early, 0.6566 late). DO NOT CONCLUDE YET: H1 alone cannot settle this, and the implied H2 near 0.87 is arithmetic, not a measurement. v28b next cycle."
   }
 ];
-const BUILT = "2026-09-02 06:04";
+const BUILT = "2026-09-02 06:10";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

@@ -456,3 +456,35 @@ and hoping.**
 **Corollary, from 3M v25-v27:** the same logic applies to time stops once an interior optimum is
 found in both directions. When up and down are both worse, the parameter is done — record it and
 move to a different kind of question.
+
+
+---
+
+## ██ HARD LESSON 14 — TRADERS SEE ACCURATELY AND PRESCRIBE BADLY. MINE THE OBSERVATIONS.
+
+**Earned:** two independent sources, nine measured items, 2026-09-02.
+
+| Source | Items tested | Descriptive claims | Prescriptive claims |
+|---|---|---|---|
+| The Oracle (video material) | 5 | 1 of 1 helped — the diagnostic item | 0 of 4 helped |
+| The 950 Rule (user-supplied) | 4 | **2 of 2 TRUE** | **0 of 2 TRUE** |
+
+**The 950 Rule split perfectly along that seam.** Its descriptive claims measured out: reaching x950
+does mean the whole number gets taken (95.0%), and break velocity is a real, balanced distinction
+(48/52 on 4,864 events). Its prescriptive claims both failed: strong breaks do not continue
+(PF 0.605) and weak breaks do not fade profitably (PF 0.732).
+
+**Why this happens.** A trader's observations are compressed experience of what a chart actually
+does, and they survive mechanisation because they are statements about the market. Their rules are
+compressed experience of *how that person trades* — including discretion, position sizing, sizing
+down, waiting, and skipping setups that "look wrong" — and none of that survives mechanisation,
+because the parts that were doing the work were never written down.
+
+**How to apply:** when new trading material arrives, **split it into what it SEES and what it TELLS
+YOU TO DO before spending a credit.** Measure the observations first — they are cheap counters and
+they usually hold. Treat every instruction as an untested hypothesis with a poor prior. Do not
+abandon a source when its rules fail; the observation that survives is often the useful part, as the
+Oracle's cycle-position diagnostic was.
+
+**Corollary:** a source whose observations FAIL is a different matter, and should be dropped quickly.
+Neither of these two has failed that test.

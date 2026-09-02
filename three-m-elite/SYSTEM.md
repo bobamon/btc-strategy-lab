@@ -310,6 +310,7 @@ so the code genuinely behaves differently. **But the count stayed at 3.**
 | v25 | Time stop 96 -> 192 bars (first exit test) | **REVERTED.** PF 0.8945->0.8578, DD 42.50%->53.38%, trades 833->797. The cap was cutting LOSERS, not winners · [report](https://mcp-api.trader.dev/backtest/01M1GZGBXAJB8SVFHF3Y41XVGN) |
 | v26 | Time stop 96 -> 48 bars | **REVERTED.** PF 0.8945->0.8204, DD 42.50%->58.85%, trades 833->915. Win rate rose to 40.33% but payoff fell to 1.214 · [report](https://mcp-api.trader.dev/backtest/01M1GZPAKD9H3HC2R8BA4BNPX8) |
 | v27 | Target 2R -> 2.5R | **REVERTED.** PF 0.8945->0.8804, DD 42.50%->45.88%, trades 833->803. Payoff +12.3%, win rate -3.0pp -- the iso-PF trade again · [report](https://mcp-api.trader.dev/backtest/01M1H00SH71Q3T0K3EBPF04E9S) |
+| v28a | Walk-forward, FIRST half 2022-01 to 2024-05 | **PF 0.9220, DD 27.59%, 410 trades**, win 36.59% -- against the full sample's 0.8945 and 36.61%. Halves look consistent; H2 pending · [report](https://mcp-api.trader.dev/backtest/01M1H0CFPW1HKNYQT9HYDEDAD4) |
 
 **When three independent corrections land on the same trade count, the binding constraint is upstream
 of all of them.** I have now spent three cycles fixing things that were genuinely wrong and none of
@@ -564,7 +565,16 @@ never been in the thing being tested — they have been in the assumptions under
     Both directions on the time axis are worse, so 96 is an interior optimum and THE AXIS IS CLOSED.
 0-V27. ~~THE TARGET: 2R -> 2.5R~~ — **REVERTED. PF 0.8945 -> 0.8804, DD 42.50% -> 45.88%.**
     THE EXIT AXIS IS FULLY CLOSED: time stop up, time stop down and target further are all worse.
-0-V28-NEXT. **WALK-FORWARD SPLIT OF v24 (top priority).** PF 0.894 has never been split across time,
+0-V28a. ~~WALK-FORWARD, FIRST HALF~~ — **DONE. PF 0.92199683 on 410 trades, win rate 36.59%.**
+    Encouraging but NOT a conclusion: one half cannot settle stability.
+0-V28b-NEXT. **WALK-FORWARD, SECOND HALF 2024-05-01 to 2026-09-01 (top priority).** Same byte-identical
+    v24 source, only the window changes. This is the run that decides whether 0.894 is a real property
+    or a blend. Do not draw the conclusion from H1 plus arithmetic -- HARD LESSON 11 says measure the
+    term, do not estimate it, and an implied H2 is an estimate.
+0-V29. **THEN the entry, and only then.** If the halves agree, the 2.6-point win-rate deficit is
+    stable and worth attacking with entry selectivity chosen from trade-count evidence. If they
+    diverge, the v24-v27 exit conclusions need re-scoping the way BTC's gate verdicts did.
+    Superseded text: WALK-FORWARD SPLIT OF v24. PF 0.894 has never been split across time,
     and the BTC base looked like 1.02 until it decomposed into 1.36 early and 0.66 late. Two runs on
     the same source, halves of 2022-01-01 -> 2026-09-01, nothing else changed. If the halves agree,
     0.894 is a real number about the mechanism. If they diverge, this lab has been optimising an
@@ -1017,3 +1027,39 @@ v24: **PF 0.894, 833 trades, long-only, 42.5% drawdown, 2.6 points of win rate s
 Entries have absorbed nine cycles and exits are now exhausted in every direction. **The next credit
 should not buy another parameter — it should ask whether 0.894 is a real number at all**, because
 the BTC base looked like 1.02 right up until it split into 1.36 and 0.66.
+
+
+---
+
+## ██ v28a — THE FIRST HALF. ENCOURAGING, AND NOT YET A CONCLUSION.
+
+| | Full sample (v24) | **First half (v28a)** |
+|---|---|---|
+| Profit factor | 0.89445064 | **0.92199683** |
+| Win rate | 36.61% | **36.59%** |
+| Payoff ratio | 1.548 | 1.598 |
+| Trades | 833 | 410 |
+| Max drawdown | 42.50% | 27.59% |
+
+**The win rates match to two decimal places — 36.61% against 36.59%.** That is the number that
+matters most, because win rate is the term the whole system is short on, and it is the term most
+likely to move if the mechanism only worked in one regime.
+
+**The lower drawdown on the half is expected, not a finding:** a shorter window has less room to
+compound a bad run, so half-sample drawdowns are structurally smaller and should not be compared
+across window lengths.
+
+### WHAT THIS WOULD MEAN IF IT HOLDS
+The BTC base decomposed into **1.3552 early and 0.6566 late** — an average of a good period and a bad
+one, which invalidated three gate verdicts earned on the blend. **If v24's halves come in close, this
+system is the opposite case: a stable, genuinely measured 0.894**, and the remaining 2.6 points of
+win rate is a real deficit worth attacking rather than an artifact of averaging.
+
+### WHY I AM NOT CONCLUDING IT YET
+H1 at 0.922 against a full sample of 0.894 *implies* H2 near 0.87. **That is arithmetic, not a
+measurement**, and HARD LESSON 11 exists precisely because I once reasoned about a number instead of
+running it. The implied value also ignores that profit factor does not decompose linearly across
+sub-periods when position size compounds. **v28b runs the second half next cycle and the conclusion
+waits for it.**
+
+**Best config unchanged: v24, long-only, PF 0.894 on 833 trades.**
