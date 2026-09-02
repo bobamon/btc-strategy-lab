@@ -30,6 +30,13 @@ LABS = {
         "subtitle": "Backtested BTCUSDT strategies. Every row is generated from a recorded "
                     "backtest &mdash; nothing here is estimated.",
     },
+    "3m": {
+        "data": ROOT / "three-m-elite" / "results" / "backtests.json",
+        "out": ROOT / "three-m-elite" / "dashboard" / "3m-elite.html",
+        "title": "3M Elite",
+        "subtitle": "The SPENNYFX 3M cascade scaled to a 3-minute entry and tested on BTCUSDT. "
+                    "Every row is a recorded backtest &mdash; nothing here is estimated.",
+    },
     "war": {
         "data": ROOT / "war-formation" / "results" / "backtests.json",
         "out": ROOT / "war-formation" / "dashboard" / "war-formation.html",
