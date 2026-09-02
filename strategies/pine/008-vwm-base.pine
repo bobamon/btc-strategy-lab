@@ -1,0 +1,82 @@
+//@version=6
+// 008 — CURRENT BASE (per CHAMPION-BOARD.md): 007's VWAP-pullback long leg + Attack 1's EMA200
+// trend filter (KEPT by the ratchet in an earlier cycle: PF 0.89->0.91, max DD 35.0%->28.8%).
+// No Pine source had been committed for this base (HARD LESSON 8) — this file fills that gap so
+// cycle 009 can literally take THIS file and change one thing, instead of re-describing it in prose.
+// VWAP + rolling-stdev bands stand in for 2-sigma bands (this engine's ta.vwap has no native band
+// output). LONG = accepted-value pullback: price stretched to +2 stdev within stretchLen bars, then
+// pulls back to within 0.5 stdev of VWAP and closes back above it, while VWAP is rising, AND price
+// closes above a 200-period EMA. Flip = close crossing VWAP; stand down coolBars bars after any flip.
+// SL/TP fixed at entry, both floored AND capped as % of price (matching the lab's other legs, e.g.
+// 004/005/006) so a single violent bar cannot blow the stop out to an undisciplined size.
+strategy("008-VWM base (long, EMA200 filter)", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+devLen       = input.int(50,    "Stdev window for VWAP bands")
+bandK        = input.float(2.0, "Band multiple (sigma)")
+pullbackK    = input.float(0.5, "Pullback proximity, x sigma")
+stretchLen   = input.int(50,    "Bars to look back for the +2sigma stretch")
+vwapSlopeLen = input.int(50,    "Bars back to confirm VWAP rising")
+swgLen       = input.int(20,    "Swing lookback for the structural stop")
+coolBars     = input.int(20,    "Bars to stand down after a VWAP flip")
+bufK         = input.float(0.25,"Stop buffer beyond the swing, x ATR14")
+rr           = input.float(2.0, "Reward:risk")
+minRpct      = input.float(0.80,"Min risk as % of price")
+maxRpct      = input.float(3.00,"Max risk as % of price")
+maxBars      = input.int(96,    "Max bars in trade")
+trendLen     = input.int(200,   "Trend-filter EMA length")
+
+vwapVal   = ta.vwap(close)
+dev       = ta.stdev(close - vwapVal, devLen)
+upperBand = vwapVal + bandK * dev
+atr14     = ta.atr(14)
+ema200    = ta.ema(close, trendLen)
+
+bs           = ta.barssince(high >= upperBand)
+wasStretched = not na(bs) and bs <= stretchLen
+pullback     = close >= vwapVal and close <= vwapVal + pullbackK * dev
+vwapRising   = vwapVal > vwapVal[vwapSlopeLen]
+trendUp      = close > ema200
+
+flipped = ta.cross(close, vwapVal)
+var int sinceFlip = 9999
+sinceFlip := flipped ? 0 : sinceFlip + 1
+coolingOff = sinceFlip < coolBars
+
+goLong = wasStretched and pullback and vwapRising and trendUp and not coolingOff
+
+swgLo = ta.lowest(low, swgLen)[1]
+buf   = na(atr14) ? 0.0 : atr14 * bufK
+minR  = close * minRpct / 100
+maxR  = close * maxRpct / 100
+rawR  = close - (swgLo - buf)
+longR = math.min(math.max(rawR, minR), maxR)
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong and longR > 0
+    strategy.entry("L", strategy.long)
+    slPx   := close - longR
+    tpPx   := close + longR * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(vwapVal,              title="VWAP")
+plot(ema200,               title="EMA200")
+plot(goLong ? 1 : 0,       title="LongSignal")
+plot(coolingOff ? 1 : 0,   title="CoolingOff")

@@ -182,6 +182,28 @@ recorded as "marginally profitable" instead of "one leg untested, the other brok
 Three cycles, three misses, in both directions (003 high, 005 low, 006 low). The estimate remains a
 hypothesis to score, never a fact to build on.
 
+## HARD LESSON 8 — a spec without saved Pine source is not a base (from cycle 008/009, 2026-09-02)
+The CHAMPION-BOARD "current base" was described only in prose (007's markdown spec, then an EMA200
+filter described in the board itself) with no Pine source ever committed to `strategies/pine/`. Two
+concurrent sessions running this same mandate each reconstructed "the base" independently from that
+prose and got different code: 433 trades / PF 0.912 / DD 28.8% in one, 649 trades / PF 0.9555 / DD
+47.7% in the other (the second added a risk cap the first lacked). Same idea in English, different
+strategy in Pine.
+
+**Rule:** every base on the CHAMPION-BOARD must have committed Pine source in `strategies/pine/`
+before the next cycle attacks it. If a source is missing, reconstructing it and re-running it in
+isolation IS the cycle's mandatory first step, and the reconstruction's real numbers — not the old
+spec's numbers, and not a rival session's uncommitted numbers — become the baseline the ratchet
+compares against. Record the reconstruction as its own `results/backtests.json` entry so any
+discrepancy is visible, not silently absorbed. When two committed reconstructions disagree, the one
+with real source wins over the one without; between two real sources, prefer the one that follows
+established lab convention (here: capping R like every sibling leg already does).
+
+**Corollary, learned the same cycle:** a base that clears rung A deserves the SAME rung-C scrutiny as
+any attack candidate (HARD LESSON 7) before the next several cycles lean on it. `008-vwm-base.pine`
+passed 15m at PF 0.9555 but failed 5m at PF 0.7992 — the pass was noise, exactly as it was for 006.
+Check generalization on the base itself, not just on cycles that individually clear rung A.
+
 ## Platform constraints — trader.dev engine
 - Pine **//@version=6**, allowlist of 65 `ta.*` indicators.
 - **FORBIDDEN:** `request.security` (no cross-symbol), arrays/maps, `strategy.cancel`,
