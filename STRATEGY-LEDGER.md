@@ -182,6 +182,85 @@ recorded as "marginally profitable" instead of "one leg untested, the other brok
 Three cycles, three misses, in both directions (003 high, 005 low, 006 low). The estimate remains a
 hypothesis to score, never a fact to build on.
 
+## HARD LESSON 8 — a spec without saved Pine source is not a base (from cycle 008/009, 2026-09-02)
+The CHAMPION-BOARD "current base" was described only in prose (007's markdown spec, then an EMA200
+filter described in the board itself) with no Pine source ever committed to `strategies/pine/`. Two
+concurrent sessions running this same mandate each reconstructed "the base" independently from that
+prose and got different code: 433 trades / PF 0.912 / DD 28.8% in one, 649 trades / PF 0.9555 / DD
+47.7% in the other (the second added a risk cap the first lacked). Same idea in English, different
+strategy in Pine.
+
+**Rule:** every base on the CHAMPION-BOARD must have committed Pine source in `strategies/pine/`
+before the next cycle attacks it. If a source is missing, reconstructing it and re-running it in
+isolation IS the cycle's mandatory first step, and the reconstruction's real numbers — not the old
+spec's numbers, and not a rival session's uncommitted numbers — become the baseline the ratchet
+compares against. Record the reconstruction as its own `results/backtests.json` entry so any
+discrepancy is visible, not silently absorbed. When two committed reconstructions disagree, the one
+with real source wins over the one without; between two real sources, prefer the one that follows
+established lab convention (here: capping R like every sibling leg already does).
+
+**Corollary, learned the same cycle:** a base that clears rung A deserves the SAME rung-C scrutiny as
+any attack candidate (HARD LESSON 7) before the next several cycles lean on it. `008-vwm-base.pine`
+passed 15m at PF 0.9555 but failed 5m at PF 0.7992 — the pass was noise, exactly as it was for 006.
+Check generalization on the base itself, not just on cycles that individually clear rung A.
+
+## HARD LESSON 9 — a 15m-only fix does not touch 5m fee drag (from cycle 010, 2026-09-02)
+The ET witching-hour filter (ban longs 1:00–4:00am ET) improved the 15m base cleanly — PF
+0.9555→0.9614, max DD 47.65%→45.78% — clearing the ratchet and rung A. Its 5m run came back
+PF 0.7883, DD 52.22%: not just still-failing, but marginally *worse* than 008's own unfiltered 5m
+result (PF 0.7992, DD 51.36%).
+
+A time-of-day gate removes a slice of bars roughly proportional to its width regardless of
+timeframe, so it *should* transfer if the edge it's cutting is real. That it didn't move 5m at all
+means the 5m loss isn't concentrated in that window — it's fee drag from trade frequency and R
+sizing, the mechanism HARD LESSON 3 names directly. **Rule:** a candidate change should be judged by
+whether it plausibly touches the failure mode rung C already diagnosed (fee drag on 5m), not just
+by whether it improves the 15m number. Selectivity filters (time-of-day, shallow pullback) prune
+bars; they don't change the R-vs-fee ratio. The R floor (attack list item 1 as of cycle 011) is the
+first change on this base that hits the actual mechanism.
+
+## HARD LESSON 10 — a flat % R floor binds harder on the tighter timeframe (from cycle 011, 2026-09-02)
+Cycle 011 raised the min-risk floor from 0.8% to 1.2% of price, reasoning from HARD LESSON 3/9 that a
+wider floor dilutes the fixed 0.10% round-trip fee and should help *both* timeframes. It helped 15m
+cleanly — PF 0.9614→1.0211, max DD 45.78%→40.67%, the first time this base line has cleared PF 1.0 —
+but 5m came back *worse* than the pre-change base on both metrics: PF 0.7883→0.7769, max DD
+52.22%→57.02%. Not flat, like the time-of-day filter in cycle 010 — actively worse.
+
+The likely mechanism: `rawR` (distance from close to the structural swing low) is naturally smaller
+on 5m than 15m, because 5m swings are tighter. That means the min-R floor binds — i.e. `rawR` gets
+overridden by `minR` — on a larger share of 5m trades than 15m trades. Raising the floor therefore
+inflates nominal per-trade risk *more* on 5m than on 15m, which widens 5m's losses and drawdown
+instead of just diluting its fee drag.
+
+**Rule:** a fee-economics argument ("wider R dilutes the fixed fee") is necessary but not sufficient
+— it ignores how a *flat percentage* floor interacts with a timeframe's typical structural stop
+distance. Before trusting a stop-sizing change to transfer across timeframes, check what fraction of
+trades are floor-bound on each timeframe; if that fraction differs a lot, the change's effect will
+differ a lot too, in a direction that isn't obvious from the fee math alone. A volatility-relative
+floor (e.g. a multiple of ATR%, not a flat % of price) is the natural fix and is now on the attack
+list.
+
+## HARD LESSON 11 — a selectivity filter can shrink the loss without fixing the edge (from cycle 012, 2026-09-02)
+Cycle 012 added a volume-confirmation gate (current volume >= its 20-bar SMA) to the pullback-hold
+bar, predicting per HARD LESSON 9 that pruning bars (rather than resizing risk, as 011's R-floor did)
+would avoid 011's 5m regression. It delivered the best 15m result this base line has ever posted — PF
+1.0211→1.0237, max DD 40.67%→21.95%, a ~19pp drawdown improvement — and did shrink 5m's damage: max DD
+57.02%→47.78%, net loss −49.83%→−41.82%, trades 622→466.
+
+But 5m profit factor did **not** clear 0.95, and it did not even fully recover to pre-011 levels:
+0.7769 (011's 5m) → 0.7544 (012's 5m). avgTradePct got slightly worse (−0.0801%→−0.0897%). The filter
+removed low-conviction bars roughly proportionally across both win and loss buckets — smaller book,
+similar edge quality — rather than disproportionately removing losers.
+
+**Rule:** a change that measurably improves drawdown and shrinks total loss is not the same as a
+change that fixes the underlying edge. Judge rung C strictly on PF crossing 0.95, not on "moved in
+the right direction." The 5m failure mode (HARD LESSON 3/9: fee drag interacting with how R is sized
+relative to structural stop distance) has now survived two different attack types — a risk-resizing
+change (011) and a bar-pruning selectivity change (012) — without being fixed. The next candidate
+should target the R-sizing mechanism directly (a volatility-relative floor, attack list item 1) rather
+than another selectivity filter, since selectivity alone has now been tried and holds the loss steady
+without moving PF.
+
 ## Platform constraints — trader.dev engine
 - Pine **//@version=6**, allowlist of 65 `ta.*` indicators.
 - **FORBIDDEN:** `request.security` (no cross-symbol), arrays/maps, `strategy.cancel`,

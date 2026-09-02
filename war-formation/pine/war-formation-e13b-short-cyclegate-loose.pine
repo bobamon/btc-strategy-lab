@@ -1,0 +1,173 @@
+//@version=6
+// WAR FORMATION E13b — 3-MINUTE CYCLE POSITION GATE, SHORT LEG ONLY, LOOSENED THRESHOLD.
+// BTCUSDT, 1m base chart. Same as E13 (queue item 0f) except cycleHiThresh 0.7 -> 0.5: shorts
+// require only the UPPER HALF of the rolling 30min range, not the top 30%. E13 collapsed the
+// sample to 2 trades (PF 0.00, both losers) -- too few to judge the gate itself. This run tests
+// whether the location-gate concept has any signal at a less punishing threshold before the
+// question is abandoned for insufficient sample, same logic as the E9 -> E9b progression.
+//
+// LEG AUDIT (HARD LESSON 6): this file contains ONLY the short leg. No long entries exist here.
+strategy("War Formation E13b Short CycleGate Loose", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+// ---------------- inputs ----------------
+greenBear    = input.int(2,     "Green HA 1h candles at or below for BEAR")
+skipOpen     = input.int(60,    "Skip first N minutes of 6h block")
+skipClose    = input.int(60,    "Skip last N minutes of 6h block")
+coilK        = input.float(0.85,"3m coil: atr(3) < atr(30) * K")
+velK         = input.float(0.8, "Velocity: min reclaim as multiple of atr(30)")
+midLo        = input.float(400, "Whole-number middles low")
+midHi        = input.float(600, "Whole-number middles high")
+bufK         = input.float(0.25,"Stop buffer beyond swept level, x atr(30)")
+rr           = input.float(2.0, "Reward:risk")
+minRpct      = input.float(0.80,"Min risk as % of price (LESSON 3 floor)")
+maxRpct      = input.float(1.50,"Max risk as % of price")
+maxBars      = input.int(720,   "Max bars in trade")
+cycleWinMins = input.int(30,    "3m-cycle rolling window, minutes (10 x 3m candles)")
+cycleHiThresh= input.float(0.5, "cyclePos threshold: shorts only above this")
+
+MS6H = 21600000
+MS1H = 3600000
+MS15 = 900000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+b15 = math.floor(time / MS15)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+new15 = b15 != b15[1]
+
+// ---------------- 1-minute Heikin Ashi (computed, not fetched) ----------------
+var float haO = na
+haC   = (open + high + low + close) / 4
+haO  := na(haO[1]) ? (open + close) / 2 : (haO[1] + haC[1]) / 2
+haDn  = haC < haO
+
+// ---------------- 1-hour real OHLC + its Heikin Ashi ----------------
+var float o1   = na
+var float h1   = na
+var float l1   = na
+var float ha1o = na
+var float ha1c = na
+
+var int grnCur  = 0
+var int cntCur  = 0
+var int grnPrev = 0
+var int cntPrev = 0
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    grnCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(o1)
+        c1 = close[1]
+        newC = (o1 + h1 + l1 + c1) / 4
+        newO = na(ha1o) ? (o1 + c1) / 2 : (ha1o + ha1c) / 2
+        ha1o := newO
+        ha1c := newC
+        cntCur := cntCur + 1
+        if ha1c > ha1o
+            grnCur := grnCur + 1
+    o1 := open
+    h1 := high
+    l1 := low
+else
+    h1 := na(h1) ? high : math.max(h1, high)
+    l1 := na(l1) ? low  : math.min(l1, low)
+
+// ---------------- LAYER 1: 6h regime from the previous block's HA 1h colours ----------------
+regimeReady = cntPrev >= 5
+bearRegime  = regimeReady and grnPrev <= greenBear
+
+// ---------------- LAYER 2: time gate inside the 6h block ----------------
+minsIn   = (time - b6 * MS6H) / 60000
+timeGate = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+// ---------------- LAYER 3: the forming 1h must agree (HA direction of the live hour) ----------------
+liveHaC = na(o1) ? na : (o1 + math.max(h1, high) + math.min(l1, low) + close) / 4
+liveHaO = na(ha1o) ? na : (ha1o + ha1c) / 2
+h1Bear  = not na(liveHaC) and not na(liveHaO) and liveHaC < liveHaO
+
+// ---------------- LAYER 4: previous completed 15m extreme (REAL prices - these are fill levels) ----------------
+var float c15h = na
+var float c15l = na
+var float p15h = na
+var float p15l = na
+
+if new15
+    p15h := c15h
+    p15l := c15l
+    c15h := high
+    c15l := low
+else
+    c15h := na(c15h) ? high : math.max(c15h, high)
+    c15l := na(c15l) ? low  : math.min(c15l, low)
+
+brokeAbove = not na(p15h) and c15h > p15h
+
+// ---------------- LAYER 5: 3m coil, read on the PRIOR bar ----------------
+atrFast  = ta.atr(3)
+atrSlow  = ta.atr(30)
+coiled   = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK
+coilPrev = coiled[1]
+velMin   = na(atrSlow) ? na : atrSlow * velK
+
+// ---------------- LAYER 6 (NEW): 3-minute cycle position gate ----------------
+cycleHigh = ta.highest(high, cycleWinMins)
+cycleLow  = ta.lowest(low, cycleWinMins)
+cycleSpan = cycleHigh - cycleLow
+cyclePos  = cycleSpan > 0 ? (close - cycleLow) / cycleSpan : na
+shortCycleGate = not na(cyclePos) and cyclePos >= cycleHiThresh
+
+// ---------------- Oracle overlays ----------------
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+// ---------------- TRIGGER: 1m reject, with velocity, on a turning HA candle ----------------
+shortTrig = not na(p15h) and not na(velMin) and ta.crossunder(close, p15h) and (p15h - close) >= velMin and haDn
+
+goShort = bearRegime and timeGate and h1Bear and brokeAbove and coilPrev and not inMiddle and shortTrig and shortCycleGate
+
+// ---------------- structural risk: stop beyond the level that was swept (LESSON 5) ----------------
+minR = close * minRpct / 100
+maxR = close * maxRpct / 100
+buf  = na(atrSlow) ? 0.0 : atrSlow * bufK
+
+rawShortR = na(c15h) ? na : (c15h + buf) - close
+shortR    = na(rawShortR) ? na : math.min(math.max(rawShortR, minR), maxR)
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goShort and not na(shortR) and shortR > 0
+    strategy.entry("S", strategy.short)
+    slPx   := close + shortR
+    tpPx   := close - shortR * rr
+    barsIn := 0
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+// ---------------- diagnostics ----------------
+plot(grnPrev,               title="GreenHA1hPrev6h")
+plot(bearRegime ? -1 : 0,   title="Regime")
+plot(haDn ? -1 : 0,         title="HA1mColour")
+plot(coilPrev ? 1 : 0,      title="CoiledPrev")
+plot(cyclePos,               title="CyclePos")
+plot(shortCycleGate ? 1 : 0, title="ShortCycleGate")

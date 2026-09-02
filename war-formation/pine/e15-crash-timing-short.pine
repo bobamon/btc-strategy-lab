@@ -1,0 +1,148 @@
+//@version=6
+// E15 — CRASH-TIMING SHORT (0d option i). SHORT ONLY. BTCUSDT, 1m base chart.
+// Cascade: 6h regime (HA 1h colours, bear) -> time gate -> 1h agreement (bear) -> ACCELERATION TRIGGER.
+// Every prior short (E9/E9b/E13/E13b/E14/E14b) fired on "reversal after a pullback" and all landed on
+// the same shape: healthy payoff, single-digit-to-low-teens win rate, net negative. This build changes
+// WHAT the entry triggers on: not a reversal at a level, but a RANGE-EXPANSION break already extended
+// past the recent structural low, timing the crash itself rather than fading into it.
+//
+// HEIKIN ASHI POLICY — HA is used for DIRECTION/COLOUR only (6h green count, 1h agreement).
+// Levels, entries, stops, targets all use REAL prices.
+strategy("E15 Crash-Timing Short", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+greenBear = input.int(2,     "Green HA 1h candles at or below for BEAR")
+skipOpen  = input.int(60,    "Skip first N minutes of 6h block")
+skipClose = input.int(60,    "Skip last N minutes of 6h block")
+expK      = input.float(1.5, "Range expansion: bar range >= K * atr(30)")
+lowerFrac = input.float(0.35,"Close must land in bottom X of the bar's range")
+bufK      = input.float(0.25,"Stop buffer beyond structural high, x atr(30)")
+rr        = input.float(2.0, "Reward:risk")
+minRpct   = input.float(0.80,"Min risk as % of price")
+maxRpct   = input.float(1.50,"Max risk as % of price")
+maxBars   = input.int(720,   "Max bars in trade")
+
+MS6H = 21600000
+MS1H = 3600000
+MS15 = 900000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+b15 = math.floor(time / MS15)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+new15 = b15 != b15[1]
+
+// ---------------- 1-hour real OHLC + its Heikin Ashi ----------------
+var float o1   = na
+var float h1   = na
+var float l1   = na
+var float ha1o = na
+var float ha1c = na
+
+var int grnCur  = 0
+var int cntCur  = 0
+var int grnPrev = 0
+var int cntPrev = 0
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    grnCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(o1)
+        c1 = close[1]
+        newC = (o1 + h1 + l1 + c1) / 4
+        newO = na(ha1o) ? (o1 + c1) / 2 : (ha1o + ha1c) / 2
+        ha1o := newO
+        ha1c := newC
+        cntCur := cntCur + 1
+        if ha1c > ha1o
+            grnCur := grnCur + 1
+    o1 := open
+    h1 := high
+    l1 := low
+else
+    h1 := na(h1) ? high : math.max(h1, high)
+    l1 := na(l1) ? low  : math.min(l1, low)
+
+// ---------------- LAYER 1: 6h regime from the previous block's HA 1h colours ----------------
+regimeReady = cntPrev >= 5
+bearRegime  = regimeReady and grnPrev <= greenBear
+
+// ---------------- LAYER 2: time gate inside the 6h block ----------------
+minsIn   = (time - b6 * MS6H) / 60000
+timeGate = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+// ---------------- LAYER 3: the forming 1h must agree (HA direction of the live hour) ----------------
+liveHaC = na(o1) ? na : (o1 + math.max(h1, high) + math.min(l1, low) + close) / 4
+liveHaO = na(ha1o) ? na : (ha1o + ha1c) / 2
+h1Bear  = not na(liveHaC) and not na(liveHaO) and liveHaC < liveHaO
+
+// ---------------- LAYER 4: previous completed 15m extreme (REAL prices - structural stop level) ----------------
+var float c15h = na
+var float c15l = na
+var float p15h = na
+var float p15l = na
+
+if new15
+    p15h := c15h
+    p15l := c15l
+    c15h := high
+    c15l := low
+else
+    c15h := na(c15h) ? high : math.max(c15h, high)
+    c15l := na(c15l) ? low  : math.min(c15l, low)
+
+// ---------------- ACCELERATION TRIGGER: range expansion, down bar, close near the low, ----------------
+// ---------------- already breaking below the prior 15m structural low (session extended) -------------
+atrSlow    = ta.atr(30)
+barRange   = high - low
+rangeExp   = not na(atrSlow) and atrSlow > 0 and barRange >= atrSlow * expK
+downBar    = close < open
+closeLow   = barRange > 0 and (close - low) <= barRange * lowerFrac
+extended   = not na(p15l) and close < p15l
+
+shortTrig = rangeExp and downBar and closeLow and extended
+
+goShort = bearRegime and timeGate and h1Bear and shortTrig
+
+// ---------------- structural risk: stop beyond the swept structural high, never at the signal level ----------------
+minR = close * minRpct / 100
+maxR = close * maxRpct / 100
+buf  = na(atrSlow) ? 0.0 : atrSlow * bufK
+
+rawShortR = na(c15h) ? na : (c15h + buf) - close
+shortR    = na(rawShortR) ? na : math.min(math.max(rawShortR, minR), maxR)
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goShort and not na(shortR) and shortR > 0
+    strategy.entry("S", strategy.short)
+    slPx   := close + shortR
+    tpPx   := close - shortR * rr
+    barsIn := 0
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(grnPrev,                title="GreenHA1hPrev6h")
+plot(bearRegime ? -1 : 0,    title="Regime")
+plot(rangeExp ? 1 : 0,       title="RangeExpansion")
+plot(extended ? 1 : 0,       title="ExtendedBelow15mLow")

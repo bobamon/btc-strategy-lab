@@ -8,6 +8,20 @@ read with OpenCV. Quotes are the author's own words.
 ---
 
 ## ✅ TYPE 1 AND TYPE 2 VALIDATION — DECODED
+**Type 2 implemented and tested 2026-09-02** (`3m-elite-v2-validation.pine`, see SYSTEM.md queue 0a).
+Result: PF 0.64 / maxDD 12.1%, worse than v1's PF 0.91 / maxDD 3.47% on both gates — rejected, v1
+stays the best-known config. The loss diagnostic (avgBarsLosing well below avgBarsWinning) pointed at
+the stop, not the gate — see queue item 0c.
+
+**The protected low/high stop implemented and tested 2026-09-02** (`3m-elite-v3-protected-stop.pine`,
+see SYSTEM.md queue 0c). On validation, the low (longs) / high (shorts) of the validating 48m candle
+is captured and held as the stop reference instead of the 3H zone edge. Result: PF 0.65 / maxDD
+11.04%, still worse than v1 on both gates — rejected. Marginally better than v2 on every metric, and
+the avgBarsLosing/avgBarsWinning ratio improved from 0.52 to 0.64, so this decoded definition was a
+real (if insufficient) fix — the stop was part of the v2 problem but not the whole problem.
+
+Type 1 (the 3M candle itself) is still not implemented; its anatomy remains undefined below.
+
 Source: `2026-08-09 07-20-21.txt`, a dedicated 10-minute lesson.
 
 > "The two types of validations: **type 1 validation is just going to be a 3M candle.** Okay, and
@@ -37,6 +51,16 @@ That low is the **protected low** (protected high for shorts) — the structural
 ---
 
 ## ✅ ZONE INVALIDATION — DECODED
+**Implemented and tested 2026-09-02** (`3m-elite-v4-zone-invalidation.pine`, built on v3, see
+SYSTEM.md queue 0d). Result: PF 0.66 / maxDD 11.11%, worse than v1's PF 0.91 / maxDD 3.47% on both
+gates — rejected, v1 stays the best-known config. Effectively identical to v3's numbers (PF
+0.65→0.66, maxDD 11.04%→11.11%): the gate fired essentially never in this sample, most likely
+because the await window (tap → engulfing validation or bias flip) is usually shorter than a 3H
+bar, leaving little room for a fresh 3H close to breach the captured zone bound first. All three
+decoded-but-previously-unimplemented gates (this one, Type 2 validation, protected low/high) are
+now implemented and tested, individually and stacked, and none rescues the validation-gate
+architecture against v1's plain instant-tap cascade.
+
 > "The second that we get a candle that **body closes below the zone**, this entire zone is **invalid**.
 > We can no longer take trades from this zone."
 
@@ -52,6 +76,17 @@ And it is judged on the **zone's own** timeframe, not the validation timeframe:
 ---
 
 ## ✅ ONE CANDLE RULE — DECODED
+**Implemented and tested 2026-09-02** (`3m-elite-v5-one-candle-rule.pine`, built on v1, see
+SYSTEM.md queue 0e). Mechanical reading: a zone is mitigated once two consecutive completed 3H
+candles close beyond the same prior edge without a pullback between them. Result: byte-identical
+to v1 on every metric — the gate fired zero times in the sample. Diagnosis: v1's zone model has no
+persistence across 3H bars (it's just "the most recently completed 3H candle," refreshed every
+period), so the two-candle mitigation trigger is structurally near-incompatible with
+`zoneBull`/`zoneBear` being true at the same time — the trigger needs a hard continuation move,
+which is the opposite of the reversal `zoneBull`/`zoneBear` require. This is a null result caused
+by the zone architecture, not evidence the rule itself is inert — SYSTEM.md queue 0g proposes a
+retest on a persistent (arm-on-tap) zone.
+
 Source: `2026-08-09 03-24-31.txt` (the whole video).
 
 Governs **when a supply/demand zone counts as mitigated**.

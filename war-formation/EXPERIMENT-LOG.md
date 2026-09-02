@@ -1717,3 +1717,41 @@ not the A.L.C.M. as specified. The specification says the position ends at targe
    `avgBarsWinning` stops pinning to it, or cut `rr` so the target is reachable inside three days.
    Until one of them resolves, no ALCM number in this log measures the specified strategy.
 2. **Position sizing.** Unchanged, and still the largest unsolved problem.
+
+
+---
+
+## ██ THE CLOUD FORK, MERGED 2026-09-02 — AND WHAT IT GOT RIGHT THAT THIS SIDE DID NOT
+
+For most of this project two lineages ran in parallel without either knowing it. The local session
+worked from this disk; three CLOUD routines cloned the GitHub repo hourly, ran their own cycles, and
+**pushed their results back to origin.** The local repo never pulled, so the fork went unnoticed until
+a source audit found the divergence: **63 commits ahead, 13 behind.**
+
+| Lab | Local lineage | Cloud lineage |
+|---|---|---|
+| BTC | Attacks 1–30 | Cycles 008–012 |
+| War Formation | E12–E46 | E12–E16 |
+| 3M Elite | v2–v30 | v2–v5 |
+
+The cloud never saw the mandate change from "one new mechanism per cycle" to "change exactly one
+thing", so it continued the older cycle numbering on its own track.
+
+### THE MERGE
+Results were unioned by id — **20 cloud-only records were added across the three labs and 23 ids were
+shared** (experiments both sides ran from the common ancestor). Cloud-only records are tagged
+`[CLOUD ROUTINE LINEAGE]` in their notes. **Every Pine file from both sides is kept.** Documents
+resolved to the local versions, which are far ahead and carry the A.L.C.M. specification correction
+the cloud copy has never had. Dashboards were regenerated rather than merged.
+
+### THE PART THAT IS UNCOMFORTABLE AND BELONGS IN THE RECORD
+**The cloud routines saved their Pine sources. This side did not.**
+
+`008-vwm-base.pine` through `012`, `3m-elite-v2` through `v5`, `e13` through `e16` — all on disk,
+committed alongside the metrics they produced. Meanwhile the local session ran roughly a hundred
+backtests, promoted four bases, and saved nothing until E44's reproduction failure forced the issue.
+
+**HARD LESSON 21 was written on this side after losing E38. The other side never needed it.** The
+lesson stands, but its origin story is a local hygiene failure, not a universal difficulty — and a
+process running unattended in a container was following the discipline that the interactive session
+kept postponing.

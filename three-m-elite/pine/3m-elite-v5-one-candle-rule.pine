@@ -1,0 +1,251 @@
+//@version=6
+// 3M ELITE v5 — BTCUSDT, 1m base chart.
+// Same cascade as v1: BIAS 12H -> ZONE 3H -> STRUCTURE 48m -> ENTRY 3m.
+//
+// CHANGE FROM v1 (single experiment this cycle, AUTOMATIC TOP PRIORITY per VOCABULARY.md): implements
+// the ONE CANDLE RULE decoded from the transcripts (VOCABULARY.md, "✅ ONE CANDLE RULE — DECODED").
+// This gate had NOT been implemented in any prior build (v1-v4 implemented Type 2 validation, the
+// protected stop and zone invalidation, but never this one), so per this project's standing rule a
+// decoded-but-unimplemented VOCABULARY.md definition jumps ahead of the queue (0e).
+//
+// The source: "Once the zone gets created with the engulfing candle, when you get the next candle
+// tapping into it and also making a new high -- this is called the one candle rule -- this one candle
+// does not mitigate the zone yet. So if we get a second candle that continues up without being a
+// triple M, and it's not a pullback, then that would mitigate the zone." Applies to every zone type.
+//
+// Mechanical reading used here (v1's zone model, not v2-v4's persistent-zone state machine): v1
+// treats the zone as the most recently completed 3H candle's range, refreshed every 3H bar. Under
+// that model the rule becomes: if the zone gets breached (closed beyond) by the 3H candle that traded
+// against it AND the candle immediately before it ALSO closed beyond that same edge (two consecutive
+// extensions with no pullback in between), the zone is MITIGATED -- an exhausted level, not a level
+// price is respecting -- and no new entry may be taken off it. A single extending candle, or an
+// extension followed by a pullback (close back inside), does NOT mitigate, matching "this one candle
+// does not mitigate the zone yet."
+// Known approximation: the source's exception ("unless it's a triple M") is not modeled, because
+// Type 1 (the 3M/triple-M candle) still has no defined anatomy anywhere in the transcripts
+// (VOCABULARY.md "STILL MISSING"). Documented here rather than guessed at.
+// Everything else (stop = 3H zone edge, TP = 12x ATR, all other gates) is unchanged from v1 so this
+// run isolates the effect of the One Candle Rule gate alone.
+strategy("3M ELITE v5 — One Candle Rule zone mitigation", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+maxBreakHi = input.int(6,    "Max breaks on bias/zone/structure")
+maxBreakEn = input.int(4,    "Max breaks on the entry timeframe")
+kcMult     = input.float(2.0,"Keltner width for overextension, x ATR")
+slopeLen   = input.int(10,   "Bars used for MA slope")
+zoneTolK   = input.float(0.25,"Zone tap tolerance, x atr(30)")
+bufK       = input.float(0.25,"Structural stop buffer, x atr(30)")
+tpATR      = input.float(12.0,"Take profit, x ATR (source's ATR method)")
+minRpct    = input.float(0.80,"Min risk as % of price")
+maxRpct    = input.float(3.00,"Max risk as % of price")
+maxBars    = input.int(1440, "Max bars in trade")
+
+MS3M  = 180000
+MS48M = 2880000
+MS3H  = 10800000
+MS12H = 43200000
+
+b3   = math.floor(time / MS3M)
+b48  = math.floor(time / MS48M)
+b3h  = math.floor(time / MS3H)
+b12h = math.floor(time / MS12H)
+
+new3   = b3   != b3[1]
+new48  = b48  != b48[1]
+new3h  = b3h  != b3h[1]
+new12h = b12h != b12h[1]
+
+// ---------- reconstructed candles: open/high/low, and the previous completed close ----------
+var float o3 = na
+var float h3 = na
+var float l3 = na
+var float c3prev = na
+var float c3prev2 = na
+if new3
+    c3prev2 := c3prev
+    c3prev  := close[1]
+    o3 := open
+    h3 := high
+    l3 := low
+else
+    h3 := na(h3) ? high : math.max(h3, high)
+    l3 := na(l3) ? low  : math.min(l3, low)
+
+var float h48 = na
+var float l48 = na
+var float c48prev = na
+var float c48prev2 = na
+if new48
+    c48prev2 := c48prev
+    c48prev  := close[1]
+    h48 := high
+    l48 := low
+else
+    h48 := na(h48) ? high : math.max(h48, high)
+    l48 := na(l48) ? low  : math.min(l48, low)
+
+var float c3hH = na
+var float c3hL = na
+var float p3hH = na
+var float p3hL = na
+var float c3hprev = na
+var float c3hprev2 = na
+
+// One Candle Rule state: consecutive-extension streak and mitigation flag per side, evaluated each
+// time a 3H candle completes, against the zone edge that candle actually traded against (the OLD
+// p3hL/p3hH, captured here BEFORE this block overwrites them below).
+var int  extStreakLo   = 0
+var int  extStreakHi   = 0
+var bool mitigatedLo   = false
+var bool mitigatedHi   = false
+
+if new3h
+    // the candle that just completed: its low/high are still in c3hL/c3hH, its close is close[1].
+    // the zone it traded against is the OLD p3hL/p3hH, not yet reassigned this bar.
+    if not na(p3hL)
+        extendedLo = c3hL < p3hL and close[1] < p3hL
+        extStreakLo := extendedLo ? extStreakLo + 1 : 0
+        if extStreakLo >= 2
+            mitigatedLo := true
+        else if not extendedLo
+            mitigatedLo := false
+    if not na(p3hH)
+        extendedHi = c3hH > p3hH and close[1] > p3hH
+        extStreakHi := extendedHi ? extStreakHi + 1 : 0
+        if extStreakHi >= 2
+            mitigatedHi := true
+        else if not extendedHi
+            mitigatedHi := false
+
+    c3hprev2 := c3hprev
+    c3hprev  := close[1]
+    p3hH := c3hH
+    p3hL := c3hL
+    c3hH := high
+    c3hL := low
+else
+    c3hH := na(c3hH) ? high : math.max(c3hH, high)
+    c3hL := na(c3hL) ? low  : math.min(c3hL, low)
+
+var float c12prev = na
+var float c12prev2 = na
+if new12h
+    c12prev2 := c12prev
+    c12prev  := close[1]
+
+// ---------- LAYER 1: BIAS (12H) model = two consecutive same-direction closes ----------
+biasBull = not na(c12prev) and not na(c12prev2) and c12prev > c12prev2
+biasBear = not na(c12prev) and not na(c12prev2) and c12prev < c12prev2
+
+// ---------- LAYER 2: ZONE (3H) model agrees + supply/demand tap, gated by the One Candle Rule ----------
+zoneBull = not na(c3hprev) and not na(c3hprev2) and c3hprev > c3hprev2
+zoneBear = not na(c3hprev) and not na(c3hprev2) and c3hprev < c3hprev2
+
+atr30 = ta.atr(30)
+tol   = na(atr30) ? 0.0 : atr30 * zoneTolK
+// demand tap: price trades back down into the previous completed 3H candle's low area
+demandTap = not na(p3hL) and low  <= p3hL + tol and not mitigatedLo
+supplyTap = not na(p3hH) and high >= p3hH - tol and not mitigatedHi
+
+// ---------- LAYER 3: STRUCTURE (48m) model agrees ----------
+structBull = not na(c48prev) and not na(c48prev2) and c48prev > c48prev2
+structBear = not na(c48prev) and not na(c48prev2) and c48prev < c48prev2
+
+// ---------- break counting: a break is a close beyond the prior 20-bar extreme ----------
+brkUpLvl = ta.highest(high, 20)[1]
+brkDnLvl = ta.lowest(low,  20)[1]
+brokeUp  = ta.crossover(close, brkUpLvl)
+brokeDn  = ta.crossunder(close, brkDnLvl)
+var int upCount = 0
+var int dnCount = 0
+if brokeUp
+    upCount := upCount + 1
+    dnCount := 0
+if brokeDn
+    dnCount := dnCount + 1
+    upCount := 0
+
+// ---------- MAs on the entry timeframe ----------
+ma20  = ta.ema(close, 20)
+ma50  = ta.ema(close, 50)
+ma200 = ta.ema(close, 200)
+
+// Keltner overextension around the 20MA (the 30SEC checklist names Keltner explicitly)
+atr14  = ta.atr(14)
+kcUp   = ma20 + kcMult * atr14
+kcDn   = ma20 - kcMult * atr14
+notExtLong  = close < kcUp
+notExtShort = close > kcDn
+
+// MAs not FULLY against bias: all three stacked the wrong way is the veto
+fullyAgainstLong  = ma20 < ma50 and ma50 < ma200
+fullyAgainstShort = ma20 > ma50 and ma50 > ma200
+
+// 20 & 50 not overextended from the 200
+maSpreadOk = not na(ma200) and ma200 > 0 and math.abs(ma20 - ma200) / ma200 * 100 < 5.0 and math.abs(ma50 - ma200) / ma200 * 100 < 5.0
+
+// slope gate: either the 20 or the 50 must favour the trade
+slope20Up = not na(ma20[slopeLen]) and ma20 > ma20[slopeLen]
+slope50Up = not na(ma50[slopeLen]) and ma50 > ma50[slopeLen]
+slope20Dn = not na(ma20[slopeLen]) and ma20 < ma20[slopeLen]
+slope50Dn = not na(ma50[slopeLen]) and ma50 < ma50[slopeLen]
+slopeOkLong  = slope20Up or slope50Up
+slopeOkShort = slope20Dn or slope50Dn
+
+// ---------- the gated cascade ----------
+longStack  = biasBull and zoneBull and structBull and demandTap and notExtLong  and not fullyAgainstLong  and maSpreadOk and slopeOkLong  and upCount <= maxBreakEn and dnCount <= maxBreakHi
+shortStack = biasBear and zoneBear and structBear and supplyTap and notExtShort and not fullyAgainstShort and maSpreadOk and slopeOkShort and dnCount <= maxBreakEn and upCount <= maxBreakHi
+
+// entry trigger on the 3m close, in the direction of bias
+goLong  = longStack  and new3 and close > o3
+goShort = shortStack and new3 and close < o3
+
+// ---------- risk: structural stop beyond the zone, ATR take profit per the source ----------
+buf  = na(atr30) ? 0.0 : atr30 * bufK
+minR = close * minRpct / 100
+maxR = close * maxRpct / 100
+
+rawLongR  = na(p3hL) ? na : close - (p3hL - buf)
+rawShortR = na(p3hH) ? na : (p3hH + buf) - close
+longR     = na(rawLongR)  ? na : math.min(math.max(rawLongR,  minR), maxR)
+shortR    = na(rawShortR) ? na : math.min(math.max(rawShortR, minR), maxR)
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong and not na(longR) and longR > 0
+    strategy.entry("L", strategy.long)
+    slPx   := close - longR
+    tpPx   := close + atr14 * tpATR
+    barsIn := 0
+else if flat and goShort and not na(shortR) and shortR > 0
+    strategy.entry("S", strategy.short)
+    slPx   := close + shortR
+    tpPx   := close - atr14 * tpATR
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(biasBull ? 1 : biasBear ? -1 : 0,     title="Bias12H")
+plot(zoneBull ? 1 : zoneBear ? -1 : 0,     title="Zone3H")
+plot(structBull ? 1 : structBear ? -1 : 0, title="Struct48m")
+plot(mitigatedLo ? 1 : 0,                  title="ZoneMitigatedLo")
+plot(mitigatedHi ? 1 : 0,                  title="ZoneMitigatedHi")
+plot(upCount,                              title="BreaksUp")
+plot(dnCount,                              title="BreaksDown")

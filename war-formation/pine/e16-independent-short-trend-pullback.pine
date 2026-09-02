@@ -1,0 +1,93 @@
+//@version=6
+// E16 — INDEPENDENT SHORT STRATEGY (queue item 0i). SHORT ONLY. BTCUSDT, 1m base chart.
+//
+// Per 0d/0i: five short constructions bolted onto the War Formation HA cascade (mirrored,
+// rejection-at-resistance, location-gated, pump-weakening, acceleration) all failed identically
+// (healthy payoff, low win rate, net negative) because they all inherited the cascade's 6h HA
+// green-count regime label, which 0c/E10-E11 proved marks CRASH RISK, not downtrend. This build
+// abandons that regime detector entirely and starts over with different primitives:
+//   Regime:  a genuine downtrend filter — EMA50 below EMA200, and EMA200 itself lower than it was
+//            100 bars ago (a real moving-average SLOPE condition, not a candle-colour count).
+//   Trigger: "sell the failed rip" — RSI(14) rallies above 55 (a real bounce happens) then crosses
+//            back under 50 while price is back below the fast EMA. This is a trend-continuation
+//            pullback entry, not a reversal-at-a-swept-level entry — a structurally different
+//            geometry from every prior short attempt in this log.
+//   Stop:    beyond the last CONFIRMED pivot high (ta.pivothigh, 10/10), never at the entry/signal
+//            level (LESSON 5), with a small ATR buffer beyond it (LESSON 5/6 convention).
+// No HA, no 6h/1h/15m reconstruction, no coil/velocity trigger — deliberately independent so the
+// both-directions standing objective is met by a separate design, not a sixth cascade leg.
+strategy("E16 Independent Short — Trend/Pullback", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+emaFastLen = input.int(50,    "Fast EMA (trend/pullback ref)")
+emaSlowLen = input.int(200,   "Slow EMA (regime)")
+slopeLook  = input.int(100,   "Bars back to confirm slow EMA is falling")
+rsiLen     = input.int(14,    "RSI length")
+rsiBounce  = input.float(55,  "RSI must have exceeded this (real bounce)")
+rsiFail    = input.float(50,  "RSI cross back under this = bounce failed")
+bounceLook = input.int(5,     "Bars back to check for the RSI bounce")
+pivL       = input.int(10,    "Pivot high left bars")
+pivR       = input.int(10,    "Pivot high right bars")
+fallbackN  = input.int(50,    "Fallback highest-high lookback if no pivot yet")
+bufK       = input.float(0.25,"Stop buffer beyond swing high, x atr(30)")
+rr         = input.float(2.0, "Reward:risk")
+minRpct    = input.float(0.80,"Min risk as % of price")
+maxRpct    = input.float(1.50,"Max risk as % of price")
+maxBars    = input.int(720,   "Max bars in trade")
+
+// ---------------- REGIME: genuine downtrend via EMA level + EMA slope ----------------
+emaFast = ta.ema(close, emaFastLen)
+emaSlow = ta.ema(close, emaSlowLen)
+slopeDn = emaSlow < emaSlow[slopeLook]
+downtrend = emaFast < emaSlow and slopeDn
+belowFast = close < emaFast
+
+// ---------------- TRIGGER: sell the failed rip (RSI bounce then fails back under) ----------------
+rsi = ta.rsi(close, rsiLen)
+hadBounce = ta.highest(rsi, bounceLook) >= rsiBounce
+failedRip = ta.crossunder(rsi, rsiFail) and hadBounce
+
+goShort = downtrend and belowFast and failedRip
+
+// ---------------- STRUCTURAL STOP: last confirmed pivot high, buffered by ATR ----------------
+atrSlow = ta.atr(30)
+pivHigh = ta.pivothigh(pivL, pivR)
+var float lastPivHigh = na
+if not na(pivHigh)
+    lastPivHigh := high[pivR]
+swingHigh = na(lastPivHigh) ? ta.highest(high, fallbackN) : lastPivHigh
+
+minR = close * minRpct / 100
+maxR = close * maxRpct / 100
+buf  = na(atrSlow) ? 0.0 : atrSlow * bufK
+
+rawShortR = na(swingHigh) ? na : (swingHigh + buf) - close
+shortR    = na(rawShortR) ? na : math.min(math.max(rawShortR, minR), maxR)
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goShort and not na(shortR) and shortR > 0
+    strategy.entry("S", strategy.short)
+    slPx   := close + shortR
+    tpPx   := close - shortR * rr
+    barsIn := 0
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(downtrend ? -1 : 0,   title="DowntrendRegime")
+plot(failedRip ? 1 : 0,    title="FailedRipTrigger")
+plot(swingHigh,            title="StructuralStopLevel")
