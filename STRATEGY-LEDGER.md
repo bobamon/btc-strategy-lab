@@ -49,6 +49,7 @@ regime, round-number magnetism — is now fair game and should be exploited rath
 | 003 | LCR-1 Liquidation Cascade Reclaim | Cascade bar (range + volume + new extreme); close position inside the bar picks fade vs. follow | closePos above 0.55 / below 0.25 | **REJECTED** — PF 0.69, ladder rung A | 2026-09-01 |
 | 004 | MAR-1 Moving-Average Retest Fade | Fade the retest of a sloped EMA200; target the opposite band | Sign of the EMA200 slope | **REJECTED** — PF 0.65, ladder rung A | 2026-09-01 |
 | 005 | CRX-1 Compression Release Volume Verdict | Compressed box releases; volume decides follow vs. fade | Volume >= 2x avg / < 1x avg | **REJECTED** — PF 0.52, ladder rung A | 2026-09-01 |
+| 006 | VTS-1 Volatility Term-Structure Regime | ATR(5)/ATR(50) term structure; loud breakout long vs. quiet breakdown short | Term-structure regime change, 20-bar stand-down | **REJECTED** — 15m PF 1.04, 5m PF 0.36 | 2026-09-02 |
 
 ## Mechanism families already consumed
 - `cross-complex-OR-confirmation` (001, archived)
@@ -56,10 +57,10 @@ regime, round-number magnetism — is now fair game and should be exploited rath
 - `liquidation-cascade signatures` (003) — closePos switch, **rejected on real data**
 - `trend-anchored MA retest` (004, new family) — first-tag entry, **rejected on real data**; a confirmed-rejection variant is still untested
 - `range-compression expansion` (005) — volume-verdict switch, **rejected on real data**; a follow-only variant is still untested
+- `volatility-term-structure` (006) — expansion/compression asymmetry, **rejected**; thresholds too tight to give the long leg a testable sample
 
 ## Families still open for future cycles
-volume/participation profile · volatility-term-structure (5m vs 15m realized vol ratio)
-· time-of-day seasonality (Asia/London/US overlap) · order-flow imbalance proxies
+volume/participation profile · time-of-day seasonality (Asia/London/US overlap) · order-flow imbalance proxies
 · session-VWAP band mechanics · funding-rate / basis effects
 · autocorrelation regime via other estimators (Hurst, ACF sign)
 · microstructure round-number behaviour · realized-vs-implied vol spread
@@ -150,6 +151,23 @@ noise.** Check this ratio on every result before interpreting anything else.
 Estimates are improving but still unreliable in both directions. Keep pre-registering them, keep
 scoring them, and treat any commission-gate argument built on one as provisional.
 
+## HARD LESSON 7 — rung C is the rung that matters (from 006, 2026-09-02)
+006 became the first strategy to clear rung A: PF 1.04 on 15m. It was noise. +0.5% across 4.7 years
+and 44 trades is statistically indistinguishable from zero, and the 5m run settled it for one credit
+— **PF 0.36, −20.2%, both legs losing.**
+
+**A single-timeframe pass is not evidence.** The same rules on a different timeframe is the cheapest
+out-of-sample test available, and it should be treated as the real gate. Rung A only decides whether
+a strategy is worth one more credit.
+
+**Objective C paid for itself on first contact.** The blended 1.04 hid a 4-trade long leg carrying
+all the profit and a 40-trade short leg losing money. Without the leg split this would have been
+recorded as "marginally profitable" instead of "one leg untested, the other broken".
+
+**Frequency scorecard update:** estimated 300–800, actual 44 (15m) and 77 (5m) — missed LOW by 4–7x.
+Three cycles, three misses, in both directions (003 high, 005 low, 006 low). The estimate remains a
+hypothesis to score, never a fact to build on.
+
 ## Platform constraints — trader.dev engine
 - Pine **//@version=6**, allowlist of 65 `ta.*` indicators.
 - **FORBIDDEN:** `request.security` (no cross-symbol), arrays/maps, `strategy.cancel`,
@@ -158,6 +176,9 @@ scoring them, and treat any commission-gate argument built on one as provisional
 - Symbol universe: **Bybit USDT linear perpetuals only** (639 instruments).
 - Each backtest costs **1 credit**. Weekly grant 1000. At 96 cycles/day, do not backtest every cycle.
 - Always call `plan_backtest_window` first — it clamps dates and reveals symbol remaps.
+- **Coverage differs by timeframe:** 15m reaches back to 2020-08, but **5m only starts 2024-06-08** and
+  **1m only covers 2025-12-16 → 2026-05-03**. A 5m or 1m run is a shorter window than a 15m one, so
+  never compare their returns without saying so.
 
 ## ARCHIVED — why the index universe was abandoned (2026-09-01)
 `plan_backtest_window` verification of the original US30/NAS100/YM/NQ universe:

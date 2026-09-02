@@ -238,5 +238,63 @@
       "verifiedAt": "2026-09-02T05:45:39Z"
     },
     "notes": "THE STABILITY PROBLEM. Same code, same parameters, second half of the window: PF 0.89 vs 3.80 in the first half, win rate 40% vs 70.6%, net -0.8% vs +8.7%. The full-window +7.8% comes almost entirely from Dec-Feb. Only 15 trades, so PF 0.89 is within noise of break-even rather than proof of failure -- but it is NOT confirmation, and it means v6 cannot be called validated."
+  },
+  {
+    "id": "war-formation-e9-short-strict",
+    "name": "War Formation SHORT rebuild (strict)",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "short",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "description": "SHORT-SIDE REBUILD, short only, judged on its own profit factor. Deliberately NOT the mirror of the long leg: the long fades a failed BREAKDOWN (sweep the prior 15m low, then reclaim it with velocity), while this fades a REJECTION AT RESISTANCE -- price rallies up into the prior 15m high from below, never closes above it, and is pushed back with an upper rejection wick. No sweep required. The 3m coil is dropped for shorts because for a rejection the wick is the energy. Bear regime, time gate, 1h HA agreement and the whole-number middles filter are retained. Stop above the 10-bar swing high plus a buffer -- a different object from the signal level -- floored at 0.8% of price, target 1.5R, both fixed at entry.",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "metrics": {
+      "netProfitPct": 0.09776496,
+      "profitFactor": 1.09920479,
+      "maxDrawdownPct": 1.63050849,
+      "totalTrades": 5,
+      "winRatePct": 20.0,
+      "avgTradePct": 0.01955299
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GE96T1VD3N2ZTG2W115DHC",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GE96T1FPTHCCSH8CGCECDX",
+      "verifiedAt": "2026-09-02T06:54:52Z"
+    },
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "notes": "E9 strict gates: only 5 trades in 4.6 months. INCONCLUSIVE, not positive -- a PF of 1.10 on n=5 tests nothing. The conjunction (bear regime + time gate + 1h bear + tagged the prior 15m high + closed below + two prior closes under resistance + 0.8x ATR wick + red HA + not in the middles) is far too restrictive to evaluate. Loosened in E9b purely for sample size."
+  },
+  {
+    "id": "war-formation-e9b-short-loose",
+    "name": "War Formation SHORT rebuild (loosened)",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "short",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "description": "SHORT-SIDE REBUILD, short only, judged on its own profit factor. Deliberately NOT the mirror of the long leg: the long fades a failed BREAKDOWN (sweep the prior 15m low, then reclaim it with velocity), while this fades a REJECTION AT RESISTANCE -- price rallies up into the prior 15m high from below, never closes above it, and is pushed back with an upper rejection wick. No sweep required. The 3m coil is dropped for shorts because for a rejection the wick is the energy. Bear regime, time gate, 1h HA agreement and the whole-number middles filter are retained. Stop above the 10-bar swing high plus a buffer -- a different object from the signal level -- floored at 0.8% of price, target 1.5R, both fixed at entry.",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "metrics": {
+      "netProfitPct": -5.85897307,
+      "profitFactor": 0.68303559,
+      "maxDrawdownPct": 7.42742316,
+      "totalTrades": 69,
+      "winRatePct": 20.28985507,
+      "avgTradePct": -0.08491265
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1GEATF9GTTBWRV1J8761CSJ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1GEATF9CBGHA8K5W18GZTNZ",
+      "verifiedAt": "2026-09-02T06:54:52Z"
+    },
+    "specPath": "war-formation/EXPERIMENT-LOG.md",
+    "notes": "E9b, gates loosened ONLY to reach a testable sample (wick 0.8 to 0.4x ATR, under-resistance requirement dropped, near-touch tolerance added). 69 trades, PF 0.68, win rate 20.3%. The payoff geometry was fine at 2.68:1 -- break-even needs ~27% and it delivered 20.3%. CONCLUSION: the short side now fails on TWO structurally different constructions -- the mirrored failed-breakout (v5: 2 winners in 15) and rejection-at-resistance (14 in 69). Geometry is not the problem. The leading remaining hypothesis is the bear-regime definition itself, or that Dec 2025 - May 2026 simply had no tradeable downside."
   }
 ]

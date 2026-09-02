@@ -45,6 +45,8 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 | E6 | Ablation: strip the whole cascade | PF 0.68 — cascade is the edge |
 | E7 | v6 long only | **PF 1.69** — best full-window result |
 | E8 | Split-half stability | 3.80 vs 0.89 — edge concentrated in first half |
+| E9 | Short rebuild, rejection-at-resistance, strict gates | 5 trades — inconclusive, sample too small to test |
+| E9b | Same short, gates loosened for sample size | PF 0.68, 69 trades, win rate 20.3% — **short side fails again** |
 
 ## STANDING OBJECTIVES — every variant must satisfy these
 - **Both directions.** Long AND short, each with its own entry logic, its own level definition and
@@ -56,12 +58,15 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
   grid. These never relax.
 
 ## OPEN QUEUE — take the top unblocked item each cycle
-0a. **REBUILD THE SHORT SIDE PROPERLY (highest priority).** Not a mirror. In a bear regime the
-    tradeable event is a *failed bounce into resistance*: price rallies into the previous 15m high
-    or a prior broken level, fails to reclaim it, and rolls over on a red HA candle. Stop above the
-    failed-bounce swing high (structure, per LESSON 5). Consider a lower rr for shorts, since
-    downside moves in crypto are faster but shallower to a fixed target. Judge the short leg on its
-    OWN profit factor, not on whether it improves the blended number.
+0a. ~~REBUILD THE SHORT SIDE PROPERLY~~ — **DONE (E9/E9b), failed.** See the new 0c below.
+0c. **DIAGNOSE THE BEAR REGIME ITSELF (new top priority).** Two structurally different short
+    constructions have now failed: the mirrored failed-breakout (v5, 2 of 15) and
+    rejection-at-resistance (E9b, 14 of 69, PF 0.68). Both had healthy payoff ratios and losing win
+    rates. **Geometry is not the problem, so stop iterating on geometry.** Test the regime label
+    instead: (i) how many bars of the window were even classified BEAR by `grnPrev <= 2`? (ii) what
+    was BTC's net return across exactly those bars? If the bear-labelled periods were flat or rising,
+    no short construction could have worked and the finding is about the sample, not the strategy.
+    This is a plotting/measurement question first — it may need no backtest at all.
 0b. **BUILD AN EXPLICIT REGIME-FLIP DETECTOR.** Right now the 6h HA green-count classifies the
     regime but nothing detects the *transition*. Add a flip signal — the green count crossing its
     threshold in either direction — and test three responses: (i) stand down for N bars after a
@@ -70,6 +75,9 @@ either. **The binding constraint is sample size.** 1m coverage on this engine is
 1. **Port the cascade to 15m and 5m.** Highest value by far: 4.7 years of data instead of 4.6 months.
    6h/1h/15m all reconstruct from 15m bars the same way they do from 1m. Entry precision is coarser,
    but a 500+ trade sample settles what 32 trades cannot. **Do this first.**
+1b. **If 0c shows the bear label is sound but shorts still lose**, the honest conclusion is that this
+    cascade is a long-only edge on this data, and the short requirement should be met by a separate
+    strategy rather than by forcing a second leg onto this one. Record that and move on.
 2. **Leave-one-out ablation of each veto** (six runs, one per cycle): 6h regime · time gate ·
    1h agreement · 15m violation · 3m coil · middles filter · witching ban. Which layers earn their
    place? Drop any that costs nothing — fewer vetoes means more trades means a bigger sample.
