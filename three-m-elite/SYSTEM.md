@@ -1377,3 +1377,57 @@ for this lab as configured.** v30, the rebuild and v31 all run on **15m over 202
    **3M has 4.7 years and no excuse not to split.** Do this before any tuning.
 3. **Then** the freshness neighbourhood (dzAge 6 and 24, both sides), watching for the monotone
    ratio-for-sample walk BTC's `coolBars` turned out to be.
+
+
+---
+
+## ██ v32 - THE R FLOOR BINDS ON 77.5% OF TRADES. KEPT. (2026-09-02)
+
+| | v31 | **v32 (floor enforced)** |
+|---|---|---|
+| Profit factor | 0.88869052 | **1.22482256** |
+| Max drawdown | 34.63598596% | **10.90593093%** |
+| Trades | 734 | **165** |
+| Win rate | 37.60% | 42.42% |
+| Return | -23.91% | **+28.62%** |
+
+### THE UNVERIFIED ASSERTION WAS WRONG
+The anchor rebuild's header defended the missing floor: *"BTC 4H engulf-candle bases run far wider
+than 0.8% of price on this instrument, so the check is structural, not enforced by a clamp. Recorded
+literally as tested; if the reproduction's R distribution disagrees this note is wrong."*
+
+**It disagrees. 569 entries - 77.5% of the population - had stops under 0.8% of price.** Those
+micro-stop trades (price a hair above the zone floor, tiny R, a stop noise alone removes) are what
+made this lab look like a loser for thirty-one versions.
+
+**This is the best-supported positive result in the project**: PF 1.22482256 on 165 trades across
+4.7 years, passing the ratchet by PF +0.336 and drawdown -23.7pp.
+
+### ENFORCED BY EXCLUSION, NOT CLAMPING - AND THAT MATTERED
+`r = math.max(close - dzBot, minR)` would push `slPx = close - r` BELOW `dzBot`, turning a STRUCTURAL
+stop (LESSON 5) into a risk-defined one. **Fixing a LESSON 3 violation by creating a LESSON 5
+violation is not a fix.** Skipping trades whose structural stop is too tight satisfies both.
+
+### THE CAUTION REGISTERED BEFORE THE RUN, AND IT STILL APPLIES
+The Pine said a PF above 1.0 must be read against the trade count, because a hard sample cut can
+manufacture one - which is what BTC's `coolBars` turned out to be. **The count fell 78%.**
+
+The distinction that cuts the other way: **`coolBars` was a free parameter tuned to taste; 0.8% is a
+pre-existing rule** set long ago for independent reasons and simply never applied here. This is
+compliance, not tuning. And 165 trades over 4.7 years clears the 30-trade floor comfortably.
+
+### NOT VALIDATED - IT HAS NOT BEEN SPLIT-TESTED
+On the same day this ran, BTC's Attack 32 showed a filtered build printing **2.077 in-sample** while
+the bare mechanism returned **~0.9 across 1,658 trades**. **3M has 4.7 years and can be split at
+2024-06-08.** Until that is done, **1.225 is a direction, not a result.**
+
+### QUEUE
+1. **SPLIT-TEST v32 at 2024-06-08, both halves together.** Nothing else matters until this is known.
+   If the pre-2024 half holds above 1.0 this becomes the first validated result in the project; if it
+   collapses, v32 joins Attack 31b as an in-sample artifact.
+2. **Then the R-floor neighbourhood (0.5% and 1.2%, both sides)** - HARD LESSONS 16 and 19, and watch
+   explicitly for the monotone ratio-for-sample walk, since the floor is a selectivity parameter.
+3. **Then** the freshness neighbourhood (dzAge 6 and 24).
+
+**BASE: v32. PF 1.22482256, DD 10.90593093%, 165 trades, long-only, anchored at
+pine/3m-elite-v32-r-floor.pine. Still no champion - a champion needs a split test.**

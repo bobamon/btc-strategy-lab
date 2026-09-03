@@ -903,5 +903,34 @@
    "verifiedAt": "2026-09-03T00:42:00Z"
   },
   "notes": "THE RE-ENTRY STORM IS CONFIRMED, AND IT CORRECTS THE CLOUD ROUTINE VERDICT. Reading the rebuild code showed the mechanism was present: entry is if-flat-and-longCond with dzTouch incrementing only inside if-new4h, so within one 4H candle there are sixteen 15m bars on which the strategy can be flat inside a still-live zone and it enters on every one. A single dzTraded latch took the count 2,469 to 734 -- WITHIN 10% of v30 recorded 811 -- with profit factor within 0.0084 (0.88869052 vs 0.89710112) and win rate within 0.9pp (37.60% vs 36.74%). That was outcome 1 of three registered before the run. THE LIMIT STATED PRECISELY: this is a NEAR-reproduction, not a match. 734 is not 811 and drawdown is 6.2pp apart (34.64% vs 40.79%). So v30 is SUBSTANTIALLY reproduced once the defect is fixed -- the model in SYSTEM.md is essentially right -- while a residual 10% trade gap remains unexplained. The unreproducible verdict SOFTENS but does not vanish, and it was reached from a buggy rebuild rather than from v30 itself. v31 IS NOW THE ANCHORED BASE: on disk at pine/3m-elite-v31-one-entry-per-zone.pine, reproducible, matching v30 profile closely. PF 0.889 is STILL A LOSING STRATEGY -- no champion, no candidate. LEADING REMAINING SUSPECT, QUEUED: there is no R FLOOR (r = close - dzBot, no 0.8% minimum, LESSON 3). The rebuild header asserted 4H engulf bases run wider than 0.8% on this instrument but recorded that as UNVERIFIED."
+ },
+ {
+  "id": "3m-elite-v32-r-floor",
+  "name": "3M Elite v32 R floor enforced",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "long",
+  "status": "testing",
+  "createdDate": "2026-09-02",
+  "lastTestedDate": "2026-09-02",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "specPath": "three-m-elite/SYSTEM.md",
+  "description": "Queue item 1: enforce the R floor. v31 sized risk as r = close - dzBot with no 0.8%-of-price minimum, violating LESSON 3. The anchor rebuild header asserted engulf bases run wider than 0.8% here but recorded it as UNVERIFIED. One change from v31: skip entries whose structural stop is under 0.8% of price, enforced by exclusion rather than clamping so the stop stays at dzBot.",
+  "metrics": {
+   "netProfitPct": 28.62217491,
+   "profitFactor": 1.22482256,
+   "maxDrawdownPct": 10.90593093,
+   "totalTrades": 165,
+   "winRatePct": 42.42424242,
+   "avgTradePct": 0.17346773
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1JB9TSTCYFMBJ5Z5P79TF25",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JB9TSTA5ZBYMM09MSAFWN4",
+   "verifiedAt": "2026-09-03T00:48:00Z"
+  },
+  "notes": "KEPT -- THE FLOOR BINDS HARD AND THE REBUILD ASSERTION WAS WRONG. v31 PF 0.88869052 / DD 34.63598596% / 734 trades; v32 PF 1.22482256 / DD 10.90593093% / 165 trades. 569 entries, 77.5% of the population, had stops under 0.8% of price. The anchor rebuild header claimed 4H engulf bases run far wider than 0.8% on this instrument and recorded that as UNVERIFIED -- it was wrong, and those micro-stop trades were what made this lab look like a loser. Passes the ratchet by the widest margin in any lab today: PF +0.336, drawdown -23.7pp. ENFORCED BY EXCLUSION NOT CLAMPING: raising r would push slPx below dzBot and convert a structural stop into a risk-defined one, so fixing a LESSON 3 violation would have created a LESSON 5 one. THE REGISTERED CAUTION STILL APPLIES: a PF above 1.0 must be read against the count, because a hard sample cut can manufacture one -- the count fell 78%. The distinction cutting the other way is that coolBars was a FREE PARAMETER tuned to taste while 0.8% is a PRE-EXISTING RULE set long ago for independent reasons and simply never applied here. This is compliance, not tuning, and 165 trades over 4.7 years clears the 30-trade floor comfortably. NOT VALIDATED: THIS HAS NOT BEEN SPLIT-TESTED. On the same day, BTC Attack 32 showed a filtered build printing 2.077 in-sample while the bare mechanism returned ~0.9 on 1,658 trades. 3M has 4.7 years and CAN be split at 2024-06-08. Until that is done 1.225 is a direction, not a result."
  }
 ]
