@@ -467,6 +467,29 @@ Whether a **new** stage 1 can begin immediately after a stage-2 react depends on
 regardless of clusters — the same "one break the wrong way flips the whole model" rule already used
 elsewhere in this project's model-direction logic.
 
+### ✅ UPDATE, 2026-09-03 (v46/v47) — "TAP" IS RESOLVED: A WICK TOUCH, NOT A BODY CLOSE
+
+Queue item 1 from v45 asked whether a cluster "tap" needs a body close (like the separately-decoded
+mitigation rule) or a mere wick touch. Re-reading `transcripts/2026-08-09 04-42-54.txt` for this
+specific question (rather than the stage-sequence question it was originally mined for) turns up a
+direct answer at [35:19]:
+
+> "All that needs to happen is that the zone gets tapped. Okay, the zone doesn't need to hold."
+
+**"Doesn't need to hold" is the tell: a tap is a wick touch.** This is the same word ("hold") the
+source uses elsewhere to describe a candle staying closed inside a zone — explicitly saying tap does
+NOT require that. This is deliberately weaker than the mitigation rule (which V13 confirmed requires a
+BODY close) — the two are different mechanisms measuring different things: mitigation kills a zone,
+tap starts a cluster's eligibility. v45's `dzTouch>=1` approximation for "tapped" was actually reusing
+the mitigation counter, i.e. measuring body-close touches — the wrong primitive. Fixed at v47 (see
+SYSTEM.md's v46/v47 entry): a separate latched `dzTapped` flag, true from the first wick touch
+(`low <= dzTop`) while the zone is live, independent of the body-close `dzTouch` counter.
+
+The second ambiguity from v45's queue item 1 (entry-timeframe mapping for the stage/cluster gate) is
+NOT resolved by new source material — no transcript states how "whatever your entry timeframe is"
+should map onto a 4.7-year 15m-base backtest versus the source's literal 3m entry. It remains a
+data-availability convention (15m, per the champion's existing resolution), not a decoded fact.
+
 ### Why this matters for this lab specifically
 
 **None of v1 through v44 have ever implemented this gate.** SYSTEM.md's original ENTRY-layer checklist

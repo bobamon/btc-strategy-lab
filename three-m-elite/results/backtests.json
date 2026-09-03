@@ -1413,5 +1413,65 @@
     },
     "pineSource": "three-m-elite/pine/3m-elite-v45-cluster-diagnostic.pine",
     "notes": "POPULATION IS REAL, NOT DEGENERATE. 664 cluster-candidate events in 4.7 years, against v20/v23-era baselines of 2,711 engulfs and 71 deepest-zone creations -- comfortably between a starved population (a handful, which would mean the break-lookback or tap definition is too strict) and the full engulf count (which would mean the tap condition is not filtering anything). This is a first frequency read only, built on two stated approximations (a 20-bar-new-high proxy for structural break, and dzTouch>=1 as a proxy for tap) that are NOT derived from the source and must be resolved (or at least sensitivity-checked) before any real stage-machine or entry logic is built on this number. Recorded rejected because it is a diagnostic, not a candidate strategy -- exactly the convention used for v12/v19/v20/v22."
+  },
+  {
+    "id": "3m-elite-v46-pivot-break-diagnostic",
+    "name": "3M Elite v46 cluster-candidate counter (diagnostic, real pivot-break detector)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "A COUNTER, NOT A STRATEGY. Queue item 2 from v45: replaces v45's 20-bar-new-high proxy for 'break up' with a REAL structural-break detector built from ta.pivothigh (close crosses above the last CONFIRMED pivot high). Everything else held byte-identical to v45: the 4H zone lifecycle (engulf creates [low,open] demand zone, body-close mitigation with the One Candle Rule cap at 2) and the 'tapped' definition (dzTouch>=1, a body-close touch -- deliberately held at v45's known-wrong approximation so this run isolates the break-detector axis alone; the tap-definition axis is isolated separately in v46's sibling, v47). One-bar exit; totalTrades IS the count. P&L is NOT meaningful by construction, same exemption as v12/v19/v20/v22/v45.",
+    "metrics": {
+      "netProfitPct": -30.83176819,
+      "profitFactor": 0.43916007,
+      "maxDrawdownPct": 32.07000881,
+      "totalTrades": 416,
+      "winRatePct": 25.24038462,
+      "avgTradePct": -0.07411483
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1KB49BZQE9732VP2HCM0K4X",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KB49BZRR0P1MZA7T87Q9G3",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v46-pivot-break-diagnostic.pine",
+    "notes": "PREDICTED BEFORE RUNNING (stated in the Pine header, LESSON 17): a real confirmed-pivot break detector is stricter than a 20-bar-new-high proxy, so the count should fall below v45's 664. CONFIRMED: 416 < 664. This isolates the break-detector axis of v45's two stated approximations -- the tap-definition axis is measured separately at v47 on top of this same break detector, so the two errors in v45's 664 are no longer conflated."
+  },
+  {
+    "id": "3m-elite-v47-wicktap-diagnostic",
+    "name": "3M Elite v47 cluster-candidate counter (diagnostic, wick-tap fix)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "A COUNTER, NOT A STRATEGY. Queue item 1 from v45: resolves the 'tap = wick vs body' ambiguity from transcripts/2026-08-09 04-42-54.txt [35:19] ('All that needs to happen is that the zone gets tapped... the zone doesn't need to hold') -- a cluster tap is a WICK touch, not a body close. Built on v46's real pivot-break detector, with 'tapped' redefined as a latched dzTapped flag (true once low<=dzTop while the zone is live) instead of v45/v46's dzTouch>=1 (which actually measures body-close/mitigation-strength touches, the wrong primitive for 'tap'). Mitigation itself (dzTouch, the One Candle Rule cap) is unchanged. One-bar exit; totalTrades IS the count. P&L is NOT meaningful by construction, same exemption as v12/v19/v20/v22/v45/v46.",
+    "metrics": {
+      "netProfitPct": -76.78283918,
+      "profitFactor": 0.39985733,
+      "maxDrawdownPct": 76.85388735,
+      "totalTrades": 1407,
+      "winRatePct": 25.0177683,
+      "avgTradePct": -0.05457203
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1KB61W6A6K2MJWVCA1JZ12E",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KB61W6F7RZDK7MB0YP842R",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v47-wicktap-diagnostic.pine",
+    "notes": "PREDICTED BEFORE RUNNING (stated in the Pine header, LESSON 17): a wick-tap is strictly easier to satisfy than a body-close tap, so the count should rise above v46's 416. CONFIRMED, and by a wide margin: 1407 >> 416 (3.4x). Both stated ambiguities from v45's queue item 1/2 are now separately measured: the break-detector fix alone (v46, 664->416) and the tap-definition fix alone on top of it (v47, 416->1407). Neither run is a candidate strategy -- both are diagnostics establishing the real population size before any stage-machine build. v47's count (1407) is now the most source-faithful reading of 'cluster-candidate' this lab has produced, though it still omits the full 5-state cycle, model-direction tracking and reset rules per v45's scoping."
   }
 ]

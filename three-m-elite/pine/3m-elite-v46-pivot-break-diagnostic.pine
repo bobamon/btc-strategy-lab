@@ -1,0 +1,115 @@
+//@version=6
+// 3M ELITE v46 - CLUSTER DIAGNOSTIC, AXIS 1: REAL SWING-BREAK DETECTOR (APPROXIMATE COUNTER, NOT A
+//   STRATEGY). Queue item 2 from v45 (SYSTEM.md): v45's cluster-candidate counter approximated
+//   "break up" as a 20-bar new-high proxy, flagged explicitly as "an arbitrary window, not derived
+//   from the source, and the single biggest source of uncertainty in this measurement." This build
+//   replaces that proxy with a REAL structural-break detector built from ta.pivothigh/ta.pivotlow
+//   (both on the codegen allowlist) -- the same "close beyond the prior swing extreme" definition
+//   this lab used for "Break" in v1 (SYSTEM.md's "WHAT I COULD DEFINE MECHANICALLY" table), which has
+//   never actually been built until now. Everything else is held byte-identical to v45: the 4H zone
+//   lifecycle (engulf creates [low,open] demand zone, body-close mitigation with the One Candle Rule
+//   cap at 2) and the "tapped" definition (dzTouch >= 1, a body-close touch -- NOT yet the wick-tap
+//   fix from the v46/v47 VOCABULARY.md finding below; that is isolated separately in v47 so this run
+//   measures ONE axis only, per this lab's own discipline, HARD LESSON 10/12).
+//
+// NEW FINDING THIS CYCLE (VOCABULARY.md, STAGE AND CLUSTER section): transcripts/2026-08-09 04-42-54.txt
+// [35:19] "All that needs to happen is that the zone gets tapped. Okay, the zone doesn't need to hold" --
+// this resolves queue item 1's first ambiguity: a cluster "tap" is a WICK touch, explicitly weaker than
+// the separately-decoded mitigation rule (which the source states requires a BODY close). v45's
+// dzTouch>=1 approximation was actually the WRONG primitive for "tap" (it counts body closes, i.e.
+// mitigation-strength touches) -- this run keeps that known-wrong approximation deliberately, to isolate
+// the break-detector fix alone; v47 fixes the tap definition on top of this run's break detector.
+//
+// Second ambiguity from queue item 1 (entry-timeframe mapping) is NOT resolved by new source material --
+// it is a data-availability convention already adopted at v45 (15m base, per the champion's existing
+// resolution, to avoid the 20x-smaller 1m-only Dec2025-May2026 window) and is unchanged here.
+//
+// AUDIT (LESSON 17, stated before running): this is a diagnostic counter, not a strategy -- LESSON 3
+// (R floor) and LESSON 5 (structural stop) do not apply, exactly as exempted for v12/v19/v20/v22/v45.
+// PREDICTION: a real swing-break detector is stricter than a 20-bar new-high proxy (pivots need
+// pivRight bars to confirm, and a confirmed swing high is usually a taller bar than "any new 20-bar
+// high"), so this count should be LOWER than v45's 664, not higher. If it comes back higher, the proxy
+// was not the more permissive definition and that assumption needs revisiting, not the count itself.
+strategy("3M ELITE v46 pivot-break diagnostic (approx)", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+pivLeft  = input.int(5, "Pivot left bars (swing-high confirmation)")
+pivRight = input.int(5, "Pivot right bars (swing-high confirmation)")
+
+// ---------- real structural break: close crosses above the last CONFIRMED pivot high ----------
+ph = ta.pivothigh(pivLeft, pivRight)
+
+var float lastSwingHigh = na
+if not na(ph)
+    lastSwingHigh := ph
+
+breakUp = not na(lastSwingHigh) and close > lastSwingHigh and close[1] <= lastSwingHigh
+
+// ---------- 4H reconstruction from the 15m base (byte-identical to v37/v45) ----------
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+var float pO  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+// ---------- engulf on the just-completed 4H candle vs the one before it (body containment, no gap) ----------
+bullEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC < ppO and pC > pO and pC > ppO
+
+// ---------- demand zone lifecycle: create on bull engulf, mitigate on a body close inside (One Candle Rule) ----------
+var float dzTop   = na
+var float dzBot   = na
+var bool  dzLive  = false
+var int   dzTouch = 0
+
+if new4h
+    if dzLive and not na(pC) and pC <= dzTop
+        dzTouch := dzTouch + 1
+        if dzTouch >= 2
+            dzLive := false
+    if bullEngulf
+        dzTop   := pO
+        dzBot   := pL
+        dzLive  := true
+        dzTouch := 0
+
+// ---------- cluster candidate: zone live and tapped (v45's body-close approximation, held fixed), THEN a real structural break up ----------
+tapped   = dzLive and dzTouch >= 1
+clusterCandidate = tapped and breakUp
+
+// ---------- one-bar-exit counter: totalTrades IS the cluster-candidate count ----------
+if strategy.position_size == 0 and clusterCandidate
+    strategy.entry("C", strategy.long)
+
+if strategy.position_size != 0
+    strategy.close_all()
+
+plot(dzLive ? 1 : 0, title="DemandZoneLive")
+plot(breakUp ? 1 : 0, title="RealBreakUp")
+plot(clusterCandidate ? 1 : 0, title="ClusterEvent")

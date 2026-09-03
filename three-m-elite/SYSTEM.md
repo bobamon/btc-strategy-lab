@@ -1206,6 +1206,97 @@ measurement, not a ratchet candidate — no config change follows from it this c
 
 ---
 
+## ██ v46/v47 — BOTH v45 APPROXIMATIONS SEPARATED AND MEASURED; "TAP" IS RESOLVED (2026-09-03)
+
+**A NOTE ON THE PROMPT, A NINTH TIME.** This cycle's stored scheduled prompt is again the same stale
+text first flagged at v34 and repeated at v36, v37/v38, v39, v40/v41, v42/v43, v44 and v45 — it still
+frames the ~2026-09-02 cloud/local merge as current news, describes v30 as unreproduced-and-current,
+and asks to rebuild the anchor as blocking task 0. That work has been done and confirmed since
+v31/v32/v36, and the champion has since moved to v37 then stayed there through v45. Per the prompt's
+own instruction ("THE DOCS WIN over this prompt") and HARD LESSON 26, this cycle again works from the
+real queue (v45's items 1 and 2) rather than re-running the anchor. **Not re-notified as a push this
+cycle**: v39 already escalated this staleness, v40/v41 confirmed `update_trigger` cannot fix it from
+inside a cycle (the routine was created via `http_api`, not by an agent), and nothing has changed
+since either report — per the established "not re-notifying an unchanged, already-escalated condition"
+discipline, this is recorded here as the ninth occurrence rather than sent as a ninth notification.
+
+### QUEUE ITEM 1 FROM v45: RESOLVE THE "TAP" AMBIGUITY
+
+Re-read `transcripts/2026-08-09 04-42-54.txt` specifically for the tap question (it had only been
+mined for the stage sequence before). Found a direct answer at [35:19]: *"All that needs to happen is
+that the zone gets tapped. Okay, the zone doesn't need to hold."* **A cluster tap is a WICK touch, not
+a body close** — explicitly weaker than the separately-decoded mitigation rule. v45's `dzTouch>=1`
+approximation for "tapped" was reusing the mitigation counter (a body-close primitive), which is the
+wrong object. Full decode in VOCABULARY.md's new update section. The second ambiguity (entry-timeframe
+mapping for the stage/cluster gate) is unchanged — no transcript answers it; it remains v45's
+data-availability convention (15m base), not a decoded fact.
+
+### QUEUE ITEM 2 FROM v45: BUILD A REAL BREAK-UP DETECTOR, AND SEPARATE THE TWO APPROXIMATIONS
+
+v45's counter conflated two stated approximations into one number (664): a 20-bar-new-high proxy for
+"break up", and a body-close (`dzTouch>=1`) proxy for "tapped". Rather than fix both at once and get a
+single number that cannot say which fix did what, this cycle measured them as two separate one-axis
+runs (this lab's own discipline, HARD LESSON 10/12), each with its prediction stated before running
+(HARD LESSON 17):
+
+| Build | Break detector | Tap definition | Cluster-candidate count |
+|---|---|---|---|
+| v45 (prior) | 20-bar new-high proxy | body close (`dzTouch>=1`) | 664 |
+| **v46** | **real confirmed-pivot break (`ta.pivothigh`)** | body close (`dzTouch>=1`, held fixed) | **416** |
+| **v47** | real confirmed-pivot break (same as v46) | **WICK touch (`dzTapped`, the resolved definition)** | **1407** |
+
+**v46 (break-detector axis): PREDICTED to fall below 664 (a confirmed swing high needing `pivRight`
+bars to form is stricter than "any new 20-bar high"). CONFIRMED: 416.** This is this lab's first real
+structural-break detector, built from `ta.pivothigh`/`ta.pivotlow` (both codegen-allowlisted) — the
+same "close beyond the prior swing extreme" definition SYSTEM.md's v1 table named for "Break" but that
+no build until now had actually implemented.
+
+**v47 (tap-definition axis, on top of v46's break detector): PREDICTED to rise well above 416 (a wick
+touch is strictly easier to satisfy than a body close — every body-close touch is also a wick touch,
+but not vice versa). CONFIRMED, by 3.4x: 1407.** The wick-tap fix dominates the break-detector fix in
+magnitude — loosening "tapped" adds far more candidate events than tightening "break up" removes.
+
+**Both v45 approximation errors are now separated rather than netting out by coincidence.** v45's 664
+was a stricter tap (body) combined with a looser break (20-bar high); v47's 1407 is the most
+source-faithful reading produced so far — real pivot break AND wick tap, both per the source's own
+language. **1407 is comfortably not degenerate** (HARD LESSON 19) — it sits between v20's raw engulf
+count (2,711) and v45's original estimate (664), which is the right neighbourhood for a population that
+adds a break-confirmation requirement on top of engulfs but loosens the tap gate.
+
+**Both runs are diagnostics, not strategies** — one-bar exit, `totalTrades` is the count, P&L (PF 0.44
+and PF 0.40 respectively, both deeply negative) is an artefact of the instrument exactly as exempted
+for v12/v19/v20/v22/v45. Saved to `pine/3m-elite-v46-pivot-break-diagnostic.pine` and
+`pine/3m-elite-v47-wicktap-diagnostic.pine` in the same actions that ran them (HARD LESSON 21).
+
+### WHAT THIS DOES AND DOES NOT SETTLE
+
+This closes queue item 1 (tap is resolved) and substantially advances item 2 (a real break detector now
+exists and is measured, not just proposed). **It does not attempt the 5-state stage machine** — v45's
+queue item 3 explicitly gated that on both of these being done first, and this cycle's two-backtest
+budget went entirely to the two measurement axes rather than a partial machine build. The stage/cluster
+gate remains fully unimplemented as an entry filter; only its atomic "cluster-candidate" event has now
+been measured under three different definitions.
+
+### QUEUE
+1. **Attempt the 5-state stage machine**, using v47's real-pivot-break + wick-tap primitives as the
+   corrected cluster-candidate event, gated by the entry timeframe. Per v45's own plan: measure it
+   FIRST as a filter on top of champion v37 (does restricting v37's entries to stage ∈ {1, 1-reacc, 2,
+   2-reacc} change anything?) before considering it a freestanding system.
+2. **A purpose-built regime-flip split remains open** for the short leg / flip-rule side of the
+   STANDING REQUIREMENT — unchanged from v36 onward, not touched by this cycle's cluster work.
+3. **The scheduled prompt still needs to be edited at the source.** Nine consecutive cycles (v34, v36,
+   v37/v38, v39, v40/v41, v42/v43, v44, v45, now v46/v47) have found and worked around the same stale
+   text; `update_trigger` was confirmed (v40/v41) outside any cycle's reach on this routine. Not
+   re-flagged as a new push per the established discipline — nothing has changed since v39/v40's
+   reports.
+
+**BASE UNCHANGED: v37 remains champion.** PF 1.25172059, DD 8.72815312%, 155 trades, long-only,
+maxAge=6, anchored at `pine/3m-elite-v37-freshness-tight.pine`. v46/v47 are diagnostic measurements
+refining the cluster-candidate population estimate, not ratchet candidates — no config change to the
+champion follows from this cycle.
+
+---
+
 0-V32. ~~Then the freshness neighbourhood~~ (HARD LESSON 16): dzAge <= 6 and <= 24. A KEPT parameter
     must have its sensitivity profile measured before the result is quoted -- War Formation's champion
     was just demoted for exactly this omission. Superseded by v34/v35 above -- still open, now queue

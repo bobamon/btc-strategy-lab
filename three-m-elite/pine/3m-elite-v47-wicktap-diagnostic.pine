@@ -1,0 +1,120 @@
+//@version=6
+// 3M ELITE v47 - CLUSTER DIAGNOSTIC, AXIS 2: THE WICK-TAP FIX (APPROXIMATE COUNTER, NOT A STRATEGY).
+//   Queue item 1 from v45 (SYSTEM.md): resolve the "tap = wick vs body" ambiguity before building
+//   further on the stage/cluster mechanism. RESOLVED this cycle from source material not previously
+//   mined for this question: transcripts/2026-08-09 04-42-54.txt [35:19] -- "All that needs to happen
+//   is that the zone gets tapped. Okay, the zone doesn't need to hold." This is explicit: a cluster
+//   TAP is a WICK touch, deliberately weaker than the separately-decoded MITIGATION rule (VOCABULARY.md,
+//   "MITIGATION IS JUDGED ON THE BODY"), which the source states requires a body close. v45's and v46's
+//   `dzTouch >= 1` approximation for "tapped" was measuring the wrong primitive -- it counts body-close
+//   touches (mitigation-strength events), not the weaker wick touches the source actually describes.
+//   This build fixes ONLY that one definition, on top of v46's real pivot-break detector, to isolate
+//   the tap-definition axis exactly as v46 isolated the break-detector axis (this lab's own discipline,
+//   HARD LESSON 10/12 -- one axis per run).
+//
+// THE FIX: a new persistent latch `dzTapped`, reset to false whenever the zone is (re)created, set
+// true the first time price WICKS into the live zone (`low <= dzTop`), checked every 15m bar rather
+// than only at 4H boundaries (a wick can occur inside a still-forming 4H candle). `tapped` becomes
+// `dzLive and dzTapped` instead of v46's `dzLive and dzTouch >= 1`. Mitigation itself (dzTouch, the
+// One Candle Rule cap) is UNCHANGED -- that rule was already confirmed correct at v13 and is a
+// different mechanism (zone death) from tap (cluster eligibility).
+//
+// AUDIT (LESSON 17, stated before running): diagnostic counter, not a strategy -- LESSON 3/5 exempt,
+// same convention as v12/v19/v20/v22/v45/v46. PREDICTION: a wick-tap is strictly easier to satisfy
+// than a body-close tap (every body-close touch is also a wick touch, but not vice versa -- wicks can
+// happen without a body ever closing inside), so `dzTapped` should be true across a STRICTLY LARGER
+// span of bars than v46's `dzTouch>=1`, and the tap condition should therefore bind less often. The
+// cluster count should come back HIGHER than v46's 416 (more bars qualify as "tapped", so more
+// break-up events land inside an already-tapped window), moving further from, not closer to, v45's
+// 664 -- v45 combined a stricter tap (body) with a looser break proxy (20-bar high); this run combines
+// a looser tap (wick) with the same stricter break detector as v46, so the two v45 approximation
+// errors are now separated rather than netting out by coincidence.
+strategy("3M ELITE v47 wick-tap diagnostic (approx)", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+pivLeft  = input.int(5, "Pivot left bars (swing-high confirmation)")
+pivRight = input.int(5, "Pivot right bars (swing-high confirmation)")
+
+// ---------- real structural break: close crosses above the last CONFIRMED pivot high (byte-identical to v46) ----------
+ph = ta.pivothigh(pivLeft, pivRight)
+
+var float lastSwingHigh = na
+if not na(ph)
+    lastSwingHigh := ph
+
+breakUp = not na(lastSwingHigh) and close > lastSwingHigh and close[1] <= lastSwingHigh
+
+// ---------- 4H reconstruction from the 15m base (byte-identical to v37/v45/v46) ----------
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+var float pO  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+// ---------- engulf on the just-completed 4H candle vs the one before it (body containment, no gap) ----------
+bullEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC < ppO and pC > pO and pC > ppO
+
+// ---------- demand zone lifecycle: create on bull engulf, MITIGATE on a body close inside (One Candle Rule) -- unchanged ----------
+var float dzTop    = na
+var float dzBot    = na
+var bool  dzLive   = false
+var int   dzTouch  = 0
+var bool  dzTapped = false
+
+if new4h
+    if dzLive and not na(pC) and pC <= dzTop
+        dzTouch := dzTouch + 1
+        if dzTouch >= 2
+            dzLive := false
+    if bullEngulf
+        dzTop    := pO
+        dzBot    := pL
+        dzLive   := true
+        dzTouch  := 0
+        dzTapped := false
+
+// ---------- THE FIX: tap is a WICK touch, latched, checked every bar -- not the body-close dzTouch counter ----------
+if dzLive and low <= dzTop
+    dzTapped := true
+
+// ---------- cluster candidate: zone live and WICK-tapped, THEN a real structural break up ----------
+tapped   = dzLive and dzTapped
+clusterCandidate = tapped and breakUp
+
+// ---------- one-bar-exit counter: totalTrades IS the cluster-candidate count ----------
+if strategy.position_size == 0 and clusterCandidate
+    strategy.entry("C", strategy.long)
+
+if strategy.position_size != 0
+    strategy.close_all()
+
+plot(dzLive ? 1 : 0, title="DemandZoneLive")
+plot(dzTapped ? 1 : 0, title="WickTapped")
+plot(clusterCandidate ? 1 : 0, title="ClusterEvent")
