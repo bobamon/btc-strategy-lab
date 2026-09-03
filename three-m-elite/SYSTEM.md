@@ -2445,3 +2445,53 @@ document, in a scheduled prompt, or in any earlier entry. In brief:
 
 **No cycle may change these.** A cycle that finds one of them binding in an unreasonable place should
 record that and flag it, not route around it.
+
+
+---
+
+## ██ v51 — THE FAILED-RECLAIM SHORT. REJECTED, AND THE HYPOTHESIS IS FALSIFIED. (2026-09-03)
+
+| | v34 (fade into zone) | **v51 (failed reclaim)** |
+|---|---|---|
+| Profit factor | 0.73634167 | **0.68150476** |
+| Max drawdown | 29.25265633% | 31.03294550% |
+| Trades | 256 | 176 |
+| **Win rate** | **13.28%** | **13.07%** |
+| Avg win / avg loss | ~1:1 | **4.53348821** |
+
+### THE WIN RATE DID NOT MOVE
+v34's diagnostic said the supply zone usually does not reject price — 13.28% win rate, losers dying
+four times faster than winners resolved. v51's reasoning was that demanding **evidence** of rejection
+(price enters the zone, then closes back below it) would remove most of those 222 losers.
+
+**It removed 80 trades and kept the same hit rate: 13.07%.** So the zone-rejection question was never
+the problem. Profit factor fell, so this fails RATCHET v2 clause 1 outright.
+
+### WHAT DID CHANGE, AND WHY IT DOES NOT RESCUE IT
+Payoff went from roughly 1:1 to **4.53** — average win $218.52 against average loss $48.20, with
+winners running 36.5 bars and losers dying in 8.0. **Confirmation buys a much better payoff and cannot
+use it at a 13% hit rate.**
+
+### THE REGISTERED CONSEQUENCE, HONOURED
+This is the **sixth short-leg failure** across the two labs that have tried, and unlike the previous
+five it is not a "wrong construction" result — **confirmation did not even help.** The honest
+statement, written before the run and held to now:
+
+**The short side may not be viable on this instrument in this era, and a seventh construction is not
+the answer.** Long-only is starting to look like a property of BTCUSDT 2022–2026 rather than a gap in
+effort. That does not satisfy the standing requirement (both directions, all regimes) — it is a
+finding ABOUT the standing requirement, and the user should see it as such.
+
+### AN ANOMALY, FLAGGED RATHER THAN INTERPRETED
+`cascadeRatio` came back **1.4193548387096775** (this run was renumbered from v50 after the cloud routine independently claimed that number for its regime-flip split) — 176 rows from **124 unique entries**, histogram
+{1:81, 2:35, 3:7, 4:1}. **This is the first non-unit cascade this lab has produced.** The headline
+trade count overstates distinct decisions. It clears the 30-trade floor on either number, but the
+trigger needs checking before any future short build reuses it, and no conclusion here rests on it.
+
+### QUEUE
+1. **Decompose v37's H1** into its crash leg and its recovery leg. SYSTEM.md already flags that H1
+   contains both and that the champion is evidence the entry SURVIVED a severe drawdown, not yet that
+   it WORKS in one. That is the largest untested claim about the champion.
+2. **Check the v51 cascade** before any short work reuses the failed-reclaim trigger.
+3. **The short leg is paused, not queued.** Six constructions have failed. Reopening it needs a reason
+   from outside this lab — new source material, or a different instrument — not another geometry.
