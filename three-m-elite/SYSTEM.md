@@ -580,9 +580,98 @@ never been in the thing being tested — they have been in the assumptions under
     change from the NEW base, so it is attributable. v29 showed the touch removal is worth +0.078 of
     PF but cost 19pp of drawdown; freshness has just bought 1.7pp back. If the combination lands above
     0.95 with drawdown near v24's, this lab is genuinely close for the first time.
-0-V32. **Then the freshness neighbourhood** (HARD LESSON 16): dzAge <= 6 and <= 24. A KEPT parameter
+## ██ v34 — THE SHORT LEG, BUILT INDEPENDENTLY, FAILS ON ITS OWN GEOMETRY (2026-09-03)
+
+**A NOTE ON NUMBERING FIRST.** This scheduled cycle's prompt was written against a stale snapshot
+(the 2026-09-02 fork before the cloud/local merge) — it describes v30 as unreproduced-and-current
+and asks to rebuild the v30 anchor as task 0. **That work is already done and superseded**: v31
+found and fixed the re-entry-storm defect (the anchor exists), v32 enforced the R floor and became
+champion (PF 1.22482256, DD 10.90593093%, 165 trades), and v33 split-tested v32 and promoted it —
+the first validated result in the project. Per the prompt's own instruction ("THE DOCS WIN over
+this prompt; say so if they disagree"), this cycle continues the numbering after v33, at v34, and
+picks up v33's actual queue rather than re-running the anchor task.
+
+Queue item 1 from v33: **build and test the short leg on its own supply-zone geometry, never
+mirrored off the long** (the standing requirement's real next step, per LESSON 6).
+
+Supply zone = `[open, high]` of a bearish engulfing 4H candle — the mirror-image definition of the
+demand zone's `[low, open]`, but implemented as its own code with its own state (`szTop`/`szBot`/
+`szLive`/`szTouch`/`szAge`/`szTraded`), not copy-pasted with signs flipped. Same lifecycle rules as
+the champion: most-recent replacement (v23), body mitigation with the One Candle Rule cap 2 (v13),
+freshness cap 12 (v30), one-entry-per-zone latch (v31), 0.8% R floor (v32), stop = zone top
+(structural, LESSON 5), 2R target, 96-bar time stop. Short-only, so the leg is judged on its own
+terms (LESSON 6) rather than blended with the long.
+
+| | v32 (long, champion) | **v34 (short, own geometry)** |
+|---|---|---|
+| Profit factor | 1.22482256 | **0.73634167** |
+| Max drawdown | 10.90593093% | **29.25265633%** |
+| Trades | 165 | **256** |
+| Win rate | 42.42% | **13.28%** |
+
+**REJECTED.** The short leg loses decisively even with fully independent code. Win rate 13.28% is
+far below what the 4.81:1 avgWin/avgLoss ratio needs to break even (~17%), and `avgBarsLosing`
+(8.48) sits well under a quarter of `avgBarsWinning` (36.88) — the classic "stop inside the noise"
+shape, even though the stop is structurally placed at the zone top (LESSON 5 was honoured; the
+entries themselves are simply badly timed, the same diagnosis v15 made for the demand side before
+its validation gate existed).
+
+**This is the fifth short-leg failure across the two labs that have tried mirroring or independent
+short construction (LESSON 6) — but the first one in EITHER lab built from genuinely independent,
+non-mirrored code.** That makes it a real data point rather than a repeat of the old mistake: this
+system's supply-side logic, honestly implemented from its own definitions, does not have an edge on
+this instrument over this window. Long-only is not a shortcut that was never tried — it is the
+leg that happens to work.
+
+**HONEST STATUS AGAINST THE STANDING REQUIREMENT (both directions, all regimes, 2026-09-02):**
+long leg stands (v32/v33, validated). Short leg built and fails (v34). No mechanical flip rule
+beyond zone invalidation exists. No dedicated bear-market or regime-flip split has been run — H1 of
+the v33 split (2022–2024) contains a bear leg blended with a recovery, not an isolated one. **3M
+Elite still does not meet the standing requirement**, but for a different reason than before: the
+short leg was actually built and tested, not merely deferred.
+
+## ██ v35 — THE R FLOOR IS A REAL INTERIOR OPTIMUM, NOT A MONOTONE WALK (2026-09-03)
+
+Queue item 2 from v33: the R-floor neighbourhood (HARD LESSON 16 — a load-bearing, unmeasured
+parameter). One change from v32: `minRpct` 0.80 → 1.20 (the untested tight side; the loose side is
+already covered by v31's `minRpct=0`).
+
+| minRpct | Profit factor | Max drawdown | Trades |
+|---|---|---|---|
+| 0% (v31) | 0.88869052 | 34.63598596% | 734 |
+| **0.80% (v32, champion)** | **1.22482256** | **10.90593093%** | **165** |
+| 1.20% (v35) | 1.09260420 | 16.58968851% | 67 |
+
+**Both ratchet terms worse than v32 — not kept — but this is the informative outcome, not a null
+one.** PF rises then falls and drawdown falls then rises across the three points: a genuine interior
+optimum with graceful degradation on the tight side, not a curve-fit spike (HARD LESSON 16) and not
+a monotone ratio-for-sample walk with no peak (the cross-lab `coolBars` warning this cycle's prompt
+explicitly flagged). 67 trades is comfortably clear of the ~30-trade interpretability floor (HARD
+LESSON 19), so this is a real reading of the parameter, not a degenerate one running out of sample.
+
+**v32 stands confirmed as champion**, now with one side of its load-bearing parameter's
+neighbourhood measured. The loose-side point (0.5%) remains open for a future cycle to fully bound
+the peak per HARD LESSON 16's "both neighbours" requirement — deferred, not forgotten, since this
+cycle's two-backtest budget went to the higher-priority short-leg build instead.
+
+### QUEUE
+1. **The R-floor neighbourhood, loose side (0.5%)** — completes the bound HARD LESSON 16 requires.
+2. **The freshness neighbourhood** (dzAge <= 6 and <= 24, HARD LESSON 16) — `maxAge=12` was chosen
+   as a round number in v30 and its neighbourhood is still unmeasured.
+3. **A purpose-built bear-market or regime-flip split** — neither v33 half isolates a falling market
+   from a rising one; the standing requirement needs one before it can be called met on the "all
+   regimes" clause, independent of whatever happens to the short leg.
+4. **Re-verify v32's own reproducibility before further cycles lean on it** (HARD LESSON 25 — two of
+   this project's last three headline results, War Formation's E38 and E47, did not survive a cold
+   re-run; v32 has only been confirmed via the v33 split's exact 101+64=165 partition, which is
+   strong internal evidence but not the same as a byte-identical cold re-run).
+
+---
+
+0-V32. ~~Then the freshness neighbourhood~~ (HARD LESSON 16): dzAge <= 6 and <= 24. A KEPT parameter
     must have its sensitivity profile measured before the result is quoted -- War Formation's champion
-    was just demoted for exactly this omission.
+    was just demoted for exactly this omission. Superseded by v34/v35 above -- still open, now queue
+    item 2 for the next cycle.
     Superseded text: RECOVER v29's PROFIT FACTOR WITHOUT ITS DRAWDOWN. v29 is the closest
     this lab has come to 1.0 and it failed on one term only. The drawdown came from 243 extra trades
     compounding at percent_of_equity 100, not from worse trades -- the win rate ROSE. Test v29 with

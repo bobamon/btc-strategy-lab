@@ -1,0 +1,131 @@
+//@version=6
+// 3M ELITE v35 - R-FLOOR NEIGHBOURHOOD, TIGHT SIDE. minRpct 0.80 -> 1.20.
+//   Queue item 2 from v33 (after item 1, the short leg, see v34): "the R-floor neighbourhood
+//   (0.5% and 1.2%, both sides) - HARD LESSONS 16 and 19, watching for the monotone
+//   ratio-for-sample walk since the floor is a selectivity parameter."
+//
+// WHY THIS SIDE, WITH ONE CREDIT: v32's header already flags minRpct as load-bearing - the
+// floor binds on 77.5% of candidates (E17) and moved PF 0.889 -> 1.225 (v31 -> v32). HARD
+// LESSON 16 requires BOTH neighbours before quoting a load-bearing term as robust. The loose
+// side is already effectively measured: v31 (minRpct=0, no floor) gave PF 0.88869052 on 734
+// trades, worse than v32. The untested side is TIGHT - does PF keep climbing (a monotone
+// ratio-for-sample walk with no interior optimum, HARD LESSON 19 / the cross-lab coolBars
+// warning) or does it turn over (a real interior optimum, defensible)? This run answers that
+// with the one remaining credit this cycle.
+//
+// ONE CHANGE FROM v32 (pine/3m-elite-v32-r-floor.pine): minRpct 0.80 -> 1.20. Everything else
+// byte-identical - demand zone geometry, most-recent replacement, body mitigation + One Candle
+// Rule, dzAge>=1 sequencing, one-entry-per-zone latch, freshness cap 12, 2R target, 96-bar
+// time stop, long-only.
+//
+// STATED BEFORE THE RUN (HARD LESSON 17):
+//   PF continues to rise past 1.225 with a trade count still comfortably above the ~30-trade
+//     interpretability floor (HARD LESSON 19) -> real reading, floor tightening helps, test 1.5%
+//     next to keep bounding the peak.
+//   PF rises but the trade count collapses toward degenerate territory (HARD LESSON 19's
+//     "bounded by degeneracy", e.g. under ~30 trades or a large chunk of the window untraded)
+//     -> the number is NOT evidence about the parameter, it is the sample running out; report it
+//     as a degenerate bound, not a confirmed peak.
+//   PF falls back below 1.225 with a real sample -> 0.80 sits on an interior optimum in a
+//     meaningful neighbourhood (only one side tested so far; 0.5% remains open for a future
+//     cycle to fully bound it, per HARD LESSON 16's "both neighbours" requirement).
+//
+// 15m entry / 4H structure-zone reconstruction, 2022-01-01 -> 2026-09-01, same window as v32.
+strategy("v32 R-floor neighbourhood, minRpct=1.20 (tight side)", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rTarget  = input.float(2.0, "Target, x R")
+maxBars  = input.int(96,    "Max bars in trade (entry timeframe)")
+maxAge   = input.int(12,    "Zone freshness cap, 4H candles since creation")
+minRpct  = input.float(1.20,"R-floor neighbourhood: min stop distance as % of price (tight side)")
+
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+var float pO  = na
+var float pH  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pH  := h4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+bullEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC < ppO and pC > pO and pC > ppO
+bearEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC > ppO and pC < pO and pC < ppO
+
+var float dzTop   = na
+var float dzBot   = na
+var bool  dzLive  = false
+var int   dzTouch = 0
+var int   dzAge   = 0
+var bool  dzTraded = false
+
+if new4h
+    if dzLive and not na(pC) and pC <= dzTop
+        dzTouch := dzTouch + 1
+        if dzTouch >= 2
+            dzLive := false
+    if dzLive
+        dzAge := dzAge + 1
+    if bullEngulf
+        dzTop   := pO
+        dzBot   := pL
+        dzLive  := true
+        dzTouch := 0
+        dzAge   := 0
+        dzTraded := false
+
+minR    = close * minRpct / 100
+rBig    = not na(dzBot) and (close - dzBot) >= minR
+
+longCond = rBig and dzLive and not dzTraded and dzAge >= 1 and dzTouch < 2 and low <= dzTop and close > dzBot and dzAge <= maxAge
+
+flat = strategy.position_size == 0
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if flat and longCond and not na(dzBot) and close > dzBot
+    r = close - dzBot
+    if r > 0
+        strategy.entry("L", strategy.long)
+        dzTraded := true
+        slPx   := dzBot
+        tpPx   := close + r * rTarget
+        barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(dzLive ? 1 : 0, title="DemandZoneLive")
+plot(dzAge,          title="DemandZoneAge")

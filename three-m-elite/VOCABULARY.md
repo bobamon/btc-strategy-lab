@@ -304,3 +304,17 @@ v32 then found the R floor (LESSON 3, 0.8% of price) was never enforced and boun
 vocabulary term was decoded this cycle; Type 1 (the 3M candle's anatomy) and the swing rule remain
 undefined, per the table above, and are not currently blocking anything since the working entry uses
 Type-2-adjacent (engulf) logic only.
+
+## ✅ UPDATE, 2026-09-03 — SUPPLY ZONE GEOMETRY BUILT AND TESTED, NO EDGE FOUND (v34)
+
+The demand-zone geometry above (`[low, open]` of a bullish engulfing candle, most-recent
+replacement, body mitigation with the One Candle Rule) was mirrored on paper — not in code — into
+its supply-side counterpart: **supply zone = `[open, high]` of a bearish engulfing 4H candle**, with
+its own independent lifecycle state. This is a straight reading of VOCABULARY.md's own "ZONE
+GEOMETRY" section applied to the opposite side; nothing new was decoded to build it.
+
+**Built and tested short-only (SYSTEM.md v34): PF 0.73634167, DD 29.25265633%, 256 trades, 13.28%
+win rate — rejected.** The definitions themselves are not in question (this is the same model that
+produced the validated long leg); what this measures is that the supply side of this instrument's
+price action, over 2022–2026, does not reward the same mechanism the demand side does. Long-only
+remains this lab's only working leg, now confirmed rather than merely assumed.

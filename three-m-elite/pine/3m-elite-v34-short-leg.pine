@@ -1,0 +1,150 @@
+//@version=6
+// 3M ELITE v34 - THE SHORT LEG, BUILT FROM ITS OWN GEOMETRY. SHORT ONLY.
+//   Queue item 1 from v33: "Build and test the short leg on its own geometry (supply zones),
+//   never mirrored off the long (LESSON 6 is explicit that mirroring has failed four times
+//   across two labs). This is the standing requirement's actual next step."
+//
+// BASE: byte-identical demand-side mechanics to pine/3m-elite-v32-r-floor.pine (the champion,
+// PF 1.22482256, DD 10.90593093%, 165 trades, split-tested v33: H1 1.346 / H2 1.054). This file
+// REPLACES the long leg with an independently-built supply-side leg and disables longs entirely,
+// so the short leg's own profit factor can be judged on its own terms (LESSON 6: apply the risk
+// rules to EVERY leg, never assume symmetry transfers).
+//
+// SUPPLY ZONE GEOMETRY (VOCABULARY.md, "ZONE GEOMETRY" section, mirrored on paper, NOT copy-
+// mirrored in code without its own audit):
+//   Demand zone = [low, open] of a BULLISH engulfing 4H candle       -> dzBot=pL, dzTop=pO
+//   Supply zone = [open, high] of a BEARISH engulfing 4H candle      -> szBot=pO, szTop=pH
+// Most-recent engulf always replaces the zone (v23 - no "deepest" ratchet, LESSON per v22's
+// lock-up finding). Mitigation on the BODY closing back inside (One Candle Rule, cap 2, v13).
+// Zone freshness cap dzAge<=maxAge (v30). One entry per zone (v31's re-entry-storm latch).
+//
+// PER-LEG AUDIT (HARD LESSON 6 - one line per rule, done separately from the long leg):
+//   LESSON 3 (R >= 0.8% of price): minRpct=0.80 applied to the short leg's OWN r = szTop-close.
+//     Not inherited by assumption - it is the same pre-existing rule, re-applied to this leg's
+//     own R distribution, which has never been measured. Binding rate is unmeasured pre-run.
+//   LESSON 5 (stop beyond structure, not the signal level): stop = szTop, the supply zone's own
+//     structural edge - not a fixed tick offset from the entry candle, mirroring how dzBot was
+//     used for the long leg, but computed from THIS leg's own zone object.
+//   LESSON 6 (apply rules to every leg, do not mirror the code blindly): szTouch/szAge/szTraded
+//     are independent state from dzTouch/dzAge/dzTraded - a supply zone and a demand zone can be
+//     live at the same time and must not share a latch.
+//   BINDING (E17) / REDUNDANCY (E14): unmeasured pre-run, same as the long leg's minRpct was
+//     unmeasured before v32. No existing short-side term already bounds R size, so the floor is
+//     not redundant with anything else in this conjunction.
+//
+// STATED BEFORE THE RUN (HARD LESSON 17 - both outcomes, written down in advance):
+//   PF > ~1.0 on a real sample (>=30 trades) -> the short leg stands on its own geometry and this
+//     lab is the first of the three to build a genuinely two-sided, non-mirrored system. Queue
+//     next: combine both legs and re-measure for the v24-style interaction effect (removing shorts
+//     added 84 long entries there, so legs are NOT independent in this lab under pyramiding=1).
+//   PF well below 1.0, or a degenerate trade count -> the short leg does not work on its own
+//     geometry either, joining LESSON 6's four prior mirrored-short failures (this one is NOT
+//     mirrored, so a failure here is a genuinely new data point, not a fifth repeat of the same
+//     mistake) - the honest report is "long-only remains the only working leg", not a discovery
+//     to be softened.
+//
+// 15m entry / 4H structure-zone reconstruction, 2022-01-01 -> 2026-09-01, same window as v32.
+strategy("3M ELITE v34 short leg (supply zone, own geometry)", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rTarget  = input.float(2.0, "Target, x R")
+maxBars  = input.int(96,    "Max bars in trade (entry timeframe)")
+maxAge   = input.int(12,    "Zone freshness cap, 4H candles since creation")
+minRpct  = input.float(0.80,"Min stop distance as % of price (LESSON 3)")
+
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+// ---------- reconstruct the 4H candle from 15m bars: in-progress OHLC ----------
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+// ---------- snapshots of the two most recently COMPLETED 4H candles (open + close; +H/L for the most recent) ----------
+var float pO  = na
+var float pH  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pH  := h4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+// ---------- engulf on the just-completed candle vs the one before it (body containment, no gap) ----------
+bearEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC > ppO and pC < pO and pC < ppO
+
+// ---------- supply zone lifecycle: create on bear engulf, mitigate on a body close inside, age in 4H units ----------
+var float szTop   = na
+var float szBot   = na
+var bool  szLive  = false
+var int   szTouch = 0
+var int   szAge   = 0
+var bool  szTraded = false   // one entry per zone, mirrors v31's dzTraded latch on its OWN state
+
+if new4h
+    // mitigation check on the candle that just completed, against the zone as it stood BEFORE this candle
+    if szLive and not na(pC) and pC >= szBot
+        szTouch := szTouch + 1
+        if szTouch >= 2
+            szLive := false
+    if szLive
+        szAge := szAge + 1
+    // most-recent engulf always creates/replaces the zone (v23 rule, applied on this leg's own state)
+    if bearEngulf
+        szTop   := pH
+        szBot   := pO
+        szLive  := true
+        szTouch := 0
+        szAge   := 0
+        szTraded := false        // a NEW zone is tradeable again
+
+// ---------- entry: zone live, sequenced after creation, not yet double-mitigated, price back at the zone, still fresh ----------
+minR    = close * minRpct / 100
+rBig    = not na(szTop) and (szTop - close) >= minR
+
+shortCond = rBig and szLive and not szTraded and szAge >= 1 and szTouch < 2 and high >= szBot and close < szTop and szAge <= maxAge
+
+flat = strategy.position_size == 0
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if flat and shortCond and not na(szTop) and close < szTop
+    r = szTop - close
+    if r > 0
+        strategy.entry("S", strategy.short)
+        szTraded := true         // latch - this zone is now spent
+        slPx   := szTop
+        tpPx   := close - r * rTarget
+        barsIn := 0
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(szLive ? 1 : 0, title="SupplyZoneLive")
+plot(szAge,           title="SupplyZoneAge")

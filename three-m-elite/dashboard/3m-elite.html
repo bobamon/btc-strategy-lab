@@ -1219,9 +1219,69 @@ const DATA = [
     },
     "pineSource": "three-m-elite/pine/3m-elite-v32-r-floor.pine",
     "notes": "PF 1.05357727, DD 10.88660191%, 64 trades, win 40.63%, Sharpe 0.16 against H1's 0.90. Clears PF 1.0 but only just -- net return is +2.23% over 2.25 years, essentially flat. This is the weaker half and the honest reading of the split: the edge is real (both halves clear 1.0, and the trade counts partition exactly) but concentrated in H1, not evenly spread. Does not disconfirm v32 (HARD LESSON 22's test is passed), but does not repeat H1's strength either -- record this caveat every time v32's PF 1.225 is quoted."
+  },
+  {
+    "id": "3m-elite-v34-short-leg",
+    "name": "3M Elite v34 short leg (supply zone, own geometry)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "short",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Queue item 1 from v33 (the STANDING REQUIREMENT's next step): build and test the short leg on its own supply-zone geometry, short-only, never mirrored off the long leg's code (LESSON 6). Supply zone = [open, high] of a bearish engulfing 4H candle (most-recent replacement, body mitigation with the One Candle Rule, freshness cap 12, one-entry-per-zone latch, 0.8% R floor, stop = zone top, 2R target, 96-bar time stop) -- an independent implementation, not a copy of the demand-side code with signs flipped.",
+    "metrics": {
+      "netProfitPct": -23.0588179,
+      "profitFactor": 0.73634167,
+      "maxDrawdownPct": 29.25265633,
+      "totalTrades": 256,
+      "winRatePct": 13.28125,
+      "avgTradePct": -0.09007351
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JFKYHZVET948Y8PS34RBSF",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JFKYHZC0RPMGCF1GBRRRBT",
+      "verifiedAt": "2026-09-03T01:14:59Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v34-short-leg.pine",
+    "notes": "REJECTED. PF 0.73634167, DD 29.25265633%, 256 trades, win rate 13.28% (34W/222L), Sharpe -0.81. avgBarsLosing 8.48 vs avgBarsWinning 36.88 -- losers die about 4x faster than winners resolve, the classic 'stop inside the noise' shape, even though the stop is structural (zone top, LESSON 5-compliant) -- the more likely read is that supply-side entries in this window are simply badly timed, the same finding v15 made for the demand side before the validation gate existed. This is the FIFTH short-leg failure across the two labs that have tried (LESSON 6), but the FIRST one built from genuinely independent, non-mirrored code -- a new data point, not a repeat of the old mistake. HONEST STATUS AGAINST THE STANDING REQUIREMENT: long-only remains the only working leg. No flip rule is implemented beyond zone invalidation; no dedicated bear-market split has been run."
+  },
+  {
+    "id": "3m-elite-v35-rfloor-tight",
+    "name": "3M Elite v32 R-floor neighbourhood, minRpct=1.20 (tight side)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Queue item 2 from v33: R-floor neighbourhood test (HARD LESSONS 16/19). One change from pine/3m-elite-v32-r-floor.pine: minRpct 0.80 -> 1.20 (tight side; the loose side is already covered by v31's minRpct=0 result). Tests whether v32's load-bearing R floor sits on a real interior optimum or a monotone ratio-for-sample walk with no peak (the cross-lab coolBars warning).",
+    "metrics": {
+      "netProfitPct": 6.10892245,
+      "profitFactor": 1.0926042,
+      "maxDrawdownPct": 16.58968851,
+      "totalTrades": 67,
+      "winRatePct": 38.80597015,
+      "avgTradePct": 0.09117795
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JFPBNQPBRXE6RPBRM19KQ9",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JFPBNPPXHE2E7WKBP7GDWW",
+      "verifiedAt": "2026-09-03T01:16:18Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v35-rfloor-tight.pine",
+    "notes": "NOT KEPT (both ratchet terms worse than v32) but a genuinely informative neighbourhood point. Three-point R-floor curve: minRpct=0 (v31) PF 0.88869052 / DD 34.64% / 734 trades -> minRpct=0.80 (v32) PF 1.22482256 / DD 10.90593093% / 165 trades -> minRpct=1.20 (v35) PF 1.09260420 / DD 16.58968851% / 67 trades. PF rises then falls and DD falls then rises -- a real interior optimum with graceful degradation on the tight side (67 trades is well clear of the ~30-trade interpretability floor, so this is a real reading, not a degenerate one per HARD LESSON 19), not a curve-fit spike per HARD LESSON 16. v32 (0.80%) stands confirmed as the champion on this axis. The loose-side neighbour (0.5%) remains untested for a future cycle to fully bound the peak per HARD LESSON 16's 'both neighbours' requirement."
   }
 ];
-const BUILT = "2026-09-03 00:56";
+const BUILT = "2026-09-03 01:56";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
