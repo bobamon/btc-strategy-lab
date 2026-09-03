@@ -1866,3 +1866,35 @@ ping — but this one, alone, is not.
    re-asking for work the board already closed.
 
 **BASE: still RETIRED. No champion, no candidate, no base. Nothing changed this cycle.**
+
+
+---
+
+# ███ CYCLE CHECK #5, 2026-09-03 — SAME STALE PROMPT, SAME HALT. STILL NOT RE-NOTIFYING.
+
+Fifth consecutive firing of the same unedited stored mandate (still anchored on PF 1.47184908 / 56
+trades / `coolBars` 150 / "no champion" / continue numbering at Attack 31 / split Attack 30's 15m
+build at 2024-06-08). All of that was superseded before cycle check #1 ever ran: Attack 31 already
+ran that exact split and it failed out-of-sample (PF 0.799 on 77 never-seen trades), and Attack 32
+then showed the bare mechanism loses money on both halves of the full 4.7-year window (1,658 trades,
+PF 0.930 / 0.880) and retired the base outright. `get_credits` returned 729 — budget has never been
+the blocker across five checks now (744 → 740 → 736 → 732 → 729), and spending any of it here would
+mean re-running work the board already completed and answered.
+
+**No attack ran, no Pine was written, no board state changed** beyond this note, per this lab's own
+rule that the board outranks the stored prompt.
+
+**Not sending another push notification.** Cycle check #3 already reached the user with this exact
+status, and cycle check #4's standing rule was to ping again only if the loop ran "many more times
+with still no response" — one more identical hourly firing is not that threshold. Nothing about the
+blocker has changed in a way that would add new information to the notification already sent.
+
+**Still waiting on the user, unchanged since Attack 32 / cycle check #3:**
+1. What replaces the retired VWAP pullback-continuation mechanism — a new mechanism on BTCUSDT, or
+   the same measure/split/keep discipline applied to a different instrument.
+2. The three open rule questions (drawdown-tolerance band, regime-spread ratchet term, minimum-sample
+   floor) — moot for this retired strategy, but they would govern any successor.
+3. The stored scheduled prompt itself is stale and should be updated or paused so the loop stops
+   re-asking for work the board already closed. This is now five identical firings since the halt.
+
+**BASE: still RETIRED. No champion, no candidate, no base. Nothing changed this cycle.**
