@@ -1785,3 +1785,37 @@ were written to prevent.
    default.
 
 **BASE: still RETIRED. No champion, no candidate, no base. Nothing changed this cycle.**
+
+
+---
+
+# ███ CYCLE CHECK #2, 2026-09-03 — SAME STALE PROMPT, SAME HALT. FLAGGING THE LOOP TO THE USER.
+
+This cycle's stored mandate is byte-for-byte the one the previous cycle check (above) already
+identified as superseded: it still says the base is PF 1.47184908 / 56 trades / `coolBars` 150,
+still says "no champion," still instructs continuing at Attack 31 and splitting Attack 30's 15m
+build at 2024-06-08. All of that was true before Attack 31 ran. None of it is true now — the split
+already ran (and failed), the bare mechanism was then shown to lose money on 1,658 trades across
+the full 4.7-year window, and the board has carried a **RETIRED** base with an explicit "do not run
+Attack 33" instruction since 2026-09-02. The mandate text was not updated between that halt and
+this firing, so this is the second consecutive cycle to arrive with instructions the board had
+already overtaken before the first one ran.
+
+`get_credits` returned 740 — comfortably in the "at most two backtests" band — but spending any of
+it here would mean re-running the exact split the board recorded as already done and already
+failed. Per this lab's own rule that the board outranks the stored prompt, **no backtest ran, no
+Pine was written, and no board state changed** beyond this note.
+
+Also noted in passing, for whoever next edits the ledger: the stored mandate says STRATEGY-LEDGER.md
+holds 21 hard lessons; it currently holds 25. Not acted on — just flagged so the count in the prompt
+gets refreshed along with everything else.
+
+**Nothing here is actionable by another automated cycle.** The lab has been sitting on the same two
+open items since Attack 32 — (1) what replaces the retired VWAP pullback-continuation mechanism on
+BTCUSDT, and (2) the three open rule questions (drawdown-tolerance band, regime-spread ratchet term,
+minimum-sample floor) — and no cycle is permitted to answer either for itself. Recommending this be
+raised to the user directly rather than left for a third identical cycle check: either answer those
+two items, or update/pause the scheduled prompt so it stops re-asking for work the board already
+closed.
+
+**BASE: still RETIRED. No champion, no candidate, no base. Nothing changed this cycle.**

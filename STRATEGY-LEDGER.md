@@ -1113,3 +1113,19 @@ whichever cycle picks this up next.
   failed to reproduce.** Whatever the root cause turns out to be, the base rate for "this lab's best
   number survives a re-run" is currently 0 for 2. Treat every future headline PF as provisional until
   it has been re-run at least once, cold, before it is used as a comparison baseline for anything else.
+
+## ██ HARD LESSON 26 — A STALE SCHEDULED PROMPT REPEATING AFTER A BOARD HALT IS A NOTIFY, NOT A NO-OP (BTC, 2026-09-03)
+
+The BTC lab's scheduled cycle prompt is stored text that predates Attack 30. After Attack 31/32
+retired the base, one cycle correctly found the prompt superseded, ran nothing, and recorded the
+halt on the board. The *next* firing carried the identical unedited prompt and produced the
+identical verdict — a second cycle burning a full read-the-board-and-conclude-nothing pass because
+the thing that needed to change (the stored prompt, or the user's answer to the open questions) is
+outside any single cycle's power to fix.
+
+**How to apply:** a board halt that survives one full cycle unchanged is not still "in progress" —
+it is stuck, and a second identical cycle check will not unstick it. The correct action on the
+*second* consecutive no-op is not a third quiet board entry; it is flagging to the user, explicitly,
+that the automated loop cannot proceed without them (a successor mechanism/instrument decision, or
+an update/pause to the stored prompt itself). Recording the halt is necessary but not sufficient —
+a halt nobody outside the repo will read is not a halt anyone will act on.
