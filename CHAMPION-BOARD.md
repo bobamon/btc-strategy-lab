@@ -2089,3 +2089,47 @@ more firings, still no response" threshold. Nothing about the blocker has moved 
    spanning roughly nine hours.
 
 **BASE: still RETIRED. No champion, no candidate, no base. Nothing changed this cycle.**
+
+
+---
+
+# ███ CYCLE CHECK #11, 2026-09-03 11:19 UTC — SAME STALE PROMPT, SAME HALT. RE-NOTIFYING — FOUR HOURS SINCE THE LAST PAGE.
+
+Eleventh consecutive firing of the same unedited stored mandate (still anchored on PF 1.47184908 / 56
+trades / `coolBars` 150 / "no champion" / continue numbering at Attack 31 / split Attack 30's 15m
+build at 2024-06-08, and still citing 21 hard lessons — the ledger now holds 30). Superseded before
+cycle check #1, for the reasons recorded there and in Attacks 31/32: the split already ran and failed
+out-of-sample (PF 0.799 on 77 never-seen trades), and the bare mechanism was then shown to lose money
+on both halves of the full 4.7-year window (1,658 trades, PF 0.930 / 0.880), which retired the base
+outright.
+
+Also found the local `main` ref detached and 4 commits behind, diverged from `origin/main` by 58 —
+the same fork-merge leftover cycle check #9 already documented. Reset to `origin/main` before reading
+anything, per the rule that the board on `origin` is authoritative.
+
+`get_credits` returned 708 — budget has never been the blocker across eleven checks now
+(744 → 740 → 736 → 732 → 729 → 725 → 721 → 718 → 716 → 712 → 708; the drift with no BTC backtest run
+reflects the other two labs sharing the same pool). `git log` confirms no BTC lab commit landed
+between cycle check #10 and this firing — only War Formation (E61) and 3M Elite (v48/v49) activity —
+so there is nothing new on this lab's own board to react to. Per this lab's own rule that the board
+outranks the stored prompt: no attack ran, no Pine was written, no board state changed beyond this
+note.
+
+**Sending a push notification this time.** Cycle check #7 paged the user at 07:18 after a four-hour
+silence; checks #8–#10 held that the gap since that page was shorter than four hours and did not
+re-notify (53min, ~1h51m, ~2h53m). This check lands at 11:19 — almost exactly **four hours** after the
+07:18 page, matching the same threshold that triggered it — with zero user engagement in between. The
+same logic HARD LESSON 26 gives for a first page (a halt nobody reads is not a halt anyone acts on)
+applies to a second silence of the same length. This is a reminder ping, not new findings: the blocker
+is unchanged from check #7, but the loop now spans eleven identical firings and roughly ten hours.
+
+**Still waiting on the user, unchanged since Attack 32 / cycle check #3:**
+1. What replaces the retired VWAP pullback-continuation mechanism — a new mechanism on BTCUSDT, or
+   the same measure/split/keep discipline applied to a different instrument.
+2. The three open rule questions (drawdown-tolerance band, regime-spread ratchet term, minimum-sample
+   floor) — moot for this retired strategy, but they would govern any successor.
+3. The stored scheduled prompt itself is stale and should be updated or paused so the loop stops
+   re-asking for work the board already closed. This is now eleven identical firings since the halt,
+   spanning roughly ten hours.
+
+**BASE: still RETIRED. No champion, no candidate, no base. Nothing changed this cycle.**
