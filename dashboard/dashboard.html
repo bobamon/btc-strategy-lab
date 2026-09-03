@@ -2179,67 +2179,9 @@ const DATA = [
       "verifiedAt": "2026-09-03T00:00:00Z"
     },
     "notes": "PF 2.07724976 on 64 trades -- far stronger than the 5m base's own PF 1.47 on the same window/mechanism family, and far stronger than Attack 30's blended 4.7-year figure of 1.232. This is the period every tuning decision in this lab was made on. Read together with H1: the entire lab's positive full-sample results are a property of this one window, not of the mechanism generally. See CHAMPION-BOARD.md Attack 31."
-  },
-  {
-    "id": "vwm-attack31a-out-of-sample",
-    "name": "VWM Attack31a 15m out-of-sample",
-    "symbol": "BTCUSDT",
-    "timeframe": "15m",
-    "direction": "long",
-    "status": "rejected",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2022-01-01",
-    "backtestEnd": "2024-06-08",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "THE TRUE OUT-OF-SAMPLE HALF. 5m data begins 2024-06-08, so all of Attacks 1-30 were tuned, measured and argued after that date. Everything before it is data this strategy has never been fitted to. Paired with 31b, the tuning era, because the question is about the CONTRAST.",
-    "metrics": {
-      "netProfitPct": -11.11917076,
-      "profitFactor": 0.79859252,
-      "maxDrawdownPct": 13.55670685,
-      "totalTrades": 77,
-      "winRatePct": 33.76623377,
-      "avgTradePct": -0.14440482
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1JA5VDQ808EDWDNFQXEF9FS",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JA5VDPE7XZPCM79THAX81N",
-      "verifiedAt": "2026-09-03T00:22:00Z"
-    },
-    "notes": "THE STRATEGY LOSES MONEY ON DATA IT HAS NEVER SEEN. PF 0.79859252 on 77 trades, -11.12% return, 33.77% win rate across 2.4 years. Against 31b's 2.07724976 on the tuning era, the gap is 1.279 in profit factor and 27 PERCENTAGE POINTS of win rate -- not degradation, a different object. A DETAIL THAT MAKES IT STARKER: Attack 30's whole-window max drawdown was 13.55670685%, which is EXACTLY this half's drawdown to eight decimals. The entire risk of the combined 4.7-year result came from the losing half; the tuning era contributed no drawdown at all. THIS WITHDRAWS ATTACK 30's HEADLINE. It was recorded as 'the edge survives out of period -- the first such evidence in this project'. It does not: the aggregate was carried entirely by the 2.2 years it was fitted on. The record already flagged that the aggregate could not separate the halves and queued this run, so the process caught it, but the claim was premature. IT ALSO REFRAMES ALL FOUR KEPT CHANGES -- Attacks 15, 23, 26 and 29 were every one of them measured inside 2024-06-08 onward, so there is no evidence any of them generalises and direct evidence the configuration they produced does not."
-  },
-  {
-    "id": "vwm-attack31b-tuning-era",
-    "name": "VWM Attack31b 15m tuning era",
-    "symbol": "BTCUSDT",
-    "timeframe": "15m",
-    "direction": "long",
-    "status": "research",
-    "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
-    "backtestStart": "2024-06-08",
-    "backtestEnd": "2026-09-01",
-    "specPath": "CHAMPION-BOARD.md",
-    "description": "The tuning-era half and the control for 31a. Every attack in this lab happened after 2024-06-08 because that is where 5m data begins. On its own this says little -- a strategy performing well on the data it was tuned on is the least surprising result in research. Both halves share the 15m timeframe, so any gap between them is PERIOD, not timeframe.",
-    "metrics": {
-      "netProfitPct": 34.30186564,
-      "profitFactor": 2.07724976,
-      "maxDrawdownPct": 5.1950834,
-      "totalTrades": 64,
-      "winRatePct": 60.9375,
-      "avgTradePct": 0.53596665
-    },
-    "provenance": {
-      "source": "trader.dev",
-      "jobId": "adhoc_01M1JA6EHZCADM3KEKAW5Y9623",
-      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JA6EHZBMP6VWX7K5XXVZSK",
-      "verifiedAt": "2026-09-03T00:22:00Z"
-    },
-    "notes": "PF 2.07724976, DD 5.1950834%, 64 trades, 60.94% win, +34.30% -- by far the best numbers this lab has ever produced, AND THEY ARE THE LEAST MEANINGFUL ONES IN IT. This is the window every attack was fitted in. Its only job is to be the contrast for 31a, and the contrast is decisive: 2.077 in-sample against 0.799 out-of-sample. Because both halves share the 15m timeframe, the gap is period rather than timeframe -- the tuning did not merely fail to generalise, the configuration is actively unprofitable outside its own window. 77 + 64 = 141 reconciles against Attack 30's whole-window run."
   }
 ];
-const BUILT = "2026-09-02 18:22";
+const BUILT = "2026-09-02 18:23";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

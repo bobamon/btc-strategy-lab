@@ -1755,3 +1755,58 @@ backtests, promoted four bases, and saved nothing until E44's reproduction failu
 lesson stands, but its origin story is a local hygiene failure, not a universal difficulty — and a
 process running unattended in a container was following the discipline that the interactive session
 kept postponing.
+
+
+---
+
+# ██ E47 — THE CAP WAS BINDING. THE FIRST RUN THAT MEASURES THE A.L.C.M. AS SPECIFIED.
+
+| | E46 (cap 4320) | **E47 (cap 12960)** |
+|---|---|---|
+| Profit factor | 0.92509109 | **1.21869905** |
+| Max drawdown | 17.69793937% | **17.44898097%** |
+| Trades | 25 | 21 |
+| Win rate | 52.0% | 42.86% |
+| **Payoff ratio** | 0.85393024 | **1.62493207** |
+| **avgBarsWinning** | **4022 / 4320 = 93%** | **7317 / 12960 = 56%** |
+
+**KEPT — passes the ratchet on both terms.**
+
+## THE DIAGNOSTIC WORKED BECAUSE IT PLATEAUED
+The run was designed to separate two hypotheses that look identical at one cap value. If the cap were
+truncating winners, `avgBarsWinning` would SCALE with it and pin near 93% again — around 12,000. If
+the old cap was simply too tight, it would PLATEAU at a natural resolution time.
+
+**It plateaued at 7,317.** The cap was genuinely binding at 4320.
+
+## WHAT THAT MEANS FOR THE WHOLE ALCM RECORD
+The specification says the position ends **at target or at liquidation**. Until this run, it ended on
+a timer. **Every result from E36 onward — including the $2,000 shield sweep of E38–E41 — used
+`maxBars` 4320 and therefore measured a three-day hold with a shield attached, not the A.L.C.M.**
+
+E35 diagnosed this at `maxBars` 720 and E36 raised it to 4320, which moved the problem instead of
+fixing it. Two more cycles were needed to see that the same failure had simply relocated.
+
+## THE MECHANISM IS VISIBLE IN THE PAYOFF, NOT THE WIN RATE
+Payoff **0.854 → 1.625**; average winner **$205.44 → $410.53**. Winners are now reaching toward the
+$4,000 target rather than being closed at market mid-move.
+
+**And the cost is real: win rate FELL 52.0% → 42.86%.** A longer hold lets winners run, but it also
+lets some would-be winners turn into losers. The trade is strongly net positive and it is not free.
+
+## TWO LIMITS THAT KEEP THIS FROM BEING A CANDIDATE
+1. **21 trades**, at the declared ~20–30 ceiling. Above the ~15 floor registered before the run, so
+   the ratio is read — but as a DIRECTION, not a validated result.
+2. **There is no out-of-sample period available on this instrument.** BTC's Attack 31 demonstrated the
+   same day that an in-sample profit factor can be worthless — 2.077 inside the tuning window against
+   0.799 outside it. War Formation has ONLY 4.5 months of 1m data, so **PF 1.219 cannot be
+   split-tested at all.** That is a structural limit of this lab, and after Attack 31 it is the single
+   biggest reason not to call this a result.
+
+## QUEUE
+1. **The `maxBars` neighbourhood — 8640 and 25920, both sides together** (HARD LESSON 16, and
+   HARD LESSON 19: a degenerate neighbour is not a bound). Watch for the monotone ratio-for-sample
+   walk BTC's `coolBars` turned out to be — read the TRADE COUNT, not just the profit factor.
+2. **Re-derive the shield sweep under the corrected cap.** E38–E41's $2,000 optimum was measured on
+   the three-day hold and on unreproducible code. Both defects apply.
+3. **Position sizing.** Unchanged, and still the largest unsolved problem.
