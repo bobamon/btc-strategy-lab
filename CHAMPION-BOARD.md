@@ -1838,3 +1838,31 @@ items and the stale-prompt loop itself. No backtest ran, no Pine was written, no
 beyond this note and the notification.
 
 **BASE: still RETIRED. No champion, no candidate, no base. Nothing changed this cycle.**
+
+
+---
+
+# ███ CYCLE CHECK #4, 2026-09-03 — SAME STALE PROMPT, SAME HALT. NOT RE-NOTIFYING.
+
+Fourth consecutive firing of the same unedited stored mandate. `get_credits` returned 732 — budget is
+not and has never been the blocker. Per this lab's own rule that the board outranks the stored
+prompt: no backtest ran, no Pine was written, no board state changed beyond this note.
+
+**Not sending a second push notification.** Cycle check #3 already reached the user with this exact
+message — retired base, two open decisions (successor mechanism/instrument; the three rule questions)
+— and nothing has changed since that would add to it. HARD LESSON 26 calls for notifying on the
+second consecutive no-op so the stuck loop reaches someone who can fix it; it is not a mandate to
+re-page the user every subsequent hour with an unchanged status. Repeating an unactioned notification
+on an unchanged fact wastes the signal rather than reinforcing it. If a future cycle check finds this
+loop has run many more times with still no response, that itself is new information worth one more
+ping — but this one, alone, is not.
+
+**Still waiting on the user, unchanged since Attack 32 / cycle check #3:**
+1. What replaces the retired VWAP pullback-continuation mechanism — a new mechanism on BTCUSDT, or
+   the same measure/split/keep discipline applied to a different instrument.
+2. The three open rule questions (drawdown-tolerance band, regime-spread ratchet term, minimum-sample
+   floor) — moot for this retired strategy, but they would govern any successor.
+3. The stored scheduled prompt itself is stale and should be updated or paused so the loop stops
+   re-asking for work the board already closed.
+
+**BASE: still RETIRED. No champion, no candidate, no base. Nothing changed this cycle.**
