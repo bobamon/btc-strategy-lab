@@ -2066,9 +2066,38 @@ const DATA = [
       "verifiedAt": "2026-09-03T00:26:00Z"
     },
     "notes": "KEPT -- THE CAP WAS BINDING, AND THIS IS THE FIRST RUN IN THIS LAB THAT MEASURES THE A.L.C.M. AS SPECIFIED. avgBarsWinning PLATEAUED rather than scaling: 4022 of 4320 (93%) became 7317 of 12960 (56%). Had the cap still been the constraint it would have run to ~12,000. That was the second of three outcomes registered before the run. E46 PF 0.92509109 / DD 17.69793937% / 25 trades; E47 PF 1.21869905 / DD 17.44898097% / 21 trades. Passes the ratchet on both terms. THE MECHANISM IS VISIBLE IN THE PAYOFF: 0.85393024 to 1.62493207, and average winner $205.44 to $410.53. Winners now reach toward the $4,000 target instead of being closed at market by a timer. THE COSTS, STATED: win rate FELL 52.0% to 42.86% -- a longer hold lets winners run but also lets some would-be winners turn into losers; net strongly positive but not free. 21 trades sits at the declared ~20-30 ceiling, above the ~15 refusal floor set before the run, so the ratio is read as a DIRECTION and not a validated result. THE STRUCTURAL CAVEAT THAT NOW MATTERS MOST: BTC's Attack 31 showed the same day that an in-sample profit factor can be worthless -- 2.077 in the tuning window against 0.799 outside it. War Formation has ONLY 4.5 months of 1m data, so there is no out-of-sample period available at all and PF 1.219 CANNOT be split-tested on this instrument. That is a structural limit of the lab, not a footnote. IT ALSO RE-READS THE WHOLE ALCM RECORD: every result from E36 onward used maxBars 4320 and therefore measured a three-day hold with a shield attached, including the $2,000 shield sweep of E38-E41. Those runs did not measure the specification."
+  },
+  {
+    "id": "wf-e48-shield-3000",
+    "name": "WF E48 shield 3000",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Re-derive the shield under E47's corrected cap. E38-E41 called 2000 the optimum but ran on the three-day hold and on unreproducible code. 3000 is the number the source infographic names. One change from E47: shield 2000 to 3000, cap held at 12960.",
+    "metrics": {
+      "netProfitPct": -7.52342903,
+      "profitFactor": 0.7663313,
+      "maxDrawdownPct": 28.92342722,
+      "totalTrades": 15,
+      "winRatePct": 40.0,
+      "avgTradePct": -0.50156194
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JBHB9VZ57D39VJ2QWRYEJZ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JBHB9VPEFCTFW7NE5RKEJA",
+      "verifiedAt": "2026-09-03T00:52:00Z"
+    },
+    "notes": "REVERTED ON THE RATCHET BUT INCONCLUSIVE ON THE SHIELD, AND THE DISTINCTION IS THE FINDING. E47 (2000): PF 1.21869905 / DD 17.44898097% / 21 trades / avgBarsWinning 7317 of 12960 = 56%. E48 (3000): PF 0.76633130 / DD 28.92342722% / 15 trades / avgBarsWinning 10900 of 12960 = 84%. TWO REASONS THIS DOES NOT SETTLE THE QUESTION. First, 15 trades is below the ~20 floor registered before the run, so the COUNT is reported and 0.766 is NOT read as a profit factor -- the revert rests on did-not-improve, not on that number. Second, THE CAP BINDS AGAIN AT 3000 at 84% of the maximum hold: E47 proved 12960 was long enough for a 2000 shield at 56%, but a wider shield needs longer to resolve, so E48 measures a NINE-DAY HOLD rather than the 3000 ALCM. That is exactly the failure E47 fixed, re-appearing one shield-width up. THE SHIELD AND THE CAP ARE COUPLED AND CANNOT BE SWEPT INDEPENDENTLY -- any shield comparison at a fixed cap is confounded, because the wider shield is the one the cap truncates. E38-E41's 2000 conclusion is therefore NEITHER CONFIRMED NOR REFUTED, and it now carries THREE known confounds rather than two: unreproducible code (E44), a binding cap that bound differently at each width, and risk-per-trade varying with shield width (2% of equity at 2000, 3% at 3000, under percent_of_equity 100)."
   }
 ];
-const BUILT = "2026-09-02 18:26";
+const BUILT = "2026-09-02 18:44";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

@@ -1881,3 +1881,50 @@ returned ~0.9 across 1,658 trades - that remains the reason this is a direction 
 2. **Re-derive the shield sweep under the corrected cap.** E38-E41's $2,000 optimum was measured on
    the three-day hold AND on unreproducible code. Both defects apply.
 3. **Risk fraction, correctly stated:** is 2% per trade right, and should it scale with shield width?
+
+
+---
+
+# ██ E48 - THE SHIELD AND THE CAP ARE COUPLED. THE SWEEP CANNOT BE DONE AT A FIXED CAP.
+
+| | E47 ($2,000) | E48 ($3,000) |
+|---|---|---|
+| Profit factor | 1.21869905 | 0.76633130 |
+| Max drawdown | 17.44898097% | 28.92342722% |
+| Trades | 21 | **15** |
+| **avgBarsWinning** | 7317 / 12960 = **56%** | **10900 / 12960 = 84%** |
+
+**REVERTED** - worse on both ratchet terms. But it does NOT answer the shield question.
+
+## TWO REASONS IT IS INCONCLUSIVE, BOTH REGISTERED IN ADVANCE
+1. **15 trades is below the ~20 floor.** The COUNT is reported and **0.766 is not read as a profit
+   factor**. The revert rests on "did not improve", not on that number.
+2. **THE CAP BINDS AGAIN AT $3,000 - 84% of the maximum hold.** E47 established that 12960 was long
+   enough for a $2,000 shield (56%). A wider shield needs longer to resolve. **So E48 measures a
+   nine-day hold, not the $3,000 A.L.C.M.** - the exact failure E47 fixed, re-appearing one
+   shield-width up.
+
+## THE STRUCTURAL FINDING
+**The shield and the cap are coupled and cannot be swept independently.** Any comparison of shield
+widths at a FIXED cap is confounded, because the wider shield is precisely the one the cap truncates.
+A sweep that holds the cap constant is measuring the cap, not the shield.
+
+## WHAT THIS DOES TO E38-E41
+**Their $2,000 conclusion is neither confirmed nor refuted.** And it now carries **three** known
+confounds rather than two:
+1. **Unreproducible code** (E44) - the deltas are void.
+2. **A binding cap** (E47) - and this run shows it bound *differently at each width*, so the sweep
+   was comparing differently-truncated strategies.
+3. **Risk-per-trade varying with width** - under `percent_of_equity = 100`, a $2,000 shield risks 2%
+   of equity per trade and $3,000 risks 3%. The sweep varied risk and exit geometry together.
+
+## QUEUE
+1. **Raise the cap until avgBarsWinning stops pinning AT EACH SHIELD WIDTH SEPARATELY, then compare.**
+   That is the only honest way to sweep the shield, and it is now the top item.
+2. **The maxBars neighbourhood at $2,000** (8640 and 25920) - still open, and the cloud routine was
+   working it at :37.
+3. **Risk fraction:** is 2% per trade right, and should it scale with shield width? The coupling found
+   here makes that question sharper, not softer.
+
+**Base unchanged: E47, PF 1.21869905, DD 17.44898097%, 21 trades, $2,000 shield, cap 12960,
+long-only, anchored at pine/e47-alcm-long-cap12960.pine. No champion, no candidate.**
