@@ -1294,6 +1294,42 @@ practically different from impossible when the base rate is measured in years.
 
 ---
 
+## ██ HARD LESSON 31 — IF A CHANGE CAN ONLY MOVE THE WINNER SIDE, AN UNCHANGED DRAWDOWN LOCATES THE
+## PROBLEM ON THE LOSER SIDE, TO THE CENT (BTC ATTACK 35, 2026-09-03)
+
+Attack 34 (weekly break-and-hold) was flagged as disqualified by its **drawdown** (46.88% / 32.25%),
+not its profit factor. Attack 35 changed exactly one thing — reward:risk 2.0 → 1.5 — with entry and
+stop byte-identical to Attack 34. The change was reverted (profit factor fell on both halves), but
+one number in the reverted run was worth more than the revert itself: **the recent half's max
+drawdown came back at 32.24854336% — identical, to the cent, to Attack 34's own recent-half
+drawdown.**
+
+**Why that is diagnostic and not a coincidence.** A target-multiple change can only alter where a
+*winning* trade closes — it cannot move a stop-loss exit at all. If the worst peak-to-trough point in
+the equity curve had been set by a trade that used to run further before hitting 2R, cutting the
+target to 1.5R would have closed that trade earlier, at a smaller gain, and the drawdown number
+would have shifted. **It did not shift, at all, to eight significant figures.** The only
+configuration consistent with that is that the trade setting the drawdown floor never reached its
+target in either version — it was stopped out, and the stop is untouched by this change. So the
+drawdown in this mechanism is a property of the **stop side**, not the **target side**, and that was
+established from one exact-match number rather than inspected trade-by-trade.
+
+**How to apply:**
+- **Before proposing a fix to a metric, ask which side of the trade the proposed change can actually
+  reach.** A target-side change cannot explain or repair a loss-side problem, and the reverse. Attack
+  34's own header had already speculated the drawdown came from unbounded R on the stop side; this
+  cycle turned that into a checked fact rather than leaving it a plausible-sounding guess.
+- **An unchanged output after a change that could only touch one branch of the logic is itself a
+  result.** Read it, don't discard it because the headline ratchet verdict was REVERTED — HARD LESSON
+  11's point (a declared limitation must be measured, not reasoned about) applies here in reverse: an
+  *unmeasured null result* is still a result if the match is exact enough to rule out coincidence.
+- **This also retires a search direction cheaply.** One pair of runs (2 credits) now rules out the
+  entire "target multiple" axis for Attack 34's successors, rather than requiring a second or third
+  guess at the right multiple.
+
+
+---
+
 # ██████ THE RATCHET — v2. USER DECISION, 2026-09-03. THIS SUPERSEDES ALL EARLIER STATEMENTS.
 
 The three rule questions raised by Attack 3, Attack 27 and Attack 29 were put to the user and

@@ -2331,3 +2331,73 @@ is part of the user's strategy, not an optional extra this lab gets to retire.
 Before proposing a change in War Formation or 3M Elite, ask: **is this a small tweak that perfects the
 strategy the user gave me, or am I rebuilding it into something else?** If the second, it does not
 belong in that lab. Ideas of that kind belong in the BTC lab, which exists precisely to be invented.
+
+---
+
+# ██ ATTACK 35 — TARGET CUT 2R → 1.5R. REVERTED — AND IT LOCATES THE DRAWDOWN ON THE STOP SIDE.
+
+Per the mandate: **the drawdown, not the profit factor, disqualifies Attack 34** (46.88% / 32.25%
+against 3M's verified champion at 8.73%), and the fix should come from EXIT/RISK — target multiple,
+hold cap, stop reference — before any new entry filter. This cycle tests the first of those three.
+
+## THE CHANGE, AND WHAT IT WAS NOT
+**One parameter only: reward:risk 2.0 → 1.5.** Entry and stop are byte-identical to Attack 34 (first
+close above the prior completed week's high; stop at the prior completed week's low). No new entry
+term, no filter stack.
+
+**An R ceiling was considered first and rejected before coding**, using Attack 34a's real trade log
+(pulled via `get_trades`, not assumed): every streak-driving loser in the 2022 drawdown sat at 8–10%
+R, below where any sane ceiling would cut, while the one trade a ceiling would remove (34a #27,
+R≈15.3%) was the single best winner in the set (+30.5%). A ceiling would have cut the best trade and
+missed every trade that actually built the drawdown. That is a real finding on its own and is why the
+target multiple was tested instead.
+
+**The 1.5R choice was verified against the same log, not hypothesised**: 34a trade #1 (entry
+39502.5, R=4012) ran up $6,422 in price before reversing to its eventual −10.25% stop-out — more than
+a 1.5R distance (6018) but less than 2R (8024). A nearer target would have closed that exact,
+already-realised trade as a win instead of a full loss. That was the pre-registered mechanism this
+change was betting on.
+
+## BOTH HALVES, SIDE BY SIDE
+
+| | Attack 34a | Attack 35a | | Attack 34b | Attack 35b |
+|---|---|---|---|---|---|
+| Window | 2022→Jun 2024 | 2022→Jun 2024 | | Jun 2024→2026 | Jun 2024→2026 |
+| Profit factor | 1.48290761 | **1.277564** | | 1.13703696 | **1.08255083** |
+| Max drawdown | 46.88451809% | **45.81833173%** | | 32.24854336% | **32.24854336%** |
+| Trades | 30 | 31 | | 23 | 24 |
+| Win rate | 50.00% | 54.84% | | 43.48% | 45.83% |
+
+## THE VERDICT — REVERTED, RATCHET v2 CLAUSE 1
+**PF fell on BOTH halves** (1.483→1.278, 1.137→1.083). Clause 1 ("profit factor improves") fails
+outright; clauses 2 and 3 don't need to be reached. This was pre-registered as one of the three
+possible outcomes before the run, and it is the one that happened.
+
+## THE FINDING THAT SURVIVES THE REVERT — AND IT IS BIGGER THAN "REVERTED"
+**35b's max drawdown is 32.24854336% — identical to Attack 34b's, to the cent.** A change that can
+only move the *target* exit price left the trade that sets H2's drawdown floor completely untouched.
+The only way that is possible is if that trade is a **stop-loss**, not a shortened winner.
+
+**Attack 34's drawdown is set by the STOP side of the trade, not the target side.** That eliminates
+target multiple as a drawdown lever for this mechanism, cleanly and cheaply (one pair of runs), and
+it sharpens where the next attempt must look: the stop's structural reference or the hold cap, not
+the reward multiple. This is exactly the kind of negative result the mandate asks for — the
+disqualifying number was checked first, and a real lever was ruled out with evidence rather than
+guessed away.
+
+**Trade count also moved** (30→31 on H1, 23→24 on H2) despite entry logic being byte-identical to
+Attack 34. This confirms trade count at this sample size is not perfectly reproducible in the
+strict sense across separate runs — worth flagging, not worth chasing at n≈30.
+
+## QUEUE
+1. **The stop's structural reference is the remaining candidate of the three exit/risk levers**,
+   now that target multiple is eliminated. Any change there must still keep the stop genuinely
+   beyond structure (LESSON 5) — not an ATR clamp, which the Attack 34 header already flagged as a
+   LESSON-5 violation.
+2. **The hold cap binds far more often than its name suggests** — roughly a third to two-fifths of
+   all trades in both halves exit on the 4-week cap rather than on stop or target (counted directly
+   from `get_trades`, `barsInTrade == 2688` on many rows). That was not touched this cycle and is
+   worth its own isolated test, but it did not appear to be the drawdown driver in the specific
+   losing streak examined here (those losses closed well before the cap).
+3. **Do not re-test target multiple on this mechanism.** This cycle closes that question with a
+   pair of real runs, not a guess.

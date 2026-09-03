@@ -1,0 +1,135 @@
+//@version=6
+// BTC ATTACK 35 -- WEEKLY BREAK-AND-HOLD, TARGET CUT 2R -> 1.5R. REVERTED.
+//   35a NEVER-TUNED 2022-01-01 -> 2024-06-08
+//       https://mcp-api.trader.dev/backtest/01M1KM9NADQDRXRWYY7EWQF0WF
+//       PF 1.277564 | DD 45.81833173% | 31 trades | 54.84% win | +32.85% | commission $286.09
+//   35b recent      2024-06-08 -> 2026-09-01
+//       https://mcp-api.trader.dev/backtest/01M1KMAEQS2KJPZEKF6XWVS3S1
+//       PF 1.08255083 | DD 32.24854336% | 24 trades | 45.83% win | +8.50% | commission $240.68
+//
+// VERDICT: REVERTED. PF fell on BOTH halves against Attack 34 (1.483->1.278, 1.137->1.083).
+// RATCHET v2 clause 1 fails outright; clauses 2/3 are moot. THE FINDING THAT SURVIVES: 35b's max
+// drawdown is 32.24854336% -- IDENTICAL TO THE CENT to Attack 34b's. A change that only alters the
+// TARGET price could not have moved the trade that sets H2's drawdown floor, which means that trade
+// was a STOP-LOSS, not a shortened winner. Drawdown in this mechanism is set by the stop side, not
+// the target side. Target multiple is eliminated as a drawdown lever for this mechanism -- reported
+// so no future cycle re-spends credits re-testing it.
+//
+// BASE: Attack 34 (strategies/pine/attack34-weekly-break.pine), unchanged entry, unchanged stop.
+//   Entry: first close above the PRIOR COMPLETED WEEK'S HIGH.
+//   Stop:  the prior completed week's LOW (genuine structure, LESSON 5). Unchanged.
+//   ONLY CHANGE: reward:risk 2.0 -> 1.5. Hold cap (4 weeks) unchanged. No new entry term.
+//
+// WHY THIS AND NOT A FILTER. The mandate (2026-09-03) says the DRAWDOWN, not the profit factor,
+// disqualifies Attack 34 (46.88% / 32.25%, against 3M's verified champion at 8.73%) and to fix it
+// via EXIT/RISK -- target multiple, hold cap, stop reference -- before adding entry conditions.
+//
+// WHERE THE DRAWDOWN ACTUALLY COMES FROM (read from Attack 34a's real trade log via get_trades,
+// not assumed). The 46.88% max DD is NOT one catastrophic trade -- every loser in the log is a
+// clean, structural stop-out in the 5-14% range. It is a COMPOUNDING STREAK: six of the first nine
+// 34a trades in the 2022 bear market are losers of comparable size (-10.25%, -8.89%, -8.48%,
+// -8.40%, -10.20%, -10.10%), and because sizing is 100% of equity (engine-mandated, not a lab
+// choice), those losses compound multiplicatively: 0.90 x 0.91 x 0.92 x 0.92 x 0.90 x 0.90 =~ 0.53,
+// i.e. an intra-period trough near -47% before any single trade was unusually large. An R CEILING
+// (excluding the widest-stop weeks) was considered and REJECTED before coding: measured against the
+// same trade log, every streak-driving loser sat at 8-10% R, i.e. BELOW where any sane ceiling would
+// cut, while the trade a ceiling WOULD remove (34a #27, R~15.3%) is the single best winner in the
+// set (+30.5%). An R ceiling would not have touched the drawdown and would have cut the best trade.
+//
+// WHAT A LOWER TARGET ACTUALLY DOES, VERIFIED AGAINST THE SAME LOG, NOT HYPOTHESISED: 34a trade #1
+// (entry 39502.5, stop-distance R=4012, i.e. R%=10.16) ran up $6,422 in price terms before reversing
+// to its eventual -10.25% stop-out. 1.5R from entry is 6018 -- LESS than the $6,422 run-up, so this
+// exact trade would have closed at its 1.5R target instead of its stop. 2R (8024) was never reached,
+// which is why it stopped out under Attack 34. This is one concrete, already-realised instance of the
+// mechanism this change is betting on: a nearer target lets some trades that already reversed against
+// the stop close as a smaller WIN instead of a full structural loss, which should shrink both the
+// SIZE and the FREQUENCY of the full-R losses that compound into the drawdown streak above.
+//
+// THE COST, STATED BEFORE RUNNING: every winner that would have run to 2R under Attack 34 is
+// captured smaller under 1.5R (34a #27's 2R winner shrinks from +30.5% to an estimated +22.9%).
+// Breakeven win rate rises correspondingly (33.3% -> 40.0% at fixed structural R), still comfortably
+// under 34a's realised 50.0% -- but realised win rate must be re-measured, not assumed unchanged,
+// because more trades close at the (now nearer) target and the win/loss split can shift either way.
+//
+// ENTRY LOGIC IS BYTE-IDENTICAL TO ATTACK 34 -- same breakUp/rBig conjunction, same R floor by
+// EXCLUSION not clamping (LESSON 3), so the trade COUNT this run produces should be IDENTICAL to
+// 34a's 30 and 34b's 23 (verify on run; a difference would mean a coding error, not a real effect).
+// Because trade count cannot legitimately move here, RATCHET v2 clause 4 (split test on a >50% cut)
+// is moot by construction, and clause 3 (>=30 floor) rides on Attack 34's own count.
+//
+// PRE-REGISTERED OUTCOME, STATED BEFORE THE RUN (HARD LESSON 17):
+//   - PF improves on BOTH halves AND DD does not worsen (RATCHET v2 clause 1+2), trades >=30/>=30 ->
+//     KEEP, becomes the new base, replacing Attack 34 on the board.
+//   - DD improves but PF fails to improve on either half -> RATCHET clause 1 fails -> REVERTED, but
+//     recorded as a real, evidence-backed finding about the target-multiple/drawdown tradeoff (the
+//     mandate's own framing: judge on drawdown first, but the ratchet still decides KEEP/REVERT).
+//   - Either half's PF falls, or trade count is not ~30/~23 as predicted (a coding error) -> DISCARD
+//     and say so; do not rationalise a broken run.
+//
+// AUDIT (LESSON 6, one line per leg -- there is exactly one leg, long-only, mirroring forbidden):
+//   Entry: unchanged from Attack 34. Stop: unchanged (prior completed week's low, genuine structure,
+//   LESSON 5). R floor: unchanged, 0.8% by EXCLUSION (LESSON 3). R ceiling: none -- considered and
+//   rejected above with log evidence, not asserted. Latch (HARD LESSON 8): setup (week rollover) and
+//   trigger (crossover) are still on different bars by construction, unchanged from Attack 34.
+//   BINDING/REDUNDANCY (E17/E14): entry terms unchanged from Attack 34, already measured there; this
+//   change touches ONLY the exit target, so no new term needs a fresh binding count.
+strategy("BTC Attack35 weekly break, 1.5R target", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rr      = input.float(1.5,  "Reward:risk")
+minRpct = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars = input.int(2688,   "Max bars in trade -- 4 weeks on 15m")
+
+MS1W = 604800000
+b1w  = math.floor(time / MS1W)
+newWeek = b1w != b1w[1]
+
+var float wHi  = na
+var float wLo  = na
+var float pwHi = na
+var float pwLo = na
+
+if newWeek
+    pwHi := wHi
+    pwLo := wLo
+    wHi  := high
+    wLo  := low
+else
+    wHi := na(wHi) ? high : math.max(wHi, high)
+    wLo := na(wLo) ? low  : math.min(wLo, low)
+
+breakUp = not na(pwHi) and ta.crossover(close, pwHi)
+
+minR  = close * minRpct / 100
+rLong = na(pwLo) ? na : close - pwLo
+rBig  = not na(rLong) and rLong >= minR
+
+goLong = breakUp and rBig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong and rLong > 0
+    strategy.entry("L", strategy.long)
+    slPx   := pwLo
+    tpPx   := close + rLong * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(pwHi,           title="PrevWeekHigh")
+plot(pwLo,           title="PrevWeekLow")

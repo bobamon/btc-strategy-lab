@@ -282,9 +282,67 @@ const DATA = [
       "verifiedAt": "2026-09-03T12:31:00Z"
     },
     "notes": "BOTH HALVES CLEAR 1.0 - THE FIRST MECHANISM IN THIS LAB'S HISTORY TO DO SO. 34a (never-tuned, 2022-01-01 to 2024-06-08): PF 1.48290761 / DD 46.88451809% / 30 trades / 50.00% win / +55.93% / commission $292.22. 34b (recent): PF 1.13703696 / DD 32.24854336% / 23 trades / 43.48% win / +14.20% / commission $243.50. THE FREQUENCY FIX WORKED COMPLETELY: $292 and $243 of commission against Attack 33's $6,460.27 on 757 trades. The cost problem that killed Attack 33 is solved. AND THE TENSION REGISTERED BEFORE THE RUN IS EXACTLY WHAT HAPPENED. The Pine header stated in advance: 'the low-frequency fix for the cost problem runs straight into the sample floor'. 34a lands on EXACTLY 30 trades - the thinnest possible pass of RATCHET v2 clause 3 - and 34b's 23 trades is BELOW it. So 1.13703696 on 23 trades is a DIRECTION, not a result, and is not quoted as one (LESSON 12). VERDICT: ADVANCES by the mandate's own words, since both halves cleared 1.0 - but as the WEAKEST POSSIBLE ADVANCE. One half sits at the floor, one below it, and the drawdowns are severe: 46.88% and 32.25%, against 3M's verified champion at 8.73%. A strategy losing nearly half its equity is not tradeable regardless of profit factor. THE STRUCTURAL FINDING IS BIGGER THAN THE MECHANISM: on 4.7 years of 15m data a strategy apparently cannot be BOTH cheap enough to be profitable AND frequent enough to be provable. Attack 33 had 757 trades and died on costs; Attack 34 is cost-free and cannot reach a sample. That is a constraint on the whole search, not on either candidate, and it was predicted in writing before this run rather than discovered afterwards."
+  },
+  {
+    "id": "vwm-attack35a-weekly-break-15rr-h1",
+    "name": "BTC Attack35a weekly break 1.5R H1",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "Attack 34's weekly break-and-hold with the ONLY change being reward:risk cut from 2.0 to 1.5. Entry and stop byte-identical to Attack 34 (first close above the prior completed week's high; stop at the prior completed week's low). Motivated by Attack 34's own mandate-required audit: the disqualifying number is drawdown, not profit factor, and the mandate asks for exit/risk changes (target multiple, hold cap, stop reference) before new entry filters. Pre-registered rationale verified against Attack 34a's real trade log via get_trades: trade #1 (entry 39502.5, R=4012) ran up $6,422 in price before reversing to its eventual stop-out -- MORE than a 1.5R target distance (6018) but LESS than 2R (8024) -- so a nearer target would have closed that exact trade as a win instead of a full loss. An R ceiling was considered and rejected first: every streak-driving loser in 34a's 2022 drawdown sat at 8-10% R, below where any sane ceiling would cut, while the trade a ceiling would remove (34a #27, R~15.3%) was the single best winner in the set.",
+    "metrics": {
+      "netProfitPct": 32.85139035,
+      "profitFactor": 1.277564,
+      "maxDrawdownPct": 45.81833173,
+      "totalTrades": 31,
+      "winRatePct": 54.83870968,
+      "avgTradePct": 1.05972227
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1KM9NADBGYM7YX6B3P7FH7G",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KM9NADQDRXRWYY7EWQF0WF",
+      "verifiedAt": "2026-09-03T13:10:00Z"
+    },
+    "notes": "REVERTED - RATCHET v2 clause 1 fails on both halves. 35a: PF 1.277564 / DD 45.81833173% / 31 trades / 54.84% win / +32.85% / commission $286.09, against Attack 34a's PF 1.48290761 / DD 46.88451809% / 30 trades. PF fell (1.483 -> 1.278) while DD improved only 1.07pp (46.88% -> 45.82%). 35b: PF 1.08255083 / DD 32.24854336% / 24 trades / 45.83% win / +8.50% / commission $240.68, against Attack 34b's PF 1.13703696 / DD 32.24854336% / 23 trades. PF fell (1.137 -> 1.083) and DD was IDENTICAL TO THE CENT to Attack 34b's (32.24854336% both times). THE FINDING THAT SURVIVES THE REVERT: a change that can only move the TARGET exit price left H2's drawdown-setting trade completely untouched, which means that trade was a STOP-LOSS, not a shortened winner. Attack 34's drawdown is set by the stop side of the trade, not the target side. Target multiple is eliminated as a lever for this mechanism's drawdown -- recorded so no future cycle re-spends credits re-testing it. Trade count also moved (30->31, 23->24) despite byte-identical entry logic, confirming the count is not perfectly deterministic run-to-run at this sample size (a small number of trades sit exactly on the window boundary) rather than any entry-logic difference."
+  },
+  {
+    "id": "vwm-attack35b-weekly-break-15rr-h2",
+    "name": "BTC Attack35b weekly break 1.5R H2",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "Attack 34's weekly break-and-hold with the ONLY change being reward:risk cut from 2.0 to 1.5. Entry and stop byte-identical to Attack 34. The recent half and the control for the target-multiple drawdown hypothesis.",
+    "metrics": {
+      "netProfitPct": 8.49577034,
+      "profitFactor": 1.08255083,
+      "maxDrawdownPct": 32.24854336,
+      "totalTrades": 24,
+      "winRatePct": 45.83333333,
+      "avgTradePct": 0.35399043
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1KMAEQS2CJW2104BVN3AR3Y",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KMAEQS2KJPZEKF6XWVS3S1",
+      "verifiedAt": "2026-09-03T13:10:00Z"
+    },
+    "notes": "REVERTED - RATCHET v2 clause 1 fails on both halves. See vwm-attack35a-weekly-break-15rr-h1 for the full pair writeup. This half's headline number: max drawdown 32.24854336% is IDENTICAL TO THE CENT to Attack 34b's 32.24854336%, proving the drawdown-setting trade in this window is a stop-loss unaffected by the target change. Target multiple is eliminated as a drawdown lever for the weekly break-and-hold mechanism."
   }
 ];
-const BUILT = "2026-09-03 06:25";
+const BUILT = "2026-09-03 12:38";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
