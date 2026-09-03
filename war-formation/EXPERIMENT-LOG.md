@@ -16,9 +16,16 @@ from the long leg, PF 1.21869905, DD 17.44898097%, 21 trades, all long — is th
 that is genuinely single-leg in code (not just in outcome, the E47/HARD LESSON 24 defect) AND confirmed
 reproducible under cold re-run in three separate runs, one of them cross-session (E53=E54=E55). It sits
 right at the ~20-trade floor and cannot be split-tested for lack of data, so it is read as a **direction,
-not a candidate** — the same caveat E47 carried before its own reproduction broke. **The next cycle's
-job is the maxBars neighbourhood (8640/25920) on e50b, run together in one cycle, before anything further
-is built on it.**
+not a candidate** — the same caveat E47 carried before its own reproduction broke. E56 confirmed
+maxBars=12960 is a real (non-degenerate), if shallow, local optimum against its own 8640/25920
+neighbours. E57 then swept the shield itself ($3,000/$4,000, ORACLE-RULES) with maxBars scaled to
+match — 19440/25920 — and found the sweep is **not measurable on this data**: trade count collapsed to
+13 and 8 (both below the ~20 floor) because a wider shield's resolution time grows super-linearly with
+R, not linearly, consuming too much of the fixed 4.5-month window per trade (occupancy, HARD LESSON 24).
+**e50b's $2,000/12960 stays the only shield width in this family above the interpretability floor, by
+elimination, not by having beaten the wider shields on their merits.** The next open item is position
+sizing / risk fraction (drawdowns are 1x figures and must be scaled to the ~33x effective leverage a
+$2,000 shield implies).
 
 *(The paragraph below describes v6, kept for history — it is DEMOTED, not current.)*
 **v6 — HA cascade, LONG ONLY, structural stop (pre-A.L.C.M., WRONG EXIT MODEL).** BTCUSDT 1m,
@@ -2547,3 +2554,136 @@ binds, per this cycle's own instruction not to declare a caveat without measurin
 3. **Root cause of `pine/e47-alcm-long-cap12960.pine`'s specific mismatch** — still open, still low
    priority, e50b already supersedes it as the anchor regardless of the answer.
 4. **Position sizing / risk fraction:** unchanged, still open, still not the priority.
+
+---
+
+# ██ E57 — THE SHIELD SWEEP, DONE PROPERLY (SCALED CAP). IT SHRINKS THE SAMPLE BELOW THE FLOOR
+# BEFORE IT SAYS ANYTHING ABOUT THE EDGE.
+
+**Numbering note:** this cycle's stored prompt is stale again, unchanged from the version E56 already
+flagged — same closed-2x2 framing, same "no champion/candidate", same "continue at E47" instruction.
+Per that prompt's own words and HARD LESSON 26's general principle, the docs win: this log already ran
+through E56 with a confirmed local optimum at maxBars=12960 and a carried-forward queue. **This is not
+a BTC-lab-style stuck board** — the queue has a live, specific next item, so this cycle executed it
+rather than filing another stale-prompt notice. (HARD LESSON 26 is about a *board halt* repeating with
+nothing left to do; War Formation has never been in that state.)
+
+**Credits: 725 at start (free tier). Budget rule: above 500 → at most TWO backtests. Both used, on the
+one decisive pair E56's own queue named: shield width swept WITH a scaled maxBars, per E48's coupling
+finding.**
+
+## QUEUE ITEM ADDRESSED
+E56's carried-forward item 1: "the shield sweep, varying maxBars WITH each shield width, on e50b at
+maxBars=12960" as the anchor. ORACLE-RULES.md names $3,000 and $4,000 ("$4,000 is safer") as the two
+other shield widths worth reading, so both were tested this cycle rather than spending two credits on
+one width.
+
+## THE CALIBRATION, STATED BEFORE THE RUN
+E48 tried this sweep at a FIXED cap and found it confounded (HARD LESSON, E48): $2,000/cap12960 bound
+at avgBarsWinning 56.5% (7317/12960, E47's anchor), but $3,000 on the SAME cap bound at 84%
+(10900/12960) — proof the cap needed to scale up with the shield, not stay fixed. This cycle used E47's
+own ratio as the calibration: projecting linearly with R, $3,000 (1.5×) should need ~7317×1.5 = 10976
+avg winning bars — E48's actual 10900 landed within 0.7% of that projection. That one data point was
+the entire basis for scaling maxBars linearly with shieldUsd: 12960 × 1.5 = **19440** for $3,000, ×2 =
+**25920** for $4,000. Both restore the same ~56% avgBarsWinning target *if the linear projection holds
+into the tested range*. **That is explicitly a one-point extrapolation, stated as an assumption, not a
+verified law — see the result below.**
+
+## PRE-RUN AUDIT
+Both files are byte-identical to `pine/e50b-alcm-long-only-uncoiled.pine` except `shieldUsd` and
+`maxBars`. LONG (only leg): R = shieldUsd ($3,000 / $4,000, ~3.3%/4.4% of BTC price — well clear of the
+0.8% floor, HARD LESSON 3); stop is risk-defined, not structural, the declared ALCM deviation (LESSON
+5); one leg only, short mechanically deleted, `position_size` can never go negative (LESSON 6, trivially
+satisfied, unchanged from e50b/e56a/e56b); no new terms, no new redundancy to check (LESSON 18). Saved
+to `pine/e57a-shield3000-maxbars19440.pine` and `pine/e57b-shield4000-maxbars25920.pine` in the same
+action as this record (LESSON 21).
+
+**Pre-registered outcome (HARD LESSON 17), against e50b's PF 1.21869905 / 21 trades / avgBarsWinning
+56.5% at $2,000:**
+- PF close to 1.22 with adequate trades and avgBarsWinning near the targeted ~55–60% → shield width is
+  not the binding lever once decoupled from the cap; $2,000/12960 remains the reasonable working point.
+- PF meaningfully BETTER with adequate trade count → wider shields genuinely help once the cap stops
+  confounding the read; would support ORACLE-RULES' "$4,000 is safer" empirically.
+- PF meaningfully WORSE, especially if avgBarsWinning still lands far above ~60% despite the scaled cap
+  → the linear-scaling projection itself does not hold; hold time grows faster than proportionally with
+  R, and this construction cannot cleanly decouple shield from cap within a reasonable maxBars.
+- Trade count collapsing toward single digits → HARD LESSON 19 degenerate neighbour, report as a count,
+  not a result.
+
+## THE RESULT
+
+| Shield | maxBars | PF | Trades | Max DD | Win rate | avgBarsWinning / cap | Cap hits (get_trades) |
+|---|---|---|---|---|---|---|---|
+| $2,000 (e50b anchor) | 12960 | **1.21869905** | 21 | 17.45% | 42.86% | 7317/12960 = 56.5% | 0 documented (E55) |
+| $3,000 (E57a) | 19440 | **0.59979826** | **13** | 32.26% | 30.77% | 14989/19440 = **77.1%** | 1 of 13 |
+| $4,000 (E57b) | 25920 | **0.68656058** | **8** | 31.39% | 37.50% | 25039/25920 = **96.6%** | 2 of 8 |
+
+[E57a report](https://mcp-api.trader.dev/backtest/01M1JZZN2E3KD2YQB6HAH9EXW7) ·
+[E57b report](https://mcp-api.trader.dev/backtest/01M1K0005H5FQBY209V59Y7MZK)
+
+**The fourth pre-registered outcome landed: trade count collapsed (21 → 13 → 8), both below the ~20
+floor and E57b deep into single digits.** Per this cycle's own instruction (and HARD LESSON 19), **these
+PFs are reported as counts, not read as results.** 0.60 and 0.69 are NOT evidence that wider shields hurt
+the edge — they are evidence that this window cannot support the test at these widths.
+
+## WHAT get_trades ADDS
+
+Pulled both completed results' trade lists (free reads, no credit spent) to check the mechanism, not
+just the headline (HARD LESSON 11).
+
+- **The linear-scaling projection FAILED, and failed in the same direction both times.** Target
+  avgBarsWinning was ~56%; actual came in at 77.1% ($3,000) and 96.6% ($4,000). The one-point
+  calibration from E48 (which projected within 0.7% at $3,000 *held at the fixed 12960 cap*) did not
+  extrapolate to the *scaled* cap — winners at wider R take a **disproportionately** longer time to
+  resolve than a linear read of E47/E48 predicted. Hold time scales super-linearly with R, not linearly.
+- **The cap itself barely bound directly** — only 1 of 13 trades at $3,000 and 2 of 8 at $4,000 hit the
+  cap exactly, and every one of those was a WIN forced to an early close, not a winner-turned-loser
+  (contrast E56a, where the 8640 cap converted a genuine winner into a loss). So this is NOT a repeat of
+  E46/E56a's failure mode (cap truncating winners into losses).
+- **The real mechanism is occupancy, not truncation (HARD LESSON 24, extended).** `avgBarsInTrade` rose
+  from an implied ~5-6k bars at $2,000 to 8441.6 at $3,000 to **16111.5 at $4,000** — each trade at
+  $4,000 occupies the book for an average of **~11.2 days**, against a total window of only 4.5 months.
+  Every bar spent in one trade is a bar the strategy cannot take the next signal. Trade count falling
+  21 → 13 → 8 as R widens is a direct, mechanical consequence of that occupancy growth, independent of
+  whether the cap ever binds. **Widening the shield does not just require scaling the cap — it
+  unavoidably shrinks the number of trades this dataset can offer, because each trade's resolution time
+  grows faster than the shield width does.**
+
+## WHAT THIS ESTABLISHES
+- **The shield/cap coupling E48 found is worse than E48's own framing suggested.** E48 treated it as "the
+  cap needs to scale with the shield" — a fixable calibration problem. This cycle shows that even a
+  calibrated, scaled cap does not restore a stable avgBarsWinning ratio, because the true relationship
+  between R and resolution time is super-linear, not linear. There may be no cap that both avoids
+  truncating winners AND preserves trade count on this data at $3,000+ shields.
+- **On this specific 4.5-month, single-instrument window, $3,000 and $4,000 shields cannot be tested
+  above the interpretability floor at all**, regardless of maxBars — the occupancy cost of a wider
+  shield consumes too much of the fixed window. This is a data-coverage limit (HARD LESSON 22), not a
+  finding about whether wider shields help or hurt the edge.
+- **$2,000/12960 (e50b) remains the only shield width in this family with a trade count above the ~20
+  floor.** It stays the working anchor by elimination, not because it has been shown to beat the wider
+  shields on their merits — that comparison is not available on this data.
+
+## WHAT THIS DOES NOT DO
+- **Does not demote or promote e50b.** Its own number (PF 1.21869905, 21 trades) is unchanged and
+  unchallenged by this cycle — the wider shields simply could not be measured cleanly, not measured and
+  found worse.
+- **Does not resolve whether $3,000/$4,000 shields have a real edge.** Answering that would need either
+  more 1m history (HARD LESSON 22's standing limit) or a materially different maxBars regime this cycle
+  did not try — see queue below.
+- **Does not re-open coilPrev or the short leg** — unchanged from e50b, not this cycle's question.
+- **Does not touch position sizing / risk fraction** (old queue item 4) — unchanged, still open, still
+  not reached.
+
+## QUEUE
+1. **Position sizing / risk fraction** — old queue item 4, now the top item by elimination: the shield
+   sweep (items 1–2 from E56) is now closed for this data window (structurally unmeasurable above the
+   floor at $3,000+), so the next open question is the one ORACLE-RULES.md flags directly — drawdowns
+   are 1x figures under the engine's forced margin=100 override and must be scaled to the ~33x effective
+   leverage a $2,000 shield implies (100,000/3,000), not read as-is.
+2. **A finer maxBars grid (10800 / 14400) around 12960 on e50b** — unchanged from E56, still lower
+   priority than sizing; would only sharpen how broad e50b's own local optimum is.
+3. **Root cause of `pine/e47-alcm-long-cap12960.pine`'s specific mismatch** — still open, still low
+   priority, e50b already supersedes it as the anchor regardless of the answer.
+4. **If more 1m history ever becomes available**, the $3,000/$4,000 shield question this cycle could not
+   answer is the first thing to re-run — not a new construction, the same e57a/e57b files on a longer
+   window.

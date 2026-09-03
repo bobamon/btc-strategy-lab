@@ -1166,3 +1166,40 @@ construction is.
   entry in `backtests.json` is left exactly as it was recorded; the new understanding is recorded in the
   entries that discovered it (E50, now E53/E54), per HARD LESSON 21's own instruction not to
   silently re-baseline.
+
+## ██ HARD LESSON 28 — CALIBRATING A COUPLED PARAMETER FROM ONE DATA POINT DOES NOT MEAN THE RELATIONSHIP IS LINEAR (WAR FORMATION, 2026-09-03)
+
+E48 found the A.L.C.M. shield and `maxBars` are coupled: a wider shield needs a longer cap to resolve,
+so sweeping shield width at a fixed cap just measures the cap. E48's own numbers looked like they
+supported a linear fix — going from a $2,000 shield to $3,000 (1.5×) at the SAME fixed cap moved
+avgBarsWinning from 56.5% to 84%, and a naive linear projection from the $2,000 anchor alone predicted
+almost exactly that (~55.5% vs the actual — coincidentally close). That single point of agreement was
+then used to scale `maxBars` linearly with shield width for a real sweep (E57): 1.5× shield → 1.5× cap,
+2× shield → 2× cap.
+
+**The linear projection failed on the very data it was supposed to unlock.** Both scaled runs came in
+far above the targeted ~56% avgBarsWinning ratio (77% at $3,000, 97% at $4,000), and trade count
+collapsed (21 → 13 → 8) because each trade's actual resolution time grew faster than the shield width
+did — an occupancy effect (HARD LESSON 24), not a truncation effect (the cap itself barely bound: only
+1-2 trades per run hit it, and always as forced wins, never as winners-turned-losses). **One point of
+agreement between a linear model and a real measurement is not confirmation of linearity** — it is
+consistent with linearity and with any number of other relationships that happen to agree near that one
+point. The projection needed a second point to be trustworthy, and the sweep it was calibrating had no
+budget left to get one before spending it.
+
+**How to apply:**
+- **A calibration built from a single data point is a guess with a number attached, not a verified
+  relationship.** Before spending real credits on a projection's extrapolated range, ask what a SECOND
+  point would look like if the model is wrong — here, that would have meant checking whether E48's
+  84%-vs-projected-~55.5% agreement held at a nearby width too, before committing both of a cycle's
+  credits to two extrapolated points at once.
+- **A parameter that "just needs scaling" can still make the population unmeasurable.** Fixing the
+  confound (cap truncating winners) does not guarantee the fix lands the result back above the
+  interpretability floor — here it revealed a second, independent limit: total sample size shrinks
+  mechanically as R widens, regardless of where the cap sits, because each trade occupies the book
+  longer. Both limits have to be checked, not just the one the previous experiment named.
+- **When a sweep can't be run cleanly on the data available, say so and stop, rather than reading the
+  degenerate numbers as a verdict on the parameter.** E57's PF 0.60/0.69 at $3,000/$4,000 are NOT
+  evidence wider shields hurt the edge — they are evidence this window's trade count cannot support the
+  test at those widths. Conflating "unmeasurable" with "worse" would have closed off $3,000-$4,000
+  shields on invalid grounds.

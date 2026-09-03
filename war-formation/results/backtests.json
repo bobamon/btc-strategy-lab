@@ -2188,5 +2188,63 @@
       "verifiedAt": "2026-09-03T05:00:00Z"
     },
     "notes": "PF 1.079 vs e50b's 1.219 at maxBars=12960 -- WORSE, despite the cap essentially never binding: get_trades shows the longest trade (seq1) runs 23644 bars, well short of the 25920 cap, and NONE of the 19 trades hit the cap at all (max barsInTrade 23644). So loosening the cap fully resolves the 'cap forces early exit' failure mode (0/19 vs E56a's 5/22), yet PF does not improve past e50b's 12960 anchor -- it lands between E56a (1.038) and e50b (1.219). Trade count 19, not degenerate. Combined with E56a: 12960 sits at a real (non-degenerate) local optimum among the three tested points, both neighbours genuinely worse, but the gap (1.04-1.22-1.08) is shallow, not a HARD LESSON 16 narrow-spike collapse -- and part of the differences between all three runs reflects book-occupancy-driven changes in WHICH trades are admitted (HARD LESSON 24), not purely exit-timing changes on an identical trade set, since entries after the first diverge across the three files once one file's earlier trade closes sooner and frees the book."
+  },
+  {
+    "id": "wf-e57a-shield3000-maxbars19440",
+    "name": "WF E57a: shield sweep leg 1 -- $3,000 shield, maxBars scaled 1.5x to 19440",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "research",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Shield sweep leg 1: e50b with shieldUsd 2000->3000 and maxBars scaled 12960->19440 (1.5x, calibrated from E47/E48's avgBarsWinning ratio) so the cap and shield are not confounded (E48's coupling finding). Saved as pine/e57a-shield3000-maxbars19440.pine before running.",
+    "metrics": {
+      "netProfitPct": -13.47019831,
+      "profitFactor": 0.59979826,
+      "maxDrawdownPct": 32.26123975,
+      "totalTrades": 13,
+      "winRatePct": 30.76923077,
+      "avgTradePct": -1.0361691
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JZZN2EJYDNF9EEGY9NF8T0",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JZZN2E3KD2YQB6HAH9EXW7",
+      "verifiedAt": "2026-09-03T05:00:00Z"
+    },
+    "notes": "13 trades is BELOW the ~20-trade interpretability floor (HARD LESSON 19) -- PF 0.600 is reported as a count, not read as a result. avgBarsWinning 14988.75/19440 = 77.1%, far above the ~56% the linear scaling from E48 targeted -- the projection failed (HARD LESSON 28). get_trades shows the cap hit exactly once (seq1, 19441 bars, a WIN forced to an early close, not a winner-turned-loser -- not E46/E56a's failure mode). The trade-count collapse (21->13) is occupancy-driven (HARD LESSON 24): avgBarsInTrade 8441.6, each trade holding the book far longer as R widens, leaving less of the fixed 4.5-month window for further entries. Companion run: E57b ($4,000/25920)."
+  },
+  {
+    "id": "wf-e57b-shield4000-maxbars25920",
+    "name": "WF E57b: shield sweep leg 2 -- $4,000 shield, maxBars scaled 2x to 25920",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "research",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Shield sweep leg 2, sibling of E57a. e50b with shieldUsd 2000->4000 (ORACLE-RULES: '$4,000 is safer') and maxBars scaled 12960->25920 (2x). Saved as pine/e57b-shield4000-maxbars25920.pine before running.",
+    "metrics": {
+      "netProfitPct": -8.1582537,
+      "profitFactor": 0.68656058,
+      "maxDrawdownPct": 31.38775541,
+      "totalTrades": 8,
+      "winRatePct": 37.5,
+      "avgTradePct": -1.01978171
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1K0005J2VJ3F6Z45C1FC8NX",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1K0005H5FQBY209V59Y7MZK",
+      "verifiedAt": "2026-09-03T05:00:00Z"
+    },
+    "notes": "8 trades is deep below the ~20-trade interpretability floor (HARD LESSON 19), degenerate -- PF 0.687 is reported as a count, not read as a result. avgBarsWinning 25039.33/25920 = 96.6%, the cap essentially always eventually binds on winners -- but get_trades shows both cap hits (seq1, seq6, 25921 bars each) resolved as WINS forced to an early close, not losses, so this is not E46/E56a's truncation failure mode. avgBarsInTrade 16111.5 (~11.2 days per trade) against a 4.5-month window explains the trade count collapse (21->8) on occupancy grounds alone (HARD LESSON 24), independent of cap-binding. Companion run: E57a ($3,000/19440)."
   }
 ]
