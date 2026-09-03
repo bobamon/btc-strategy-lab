@@ -2530,9 +2530,38 @@ const DATA = [
       "verifiedAt": "2026-09-03T06:00:00Z"
     },
     "notes": "28 trades (all long), above the ~20 floor, PF below 1.0. Together with E58a and e50b the three shieldUsd points ($1,000/$1,500/$2,000) are NON-MONOTONIC (1.240 / 0.860 / 1.219) -- not a degrading-with-width trend and not a plateau, which is the tell (per HARD LESSON 24/28) that this is a book-occupancy trade-admission effect, not a clean reading of how risk fraction affects the edge. get_trades confirms: e58b's trade 2 (entryBar 18042) matches e58a's trade 3 exactly, shifted by one, because e58b's wider stop kept trade 1 open through the entry that became e58a's trade 2. Companion: E58a ($1,000/6480, PF 1.240, 36 trades)."
+  },
+  {
+    "id": "wf-e59-e58a-reproduction-check",
+    "name": "WF E59: cross-session cold re-run of E58a (shield1000/maxbars6480)",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "research",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Byte-identical cold re-run of pine/e58a-shield1000-maxbars6480.pine, new session, per E58's carried-forward queue item 1 (the same reproducibility bar e50b cleared over E53/E54/E55 and E47 failed). No code changed.",
+    "metrics": {
+      "netProfitPct": 7.47495942,
+      "profitFactor": 1.24015239,
+      "maxDrawdownPct": 9.82519609,
+      "totalTrades": 36,
+      "winRatePct": 41.66666667,
+      "avgTradePct": 0.20763776
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1K6RQGRDM9RJZHT3JAH72FF",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1K6RQGRDM9RJZHT3JAH72FF",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "notes": "EXACT MATCH to E58a's original documented result (PF 1.24015239, DD 9.82519609%, 36 trades, 41.67% win rate, all long) -- to eight decimal places. e58a is now this lab's THIRD file confirmed reproducible on a cold re-run (after alcm-reference: E44=E51, and e50a/e50b: E50=E52, E53=E54=E55 cross-session). pine/e47-alcm-long-cap12960.pine remains the lab's only anchor with a documented reproduction failure. Still not promoted to champion or candidate: 36 trades clears the ~20 floor comfortably, but per HARD LESSON 24/28/29 (this cycle, E58) e58a's trade population is not comparable to e50b's or e58b's on a controlled 'R varied, book otherwise identical' basis -- each shieldUsd value admits a different trade set via the shared single-position book. No out-of-sample split is possible on this instrument (only 4.5 months of 1m data, HARD LESSON 22)."
   }
 ];
-const BUILT = "2026-09-03 07:47";
+const BUILT = "2026-09-03 08:40";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

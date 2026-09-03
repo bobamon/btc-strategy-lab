@@ -34,6 +34,15 @@ onward. E58a stands as an individually valid, NOT-YET-REPRODUCED (HARD LESSON 25
 terms, not as proof narrower shields beat wider ones. **Also this cycle: HARD LESSON 23 (drawdowns need
 no leverage rescaling) was already settled on 2026-09-02 — the "must be scaled to ~33x" framing that had
 crept back into this file's own queue text (E56/E57) was a regression against it and is retracted.**
+E59 (bottom of file, most recent) closed the reproducibility gap on E58a: a byte-identical cold re-run
+in a new session landed EXACT to the cent (PF 1.24015239, DD 9.82519609%, 36 trades) — e58a is now this
+lab's **third** file confirmed reproducible under cold re-run, joining `alcm-reference.pine` and the
+e50a/e50b pair. `pine/e47-alcm-long-cap12960.pine` remains the only anchor that has ever failed to
+reproduce, out of five files now checked — three data points now support book-occupancy-on-the-short-leg
+(HARD LESSON 24) as that file's specific failure mechanism, not lab-wide non-determinism. E58a is still
+not a champion or candidate: reproducibility is necessary, not sufficient, and HARD LESSON 29 (its trade
+population is not a controlled comparison against e50b/e58b) and HARD LESSON 22 (no out-of-sample split
+possible on this instrument) both still apply.
 
 *(The paragraph below describes v6, kept for history — it is DEMOTED, not current.)*
 **v6 — HA cascade, LONG ONLY, structural stop (pre-A.L.C.M., WRONG EXIT MODEL).** BTCUSDT 1m,
@@ -2830,3 +2839,97 @@ broke the maxBars sweeps.
    — e.g. running each shieldUsd value as a fully separate simulated account rather than one shared
    book — which is a different construction, not a parameter sweep of this one. Not queued; a bigger
    lift than this lab's cycle budget supports without a specific reason to prioritize it over the reproduction check above.
+
+---
+
+# ██ E59 — E58a CLEARS THE CROSS-SESSION REPRODUCTION BAR. THIRD FILE CONFIRMED, EXACT MATCH.
+
+**Numbering note:** this cycle's stored prompt is stale again, same pattern as every cycle since E51 —
+it describes a closed 2x2 at E42–E46, says there is no champion/candidate (still true), and says to
+continue numbering at E47. Per the prompt's own instruction and HARD LESSON 26, the docs win: this log
+runs through E58 with a confirmed-promising-but-unreproduced result (E58a) and a carried-forward queue.
+This cycle executed that queue's own item 1.
+
+**Credits: 718 at start (free tier). Budget rule: above 500 → at most TWO backtests.** Only ONE spent —
+the queue item is a single decisive check, not a paired sweep; the second was deliberately left
+unspent, same discipline E55 applied, since the next item that could use it (the finer maxBars grid,
+queue item 2) needs both neighbours run together (HARD LESSON 16/19) and a lone credit cannot satisfy
+that on its own.
+
+## QUEUE ITEM ADDRESSED
+E58's carried-forward item 1: *"Cross-session cold re-run of `pine/e58a-shield1000-maxbars6480.pine`,
+byte-identical, before it is trusted at all — the same bar e50b cleared over three checks (E53/E54/E55)
+and E47 failed."*
+
+## PRE-RUN AUDIT
+Unchanged from `pine/e58a-shield1000-maxbars6480.pine`'s own header (written at E58, re-stated here, no
+code changed): R = shieldUsd = $1,000, ~1.0% of BTC price, passes the 0.8% floor (HARD LESSON 3), the
+narrowest shield tested in this family — flagged, not hidden. Stop is risk-defined, not structural, the
+declared ALCM deviation (LESSON 5). One leg only, short mechanically deleted, `position_size` can never
+go negative (LESSON 6, trivially satisfied). No redundant terms introduced (LESSON 18). Same symbol,
+timeframe, and declared window (2025-12-16 to 2026-05-03) as the original E58a run.
+
+**Pre-registered outcome (HARD LESSON 17), against E58a's documented PF 1.24015239 / 36 trades / DD
+9.82519609%:** exact match → e58a becomes this lab's third confirmed-reproducible file, joining
+`alcm-reference.pine` and the e50a/e50b pair. Divergence → e58a joins `pine/e47-alcm-long-cap12960.pine`
+as unreproducible, and because this file (like e50b) has no short leg at all, a divergence here would
+again rule out book-occupancy-on-the-short-leg as *the* explanation for instability and point toward
+something else.
+
+## THE RESULT
+
+| | E58a (documented, 2026-09-03) | E59 (this cycle, new session, 2026-09-03) |
+|---|---|---|
+| Profit factor | 1.24015239 | **1.24015239** |
+| Max drawdown | 9.82519609% | **9.82519609%** |
+| Net profit | $747.49594220001 | **$747.49594220001** |
+| Trades | 36, all long | **36, all long** |
+| Win rate | 41.66666667% | **41.66666667%** |
+
+[E59 report](https://mcp-api.trader.dev/backtest/01M1K6RQGRDM9RJZHT3JAH72FF)
+
+**EXACT MATCH, to the cent.**
+
+## WHAT THIS ESTABLISHES
+- **`pine/e58a-shield1000-maxbars6480.pine` clears the cross-session reproduction bar E47 failed on.**
+  This lab now has **three** files confirmed reproducible under cold re-run: `alcm-reference.pine`
+  (2/2, E44=E51), `pine/e50a-alcm-long-only-coiled.pine` (2/2, E50=E52), and
+  `pine/e50b-alcm-long-only-uncoiled.pine` (3/3 incl. cross-session, E53=E54=E55) — and now
+  `pine/e58a-shield1000-maxbars6480.pine` (2/2 incl. cross-session, E58=E59).
+  `pine/e47-alcm-long-cap12960.pine` remains the lab's ONLY anchor with a documented reproduction
+  failure, out of five files now checked.
+- **This further narrows E47's failure, consistent with E55's reading.** Every file with the short leg
+  genuinely absent (e50a, e50b, e58a) has reproduced cleanly; the one file that still carries a live
+  (if usually-starved) short leg (E47's own saved source) is the one that drifted. That is now three
+  data points toward book-occupancy-on-the-short-leg (HARD LESSON 24) as the actual mechanism, not
+  lab-wide non-determinism.
+- **E58a's own number is now individually trustworthy in the narrow sense HARD LESSON 25 requires**
+  (survives a cold re-run) — but it is still not a champion or candidate. Per E58's own finding (HARD
+  LESSON 29), e58a's 36 trades are not a controlled "R varied, book otherwise identical" comparison
+  against e50b (21 trades) or e58b (28 trades); each shieldUsd value admits a different trade
+  population through the shared single-position book. 36 trades clears the ~20-30 sample ceiling
+  comfortably on its own terms, but there is still no out-of-sample split possible on this instrument —
+  only 4.5 months of 1m data exist at all (HARD LESSON 22).
+
+## WHAT THIS DOES NOT DO
+- **Not promoted to champion or candidate.** Reproducibility is necessary, not sufficient — the sample
+  ceiling and the lack of an out-of-sample window (HARD LESSON 22) still apply regardless.
+- **Does not touch the finer maxBars grid** (queue item 2, carried from E56/E57) — no credits remained
+  after this single decisive check; per HARD LESSON 16/19 that sweep needs both neighbours run together
+  to be interpretable, so the second credit was deliberately left unspent rather than spent on one side
+  alone.
+- **Does not touch E47's own root cause** (queue item 3) — still open, still low priority, e50b/e58a
+  already supersede it as working anchors regardless of the answer.
+
+## QUEUE
+1. **The finer maxBars grid (10800 / 14400) around 12960 on e50b**, run together in one cycle (HARD
+   LESSON 16/19) — now the top item, unblocked by e58a's own reproduction check having no further
+   claim on the shared credit budget this cycle.
+2. **Root cause of `pine/e47-alcm-long-cap12960.pine`'s specific mismatch** — still open, still low
+   priority, e50b/e58a already supersede it as working anchors regardless of the answer.
+3. **Position sizing / risk fraction as an independently testable axis** — still closed per HARD LESSON
+   29 (E58) for this single-position-book construction; would need a fundamentally different
+   construction (separate simulated accounts per shieldUsd value) to reopen, not queued given the
+   lift required.
+4. **If more 1m history ever becomes available**, the $3,000/$4,000 shield question E57 could not
+   answer is still the first thing to re-run on a longer window.
