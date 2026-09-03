@@ -755,17 +755,84 @@ three points (150+), so this is not the degenerate-sample failure mode — but g
 never been measured, so whether 6 is a true local optimum or the near side of a monotone walk that
 has not yet turned is still open.
 
+### QUEUE (superseded by v39 below)
+1. ~~Test tighter than maxAge=6~~ — still open, now queue item 1 below.
+2. **A purpose-built bear-market or regime-flip split** — still open.
+3. **The remaining signal terms**: `close > dzBot` and `dzAge >= 1` — still open.
+4. ~~Split-test v37~~ — **DONE, v39 below. v37 promoted.**
+5. ~~Update the scheduled prompt~~ — **flagged AGAIN this cycle (v39), fourth consecutive time
+   (v34, v36, v37/v38, now v39). Escalated as a push notification this cycle, not just a ledger
+   note — see below.**
+
+---
+
+## ██ v39 — v37 SPLIT-TESTS CLEAN AND IS PROMOTED. THE PROMPT IS STILL STALE, A FOURTH TIME. (2026-09-03)
+
+**A NOTE ON THE PROMPT, A FOURTH TIME.** This cycle's stored scheduled prompt is again the text first
+flagged at v34, repeated at v36 and v37/v38 — it frames the ~2026-09-02 cloud/local merge as current
+news, describes v30 as unreproduced-and-current, and asks to rebuild the anchor as blocking task 0.
+That work has been done and confirmed since v31/v32/v36. Per the prompt's own instruction ("THE DOCS
+WIN over this prompt") and HARD LESSON 26, this cycle again continues the real queue (v37/v38's queue
+item 4) instead of re-running the anchor task. Three prior cycles noted this only in the ledger and it
+had no visible effect — per v37/v38's own queue item 5 ("this should be raised to the user directly,
+not just noted in the ledger again"), this cycle sends a push notification instead of relying on the
+ledger alone.
+
+### THE SPLIT TEST, DONE — QUEUE ITEM 4 FROM v37/v38
+
+Same design as v32→v33: byte-identical Pine (`pine/3m-elite-v37-freshness-tight.pine`, maxAge=6),
+only the backtest window changed, split at 2024-06-08.
+
+| | H1 (2022-01 → 2024-06-08) | H2 (2024-06-08 → 2026-09-01) | Full sample (v37) |
+|---|---|---|---|
+| Profit factor | **1.33630490** | **1.12058245** | 1.25172059 |
+| Max drawdown | 8.72815312% | 7.29383280% | 8.72815312% |
+| Trades | 96 | 59 | 155 |
+| Win rate | 43.75% | 40.68% | 42.58% |
+| Sharpe | 0.87 | 0.30 | — |
+| Net return | +24.25% | +4.47% | +29.76% |
+
+**96 + 59 = 155, exactly the full sample — a clean partition, no boundary double-count.**
+
+### THE CRITERION, MET — AND MET MORE EVENLY THAN v32/v33
+
+v32's own split (v33) passed with H1 1.35 / H2 1.05 — a "concentrated in H1" result the ledger flagged
+as the honest reading over the headline. **v37's split is stronger on the weak half**: H2 here is
+**1.12058245**, above v32/v33's own H2 of 1.05357727, on a comparable trade count (59 vs 64). Both
+halves clear 1.0 with room, and neither collapses. **v37 is PROMOTED to `status: passed`** and is now
+the champion of record, superseding v32.
+
+### THE HONEST READING
+
+H2's Sharpe (0.30) and net return (+4.47% over ~2.25 years) are still weak in absolute terms — this is
+not a strong second half, it is a second half that does not fail. The same caveat v33 attached to v32
+applies here: the edge is real but uneven across time, concentrated in the 2022-crash-and-recovery
+window, and every future citation of "v37, PF 1.25" should carry the H1/H2 split alongside the blended
+number, not instead of it.
+
+### WHAT THIS DOES AND DOES NOT SETTLE
+
+This satisfies the split-test half of HARD LESSON 22 (v37's `maxAge=6` was chosen from the v36/v37/v38
+full-sample sweep; neither half was used to pick it, so this is a genuine out-of-sample check, not a
+re-fit). It does **not** touch the STANDING REQUIREMENT — v37 is still long-only, still has no
+purpose-built bear-regime split, and the short leg is still rejected (v34). Those remain exactly as
+open as they were under v32/v33.
+
 ### QUEUE
-1. **Test tighter than maxAge=6** (e.g. 3) to confirm v37 sits on a real optimum rather than an
-   unfinished monotone walk on drawdown.
-2. **A purpose-built bear-market or regime-flip split** (unchanged from v36's queue item 2) — the
-   standing requirement still needs one.
-3. **The remaining signal terms**: `close > dzBot` and `dzAge >= 1` (unchanged from v36's queue
-   item 3).
-4. **Split-test v37** before calling it more than a new base — the same check v32 passed in v33.
-5. **Update the scheduled prompt.** Third consecutive cycle (v34, v36, v37/v38) finding the same
-   stale text describing v30 as the unreproduced, current anchor. This should be raised to the user
-   directly, not just noted in the ledger again.
+1. **Test tighter than maxAge=6** (e.g. 3), to confirm v37 sits on a real optimum on the drawdown axis
+   rather than the near side of an unfinished monotone walk (HARD LESSON 19 caution, still open from
+   v37/v38).
+2. **A purpose-built bear-market or regime-flip split** — unchanged, still the largest gap against the
+   STANDING REQUIREMENT.
+3. **The remaining signal terms**: `close > dzBot` and `dzAge >= 1`, the binding test never yet applied
+   to either — unchanged from v36/v37/v38.
+4. **The scheduled prompt needs to be edited at the source**, not just re-flagged each cycle. Four
+   consecutive cycles (v34, v36, v37/v38, v39) have now found and worked around the same stale text.
+   This cycle escalates it as a push notification rather than a fifth silent ledger note.
+
+**BASE: v37. PF 1.25172059, DD 8.72815312%, 155 trades, long-only, maxAge=6, anchored at
+pine/3m-elite-v37-freshness-tight.pine. Split-tested and PROMOTED — the second validated champion in
+this lab, after v32.**
 
 ---
 

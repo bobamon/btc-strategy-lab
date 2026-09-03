@@ -329,3 +329,15 @@ R floor (LESSON 3) now has both neighbours measured (0.50% and 1.20%), confirmin
 optimum rather than an artefact of an untested edge. Type 1 (the 3M candle's anatomy) and the swing
 rule remain undefined, per the table above, and still do not block anything since the working entry
 uses engulf-based (Type-2-adjacent) logic only.
+
+## ✅ UPDATE, 2026-09-03 — v37 (FRESHNESS maxAge=6) SPLIT-TESTS CLEAN AND IS PROMOTED (v39)
+
+No new vocabulary term was decoded this cycle either. The existing model (engulf creates the zone,
+`[low, open]` geometry, most-recent replacement, body mitigation with the One Candle Rule, the 0.8%
+R floor, and now a tighter freshness cap of 6 four-hour candles instead of v32's 12) was split-tested
+at 2024-06-08 the same way v32 was in v33: byte-identical Pine, only the window changed. Both halves
+clear PF 1.0 (H1 1.336 on 96 trades, H2 1.121 on 59 trades, partitioning the full 155-trade sample
+exactly) — H2 here is stronger than v32/v33's own H2 (1.054), so this is not a weaker replication of
+the same pattern, it is a cleaner one. v37 is now the champion of record (SYSTEM.md's v39 entry has
+the full numbers). Type 1 and the swing rule remain undefined and still do not block the working
+engulf-based entry.

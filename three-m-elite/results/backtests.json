@@ -1120,7 +1120,7 @@
     "symbol": "BTCUSDT",
     "timeframe": "15m",
     "direction": "long",
-    "status": "testing",
+    "status": "passed",
     "createdDate": "2026-09-03",
     "lastTestedDate": "2026-09-03",
     "backtestStart": "2022-01-01",
@@ -1142,7 +1142,7 @@
       "verifiedAt": "2026-09-03T03:54:00Z"
     },
     "pineSource": "three-m-elite/pine/3m-elite-v37-freshness-tight.pine",
-    "notes": "KEPT -- both ratchet terms improved over v32 (PF 1.22482256 -> 1.25172059, DD 10.90593093% -> 8.72815312%), on 165 -> 155 trades, a healthy sample. This is a genuine ratchet pass, same rule this lab used to keep v30 and v32. New base pending a split test (v32 was only promoted to status:passed after v33 split it -- v37 has not yet had that check). The neighbourhood is NOT a clean single peak: v38 (maxAge=24) also beats v32 on PF but not on DD, and v32 (maxAge=12) sits worse than BOTH its neighbours on PF -- a dip, not a smooth curve. Drawdown is the unambiguous signal here (monotonically rising with age: 8.73% at 6, 10.91% at 12, 10.92% at 24); profit factor differences among the three points are small enough (155/165/170 trades) that they may be partly noise. Flagged for next cycle: test even tighter (maxAge=3 or similar) to see whether this is a true optimum at 6 or a monotone walk that has not yet turned (HARD LESSON 19 caution) -- trade counts here stay healthy (150+) so this is not the degenerate-sample failure mode, but the direction is unconfirmed past 6."
+    "notes": "KEPT -- both ratchet terms improved over v32 (PF 1.22482256 -> 1.25172059, DD 10.90593093% -> 8.72815312%), on 165 -> 155 trades, a healthy sample. This is a genuine ratchet pass, same rule this lab used to keep v30 and v32. New base pending a split test (v32 was only promoted to status:passed after v33 split it -- v37 has not yet had that check). The neighbourhood is NOT a clean single peak: v38 (maxAge=24) also beats v32 on PF but not on DD, and v32 (maxAge=12) sits worse than BOTH its neighbours on PF -- a dip, not a smooth curve. Drawdown is the unambiguous signal here (monotonically rising with age: 8.73% at 6, 10.91% at 12, 10.92% at 24); profit factor differences among the three points are small enough (155/165/170 trades) that they may be partly noise. Flagged for next cycle: test even tighter (maxAge=3 or similar) to see whether this is a true optimum at 6 or a monotone walk that has not yet turned (HARD LESSON 19 caution) -- trade counts here stay healthy (150+) so this is not the degenerate-sample failure mode, but the direction is unconfirmed past 6. PROMOTED 2026-09-03: split-tested at 2024-06-08 (see 3m-elite-v37-split-h1 / -h2), both halves clear PF 1.0 (H1 1.33630491 on 96 trades, H2 1.12058245 on 59 trades, 96+59=155 exact partition), matching or exceeding v32/v33's own split. v37 is now the champion of record."
   },
   {
     "id": "3m-elite-v38-freshness-loose",
@@ -1173,5 +1173,65 @@
     },
     "pineSource": "three-m-elite/pine/3m-elite-v38-freshness-loose.pine",
     "notes": "NOT KEPT against v32 -- PF improves (1.22482256 -> 1.24828129) but drawdown is marginally worse (10.90593093% -> 10.91697823%, +0.011pp), failing the both-terms ratchet by a hair. Completes the freshness neighbourhood on both sides (v37 tight, v38 loose) per HARD LESSON 16, but the curve is not a clean single peak at v32s maxAge=12 -- see v37s notes for the full three-point shape and the honest reading that drawdown is the real signal here, not profit factor."
+  },
+  {
+    "id": "3m-elite-v37-split-h1",
+    "name": "3M Elite v37 split-test, H1 (2022-01 to 2024-06-08)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "passed",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Queue item 4 from v37/v38: split-test v37 (maxAge=6) before calling it more than a new base, mirroring the v32->v33 split methodology. Byte-identical Pine to pine/3m-elite-v37-freshness-tight.pine, only the backtest window changed.",
+    "metrics": {
+      "netProfitPct": 24.24592963,
+      "profitFactor": 1.3363049,
+      "maxDrawdownPct": 8.72815312,
+      "totalTrades": 96,
+      "winRatePct": 43.75,
+      "avgTradePct": 0.25256177
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JSV3QVH74NTYBBZ0MNNKS9",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JSV3QVBTXX99FJ7YPYNT35",
+      "verifiedAt": "2026-09-03T04:33:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v37-freshness-tight.pine",
+    "notes": "H1 clears PF 1.0 comfortably (1.336) on 96 trades, DD 8.73%, win 43.75%. See 3m-elite-v37-split-h2 for the other half; 96+59=155 exactly partitions v37's full-sample trade count with no boundary double-count."
+  },
+  {
+    "id": "3m-elite-v37-split-h2",
+    "name": "3M Elite v37 split-test, H2 (2024-06-08 to 2026-09-01)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "passed",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Queue item 4 from v37/v38: split-test v37 (maxAge=6) before calling it more than a new base, mirroring the v32->v33 split methodology. Byte-identical Pine to pine/3m-elite-v37-freshness-tight.pine, only the backtest window changed.",
+    "metrics": {
+      "netProfitPct": 4.47463187,
+      "profitFactor": 1.12058245,
+      "maxDrawdownPct": 7.2938328,
+      "totalTrades": 59,
+      "winRatePct": 40.6779661,
+      "avgTradePct": 0.07584122
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JSVQYHMVFD9JN5XR6QP1P4",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JSVQYHCJGYFR481SWQJGFY",
+      "verifiedAt": "2026-09-03T04:34:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v37-freshness-tight.pine",
+    "notes": "H2 clears PF 1.0 (1.121) on 59 trades, DD 7.29%, win 40.68% -- weaker than H1 but does not collapse, and is actually stronger than v32/v33's own H2 (1.0536 on 64 trades). See 3m-elite-v37-split-h1 for the other half."
   }
 ]
