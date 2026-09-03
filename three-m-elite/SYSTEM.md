@@ -1376,6 +1376,121 @@ config change to the champion follows from this cycle.
 
 ---
 
+## ██ v50 — THE REGIME-FLIP SPLIT (OPEN SINCE v36): THE STRATEGY TRADES THROUGH THE FLIP, AND DOESN'T LOSE DOING IT (2026-09-03)
+
+**A NOTE ON THE PROMPT, AN ELEVENTH TIME.** This cycle's stored scheduled prompt is again the same
+stale text first flagged at v34 and repeated at v36, v37/v38, v39, v40/v41, v42/v43, v44, v45, v46/v47
+and v48/v49 — it still frames the ~2026-09-02 cloud/local merge as current news, describes v30 as
+unreproduced-and-current, and asks to rebuild the anchor as blocking task 0. That work has been done
+and confirmed since v31/v32/v36, and the champion has since moved to v37 and stayed there through v49.
+Per the prompt's own instruction ("THE DOCS WIN over this prompt") and HARD LESSON 26, this cycle again
+works from the real queue (v48/v49's items 1 and 2) rather than re-running the anchor. **Not
+re-notified as a push this cycle**: nothing has changed since the tenth report — recorded here as the
+eleventh occurrence rather than an eleventh notification of the same fact. This cycle's own finding
+below (real regime-flip evidence, the item open since v36) is reported to the user as the substantive
+update instead.
+
+### QUEUE ITEM 1 FROM v48/v49: RE-CHECK THE TRANSCRIPT FOR A LOOSER RESET CONDITION 2 — NONE FOUND
+
+Before touching the stage machine again, this cycle re-read `transcripts/2026-08-09 04-42-54.txt`
+specifically for the reset-condition wording (grep count: this is the ONLY transcript in the directory
+that mentions "cluster" or "reset" at all — 171 and 25 hits respectively; all nine other files are
+zero on both, confirming the "last week I taught you guys about clusters" material really is absent
+from this project's captured transcripts, not merely unmined). The relevant passage ([15:04]-[17:43])
+states the two reset forms in the author's own words with no looser variant available: (1) the model
+turns bearish then bullish again, or (2) "a new set of breaks to the upside with no cluster and then
+get another react." A third, faster path is also stated explicitly ([11:20]-[11:37]: one break up in
+stage 2 followed by an instant break down flips the model to distribution immediately) — but this is
+already the mechanism v48/v49 built for the "instant break-down in stage 2" whipsaw, not a new, looser
+reading of condition 2 itself. **No genuinely better-supported reading was found.** Per this cycle's
+own instruction: say so plainly rather than force a rebuild on a guess, and move to the regime-flip
+split instead. RESET condition 1 remains blocked on a user-confirmed bias/model definition (0-V26);
+the stage machine is not reattempted this cycle.
+
+### QUEUE ITEM 2 FROM v36 (STILL OPEN THROUGH TEN CYCLES): THE REGIME-FLIP SPLIT
+
+v41 isolated the full 2022 calendar year (bear, PF 1.17318184, 52 trades) and v42 the full 2023
+calendar year (bull, PF 1.62141981, 24 trades) — but neither window contains the actual FLIP itself,
+they are two clean, single-regime years. This cycle picked a specific, defensible window containing a
+real, continuous, well-documented reversal: **2022-09-01 to 2023-03-31**, straddling the November 2022
+FTX-collapse capitulation low (BTC ~$22k falling to ~$16.1k) and the Q1 2023 recovery rally that
+followed directly from it (BTC back above $20k by mid-January, ~$28k by late March) — one run, one
+genuine trend reversal in the middle, not an average of two regimes.
+
+**PRE-RUN AUDIT (stated before running, HARD LESSON 17).** Long only, unchanged from v37 (LESSON 6 —
+legs are judged separately in this lab; no short leg reintroduced or mirrored, per v34's independent
+build-and-reject and the user's explicit instruction against mirroring). Stop = `dzBot`, structural
+(LESSON 5), unchanged. R floor 0.80% of price (`minRpct`, LESSON 3) confirmed present in the source
+before running. SL/TP fixed at entry, unchanged. Source is BYTE-IDENTICAL to v37 line-for-line (only
+comments, the strategy title, and one input label differ — verified with `diff`, same convention as
+v41/v42) — only the backtest window changed, at the `quick_backtest` call, exactly like the v33/v39/
+v41/v42 methodology. **PREDICTION, stated before running:** because a body close beyond `dzBot` both
+stops out any open long and invalidates the zone that produced it, the still-declining September–
+November segment should show LOW trade density and poor quality, with most activity shifting to the
+December–March recovery — i.e. the strategy should behave as though standing down while the trend
+argues against it, not as a null/degenerate result.
+
+**RESULT: `pine/3m-elite-v50-regime-flip-split.pine`, saved in this same action (HARD LESSON 21).**
+
+| | v41 (2022, bear year) | v42 (2023, bull year) | **v50 (Sep 2022 – Mar 2023, the flip)** |
+|---|---|---|---|
+| Profit factor | 1.17318184 | 1.62141981 | **1.6092115** |
+| Max drawdown | 8.72815312% | 4.33298381% | **4.1919455%** |
+| Trades | 52 | 24 | **22** |
+| Win rate | 38.46% | 45.83% | 50.00% |
+
+**THE PREDICTION WAS WRONG ON FREQUENCY, RIGHT ON SHAPE.** `get_trades` on the full 22-trade list shows
+the mechanism did NOT go quiet during the decline — 9 of the 22 trades (Sep 13 – Dec 14 2022) fall
+inside the still-declining/bottoming segment, a third of the window's activity, not a handful. New
+demand zones kept forming and getting traded in the downtrend, exactly as v41's 52 full-bear-year
+trades already implied. **But it also did not bleed doing it**: those 9 decline-segment trades net to
+**+$219.43** (5 wins, 4 losses, largest single loss -$152.87 — no blow-up), and the 13 recovery-segment
+trades (Jan–Mar 2023) added the remaining +$621.59 to reach the window's +$841.02 / PF 1.6092115.
+Max drawdown for the flip window (4.19%) is LOWER than either isolated calendar year, and its PF sits
+essentially level with the pure bull year despite carrying a genuine bear tail.
+
+**THE HONEST READING.** The mechanical flip response (zone invalidation on a body close beyond `dzBot`)
+does not implement "stand down while the trend is against you" — it has no such rule, and this cycle's
+prediction that it would behave as though it did was wrong. What actually protects the strategy through
+the flip is the COMBINATION already in place for other reasons: the 0.80% R floor (HARD LESSON 3) and
+the fixed 2R target keep individual losing trades small, and the deepest-zone/freshness rules (v22,
+v37) keep the population selective enough that decline-segment losers don't compound. **The STANDING
+REQUIREMENT's flip-rule question now has a real, credit-backed answer for this one window: the strategy
+trades THROUGH the flip rather than standing down, and does not lose money doing so.** This is evidence
+about one flip (7 months, one reversal), not proof the pattern holds at every regime change in the
+4.7-year sample — a different flip (e.g. a sustained bull-to-bear rollover rather than a capitulation
+V-bottom) could plausibly read differently, since this window's "flip" is specifically a sharp bottom
+followed by a strong recovery, not a slow topping process.
+
+### WHAT THIS DOES AND DOES NOT SETTLE
+
+Advances the STANDING REQUIREMENT's table from "two isolated single-regime years, no flip window
+measured" to "two isolated years plus one measured flip window, all three clearing PF 1.0." The two
+structural gaps against the full four-part requirement are unchanged: the short leg (independently
+built and rejected, v34) and long-only status itself. Does not touch the stage-machine work (queue item
+1 above closes it for this cycle with a negative finding, not a new attempt).
+
+### QUEUE
+1. **A second regime-flip window, of a different shape**, would test whether v50's result generalises:
+   this window was a sharp capitulation-and-V-recovery; a slower bull-to-bear rollover (a topping
+   process rather than a crash) is the untested shape and could plausibly read differently, per this
+   cycle's own honest-reading caveat above.
+2. **Resolve which reset path to pursue for the stage machine** remains open exactly as v48/v49 left
+   it: (a) a user-confirmed model/bias definition for RESET condition 1 (not available in an unattended
+   run, per 0-V26 — do not invent one), since (b) is now closed this cycle with a negative finding (no
+   looser transcript reading exists).
+3. **The scheduled prompt still needs to be edited at the source.** Eleven consecutive cycles (v34,
+   v36, v37/v38, v39, v40/v41, v42/v43, v44, v45, v46/v47, v48/v49, now v50) have found and worked
+   around the same stale text; `update_trigger` was confirmed (v40/v41) outside any cycle's reach on
+   this routine. No further action possible from inside a cycle.
+
+**BASE UNCHANGED: v37 remains champion.** PF 1.25172059, DD 8.72815312%, 155 trades, long-only,
+maxAge=6, anchored at `pine/3m-elite-v37-freshness-tight.pine`. v50 is regime-flip evidence about the
+champion's behaviour on one specific window, not a ratchet candidate — no config change to the champion
+follows from this cycle.
+
+---
+
 0-V32. ~~Then the freshness neighbourhood~~ (HARD LESSON 16): dzAge <= 6 and <= 24. A KEPT parameter
     must have its sensitivity profile measured before the result is quoted -- War Formation's champion
     was just demoted for exactly this omission. Superseded by v34/v35 above -- still open, now queue
@@ -1542,7 +1657,7 @@ configuration must say explicitly that the short leg and the regime evidence are
 |---|---|---|---|---|---|
 | BTC | yes, but PF 1.36 early / 0.66 late | built, PF 0.58, fails | yes — VWAP cross, stand down 60 bars | no — the base REQUIRES close above the 600 EMA, so it only trades bull conditions | **NO** |
 | War Formation | yes, PF 1.69 full / 0.89 recent | four attempts, best PF 0.75 | yes — 6h regime recomputes each block | no — requires 4+ green HA 1h candles, so bull conditions only | **NO** |
-| 3M Elite | yes, v37 PF 1.25 full / 1.34 H1 / 1.12 H2 | built independently, PF 0.74, fails (v34) | yes — zone invalidation on a body close | BOTH regimes now isolated: bear year (2022, v41) PF 1.17318184/52 trades, bull year (2023, v42) PF 1.62141981/24 trades. Bear year's drawdown equals the full sample's worst (8.73%); bull year is calmer (4.33%) and its 24 trades sit just under the ~30-trade floor | **NO — long leg validated with both regimes measured, short leg built and rejected** |
+| 3M Elite | yes, v37 PF 1.25 full / 1.34 H1 / 1.12 H2 | built independently, PF 0.74, fails (v34) | yes — zone invalidation on a body close; v50 (2026-09-03) measured its actual behaviour at a real flip: the strategy trades THROUGH the reversal rather than standing down, and nets positive doing so (see below) | BOTH regimes isolated (bear year 2022, v41, PF 1.17318184/52 trades; bull year 2023, v42, PF 1.62141981/24 trades) PLUS one measured flip window (v50, Sep 2022–Mar 2023, PF 1.6092115/22 trades, DD 4.19% — lower than either isolated year) | **NO — long leg validated with both regimes AND a flip window measured, short leg built and rejected** |
 
 **The blunt version: two of the three labs are structurally bull-only.** The BTC base gates on price
 above a long EMA and War Formation gates on green Heikin Ashi hourly candles — those are not filters
@@ -1556,7 +1671,15 @@ isolated bull year (v42, PF 1.62141981, 24 trades) now clearing 1.0 — the regi
 requirement is complete for the long leg. The supply-side entry was built from its own independent
 geometry, never mirrored, and honestly loses (v34, PF 0.74) — so the remaining gap is not "the entry
 doesn't work in either direction" any more, it is specifically that the short side of this mechanism
-has no edge on this instrument over this window. That, plus long-only status itself, are the two
+has no edge on this instrument over this window. **UPDATE 2026-09-03 (v50):** the flip-rule clause now
+has real evidence too, not just an asserted mechanism. A purpose-built window (2022-09-01 to
+2023-03-31) straddling the Nov 2022 FTX-collapse bottom and the Q1 2023 recovery shows the strategy
+does NOT stand down while the trend is against it — a third of the window's trades fire during the
+still-declining segment — but the R floor and 2R target keep those losses small enough that the segment
+nets positive ($219 of the window's $841), and the whole window's PF (1.61) and drawdown (4.19%, the
+lowest of any regime slice measured so far) both hold up. This is one flip of one shape (a sharp
+capitulation-and-V-recovery); a slower bull-to-bear rollover is untested and flagged as the natural
+next window. That, plus long-only status itself, are the two
 structural items left against the full four-part requirement — both are now sensitivity/robustness-
 exhausted on the long leg and need new short-side ideas or a user decision, not another backtest.
 

@@ -518,3 +518,19 @@ flip) remains unimplemented pending a user-confirmed bias/model definition (the 
 deferred Type 2 gate, 0-V26) — implementing it is one of the two live paths forward; the other is
 re-reading the source for a looser take on RESET condition 2. Neither the swing rule nor the 3M
 candle's anatomy were touched this cycle and remain genuinely absent from the transcripts.
+
+### ⚠️ UPDATE, 2026-09-03 (v50) — THE LOOSER-READING RE-CHECK CAME BACK EMPTY
+
+v48/v49's second live path (re-read the source for a looser take on RESET condition 2) was checked
+this cycle. `transcripts/2026-08-09 04-42-54.txt` is confirmed as the ONLY transcript file in this
+project that mentions "cluster" or "reset" at all (grep across all ten files: 171/25 hits there, zero
+everywhere else) — the "last week I taught you guys about clusters" material this video references is
+genuinely absent from the captured transcripts, not merely unmined. Re-reading [15:04]-[17:43] finds
+the two reset forms stated exactly as already decoded above, with no looser variant on offer: (1) model
+flips bearish then bullish again, or (2) a full set of breaks up containing no cluster, then a react.
+The "one break up, instant break down" fast path ([11:20]-[11:37]) is a special case of condition 1
+(an instant model flip), already the mechanism v48/v49 built for the whipsaw rule — not a third, looser
+reading of condition 2. **No genuinely better-supported reading exists in this lab's source material.**
+This closes v48/v49's item (a)/(b) choice with a negative finding on (b); the only remaining live path
+for the stage machine is (a), a user-confirmed bias/model definition, which per 0-V26 this lab does not
+invent on its own.

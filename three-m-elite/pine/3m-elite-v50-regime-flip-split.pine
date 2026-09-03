@@ -1,0 +1,134 @@
+//@version=6
+// 3M ELITE v50 - PURPOSE-BUILT REGIME-FLIP SPLIT. BYTE-IDENTICAL to v37 (3m-elite-v37-freshness-tight.pine)
+//   -- logic below is unchanged line-for-line from v37; only this header, the strategy title, and the
+//   backtest window (set at the quick_backtest call, not in this file) differ.
+//   15m, 2022-09-01 -> 2023-03-31 (7 months), BTCUSDT, long-only.
+//
+// PURPOSE: queue item from v36/v41/v42/v48/v49 -- "a purpose-built regime-flip split remains open,"
+// unresolved since v36. v41 isolated the 2022 calendar year (bear, PF 1.17) and v42 isolated the 2023
+// calendar year (bull, PF 1.62), but neither window contains the actual FLIP -- both are clean,
+// single-regime years. This window instead straddles a real, continuous, well-documented reversal:
+// the tail of the 2022 decline through the Nov 2022 capitulation low (the FTX-collapse crash, BTC
+// ~$20k -> ~$15.5k) and directly into the Q1 2023 recovery rally (BTC back above $20k by mid-January,
+// ~$28k by late March) -- a single run containing a genuine trend reversal, not two averaged regimes.
+//
+// QUESTION STATED BEFORE RUNNING (HARD LESSON 17): the STANDING REQUIREMENT asks whether the
+// mechanical flip response (zone invalidation on a body close beyond dzBot) causes this long-only
+// strategy to sensibly go quiet as the downtrend continues into the reversal, or whether it keeps
+// firing losing longs through the decline. PREDICTION: because a body close beyond dzBot both stops
+// out any open long AND invalidates the zone that would otherwise be re-traded, the still-declining
+// September-November segment should produce few, low-quality entries (zones invalidate before or
+// shortly after being re-tapped), with trade density picking up once price stabilizes and begins
+// making higher highs in December-March. Given 52 trades/year in the full 2022 bear split (v41) and
+// this window is ~7 months with roughly half spent in the tail of an already-mature decline, expect
+// a LOW trade count for this window (rough order of magnitude 10-20), not a null result and not a
+// full-year-scale count.
+//
+// AUDIT: LONG ONLY, unchanged from v37 (LESSON 6 -- legs are not judged together in this lab, v24; no
+// short leg reintroduced or mirrored, per v34's independent-build-and-reject and the user's explicit
+// instruction not to mirror). Stop = dzBot, structural (LESSON 5), unchanged. R floor 0.80% of price
+// (minRpct, LESSON 3) confirmed present and unchanged at line below. SL/TP fixed at entry, unchanged.
+// No parameter changed from v37 -- window only, same construction as v41/v42's regime splits.
+strategy("3M ELITE v50 regime-flip split (2022-09 to 2023-03)", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rTarget  = input.float(2.0, "Target, x R")
+maxBars  = input.int(96,    "Max bars in trade (entry timeframe)")
+maxAge   = input.int(6,     "Zone freshness cap, 4H candles since creation")
+minRpct  = input.float(0.80,"Min stop distance as % of price (LESSON 3)")
+
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+// ---------- reconstruct the 4H candle from 15m bars: in-progress OHLC ----------
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+// ---------- snapshots of the two most recently COMPLETED 4H candles (open + close; +H/L for the most recent) ----------
+var float pO  = na
+var float pH  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pH  := h4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+// ---------- engulf on the just-completed candle vs the one before it (body containment, no gap) ----------
+bullEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC < ppO and pC > pO and pC > ppO
+bearEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC > ppO and pC < pO and pC < ppO
+
+// ---------- demand zone lifecycle: create on bull engulf, mitigate on a body close inside, age in 4H units ----------
+var float dzTop   = na
+var float dzBot   = na
+var bool  dzLive  = false
+var int   dzTouch = 0
+var int   dzAge   = 0
+var bool  dzTraded = false
+
+if new4h
+    if dzLive and not na(pC) and pC <= dzTop
+        dzTouch := dzTouch + 1
+        if dzTouch >= 2
+            dzLive := false
+    if dzLive
+        dzAge := dzAge + 1
+    if bullEngulf
+        dzTop   := pO
+        dzBot   := pL
+        dzLive  := true
+        dzTouch := 0
+        dzAge   := 0
+        dzTraded := false
+
+// ---------- entry: zone live, sequenced after creation, not yet double-mitigated, price back at the zone, still fresh ----------
+minR    = close * minRpct / 100
+rBig    = not na(dzBot) and (close - dzBot) >= minR
+
+longCond = rBig and dzLive and not dzTraded and dzAge >= 1 and dzTouch < 2 and low <= dzTop and close > dzBot and dzAge <= maxAge
+
+flat = strategy.position_size == 0
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if flat and longCond and not na(dzBot) and close > dzBot
+    r = close - dzBot
+    if r > 0
+        strategy.entry("L", strategy.long)
+        dzTraded := true
+        slPx   := dzBot
+        tpPx   := close + r * rTarget
+        barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(dzLive ? 1 : 0, title="DemandZoneLive")
+plot(dzAge,          title="DemandZoneAge")
