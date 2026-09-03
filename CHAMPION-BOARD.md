@@ -1898,3 +1898,39 @@ blocker has changed in a way that would add new information to the notification 
    re-asking for work the board already closed. This is now five identical firings since the halt.
 
 **BASE: still RETIRED. No champion, no candidate, no base. Nothing changed this cycle.**
+
+
+---
+
+# ███ CYCLE CHECK #6, 2026-09-03 — SAME STALE PROMPT, SAME HALT. STILL NOT RE-NOTIFYING.
+
+Sixth consecutive firing of the same unedited stored mandate (still anchored on PF 1.47184908 / 56
+trades / `coolBars` 150 / "no champion" / continue numbering at Attack 31 / split Attack 30's 15m
+build at 2024-06-08, and still citing 21 hard lessons — the ledger now holds 27). All of it was
+superseded before cycle check #1 ever ran, for the reasons recorded there and in Attacks 31/32:
+the split already ran and failed out-of-sample (PF 0.799 on 77 never-seen trades), and the bare
+mechanism was then shown to lose money on both halves of the full 4.7-year window (1,658 trades,
+PF 0.930 / 0.880), which retired the base outright.
+
+`get_credits` returned 725 — budget has never been the blocker across six checks now
+(744 → 740 → 736 → 732 → 729 → 725; the small drift with no BTC backtest run reflects the other two
+labs sharing the same pool). Per this lab's own rule that the board outranks the stored prompt: no
+attack ran, no Pine was written, no board state changed beyond this note. `git log` confirms no BTC
+lab commit landed between cycle check #5 and this firing — only War Formation (E56) and 3M Elite
+(v40/v41) activity — so there is nothing new on this lab's own board to react to either.
+
+**Not sending another push notification.** Cycle check #3 reached the user once with this exact
+status. Checks #4 and #5 held that a single further identical firing is not "many more... with still
+no response," and this is only the second identical firing since that call, not a new order of
+magnitude. Nothing about the blocker has changed in a way that would add information to the
+notification already sent — repeating it now would be paging the user for a fact they already have.
+
+**Still waiting on the user, unchanged since Attack 32 / cycle check #3:**
+1. What replaces the retired VWAP pullback-continuation mechanism — a new mechanism on BTCUSDT, or
+   the same measure/split/keep discipline applied to a different instrument.
+2. The three open rule questions (drawdown-tolerance band, regime-spread ratchet term, minimum-sample
+   floor) — moot for this retired strategy, but they would govern any successor.
+3. The stored scheduled prompt itself is stale and should be updated or paused so the loop stops
+   re-asking for work the board already closed. This is now six identical firings since the halt.
+
+**BASE: still RETIRED. No champion, no candidate, no base. Nothing changed this cycle.**
