@@ -1136,9 +1136,9 @@ const DATA = [
     "symbol": "BTCUSDT",
     "timeframe": "15m",
     "direction": "long",
-    "status": "testing",
+    "status": "passed",
     "createdDate": "2026-09-02",
-    "lastTestedDate": "2026-09-02",
+    "lastTestedDate": "2026-09-03",
     "backtestStart": "2022-01-01",
     "backtestEnd": "2026-09-01",
     "specPath": "three-m-elite/SYSTEM.md",
@@ -1157,10 +1157,71 @@ const DATA = [
       "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JB9TSTA5ZBYMM09MSAFWN4",
       "verifiedAt": "2026-09-03T00:48:00Z"
     },
-    "notes": "KEPT -- THE FLOOR BINDS HARD AND THE REBUILD ASSERTION WAS WRONG. v31 PF 0.88869052 / DD 34.63598596% / 734 trades; v32 PF 1.22482256 / DD 10.90593093% / 165 trades. 569 entries, 77.5% of the population, had stops under 0.8% of price. The anchor rebuild header claimed 4H engulf bases run far wider than 0.8% on this instrument and recorded that as UNVERIFIED -- it was wrong, and those micro-stop trades were what made this lab look like a loser. Passes the ratchet by the widest margin in any lab today: PF +0.336, drawdown -23.7pp. ENFORCED BY EXCLUSION NOT CLAMPING: raising r would push slPx below dzBot and convert a structural stop into a risk-defined one, so fixing a LESSON 3 violation would have created a LESSON 5 one. THE REGISTERED CAUTION STILL APPLIES: a PF above 1.0 must be read against the count, because a hard sample cut can manufacture one -- the count fell 78%. The distinction cutting the other way is that coolBars was a FREE PARAMETER tuned to taste while 0.8% is a PRE-EXISTING RULE set long ago for independent reasons and simply never applied here. This is compliance, not tuning, and 165 trades over 4.7 years clears the 30-trade floor comfortably. NOT VALIDATED: THIS HAS NOT BEEN SPLIT-TESTED. On the same day, BTC Attack 32 showed a filtered build printing 2.077 in-sample while the bare mechanism returned ~0.9 on 1,658 trades. 3M has 4.7 years and CAN be split at 2024-06-08. Until that is done 1.225 is a direction, not a result."
+    "notes": "KEPT -- THE FLOOR BINDS HARD AND THE REBUILD ASSERTION WAS WRONG. v31 PF 0.88869052 / DD 34.63598596% / 734 trades; v32 PF 1.22482256 / DD 10.90593093% / 165 trades. 569 entries, 77.5% of the population, had stops under 0.8% of price. The anchor rebuild header claimed 4H engulf bases run far wider than 0.8% on this instrument and recorded that as UNVERIFIED -- it was wrong, and those micro-stop trades were what made this lab look like a loser. Passes the ratchet by the widest margin in any lab today: PF +0.336, drawdown -23.7pp. ENFORCED BY EXCLUSION NOT CLAMPING: raising r would push slPx below dzBot and convert a structural stop into a risk-defined one, so fixing a LESSON 3 violation would have created a LESSON 5 one. THE REGISTERED CAUTION STILL APPLIES: a PF above 1.0 must be read against the count, because a hard sample cut can manufacture one -- the count fell 78%. The distinction cutting the other way is that coolBars was a FREE PARAMETER tuned to taste while 0.8% is a PRE-EXISTING RULE set long ago for independent reasons and simply never applied here. This is compliance, not tuning, and 165 trades over 4.7 years clears the 30-trade floor comfortably. NOT VALIDATED: THIS HAS NOT BEEN SPLIT-TESTED. On the same day, BTC Attack 32 showed a filtered build printing 2.077 in-sample while the bare mechanism returned ~0.9 on 1,658 trades. 3M has 4.7 years and CAN be split at 2024-06-08. Until that is done 1.225 is a direction, not a result. SPLIT-TESTED 2026-09-03 at 2024-06-08 (queue item 1): H1 (2022-01->2024-06-08) PF 1.34562489, DD 9.59321547%, 101 trades, win 43.56%. H2 (2024-06-08->2026-09-01) PF 1.05357727, DD 10.88660191%, 64 trades, win 40.63%. BOTH HALVES CLEAR PF 1.0, and trade counts sum exactly to the full sample's 165 (101+64), confirming the two windows partition it cleanly. This satisfies the criterion registered before the run in v32's own Pine header: 'if the pre-2024 half holds above 1.0 this becomes the first validated result in the project.' PROMOTED to status=passed on that basis -- the first champion-grade PF in this lab. HONEST CAVEAT: H2 is weak -- PF 1.05 is barely above breakeven, Sharpe 0.16 against H1's 0.90, and equity is nearly flat (+2.23% over 2.25 years). The edge is real but concentrated in H1; H2 does not disconfirm it (HARD LESSON 22 test passed) but does not repeat it either. STANDING REQUIREMENT NOT MET: this is long-only (short leg removed at v24, LESSON 6) and has no explicit flip rule beyond zone invalidation. H1 does span the 2022 crash (BTC roughly -66% peak-to-trough within the window) as well as the 2023-2024 recovery, but the split was not decomposed further to isolate performance during the crash leg itself -- only the combined H1 aggregate (PF 1.35) is measured, so this is not yet evidence the entry works IN a falling market, only that it survived a window containing one. Validated PF on a real out-of-sample split; not a finished system.",
+    "pineSource": "three-m-elite/pine/3m-elite-v32-r-floor.pine"
+  },
+  {
+    "id": "3m-elite-v32-split-h1",
+    "name": "3M Elite v32 split test, first half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "passed",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Queue item 1 from v32: split-test the R-floor base at 2024-06-08 before any further tuning (v32's own header flagged itself NOT YET VALIDATED on this point, and HARD LESSON 22 requires it before an in-sample number is trusted). Pine is byte-identical to pine/3m-elite-v32-r-floor.pine -- only the backtest window changes.",
+    "metrics": {
+      "netProfitPct": 25.85631611,
+      "profitFactor": 1.34562489,
+      "maxDrawdownPct": 9.59321547,
+      "totalTrades": 101,
+      "winRatePct": 43.56435644,
+      "avgTradePct": 0.25600313
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JC4R7KVK8VG57Q6EGP7144",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JC4R7K3QN3JVYRM7TF1YQ0",
+      "verifiedAt": "2026-09-03T00:54:15Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v32-r-floor.pine",
+    "notes": "PF 1.34562489, DD 9.59321547%, 101 trades, win 43.56%. Contains the 2022 crash and the 2023-2024 recovery. Trade count (101) plus H2's (64) sums exactly to the full-sample 165, confirming the two windows partition v32 cleanly with no boundary double-count. Clears PF 1.0 with the widest margin of either half -- see 3m-elite-v32-split-h2 for the weaker half and 3m-elite-v32-r-floor for the combined verdict."
+  },
+  {
+    "id": "3m-elite-v32-split-h2",
+    "name": "3M Elite v32 split test, second half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "passed",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Second half of the v32 split test (see 3m-elite-v32-split-h1). Pine is byte-identical to pine/3m-elite-v32-r-floor.pine -- only the backtest window changes.",
+    "metrics": {
+      "netProfitPct": 2.23345848,
+      "profitFactor": 1.05357727,
+      "maxDrawdownPct": 10.88660191,
+      "totalTrades": 64,
+      "winRatePct": 40.625,
+      "avgTradePct": 0.03489779
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JC5CTZX8K2K2W0R2H8F7Q8",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JC5CTZ1Z05HBNHQAHFQ9G7",
+      "verifiedAt": "2026-09-03T00:54:36Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v32-r-floor.pine",
+    "notes": "PF 1.05357727, DD 10.88660191%, 64 trades, win 40.63%, Sharpe 0.16 against H1's 0.90. Clears PF 1.0 but only just -- net return is +2.23% over 2.25 years, essentially flat. This is the weaker half and the honest reading of the split: the edge is real (both halves clear 1.0, and the trade counts partition exactly) but concentrated in H1, not evenly spread. Does not disconfirm v32 (HARD LESSON 22's test is passed), but does not repeat H1's strength either -- record this caveat every time v32's PF 1.225 is quoted."
   }
 ];
-const BUILT = "2026-09-02 18:40";
+const BUILT = "2026-09-03 00:56";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

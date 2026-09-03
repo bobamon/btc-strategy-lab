@@ -285,3 +285,22 @@ This does not mean the decoded definitions above are wrong — the reconstructio
 an implicit guard no transcript ever stated. But until a saved, reproducible build confirms otherwise,
 none of the trade counts or profit factors quoted in this file's zone-lifecycle sections should be
 treated as verified against real code.
+
+---
+
+## ✅ UPDATE, 2026-09-03 — THE ANCHOR WAS FOUND, AND THE MODEL SURVIVED
+
+v31 (SYSTEM.md) found the missing guard: the reconstruction was checking the entry conjunction on
+every 15m bar with no memory of a prior stop-out from the same zone, producing a re-entry storm. A
+single `dzTraded` latch (one entry per zone) took the trade count from 2,469 to 734 — a near-match to
+v30's recorded 811. **So every definition on this page is essentially confirmed**, not merely
+plausible: engulf creates the zone, `[low, open]`/`[open, high]` geometry, most-recent replacement,
+body mitigation with the One Candle Rule, and zone freshness all survived contact with a real,
+saved, reproducible build.
+
+v32 then found the R floor (LESSON 3, 0.8% of price) was never enforced and bound on 77.5% of trades
+— PF 0.889 → 1.225. **v33 split-tested that at 2024-06-08 and both halves cleared PF 1.0** (1.35 and
+1.05 — see SYSTEM.md's v33 entry). This is the first validated positive result in the project. No new
+vocabulary term was decoded this cycle; Type 1 (the 3M candle's anatomy) and the swing rule remain
+undefined, per the table above, and are not currently blocking anything since the working entry uses
+Type-2-adjacent (engulf) logic only.

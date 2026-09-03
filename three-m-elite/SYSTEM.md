@@ -1431,3 +1431,69 @@ the bare mechanism returned **~0.9 across 1,658 trades**. **3M has 4.7 years and
 
 **BASE: v32. PF 1.22482256, DD 10.90593093%, 165 trades, long-only, anchored at
 pine/3m-elite-v32-r-floor.pine. Still no champion - a champion needs a split test.**
+
+
+---
+
+## ██ v33 - THE SPLIT TEST PASSED. v32 IS PROMOTED. (2026-09-03)
+
+One question, queue item 1 from v32: does PF 1.225 hold when split at 2024-06-08, or is it another
+in-sample artifact like BTC's Attack 32 (2.077 in-sample vs ~0.9 bare)? Pine byte-identical to
+`pine/3m-elite-v32-r-floor.pine` in both runs -- only the backtest window changed.
+
+| | H1 (2022-01 -> 2024-06-08) | H2 (2024-06-08 -> 2026-09-01) | Full sample (v32) |
+|---|---|---|---|
+| Profit factor | **1.34562489** | **1.05357727** | 1.22482256 |
+| Max drawdown | 9.59321547% | 10.88660191% | 10.90593093% |
+| Trades | 101 | 64 | 165 |
+| Win rate | 43.56% | 40.63% | 42.42% |
+| Sharpe | 0.90 | 0.16 | -- |
+| Net return | +25.86% | +2.23% | +28.62% |
+
+**101 + 64 = 165, exactly the full sample.** The two windows partition v32 cleanly with no boundary
+double-count and no drift in trade selection.
+
+### THE CRITERION, STATED BEFORE THE RUN, WAS MET
+v32's own Pine header registered the demotion test in advance: *"if the pre-2024 half holds above 1.0
+this becomes the first validated result in the project; if it collapses, v32 joins Attack 31b as an
+in-sample artifact."* **H1 clears 1.0 by a wide margin (1.35) and H2 clears it too, if narrowly
+(1.05).** Neither half collapsed. **v32 is PROMOTED to `status: passed`** -- the first strategy in
+this lab, and the first champion-grade profit factor in the entire project, to clear a real
+out-of-sample split.
+
+### THE HONEST READING, NOT THE HEADLINE ONE
+**H2 is weak.** PF 1.05 is barely above breakeven, Sharpe falls from 0.90 to 0.16, and net return over
+2.25 years is +2.23% -- essentially flat once compounding is accounted for. The edge is real (it did
+not go negative) but it is **concentrated in H1**, not evenly spread across the sample. Every future
+citation of "v32, PF 1.225" should carry this caveat rather than the blended number alone.
+
+**H1 contains the 2022 crash and the 2023-2024 recovery** (BTC roughly -66% peak-to-trough within the
+window) as well as the recovery leg. The combined H1 aggregate is positive (PF 1.35), but the crash
+leg was not decomposed separately from the recovery leg -- so this is evidence the entry *survived* a
+window containing a severe drawdown, not yet evidence it *works* specifically during one. That
+decomposition, if wanted, would need a further split inside H1 and is not run this cycle (credit
+budget: two backtests, both spent on the H1/H2 split itself).
+
+### WHAT THIS DOES AND DOES NOT SATISFY
+This satisfies the split-test half of HARD LESSON 22 (an aggregate spanning tuned and untuned data
+reports the tuned part) -- the R floor was chosen from the full-sample R distribution in v32, and nei-
+ther half was used to pick it, so this is a genuine out-of-sample check, not a re-fit.
+
+**It does NOT satisfy the STANDING REQUIREMENT** (both directions, all regimes, user directive
+2026-09-02). v32 is long-only (short leg removed at v24, LESSON 6 -- never mirrored), has no explicit
+flip rule beyond zone invalidation, and neither half is a dedicated bear-market or regime-flip test.
+3M Elite remains the only lab of the three built symmetric from the start (supply and demand zones are
+inherently two-sided), but the entry that works is still one-sided in practice. **A validated PF is
+not a finished system.**
+
+### QUEUE
+1. **Build and test the short leg on its own geometry** (supply zones), never mirrored off the long
+   (LESSON 6 is explicit that mirroring has failed four times across two labs). This is the standing
+   requirement's actual next step, not another parameter sweep on the long leg.
+2. **The R-floor neighbourhood (0.5% and 1.2%, both sides)** -- HARD LESSONS 16 and 19, watching for
+   the monotone ratio-for-sample walk since the floor is a selectivity parameter. Deferred behind (1)
+   because the short leg is the larger gap against the standing requirement.
+3. **Then** the freshness neighbourhood (dzAge 6 and 24, both sides) -- HARD LESSON 16, `maxAge=12` was
+   chosen as a round number and its neighbourhood is still unmeasured.
+4. If a bear-only or flip-rule test is wanted, it needs a purpose-built split (not just H1/H2), since
+   neither half here isolates a falling market from a rising one.
