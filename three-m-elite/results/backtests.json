@@ -1233,5 +1233,65 @@
     },
     "pineSource": "three-m-elite/pine/3m-elite-v37-freshness-tight.pine",
     "notes": "H2 clears PF 1.0 (1.121) on 59 trades, DD 7.29%, win 40.68% -- weaker than H1 but does not collapse, and is actually stronger than v32/v33's own H2 (1.0536 on 64 trades). See 3m-elite-v37-split-h1 for the other half."
+  },
+  {
+    "id": "3m-elite-v40-freshness-tighter",
+    "name": "3M Elite v37 freshness neighbourhood, maxAge=3 (tighter than tight)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Queue item 1 from v39: test tighter than maxAge=6 to settle whether v37 sits on a real optimum on the drawdown axis (HARD LESSON 19 caution) or the near side of an unfinished monotone walk. One change from pine/3m-elite-v37-freshness-tight.pine: maxAge 6 -> 3.",
+    "metrics": {
+      "netProfitPct": 8.51363494,
+      "profitFactor": 1.09462761,
+      "maxDrawdownPct": 11.00403788,
+      "totalTrades": 119,
+      "winRatePct": 39.49579832,
+      "avgTradePct": 0.07154315
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JXCA72X9PDTH3E5KJ2ARVG",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JXCA72AWW7XSBVK2GKF0V5",
+      "verifiedAt": "2026-09-03T05:15:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v40-freshness-tighter.pine",
+    "notes": "REVERTED -- both ratchet terms worse than v37 (PF 1.25172059 -> 1.09462761, DD 8.72815312% -> 11.00403788%), on 155 -> 119 trades, still comfortably above the ~30-trade interpretability floor. Drawdown was falling monotonically from maxAge=24 down through 6 (10.92% -> 10.91% -> 8.73%); at 3 it reverses sharply upward past even maxAge=12's number. This settles v37/v38's open HARD LESSON 19 caution: maxAge=6 is a genuine local turn, not the near side of an unfinished monotone walk. The freshness axis is now closed on three points either side of the champion; no further freshness sweep is queued. v37 (maxAge=6) remains champion."
+  },
+  {
+    "id": "3m-elite-v41-bear-regime-split",
+    "name": "3M Elite v37 isolated bear-regime split, 2022 calendar year",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2022-12-31",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Queue item 2 from v36/v37/v38/v39, and the STANDING REQUIREMENT's 'both regimes' clause: a purpose-built bear-market split, distinct from the time-based halves (v28a/b, v33, v39's H1/H2) which all blend the 2022 crash with the 2023-2024 recovery. Byte-identical pine/3m-elite-v37-freshness-tight.pine, window narrowed to the one full calendar year in this project's data coverage that is unambiguously a bear market (BTC ~$47k -> ~$16.5k).",
+    "metrics": {
+      "netProfitPct": 6.95618859,
+      "profitFactor": 1.17318184,
+      "maxDrawdownPct": 8.72815312,
+      "totalTrades": 52,
+      "winRatePct": 38.46153846,
+      "avgTradePct": 0.13377286
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JXD1CG86BEKPMTBMC05G27",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JXD1CGPS0Q6M62EP6TDF10",
+      "verifiedAt": "2026-09-03T05:16:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v41-bear-regime-split.pine",
+    "notes": "PF clears 1.0 in an isolated bear year -- the first purpose-built bear-regime evidence this lab (or either sister lab) has produced. 52 trades is above the ~30-trade interpretability floor. FLAG: max drawdown is byte-identical to the full 4.7-year sample's (8.72815312% to eight decimal places), meaning the single worst drawdown of the entire backtest occurred inside this one bear year -- the strategy was profitable through it but felt its full worst-case pain during the hardest regime, not spread across the sample. Advances the STANDING REQUIREMENT's 'both regimes' cell from 'no isolated regime evidence' to 'one isolated bear year measured, PF>1.0' but does not supply an isolated pure-bull year, and does not touch the rejected short leg (v34). v37 remains champion; this is evidence about the champion's behaviour in one regime, not a ratchet candidate."
   }
 ]

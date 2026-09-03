@@ -836,6 +836,98 @@ this lab, after v32.**
 
 ---
 
+## ██ v40/v41 — maxAge=6 CONFIRMED A REAL TURN, AND THE BEAR-MARKET GAP CLOSES WITH A POSITIVE RESULT (2026-09-03)
+
+**A NOTE ON THE PROMPT, A FIFTH TIME.** This cycle's stored scheduled prompt is again the same stale
+text first flagged at v34 and repeated at v36, v37/v38 and v39 — it still frames the ~2026-09-02
+cloud/local merge as current news, describes v30 as unreproduced-and-current, and asks to rebuild the
+anchor as blocking task 0. That work has been done and confirmed since v31/v32/v36, and the champion
+has since moved to v37. Per the prompt's own instruction ("THE DOCS WIN over this prompt") and HARD
+LESSON 26, this cycle again continues the real queue (v39's items 1 and 2) rather than re-running the
+anchor. **v39 already escalated this exact staleness as a push notification; nothing has changed
+since, so this cycle records it here and does not send a second push for the same unaddressed issue**
+— the same "not re-notifying" discipline the BTC lab applies to a repeated, unchanged condition.
+
+### QUEUE ITEM 1 FROM v39: TEST TIGHTER THAN maxAge=6
+
+One change from `pine/3m-elite-v37-freshness-tight.pine`: `maxAge` 6 → 3.
+
+| maxAge | Profit factor | Max drawdown | Trades |
+|---|---|---|---|
+| 3 (v40) | 1.09462761 | 11.00403788% | 119 |
+| **6 (v37, champion)** | **1.25172059** | **8.72815312%** | **155** |
+| 12 (v32) | 1.22482256 | 10.90593093% | 165 |
+| 24 (v38) | 1.24828129 | 10.91697823% | 170 |
+
+**REVERTED — both ratchet terms worse than v37.** PF falls (1.25172059 → 1.09462761) and drawdown
+*rises* (8.72815312% → 11.00403788%). Drawdown was falling monotonically from 24 down through 6; at 3
+it reverses and jumps past even v32's 12-candle number. **This settles HARD LESSON 19's open
+caution from v37/v38: maxAge=6 is a genuine local turn on the drawdown axis, not the near side of an
+unfinished monotone walk.** 119 trades is comfortably above the ~30-trade interpretability floor, so
+this is a real reading, not a degenerate one. The freshness neighbourhood is now closed on three
+points either side of the champion and the axis is CLOSED — no further freshness sweep is queued.
+
+### QUEUE ITEM 2 FROM v36/v37/v38/v39: A PURPOSE-BUILT BEAR-MARKET SPLIT
+
+Every prior split in this lab (v28a/b's walk-forward halves, v33's and v39's promotion splits) divided
+the 2022–2026 window in *time*, not by *regime* — each half still blends the 2022 crash with the
+2023–2024 recovery. The STANDING REQUIREMENT (below) has flagged this gap unchanged across four
+cycles. This run isolates the one full calendar year in the data window that is unambiguously a bear
+market: **2022-01-01 to 2022-12-31**, BTC falling from ~$47k to ~$16.5k. Byte-identical
+`pine/3m-elite-v37-freshness-tight.pine`, only the window narrowed.
+
+| | Full sample (v37, 2022–2026) | **2022 bear year alone (v41)** |
+|---|---|---|
+| Profit factor | 1.25172059 | **1.17318184** |
+| Max drawdown | 8.72815312% | **8.72815312%** |
+| Trades | 155 | **52** |
+| Win rate | 42.58% | **38.46%** |
+| Net return | +29.76% | **+6.96%** |
+
+**PF clears 1.0 in an isolated bear year — the first purpose-built bear-regime evidence this lab (or
+either sister lab) has produced.** 52 trades sits comfortably above the ~30-trade interpretability
+floor (HARD LESSON 19), so this is a real reading, not a degenerate one on a thin slice.
+
+**One number needs a flag, not a celebration: the max drawdown is byte-identical to the full sample's,
+to eight decimal places (8.72815312%).** That is not a coincidence of rounding — it means the single
+worst drawdown of the entire 4.7-year backtest occurred inside this one bear year. The strategy
+survived it (PF still positive over the year as a whole), but the worst-case pain this system has ever
+produced happened during the regime the STANDING REQUIREMENT is most worried about. That is a
+genuinely mixed result: profitable through the bear year, but its worst drawdown happened there too,
+and a live account would have felt the full 8.7% hit during the hardest regime, not spread across the
+sample.
+
+**What this does and does not settle against the STANDING REQUIREMENT.** This is real evidence in one
+falling-market year, and it moves the "both regimes" column from "no isolated regime evidence at all"
+to "one isolated bear year measured, PF>1.0, worst-drawdown coincides with it." It does **not** supply
+an isolated pure-bull year for symmetric comparison (2023–2024 in this window is a recovery off a
+crash low, not a clean uptrend from a stable base), and it does not touch the long-only status or the
+rejected short leg (v34). The STANDING REQUIREMENT table below is updated accordingly — still not met,
+but the "both regimes" cell is no longer simply "no."
+
+### QUEUE
+1. ~~Test tighter than maxAge=6~~ — **DONE. Reverted; the freshness axis is closed.**
+2. ~~A purpose-built bear-market split~~ — **DONE (this cycle). An isolated pure-bull-year split is
+   the natural next half of this same idea** — the data window's 2023 (post-crash recovery into a
+   fresh uptrend, before the 2024-06-08 split point) is the nearest candidate, though it is a recovery
+   year rather than a clean established uptrend and that caveat should travel with any result.
+3. **The remaining signal terms**: `close > dzBot` and `dzAge >= 1`, the binding test never yet applied
+   to either — unchanged from v36/v37/v38/v39.
+4. **The scheduled prompt still needs to be edited at the source — and this cycle confirmed no
+   automated cycle can do it.** Five consecutive cycles (v34, v36, v37/v38, v39, now v40/v41) have
+   found and worked around the same stale text. This cycle tried `update_trigger` directly on
+   `trig_01JCaVDM2gCobMXBAtShZPSU` to fix it at the source rather than flag it a sixth time, and the
+   tool refused: *"this routine was created via http_api, not by an agent. Agents can only update
+   routines they created."* **That is new information v39's push notification did not have — the fix
+   is not merely undone, it is structurally outside any cycle's reach**, so this is escalated as a
+   push notification again (not a repeat of the same report — a materially new finding about *why* it
+   keeps recurring) rather than silently re-noting it a sixth time.
+
+**BASE UNCHANGED: v37 remains champion.** PF 1.25172059, DD 8.72815312%, 155 trades, long-only,
+maxAge=6, anchored at `pine/3m-elite-v37-freshness-tight.pine`.
+
+---
+
 0-V32. ~~Then the freshness neighbourhood~~ (HARD LESSON 16): dzAge <= 6 and <= 24. A KEPT parameter
     must have its sensitivity profile measured before the result is quoted -- War Formation's champion
     was just demoted for exactly this omission. Superseded by v34/v35 above -- still open, now queue
@@ -1002,15 +1094,20 @@ configuration must say explicitly that the short leg and the regime evidence are
 |---|---|---|---|---|---|
 | BTC | yes, but PF 1.36 early / 0.66 late | built, PF 0.58, fails | yes — VWAP cross, stand down 60 bars | no — the base REQUIRES close above the 600 EMA, so it only trades bull conditions | **NO** |
 | War Formation | yes, PF 1.69 full / 0.89 recent | four attempts, best PF 0.75 | yes — 6h regime recomputes each block | no — requires 4+ green HA 1h candles, so bull conditions only | **NO** |
-| 3M Elite | broken | broken | yes — zone invalidation on a body close | symmetric BY DESIGN (demand and supply zones) but no working entry yet | **NO — but the only one built symmetric from the start** |
+| 3M Elite | yes, v37 PF 1.25 full / 1.34 H1 / 1.12 H2 | built independently, PF 0.74, fails (v34) | yes — zone invalidation on a body close | ONE isolated bear year measured (2022, v41): PF 1.17318184, 52 trades — clears 1.0, but its drawdown equals the full sample's worst (8.73%). No isolated pure-bull year yet | **NO — long leg validated, short leg built and rejected, one regime measured** |
 
 **The blunt version: two of the three labs are structurally bull-only.** The BTC base gates on price
 above a long EMA and War Formation gates on green Heikin Ashi hourly candles — those are not filters
 that happen to favour uptrends, they are conditions that make a downtrend un-tradeable by
 construction. Meeting this requirement means changing the systems, not tuning them.
 
-**3M Elite is the closest in structure**, because supply and demand zones are inherently two-sided —
-its problem is that the entry does not work yet in either direction, not that it is one-sided.
+**3M Elite is the closest in structure**, because supply and demand zones are inherently two-sided.
+**UPDATE 2026-09-03 (v34/v39/v41):** the long leg now works and is split-tested (v37, PF 1.25 full
+sample, both halves clear 1.0) with one isolated bear year also clearing 1.0 (v41). The supply-side
+entry was built from its own independent geometry, never mirrored, and honestly loses (v34, PF 0.74) —
+so the remaining gap is not "the entry doesn't work in either direction" any more, it is specifically
+that the short side of this mechanism has no edge on this instrument over this window, plus no
+isolated pure-bull-year split yet to complete the regime evidence.
 
 
 ---

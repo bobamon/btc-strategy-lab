@@ -341,3 +341,16 @@ exactly) — H2 here is stronger than v32/v33's own H2 (1.054), so this is not a
 the same pattern, it is a cleaner one. v37 is now the champion of record (SYSTEM.md's v39 entry has
 the full numbers). Type 1 and the swing rule remain undefined and still do not block the working
 engulf-based entry.
+
+## ✅ UPDATE, 2026-09-03 — FRESHNESS AXIS CLOSED, FIRST BEAR-REGIME EVIDENCE (v40/v41)
+
+No new vocabulary term was decoded this cycle. Two measurements against the existing model instead
+(SYSTEM.md's v40/v41 entry has the full numbers): tightening the freshness cap further, to
+`maxAge=3`, reverses both the profit factor and drawdown gains v37 (`maxAge=6`) won over v32
+(`maxAge=12`) — confirming 6 is a genuine local optimum on the recency axis, not an unfinished walk.
+And a purpose-built isolated bear-market split (2022 calendar year alone, byte-identical v37 source)
+clears PF 1.0 on 52 trades — the first regime-specific evidence (as opposed to a time-based half that
+blends regimes) either this lab or either sister lab has produced — though its drawdown matches the
+full sample's worst exactly, meaning the champion's single worst drawdown occurred inside that bear
+year. Type 1 and the swing rule remain undefined and still do not block the working engulf-based
+entry.
