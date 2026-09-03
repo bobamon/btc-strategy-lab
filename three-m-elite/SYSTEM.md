@@ -1326,3 +1326,54 @@ backtests, promoted four bases, and saved nothing until E44's reproduction failu
 lesson stands, but its origin story is a local hygiene failure, not a universal difficulty — and a
 process running unattended in a container was following the discipline that the interactive session
 kept postponing.
+
+
+---
+
+## ██ v31 - THE RE-ENTRY STORM WAS REAL. THE ANCHOR EXISTS. (2026-09-02)
+
+| | v30 recorded | Cloud rebuild | **v31 (latch added)** |
+|---|---|---|---|
+| Profit factor | 0.89710112 | 0.63917105 | **0.88869052** |
+| Max drawdown | 40.78978663% | 91.74760797% | **34.63598596%** |
+| Trades | **811** | 2,469 | **734** |
+| Win rate | 36.74% | - | 37.60% |
+
+### THE DEFECT WAS IN THE REBUILD, NOT IN v30
+The cloud routine's own hypothesis was right, and reading its code confirmed the mechanism before the
+run: entry is `if flat and longCond`, but `dzTouch` increments only inside `if new4h`. **Within a
+single 4H candle there are sixteen 15m bars on which the strategy can be flat inside a still-live
+zone - and it enters on every one.** A stop-out simply frees it to re-enter next bar.
+
+One `dzTraded` latch - one entry per zone, cleared only when a new engulf creates a zone - took the
+count **2,469 -> 734**, within 10% of v30's 811, profit factor within **0.0084**, win rate within
+**0.9pp**.
+
+### THE VERDICT SOFTENS, IT DOES NOT VANISH
+**"v30 is unreproducible" was concluded from a BUGGY rebuild.** With the defect fixed, the model
+written down in this document is essentially confirmed.
+
+**But 734 is not 811, and drawdown is still 6.2 percentage points apart.** This is a NEAR-reproduction
+and the residual gap is unexplained. Recorded as such rather than rounded off - the same discipline
+E44 applied in the sister lab, applied now in the other direction.
+
+### v31 IS THE ANCHORED BASE
+On disk at `pine/3m-elite-v31-one-entry-per-zone.pine`, with its result URL in the header. Every
+future 3M comparison anchors here. **PF 0.88869052 - still a losing strategy. No champion, no
+candidate.**
+
+### A CORRECTION TO THE CYCLE PROMPT
+The prompt's DATA LIMIT paragraph says 1m coverage is only 2025-12-16 to 2026-05-03. **That is stale
+for this lab as configured.** v30, the rebuild and v31 all run on **15m over 2022-01-01 to
+2026-09-01 - 4.7 years.** This matters: unlike War Formation, **3M CAN be split-tested.**
+
+### QUEUE
+1. **THE MISSING R FLOOR (leading suspect).** `r = close - dzBot` with no 0.8%-of-price minimum, which
+   LESSON 3 requires. The rebuild's header asserted 4H engulf bases run wider than 0.8% on this
+   instrument and recorded that as UNVERIFIED. It is the prime remaining explanation for both the
+   residual trade gap and the drawdown. Measure the R distribution before assuming either way.
+2. **SPLIT-TEST v31 at 2024-06-08.** BTC's Attacks 31/32 showed the same day that an in-sample number
+   can be worthless, and that a bare mechanism can return ~0.9 while a filtered one prints 2.077.
+   **3M has 4.7 years and no excuse not to split.** Do this before any tuning.
+3. **Then** the freshness neighbourhood (dzAge 6 and 24, both sides), watching for the monotone
+   ratio-for-sample walk BTC's `coolBars` turned out to be.

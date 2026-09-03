@@ -1100,9 +1100,38 @@ const DATA = [
     },
     "pineSource": "three-m-elite/pine/3m-elite-v30-zone-freshness.pine",
     "notes": "V30 IS NOT REPRODUCIBLE FROM THE LOG, AND THAT IS THE FINDING -- the same defect HARD LESSON 21 named in War Formation E38/E44, now confirmed in this lab too. The reconstruction implements every decoded rule in VOCABULARY.md exactly as measured across v9-v30: engulf creates the zone (body containment, no gap, v19/v20), demand zone = [low, open] of the engulfing 4H candle (v10/v11), most-recent zone always replaces the incumbent (v23), mitigation on a completed 4H candle's BODY closing inside the zone with the One Candle Rule cap at 2 (v13), long-only (v24), stop = zone bottom / target = 2R / time stop 96 15m-bars (v15, v25-27), zone freshness dzAge<=12 (v30 itself). It returned PF 0.63917105, DD 91.74760797%, 2469 trades against v30's recorded PF 0.89710112, DD 40.78978663%, 811 trades -- three times the trade count and a badly worse result, not a rounding difference. A trade count that far off means different code, not sampling noise. SUSPECTED CAUSE, NOT TESTED THIS CYCLE: the reconstruction checks the entry conjunction on every 15m bar with no memory of a prior stop-out from the same zone, so a zone that stops a trade out can immediately re-arm the same bar or the next one if price is still inside [dzBot, dzTop] -- a whipsaw-reentry storm within a single zone visit that the mitigation counter (evaluated only at 4H boundaries) cannot see or stop. avgBarsLosing fell to 6.86 here, consistent with fast repeated stop-outs. THE DAMAGE EXTENDS BACKWARD: v9 through v30 were never saved to pine/, so none of their numbers -- including the v24 long-only 0.894 this lab quoted as its best honest result -- can be verified against real code, only against this same unreproduced prose. Per HARD LESSON 8 (BTC lab) and the identical War Formation E44 precedent, a reconstruction's real, on-disk numbers become the working baseline when nothing else has source. THIS RUN, not v30, is therefore what the next cycle must build from -- and it is not viable at PF 0.64 / DD 91.7%. The re-entry-storm hypothesis above is a hypothesis, not a measurement, and is queued as the next diagnostic, not assumed."
+  },
+  {
+    "id": "3m-elite-v31-one-entry-per-zone",
+    "name": "3M Elite v31 one entry per zone",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Tests the cloud routine's own registered hypothesis for why its v30 anchor rebuild produced 2,469 trades against v30's recorded 811: an unguarded re-entry storm, since entry is checked every 15m bar while dzTouch only increments on completed 4H candles. One change from the rebuild: a dzTraded latch giving one entry per zone, cleared only when a new engulf creates a zone.",
+    "metrics": {
+      "netProfitPct": -23.90561036,
+      "profitFactor": 0.88869052,
+      "maxDrawdownPct": 34.63598596,
+      "totalTrades": 734,
+      "winRatePct": 37.60217984,
+      "avgTradePct": -0.03256895
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JAYV1BMTSYF5DZKBV334MM",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JAYV1BRSJD02FXC6A8AN9C",
+      "verifiedAt": "2026-09-03T00:42:00Z"
+    },
+    "notes": "THE RE-ENTRY STORM IS CONFIRMED, AND IT CORRECTS THE CLOUD ROUTINE VERDICT. Reading the rebuild code showed the mechanism was present: entry is if-flat-and-longCond with dzTouch incrementing only inside if-new4h, so within one 4H candle there are sixteen 15m bars on which the strategy can be flat inside a still-live zone and it enters on every one. A single dzTraded latch took the count 2,469 to 734 -- WITHIN 10% of v30 recorded 811 -- with profit factor within 0.0084 (0.88869052 vs 0.89710112) and win rate within 0.9pp (37.60% vs 36.74%). That was outcome 1 of three registered before the run. THE LIMIT STATED PRECISELY: this is a NEAR-reproduction, not a match. 734 is not 811 and drawdown is 6.2pp apart (34.64% vs 40.79%). So v30 is SUBSTANTIALLY reproduced once the defect is fixed -- the model in SYSTEM.md is essentially right -- while a residual 10% trade gap remains unexplained. The unreproducible verdict SOFTENS but does not vanish, and it was reached from a buggy rebuild rather than from v30 itself. v31 IS NOW THE ANCHORED BASE: on disk at pine/3m-elite-v31-one-entry-per-zone.pine, reproducible, matching v30 profile closely. PF 0.889 is STILL A LOSING STRATEGY -- no champion, no candidate. LEADING REMAINING SUSPECT, QUEUED: there is no R FLOOR (r = close - dzBot, no 0.8% minimum, LESSON 3). The rebuild header asserted 4H engulf bases run wider than 0.8% on this instrument but recorded that as UNVERIFIED."
   }
 ];
-const BUILT = "2026-09-02 23:58";
+const BUILT = "2026-09-02 18:35";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

@@ -1,0 +1,136 @@
+//@version=6
+// 3M ELITE v31 - ONE ENTRY PER ZONE. THE ANCHORED BASE.
+//   https://mcp-api.trader.dev/backtest/01M1JAYV1BRSJD02FXC6A8AN9C
+//   PF 0.88869052 | DD 34.63598596% | 734 trades | 37.60% win | -23.91% | long-only
+//
+// WHAT THIS FIXED. The cloud routine rebuilt v30 from SYSTEM.md prose (v30's own source was never
+// saved -- HARD LESSON 21) and got PF 0.63917105 / DD 91.74760797% / 2,469 trades against v30's
+// recorded 0.89710112 / 40.78978663% / 811. It concluded v30 was unreproducible and logged a
+// hypothesis: an unguarded re-entry storm, since entry is checked every 15m bar while dzTouch only
+// increments on completed 4H candles -- so a stop-out inside a still-live zone frees the strategy to
+// re-enter on the very next bar, up to sixteen times per 4H candle.
+//
+// Adding a single dzTraded latch -- one entry per zone, cleared only when a new engulf creates a new
+// zone -- took the count 2,469 -> 734, within 10% of v30's 811, with profit factor within 0.0084 and
+// win rate within 0.9pp.
+//
+// SO THE VERDICT SOFTENS BUT DOES NOT VANISH. "v30 is unreproducible" was concluded from a BUGGY
+// rebuild. With the defect fixed the model in SYSTEM.md is essentially confirmed. But 734 is not 811
+// and drawdown is still 6.2pp apart, so this is a NEAR-reproduction and the residual gap is
+// unexplained. Recorded as such, not rounded off.
+//
+// THIS IS THE ANCHOR. On disk, reproducible, matching v30's profile closely. Every future 3M
+// comparison anchors here. PF 0.889 -- STILL A LOSING STRATEGY. No champion, no candidate.
+//
+// KNOWN DEFECT, INHERITED AND NOT YET FIXED (queued next): there is NO R FLOOR. r = close - dzBot
+// with no 0.8%-of-price minimum, which LESSON 3 requires. The rebuild's header asserted 4H engulf
+// bases run far wider than 0.8% on this instrument and recorded the check as structural rather than
+// clamped -- that claim is UNVERIFIED and is the leading remaining suspect for both the residual
+// trade gap and the drawdown.
+//
+// AUDIT: LONG ONLY -- v24 removed the short leg, nothing is mirrored (LESSON 6); the legs are NOT
+// independent in this lab (v24 showed removing shorts ADDED 84 long entries) so no BTC-style split is
+// assumed. Stop = dzBot, the zone structural floor (LESSON 5). SL and TP fixed at entry.
+// dzAge >= 1 still forbids setup and trigger on one bar (HARD LESSON 8). dzTouch counts MITIGATION by
+// the market; dzTraded records CONSUMPTION by the strategy -- different ideas, no redundancy (E14).
+strategy("v31 3M ELITE v30 anchor rebuild", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rTarget  = input.float(2.0, "Target, x R")
+maxBars  = input.int(96,    "Max bars in trade (entry timeframe)")
+maxAge   = input.int(12,    "Zone freshness cap, 4H candles since creation")
+
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+// ---------- reconstruct the 4H candle from 15m bars: in-progress OHLC ----------
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+// ---------- snapshots of the two most recently COMPLETED 4H candles (open + close; +H/L for the most recent) ----------
+var float pO  = na
+var float pH  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pH  := h4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+// ---------- engulf on the just-completed candle vs the one before it (body containment, no gap) ----------
+bullEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC < ppO and pC > pO and pC > ppO
+bearEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC > ppO and pC < pO and pC < ppO
+
+// ---------- demand zone lifecycle: create on bull engulf, mitigate on a body close inside, age in 4H units ----------
+var float dzTop   = na
+var float dzBot   = na
+var bool  dzLive  = false
+var int   dzTouch = 0
+var int   dzAge   = 0
+var bool  dzTraded = false   // v31: one entry per zone
+
+if new4h
+    // mitigation check on the candle that just completed, against the zone as it stood BEFORE this candle
+    if dzLive and not na(pC) and pC <= dzTop
+        dzTouch := dzTouch + 1
+        if dzTouch >= 2
+            dzLive := false
+    if dzLive
+        dzAge := dzAge + 1
+    // most-recent engulf always creates/replaces the zone (v23 — no "deepest" ratchet)
+    if bullEngulf
+        dzTop   := pO
+        dzBot   := pL
+        dzLive  := true
+        dzTouch := 0
+        dzAge   := 0
+        dzTraded := false        // v31: a NEW zone is tradeable again
+
+// ---------- entry: zone live, sequenced after creation, not yet double-mitigated, price back at the zone, still fresh ----------
+longCond = dzLive and not dzTraded and dzAge >= 1 and dzTouch < 2 and low <= dzTop and close > dzBot and dzAge <= maxAge
+
+flat = strategy.position_size == 0
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if flat and longCond and not na(dzBot) and close > dzBot
+    r = close - dzBot
+    if r > 0
+        strategy.entry("L", strategy.long)
+        dzTraded := true         // v31: latch -- this zone is now spent
+        slPx   := dzBot
+        tpPx   := close + r * rTarget
+        barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(dzLive ? 1 : 0, title="DemandZoneLive")
+plot(dzAge,          title="DemandZoneAge")
