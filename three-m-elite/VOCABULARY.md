@@ -318,3 +318,14 @@ win rate — rejected.** The definitions themselves are not in question (this is
 produced the validated long leg); what this measures is that the supply side of this instrument's
 price action, over 2022–2026, does not reward the same mechanism the demand side does. Long-only
 remains this lab's only working leg, now confirmed rather than merely assumed.
+
+## ✅ UPDATE, 2026-09-03 — THE ANCHOR REPRODUCES COLD, AND THE R FLOOR IS FULLY BOUNDED (v36)
+
+No new vocabulary term was decoded this cycle. Two things were confirmed about the existing model
+instead (SYSTEM.md's v36 entry has the full numbers): a byte-identical, independently-submitted
+re-run of `pine/3m-elite-v32-r-floor.pine` reproduced every recorded metric exactly — the first
+headline result in this project (any of the three labs) to pass that check — and the 0.8%-of-price
+R floor (LESSON 3) now has both neighbours measured (0.50% and 1.20%), confirming a real interior
+optimum rather than an artefact of an untested edge. Type 1 (the 3M candle's anatomy) and the swing
+rule remain undefined, per the table above, and still do not block anything since the working entry
+uses engulf-based (Type-2-adjacent) logic only.

@@ -1279,9 +1279,69 @@ const DATA = [
     },
     "pineSource": "three-m-elite/pine/3m-elite-v35-rfloor-tight.pine",
     "notes": "NOT KEPT (both ratchet terms worse than v32) but a genuinely informative neighbourhood point. Three-point R-floor curve: minRpct=0 (v31) PF 0.88869052 / DD 34.64% / 734 trades -> minRpct=0.80 (v32) PF 1.22482256 / DD 10.90593093% / 165 trades -> minRpct=1.20 (v35) PF 1.09260420 / DD 16.58968851% / 67 trades. PF rises then falls and DD falls then rises -- a real interior optimum with graceful degradation on the tight side (67 trades is well clear of the ~30-trade interpretability floor, so this is a real reading, not a degenerate one per HARD LESSON 19), not a curve-fit spike per HARD LESSON 16. v32 (0.80%) stands confirmed as the champion on this axis. The loose-side neighbour (0.5%) remains untested for a future cycle to fully bound the peak per HARD LESSON 16's 'both neighbours' requirement."
+  },
+  {
+    "id": "3m-elite-v32-reproducibility-check",
+    "name": "3M Elite v32 cold reproducibility re-run",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "passed",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Queue item 4 / HARD LESSON 25: re-verify the champion's own reproducibility before further cycles lean on it, since two of this project's other headline results (War Formation's E38 and E47) both failed a cold re-run of their own saved source. Byte-identical re-run of pine/3m-elite-v32-r-floor.pine, submitted as a fresh adhoc job rather than continuing v32's own strategy chain.",
+    "metrics": {
+      "netProfitPct": 28.62217491,
+      "profitFactor": 1.22482256,
+      "maxDrawdownPct": 10.90593093,
+      "totalTrades": 165,
+      "winRatePct": 42.42424242,
+      "avgTradePct": 0.17346773
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JK1V5MZ2G7JVVNFAT9GSC1",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JK1V5MDPYD3Z50PCB0Y8C6",
+      "verifiedAt": "2026-09-03T02:00:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v32-r-floor.pine",
+    "notes": "REPRODUCED EXACTLY -- every metric byte-identical to the recorded v32 result (PF 1.22482256, DD 10.90593093%, 165 trades, 42.42424242% win, +28.62217491% net). Unlike War Formation's E38 and E47, this anchor survives a cold, unmodified re-run of its own saved source on the same declared window. v32 is now confirmed both internally (the v33 split partitions exactly 101+64=165) and externally (this independent re-run), and can be safely built on without the caveat HARD LESSON 25 required."
+  },
+  {
+    "id": "3m-elite-v36-rfloor-loose",
+    "name": "3M Elite v32 R-floor neighbourhood, minRpct=0.50 (loose side)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Queue item 1: completes HARD LESSON 16's both-neighbours requirement for the R-floor parameter. v35 measured the tight side (1.20%); this measures the loose side (0.50%). One change from pine/3m-elite-v32-r-floor.pine: minRpct 0.80 -> 0.50.",
+    "metrics": {
+      "netProfitPct": 11.194208,
+      "profitFactor": 1.05593889,
+      "maxDrawdownPct": 16.58851777,
+      "totalTrades": 334,
+      "winRatePct": 39.22155689,
+      "avgTradePct": 0.03351559
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JK3PQYXEKE8D1BMG5HY2MP",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JK3PQY6KR62PG9FS6BR9TC",
+      "verifiedAt": "2026-09-03T02:03:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v36-rfloor-loose.pine",
+    "notes": "NOT KEPT (both ratchet terms worse than v32) but completes the R-floor neighbourhood cleanly on both sides. Four-point curve: minRpct=0 (v31) PF 0.88869052 / DD 34.63598596% / 734 trades -> minRpct=0.50 (v36) PF 1.05593889 / DD 16.58851777% / 334 trades -> minRpct=0.80 (v32) PF 1.22482256 / DD 10.90593093% / 165 trades -> minRpct=1.20 (v35) PF 1.09260420 / DD 16.58968851% / 67 trades. PF rises monotonically to 0.80% then falls; drawdown falls monotonically to 0.80% then rises. This is a clean, smooth interior optimum on BOTH sides now (HARD LESSON 16 fully satisfied) -- not a monotone ratio-for-sample walk (the cross-lab coolBars warning) and not a curve-fit spike. 334 trades is comfortably clear of the ~30-trade interpretability floor (HARD LESSON 19). v32 (0.80%) stands as champion with its load-bearing parameter now fully bounded on both neighbours."
   }
 ];
-const BUILT = "2026-09-03 01:56";
+const BUILT = "2026-09-03 02:56";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

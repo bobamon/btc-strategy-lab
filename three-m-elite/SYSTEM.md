@@ -654,17 +654,65 @@ neighbourhood measured. The loose-side point (0.5%) remains open for a future cy
 the peak per HARD LESSON 16's "both neighbours" requirement — deferred, not forgotten, since this
 cycle's two-backtest budget went to the higher-priority short-leg build instead.
 
+## ██ v36 — REPRODUCIBILITY CONFIRMED, THEN THE R-FLOOR NEIGHBOURHOOD CLOSED ON BOTH SIDES (2026-09-03)
+
+**A NOTE ON THE PROMPT AGAIN.** This cycle's stored scheduled prompt is the SAME stale text v34 already
+flagged — it still describes v30 as unreproduced-and-current and asks to rebuild the anchor as task 0.
+That work has been done since v31 (the anchor exists and, as of this cycle, is now doubly confirmed —
+see below). Per the prompt's own instruction ("THE DOCS WIN over this prompt; say so if they disagree")
+and HARD LESSON 26 (a stale prompt repeating is worth flagging, not silently reworking every cycle),
+this cycle continues the real queue from v35 rather than re-running the anchor task, and the push
+summary says plainly that the prompt itself needs updating so this stops recurring.
+
+**Queue item 4 first, deliberately out of its listed order.** HARD LESSON 25 (War Formation's E38 and
+E47 both stopped reproducing their own saved source on a later cold re-run) says explicitly: verify a
+load-bearing anchor's reproducibility *before* building further on it, not only when a downstream
+number looks wrong. v32 had only ever been confirmed internally (the v33 split partitions exactly
+101+64=165) — never by an independent, byte-identical cold re-run submitted as a fresh job. Given the
+two-backtest budget this cycle, that check came first.
+
+**Result: v32 reproduces exactly.** A cold re-run of `pine/3m-elite-v32-r-floor.pine`, submitted as a
+brand-new adhoc job (not continuing v32's own strategy chain), returned PF 1.22482256, DD 10.90593093%,
+165 trades, 42.42424242% win, +28.62217491% net — every figure byte-identical to the recorded result.
+**This is the first headline number in this project (across all three labs) to pass this exact check.**
+v32 is now confirmed both internally and externally and can be built on without HARD LESSON 25's
+caveat.
+
+**Queue item 1 second: the R-floor neighbourhood, loose side.** One change from v32:
+`minRpct` 0.80 → 0.50 (v35 already measured the tight side, 1.20%).
+
+| minRpct | Profit factor | Max drawdown | Trades |
+|---|---|---|---|
+| 0% (v31) | 0.88869052 | 34.63598596% | 734 |
+| 0.50% (v36) | 1.05593889 | 16.58851777% | 334 |
+| **0.80% (v32, champion)** | **1.22482256** | **10.90593093%** | **165** |
+| 1.20% (v35) | 1.09260420 | 16.58968851% | 67 |
+
+**The neighbourhood is now closed on both sides, and the shape is unambiguous.** Profit factor rises
+monotonically from 0.89 to 1.06 to 1.22 and then falls to 1.09; drawdown falls monotonically from
+34.6% to 16.6% to 10.9% and then rises to 16.6%. That is a smooth, single-peaked curve centred on
+v32's 0.80% with both neighbours now measured — a real interior optimum (HARD LESSON 16 fully
+satisfied on this parameter), not a monotone ratio-for-sample walk (the cross-lab `coolBars` warning)
+and not a curve-fit spike. 334 trades is comfortably clear of the ~30-trade interpretability floor
+(HARD LESSON 19). **v32 stands as champion, now with its one load-bearing parameter fully bounded.**
+
+Both new runs saved to `pine/` in the same action that recorded their metrics (HARD LESSON 21).
+
 ### QUEUE
-1. **The R-floor neighbourhood, loose side (0.5%)** — completes the bound HARD LESSON 16 requires.
-2. **The freshness neighbourhood** (dzAge <= 6 and <= 24, HARD LESSON 16) — `maxAge=12` was chosen
-   as a round number in v30 and its neighbourhood is still unmeasured.
-3. **A purpose-built bear-market or regime-flip split** — neither v33 half isolates a falling market
+1. **The freshness neighbourhood** (dzAge <= 6 and <= 24, HARD LESSON 16) — `maxAge=12` was chosen
+   as a round number in v30 and its neighbourhood is still unmeasured. Now the top remaining
+   parameter-sensitivity item since the R floor is fully closed.
+2. **A purpose-built bear-market or regime-flip split** — neither v33 half isolates a falling market
    from a rising one; the standing requirement needs one before it can be called met on the "all
    regimes" clause, independent of whatever happens to the short leg.
-4. **Re-verify v32's own reproducibility before further cycles lean on it** (HARD LESSON 25 — two of
-   this project's last three headline results, War Formation's E38 and E47, did not survive a cold
-   re-run; v32 has only been confirmed via the v33 split's exact 101+64=165 partition, which is
-   strong internal evidence but not the same as a byte-identical cold re-run).
+3. **The remaining signal terms** (v31-era item, still open): `close > dzBot` and `dzAge >= 1`
+   themselves have never had the binding test applied — v29 showed removing `dzTouch < 2` was
+   informative; the other two conjunction terms have not been individually tested.
+4. **Flag the scheduled-prompt staleness to the user.** This is now the second cycle (v34, then this
+   one) to find the stored prompt unchanged and still describing v30 as the unreproduced, current
+   anchor. Per HARD LESSON 26, a repeat like this is worth surfacing rather than silently re-absorbing
+   every cycle — the prompt should be updated to reflect that the anchor exists, is now doubly
+   confirmed, and the real queue lives here.
 
 ---
 
