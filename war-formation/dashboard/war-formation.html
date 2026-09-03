@@ -2650,9 +2650,67 @@ const DATA = [
       "verifiedAt": "2026-09-03T00:00:00Z"
     },
     "notes": "EXACT match to E50s re-run of the same file to 8 decimal places (PF 0.58008733, DD 18.86871179%, 24 trades, 9L/15S, 2/1 winning split) -- NOT a match to the originally-documented E47 headline (PF 1.21869905/21 all-long), and NOT a fourth number. Two independent cold re-runs (E50, this one, different sessions) now agree exactly: the file as currently saved on disk is deterministic and stable, and what it deterministically produces is E50s number, never the original E47 headline. This rules out per-call engine non-determinism as the mechanism. Combined with HARD LESSON 27 (a structurally different file, e50b, independently reproduces the ORIGINAL E47 number 3x including cross-session), the evidence now points specifically at: the file saved under the e47 name was never the code that generated the number recorded under that name -- e50bs construction was. Root cause of HOW that mismatch happened (editing after the run, wrong file saved, etc.) remains unknown and unknowable from here, but the practical question (does e47.pine reproduce itself) is answered: no, consistently, twice. Does not change any working anchor -- e50b (E53=E54=E55) and e58a (E58=E59) remain this labs only reproducible ALCM directions. e47-alcm-long-cap12960.pine is reclassified from unreproducible/unknown to reproducible-but-mislabeled: a real, stable PF 0.58 short+long build, not the PF 1.22 long-only build its own header claims."
+  },
+  {
+    "id": "wf-e63a-5m-rescale-h1",
+    "name": "WF E63a 5m rescale H1",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2025-07-20",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "The timeframe rescale. e58a (shield $1,000, the family's largest sample at 36 trades and confirmed reproducible by E59's cold re-run) moved from a 1m to a 5m entry. 15m was rejected in design: the 15m level is reconstructed from timestamps, so on a 15m entry each bar IS one bucket, p15l collapses to the previous bar's low and brokeBelow stops being a structural level. Scaling: maxBars 6480->1296 and ta.atr(30)->atr(6), both preserving wall clock. skipOpen/skipClose are minutes, greenBull counts 1h candles, shield/rr/velK are dollars or ratios - all unscaled. Split at 2025-07-20, the BTC lab's Attack 16 boundary, a pre-existing date not chosen from this data. First half.",
+    "metrics": {
+      "netProfitPct": -22.05511655,
+      "profitFactor": 0.70674847,
+      "maxDrawdownPct": 31.81350346,
+      "totalTrades": 95,
+      "winRatePct": 29.47368421,
+      "avgTradePct": -0.23215912
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1KJMNNKETC9VVPGWWBG2F5M",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KJMNNJV95QMD3WRVERSN9T",
+      "verifiedAt": "2026-09-03T12:12:00Z"
+    },
+    "notes": "BOTH HALVES FAIL. E63a PF 0.70674847 / DD 31.81350346% / 95 trades / 29.47% win. E63b PF 0.83434289 / DD 16.01925213% / 73 trades / 32.88% win. That is the third of three outcomes registered before the runs. THE CEILING IS GONE AND THE EDGE WENT WITH IT: 168 trades across the two halves against the 20-30 this family had been capped at since E35, and neither half clears 1.0. THE SHARPER POINT IS IN THE BAR COUNTS: avgBarsInTrade is 225.71 and 292.85 against a 1296 cap - 17% and 23%. THE CAP DOES NOT BIND AT 5m. Every previous ALCM measurement had winners pinned at 56-93% of their cap, which is the entire reason E47 existed. So this is the FIRST measurement in this lab's history where the exit actually resolves at target or shield as the specification requires - and it returns 0.71 and 0.83. ON WHICH READING IS RIGHT: 'the ALCM family is 1m-specific' is one explanation. The simpler one is that e58a's 1.24 on 36 trades was SMALL-SAMPLE NOISE and 168 trades is the more trustworthy number. This lab's own docs have warned for weeks that 20-30 trades cannot support a ratio; this is what it looks like when that warning is finally tested. RATCHET v2 clause 5, regime spread reported: 0.12759442, H2 the better half."
+  },
+  {
+    "id": "wf-e63b-5m-rescale-h2",
+    "name": "WF E63b 5m rescale H2",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-07-20",
+    "backtestEnd": "2026-09-01",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "The timeframe rescale. e58a (shield $1,000, the family's largest sample at 36 trades and confirmed reproducible by E59's cold re-run) moved from a 1m to a 5m entry. 15m was rejected in design: the 15m level is reconstructed from timestamps, so on a 15m entry each bar IS one bucket, p15l collapses to the previous bar's low and brokeBelow stops being a structural level. Scaling: maxBars 6480->1296 and ta.atr(30)->atr(6), both preserving wall clock. skipOpen/skipClose are minutes, greenBull counts 1h candles, shield/rr/velK are dollars or ratios - all unscaled. Split at 2025-07-20, the BTC lab's Attack 16 boundary, a pre-existing date not chosen from this data. Second half, the control.",
+    "metrics": {
+      "netProfitPct": -9.55805201,
+      "profitFactor": 0.83434289,
+      "maxDrawdownPct": 16.01925213,
+      "totalTrades": 73,
+      "winRatePct": 32.87671233,
+      "avgTradePct": -0.13093222
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1KJND79MXMQ4KHV06CG29H3",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KJND79NQ4WEQ4QY6H7ZCDH",
+      "verifiedAt": "2026-09-03T12:12:00Z"
+    },
+    "notes": "BOTH HALVES FAIL. E63a PF 0.70674847 / DD 31.81350346% / 95 trades / 29.47% win. E63b PF 0.83434289 / DD 16.01925213% / 73 trades / 32.88% win. That is the third of three outcomes registered before the runs. THE CEILING IS GONE AND THE EDGE WENT WITH IT: 168 trades across the two halves against the 20-30 this family had been capped at since E35, and neither half clears 1.0. THE SHARPER POINT IS IN THE BAR COUNTS: avgBarsInTrade is 225.71 and 292.85 against a 1296 cap - 17% and 23%. THE CAP DOES NOT BIND AT 5m. Every previous ALCM measurement had winners pinned at 56-93% of their cap, which is the entire reason E47 existed. So this is the FIRST measurement in this lab's history where the exit actually resolves at target or shield as the specification requires - and it returns 0.71 and 0.83. ON WHICH READING IS RIGHT: 'the ALCM family is 1m-specific' is one explanation. The simpler one is that e58a's 1.24 on 36 trades was SMALL-SAMPLE NOISE and 168 trades is the more trustworthy number. This lab's own docs have warned for weeks that 20-30 trades cannot support a ratio; this is what it looks like when that warning is finally tested. RATCHET v2 clause 5, regime spread reported: 0.12759442, H2 the better half."
   }
 ];
-const BUILT = "2026-09-03 10:42";
+const BUILT = "2026-09-03 06:08";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

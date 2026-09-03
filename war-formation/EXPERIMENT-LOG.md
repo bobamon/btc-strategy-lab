@@ -3260,3 +3260,62 @@ document, in a scheduled prompt, or in any earlier entry. In brief:
 
 **No cycle may change these.** A cycle that finds one of them binding in an unreasonable place should
 record that and flag it, not route around it.
+
+
+---
+
+# ██ E63 — THE RESCALE. THE CEILING IS GONE AND THE EDGE WENT WITH IT.
+
+The halt E61/E62 declared rested on a false premise: that 1m was part of the specification. It is not
+— **the A.L.C.M. constrains the EXIT**, and the cascade is a chain of ratios. So the entry was moved
+to 5m and the family finally got a real sample and a split.
+
+| | E63a · H1 | E63b · H2 |
+|---|---|---|
+| Window | Jun 2024 → Jul 2025 | Jul 2025 → Sep 2026 |
+| Profit factor | **0.70674847** | **0.83434289** |
+| Max drawdown | 31.81350346% | 16.01925213% |
+| Trades | **95** | **73** |
+| Win rate | 29.47% | 32.88% |
+| avgBarsInTrade | 225.71 / 1296 | 292.85 / 1296 |
+
+**BOTH HALVES FAIL** — the third of three outcomes registered before the runs.
+
+## WHY 15m WAS REJECTED IN DESIGN, NOT AFTER
+The 15m level is reconstructed from timestamps (`b15 = math.floor(time / 900000)`). On a 15m entry
+chart every bar IS one 15m bucket, so `p15l` collapses to the previous bar's low and `brokeBelow`
+degenerates from "price broke the previous 15m structural low" into "this bar's low is under the last
+bar's". **The entry timeframe cannot be lifted above the lowest structural rung of its own cascade
+without destroying it.** 5m keeps three entry bars per bucket and leaves the structure intact.
+
+## THE SHARPER FINDING IS IN THE BAR COUNTS
+`avgBarsInTrade` is **225.71 and 292.85 against a 1296 cap — 17% and 23%. The cap does not bind at
+5m.** Every previous A.L.C.M. measurement had winners pinned at **56–93%** of their cap; that is the
+entire reason E47 existed and the entire reason E35 through E46 were re-read as three-day holds.
+
+**So this is the first measurement in this lab's history where the exit actually resolves at target or
+at liquidation, as the specification requires — and it returns 0.71 and 0.83.**
+
+## WHICH READING IS RIGHT
+"The A.L.C.M. family is 1m-specific" is one explanation. **The simpler one is that e58a's PF 1.24 on
+36 trades was small-sample noise, and 168 trades is the more trustworthy number.** This log has warned
+for weeks that a 20–30 trade family cannot support a ratio. This is what it looks like when that
+warning is finally tested rather than restated.
+
+RATCHET v2 clause 5, spread reported: **0.12759442**, H2 the better half.
+
+## WHAT THIS SETTLES
+- **The data ceiling was never the binding constraint.** It was removed, and the result got worse.
+- **The 1m results from E35 onward should be read as thin-sample readings**, not as a microstructure
+  edge that 5m destroys. Anyone citing e58a's 1.24 should cite this alongside it.
+- **The lab is not blocked on data any more.** It is blocked on the mechanism.
+
+## QUEUE
+1. **Test the entry, not the exit.** Every axis explored since E35 — shield width, hold cap, the coil,
+   the 2x2 — has been about the EXIT or a filter. On a 168-trade sample the entry itself
+   (`brokeBelow` + a velocity-gated reclaim of the previous 15m low) can finally be binding-tested
+   term by term, which was never possible at 20-30 trades.
+2. **Re-measure the shield sweep at 5m.** E38–E41's $2,000 optimum was measured on unreproducible
+   code, a binding cap, and a varying risk-per-trade. At 5m the cap no longer binds, so the sweep is
+   worth exactly one honest re-run.
+3. **Do not retreat to the 1m window.** Results there are not more real for being more flattering.
