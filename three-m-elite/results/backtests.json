@@ -1113,5 +1113,65 @@
     },
     "pineSource": "three-m-elite/pine/3m-elite-v36-rfloor-loose.pine",
     "notes": "NOT KEPT (both ratchet terms worse than v32) but completes the R-floor neighbourhood cleanly on both sides. Four-point curve: minRpct=0 (v31) PF 0.88869052 / DD 34.63598596% / 734 trades -> minRpct=0.50 (v36) PF 1.05593889 / DD 16.58851777% / 334 trades -> minRpct=0.80 (v32) PF 1.22482256 / DD 10.90593093% / 165 trades -> minRpct=1.20 (v35) PF 1.09260420 / DD 16.58968851% / 67 trades. PF rises monotonically to 0.80% then falls; drawdown falls monotonically to 0.80% then rises. This is a clean, smooth interior optimum on BOTH sides now (HARD LESSON 16 fully satisfied) -- not a monotone ratio-for-sample walk (the cross-lab coolBars warning) and not a curve-fit spike. 334 trades is comfortably clear of the ~30-trade interpretability floor (HARD LESSON 19). v32 (0.80%) stands as champion with its load-bearing parameter now fully bounded on both neighbours."
+  },
+  {
+    "id": "3m-elite-v37-freshness-tight",
+    "name": "3M Elite v32 freshness neighbourhood, maxAge=6 (tight side)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Queue item 1 from v36: freshness neighbourhood, tight side. One change from pine/3m-elite-v32-r-floor.pine: maxAge 12 -> 6.",
+    "metrics": {
+      "netProfitPct": 29.75955671,
+      "profitFactor": 1.25172059,
+      "maxDrawdownPct": 8.72815312,
+      "totalTrades": 155,
+      "winRatePct": 42.58064516,
+      "avgTradePct": 0.19199714
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JPDW0AFPKNQ3MDZF7CCE1C",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JPDW0AK2BY6W4MCR03SXFQ",
+      "verifiedAt": "2026-09-03T03:54:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v37-freshness-tight.pine",
+    "notes": "KEPT -- both ratchet terms improved over v32 (PF 1.22482256 -> 1.25172059, DD 10.90593093% -> 8.72815312%), on 165 -> 155 trades, a healthy sample. This is a genuine ratchet pass, same rule this lab used to keep v30 and v32. New base pending a split test (v32 was only promoted to status:passed after v33 split it -- v37 has not yet had that check). The neighbourhood is NOT a clean single peak: v38 (maxAge=24) also beats v32 on PF but not on DD, and v32 (maxAge=12) sits worse than BOTH its neighbours on PF -- a dip, not a smooth curve. Drawdown is the unambiguous signal here (monotonically rising with age: 8.73% at 6, 10.91% at 12, 10.92% at 24); profit factor differences among the three points are small enough (155/165/170 trades) that they may be partly noise. Flagged for next cycle: test even tighter (maxAge=3 or similar) to see whether this is a true optimum at 6 or a monotone walk that has not yet turned (HARD LESSON 19 caution) -- trade counts here stay healthy (150+) so this is not the degenerate-sample failure mode, but the direction is unconfirmed past 6."
+  },
+  {
+    "id": "3m-elite-v38-freshness-loose",
+    "name": "3M Elite v32 freshness neighbourhood, maxAge=24 (loose side)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Queue item 1 from v36: freshness neighbourhood, loose side. One change from pine/3m-elite-v32-r-floor.pine: maxAge 12 -> 24.",
+    "metrics": {
+      "netProfitPct": 32.57310229,
+      "profitFactor": 1.24828129,
+      "maxDrawdownPct": 10.91697823,
+      "totalTrades": 170,
+      "winRatePct": 42.94117647,
+      "avgTradePct": 0.19160648
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JPEPE4HMG76TAARMKQC480",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JPEPE3WRPK50NPMDF51RQB",
+      "verifiedAt": "2026-09-03T03:54:27Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v38-freshness-loose.pine",
+    "notes": "NOT KEPT against v32 -- PF improves (1.22482256 -> 1.24828129) but drawdown is marginally worse (10.90593093% -> 10.91697823%, +0.011pp), failing the both-terms ratchet by a hair. Completes the freshness neighbourhood on both sides (v37 tight, v38 loose) per HARD LESSON 16, but the curve is not a clean single peak at v32s maxAge=12 -- see v37s notes for the full three-point shape and the honest reading that drawdown is the real signal here, not profit factor."
   }
 ]

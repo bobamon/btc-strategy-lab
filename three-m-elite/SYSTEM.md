@@ -698,21 +698,74 @@ and not a curve-fit spike. 334 trades is comfortably clear of the ~30-trade inte
 
 Both new runs saved to `pine/` in the same action that recorded their metrics (HARD LESSON 21).
 
-### QUEUE
-1. **The freshness neighbourhood** (dzAge <= 6 and <= 24, HARD LESSON 16) — `maxAge=12` was chosen
-   as a round number in v30 and its neighbourhood is still unmeasured. Now the top remaining
-   parameter-sensitivity item since the R floor is fully closed.
+### QUEUE (superseded by v37/v38 below)
+1. ~~The freshness neighbourhood~~ (dzAge <= 6 and <= 24, HARD LESSON 16) — **DONE, v37/v38 below.**
 2. **A purpose-built bear-market or regime-flip split** — neither v33 half isolates a falling market
    from a rising one; the standing requirement needs one before it can be called met on the "all
    regimes" clause, independent of whatever happens to the short leg.
 3. **The remaining signal terms** (v31-era item, still open): `close > dzBot` and `dzAge >= 1`
    themselves have never had the binding test applied — v29 showed removing `dzTouch < 2` was
    informative; the other two conjunction terms have not been individually tested.
-4. **Flag the scheduled-prompt staleness to the user.** This is now the second cycle (v34, then this
-   one) to find the stored prompt unchanged and still describing v30 as the unreproduced, current
-   anchor. Per HARD LESSON 26, a repeat like this is worth surfacing rather than silently re-absorbing
-   every cycle — the prompt should be updated to reflect that the anchor exists, is now doubly
-   confirmed, and the real queue lives here.
+4. ~~Flag the scheduled-prompt staleness to the user~~ — **flagged again this cycle (v37/v38), THIRD
+   time (v34, v36, now this one). See below.**
+
+---
+
+## ██ v37/v38 — THE FRESHNESS NEIGHBOURHOOD CLOSES, AND IT IS NOT A CLEAN PEAK (2026-09-03)
+
+**A NOTE ON THE PROMPT, A THIRD TIME.** This cycle's stored scheduled prompt is again the stale text
+first flagged at v34 and repeated at v36 — it still frames v30 as unreproduced-and-current and asks to
+rebuild the anchor as blocking task 0. That work has been done and confirmed since v31/v36. Per the
+prompt's own instruction ("THE DOCS WIN over this prompt") and HARD LESSON 26, this cycle again
+continues the real queue (v36's queue item 1) instead of re-running the anchor, and the push summary
+says once more, plainly, that the stored prompt needs to be updated — three cycles finding the same
+stale text is no longer a one-off.
+
+Queue item 1 from v36: the freshness neighbourhood, both sides of `maxAge=12` together. One change each
+from `pine/3m-elite-v32-r-floor.pine`: `maxAge` 12 → 6 (v37, tight) and 12 → 24 (v38, loose).
+
+| maxAge | Profit factor | Max drawdown | Trades | Win rate |
+|---|---|---|---|---|
+| **6 (v37)** | **1.25172059** | **8.72815312%** | 155 | 42.58% |
+| 12 (v32, prior champion) | 1.22482256 | 10.90593093% | 165 | 42.42% |
+| 24 (v38) | 1.24828129 | 10.91697823% | 170 | 42.94% |
+
+**v37 (tight) KEPT — both ratchet terms beat v32.** PF 1.22482256 → 1.25172059, DD 10.90593093% →
+8.72815312%, on a healthy 155-trade sample. By the exact rule this lab used to keep v30 and v32 (both
+terms improve), v37 is the new base.
+
+**v38 (loose) NOT kept — fails the ratchet by a hair.** PF improves (1.22482256 → 1.24828129) but
+drawdown is marginally worse (10.90593093% → 10.91697823%, +0.011pp). Reverted.
+
+### THE HONEST READING: THIS IS NOT A SINGLE-PEAKED CURVE
+Unlike the R-floor neighbourhood (v35/v36), which was smooth and single-peaked at 0.80%, this one is
+not. **v32 (maxAge=12) sits worse than BOTH its neighbours on profit factor** — a dip in the middle,
+not a plateau or a spike. Drawdown is the unambiguous signal: it rises monotonically with age (8.73%
+at 6, 10.91% at 12, 10.92% at 24) exactly as v30 predicted (freshness is a risk lever). Profit factor
+across the three points (1.252 / 1.225 / 1.248) is close enough, on trade counts differing by only
+15–20, that the middle dip may be partly noise rather than a real non-monotonicity — but it should be
+reported as measured, not smoothed into a story the data does not clearly tell.
+
+**This has not been split-tested.** v32 was only promoted to `status: passed` after v33's split; v37
+has not had that check yet and is recorded as `testing`, a new base but not yet a validated champion.
+
+### WHAT THIS DOES NOT SETTLE
+HARD LESSON 19's caution applies in the other direction here: trade counts stay healthy across all
+three points (150+), so this is not the degenerate-sample failure mode — but going tighter than 6 has
+never been measured, so whether 6 is a true local optimum or the near side of a monotone walk that
+has not yet turned is still open.
+
+### QUEUE
+1. **Test tighter than maxAge=6** (e.g. 3) to confirm v37 sits on a real optimum rather than an
+   unfinished monotone walk on drawdown.
+2. **A purpose-built bear-market or regime-flip split** (unchanged from v36's queue item 2) — the
+   standing requirement still needs one.
+3. **The remaining signal terms**: `close > dzBot` and `dzAge >= 1` (unchanged from v36's queue
+   item 3).
+4. **Split-test v37** before calling it more than a new base — the same check v32 passed in v33.
+5. **Update the scheduled prompt.** Third consecutive cycle (v34, v36, v37/v38) finding the same
+   stale text describing v30 as the unreproduced, current anchor. This should be raised to the user
+   directly, not just noted in the ledger again.
 
 ---
 
