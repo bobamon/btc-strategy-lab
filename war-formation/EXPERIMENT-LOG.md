@@ -54,7 +54,10 @@ E55) and **e58a** (PF 1.24015239, 36 trades, reproduced E58=E59) remain this lab
 With position sizing closed (HARD LESSON 29), no new 1m data available (re-checked E61), and both the
 Oracle queue (1/5) and 950 Rule (2/4) fully worked, **this family has no further open, credit-worthy
 question on the current data window** — the honest state, stated plainly rather than spent on marginal
-re-sweeps.
+re-sweeps. **E62 (bottom of file, most recent) independently re-checked both closable conditions (new
+1m data, new source material) and found neither had changed — the halt is now confirmed twice, no
+backtest was run, and per HARD LESSON 26 this was flagged to the user rather than filed as a third
+quiet board entry.**
 
 *(The paragraph below describes v6, kept for history — it is DEMOTED, not current.)*
 **v6 — HA cascade, LONG ONLY, structural stop (pre-A.L.C.M., WRONG EXIT MODEL).** BTCUSDT 1m,
@@ -3155,3 +3158,85 @@ headline, not a fourth number.
    the current data window without either new 1m history or a genuinely new source (another trader
    rule, another annotated chart) to mine.** Say so plainly rather than spending credits on marginal
    re-sweeps of an axis HARD LESSON 29 already closed.
+
+---
+
+# ██ E62 — THE HALT CONFIRMED A SECOND TIME. NO BACKTEST RUN. FLAGGED TO THE USER (HARD LESSON 26).
+
+**Numbering note:** this cycle's stored prompt is stale in the same way E56–E61 already flagged —
+it frames the state as the closed 2x2 at E42–E46 ("no champion, no candidate... continue at E47") and
+raises two questions ("does the cap or target bind", "position sizing / drawdowns need scaling to
+~50x") that this log already answered and closed: the cap-vs-target question at E56 (cap binds hard
+below ~8640, rare by 12960, absent by 25920, with `get_trades` confirming the mechanism), and position
+sizing at the 2026-09-02 POSITION SIZING correction plus HARD LESSON 23/29 (leverage is not risk; the
+backtests already model ~2% equity risk per trade correctly, no rescaling needed). Per the prompt's own
+instruction and HARD LESSON 26, the docs win — stated here rather than re-litigated.
+
+Before trusting local state, this cycle re-verified the merge the prompt describes: local `main` had
+drifted 4 commits behind a force-pushed `origin/main` (a stale pre-fork lineage, `4dd9290`..`6e1cbb0`,
+sharing no history with the real project). Reset to `origin/main` (`14ec22b`), which carries the actual
+E1–E61 history intact. No work was lost — the pre-fork commits were vestigial, not in-progress.
+
+## QUEUE ITEM ADDRESSED
+E61's own closing item 3: whether the "no further productive move" verdict still holds. This is not a
+re-run of E61 — E61 asserted the halt from existing evidence; this cycle independently re-checked the
+two things that could reopen it before accepting the verdict a second time (HARD LESSON 17: state what
+a check will mean before running it, and honour it either way).
+
+## THE TWO CHECKS, BOTH RE-RUN FRESH THIS CYCLE (free, no credits spent)
+1. **`get_credits`:** 708 credits, free tier. Tool reachable, `whoami` confirmed. Per the budget rule
+   (>500 → at most two backtests permitted), credits are NOT the constraint this cycle — the absence of
+   an open, uncontaminated question is.
+2. **`plan_backtest_window` on BTCUSDT 1m, requested 2020-01-01 → 2026-09-03:** applied range clamped
+   to **2025-12-16 → 2026-05-03**, identical to every prior check in this log (last checked E61,
+   2026-09-03). **No new 1m history.**
+3. **Source material:** `war-formation/transcripts/` and `transcripts/youtube/` hold the same 3 local +
+   3 YouTube files as at E61 — no new recording or annotated image added to the repo since. The Oracle
+   queue (1/5) and the 950 Rule (2/4) remain fully worked; nothing new to mine.
+
+Both checks came back exactly as E61 left them. **Neither reopened the halt.**
+
+## WHY NO BACKTEST WAS RUN THIS CYCLE
+Every open thread this family has is structurally closed (HARD LESSON 29's occupancy confound makes
+`maxBars`/`shieldUsd` un-A/B-able on this window; position sizing closed by the 2026-09-02 correction;
+no out-of-sample split possible on 4.5 months of data, HARD LESSON 22). Spending either of this
+cycle's two permitted credits would mean re-sweeping an axis already characterized — the exact mistake
+HARD LESSON 28 named (reading a degenerate or already-closed number as a new verdict). **An
+analysis-only cycle that runs nothing is the correct action here, not a shortfall against the budget
+rule.** The two working anchors are unchanged and restated for the record: `pine/e50b-alcm-long-only-
+uncoiled.pine` (PF 1.21869905, DD 17.44898097%, 21 trades, all long, reproduced E53=E54=E55) and
+`pine/e58a-shield1000-maxbars6480.pine` (PF 1.24015239, DD 9.82519609%, 36 trades, reproduced E58=E59).
+Both sit at or above the ~20-trade interpretability floor (item 7 of this cycle's own instructions);
+neither is a champion or candidate.
+
+## THIS IS THE SECOND CONSECUTIVE CYCLE TO FIND THE SAME HALT — HARD LESSON 26 APPLIES
+E61 first declared "no further productive move on the current data window." This cycle independently
+re-checked the only two things that could have changed that (new data, new source material) and found
+neither had. **Per HARD LESSON 26, a halt that survives one full cycle unchanged is stuck, and the
+correct action on the second consecutive confirmation is not a third quiet board entry — it is
+flagging to the user that the automated loop cannot proceed without them.** Done this cycle via a push
+notification alongside this entry, naming the two things that would unblock the lab: new 1m history on
+this instrument, or a new source (another trader rule, another annotated chart) to mine. No backtest
+was fabricated to appear productive; the honest state is recorded as a count of checks performed, not a
+result.
+
+## WHAT THIS ESTABLISHES
+- The merge state is sound: local `main` now matches `origin/main` exactly, no stale fork remains.
+- The halt E61 declared is not a one-cycle artifact — it independently reproduces on a fresh check.
+- The scheduled prompt driving this loop needs a human update (new items, a pause, or new source
+  material) before the next firing can do more than confirm the same halt a third time.
+
+## WHAT THIS DOES NOT DO
+- Does not touch `results/backtests.json` — no backtest ran, so there is nothing new to record, and
+  `build_dashboard.py --lab war` was not run for the same reason (no new metrics to render).
+- Does not change any working anchor, champion, or candidate status.
+- Does not close the lab permanently — new 1m history or new source material reopens it immediately,
+  and the queue below stays exactly as E61 left it for that reason.
+
+## QUEUE — UNCHANGED FROM E61, CARRIED FORWARD
+1. Position sizing / risk fraction as an independently testable axis — still closed per HARD LESSON 29.
+2. If more 1m history becomes available, the $3,000/$4,000 shield question is still the first thing to
+   re-run. Re-checked this cycle via `plan_backtest_window`: still clamped to 2025-12-16 → 2026-05-03.
+3. No further productive move on the current data window without new 1m history or a genuinely new
+   source. **This is now confirmed twice (E61, E62).** The next unblock has to come from outside the
+   loop — a data extension, new source material, or an updated scheduled prompt.
