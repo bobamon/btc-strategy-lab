@@ -2039,4 +2039,94 @@ retuning `maxBars` cannot fix a leg that was supposed to be deleted and was not.
    apply to E38-E41's old $2,000 conclusion: unreproducible code (E44), a cap that binds differently at
    each shield width (E48), and a short leg that was never actually removed (E49).
 4. **Risk fraction, correctly stated:** is 2% per trade right, and should it scale with shield width?
+
+
+---
+
+# ██ E50 — E47 IS NOT REPRODUCIBLE EITHER. THE LAB'S ONLY "KEPT" ALCM RESULT JOINS E38.
+
+Queue item 1 from E49: build the true long-only source by mechanically deleting the short leg from
+`pine/e47-alcm-long-cap12960.pine` (not merely leaving it unused), save it, and re-run once to confirm
+it reproduces E47's documented 21 all-long trades.
+
+## PRE-RUN AUDIT
+- **R = $2,000 (~2% of BTC price):** passes the 0.8% floor (HARD LESSON 3).
+- **Stop placement:** risk-defined (the shield), not structural — the declared ALCM deviation from
+  HARD LESSON 5.
+- **Leg:** one leg only after deletion (long); the short leg check is trivially "each leg separately"
+  since there is only one.
+- **Redundancy (HARD LESSON 18):** none introduced by the deletion.
+- **Pre-registered outcome (HARD LESSON 17):** reproduces E47 exactly -> the short-leg deletion is
+  inert here, as E49's per-trade read implied, and the file becomes the clean single-leg anchor.
+  Differs from E47 -> something else about the saved file does not produce the number it claims, and
+  E47 itself needs re-deriving.
+
+## THE FIRST RUN CONTRADICTED ITSELF BEFORE IT COULD ANSWER THE QUEUE
+`pine/e50a-alcm-long-only-coiled.pine` — e47's code with the short leg mechanically deleted, `coilPrev`
+left untouched on the long leg — returned:
+
+| | E47 (documented) | E50a (short leg deleted) |
+|---|---|---|
+| Profit factor | 1.21869905 | **0.45694023** |
+| Max drawdown | 17.44898097% | 19.37557338% |
+| Trades | 21, all long | **10, all long** |
+
+**A strict subset of E47's own logic cannot legitimately produce fewer than half its trade count** if
+E47's "zero shorts, occupancy accident" description were still accurate — deleting an inert leg cannot
+change the surviving leg's count by more than book-occupancy noise, and 21 vs 10 is not noise. This
+result could only mean one of: a bug in the deletion, or E47 itself no longer reproducing.
+
+## THE SECOND RUN SETTLED IT: E47 DOES NOT REPRODUCE E47
+The remaining credit went to the check the contradiction demanded, not to the queue's next planned
+step (e50b, the genuinely uncoiled variant) — an exact, byte-identical re-run of
+`pine/e47-alcm-long-cap12960.pine`, unmodified, same declared window (2025-12-16 to 2026-05-03):
+
+| | E47 (documented, 2026-09-02) | E50 reproduction check (2026-09-03, same file) |
+|---|---|---|
+| Profit factor | 1.21869905 | **0.58008733** |
+| Max drawdown | 17.44898097% | 18.86871179% |
+| Trades | 21 | **24** |
+| Long / short | 21 / 0 | **9 / 15** |
+| Win rate | 42.86% | 12.5% |
+
+**Same file. Same code. Same window. Different result.** The short leg — which E49 already proved was
+never deleted from this file, only starved of a flat book by occupancy — is not starved on this run;
+it fired 15 times. Against this re-run's 9 long trades, e50a's 10 is close but not identical, which is
+consistent with removing the short leg shifting occupancy timing by one trade — e50a was not buggy,
+E47 had already stopped reproducing before e50a ever ran.
+
+## STATUS CHANGES
+- **E47 is reclassified from "the first build that measures the A.L.C.M. as specified" to "recorded
+  but UNREPRODUCIBLE."** It joins E38. Its old numbers are not deleted or replaced — both the original
+  and the failed reproduction are recorded, dated, in `results/backtests.json`
+  (`wf-e50-e47-reproduction-check`) — but nothing may be compared against E47's 1.21869905 until this
+  is resolved.
+- **E50a's own number (PF 0.45694023, 10 trades) is recorded but not read as a result** — it is not
+  comparable to anything, since the baseline it was meant to check moved under it.
+- **E50b (the genuinely uncoiled variant) was NOT run.** Both credits went to establishing that the
+  anchor had failed instead. It is still queued.
+- **There is still no champion and no candidate**, now with less certainty than E49 left, not more.
+- **Added to `STRATEGY-LEDGER.md` as HARD LESSON 25** — a result that was real and verified once
+  (E49's `get_trades` check on E47) is not thereby permanently verified. This lab's best two ALCM
+  results (E38, now E47) have both failed to reproduce on a later re-run: base rate 0 of 2.
+
+## WHAT THIS CYCLE DID NOT ESTABLISH
+The root cause is unknown: whether the underlying 1m data for this fixed historical window has been
+revised since 2026-09-02, whether the backtest engine changed behavior under an unchanged version tag
+(`tv_jul26_mc7` on both runs), or whether the engine has genuine run-to-run non-determinism on
+identical inputs. No credit remained this cycle to test it (e.g. a second immediate re-run of the same
+file to see if 24-trades is itself stable, or a re-run of `alcm-reference.pine`/E44's anchor to check
+whether IT still reproduces 28 trades).
+
+## QUEUE
+1. **Determine whether this lab's backtest results are stable under re-run at all**, before trusting
+   any anchor further. Cheapest test: re-run `alcm-reference.pine` (E44's anchor, already the
+   most-cited baseline after E47) unmodified and check it still returns PF 0.34584164 / 28 trades. If
+   it does not either, treat every historical number in this log as a point estimate from an
+   unstable process, not a fact, and say so everywhere it is cited.
+2. **If re-runs prove stable going forward**, re-derive a real long-only, no-short-leg anchor from
+   scratch on today's data/engine state — the true version of E49's queue item 1 — and only then
+   resume e50b (the uncoiled variant) and the maxBars/shield work queued since E47.
+3. **Position sizing / risk fraction:** unchanged, still open, still not the priority while the anchor
+   itself is unresolved.
    Unchanged, still open, sharpened by E48's coupling finding.

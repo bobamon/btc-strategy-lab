@@ -1,0 +1,160 @@
+//@version=6
+// WAR FORMATION E50a — THE SHORT LEG ACTUALLY DELETED FROM CODE.
+//
+// WHY THIS FILE EXISTS. E49 found that pine/e47-alcm-long-cap12960.pine -- despite being described as
+// "uncoiled longs, no shorts" -- still contained the FULL short leg (goShort, bearRegime, h1Bear,
+// brokeAbove, shortTrig, the strategy.entry("S", ...) block) live in the code. E47's 21 trades were
+// verified all-long via get_trades, but that was an OCCUPANCY ACCIDENT (the long leg's cap=12960 hold
+// times starved the short leg of a flat book), not a construction guarantee. Sweeping maxBars (E49a/b)
+// re-admitted the short leg and collapsed PF, proving the point.
+//
+// THIS FILE removes goShort, bearRegime, h1Bear, brokeAbove, shortTrig, greenBear, shortR, the short
+// strategy.entry block and the SX exit block ENTIRELY -- not left unused, deleted -- so a flat book is
+// structurally impossible to fill with a short order. This is the literal, minimal diff requested by
+// the consolidated queue (EXPERIMENT-LOG.md, end of E49): delete only the short leg, change nothing
+// else. coilPrev is DELIBERATELY LEFT IN goLong here, unchanged from e47 -- see e50b for the further
+// correction.
+//
+// A SECOND DISCREPANCY, FOUND WHILE BUILDING THIS FILE (not previously logged): e47's own title-comment
+// called itself "Long-only, uncoiled" but its goLong line requires coilPrev == true. It was never
+// uncoiled -- it is byte-identical in the long leg to alcm-reference.pine (E44's coiled-both-legs
+// anchor) with only maxBars changed 4320 -> 12960. So E46/E47's "uncoiled longs, no shorts" construction,
+// as originally described in the log, has NEVER ACTUALLY BEEN RUN. This file (e50a) is the coiled,
+// short-deleted variant; e50b is the genuinely uncoiled, short-deleted variant E46/E47 meant to test.
+//
+// PRE-REGISTERED OUTCOME (HARD LESSON 17), before running:
+//   - Reproduces E47 exactly (PF 1.21869905, 21 trades, all long) -> the short-leg deletion is provably
+//     inert on this window, as E49's per-trade read already implied, and this file becomes the clean
+//     single-leg anchor for any future maxBars/shield sweep.
+//   - Differs from E47 -> something else in the saved e47 file was not what actually produced that
+//     number, and E47's headline itself needs re-deriving on this corrected code.
+//
+// THE SPECIFICATION: War Formation has NO STOP LOSS. The exit is the A.L.C.M. shield -- a fixed dollar
+// gap to liquidation. The position ends at target or at liquidation. NEVER add to a losing trade.
+//
+// PRE-RUN AUDIT:
+//   LONG (only leg) -- R = shieldUsd = $2,000, ~2% of BTC price: PASSES the 0.8% floor (HARD LESSON 3)
+//     where v6's 0.15% clamp did not. Stop is RISK-DEFINED, not structural -- the declared deviation
+//     from HARD LESSON 5 the ALCM spec requires. SL/TP fixed at entry, no trailing. Latch order: 15m
+//     level breaks (brokeBelow), then the 1m reclaim fires (HARD LESSON 8). coilPrev still required
+//     here (E45 found this is a LIABILITY on the long leg, PF-wise) -- kept unchanged to isolate the
+//     short-leg-deletion variable alone, per the queue's own instruction.
+//   SHORT -- DELETED. No short entry can fire; strategy.position_size can never be negative.
+//   Redundancy (HARD LESSON 18): no other volatility term duplicates coilPrev in goLong, so this is not
+//     a two-gates-one-idea case.
+//   Binding test (HARD LESSON 12/15): this run cannot itself test whether coilPrev binds -- that is
+//     e50b's job, run against this file as the immediate comparison.
+//
+// SAMPLE CEILING: ~3 days per trade across 4.5 months of 1m data (2025-12-16 to 2026-05-03) caps this
+// family near 20-30 trades. A ratio below ~20 trades is reported as a COUNT, not read as a result.
+strategy("War Formation E50a long-only coiled cap12960", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+greenBull = input.int(4,     "Green 1h candles for BULL")
+skipOpen  = input.int(60,    "Skip first N minutes of 6h block")
+skipClose = input.int(60,    "Skip last N minutes of 6h block")
+coilK     = input.float(0.85,"3m coil: atr(3) < atr(30) * K")
+velK      = input.float(0.8, "Velocity: min reclaim as multiple of atr(30)")
+midLo     = input.float(400, "Whole-number middles low")
+midHi     = input.float(600, "Whole-number middles high")
+etOffset  = input.int(-4,    "ET offset from UTC")
+witchOn   = input.bool(true, "Ban longs in witching hour 1-4am ET")
+shieldUsd = input.float(2000,"THE SHIELD: fixed dollar gap to liquidation")
+rr        = input.float(2.0, "Reward:risk")
+maxBars   = input.int(12960, "Max bars in trade -- nine days, per E47")
+
+MS6H = 21600000
+MS1H = 3600000
+MS15 = 900000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+b15 = math.floor(time / MS15)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+new15 = b15 != b15[1]
+
+var float h1o     = na
+var int   grnCur  = 0
+var int   cntCur  = 0
+var int   grnPrev = 0
+var int   cntPrev = 0
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    grnCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(h1o)
+        cntCur := cntCur + 1
+        if close[1] > h1o
+            grnCur := grnCur + 1
+    h1o := open
+
+regimeReady = cntPrev >= 5
+bullRegime  = regimeReady and grnPrev >= greenBull
+
+minsIn    = (time - b6 * MS6H) / 60000
+timeGate  = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+h1Bull = not na(h1o) and close > h1o
+
+var float c15l = na
+var float p15l = na
+
+if new15
+    p15l := c15l
+    c15l := low
+else
+    c15l := na(c15l) ? low : math.min(c15l, low)
+
+brokeBelow = not na(p15l) and c15l < p15l
+
+atrFast = ta.atr(3)
+atrSlow = ta.atr(30)
+coiled  = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK
+coilPrev = coiled[1]
+velMin   = na(atrSlow) ? na : atrSlow * velK
+
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+hUTC     = math.floor(time / MS1H) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+longBan  = witchOn and witching
+
+longTrig  = not na(p15l) and not na(velMin) and ta.crossover(close, p15l) and (close - p15l) >= velMin
+
+goLong  = bullRegime and timeGate and h1Bull and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+longR = shieldUsd
+
+if flat and goLong and longR > 0
+    strategy.entry("L", strategy.long)
+    slPx   := close - longR
+    tpPx   := close + longR * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")

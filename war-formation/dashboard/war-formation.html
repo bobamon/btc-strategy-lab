@@ -2153,9 +2153,67 @@ const DATA = [
       "verifiedAt": "2026-09-03T00:44:00Z"
     },
     "notes": "REVERTED, same mechanism as wf-e49a-maxbars-8640. longTrades 8 (2W), shortTrades 16 (1W) -- the supposedly deleted short leg fired again at this cap too. PF 0.60321667. Confirms the E49a finding is not noise: at BOTH neighbours of E47's 12960, the intact short leg reasserts itself once the longer/shorter hold changes book occupancy. See EXPERIMENT-LOG.md E48 and STRATEGY-LEDGER.md HARD LESSON 24. E47 itself (PF 1.21869905, 21 trades) was independently verified via get_trades to be genuinely all-long on its own result -- that number stands -- but its 'long-only' status is an outcome of this window at this maxBars value, not a property of the code."
+  },
+  {
+    "id": "wf-e50-e47-reproduction-check",
+    "name": "WF E50 reproduction check: byte-identical e47-alcm-long-cap12960.pine",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Consolidated queue item 1's prerequisite check, run FIRST after the e50a discrepancy below forced it: an exact byte-identical re-run of the committed pine/e47-alcm-long-cap12960.pine, unchanged, to see whether the file still produces its own documented headline (PF 1.21869905, DD 17.44898097%, 21 trades, all long, 42.86% win). It does not.",
+    "metrics": {
+      "netProfitPct": -9.40602112,
+      "profitFactor": 0.58008733,
+      "maxDrawdownPct": 18.86871179,
+      "totalTrades": 24,
+      "winRatePct": 12.5,
+      "avgTradePct": -0.39191755
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JEZKGZCDKD2SVPMFFT5EQ8",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JEZKGZV8WXY2HY580ETBXN",
+      "verifiedAt": "2026-09-03T01:23:52Z"
+    },
+    "notes": "E47 IS NOT REPRODUCIBLE. Same file, same window (2025-12-16 to 2026-05-03), same code -- and this run returns 24 trades (longTrades 9 [2W], shortTrades 15 [1W]) against E47's documented 21 trades, all long. The short leg -- which E49 already proved was never deleted from this file, just starved of a flat book by occupancy -- is NOT starved on this run; it fired 15 times. This is the same class of failure as E44's non-reproduction of E38: a result recorded in the log and in the Pine file's own header comment cannot currently be regenerated from the exact source that supposedly produced it. E47 is reclassified from 'first build that measures the ALCM as specified' to 'recorded but UNREPRODUCIBLE,' joining E38. See HARD LESSON 25 in STRATEGY-LEDGER.md."
+  },
+  {
+    "id": "wf-e50a-short-leg-deleted",
+    "name": "WF E50a: short leg mechanically deleted from e47's code (coilPrev left unchanged on long)",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Consolidated queue item 1: take pine/e47-alcm-long-cap12960.pine and DELETE the short leg (goShort, bearRegime, h1Bear, brokeAbove, shortTrig, greenBear, shortR, the short strategy.entry block and the SX exit block), not merely leave it unused. coilPrev deliberately left in goLong, unchanged, to isolate the one variable. Saved to pine/e50a-alcm-long-only-coiled.pine before running.",
+    "metrics": {
+      "netProfitPct": -10.52084427,
+      "profitFactor": 0.45694023,
+      "maxDrawdownPct": 19.37557338,
+      "totalTrades": 10,
+      "winRatePct": 20,
+      "avgTradePct": -1.05208443
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JEWWZ2KF6EHCK5SC20TWK3",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JEWWZ23CD964N6RK5JNSG8",
+      "verifiedAt": "2026-09-03T01:22:23Z"
+    },
+    "notes": "Run BEFORE the reproduction check above, and the result that triggered it: this construction is a strict subset of e47's own logic (only the short leg removed) yet returned 10 trades against E47's documented 21 -- a difference that should have been impossible if E47's own 0-short claim were true and the short leg were genuinely inert. That contradiction is what forced the byte-identical e47 re-run (wf-e50-e47-reproduction-check), which showed E47 itself no longer reproduces its own number (24 trades, 15 of them short, this run). Against THAT re-run's 9 long trades, this file's 10 long trades are close but not identical -- consistent with removing the short leg shifting book-occupancy timing by exactly one trade, not with a construction bug in this file. PF 0.45694023, 10 trades, 20% win rate: not a candidate, and not comparable to E47's old number since that number is itself unreproducible now."
   }
 ];
-const BUILT = "2026-09-03 00:50";
+const BUILT = "2026-09-03 01:45";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

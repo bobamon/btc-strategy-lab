@@ -1062,3 +1062,54 @@ prose that describes them.**
   trade-count match to a different run.** E46's "no shorts" claim rested on its count matching E43's
   long-only count — plausible, but a coincidence, not a verification; this cycle's actual check of
   E47 used the real per-trade field and only then could rule out one explanation from the other.
+
+---
+
+## ██ HARD LESSON 25 — A RESULT ON DISK CAN STOP REPRODUCING ITSELF. VERIFY BEFORE BUILDING ON IT, NOT
+## JUST BEFORE COMPARING AGAINST IT
+
+**Earned:** War Formation E50, 2026-09-03.
+
+The consolidated queue's item 1 asked for a minimal, mechanical change: delete the short leg from
+`pine/e47-alcm-long-cap12960.pine` and confirm the result still reproduces E47's documented 21
+all-long trades. The deletion (e50a) came back with **10 trades** — impossible if E47's own "zero
+shorts, occupancy accident" description were still true of the current file, since removing an inert
+leg cannot change the surviving leg's count by more than book-occupancy noise, and 21 vs 10 is not
+noise.
+
+**That contradiction forced a check nothing in the queue had asked for: an exact, unmodified re-run of
+`pine/e47-alcm-long-cap12960.pine` itself.** It returned **PF 0.58008733, 24 trades (9 long, 15
+short)** — not the documented PF 1.21869905, 21 trades, all long. Same file, same code, same declared
+window (2025-12-16 to 2026-05-03). **E47 does not currently reproduce E47.**
+
+**Why this is a different failure from HARD LESSON 21/24.** Those were about source that was never
+saved, or saved source that never matched its own prose description — both are defects fixed once,
+at save time, and stable afterward. This is a result that had a real source on disk, verified once
+against its own trade list (E49, via `get_trades`), and **stopped matching that verification on a
+later, byte-identical re-run.** Nothing in this lab's process could have caught it earlier, because
+nothing before E50 ever re-ran an already-anchored file just to check it still behaves the same way.
+
+**The likely mechanism, not yet isolated:** the short leg's firing depends on exact book-occupancy
+timing (HARD LESSON 24), which is sensitive to the precise bar-by-bar path — so either the underlying
+1m data for this fixed historical window has been revised/re-ingested since E47 ran, or the backtest
+engine itself changed (`engineVersion: tv_jul26_mc7` on both runs, so if it changed, the tag didn't
+move), or there is genuine non-determinism in the engine across otherwise-identical calls. This cycle
+did not have credit budget left to distinguish these after the two runs above; it is the top item for
+whichever cycle picks this up next.
+
+**How to apply:**
+- **A construction check that comes back somewhere it structurally cannot be is itself a finding, not
+  a bug to shrug off.** e50a's 10-vs-21 gap was the tell; treating it as "must be my diff" and moving
+  on without the confirming re-run would have buried the real defect under a wrong explanation.
+- **"Verified once" is not "verified."** E49's `get_trades` check on E47 was real and correct *at the
+  time it ran*. It did not survive to E50. Anchors should be treated as perishable until this lab has
+  evidence they are not — re-check a load-bearing anchor's own reproducibility before spending more
+  cycles building on it, not only when a downstream number looks wrong.
+- **Do not silently re-baseline.** E47 is reclassified here as "recorded but UNREPRODUCIBLE," the same
+  status E38 carries. It is not deleted from the log and its old number is not quietly replaced by the
+  new one — both are recorded, dated, and flagged, exactly as HARD LESSON 21 requires for the original
+  case.
+- **This is now the second- and third-best results this lab has ever produced (E38, then E47) that
+  failed to reproduce.** Whatever the root cause turns out to be, the base rate for "this lab's best
+  number survives a re-run" is currently 0 for 2. Treat every future headline PF as provisional until
+  it has been re-run at least once, cold, before it is used as a comparison baseline for anything else.
