@@ -1810,3 +1810,74 @@ lets some would-be winners turn into losers. The trade is strongly net positive 
 2. **Re-derive the shield sweep under the corrected cap.** E38–E41's $2,000 optimum was measured on
    the three-day hold and on unreproducible code. Both defects apply.
 3. **Position sizing.** Unchanged, and still the largest unsolved problem.
+
+
+---
+
+# ██ POSITION SIZING - A STANDING CLAIM IN THIS LOG IS WRONG (2026-09-02)
+
+Queue item 3 has read, in this log and in every cycle prompt, some form of:
+
+> "DD 17.45% is a 1x figure and far past total loss at the ~50x a $2,000 shield implies."
+
+**That conflates leverage with risk, and it is wrong.** No backtest was needed to see it - only
+arithmetic, which is why it sat unexamined for so long.
+
+## THE ARITHMETIC, AT BTC ~ $100,000 WITH THE ENGINE'S FORCED 100%-OF-EQUITY SIZING
+
+| Step | Value |
+|---|---|
+| Position at 1x | $10,000 / $100,000 = **0.1 BTC** |
+| Loss if the $2,000 shield is hit | 0.1 x $2,000 = **$200** |
+| As a share of equity | **2.0% per losing trade** |
+
+**The backtests already model ~2% risk per trade.** That is a normal risk level, not an unlevered
+toy. E47's twelve losers at roughly 2% each reconcile with its 17.44898097% max drawdown, and the
+same check holds across the ALCM set. **The drawdown figures are meaningful exactly as recorded.**
+
+## WHY THE OLD CLAIM SEEMED RIGHT
+Because "1x" was read as "unlevered, therefore understated". But the engine forces
+`margin_long/short = 100` and `percent_of_equity = 100`, which fixes NOTIONAL at one unit of equity.
+Risk per trade is then set by the SHIELD - a fixed dollar distance - not by the leverage available on
+the venue.
+
+**Leverage changes the margin posted, not the risk taken.** At 58x the same 0.1 BTC needs about $172
+of margin instead of $10,000. The position, the shield and the $200 loss are identical.
+
+The only route to ruin is holding 5 BTC on $10,000 - 50x NOTIONAL - which risks $10,000 per trade.
+**Nothing in the A.L.C.M. asks for that**, and the specification's own logic forbids it.
+
+## WHAT THE SPECIFICATION'S LEVERAGE NUMBER ACTUALLY CONSTRAINS
+The source material names 58x and a $3,000 gap to liquidation. Those are not independent settings:
+
+| Effective leverage | Liquidation distance | Gap at BTC $100k |
+|---|---|---|
+| 58x | ~1.72% | ~$1,724 |
+| ~50x | ~2.0% | **$2,000** |
+| ~33x | ~3.0% | **$3,000** |
+
+**The "Bitunix Pencil" is the act of reducing leverage until the liquidation gap matches the intended
+shield.** It is a position-sizing instrument, not a risk multiplier. Raising leverage does not raise
+risk here - it moves liquidation closer, which the shield exists to prevent.
+
+## WHAT THIS CHANGES
+- **Queue item 3 is not the largest unsolved problem in this lab.** It was mis-stated, and the
+  problem it described does not exist at the sizing the specification implies.
+- **The drawdown figures throughout this log stand as recorded** and need no leverage adjustment.
+- **The real sizing question is different and much narrower:** whether 2% risk per trade is the right
+  fraction, and whether it should vary with the shield width. That is a genuine open question and it
+  replaces the old item.
+
+## WHAT DOES NOT CHANGE
+E47 is still PF 1.21869905 on **21 trades**, at the declared 20-30 sample ceiling, with **no
+out-of-sample period available on this instrument** (1m coverage is 2025-12-16 to 2026-05-03 only).
+After BTC's Attack 32 - where a filtered build printed 2.077 in-sample while the bare mechanism
+returned ~0.9 across 1,658 trades - that remains the reason this is a direction and not a result.
+
+## QUEUE, REVISED
+1. **The maxBars neighbourhood: 8640 and 25920, both sides together** (HARD LESSONS 16 and 19).
+   Watch for the monotone ratio-for-sample walk BTC's coolBars turned out to be - read the TRADE
+   COUNT, not just the profit factor.
+2. **Re-derive the shield sweep under the corrected cap.** E38-E41's $2,000 optimum was measured on
+   the three-day hold AND on unreproducible code. Both defects apply.
+3. **Risk fraction, correctly stated:** is 2% per trade right, and should it scale with shield width?

@@ -980,3 +980,35 @@ larger gross flows, and the fitted half usually does.
   inside, and HARD LESSON 20's ratchet blindness was a symptom of it.
 - **Withdraw the claim in the same words it was made in.** It was written as "the edge survives out of
   period"; it has to be unwritten that plainly, in the same document, not softened into a caveat.
+
+
+---
+
+## ██ HARD LESSON 23 - LEVERAGE IS NOT RISK, AND A REPEATED CAVEAT IS NOT A CHECKED ONE
+
+*(War Formation position-sizing review, 2026-09-02)*
+
+For most of this lab's life the log, the cycle prompts and the session summaries all carried a
+version of: "drawdown is a 1x figure and far past total loss at the ~50x the shield implies."
+
+**It was never true.** The engine forces `percent_of_equity = 100` and `margin 100/100`, so notional
+is one unit of equity and risk per trade is set by the SHIELD - a fixed dollar distance - not by
+venue leverage. At BTC ~$100k a $2,000 shield on a 0.1 BTC position is $200, or **2% of equity**.
+The recorded drawdowns were already correctly scaled.
+
+**Why:** on a perp, leverage determines MARGIN POSTED, not position size. The same 0.1 BTC costs
+$10,000 of margin at 1x or ~$172 at 58x; the trade, the shield and the loss are identical. Ruin
+requires raising the POSITION, which the specification's own liquidation-gap logic forbids.
+
+**How to apply:**
+- **A caveat that is restated every cycle is not thereby verified.** This one survived dozens of
+  write-ups because repeating it felt like diligence. Diligence would have been four lines of
+  arithmetic.
+- **Check the claims that make you look careful first.** An overstated risk warning attracts no
+  scrutiny precisely because it sounds conservative - which is exactly why it can persist unchecked.
+- **Separate the three quantities every time:** notional (position size), margin (leverage), and risk
+  (stop distance x position). Only the third is risk, and only the third belongs in a drawdown
+  discussion.
+- **The engine's parity profile is part of the model.** `margin_long/short = 100` is not a limitation
+  to apologise for in every summary; it fixes notional at 1x equity, which is what makes the recorded
+  drawdowns readable in the first place.
