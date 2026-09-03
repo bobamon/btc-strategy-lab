@@ -1819,3 +1819,22 @@ two items, or update/pause the scheduled prompt so it stops re-asking for work t
 closed.
 
 **BASE: still RETIRED. No champion, no candidate, no base. Nothing changed this cycle.**
+
+
+---
+
+# ███ CYCLE CHECK #3, 2026-09-03 — SAME STALE PROMPT, SAME HALT. USER NOTIFIED THIS TIME.
+
+Third consecutive firing of the same unedited stored mandate (still says PF 1.47184908 / 56 trades /
+`coolBars` 150 / "no champion" / continue at Attack 31 / split Attack 30's 15m build). All of that
+was superseded before the first cycle check ever ran. `get_credits` returned 736 — no shortage of
+budget, which only underlines that the blocker is not credits, it is the two open decisions below.
+
+Per HARD LESSON 26 (written by cycle check #2 for exactly this situation): a board halt that survives
+a second identical cycle unchanged is stuck, and the correct action is to notify the user rather than
+write a third quiet board entry. Cycle check #2 recommended notifying but had no way to actually reach
+the user outside this file. This cycle does — **a push notification was sent** flagging both open
+items and the stale-prompt loop itself. No backtest ran, no Pine was written, no board state changed
+beyond this note and the notification.
+
+**BASE: still RETIRED. No champion, no candidate, no base. Nothing changed this cycle.**
