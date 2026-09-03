@@ -3319,3 +3319,65 @@ RATCHET v2 clause 5, spread reported: **0.12759442**, H2 the better half.
    code, a binding cap, and a varying risk-per-trade. At 5m the cap no longer binds, so the sweep is
    worth exactly one honest re-run.
 3. **Do not retreat to the 1m window.** Results there are not more real for being more flattering.
+
+
+---
+
+# ██████ MANDATE CORRECTION — USER DIRECTIVE, 2026-09-03. THIS OUTRANKS EVERY QUEUE ITEM.
+
+The user restated the mandate, and it corrects a drift that had crept into two labs.
+
+## THE THREE LABS ARE NOT THE SAME KIND OF PROJECT
+
+**WAR FORMATION and 3M ELITE are the USER'S strategies.** They came from source material the user
+supplied — the Oracle rules and the A.L.C.M. infographic for War Formation, the SPENNYFX videos, PDFs
+and transcripts for 3M. The job in those two labs is to **MASTER what is written there and make SMALL
+TWEAKS that perfect the strategy on its own terms.** Not to replace the mechanism, not to re-engineer
+its frame, not to decide a leg does not exist.
+
+**THE BTC LAB IS THE INVENTED ONE.** There is no source material. The job there is to build a strategy
+that works and keep improving it, indefinitely.
+
+**All three get worked every cycle.** None is ever "done", "paused", or "closed".
+
+## WHERE THIS CORRECTS WAR FORMATION
+**E63 moved the entry from 1m to 5m.** It was justified on the grounds that the A.L.C.M. constrains the
+EXIT, so the entry timeframe was free. **That was wrong.** The cascade the user supplied is
+6h → 1h → 15m → 3m → 1m, and the **1m entry is part of the specification**, not an incidental choice
+inherited from the data.
+
+- **E63 stands as a DIAGNOSTIC and is not withdrawn.** It established something real: at 5m the hold
+  cap stops binding, and the 1m results from E35 onward look like thin-sample readings rather than a
+  microstructure edge. That is worth knowing and stays on the record.
+- **But 5m is NOT the new home timeframe, and E63 is NOT the new base.** Work returns to the 1m
+  cascade as specified.
+- **The 20–30 trade ceiling is therefore back**, and it is a property of the user's strategy on the
+  available data — not a defect to engineer away. Results are reported with the count stated, and the
+  ratio is not quoted below ~20 trades. That constraint is lived with, not removed.
+
+## WHERE THIS CORRECTS 3M ELITE
+**The short leg was marked "paused, not queued" after six failed constructions. That was overreach.**
+The source material describes a two-sided system — supply zones and demand zones — so the short side
+is part of the user's strategy, not an optional extra this lab gets to retire.
+
+- **The short leg is REOPENED.** It stays on the queue and keeps receiving small, source-faithful
+  tweaks.
+- The six failures remain on the record as evidence about which constructions do not work
+  (v34's fade into the zone, v51's failed reclaim, and four earlier mirrored attempts). They are not
+  evidence that the strategy has no short side.
+- **Go back to the source before the next attempt.** VOCABULARY.md decodes terms from the transcripts;
+  if the source says something specific about short entries that is not yet implemented, implementing
+  it outranks inventing a seventh geometry.
+
+## WHAT DOES NOT CHANGE
+- **RATCHET v2 still governs what is KEPT** in all three labs (user decision, same day).
+- **Never fabricate a metric, always record real provenance, always save the Pine** (HARD LESSONS 21
+  and 25).
+- **Split-test before believing a number** (HARD LESSON 22) — though in War Formation the 1m window
+  cannot support a split, and that limitation is stated rather than engineered around.
+- **Never mirror one leg off the other** (LESSON 6). Reopening the 3M short does not license mirroring.
+
+## THE PRACTICAL RULE FOR EVERY FUTURE CYCLE
+Before proposing a change in War Formation or 3M Elite, ask: **is this a small tweak that perfects the
+strategy the user gave me, or am I rebuilding it into something else?** If the second, it does not
+belong in that lab. Ideas of that kind belong in the BTC lab, which exists precisely to be invented.
