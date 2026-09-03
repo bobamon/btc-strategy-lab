@@ -3240,3 +3240,23 @@ result.
 3. No further productive move on the current data window without new 1m history or a genuinely new
    source. **This is now confirmed twice (E61, E62).** The next unblock has to come from outside the
    loop — a data extension, new source material, or an updated scheduled prompt.
+
+
+---
+
+## ██ THE THREE RULE QUESTIONS ARE CLOSED (user decision, 2026-09-03)
+
+All three open rule questions were answered by the user. **The canonical ratchet now lives in
+`STRATEGY-LEDGER.md` under "THE RATCHET — v2"**, and it outranks any statement of the rule in this
+document, in a scheduled prompt, or in any earlier entry. In brief:
+
+1. **Drawdown tolerance** — drawdown may worsen by up to **0.50pp** when profit factor improves by
+   **more than 0.02**. Raised by Attack 3, which lost the largest PF gain in its lab to 0.064pp.
+2. **Regime spread** — **measured and reported on every KEPT change, but it does not veto.** Raised by
+   Attack 26, which passed both old terms while widening the spread 0.0016 → 0.2566.
+3. **Minimum sample** — **floor of 30 trades**, and any change cutting the count by **more than 50%
+   must pass a split test before it can be kept**. Raised by the `coolBars` curve, where six
+   monotone points each passed the old rule while walking toward a 7-trade degeneracy.
+
+**No cycle may change these.** A cycle that finds one of them binding in an unreasonable place should
+record that and flag it, not route around it.

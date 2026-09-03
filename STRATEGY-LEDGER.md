@@ -1290,3 +1290,75 @@ practically different from impossible when the base rate is measured in years.
   read faithfully from the transcripts; the lock-up is a property of how those individually-correct
   rules compose, not a mistranslation of any one of them. Composition needs its own check even when
   every component checks out alone.
+
+
+---
+
+# ██████ THE RATCHET — v2. USER DECISION, 2026-09-03. THIS SUPERSEDES ALL EARLIER STATEMENTS.
+
+The three rule questions raised by Attack 3, Attack 27 and Attack 29 were put to the user and
+**answered on 2026-09-03**. They are CLOSED. This section is now the canonical definition of the
+ratchet for **all three labs** and outranks any statement of it in a scheduled prompt, a board, a log,
+or an older ledger entry.
+
+## THE RULE
+
+A change is **KEPT** only if **all three** hold:
+
+1. **Profit factor improves.**
+2. **Max drawdown does not worsen** — *except* it may worsen by up to **0.50 percentage points** when
+   profit factor improves by **more than 0.02**.
+3. **The resulting trade count is at least 30.**
+
+And two obligations attach to every KEPT change:
+
+4. **A change that cuts the trade count by more than 50% must pass a split test before it can be
+   kept.** Not after. The split is the price of a large sample cut.
+5. **The H1/H2 regime spread must be measured and reported.** It does NOT veto. But a KEPT change
+   whose spread was never measured is not properly recorded, and the record is incomplete until it is.
+
+Anything failing 1–3 is **REVERTED** and added to that lab's tried-and-reverted table.
+
+## WHY EACH CLAUSE EXISTS — THE EVIDENCE, NOT THE PREFERENCE
+
+**Clause 2, the 0.50pp band.** Attack 3 produced the largest profit-factor gain that lab ever
+recorded and was reverted because drawdown worsened by **0.064 percentage points** — comfortably
+inside noise on a ~100-trade sample. A strict rule that discards the best result over a rounding-scale
+difference is measuring precision it does not have. The band is deliberately narrow: it takes a real
+PF gain (>0.02) to buy a small DD cost, and everything outside it still reverts.
+
+**Clause 3, the floor of 30.** `coolBars` was measured at six points — 231, 166, 145, 85, 56, 7
+trades — with profit factor rising monotonically the whole way and **every step passing the old
+two-term rule against the step below it.** A rule with no sample floor does not converge; it walks a
+selectivity parameter toward degeneracy and calls each step an improvement.
+
+**Clause 4, the split on a >50% cut, and why the floor alone was not enough.** 3M's v32 cut the sample
+**78%** — from 734 trades to 165 — and that cut was *legitimate*: it enforced LESSON 3's R floor,
+excluding entries whose stop was under 0.8% of price. It went on to clear a real out-of-sample split
+(H1 1.34562489, H2 1.05357727) and became the first champion in this project. **A blunt percentage
+veto would have blocked it.** So a large cut is not forbidden — it is made expensive. It must be
+split-tested before it counts.
+
+**Clause 5, report the spread but do not veto it.** Attack 26 passed both old terms while widening the
+H1/H2 spread from 0.0016 to 0.2566 — the rule was blind to it because both its terms are whole-sample
+aggregates (HARD LESSON 20). But a hard third veto would block changes that trade a little uniformity
+for a lot of edge, and **the split test — now mandatory on every kept change — already catches the
+fatal version**. Measuring the spread every time makes the blind spot visible without adding a term
+that can reject a good simplification.
+
+## WHAT THIS DOES NOT CHANGE
+- **A ratio below ~30 trades is still not quoted as a result.** That practice predates this rule and
+  survives it; clause 3 makes it a keep/revert condition as well as a reporting one.
+- **Every KEPT change still needs its source on disk** (HARD LESSON 21) and a cold re-run that
+  reproduces to the cent before anything is built on it (HARD LESSON 25).
+- **An in-sample number is still not a finding** (HARD LESSON 22). The ratchet decides what is kept;
+  the split test decides what is believed. They are different gates and both apply.
+
+## THE HONEST LIMIT OF THIS RULE
+Every clause here was derived from failures inside this project, on one instrument, over four and a
+half years of data. **A rule tuned on its own history is subject to the same objection as a strategy
+tuned on its own history.** The thresholds — 0.50pp, 0.02, 30 trades, 50% — are judgement calls
+anchored to observed failures, not measured optima, and none of them has a neighbourhood test behind
+it. They are better than the two-term rule they replace because they close failures that actually
+occurred; they are not proven, and a future cycle that finds one of them binding in a stupid place
+should say so rather than route around it.
