@@ -2333,5 +2333,63 @@
       "verifiedAt": "2026-09-03T00:00:00Z"
     },
     "notes": "EXACT MATCH to E58a's original documented result (PF 1.24015239, DD 9.82519609%, 36 trades, 41.67% win rate, all long) -- to eight decimal places. e58a is now this lab's THIRD file confirmed reproducible on a cold re-run (after alcm-reference: E44=E51, and e50a/e50b: E50=E52, E53=E54=E55 cross-session). pine/e47-alcm-long-cap12960.pine remains the lab's only anchor with a documented reproduction failure. Still not promoted to champion or candidate: 36 trades clears the ~20 floor comfortably, but per HARD LESSON 24/28/29 (this cycle, E58) e58a's trade population is not comparable to e50b's or e58b's on a controlled 'R varied, book otherwise identical' basis -- each shieldUsd value admits a different trade set via the shared single-position book. No out-of-sample split is possible on this instrument (only 4.5 months of 1m data, HARD LESSON 22)."
+  },
+  {
+    "id": "wf-e60a-e50b-maxbars10800",
+    "name": "WF E60a: finer maxBars grid around e50b's 12960, lower side (10800)",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "research",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "e50b (pine/e50b-alcm-long-only-uncoiled.pine) with maxBars 12960->10800, no other changes. Run together with sibling E60b (maxBars=14400) per HARD LESSON 16/19, to sharpen E56's coarse neighbourhood (8640/25920) into a finer grid around the confirmed local optimum.",
+    "metrics": {
+      "netProfitPct": 3.39464857,
+      "profitFactor": 1.1024153,
+      "maxDrawdownPct": 18.75509075,
+      "totalTrades": 22,
+      "winRatePct": 40.90909091,
+      "avgTradePct": 0.15430221
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1KA8CNA3QKKCAMGES5A3CFS",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KA8CNA3QKKCAMGES5A3CFS",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "notes": "22 trades, all long, non-degenerate (HARD LESSON 19). PF 1.10 sits between e50b's anchor (1.219 at 12960) and E56's coarse lower neighbour (1.04 at 8640) -- avgBarsWinning 6848.4/10800=63.4%, the cap binds more here than at 12960 (56.5%) but less than at 8640. Companion: E60b."
+  },
+  {
+    "id": "wf-e60b-e50b-maxbars14400",
+    "name": "WF E60b: finer maxBars grid around e50b's 12960, upper side (14400)",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "research",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "e50b (pine/e50b-alcm-long-only-uncoiled.pine) with maxBars 12960->14400, no other changes. Run together with sibling E60a (maxBars=10800) per HARD LESSON 16/19.",
+    "metrics": {
+      "netProfitPct": 5.07034979,
+      "profitFactor": 1.15285243,
+      "maxDrawdownPct": 19.50624629,
+      "totalTrades": 21,
+      "winRatePct": 38.0952381,
+      "avgTradePct": 0.24144523
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1KA99PCVQGV3G19KCZNC6P0",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KA99PCVQGV3G19KCZNC6P0",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "notes": "21 trades, all long, non-degenerate (HARD LESSON 19). PF 1.15 sits between e50b's anchor (1.219 at 12960) and E56's coarse upper neighbour (1.08 at 25920) -- avgBarsWinning 5911.5/14400=41.0%, cap binds less here than at 12960 (56.5%). Companion: E60a."
   }
 ]

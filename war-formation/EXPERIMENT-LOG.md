@@ -2933,3 +2933,111 @@ something else.
    lift required.
 4. **If more 1m history ever becomes available**, the $3,000/$4,000 shield question E57 could not
    answer is still the first thing to re-run on a longer window.
+
+---
+
+# ██ E60 — THE FINER maxBars GRID CONFIRMS 12960 AS A REAL, NARROW LOCAL PEAK, NOT A PLATEAU
+
+**Numbering note:** this cycle's stored prompt is stale again, same pattern as every cycle since E51 —
+it claims the 2x2 closed at E42–E46 with no champion/candidate, and says to continue numbering at E47.
+Per the prompt's own instruction and HARD LESSON 26, the docs win: this log runs through E59 with three
+files confirmed reproducible under cold re-run and a carried-forward queue. This cycle executed that
+queue's own item 1, the last open item before it (the finer maxBars grid).
+
+**Credits: 716 at start (free tier). Budget rule: above 500 → at most TWO backtests. Both used, on the
+one decisive pair the carried-forward queue named — E56's coarse neighbourhood (8640/25920) tightened to
+±1440 around e50b's 12960.**
+
+## QUEUE ITEM ADDRESSED
+E56/57/58/59's carried-forward item: *"A finer maxBars grid (10800 / 14400) around 12960 on e50b"* — run
+together, per HARD LESSON 16 (test both sides of a load-bearing parameter) and HARD LESSON 19
+(distinguish a real neighbour from a degenerate one).
+
+## PRE-RUN AUDIT
+Both files byte-identical to `pine/e50b-alcm-long-only-uncoiled.pine` except `maxBars`. LONG (only leg):
+R = shieldUsd = $2,000, ~2% of BTC price, passes the 0.8% floor (HARD LESSON 3); stop is risk-defined,
+not structural, the declared ALCM deviation (LESSON 5); one leg only, short mechanically deleted,
+`position_size` can never go negative (LESSON 6, trivially satisfied, unchanged from e50b/e56a/e56b/
+e58a/e58b); no new terms, no new redundancy to check (LESSON 18). Saved to
+`pine/e60a-e50b-maxbars10800.pine` and `pine/e60b-e50b-maxbars14400.pine` in the same action as this
+record (LESSON 21).
+
+**Pre-registered outcome (HARD LESSON 17), against e50b's PF 1.21869905 / 21 trades and E56's coarse
+grid (8640: PF 1.038/22 trades; 25920: PF 1.079/19 trades):**
+- Both land close to 1.22 with trade counts near 21 → the plateau is broad and tight around 12960,
+  E56's coarse-grid shallowness was already the full picture at this resolution.
+- One or both land closer to E56's coarse-grid values (1.04/1.08) or between them and 1.22 → the
+  optimum narrows faster than the coarse grid suggested; 12960 is a sharper peak than E56 read it as.
+- Trade count collapsing toward single digits on either side → HARD LESSON 19 degenerate neighbour,
+  report as a count, not a result.
+
+## THE RESULT
+
+get_trades pulled on E56a/E56b (free reads, no credit spent) to compute their avgBarsWinning directly —
+the E56 write-up never recorded this figure, only cap-hit counts, so it is derived here from the raw
+trade lists rather than carried forward as a remembered number (HARD LESSON 11: measure a mechanism,
+don't declare it).
+
+| maxBars | PF | Trades | Max DD | Win rate | avgBarsWinning / cap |
+|---|---|---|---|---|---|
+| 8640 (E56a, coarse) | 1.03751749 | 22 | 21.28% | 36.36% | 63.63% (5498.0/8640, computed from get_trades) |
+| **10800 (E60a)** | **1.10241530** | **22** | **18.76%** | 40.91% | **63.4%** (6848.4/10800) |
+| 12960 (e50b anchor) | **1.21869905** | 21 | **17.45%** | **42.86%** | 56.5% (7317/12960) |
+| **14400 (E60b)** | **1.15285243** | **21** | **19.51%** | 38.10% | **41.0%** (5911.5/14400) |
+| 25920 (E56b, coarse) | 1.07927810 | 19 | 19.49% | 36.84% | 29.19% (7566.9/25920, computed from get_trades) |
+
+[E60a report](https://mcp-api.trader.dev/backtest/01M1KA8CNA3QKKCAMGES5A3CFS) ·
+[E60b report](https://mcp-api.trader.dev/backtest/01M1KA99PCVQGV3G19KCZNC6P0)
+
+**The second pre-registered branch landed, more clearly than at the coarse grid.** PF is monotonically
+decreasing on BOTH sides as distance from 12960 grows: 1.219 (0) → 1.103/1.153 (±1440) → 1.038/1.079
+(±3960/±12960's coarse siblings). That is a genuine local peak, not a plateau — moving in by roughly a
+third of the distance to E56's coarse neighbours recovers roughly half the PF gap on the low side
+(1.038→1.103, versus the 1.038→1.219 coarse-to-anchor gap) and a smaller share on the high side
+(1.079→1.153 vs 1.079→1.219).
+
+**The avgBarsWinning/cap ratio is monotonically DECREASING as maxBars increases — 63.63% → 63.4% →
+56.5% → 41.0% → 29.19% across the five points, in cap order, not in distance-from-12960 order.** That is
+the expected arithmetic of a numerator (raw winning bars, roughly 5500-7600 across all five runs, not
+scaling with the cap) divided by a denominator that keeps growing — it says the cap binds proportionally
+less as it widens, which is unsurprising and was already established qualitatively by E56/E47. **It does
+NOT, on its own, explain why PF peaks specifically at 12960 rather than continuing to improve as the cap
+loosens further (12960→14400→25920 all have progressively looser caps but PF goes 1.219→1.153→1.079)** —
+the falling PF past 12960 is the book-occupancy mechanism E56/E58 already identified (HARD LESSON 24/29):
+a wider cap changes which trades get admitted at all, not just how the same trades resolve.
+
+## WHAT THIS ESTABLISHES
+- **maxBars=12960 is now confirmed a real, narrow local optimum on FOUR flanking points (8640, 10800,
+  14400, 25920), not a two-point coarse read.** All four are non-degenerate trade counts (19–22, HARD
+  LESSON 19) and all four sit below e50b's 1.219 headline.
+- **This is still not a HARD LESSON 16 curve-fit spike** — the full five-point range (1.038–1.219) is a
+  smooth, monotone falloff on both sides, not a narrow peak with a cliff. But it is narrower than E56's
+  own framing ("shallow... not a spike") suggested from two points alone: the finer grid shows real
+  separation (1.10/1.15 vs 1.22) at only ±1440, roughly 11% off the anchor.
+
+## WHAT THIS DOES NOT DO
+- **Not promoted to champion or candidate.** All five points in this family sit at or near the ~20-trade
+  interpretability floor (HARD LESSON 19) on a 4.5-month, single-instrument window with no
+  out-of-sample split available (HARD LESSON 22) — directions, not validated results.
+- **Does not touch the shield sweep** (carried-forward item, still low priority per E58's HARD LESSON 29
+  finding that shieldUsd is not independently testable in this single-position-book construction).
+- **Does not re-run e50b itself** — its own number (PF 1.21869905, 21 trades) is unchanged, already
+  reproduced three times (E53=E54=E55), and stands as this family's best point across all five now
+  tested.
+- **Does not resolve why 12960 specifically, only that it is now confirmed a local optimum on a finer
+  grid than E56 tested** — an even finer grid (11800/13800, say) is conceivable but is diminishing
+  returns per credit against the queue's other open items below.
+
+## QUEUE
+1. **Root cause of `pine/e47-alcm-long-cap12960.pine`'s specific mismatch** — still open, still low
+   priority, e50b/e58a already supersede it as working anchors regardless of the answer. Now the
+   longest-standing open item in this log (queued since E50).
+2. **Position sizing / risk fraction as an independently testable axis** — still closed per HARD LESSON
+   29 (E58) for this single-position-book construction; would need a fundamentally different
+   construction (separate simulated accounts per shieldUsd value) to reopen, not queued given the
+   lift required.
+3. **If more 1m history ever becomes available**, the $3,000/$4,000 shield question E57 could not
+   answer is still the first thing to re-run on a longer window.
+4. **The maxBars axis on this construction is now well-characterized (five points, real local optimum
+   at 12960) and is not worth further credits** absent a specific reason — the marginal information per
+   credit has dropped sharply since E56.
