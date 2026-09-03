@@ -1,0 +1,111 @@
+//@version=6
+// VWM 15m SCALED BUILD — the exact program behind Attack 30 (2026-09-02), reconstructed and saved
+// under HARD LESSON 21 (a result without its source on disk is not a result). Attack 30's own
+// backtests.json entry pointed specPath at CHAMPION-BOARD.md, not a Pine file -- the same defect
+// that made War Formation's E38 unreproducible. This file closes that gap for Attack 30 and is the
+// SAME source used for Attack 31's H1/H2 split.
+//
+// DERIVATION. Identical to strategies/pine/vwm-base-current.pine (the 5m base, coolBars 150) with
+// every bar-count parameter divided by 3 -- mechanically restoring the native 15m values the 5m set
+// was tripled from. Price- and ratio-denominated inputs (pullK, bufK, rr, minRpct, maxRpct, etOffset)
+// are timeframe-independent and unchanged. This is a timeframe PORT, not a re-fit: nothing here was
+// reoptimised for 15m.
+//
+//   sdLen    300 -> 100   slopeLen 150 -> 50   coolBars 150 -> 50   swgLen  60 -> 20
+//   maxBars  288 -> 96    trendLen 600 -> 200  volLen   600 -> 200  atrLen   42 -> 14
+//
+// ATTACK 30 RESULT (BTCUSDT 15m, 2022-01-01 -> 2026-09-01, full window this file reproduces):
+//   PF 1.23178053 | DD 13.55670685% | 141 trades | 46.10% win | +19.35% net
+//   https://mcp-api.trader.dev/backtest/01M1J0T09TFD8AZE208W6413V6
+// This was a VALIDATION run, not a ratchet attack -- a different timeframe over a different period
+// is not like-for-like, so it was neither KEPT nor REVERTED. The 5m base (vwm-base-current.pine)
+// remains the base.
+//
+// ATTACK 31 uses this exact file to split the window at 2024-06-08, per the board's queue item 1:
+// H1 = 2022-01-01 -> 2024-06-08 (never seen by any tuning attack -- 5m data, and every coolBars sweep,
+// starts at 2024-06-08), H2 = 2024-06-08 -> 2026-09-01 (the period every prior attack was tuned on).
+// If H1+H2 trade counts reconcile to 141, this reconstruction is verified against Attack 30's number
+// without spending an extra credit on a reproduction run.
+//
+// AUDIT: long-only, one leg (LESSON 6). Stop at the swing low minus a 0.25x ATR buffer -- STRUCTURE,
+// not the signal level (LESSON 5). R floor 0.80% of price (LESSON 3). SL and TP fixed at entry, no
+// trailing stop. Latching unchanged since the 5m base was formed (HARD LESSON 8).
+strategy("VWM 15m Scaled (Attack 30 build)", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+sdLen    = input.int(100,   "Stdev length for the bands")
+slopeLen = input.int(50,    "Bars used to measure VWAP slope")
+pullK    = input.float(0.5, "Pullback must reach VWAP + K x sigma")
+coolBars = input.int(50,    "Flip stand-down (150/3, native 15m value)")
+swgLen   = input.int(20,    "Swing lookback for the structural stop")
+bufK     = input.float(0.25,"Stop buffer beyond the swing, x ATR")
+rr       = input.float(2.0, "Reward:risk")
+minRpct  = input.float(0.80,"Min risk as % of price")
+maxRpct  = input.float(3.00,"Max risk as % of price")
+maxBars  = input.int(96,    "Max bars in trade")
+trendLen = input.int(200,   "Trend filter EMA length")
+volLen   = input.int(200,   "Bars for the volatility reference")
+atrLen   = input.int(14,    "ATR length")
+etOffset = input.int(-4,    "ET offset from UTC")
+
+vw   = ta.vwap
+sd   = ta.stdev(close, sdLen)
+atrS = ta.atr(atrLen)
+
+vwUp  = not na(vw[slopeLen]) and vw > vw[slopeLen]
+
+flipUp   = ta.crossover(close, vw)
+flipDn   = ta.crossunder(close, vw)
+flipped  = flipUp or flipDn
+var int sinceFlip = 9999
+sinceFlip := flipped ? 0 : sinceFlip + 1
+coolingOff = sinceFlip < coolBars
+
+pulledBack = low <= vw + pullK * sd and close > vw
+
+trendMA = ta.ema(close, trendLen)
+trendOk = not na(trendMA) and close > trendMA
+
+volRatio = close > 0 and not na(atrS) ? atrS / close : na
+volRef   = ta.sma(volRatio, volLen)
+highVol  = not na(volRatio) and not na(volRef) and volRatio > volRef
+
+hUTC     = math.floor(time / 3600000) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+
+goLong = vwUp and not coolingOff and pulledBack and trendOk and highVol and not witching
+
+swgLo = ta.lowest(low, swgLen)
+buf   = na(atrS) ? 0.0 : atrS * bufK
+minR  = close * minRpct / 100
+maxR  = close * maxRpct / 100
+
+rawLongR = close - (swgLo - buf)
+longR    = math.min(math.max(rawLongR, minR), maxR)
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong and longR > 0
+    strategy.entry("L", strategy.long)
+    slPx   := close - longR
+    tpPx   := close + longR * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")

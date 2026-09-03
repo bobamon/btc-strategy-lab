@@ -287,6 +287,52 @@ The silent remaps were the real danger: a backtest would have returned **genuine
 wrong instrument**. Strategy 001 remains on file as an external-backtest-only spec should an index
 data path ever be added.
 
+## ██ HARD LESSON 22 — A LAB CAN ONLY VALIDATE OUTSIDE THE WINDOW IT TUNED ON, AND UNTIL IT DOES, IT HASN'T
+
+**Earned:** BTC Attack 31, 2026-09-03.
+
+The BTC 5m base was tuned across 29 attacks — seven filters, a signal-term sweep, a six-point
+`coolBars` curve, four KEPT changes — entirely within 2024-06-08 → 2026-09-01, because that is the
+first bar 5m coverage has. There was no second window to check against until Attack 30 ported the
+same code to 15m, which reaches back to 2022. Attack 31 split that 15m run at the coverage boundary:
+
+| | Never tuned (2022–2024) | The tuned window (2024–2026) |
+|---|---|---|
+| Profit factor | **0.79859252** | 2.07724976 |
+| Trades | 77 | 64 |
+
+**The only period this mechanism has never been shaped by is a loser, on a bigger sample than the
+current base's own headline number.** Attack 30 had called the blended full-window result (PF 1.232)
+evidence the edge "survives out of period." It does not generalize — the tuned half was strong enough
+(PF 2.08) to carry the untuned half's loss and still average above 1.0. Averaging a win with a loss
+is not the same claim as a win.
+
+**Why this is a different failure from HARD LESSON 20 (the aggregate ratchet can't see a distributional
+change).** That lesson was about two halves of the SAME tuned window. This is about tuned versus
+never-tuned, and the gap (0.80 vs 2.08) is roughly ten times wider than anything the within-window
+splits ever found. A lab whose only data source starts where its tuning starts has never actually
+been out-of-sample tested, no matter how many gates, filters, or coolBars values it has swept — it has
+only ever cross-validated against itself.
+
+**How to apply:**
+- **Before treating any full-sample or blended number as evidence of a durable edge, ask what window
+  the tuning was DONE on, not just what window the final number was MEASURED on.** If they're the
+  same window, no amount of internal sweeping substitutes for external data.
+- **When a mechanism's tuning coverage and its data coverage start at the same date, that coincidence
+  is not a green light — it is the reason no genuine out-of-sample test has happened yet.** Actively
+  look for a longer-history proxy (a coarser timeframe, as here) specifically to break that
+  coincidence, and do it before crediting any KEPT change with generality.
+- **A positive blended average across a tuned and an untuned period is compatible with the untuned
+  period being a clear loser.** Report the two halves separately before quoting the blend, every time
+  a boundary like this exists — do not wait for a queue item to force it, since the blend actively
+  hides the failure it should reveal.
+- **This generalises to the other two labs.** War Formation and 3M Elite have both tuned exclusively
+  within whatever window their own working data covers; neither has run this same test. Until they
+  do, their KEPT/champion claims carry the identical caveat this one just earned.
+
+
+---
+
 ### HARD LESSON 8 — A setup and its trigger must be LATCHED IN SEQUENCE, never required on the same bar
 Observed twice, in two different labs, both times as a run with **zero trades**:
 

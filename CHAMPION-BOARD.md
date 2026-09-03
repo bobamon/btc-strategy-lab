@@ -1548,3 +1548,93 @@ backtests, promoted four bases, and saved nothing until E44's reproduction failu
 lesson stands, but its origin story is a local hygiene failure, not a universal difficulty — and a
 process running unattended in a container was following the discipline that the interactive session
 kept postponing.
+
+
+---
+
+## ██ ATTACK 31 — THE SPLIT AT 2024-06-08 FAILS. THE LAB HAS BEEN TUNING ON ONE WINDOW ALL ALONG. (2026-09-03)
+
+Board queue item 1: split Attack 30's 15m build at 2024-06-08, the true out-of-sample test, because
+that date is where 5m data begins and therefore where **every single tuning decision in this lab's
+history** — all 29 prior attacks, all four KEPT changes, the entire six-point `coolBars` curve — was
+made. 2022-01-01 through 2024-06-08 is the ONE stretch of data this mechanism has never been shaped
+by. Credit budget allowed exactly this: one run plus one control, per the tool-check rule.
+
+Attack 30's 15m source had never been saved to disk — its `backtests.json` entry pointed `specPath`
+at `CHAMPION-BOARD.md`, the same defect HARD LESSON 21 already named once. It is now saved as
+`strategies/pine/vwm-15m-attack30-scaled.pine`, reconstructed mechanically (every bar-count parameter
+÷3 from the 5m base) and used unchanged for both halves below.
+
+| | **H1 — 2022-01-01 → 2024-06-08 (never tuned)** | H2 — 2024-06-08 → 2026-09-01 (the tuned period) |
+|---|---|---|
+| Profit factor | **0.79859252** | 2.07724976 |
+| Max drawdown | 13.55670685% | 5.1950834% |
+| Trades | 77 | 64 |
+| Win rate | 33.77% | 60.94% |
+| Net return | −11.12% | +34.30% |
+
+**Prediction registered before the run (Hard Lesson 17):** PF ≥ 1.0 on H1 would be real out-of-sample
+evidence and would license promoting 15m as the home timeframe, per the queue. Decisively below 1.0
+would mean Attack 30's 4.7-year headline of 1.232 is a blend hiding a bad true-out-of-sample half —
+the same shape as Attack 27's downgrade of Attack 25. **It came back decisively below 1.0.** 77 trades
+clears the ~30-trade quoting floor (HARD LESSON 12) with room to spare.
+
+### THE RECONCILIATION CONFIRMS THE RECONSTRUCTION IS RIGHT
+77 + 64 = **141**, exactly Attack 30's total. Compounding the two halves' returns —
+(1 − 0.1112) × (1 + 0.3430) = 1.1936, i.e. **+19.36%** — lands within 0.01pp of Attack 30's recorded
+**+19.35%**. H1's drawdown, 13.55670685%, matches Attack 30's full-window drawdown to eight decimal
+places, because the worst peak-to-trough of the whole 4.7 years occurred entirely inside H1. Three
+independent numbers agree. This is Attack 30's actual source, not an approximation of it.
+
+### THE ANSWER TO QUEUE ITEM 1 IS NO
+**Both halves do not clear 1.0, so 15m is NOT promoted as the home timeframe.** The queue's own
+stated condition is unmet. That closes the question the falsification test was built to answer —
+but it is not the important part of this result.
+
+### WHAT THIS ACTUALLY SHOWS, STATED WITHOUT HEDGING
+**Every positive number this lab has ever produced on this mechanism was measured on a single
+27-month window, because that window is the only data 5m coverage ever gave it.** Attacks 1–29 were
+never "tuned then validated" — there was no second window to validate against until this cycle. The
+first time any version of this code met data from outside that window, it lost money: PF 0.80, net
+−11.1%, over a sample (77 trades) larger than the 56-trade sample the current base's own headline
+number rests on.
+
+**Read the two profit factors as a spread, the way Attack 17 read VWAP flip rates.** 0.80 versus 2.08
+is a far larger gap than anything the H1/H2 splits inside the tuned window ever found (Attack 25's
+0.0016, Attack 27's reopened 0.257). Every earlier "regime" measurement in this lab was a comparison
+between two halves of the SAME tuned window. This is the first comparison between the tuned window
+and something else, and the gap is an order of magnitude larger.
+
+**This retroactively reframes Attack 30.** "The edge survives out of period" was true only in the
+sense that a strong enough win in the tuned half can outvote a loss in the untuned half when both are
+averaged together. It does not mean the mechanism generalizes — it means the tuned window's edge was
+large enough to carry a losing window on its back. That is a materially weaker claim, and the board's
+prior framing of Attack 30 as validation should be read with this correction attached.
+
+### WHAT THIS DOES AND DOES NOT INVALIDATE
+**Does not invalidate:** the 5m base's own numbers on its own window. PF 1.47184908 on `coolBars` 150
+was always a same-window statement and remains exactly what it was measured to be.
+
+**Does invalidate:** any reading of Attack 30, or of this lab's four KEPT changes collectively, as
+evidence the mechanism has a durable edge independent of the 2024-06-08→2026-09-01 regime. It does
+not. The honest position is that this lab has one mechanism that has only ever been shown to work in
+one specific window, and the one time it was asked to work outside that window, on 77 trades, it did
+not.
+
+### THE RATCHET DOES NOT APPLY — SAME AS ATTACK 30
+This is a validation run on a different timeframe over a different period, not a like-for-like change
+to the base. It is neither KEPT nor REVERTED. **BASE UNCHANGED: PF 1.47184908, DD 6.98569615%,
+56 trades, `coolBars` 150, 5m, long-only. No champion — and the strongest evidence yet that there is
+no champion to find inside this mechanism family without new, currently-unavailable data (5m/15m
+history before 2024-06-08 does not exist; 15m does, and just failed on it).**
+
+### QUEUE
+1. **`coolBars` stays frozen** — Open Rule Question 3 is still open and this result does not touch it.
+2. **This result belongs beside Open Rule Question 2** (the H1/H2 spread term): the user should see
+   both the within-window spread problem and this between-window one together, since they are the
+   same failure mode at two different scales.
+3. **Any future BTC cycle that reports a positive profit factor must state which window produced it**,
+   and whether that window is the same one every prior KEPT change was measured on. This result is the
+   reason that disclosure is now mandatory, not optional.
+4. **The short leg and the both-directions requirement remain outstanding**, per the standing
+   objective — untouched by this cycle.

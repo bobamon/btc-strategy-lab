@@ -2121,9 +2121,67 @@ const DATA = [
     },
     "specPath": "strategies/pine/012-vwm-vol-confirm.pine",
     "notes": "[CLOUD ROUTINE LINEAGE] REJECTED for generalization -- fails rung C (PF 0.7544 < 0.95). Mixed vs 011's own 5m run: max DD improved (57.02%->47.78%) and net loss shrank (-49.83%->-41.82%), but PF actually dipped slightly (0.7769->0.7544) and avgTradePct got worse (-0.0801->-0.0897). Volume confirmation pruned trades on 5m too (622->466) but did not fix the underlying fee-drag/quality problem HARD LESSON 3/9 diagnosed -- it shrank the loss without fixing the edge. Still KEPT as base per 15m ratchet (see 012-vwm-vol-confirm-btcusdt-15m); not promoted to champion."
+  },
+  {
+    "id": "vwm-attack31-15m-h1-2022-2024",
+    "name": "VWM Attack31 15m H1 (never-tuned period)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/vwm-15m-attack30-scaled.pine",
+    "description": "BOARD QUEUE ITEM 1: split Attack 30's 15m build at 2024-06-08, the true out-of-sample test. This is the H1 half -- 2022-01-01 to 2024-06-08, the ONLY period in this lab's history that no tuning attack has ever touched (5m data, and every coolBars/gate sweep across Attacks 1-29, starts at 2024-06-08). Same exact Pine source as the H2 entry below and as Attack 30's full-window run. Prediction registered before running (Hard Lesson 17): PF>=1.0 here would be real out-of-sample evidence; decisively below 1.0 would mean Attack 30's 4.7-year headline is a blend hiding a bad true-out-of-sample half.",
+    "metrics": {
+      "netProfitPct": -11.11917076,
+      "profitFactor": 0.79859252,
+      "maxDrawdownPct": 13.55670685,
+      "totalTrades": 77,
+      "winRatePct": 33.76623377,
+      "avgTradePct": -0.14440482
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1J9VT3J721J5QRTG626JKPS",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1J9VT3HR62TTFKA6YNFDDWY",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "notes": "THE PREDICTION FAILED IN THE NEGATIVE DIRECTION. PF 0.79859252 on 77 trades -- decisively below breakeven, above the ~30-trade quoting floor (Hard Lesson 12). This is the ONLY genuinely out-of-sample period this base has ever been tested on, and it loses money. See H2 (vwm-attack31-15m-h2-2024-2026) for the control and CHAMPION-BOARD.md Attack 31 for the full reconciliation against Attack 30's unsaved source (77+64=141 trades, compounded net -11.12%->+34.30% chains to +19.36% against Attack 30's recorded +19.35%)."
+  },
+  {
+    "id": "vwm-attack31-15m-h2-2024-2026",
+    "name": "VWM Attack31 15m H2 (the tuned period)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "strategies/pine/vwm-15m-attack30-scaled.pine",
+    "description": "BOARD QUEUE ITEM 1, H2 half: 2024-06-08 to 2026-09-01 -- the ONLY period any tuning attack in this lab (all of Attacks 1-29, every coolBars value, every KEPT change) has ever been measured on, now re-run at 15m instead of 5m. The control run that makes the H1 result interpretable: same source, adjacent like-for-like period.",
+    "metrics": {
+      "netProfitPct": 34.30186564,
+      "profitFactor": 2.07724976,
+      "maxDrawdownPct": 5.1950834,
+      "totalTrades": 64,
+      "winRatePct": 60.9375,
+      "avgTradePct": 0.53596665
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1J9WQ4QFCXHC5RJ0QA5J9ZG",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1J9WQ4PDCWS0W52R4KV7HWT",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "notes": "PF 2.07724976 on 64 trades -- far stronger than the 5m base's own PF 1.47 on the same window/mechanism family, and far stronger than Attack 30's blended 4.7-year figure of 1.232. This is the period every tuning decision in this lab was made on. Read together with H1: the entire lab's positive full-sample results are a property of this one window, not of the mechanism generally. See CHAMPION-BOARD.md Attack 31."
   }
 ];
-const BUILT = "2026-09-02 17:52";
+const BUILT = "2026-09-03 00:17";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
