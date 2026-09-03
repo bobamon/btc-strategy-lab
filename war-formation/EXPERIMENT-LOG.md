@@ -23,9 +23,17 @@ match — 19440/25920 — and found the sweep is **not measurable on this data**
 13 and 8 (both below the ~20 floor) because a wider shield's resolution time grows super-linearly with
 R, not linearly, consuming too much of the fixed 4.5-month window per trade (occupancy, HARD LESSON 24).
 **e50b's $2,000/12960 stays the only shield width in this family above the interpretability floor, by
-elimination, not by having beaten the wider shields on their merits.** The next open item is position
-sizing / risk fraction (drawdowns are 1x figures and must be scaled to the ~33x effective leverage a
-$2,000 shield implies).
+elimination, not by having beaten the wider shields on their merits.** E58 (bottom of file, most
+recent) swept the shield DOWN instead — $1,000/6480 and $1,500/9720 — the direction never tried before,
+and found the family's largest sample yet: E58a ($1,000/6480) scores PF 1.24015239, DD 9.82519609%, 36
+trades, the best drawdown and sample size of the whole family. **But it is not comparable to e50b as a
+clean risk-fraction read** — HARD LESSON 29 shows the same book-occupancy confound that broke the
+maxBars sweeps (HARD LESSON 24/28) also applies to shieldUsd, because it moves both the stop and (via
+`rr`) the target, and `get_trades` confirms e58a/e58b's own admitted trade sets diverge from trade 2
+onward. E58a stands as an individually valid, NOT-YET-REPRODUCED (HARD LESSON 25) direction on its own
+terms, not as proof narrower shields beat wider ones. **Also this cycle: HARD LESSON 23 (drawdowns need
+no leverage rescaling) was already settled on 2026-09-02 — the "must be scaled to ~33x" framing that had
+crept back into this file's own queue text (E56/E57) was a regression against it and is retracted.**
 
 *(The paragraph below describes v6, kept for history — it is DEMOTED, not current.)*
 **v6 — HA cascade, LONG ONLY, structural stop (pre-A.L.C.M., WRONG EXIT MODEL).** BTCUSDT 1m,
@@ -2687,3 +2695,138 @@ just the headline (HARD LESSON 11).
 4. **If more 1m history ever becomes available**, the $3,000/$4,000 shield question this cycle could not
    answer is the first thing to re-run — not a new construction, the same e57a/e57b files on a longer
    window.
+
+---
+
+# ██ E58 — THE SHIELD SWEPT DOWN. LARGEST SAMPLE IN THE FAMILY, BUT THE OCCUPANCY CONFOUND GENERALIZES
+# PAST maxBars. AND A CORRECTION: E56/E57's "SCALE DD TO ~33x LEVERAGE" WAS ALREADY WRONG WHEN WRITTEN.
+
+**Numbering note:** this cycle's stored prompt is stale again, same as every prior cycle since E51 —
+it describes a closed 2x2 at E42-E46, says there is no champion/candidate (still true), and says to
+continue numbering at E47. Per the prompt's own instruction and HARD LESSON 26, the docs win: this log
+runs through E57 with a fully worked shield/cap coupling result and a carried-forward queue. **Docs
+also override the prompt's OWN item 4** ("does the cap or target bind") — resolved at E56/E47 — and its
+framing of item on drawdown scaling, addressed below.
+
+**Credits: 721 at start (free tier). Budget rule: above 500 → at most TWO backtests. Both used, on the
+one decisive pair described below.**
+
+## A CORRECTION BEFORE THE QUEUE ITEM: THE "SCALE DD TO ~33x LEVERAGE" CLAIM IS ALREADY WRONG
+This cycle's own stored prompt (and E56/E57's carried-forward queue item 1, which the prompt echoes)
+frames "position sizing / risk fraction" as: *"drawdowns are 1x figures... must be scaled to the ~33x
+effective leverage a $2,000 shield implies."* **`STRATEGY-LEDGER.md` HARD LESSON 23, written
+2026-09-02 — BEFORE E56 and E57 restated this claim — already resolved it the other way.** The engine
+forces `percent_of_equity=100` and `margin_long/short=100`, which fixes notional at one unit of equity;
+risk per trade is set by the SHIELD (a fixed dollar distance) alone, not by venue leverage. A $2,000
+shield on a ~0.1 BTC position at BTC ~$100k is ~2% of equity, and **the recorded drawdowns are already
+correctly scaled — no leverage rescaling applies.** HARD LESSON 23's own words: *"a caveat that is
+restated every cycle is not thereby verified... check the claims that make you look careful first."*
+That is exactly what happened here: E56 and E57 both restated a claim their own lab had already
+retracted, and this cycle is the first to notice. **This queue item is retracted as originally framed.**
+
+## WHAT WAS ACTUALLY OPEN
+With HARD LESSON 23 back in force, "risk fraction" is not an independent lever from `shieldUsd` — under
+the engine's forced 100%-of-equity sizing, `shieldUsd` (as a fraction of price) IS the risk fraction.
+That is the same variable the shield sweep (E38-41, E48, E57) already varies. **What has never been
+tried is that axis going DOWN from the $2,000 anchor.** E57 swept UP toward ORACLE-RULES' stated
+$3,000/$4,000 and found the sample collapses below the ~20 floor at both. This cycle tested the
+opposite direction — off-spec relative to ORACLE-RULES (which names $3,000-$4,000, not $1,000-$1,500),
+but purely to find out whether the shieldUsd axis says anything about the edge at all before spending
+more credits on widths the data cannot measure.
+
+## PRE-RUN AUDIT
+Both files byte-identical to `pine/e50b-alcm-long-only-uncoiled.pine` except `shieldUsd` and `maxBars`.
+LONG (only leg): E58a R = $1,000 (~1.0% of BTC price), E58b R = $1,500 (~1.5%) — both PASS the 0.8%
+floor (HARD LESSON 3), though E58a is the narrowest shield tested in this family, flagged not hidden.
+Stop risk-defined, not structural — the declared ALCM deviation (LESSON 5). SL/TP fixed at entry, no
+trailing. SHORT — deleted, identical to e50a/e50b (LESSON 6, trivially satisfied). Redundancy (LESSON
+18): none introduced. `maxBars` scaled linearly from e50b's 12960: 6480 (E58a, 0.5x) and 9720 (E58b,
+0.75x) — stated as an assumption, not a verified law, same caveat E57 carried, but the conservative
+direction this time: at fixed `rr`, a smaller shield also means a proportionally NEARER target, so less
+distance to travel, unlike E57's upward sweep where linear scaling undershot. Saved to
+`pine/e58a-shield1000-maxbars6480.pine` and `pine/e58b-shield1500-maxbars9720.pine` in the same action
+as this record (LESSON 21).
+
+**Pre-registered outcome (HARD LESSON 17), against e50b's PF 1.21869905 / 21 trades / avgBarsWinning
+56.5% at $2,000/12960:**
+- PF stays clearly above 1.0 AND trade count rises meaningfully above 21 → a narrower shield buys
+  sample without costing edge, the most promising direction this axis has produced.
+- PF collapses even with an adequate (≥20) trade count → a nearer target hurts this construction.
+- Trade count still fails to clear ~20 → occupancy/latch mechanics, not R, cap this construction's
+  sample, and shieldUsd is uninformative in either direction on this window.
+
+## THE RESULT
+
+| Shield | maxBars | PF | Trades | Max DD | Win rate | avgBarsInTrade |
+|---|---|---|---|---|---|---|
+| $1,000 (E58a) | 6480 | **1.24015239** | **36** | **9.83%** | 41.67% | 1387.6 |
+| $1,500 (E58b) | 9720 | **0.86012367** | 28 | 17.05% | 32.14% | 2319.4 |
+| $2,000 (e50b anchor) | 12960 | 1.21869905 | 21 | 17.45% | 42.86% | ~5-6k (implied) |
+
+[E58a report](https://mcp-api.trader.dev/backtest/01M1K3J6GDK0Z51MFX60ECM75F) ·
+[E58b report](https://mcp-api.trader.dev/backtest/01M1K3K754PZ0DPJ5K5W4W91MC)
+
+**None of the three pre-registered branches landed cleanly.** Both trade counts cleared ~20 (36 and 28)
+— the first time BOTH sides of a shield-family sweep have cleared the floor together — but the PF
+sequence across $1,000/$1,500/$2,000 is **1.240 / 0.860 / 1.219: non-monotonic**, not a degrading trend
+and not a plateau.
+
+## WHAT get_trades ADDS: THE OCCUPANCY CONFOUND IS NOT SPECIFIC TO maxBars
+
+Pulled both trade lists (free reads, no credit spent), per this lab's own standing instruction not to
+declare a mechanism without measuring it (HARD LESSON 11). **E58a and E58b's trade 1 is identical** —
+same entry bar (5108), same entry price ($87,943) — the entry signal genuinely does not depend on
+`shieldUsd`. **Their EXITS differ**: E58a's trade 1 closes at bar 5346 (239 bars, stopped at $86,943);
+E58b's trade 1 stays open to bar 12364 (7,257 bars, stopped at $86,443) — the wider shield's stop AND
+target (via `rr`) are both further away, so it simply takes longer to resolve either way. **That shifted
+exit re-opens the book at a different bar, and every downstream trade diverges from there**: E58b's
+trade 2 (entryBar 18042, $87,844) is exactly E58a's trade 3 (entryBar 18042, $87,844) — E58a's book was
+flat in time to catch an entry that E58b's still-open trade 1 was occupying through.
+
+**This generalizes E56/E57's finding past `maxBars`.** Added to `STRATEGY-LEDGER.md` as HARD LESSON 29:
+in a `pyramiding=1` single-position construction, ANY parameter that changes a trade's resolution
+time — the cap, the stop distance, the target distance, `rr` — changes which bars the book is flat on,
+which changes which of the strategy's own entries get admitted at all. `shieldUsd` moves the stop and
+(via `rr`) the target simultaneously, so it was never going to be exempt from the same mechanism that
+broke the maxBars sweeps.
+
+## WHAT THIS ESTABLISHES
+- **E58a (PF 1.24015239, 36 trades, DD 9.83%) is this family's best sample size and lowest drawdown
+  to date, individually.** It is a real reading of "this exact construction at $1,000/6480 on this
+  window" — not withdrawn, not a curve-fit artefact by any test applied so far.
+- **It is NOT evidence that narrower shields beat wider ones.** The comparison that would show that —
+  same trades, only R varied — cannot be run in this construction on a fixed historical window, per
+  HARD LESSON 29. E58a, E58b, and e50b are three individually-valid readings of three different trade
+  populations, not three points on one clean curve.
+- **"Position sizing / risk fraction" is closed as an independently testable axis in this construction**
+  — not because the question doesn't matter, but because it is mechanically the same lever as every
+  other exit-timing parameter already shown to be confounded (HARD LESSON 24/28/29), and no sweep of it
+  can isolate "risk fraction's effect" from "which trades got admitted."
+- **The stated ~20-30 trade sample ceiling (this cycle's own instructions, item 7) is a property of
+  e50b's specific ~4-6k-bar average hold time, not a fixed fact about the data window.** E58a's ~1,388
+  average bars-in-trade produced 36 trades on the identical window — the ceiling moves with R.
+
+## WHAT THIS DOES NOT DO
+- **Does not promote E58a to champion or candidate.** It has been run exactly once — HARD LESSON 25
+  requires a cold re-run before any PF in this lab is trusted, and this is a first run, at the stage
+  E47's now-notorious number was in before it failed to reproduce.
+- **Does not resolve whether $1,000-class shields have a real edge**, only that this one run of one is
+  promising and unconfounded by the cap (avgBarsWinning 2066.67/6480 = 31.9%, well below where the cap
+  itself binds).
+- **Does not re-open coilPrev or the short leg** — unchanged from e50b, not this cycle's question.
+- **Does not change ORACLE-RULES.md's own $3,000/$4,000 guidance** — E58a/E58b are declared, flagged
+  off-spec explorations of measurability, not a claim that the source material's stated shield is wrong.
+
+## QUEUE
+1. **Cross-session cold re-run of `pine/e58a-shield1000-maxbars6480.pine`**, byte-identical, before it
+   is trusted at all — the same bar e50b cleared over three checks (E53/E54/E55) and E47 failed. Top
+   item; cheapest next step; this cycle had no budget left after the paired E58a/E58b run.
+2. **A finer maxBars grid (10800 / 14400) around 12960 on e50b** — unchanged from E56/E57, still lower
+   priority than E58a's own reproduction check.
+3. **Root cause of `pine/e47-alcm-long-cap12960.pine`'s specific mismatch** — still open, still low
+   priority, e50b already supersedes it as the anchor regardless of the answer.
+4. **If a future cycle wants to test risk fraction as a variable independent of trade admission**, it
+   would need a construction that does NOT gate re-entry on `flat = strategy.position_size == 0` alone
+   — e.g. running each shieldUsd value as a fully separate simulated account rather than one shared
+   book — which is a different construction, not a parameter sweep of this one. Not queued; a bigger
+   lift than this lab's cycle budget supports without a specific reason to prioritize it over the reproduction check above.

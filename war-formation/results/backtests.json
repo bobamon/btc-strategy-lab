@@ -2246,5 +2246,63 @@
       "verifiedAt": "2026-09-03T05:00:00Z"
     },
     "notes": "8 trades is deep below the ~20-trade interpretability floor (HARD LESSON 19), degenerate -- PF 0.687 is reported as a count, not read as a result. avgBarsWinning 25039.33/25920 = 96.6%, the cap essentially always eventually binds on winners -- but get_trades shows both cap hits (seq1, seq6, 25921 bars each) resolved as WINS forced to an early close, not losses, so this is not E46/E56a's truncation failure mode. avgBarsInTrade 16111.5 (~11.2 days per trade) against a 4.5-month window explains the trade count collapse (21->8) on occupancy grounds alone (HARD LESSON 24), independent of cap-binding. Companion run: E57a ($3,000/19440)."
+  },
+  {
+    "id": "wf-e58a-shield1000-maxbars6480",
+    "name": "WF E58a: shield sweep DOWN leg 1 -- $1,000 shield, maxBars scaled to 6480",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "research",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "e50b with shieldUsd 2000->1000 and maxBars scaled 12960->6480 (linear, 0.5x) -- the shield sweep going DOWN, never tested before (E38-41/E47/E48/E57 only tested up, toward or past ORACLE-RULES' stated $3,000/$4,000). Saved as pine/e58a-shield1000-maxbars6480.pine before running.",
+    "metrics": {
+      "netProfitPct": 7.47495942,
+      "profitFactor": 1.24015239,
+      "maxDrawdownPct": 9.82519609,
+      "totalTrades": 36,
+      "winRatePct": 41.66666667,
+      "avgTradePct": 0.20763776
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1K3J6GDK0Z51MFX60ECM75F",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1K3J6GDK0Z51MFX60ECM75F",
+      "verifiedAt": "2026-09-03T06:00:00Z"
+    },
+    "notes": "36 trades (all long) is the largest sample and lowest drawdown of this entire ALCM family, and PF stays above 1.0 -- the first individually-legitimate reading this axis has produced. BUT get_trades confirms the SAME occupancy confound (HARD LESSON 24/28) found on maxBars now generalizes to shieldUsd: e58a's and e58b's (sibling, $1,500) trade sequences diverge starting at trade 2 because trade 1's exit time shifts with the stop/target distance, cascading through every downstream admission. So this is NOT a controlled 'risk fraction held constant, R varied' comparison against e50b or e58b -- each shieldUsd value admits a genuinely different trade population, exactly as maxBars sweeps do. Read as an individually valid, unreproduced-yet (HARD LESSON 25 requires a cold re-run before trust) direction, not as evidence that smaller shields beat larger ones. Companion: E58b ($1,500/9720, PF 0.860, 28 trades)."
+  },
+  {
+    "id": "wf-e58b-shield1500-maxbars9720",
+    "name": "WF E58b: shield sweep DOWN leg 2 -- $1,500 shield, maxBars scaled to 9720",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "research",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "e50b with shieldUsd 2000->1500 and maxBars scaled 12960->9720 (linear, 0.75x) -- sibling of E58a, run together per HARD LESSON 16/19. Saved as pine/e58b-shield1500-maxbars9720.pine before running.",
+    "metrics": {
+      "netProfitPct": -5.29925126,
+      "profitFactor": 0.86012367,
+      "maxDrawdownPct": 17.04654305,
+      "totalTrades": 28,
+      "winRatePct": 32.14285714,
+      "avgTradePct": -0.18925897
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1K3K754PZ0DPJ5K5W4W91MC",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1K3K754PZ0DPJ5K5W4W91MC",
+      "verifiedAt": "2026-09-03T06:00:00Z"
+    },
+    "notes": "28 trades (all long), above the ~20 floor, PF below 1.0. Together with E58a and e50b the three shieldUsd points ($1,000/$1,500/$2,000) are NON-MONOTONIC (1.240 / 0.860 / 1.219) -- not a degrading-with-width trend and not a plateau, which is the tell (per HARD LESSON 24/28) that this is a book-occupancy trade-admission effect, not a clean reading of how risk fraction affects the edge. get_trades confirms: e58b's trade 2 (entryBar 18042) matches e58a's trade 3 exactly, shifted by one, because e58b's wider stop kept trade 1 open through the entry that became e58a's trade 2. Companion: E58a ($1,000/6480, PF 1.240, 36 trades)."
   }
 ]

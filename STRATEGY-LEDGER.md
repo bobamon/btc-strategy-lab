@@ -1203,3 +1203,51 @@ budget left to get one before spending it.
   evidence wider shields hurt the edge — they are evidence this window's trade count cannot support the
   test at those widths. Conflating "unmeasurable" with "worse" would have closed off $3,000-$4,000
   shields on invalid grounds.
+
+
+---
+
+## ██ HARD LESSON 29 — THE OCCUPANCY CONFOUND IS NOT SPECIFIC TO `maxBars`. IT APPLIES TO ANY PARAMETER
+## THAT CHANGES HOW LONG A TRADE STAYS OPEN (WAR FORMATION, 2026-09-03)
+
+E56 and E57 both diagnosed book-occupancy shifting the admitted trade set when `maxBars` changed — a
+trade's exit bar moves, so the flat-book window every downstream signal depends on moves with it (HARD
+LESSON 24). Both treated this as a property of the CAP specifically. **E58a/E58b show it is not.**
+
+Sweeping `shieldUsd` DOWN from the $2,000 anchor to $1,000/$1,500 (with `maxBars` scaled
+proportionally, the one direction this axis had never been tested), the three points came back
+non-monotonic: PF 1.240 (36 trades) / 0.860 (28 trades) / 1.219 (21 trades, the e50b anchor) as the
+shield rises. Neither a degrade-with-width trend nor a plateau — the exact anti-pattern HARD LESSON
+28 flagged as the tell for a confound rather than a real reading.
+
+`get_trades` confirmed it directly: e58a's and e58b's trade 1 is identical (same entry bar, same
+price — the entry signal does not depend on `shieldUsd`), but its EXIT differs, because a wider
+shield means both a wider stop and (at fixed `rr`) a wider target, so it takes longer to resolve
+either way. That shifted exit re-opens the book at a different bar, so trade 2 onward diverge
+immediately: **e58b's trade 2 is exactly e58a's trade 3, shifted by one**, because e58a's book was
+flat again in time to catch an entry e58b's still-open trade 1 was occupying through.
+
+**Why this generalizes past `maxBars`:** in a `pyramiding=1`, single-position construction, ANY
+parameter that changes a trade's resolution time — the cap, the stop distance, the target distance,
+the reward:risk ratio — changes which bars the book is flat on, which changes which of the strategy's
+own entry signals get admitted at all. The entry LOGIC can be byte-identical across two runs and the
+admitted TRADE SET can still be entirely different past the first divergence. `shieldUsd` moves both
+the stop and (via `rr`) the target simultaneously, so it was never going to be exempt.
+
+**How to apply:**
+- **Before reading a sweep across ANY parameter in this family as "same trades, different R" (or
+  different cap, or different anything), check `get_trades` for where the admitted entries first
+  diverge.** If they diverge before the last trade, the comparison is confounded and the ratchet
+  cannot be applied trade-for-trade — only the aggregate PF/DD/count can be compared, and only as
+  "this construction, this setting" versus "this construction, that setting," never as an isolated
+  read of the swept variable's own effect.
+- **A single-leg, single-position (`pyramiding=1`) construction cannot cleanly A/B any exit-timing
+  parameter on a fixed historical window.** There is no way to hold "which trades get taken" constant
+  while varying how long they take to resolve — the two are mechanically the same lever. This is a
+  structural property of the construction, not a bug in any one experiment, and no amount of careful
+  pre-registration removes it.
+- **Individually, an unconfounded-looking number can still be a real reading of "this exact
+  configuration on this exact window."** E58a's PF 1.240 on 36 trades (this family's largest sample
+  and lowest drawdown) is not thereby worthless — it is a genuine result for that specific
+  construction, just not evidence that narrower shields beat wider ones, because the comparison that
+  would show that cannot be run here.
