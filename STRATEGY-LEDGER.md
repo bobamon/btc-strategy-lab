@@ -1129,3 +1129,40 @@ it is stuck, and a second identical cycle check will not unstick it. The correct
 that the automated loop cannot proceed without them (a successor mechanism/instrument decision, or
 an update/pause to the stored prompt itself). Recording the halt is necessary but not sufficient —
 a halt nobody outside the repo will read is not a halt anyone will act on.
+
+## ██ HARD LESSON 27 — A DIFFERENT CONSTRUCTION LANDING ON AN ORPHANED RESULT IS EVIDENCE ABOUT THAT RESULT'S TRUE SOURCE, NOT A COINCIDENCE TO WAVE AWAY (WAR FORMATION, 2026-09-03)
+
+E50 established that `pine/e47-alcm-long-cap12960.pine` — coilPrev present, full short leg present —
+no longer reproduces its own documented headline (PF 1.21869905, 21 trades, all long). That failure was
+left as an open root cause: data revision, engine drift, or genuine non-determinism, in that order of
+suspicion.
+
+E53, run for an unrelated reason (testing whether `coilPrev` binds on the long leg alone, via a file —
+`e50b` — that had never been run before), landed on **the exact same number**: PF 1.21869905, DD
+17.44898097%, 21 trades, all long, to eight decimal places. e50b is not e47's file — it has the short
+leg deleted from the code AND `coilPrev` removed, a strictly different construction. E54 confirmed E53
+is itself stable under an immediate cold re-run, so this was not a fluke of that one call.
+
+**A different, independently-built file reproducing an orphaned, unreproducible result exactly is not
+noise — it is the strongest evidence yet of what actually generated that result.** The engine-drift and
+data-revision hypotheses both predicted nearby files would drift together; E51/E52 already showed they
+did not. This finding points somewhere more specific: the file saved on disk under the E47 name is
+likely not the file that was actually run to produce the number recorded under that name — e50b's
+construction is.
+
+**How to apply:**
+- **When an unrelated run reproduces a previously "unreproducible" number, treat that as a lead, not a
+  curiosity.** The natural instinct is to log it as a nice coincidence and move on to the queue item the
+  run was actually for. The coincidence IS the finding — chase it the same cycle, while the context for
+  interpreting it (what changed, what didn't, what construction produced it) is still loaded.
+- **"Source on disk" (HARD LESSON 21) can fail in a form neither HARD LESSON 21 nor 24 named yet: a file
+  that was genuinely saved, genuinely readable, and STILL not the file that generated the result
+  attached to it.** Verifying a result now has three tiers, not two: the source exists (21), the source's
+  own construction matches its prose description (24), and the source reproduces the number recorded
+  under its name (25) — a file can pass the first two and still fail the third, and this lesson shows a
+  fourth check worth adding: does anything ELSE, run for a different reason, land on the same number?
+  If so, that other file — not the named one — may be the real source.
+- **Do not resolve this by editing the orphaned file's provenance after the fact.** e47's original
+  entry in `backtests.json` is left exactly as it was recorded; the new understanding is recorded in the
+  entries that discovered it (E50, now E53/E54), per HARD LESSON 21's own instruction not to
+  silently re-baseline.

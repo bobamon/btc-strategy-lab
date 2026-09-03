@@ -2223,4 +2223,126 @@ unidentified**; this cycle did not have budget left to chase it further (2 of 2 
    specific bars/trades moved, whether `engineVersion` differs) rather than a re-statement of HARD
    LESSON 25 — this cycle's finding is that such failures are the exception, not the rule, so the next
    one deserves investigation, not a shrug.
+
+---
+
+# ██ E53/E54 — E50b LANDS EXACTLY ON E47's ORIGINAL NUMBER. E47's OWN SAVED FILE NEVER DID.
+
+**Numbering note (per HARD LESSON 26's own lesson, applied here):** this cycle's stored prompt is also
+stale — it references a closed 2x2 (E42–E46) and says to continue numbering at E47, written before
+E47–E52 happened. **The docs win, per the prompt's own instruction.** EXPERIMENT-LOG.md already runs
+through E52 with a fully worked reproducibility crisis (HARD LESSON 25) and a carried-forward queue.
+This cycle picked up that queue's own item 1, not the stale prompt's.
+
+**Credits at start: 736 (free tier). Budget rule: above 500 → at most TWO backtests. Both used, both on
+this queue item — none on new strategy design, per the same rule the prior cycle followed.**
+
+## QUEUE ITEM ADDRESSED
+E51/E52's carried-forward item 1: run `pine/e50b-alcm-long-only-uncoiled.pine` — short leg mechanically
+deleted (identical to e50a) AND `coilPrev` also removed from `goLong` — against e50a, to test whether
+the coil binds on the long leg alone. Pre-registered in e50b's own header comment before this cycle
+touched it: similar count/PF to e50a means coilPrev is inert here; meaningfully different means it
+binds.
+
+## PRE-RUN AUDIT
+Already fully stated in `pine/e50b-alcm-long-only-uncoiled.pine`'s own header (written when the file
+was saved, before this cycle ran it) — R = $2,000 (0.8% floor passes, LESSON 3), stop risk-defined not
+structural (the declared ALCM deviation from LESSON 5), one leg only (short deleted, trivially
+satisfies "each leg separately"), no redundancy introduced (LESSON 18, dead coil terms removed with the
+gate). Nothing new to add; this cycle changed no code, only ran the already-audited file.
+
+## E53 — FIRST RUN, AND IT DID NOT ANSWER THE QUESTION IT WAS RUN TO ANSWER
+
+| | E50a (coiled, anchor) | E53 (e50b, uncoiled) |
+|---|---|---|
+| Profit factor | 0.45694023 | **1.21869905** |
+| Max drawdown | 19.37557338% | **17.44898097%** |
+| Trades | 10 | **21** |
+| Win rate | 20% | **42.86%** |
+
+Against e50a, this is the "meaningfully different" branch of the pre-registered outcome: **coilPrev
+does bind on the long leg alone**, consistent with E45's finding that the coil is a liability on this
+leg (it was also true when both legs carried it). That much closes the queue item cleanly.
+
+**But the number itself is not a fresh reading.** PF 1.21869905, DD 17.44898097%, 21 trades, all long,
+42.86% win rate is **E47's ORIGINAL documented headline, to eight decimal places** — the same number
+`wf-e50-e47-reproduction-check` already showed `pine/e47-alcm-long-cap12960.pine` **cannot currently
+reproduce** (that file, re-run byte-identical today, returns PF 0.58008733, 24 trades, 9 long/15
+short). `get_trades` on this result (a free read, no credit spent, same convention E49 used) confirms
+all 21 rows are `direction: "long"`, matching E47's per-trade description exactly.
+
+## E54 — IMMEDIATE COLD RE-RUN, TO NOT REPEAT E47's MISTAKE
+
+A number this coincidental, on a file that had never been run before this cycle, landing exactly on a
+DIFFERENT file's now-unreproducible headline, is precisely what HARD LESSON 25 says to chase rather
+than shrug at. The second and last credit went to an immediate, same-session, byte-identical re-run of
+e50b, unmodified:
+
+| | E53 | E54 |
+|---|---|---|
+| Profit factor | 1.21869905 | **1.21869905** |
+| Max drawdown | 17.44898097% | **17.44898097%** |
+| Net profit | $663.034467500007 | **$663.034467500007** |
+| Trades | 21 | **21** |
+
+**EXACT MATCH, to the cent.** e50b is stable under a same-session cold re-run — the same evidentiary
+bar E51/E52 set for `alcm-reference.pine` and e50a, now cleared a third time by a different file.
+
+## WHAT THIS MOST LIKELY MEANS
+
+Three re-runs are now on the table for this neighbourhood of files: `alcm-reference.pine` (stable,
+E44=E51), `e50a` (stable, E50=E52), and `pine/e47-alcm-long-cap12960.pine` (UNSTABLE, E47≠E50). e50b
+was never run before this cycle, so it has no history to have drifted from — yet it lands exactly where
+E47's original run landed, and E47's own saved file does not.
+
+**The most parsimonious explanation is not engine non-determinism or a data revision** — those
+hypotheses predicted `alcm-reference` and `e50a` would plausibly drift too (E51/E52 already noted this
+and found no drift, narrowing but not explaining E47's failure). **The explanation this cycle's result
+points to instead: the code that actually produced E47's original number was, or was equivalent to,
+e50b's construction — genuinely uncoiled, short leg genuinely absent — and `pine/e47-alcm-long-cap12960.pine`
+as it currently sits on disk (coilPrev present, full short leg present, confirmed by direct code read in
+E49) is NOT the source that generated the result saved under its name.** Whether that happened because
+the file was edited after the run that produced E47's headline, or the wrong version was saved at the
+time, cannot be determined from here — there is only one commit of that file in `git log`, per E49 — but
+either way this is a new, more specific form of HARD LESSON 21: **saved source that does not match its
+own recorded result, discovered not because the source was ever missing, but because a different,
+independently-derived construction happened to reproduce the orphaned result exactly.**
+
+## STATUS
+
+- **`pine/e50b-alcm-long-only-uncoiled.pine` is this lab's first PF > 1.0 result since the
+  reproducibility crisis began (HARD LESSON 25), confirmed stable twice, same session, cold.** PF
+  1.21869905, DD 17.44898097%, 21 trades, all long, 42.86% win. **21 trades sits right at the ~20-trade
+  floor** (item 7 of this cycle's own instructions, HARD LESSON 19) — read as a direction, not a
+  validated result, exactly as E47's original entry was read before its reproduction failed.
+- **It has NOT cleared the bar E47 itself failed on**: E47's own reproduction broke on a re-run a day
+  *after* it first ran, not within the same session. E53=E54 is same-session evidence only. **A future
+  cycle must re-run e50b byte-identical, cold, before it is trusted as a stable anchor** the way
+  `alcm-reference` and e50a now are (two same-session matches each; neither has yet had a cross-session
+  check either — that gap applies to all three files, not only e50b).
+- **Not promoted to champion or candidate.** No out-of-sample split is possible on this instrument (only
+  4.5 months of 1m data exist at all, per HARD LESSON 22 and E47's own original caveat) — PF 1.219
+  cannot be split-tested here, only re-run.
+- **On item 4 of this cycle's stale prompt** ("the exit does not resolve," citing E46's 4320-cap 93%
+  cap-pinning): **already superseded by E47's own cap raise to 12960**, and this cycle's fresh
+  `get_trades` read on e50b/E53 confirms it directly — `avgBarsWinning` 7317/12960 = 56% (not 93%), and
+  only 2 of 9 winners (seq 11, seq 21) actually hit the `maxBars` cap; the rest resolve to target or stop
+  before it. The cap is no longer the dominant failure mode at 12960; whether the $2,000/2:1 target
+  itself is well-calibrated is a separate, still-open question (queue item 3 below).
+- **Added to `STRATEGY-LEDGER.md` as HARD LESSON 27.**
+
+## QUEUE
+1. **Cross-session reproduction check on e50b** — the one check this cycle could not do (same-session
+   only). Cheapest next step for whichever cycle picks this up: byte-identical re-run of
+   `pine/e50b-alcm-long-only-uncoiled.pine`, cold, no changes, before building anything further on it.
+2. **The maxBars neighbourhood (8640 / 25920) on e50b**, not e50a — e50a is now known to carry a binding,
+   value-destroying coil term (E53's own finding), so e50b, not e50a, is the correct base for E49's
+   original item once (1) above is clear.
+3. **The shield sweep**, varying maxBars WITH each shield width (E48's coupling finding), on e50b once
+   (1) and (2) are done.
+4. **Root cause of `pine/e47-alcm-long-cap12960.pine`'s specific mismatch** remains open and is now lower
+   priority — e50b supersedes it as the working single-leg anchor regardless of the answer — but it is
+   still worth knowing whether a file can silently stop matching its own result through means other than
+   the ones already catalogued (HARD LESSON 21/24/25), for process reasons alone.
+5. **Position sizing / risk fraction:** unchanged, still open, still not the priority.
 5. **Position sizing / risk fraction:** unchanged, still open, still not the priority.

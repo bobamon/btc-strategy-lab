@@ -2269,9 +2269,67 @@ const DATA = [
       "verifiedAt": "2026-09-03T02:21:18Z"
     },
     "notes": "EXACT MATCH to E50's documented e50a headline: PF 0.45694023, DD 19.37557338%, 10 trades (2W/8L), all long, netProfitPct -10.52084427% -- reproduced to eight decimal places. Combined with wf-e51, this lab now has ITS FIRST TWO results ever confirmed stable under a cold byte-identical re-run (prior base rate was 0 of 2: E38 and E47 both failed). pine/e50a-alcm-long-only-coiled.pine is now a verified-reproducible, genuinely single-leg (short entry mechanically deleted, position_size can never go negative) long-only anchor. PF 0.457 on 10 trades is still below the ~20-trade interpretability floor (HARD LESSON 19) and PF < 1.0, so this is NOT a candidate -- it is a trustworthy base to sweep maxBars/shield on next, which the lab has not had until now."
+  },
+  {
+    "id": "wf-e53-e50b-uncoiled",
+    "name": "WF E53: pine/e50b-alcm-long-only-uncoiled.pine, first run",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Queue item 1 carried forward from E51/E52: run e50b (short leg mechanically deleted AND coilPrev removed from goLong -- the genuinely uncoiled, single-leg construction E46/E47 described in prose but never actually built) against e50a (short leg deleted, coilPrev still present), to test whether coilPrev binds on the long leg alone.",
+    "metrics": {
+      "netProfitPct": 6.63034468,
+      "profitFactor": 1.21869905,
+      "maxDrawdownPct": 17.44898097,
+      "totalTrades": 21,
+      "winRatePct": 42.85714286,
+      "avgTradePct": 0.3157307
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JNJXH6NCS85MWQXWCT934T",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JNJXH5EA8ZYP1PNTVEA2C5",
+      "verifiedAt": "2026-09-03T03:39:16Z"
+    },
+    "notes": "NOT a fresh number -- it is BIT-FOR-BIT IDENTICAL to E47's ORIGINAL documented headline (PF 1.21869905, DD 17.44898097%, 21 trades, all long, 42.86% win, dated 2026-09-02), even though pine/e47-alcm-long-cap12960.pine -- E47's own saved file, still containing coilPrev and the full intact short leg -- does NOT reproduce that number when re-run today (wf-e50-e47-reproduction-check: PF 0.58008733, 24 trades, 9 long/15 short). get_trades on this result (free read, no credit spent) confirms all 21 rows direction=long, matching E47's per-trade description exactly. The most parsimonious explanation: the code that actually generated E47's original number was equivalent to e50b's construction (uncoiled, short leg genuinely absent) -- not to what is currently saved under the e47 filename. That file appears to have drifted from, or was never actually, the source of its own headline -- a new variant of HARD LESSON 21 (saved source that does not match its own result), not the engine non-determinism E50 left open as the leading hypothesis. Against e50a (coiled, PF 0.45694023, 10 trades): meaningfully more trades (21 vs 10) and a different PF, so per the pre-registered outcomes in e50b's own header, coilPrev DOES bind on the long leg alone, consistent with E45's finding that the coil is a liability on this leg. This is the first PF > 1.0 result in the ALCM family since the reproducibility crisis began (E44 HARD LESSON 25) at 21 trades, right at the ~20-trade floor -- read cautiously, and not yet trusted without a same-cycle cold re-run (see wf-e54)."
+  },
+  {
+    "id": "wf-e54-e50b-repro-check",
+    "name": "WF E54: immediate cold reproduction check of E53/e50b",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Per HARD LESSON 25 ('treat every future headline PF as provisional until it has been re-run at least once, cold'), and given E53's match to E47's original number is exactly the kind of anomaly that lesson says deserves investigation rather than a shrug: an immediate, byte-identical re-run of e50b, same session, same file, same window, no changes.",
+    "metrics": {
+      "netProfitPct": 6.63034468,
+      "profitFactor": 1.21869905,
+      "maxDrawdownPct": 17.44898097,
+      "totalTrades": 21,
+      "winRatePct": 42.85714286,
+      "avgTradePct": 0.3157307
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JNNQDXHMYZMXJQJCWZ1KXQ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JNNQDXVM6424KMRW8DZRTT",
+      "verifiedAt": "2026-09-03T03:40:48Z"
+    },
+    "notes": "EXACT MATCH to E53, to the cent: PF 1.21869905, netProfit $663.034467500007, DD 17.44898097%, 21 trades, all long. e50b is now confirmed stable under a same-session cold re-run (2/2, same evidentiary bar E51/E52 set for alcm-reference.pine and e50a). This does NOT yet clear the cross-session bar E47 itself failed (its own reproduction broke a day after it first ran, not within the same session) -- e50b needs a FUTURE cycle to re-run it byte-identical, cold, before it is trusted as a stable anchor the way alcm-reference and e50a now are. Both of this cycle's two backtest credits (budget: above 500 -> at most TWO) were spent on this pair; no credit remained to start the maxBars/shield sweep queued for whichever single-leg anchor survived this check. war-formation/pine/e50b-alcm-long-only-uncoiled.pine is unchanged from when it was saved in the E50 cycle -- no new source file needed, HARD LESSON 21 satisfied by the pre-existing save."
   }
 ];
-const BUILT = "2026-09-03 02:43";
+const BUILT = "2026-09-03 03:43";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
