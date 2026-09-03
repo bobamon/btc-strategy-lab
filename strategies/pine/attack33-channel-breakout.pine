@@ -1,0 +1,78 @@
+//@version=6
+// BTC ATTACK 33 — CHANNEL BREAKOUT. DISCARDED. Kept as evidence, not as a candidate.
+//   33a NEVER-TUNED 2022-01-01 -> 2024-06-08
+//       https://mcp-api.trader.dev/backtest/01M1KJWE763PNFX97BWSN6CSAG
+//       PF 0.99624764 | DD 45.17285673% | 757 trades | 42.54% win | -2.17%
+//   33b recent      2024-06-08 -> 2026-09-01
+//       https://mcp-api.trader.dev/backtest/01M1KJWVF5DZZZPVXTMXJTH4Z5
+//       PF 0.87574157 | DD 71.63985626% | 721 trades | 39.81% win | -59.78%
+//
+// FIRST MECHANISM UNDER THE DISCOVERY MANDATE. Claimed momentum PERSISTENCE - that a new N-bar
+// extreme in a trending asset is more often followed by continuation than reversal. Genuinely new
+// here: the VWAP family was pullback-into-a-mean and all seven rejected discovery strategies were
+// fades, reversions or regime switches. Not one was a trend-following breakout.
+//
+// DISCARDED: the never-tuned half is below 1.0. No filters were added to rescue it, because that is
+// exactly how Attack 31b's 2.077 was manufactured from a ~0.9 distribution.
+//
+// **THE REASON IS COST, NOT SIGNAL.** commissionPaid $6,460.27 against a NET LOSS of $217.09 - costs
+// are ~30x the net result. At 757 trades on $10,000 with 100%-of-equity sizing and 0.05% per side,
+// this is trading itself to death. 0.996 is close enough to break-even that the signal plausibly
+// carries a gross edge the cost structure eats entirely. That is a finding about FREQUENCY.
+//
+// Also named BEFORE the run: the lab requires SL/TP fixed at entry, and a fixed 2R cap is a real
+// handicap on a trend system, which normally lives on the rare very large winner that 2R truncates.
+//
+// DO NOT tune the channel length or timeframe to rescue this. The mandate forbids a parameter search
+// before a split is cleared, and "it might work if I adjust it" is what produced thirty-two attacks
+// on a losing idea. The next mechanism is chosen for LOW trade frequency instead.
+//
+// AUDIT: LONG only - mirroring forbidden (LESSON 6), a short breakout is a separate construction.
+// Stop at the 20-bar channel low, beyond STRUCTURE not at the signal level (LESSON 5). R floor 0.8%
+// by EXCLUSION so the stop stays structural (LESSON 3). Single-bar cross, no latch to sequence
+// (HARD LESSON 8). No R ceiling: a wide channel means some large losses, reported not clamped.
+strategy("BTC Attack33 channel breakout", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+chanLen = input.int(20,     "Breakout channel length, bars")
+rr      = input.float(2.0,  "Reward:risk")
+minRpct = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars = input.int(96,     "Max bars in trade")
+
+upper = ta.highest(high, chanLen)[1]
+lower = ta.lowest(low,   chanLen)[1]
+
+breakout = not na(upper) and ta.crossover(close, upper)
+
+minR  = close * minRpct / 100
+rLong = na(lower) ? na : close - lower
+rBig  = not na(rLong) and rLong >= minR
+
+goLong = breakout and rBig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong and rLong > 0
+    strategy.entry("L", strategy.long)
+    slPx   := lower
+    tpPx   := close + rLong * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(upper,          title="ChannelHigh")

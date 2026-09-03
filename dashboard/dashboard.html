@@ -2237,9 +2237,67 @@ const DATA = [
       "verifiedAt": "2026-09-03T00:32:00Z"
     },
     "notes": "THE DEFINITIVE NEGATIVE RESULT FOR THIS LAB, AND IT WAS REGISTERED BEFORE THE RUN. The bare mechanism scores 0.8804658 on 784 trades HERE -- in the very window every attack was tuned on -- against 0.9300266 pre-2024. Both below 1.0, on 1,658 trades combined. SO ATTACK 31b's 2.07724976 WAS MANUFACTURED ENTIRELY BY THE FILTER STACK. Strip the filters and the idea underneath returns ~0.9. The filters were not refining an edge; they were selecting the subset of a losing distribution that happened to profit in one window. IT ALSO SETTLES WHICH DIAGNOSIS IS RIGHT. Three outcomes were registered in advance. The bare gap between halves is only 0.0496 AND THE UNSEEN HALF IS THE BETTER ONE, so the mechanism is UNIFORMLY BAD rather than regime-dependent. All the overfitting lived in the filters, none in the idea -- which rules out the regime-dependent diagnosis that would have been a far harder problem. HONOURING THE PRE-REGISTERED CONSEQUENCE: the lab needs a NEW IDEA, not a 33rd attack on this one. The VWAP pullback-continuation is finished on BTCUSDT."
+  },
+  {
+    "id": "vwm-attack33a-channel-breakout-h1",
+    "name": "BTC Attack33a channel breakout H1",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "First mechanism under the new DISCOVERY mandate. Channel breakout: buy a new 20-bar high, stop at the 20-bar channel floor (structural), fixed 2R. Claims momentum PERSISTENCE - the behaviour every strategy this lab has tested has bet against, since the VWAP family was pullback-into-a-mean and all seven rejected discovery strategies were fades, reversions or regime switches. Bare: no trend, volatility, session or cooldown filter. This is the NEVER-TUNED half, and under the mandate it is the half that decides discard or advance.",
+    "metrics": {
+      "netProfitPct": -2.17089055,
+      "profitFactor": 0.99624764,
+      "maxDrawdownPct": 45.17285673,
+      "totalTrades": 757,
+      "winRatePct": 42.53632761,
+      "avgTradePct": -0.00286776
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1KJWE76KV9BC73978EKSD55",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KJWE763PNFX97BWSN6CSAG",
+      "verifiedAt": "2026-09-03T12:18:00Z"
+    },
+    "notes": "DISCARDED under the kill rule. 33a (never-tuned, 2022-01-01 to 2024-06-08): PF 0.99624764 / DD 45.17285673% / 757 trades / 42.54% win. 33b (recent half): PF 0.87574157 / DD 71.63985626% / 721 trades / 39.81% win. The pre-2024 half is below 1.0, so the mechanism is discarded and NOT rescued with filters - that rule exists because a filter stack manufactured Attack 31b's 2.077 out of a distribution that returned ~0.9 bare. THE NUMBER THAT CHANGES WHAT THIS MEANS: commissionPaid was $6,460.27 against a NET LOSS of $217.09. Costs are roughly thirty times the net result. At 757 trades on a $10,000 account with 100%-of-equity sizing and 0.05% per side, the 20-bar 15m breakout is trading itself to death rather than signalling badly. That is a finding about FREQUENCY, not about momentum persistence, and it plausibly applies to any fast mechanism this lab tries. 33a's 0.996 is close enough to break-even that the signal may carry a real gross edge which the cost structure consumes entirely. THE MANDATE IS STILL HONOURED: this is recorded as a diagnostic, not used to justify tuning the channel length or the timeframe, because the mandate forbids a parameter search before a split is cleared. The NEXT mechanism should be chosen for a naturally lower trade frequency, and that is now a standing design constraint rather than a discovery. A fixed 2R target was also named as a handicap BEFORE the run: a trend system normally earns its keep from the rare very large winner, which 2R truncates. Both explanations stand; neither was invented afterwards."
+  },
+  {
+    "id": "vwm-attack33b-channel-breakout-h2",
+    "name": "BTC Attack33b channel breakout H2",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "First mechanism under the new DISCOVERY mandate. Channel breakout: buy a new 20-bar high, stop at the 20-bar channel floor (structural), fixed 2R. Claims momentum PERSISTENCE - the behaviour every strategy this lab has tested has bet against, since the VWAP family was pullback-into-a-mean and all seven rejected discovery strategies were fades, reversions or regime switches. Bare: no trend, volatility, session or cooldown filter. The recent half, and the control - a good number here would prove nothing on its own, since this is the window every one of Attacks 1-32 was tuned inside.",
+    "metrics": {
+      "netProfitPct": -59.7846819,
+      "profitFactor": 0.87574157,
+      "maxDrawdownPct": 71.63985626,
+      "totalTrades": 721,
+      "winRatePct": 39.80582524,
+      "avgTradePct": -0.08291911
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1KJWVF5C462BJ8MMR393PJK",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KJWVF5DZZZPVXTMXJTH4Z5",
+      "verifiedAt": "2026-09-03T12:18:00Z"
+    },
+    "notes": "DISCARDED under the kill rule. 33a (never-tuned, 2022-01-01 to 2024-06-08): PF 0.99624764 / DD 45.17285673% / 757 trades / 42.54% win. 33b (recent half): PF 0.87574157 / DD 71.63985626% / 721 trades / 39.81% win. The pre-2024 half is below 1.0, so the mechanism is discarded and NOT rescued with filters - that rule exists because a filter stack manufactured Attack 31b's 2.077 out of a distribution that returned ~0.9 bare. THE NUMBER THAT CHANGES WHAT THIS MEANS: commissionPaid was $6,460.27 against a NET LOSS of $217.09. Costs are roughly thirty times the net result. At 757 trades on a $10,000 account with 100%-of-equity sizing and 0.05% per side, the 20-bar 15m breakout is trading itself to death rather than signalling badly. That is a finding about FREQUENCY, not about momentum persistence, and it plausibly applies to any fast mechanism this lab tries. 33a's 0.996 is close enough to break-even that the signal may carry a real gross edge which the cost structure consumes entirely. THE MANDATE IS STILL HONOURED: this is recorded as a diagnostic, not used to justify tuning the channel length or the timeframe, because the mandate forbids a parameter search before a split is cleared. The NEXT mechanism should be chosen for a naturally lower trade frequency, and that is now a standing design constraint rather than a discovery. A fixed 2R target was also named as a handicap BEFORE the run: a trend system normally earns its keep from the rare very large winner, which 2R truncates. Both explanations stand; neither was invented afterwards."
   }
 ];
-const BUILT = "2026-09-02 18:30";
+const BUILT = "2026-09-03 06:13";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

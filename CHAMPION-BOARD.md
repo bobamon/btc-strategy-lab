@@ -2153,3 +2153,60 @@ document, in a scheduled prompt, or in any earlier entry. In brief:
 
 **No cycle may change these.** A cycle that finds one of them binding in an unreasonable place should
 record that and flag it, not route around it.
+
+
+---
+
+# ██ ATTACK 33 — CHANNEL BREAKOUT. DISCARDED, AND THE REASON IS COST, NOT SIGNAL.
+
+**The first mechanism under the new discovery mandate.** Buy a new 20-bar high, stop at the 20-bar
+channel floor, fixed 2R. Bare — no trend, volatility, session or cooldown filter.
+
+**What it claimed to exploit:** that a new N-bar extreme in a trending asset is more often followed by
+continuation than reversal — momentum PERSISTENCE. **Every strategy this lab has ever tested bet the
+other way:** the VWAP family was pullback-into-a-mean, and all seven rejected discovery strategies
+were fades, reversions or regime switches. Not one was a trend-following breakout.
+
+| | 33a · NEVER TUNED | 33b · recent |
+|---|---|---|
+| Window | 2022 → Jun 2024 | Jun 2024 → 2026 |
+| Profit factor | **0.99624764** | 0.87574157 |
+| Max drawdown | 45.17285673% | 71.63985626% |
+| Trades | 757 | 721 |
+| Win rate | 42.54% | 39.81% |
+
+**DISCARDED.** The never-tuned half is below 1.0, and the kill rule says discard rather than rescue —
+that rule exists because a filter stack manufactured Attack 31b's 2.077 out of a distribution that
+returned ~0.9 bare.
+
+## THE NUMBER THAT CHANGES WHAT THIS MEANS
+**Commission paid was $6,460.27 against a net loss of $217.09. Costs are roughly thirty times the net
+result.**
+
+At 757 trades on a $10,000 account with 100%-of-equity sizing and 0.05% per side, **the 20-bar 15m
+breakout is trading itself to death rather than signalling badly.** 33a's 0.996 sits close enough to
+break-even that the signal plausibly carries a real gross edge which the cost structure consumes
+entirely.
+
+**That is a finding about FREQUENCY, not about momentum persistence** — and it plausibly applies to
+any fast mechanism this lab tries.
+
+## THE MANDATE IS STILL HONOURED
+This is recorded as a **diagnostic**, not used as licence to tune the channel length or the timeframe.
+The mandate forbids a parameter search before a split is cleared, and "the mechanism might work if I
+adjust it" is exactly the reasoning that produced thirty-two attacks on a losing idea.
+
+**The next mechanism should be chosen for a naturally LOW trade frequency.** That is now a standing
+design constraint on this lab, not a discovery to be re-made each cycle.
+
+## ALSO NAMED BEFORE THE RUN, AND STILL STANDING
+The lab's rules require SL and TP fixed at entry with no trailing stop. **A fixed 2R cap is a real
+handicap on a trend system**, which normally earns its keep from the rare very large winner that 2R
+truncates. Both explanations — cost and target truncation — were stated in advance rather than
+invented to explain a bad number.
+
+## QUEUE
+1. **Next mechanism, chosen for low frequency.** Something that fires a few dozen times across 4.7
+   years rather than 1,478 — a daily or weekly structural level, not an intraday channel.
+2. **Do not revisit the breakout by changing its parameters.** If it returns, it returns as a
+   low-frequency construction with its own split test, and it says so.
