@@ -1,0 +1,87 @@
+//@version=6
+// VWM BARE MECHANISM — THE RUN THAT RETIRED THIS LAB'S STRATEGY (Attack 32, 2026-09-02).
+//
+// This file is kept as EVIDENCE, not as a candidate. It is the strategy stripped to the idea it was
+// always supposed to be: a VWAP pullback in a rising-VWAP market. Two terms. Nothing else.
+//
+//   32a  pre-2024, NEVER SEEN   https://mcp-api.trader.dev/backtest/01M1JANZY142JVWQWD92VY9K76
+//        PF 0.93002660 | DD 45.27233030% | 874 trades | 39.47% win | -35.69%
+//   32b  tuning era             https://mcp-api.trader.dev/backtest/01M1JAPGQFATMADETGXDTTBEKQ
+//        PF 0.88046580 | DD 59.05335667% | 784 trades | 39.92% win | -49.73%
+//
+// 1,658 trades across 4.7 years, by an order of magnitude the largest sample this project produced,
+// and BOTH halves lose. The mechanism fails even in the window every attack was tuned on -- 32b is
+// the WORSE of the two.
+//
+// WHAT IT PROVED. The full build scored PF 2.07724976 on the tuning era (Attack 31b) and 0.79859252
+// outside it. Strip the filters and the idea underneath returns ~0.9 everywhere. **So the 2.077 was
+// manufactured entirely by the filter stack** -- the filters were not refining an edge, they were
+// selecting the subset of a losing distribution that happened to profit in one window.
+//
+// AND IT SETTLED THE DIAGNOSIS. The bare gap between halves is 0.0496, and the UNSEEN half is the
+// better one. So the mechanism is UNIFORMLY BAD rather than regime-dependent: all of the overfitting
+// lived in the filters and none in the idea. No amount of filter surgery could ever have helped.
+//
+// THE PRE-REGISTERED CONSEQUENCE, HONOURED: "the lab needs a new idea, not a 33rd attack on this
+// one." The VWAP pullback-continuation is finished on BTCUSDT. Do not tune this. Do not re-add
+// filters to it and re-measure in-sample. It returns 0.9.
+//
+// AUDIT: long-only, one leg (LESSON 6). Structural stop at the 20-bar swing low minus 0.25x ATR --
+// STRUCTURE, not the signal level (LESSON 5). R floor 0.80% of price (LESSON 3). No latch sequence
+// remains: the entry is a single-bar condition (HARD LESSON 8, satisfied vacuously and stated).
+strategy("VWM Bare Mechanism", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+sdLen    = input.int(100,   "Stdev length for the bands -- native 15m")
+slopeLen = input.int(50,    "Bars used to measure VWAP slope -- native 15m")
+pullK    = input.float(0.5, "Pullback must reach VWAP + K x sigma")
+swgLen   = input.int(20,    "Swing lookback for the structural stop -- native 15m")
+bufK     = input.float(0.25,"Stop buffer beyond the swing, x ATR")
+rr       = input.float(2.0, "Reward:risk")
+minRpct  = input.float(0.80,"Min risk as % of price")
+maxRpct  = input.float(3.00,"Max risk as % of price")
+maxBars  = input.int(96,    "Max bars in trade -- native 15m")
+atrLen   = input.int(14,    "ATR length -- native 15m")
+
+vw   = ta.vwap
+sd   = ta.stdev(close, sdLen)
+atrS = ta.atr(atrLen)
+
+vwUp       = not na(vw[slopeLen]) and vw > vw[slopeLen]
+pulledBack = low <= vw + pullK * sd and close > vw
+
+goLong = vwUp and pulledBack
+
+swgLo = ta.lowest(low, swgLen)
+buf   = na(atrS) ? 0.0 : atrS * bufK
+minR  = close * minRpct / 100
+maxR  = close * maxRpct / 100
+
+rawLongR = close - (swgLo - buf)
+longR    = math.min(math.max(rawLongR, minR), maxR)
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong and longR > 0
+    strategy.entry("L", strategy.long)
+    slPx   := close - longR
+    tpPx   := close + longR * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")

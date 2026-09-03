@@ -1697,3 +1697,62 @@ finding an edge.** HARD LESSON 20 and the three open rule questions were symptom
 
 **BASE: unchanged mechanically (PF 1.47184908, DD 6.98569615%, 56 trades, `coolBars` 150, 5m,
 long-only) but RECLASSIFIED — an in-sample-only configuration, not a result.**
+
+
+---
+
+# ███ ATTACK 32 — THE BARE MECHANISM HAS NO EDGE. THE IDEA IS FINISHED.
+
+Attack 31 showed the tuned build scores 2.077 in-sample and 0.799 out. The board's rewritten queue
+asked the only question left: **does ANY version of this mechanism work?** So the strategy was
+stripped to the idea it was always supposed to be — `vwUp and pulledBack`, a VWAP pullback in a
+rising-VWAP market — and run on both halves.
+
+| Run | Window | Profit factor | Max drawdown | Trades | Win rate | Return |
+|---|---|---|---|---|---|---|
+| **32a** | pre-2024, NEVER SEEN | **0.93002660** | 45.27233030% | **874** | 39.47% | −35.69% |
+| **32b** | tuning era | **0.88046580** | 59.05335667% | **784** | 39.92% | −49.73% |
+
+**1,658 trades across 4.7 years — by an order of magnitude the largest sample this project has ever
+produced — and both halves lose money.**
+
+### THE BARE MECHANISM FAILS EVEN IN THE WINDOW EVERYTHING WAS TUNED ON
+32b is **0.880**, the WORSE of the two, and it covers exactly the period where the full build printed
+2.077. **So Attack 31b's 2.077 was manufactured entirely by the filter stack.**
+
+Strip the filters and the idea underneath returns ~0.9. **The filters were not refining an edge. They
+were selecting the subset of a losing distribution that happened to profit in one window** — which is
+the precise mechanism of overfitting, observed directly rather than inferred.
+
+### IT SETTLES WHICH DIAGNOSIS IS RIGHT
+Three outcomes were registered before the runs. The bare mechanism's gap between halves is **0.0496,
+and the unseen half is the BETTER one.** So:
+
+**The mechanism is UNIFORMLY BAD, not regime-dependent.** All of the overfitting lived in the filters
+and none of it in the idea. That rules out the regime-dependent diagnosis, which would have been a
+far harder problem — and it means no amount of filter surgery could ever have helped.
+
+### THE PRE-REGISTERED CONSEQUENCE, HONOURED
+The Pine comment said: *"the lab needs a new idea, not a 33rd attack on this one."*
+
+**The VWAP pullback-continuation is finished on BTCUSDT.** Thirty-two attacks, four KEPT changes, and
+a 1,658-trade verdict that the underlying idea does not work. The four kept changes were real
+improvements to a losing strategy's in-sample score, and nothing more.
+
+### WHAT THIS LAB ACTUALLY ESTABLISHED
+Not a strategy. A method, and it is worth more than the strategy would have been:
+- **The ratchet is blind to regime distribution (HL 20) and to sample spend (Attack 29).**
+- **An aggregate over tuned and untuned data reports the tuned part (HL 22).**
+- **A result without its source on disk is not a result (HL 21).**
+- **A monotone parameter with no interior optimum is a fitting signature, not a discovery.**
+- **And the decisive test was always cheap** — two runs, once someone asked the right question.
+
+### QUEUE — THE LAB NEEDS A DECISION FROM THE USER, NOT ANOTHER ATTACK
+1. **Do not run Attack 33 on this mechanism.** Any further work here is tuning a 0.9.
+2. **The open question is what replaces it**, and that is the user's call: a different mechanism on
+   BTCUSDT, or the same discipline applied to a different instrument. The method survives either way.
+3. The three rule questions remain open but are now **moot for this strategy** — they would govern a
+   successor.
+
+**BASE: RETIRED. PF 1.47184908 describes a configuration whose underlying mechanism returns ~0.9 on
+1,658 trades. No champion, no candidate, and no base.**

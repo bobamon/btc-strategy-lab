@@ -2179,9 +2179,67 @@ const DATA = [
       "verifiedAt": "2026-09-03T00:00:00Z"
     },
     "notes": "PF 2.07724976 on 64 trades -- far stronger than the 5m base's own PF 1.47 on the same window/mechanism family, and far stronger than Attack 30's blended 4.7-year figure of 1.232. This is the period every tuning decision in this lab was made on. Read together with H1: the entire lab's positive full-sample results are a property of this one window, not of the mechanism generally. See CHAMPION-BOARD.md Attack 31."
+  },
+  {
+    "id": "vwm-attack32a-bare-pre2024",
+    "name": "VWM Attack32a bare pre2024",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "The bare mechanism on never-tuned data. After Attack 31 showed the tuned build scores 2.077 in-sample and 0.799 out, the board asked whether ANY version of this mechanism works pre-2024. Stripped to vwUp and pulledBack -- no coolingOff, no highVol, no witching ban, no trend EMA.",
+    "metrics": {
+      "netProfitPct": -35.69408958,
+      "profitFactor": 0.9300266,
+      "maxDrawdownPct": 45.2723303,
+      "totalTrades": 874,
+      "winRatePct": 39.47368421,
+      "avgTradePct": -0.04083992
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JANZY16C49BC2N0G6WCJA2",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JANZY142JVWQWD92VY9K76",
+      "verifiedAt": "2026-09-03T00:32:00Z"
+    },
+    "notes": "THE BARE MECHANISM LOSES ON DATA IT HAS NEVER SEEN: PF 0.9300266 on 874 trades, -35.69%. Paired with 32b, which is worse still at 0.8804658 on 784. Together 1,658 trades across 4.7 years -- by an order of magnitude the largest sample this project has produced -- and BOTH halves lose."
+  },
+  {
+    "id": "vwm-attack32b-bare-tuning-era",
+    "name": "VWM Attack32b bare tuning era",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-02",
+    "lastTestedDate": "2026-09-02",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "The bare mechanism on the tuning era -- the control for 32a. The full build scored 2.07724976 here. If the bare version shows a much smaller gap between halves, the filters did the overfitting; if the same gap, the mechanism is regime-dependent.",
+    "metrics": {
+      "netProfitPct": -49.73100819,
+      "profitFactor": 0.8804658,
+      "maxDrawdownPct": 59.05335667,
+      "totalTrades": 784,
+      "winRatePct": 39.92346939,
+      "avgTradePct": -0.06343241
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JAPGQFFQD23QPA6GR84SZ2",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JAPGQFATMADETGXDTTBEKQ",
+      "verifiedAt": "2026-09-03T00:32:00Z"
+    },
+    "notes": "THE DEFINITIVE NEGATIVE RESULT FOR THIS LAB, AND IT WAS REGISTERED BEFORE THE RUN. The bare mechanism scores 0.8804658 on 784 trades HERE -- in the very window every attack was tuned on -- against 0.9300266 pre-2024. Both below 1.0, on 1,658 trades combined. SO ATTACK 31b's 2.07724976 WAS MANUFACTURED ENTIRELY BY THE FILTER STACK. Strip the filters and the idea underneath returns ~0.9. The filters were not refining an edge; they were selecting the subset of a losing distribution that happened to profit in one window. IT ALSO SETTLES WHICH DIAGNOSIS IS RIGHT. Three outcomes were registered in advance. The bare gap between halves is only 0.0496 AND THE UNSEEN HALF IS THE BETTER ONE, so the mechanism is UNIFORMLY BAD rather than regime-dependent. All the overfitting lived in the filters, none in the idea -- which rules out the regime-dependent diagnosis that would have been a far harder problem. HONOURING THE PRE-REGISTERED CONSEQUENCE: the lab needs a NEW IDEA, not a 33rd attack on this one. The VWAP pullback-continuation is finished on BTCUSDT."
   }
 ];
-const BUILT = "2026-09-02 18:23";
+const BUILT = "2026-09-02 18:30";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
