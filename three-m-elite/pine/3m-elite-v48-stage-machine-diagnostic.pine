@@ -1,0 +1,204 @@
+//@version=6
+// 3M ELITE v48 - STAGE/CLUSTER STATE MACHINE, FIRST BUILD (DIAGNOSTIC, NOT A STRATEGY).
+//   Queue item 1 from v46/v47 (SYSTEM.md): "Attempt the 5-state stage machine, using v47's real-
+//   pivot-break + wick-tap primitives as the corrected cluster-candidate event, gated by the entry
+//   timeframe. Per v45's own plan: measure it FIRST as a filter on top of champion v37 ... before
+//   considering it a freestanding system." This file is the FIRST measurement: does the machine
+//   produce a sane, non-degenerate distribution of eligible/ineligible bars at all, before it is used
+//   to gate v37 (that gating is the SEPARATE v49 run).
+//
+// STATES (VOCABULARY.md "STAGE AND CLUSTER -- FULLY DECODED"):
+//   0 NO STAGE          -- entries blocked
+//   1 STAGE 1           -- entries allowed (entered on a cluster: tap + break up)
+//   2 STAGE 1 RE-ACC    -- entries allowed (entered on any break down from stage 1)
+//   3 STAGE 2           -- entries allowed (entered on any break up from stage 1 re-acc)
+//   4 STAGE 2 RE-ACC    -- entries allowed (entered on any break down from stage 2)
+//   5 LATE STAGE 2      -- entries blocked, waiting for RESET (only reached if stage 2 itself
+//                          contained a cluster; otherwise the break up after stage-2-react is
+//                          immediately a NEW stage 1, no late-stage-2 detour)
+//
+// TWO DOCUMENTED GAPS, STATED BEFORE RUNNING (LESSON 17):
+//   (a) RESET condition 1 ("the model turns bearish, then bullish again") is NOT implemented. This
+//       lab has no mechanical model/bias definition -- VOCABULARY.md is explicit that "model" is
+//       computed by a closed-source indicator, and 0-V26 already established the policy of never
+//       inventing a bias definition and calling it the source's. Only RESET condition 2 ("a full
+//       break-up cycle with no cluster, followed by another react") is implemented here. This means
+//       LATE STAGE 2 in this build can be stickier than the real system (fewer ways out), so the
+//       no-stage/late-stage-2 fraction below is an UPPER bound on how restrictive the real machine is.
+//   (b) The "one break up in stage 2 followed by an INSTANT break down resets everything to no-stage
+//       regardless of clusters" rule is mechanised literally: a var counter `upsSinceStage2` tracks
+//       continuation break-ups while in STAGE 2; a break-down with that counter still at 0 resets
+//       straight to NO STAGE instead of the normal STAGE 2 -> STAGE 2 RE-ACC path. This is a literal
+//       reading of a thinly-specified sentence, not a resolved ambiguity -- flagged, not hidden.
+//
+// PRIMITIVES (byte-identical to v46/v47, both already measured and saved):
+//   breakUp/breakDown: close crosses a CONFIRMED pivot high/low (ta.pivothigh/pivotlow).
+//   Demand-zone lifecycle: engulf creates [low,open], body-close mitigation w/ One Candle Rule cap 2
+//     (byte-identical to v37's champion lifecycle).
+//   tapped: wick touch of a live zone, latched (v47's resolved definition, not v45/v46's body-touch).
+//   clusterCandidate = tapped AND breakUp (v47's definition, unchanged).
+//   Entry timeframe = 15m, this lab's established data-availability convention since v45.
+//
+// METHOD: one-bar-exit counter (HARD LESSON, this lab's own technique since v12 -- plot() is not
+// readable from quick_backtest results). totalTrades counts bars where flat AND stageEligible, which
+// (because the position always closes the following bar) undercounts true occupancy by roughly half
+// on a fully degenerate always-true case, but gives an honest order-of-magnitude read for a sane vs.
+// broken distribution. P&L is NOT meaningful -- same exemption as v12/v19/v20/v22/v45/v46/v47.
+//
+// PREDICTION, STATED BEFORE RUNNING: stageEligible should occupy a MAJORITY but not ALL of the 15m
+// bars over 4.7 years -- NO STAGE only applies before the very first cluster of the whole sample, and
+// LATE STAGE 2 should be comparatively rare (it needs stage 2 to have clustered AND not yet reset).
+// A count near zero would mean the machine starts in NO STAGE and never escapes (a wiring bug); a
+// count within a few percent of total bars would mean LATE STAGE 2 / NO STAGE never bind at all
+// (either correct, if the source really is this permissive, or a sign the block conditions never
+// fire). Either extreme is diagnosed, not assumed, against v37's known bar count for scale.
+strategy("3M ELITE v48 stage-machine diagnostic (occupancy)", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+pivLeft  = input.int(5, "Pivot left bars (swing confirmation)")
+pivRight = input.int(5, "Pivot right bars (swing confirmation)")
+
+// ---------- real structural break up/down: close crosses a CONFIRMED pivot (byte-identical to v46/v47 for up) ----------
+ph = ta.pivothigh(pivLeft, pivRight)
+pl = ta.pivotlow(pivLeft, pivRight)
+
+var float lastSwingHigh = na
+var float lastSwingLow  = na
+if not na(ph)
+    lastSwingHigh := ph
+if not na(pl)
+    lastSwingLow := pl
+
+breakUp   = not na(lastSwingHigh) and close > lastSwingHigh and close[1] <= lastSwingHigh
+breakDown = not na(lastSwingLow)  and close < lastSwingLow  and close[1] >= lastSwingLow
+
+// ---------- 4H reconstruction from the 15m base (byte-identical to v37/v45/v46/v47) ----------
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+var float pO  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+// ---------- engulf on the just-completed 4H candle vs the one before it (body containment, no gap) ----------
+bullEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC < ppO and pC > pO and pC > ppO
+
+// ---------- demand zone lifecycle: create on bull engulf, mitigate on a body close inside (One Candle Rule) -- unchanged from v37 ----------
+var float dzTop    = na
+var float dzBot    = na
+var bool  dzLive   = false
+var int   dzTouch  = 0
+var bool  dzTapped = false
+
+if new4h
+    if dzLive and not na(pC) and pC <= dzTop
+        dzTouch := dzTouch + 1
+        if dzTouch >= 2
+            dzLive := false
+    if bullEngulf
+        dzTop    := pO
+        dzBot    := pL
+        dzLive   := true
+        dzTouch  := 0
+        dzTapped := false
+
+// ---------- tap: WICK touch, latched, checked every bar (v47's resolved definition) ----------
+if dzLive and low <= dzTop
+    dzTapped := true
+
+tapped = dzLive and dzTapped
+clusterCandidate = tapped and breakUp
+
+// ---------- THE STATE MACHINE ----------
+STAGE_NONE       = 0
+STAGE_1          = 1
+STAGE_1_REACC    = 2
+STAGE_2          = 3
+STAGE_2_REACC    = 4
+STAGE_2_LATE     = 5
+
+var int  stage                    = STAGE_NONE
+var bool stage2HadCluster         = false
+var bool lateHadClusterSinceEntry = false
+var int  upsSinceStage2           = 0
+
+// breakDown transitions
+if breakDown
+    if stage == STAGE_1
+        stage := STAGE_1_REACC
+    else if stage == STAGE_2
+        if upsSinceStage2 == 0
+            // gap (b): instant break-down whipsaw, no confirming break up -- full reset
+            stage := STAGE_NONE
+            stage2HadCluster := false
+        else
+            stage := STAGE_2_REACC
+    else if stage == STAGE_2_LATE
+        if not lateHadClusterSinceEntry
+            // RESET condition 2: a full break-up cycle with no cluster, then a react
+            stage := STAGE_NONE
+            stage2HadCluster := false
+        else
+            lateHadClusterSinceEntry := false
+
+// breakUp transitions
+if breakUp
+    if stage == STAGE_NONE
+        if clusterCandidate
+            stage := STAGE_1
+            stage2HadCluster := false
+    else if stage == STAGE_1_REACC
+        stage := STAGE_2
+        upsSinceStage2 := 0
+    else if stage == STAGE_2
+        upsSinceStage2 := upsSinceStage2 + 1
+        if clusterCandidate
+            stage2HadCluster := true
+    else if stage == STAGE_2_REACC
+        if stage2HadCluster
+            stage := STAGE_2_LATE
+            lateHadClusterSinceEntry := false
+        else
+            stage := STAGE_1
+            stage2HadCluster := false
+    else if stage == STAGE_2_LATE
+        if clusterCandidate
+            lateHadClusterSinceEntry := true
+
+stageEligible = stage == STAGE_1 or stage == STAGE_1_REACC or stage == STAGE_2 or stage == STAGE_2_REACC
+
+// ---------- one-bar-exit counter: totalTrades approximates occupancy of eligible bars (undercount ~2x, see header) ----------
+if strategy.position_size == 0 and stageEligible
+    strategy.entry("ELIG", strategy.long)
+
+if strategy.position_size != 0
+    strategy.close_all()
+
+plot(stage,          title="Stage")
+plot(stageEligible ? 1 : 0, title="StageEligible")

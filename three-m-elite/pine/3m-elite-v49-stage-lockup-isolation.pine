@@ -1,0 +1,170 @@
+//@version=6
+// 3M ELITE v49 - ISOLATE WHERE v48's STAGE MACHINE LOCKS UP (DIAGNOSTIC, NOT A STRATEGY).
+//   v48 (SYSTEM.md, this cycle) found the 5-state machine's occupancy counter stops firing entirely
+//   after 2022-11-28 -- roughly 10 months into a 4.7-year window -- meaning the machine falls into an
+//   entry-blocked state (NO STAGE or LATE STAGE 2) and never returns. This is the same lock-up shape
+//   HARD LESSON 9 already named in this lab (v22's deepest-zone rule: a monotone condition with no
+//   expiry becomes a lock once written down, even though a human trader would silently retire it).
+//
+// ONE CHANGE FROM v48: the counter now fires on `stage == STAGE_2_LATE` specifically (still flat,
+// still one-bar exit), instead of on `stageEligible`. This isolates WHICH blocked state the lock is
+// in, which v48 alone cannot distinguish (its counter only recorded eligible bars, not why they
+// stopped): if this build's last trade is also ~2022-11-28 or later, the lock is IN late stage 2 (the
+// under-specified RESET condition 2 essentially never fires, per the reasoning in the header below);
+// if this build produces few or zero trades throughout, the lock is in NO STAGE instead (an entirely
+// separate defect -- the machine falls back to NO STAGE and its only exit, a fresh clusterCandidate
+// while flat, stops occurring).
+//
+// PREDICTION, STATED BEFORE RUNNING (LESSON 17): LATE STAGE 2 is the likely lock, not NO STAGE.
+// `stage2HadCluster` only needs to be true ONCE for a stage-2 cycle to route into LATE STAGE 2, and
+// RESET condition 2 then needs an entire subsequent break-up-to-break-down cycle with ZERO cluster
+// candidates in it. Since `clusterCandidate = tapped AND breakUp`, and `tapped` is a persistent latch
+// that stays true for as long as a zone remains live (often many days), a high fraction of break-ups
+// that occur while ANY zone is live and already tapped will themselves count as cluster candidates --
+// making a fully cluster-free up-cycle the rare case, not the common one. So once LATE STAGE 2 is
+// entered, this build predicts it rarely if ever exits, and the isolation run should show trades
+// concentrated early (before the first late-stage-2 entry) and then stopping, mirroring v48.
+//
+// Primitives, byte-identical to v48 (itself byte-identical to v37/v45/v46/v47 for the shared pieces).
+// The two documented gaps from v48's header (no model-based RESET 1; the "instant break-down in
+// stage 2" whipsaw mechanised literally) are unchanged and still apply here.
+strategy("3M ELITE v49 stage-lockup isolation (late-stage-2 occupancy)", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+pivLeft  = input.int(5, "Pivot left bars (swing confirmation)")
+pivRight = input.int(5, "Pivot right bars (swing confirmation)")
+
+ph = ta.pivothigh(pivLeft, pivRight)
+pl = ta.pivotlow(pivLeft, pivRight)
+
+var float lastSwingHigh = na
+var float lastSwingLow  = na
+if not na(ph)
+    lastSwingHigh := ph
+if not na(pl)
+    lastSwingLow := pl
+
+breakUp   = not na(lastSwingHigh) and close > lastSwingHigh and close[1] <= lastSwingHigh
+breakDown = not na(lastSwingLow)  and close < lastSwingLow  and close[1] >= lastSwingLow
+
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+var float pO  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+bullEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC < ppO and pC > pO and pC > ppO
+
+var float dzTop    = na
+var float dzBot    = na
+var bool  dzLive   = false
+var int   dzTouch  = 0
+var bool  dzTapped = false
+
+if new4h
+    if dzLive and not na(pC) and pC <= dzTop
+        dzTouch := dzTouch + 1
+        if dzTouch >= 2
+            dzLive := false
+    if bullEngulf
+        dzTop    := pO
+        dzBot    := pL
+        dzLive   := true
+        dzTouch  := 0
+        dzTapped := false
+
+if dzLive and low <= dzTop
+    dzTapped := true
+
+tapped = dzLive and dzTapped
+clusterCandidate = tapped and breakUp
+
+STAGE_NONE       = 0
+STAGE_1          = 1
+STAGE_1_REACC    = 2
+STAGE_2          = 3
+STAGE_2_REACC    = 4
+STAGE_2_LATE     = 5
+
+var int  stage                    = STAGE_NONE
+var bool stage2HadCluster         = false
+var bool lateHadClusterSinceEntry = false
+var int  upsSinceStage2           = 0
+
+if breakDown
+    if stage == STAGE_1
+        stage := STAGE_1_REACC
+    else if stage == STAGE_2
+        if upsSinceStage2 == 0
+            stage := STAGE_NONE
+            stage2HadCluster := false
+        else
+            stage := STAGE_2_REACC
+    else if stage == STAGE_2_LATE
+        if not lateHadClusterSinceEntry
+            stage := STAGE_NONE
+            stage2HadCluster := false
+        else
+            lateHadClusterSinceEntry := false
+
+if breakUp
+    if stage == STAGE_NONE
+        if clusterCandidate
+            stage := STAGE_1
+            stage2HadCluster := false
+    else if stage == STAGE_1_REACC
+        stage := STAGE_2
+        upsSinceStage2 := 0
+    else if stage == STAGE_2
+        upsSinceStage2 := upsSinceStage2 + 1
+        if clusterCandidate
+            stage2HadCluster := true
+    else if stage == STAGE_2_REACC
+        if stage2HadCluster
+            stage := STAGE_2_LATE
+            lateHadClusterSinceEntry := false
+        else
+            stage := STAGE_1
+            stage2HadCluster := false
+    else if stage == STAGE_2_LATE
+        if clusterCandidate
+            lateHadClusterSinceEntry := true
+
+lateStage2 = stage == STAGE_2_LATE
+
+// ---------- THE ISOLATION: count LATE STAGE 2 occupancy alone, same one-bar-exit convention ----------
+if strategy.position_size == 0 and lateStage2
+    strategy.entry("LATE2", strategy.long)
+
+if strategy.position_size != 0
+    strategy.close_all()
+
+plot(stage, title="Stage")
+plot(lateStage2 ? 1 : 0, title="LateStage2")

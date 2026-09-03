@@ -1251,3 +1251,42 @@ the stop and (via `rr`) the target simultaneously, so it was never going to be e
   and lowest drawdown) is not thereby worthless — it is a genuine result for that specific
   construction, just not evidence that narrower shields beat wider ones, because the comparison that
   would show that cannot be run here.
+
+## ██ HARD LESSON 30 — A RESET CONDITION BUILT ON "AN ENTIRE CYCLE FREE OF A PERSISTENT LATCH" CAN BE
+## FUNCTIONALLY PERMANENT, NOT MERELY RARE (3M ELITE, 2026-09-03)
+
+3M Elite's v48/v49 built VOCABULARY.md's fully-decoded 5-state stage/cluster machine for the first
+time and measured it before gating the champion with it (this lab's own HARD LESSON 10/12
+discipline). v48's occupancy counter stopped firing entirely 10 months into a 4.7-year window; v49,
+isolating LATE STAGE 2 specifically, showed occupancy of that one blocked state continuing almost to
+the end of the same window. **The machine falls into its one no-entry state early and functionally
+never leaves.**
+
+**This is HARD LESSON 9's shape (a persistent condition with no realistic expiry becomes a lock once
+mechanised) but with a different mechanism worth naming on its own.** HARD LESSON 9's lock came from a
+monotone guard (`pL < dzBot`) that could only ever get harder to satisfy. This lock comes from
+something structurally different: an *exit* condition defined as "a full cycle containing ZERO
+occurrences of event X," where X is itself gated by a LATCH that stays true for as long as any
+qualifying object (here, a demand zone) remains live. Because the latch (`dzTapped`) is true across
+most of the time some zone is alive and already touched, and zones are created frequently, most
+break-up events co-occur with the latch — so a cycle containing *none* of them is the rare case, not
+the common one. **A condition that is individually plausible ("eventually there will be a clean
+cycle") can still have a probability low enough, given how the underlying latch actually behaves, that
+"eventually" does not arrive inside any window this lab tests.** Mathematically possible is not
+practically different from impossible when the base rate is measured in years.
+
+**How to apply:**
+- **Before trusting a RESET, TIMEOUT, or "eventually clears" condition anywhere in a state machine,
+  ask what it is a conjunction OF, and whether any of those terms is itself a persistent latch.** A
+  condition requiring "zero occurrences of X across an entire cycle" is only as loose as X is rare —
+  if X's own gating condition is a latch that stays true for long stretches, the reset is much
+  stricter than its English description ("just needs a clean cycle") suggests.
+- **Measure occupancy of the blocked state directly, the way v49 did, rather than inferring it from a
+  collapsed aggregate trade count.** v48 alone (a stopped counter) was consistent with several
+  different causes; only isolating the specific state distinguished "stuck in the no-entry branch"
+  from "the eligible-state exit condition itself broke."
+- **A structurally sound decode of source language is not the same claim as a structurally sound
+  MECHANISATION of it.** Every individual rule in this lab's stage/cluster decode (VOCABULARY.md) was
+  read faithfully from the transcripts; the lock-up is a property of how those individually-correct
+  rules compose, not a mistranslation of any one of them. Composition needs its own check even when
+  every component checks out alone.

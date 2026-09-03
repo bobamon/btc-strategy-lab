@@ -1277,11 +1277,8 @@ budget went entirely to the two measurement axes rather than a partial machine b
 gate remains fully unimplemented as an entry filter; only its atomic "cluster-candidate" event has now
 been measured under three different definitions.
 
-### QUEUE
-1. **Attempt the 5-state stage machine**, using v47's real-pivot-break + wick-tap primitives as the
-   corrected cluster-candidate event, gated by the entry timeframe. Per v45's own plan: measure it
-   FIRST as a filter on top of champion v37 (does restricting v37's entries to stage ∈ {1, 1-reacc, 2,
-   2-reacc} change anything?) before considering it a freestanding system.
+### QUEUE (superseded by v48/v49 below)
+1. ~~Attempt the 5-state stage machine~~ — **ATTEMPTED, v48/v49 below. LOCKS UP; not gated onto v37.**
 2. **A purpose-built regime-flip split remains open** for the short leg / flip-rule side of the
    STANDING REQUIREMENT — unchanged from v36 onward, not touched by this cycle's cluster work.
 3. **The scheduled prompt still needs to be edited at the source.** Nine consecutive cycles (v34, v36,
@@ -1294,6 +1291,88 @@ been measured under three different definitions.
 maxAge=6, anchored at `pine/3m-elite-v37-freshness-tight.pine`. v46/v47 are diagnostic measurements
 refining the cluster-candidate population estimate, not ratchet candidates — no config change to the
 champion follows from this cycle.
+
+---
+
+## ██ v48/v49 — THE STAGE MACHINE IS BUILT, MEASURED FIRST AS ITS OWN DISCIPLINE REQUIRES, AND LOCKS UP (2026-09-03)
+
+**A NOTE ON THE PROMPT, A TENTH TIME.** This cycle's stored scheduled prompt is again the same stale
+text first flagged at v34 and repeated at v36, v37/v38, v39, v40/v41, v42/v43, v44, v45 and v46/v47 —
+it still frames the ~2026-09-02 cloud/local merge as current news, describes v30 as
+unreproduced-and-current, and asks to rebuild the anchor as blocking task 0. That work has been done
+and confirmed since v31/v32/v36, and the champion has since moved to v37 and stayed there through
+v47. Per the prompt's own instruction ("THE DOCS WIN over this prompt") and HARD LESSON 26, this cycle
+again works from the real queue (v46/v47's item 1) rather than re-running the anchor. **Not
+re-notified as a push this cycle**: v39 already escalated this staleness, v40/v41 confirmed
+`update_trigger` cannot fix it from inside a cycle, and nothing has changed since either report — per
+the established discipline this is recorded here as the tenth occurrence rather than sent as a tenth
+notification of the same fact. This cycle's own finding below (a genuine new state-machine defect) is
+reported to the user as a push instead — a materially new thing to know, not a repeat.
+
+### QUEUE ITEM 1 FROM v46/v47: THE 5-STATE STAGE MACHINE, BUILT AND MEASURED FIRST
+
+Built `pine/3m-elite-v48-stage-machine-diagnostic.pine`: VOCABULARY.md's fully-decoded 5-state cycle
+(no stage → stage 1 → stage 1 re-acc → stage 2 → stage 2 re-acc → late stage 2 → reset), using v46's
+real confirmed-pivot break detector and v47's resolved wick-tap cluster definition, layered on the
+champion's own unchanged 4H demand-zone lifecycle. Two gaps stated in the Pine header before running
+(LESSON 17): RESET condition 1 ("the model turns bearish, then bullish again") is **not implemented**
+— this lab has no mechanical model/bias definition, and 0-V26 already established the policy of never
+inventing one and calling it the source's; only RESET condition 2 (a cluster-free break-up cycle
+followed by a react) is implemented. The "instant break-down in stage 2" whipsaw is mechanised
+literally from a thinly-specified sentence.
+
+Per this lab's own HARD LESSON 10/12 discipline (measure the terms before testing the conjunction) —
+and per v45's own explicit plan — the machine was **measured on its own before being used to gate
+v37**, exactly the discipline this lab has followed since v12.
+
+| Run | What it counts | Trades | Last trade | Finding |
+|---|---|---|---|---|
+| v48 | flat AND stage ∈ {1,2,3,4} (stageEligible), one-bar exit | 6,964 | **2026-11-28** | Stops firing ~10 months into the 4.7-year window |
+| v49 | flat AND stage == LATE STAGE 2, one-bar exit | 3,737 | **2026-08-30** | Continues almost to the end of the window |
+
+**The machine locks into LATE STAGE 2 early and stays there for most of the sample.** v48 alone was
+ambiguous about which blocked state (no stage vs. late stage 2) was responsible; v49 isolated it
+directly, as predicted before running (LESSON 17) — a single cluster inside any stage-2 up-cycle
+routes into late stage 2, and RESET condition 2 then needs an entire SUBSEQUENT up-cycle with zero
+cluster candidates in it, which is rare because `dzTapped` (the wick-tap latch) stays true for as long
+as any zone is live, making most break-ups that occur while a zone is live-and-tapped themselves
+cluster candidates. A genuinely cluster-free cycle is the rare case, not the common one — so the reset
+this lab could mechanise almost never fires. **Promoted to HARD LESSON 30** (STRATEGY-LEDGER.md): a
+reset built on "an entire cycle free of event X" is only as loose as X is rare, and if X is gated by a
+persistent latch, "eventually" may not arrive inside any window this lab tests.
+
+**Not gated onto v37 this cycle.** Filtering the champion's entries by a machine that collapses to a
+single entry-blocked state for 80%+ of the window would measure the lock, not the system — exactly
+the trap the diagnostic-first discipline exists to catch. This cycle's two-backtest budget went
+entirely to the diagnosis rather than a doomed gating run.
+
+### WHAT THIS DOES AND DOES NOT SETTLE
+
+This closes v46/v47's queue item 1 with a real, credit-backed answer — not "not yet attempted," but
+"attempted, and here specifically is why it cannot be used as built." It does not touch the STANDING
+REQUIREMENT (short leg still rejected, v34; no regime-flip split yet) and does not change the
+champion. **Two live paths forward, neither a backtest-budget item:** (a) implement RESET condition 1
+(the model flip), which needs a bias/model definition this lab has deferred since 0-V26 pending a
+user-confirmed definition — the same blocker that has stood since the Type 2 gate was first deferred;
+or (b) treat this literal mechanisation of RESET condition 2 as too strict and re-read the source for
+a looser reading (e.g. a reset scoped to a shorter window than "the entire cycle," or a different
+event than "zero clusters"). Both are decode/design questions, not parameter sweeps.
+
+### QUEUE
+1. **Resolve which reset path to pursue** ((a) a user-confirmed model/bias definition, or (b) a
+   looser re-read of RESET condition 2) before attempting the stage machine again — building a second
+   variant on an unresolved choice would repeat this cycle's finding rather than advance past it.
+2. **A purpose-built regime-flip split remains open** for the short leg / flip-rule side of the
+   STANDING REQUIREMENT — unchanged from v36 onward.
+3. **The scheduled prompt still needs to be edited at the source.** Ten consecutive cycles (v34, v36,
+   v37/v38, v39, v40/v41, v42/v43, v44, v45, v46/v47, now v48/v49) have found and worked around the
+   same stale text; `update_trigger` was confirmed (v40/v41) outside any cycle's reach on this
+   routine. No further action possible from inside a cycle.
+
+**BASE UNCHANGED: v37 remains champion.** PF 1.25172059, DD 8.72815312%, 155 trades, long-only,
+maxAge=6, anchored at `pine/3m-elite-v37-freshness-tight.pine`. v48/v49 are diagnostic measurements
+that close out the stage-machine attempt with a documented lock-up, not ratchet candidates — no
+config change to the champion follows from this cycle.
 
 ---
 

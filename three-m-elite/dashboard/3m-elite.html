@@ -1699,9 +1699,69 @@ const DATA = [
     },
     "pineSource": "three-m-elite/pine/3m-elite-v47-wicktap-diagnostic.pine",
     "notes": "PREDICTED BEFORE RUNNING (stated in the Pine header, LESSON 17): a wick-tap is strictly easier to satisfy than a body-close tap, so the count should rise above v46's 416. CONFIRMED, and by a wide margin: 1407 >> 416 (3.4x). Both stated ambiguities from v45's queue item 1/2 are now separately measured: the break-detector fix alone (v46, 664->416) and the tap-definition fix alone on top of it (v47, 416->1407). Neither run is a candidate strategy -- both are diagnostics establishing the real population size before any stage-machine build. v47's count (1407) is now the most source-faithful reading of 'cluster-candidate' this lab has produced, though it still omits the full 5-state cycle, model-direction tracking and reset rules per v45's scoping."
+  },
+  {
+    "id": "3m-elite-v48-stage-machine-diagnostic",
+    "name": "3M Elite v48 stage-machine occupancy counter (diagnostic)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "A COUNTER, NOT A STRATEGY. Queue item 1 from v46/v47: the first attempt at VOCABULARY.md's fully-decoded 5-state stage/cluster machine (no stage / stage 1 / stage 1 re-acc / stage 2 / stage 2 re-acc / late stage 2), gated on v47's real-pivot-break + wick-tap cluster-candidate primitive, layered on the champion's own 4H demand-zone lifecycle. Two documented gaps stated before running: (1) RESET condition 1 (\"the model turns bearish, then bullish again\") is NOT implemented -- this lab has no mechanical model/bias definition and 0-V26 already established the policy of never inventing one; only RESET condition 2 (a full cluster-free break-up cycle followed by a react) is implemented. (2) The thinly-specified \"instant break-down in stage 2 resets to no-stage\" rule is mechanised literally via an upsSinceStage2 counter. Entry = flat AND stage in {1,2,3,4}, one-bar exit, totalTrades approximates eligible-bar occupancy (same convention as v12/v19/v20/v22/v45/v46/v47). P&L is NOT meaningful by construction.",
+    "metrics": {
+      "netProfitPct": -99.8384951,
+      "profitFactor": 0.40701984,
+      "maxDrawdownPct": 99.83901231,
+      "totalTrades": 6964,
+      "winRatePct": 32.49569213,
+      "avgTradePct": -0.01433637
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1KEKH6VB50FJNTM1E7313NS",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KEKH6V9PTX702X9KC7Q6P7",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v48-stage-machine-diagnostic.pine",
+    "notes": "PREDICTED BEFORE RUNNING (LESSON 17): a majority-but-not-all occupancy was expected; a near-zero count would flag a wiring bug, a near-total count would flag the block conditions never firing. NEITHER extreme -- the actual finding is a THIRD shape, not predicted: totalTrades=6964, but effectiveTradeRange.lastTradeExitTs is 2026-11-28 -- eligible occupancy stops firing entirely about 10 months into the 4.7-year window and never resumes. This is a LOCK-UP, the same failure shape HARD LESSON 9 named for the deepest-zone rule (a persistent condition with no realistic expiry becomes a permanent block once mechanised, even though a human would silently retire it). v49 isolates which blocked state the lock is in."
+  },
+  {
+    "id": "3m-elite-v49-stage-lockup-isolation",
+    "name": "3M Elite v49 late-stage-2 occupancy isolation (diagnostic)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "A COUNTER, NOT A STRATEGY. Follow-up to v48: isolates WHICH entry-blocked state (NO STAGE vs LATE STAGE 2) the stage machine locks into. One change from v48: the counter fires on stage==LATE_STAGE_2 specifically instead of stageEligible, same one-bar-exit convention. Byte-identical state machine and documented gaps otherwise.",
+    "metrics": {
+      "netProfitPct": -97.61378398,
+      "profitFactor": 0.31521294,
+      "maxDrawdownPct": 97.61378398,
+      "totalTrades": 3737,
+      "winRatePct": 25.2073856,
+      "avgTradePct": -0.02612089
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1KEP39AMYNVTE832TS30NSJ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KEP39A4KK3B2731XCVQ0X1",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v49-stage-lockup-isolation.pine",
+    "notes": "PREDICTED BEFORE RUNNING (LESSON 17): LATE STAGE 2 was predicted as the likely lock, not NO STAGE, because a single cluster inside any stage-2 up-cycle routes into late stage 2, and RESET condition 2 then needs an ENTIRE subsequent up-cycle with zero cluster candidates -- rare because `tapped` is a persistent latch that stays true for as long as a zone is live, so most break-ups that occur while any zone is live-and-tapped are themselves cluster candidates. CONFIRMED: totalTrades=3737 with effectiveTradeRange.lastTradeExitTs at 2026-08-30 -- late-stage-2 occupancy continues almost to the end of the 4.7-year window, unlike v48's stageEligible counter which stopped at 2026-11-28. The machine falls into late stage 2 early and stays there for most of the sample. DIAGNOSIS: this build of the stage machine cannot be gated onto champion v37 as a naive filter -- it would collapse trades to whatever thin population survived before the lock, which measures the lock, not the system. The two live options are (a) implement RESET condition 1 (the model flip), which requires a bias/model definition this lab has explicitly deferred since 0-V26 pending a user-confirmed definition, or (b) treat this literal reading of RESET condition 2 as too strict and revisit it against the source material. Neither is a backtest-budget item; this cycle's two-run budget is spent on the diagnosis itself, not a fix."
   }
 ];
-const BUILT = "2026-09-03 09:58";
+const BUILT = "2026-09-03 10:58";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

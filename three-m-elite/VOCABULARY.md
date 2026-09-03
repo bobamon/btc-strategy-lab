@@ -502,3 +502,19 @@ attempted, and per this project's own standing instruction ("a decoded definitio
 outranks other queue items"), it is now the highest-priority open item. See SYSTEM.md's v45 entry for
 why a full implementation was deferred rather than rushed this cycle, and for the diagnostic that was
 run instead (a first frequency read on an explicitly-approximate reading of "cluster").
+
+### ⚠️ UPDATE, 2026-09-03 (v48/v49) — THE MACHINE WAS BUILT, AND IT LOCKS UP
+
+The 5-state machine decoded above was mechanised for the first time (SYSTEM.md's v48/v49 entry has the
+full numbers) and measured before being gated onto the champion, per this lab's own discipline. It
+falls into LATE STAGE 2 early and stays there for most of a 4.7-year window rather than cycling through
+all five states as the transcript describes. **This is not a correction to the vocabulary decode
+itself** — every individual quote and rule above was read faithfully and nothing here contradicts them
+— it is a finding about how the individually-correct rules COMPOSE: RESET condition 2 ("a full
+cluster-free break-up cycle, then a react") turns out to be far stricter than it reads, because the tap
+latch that gates a cluster candidate stays true for as long as any zone is live, making a genuinely
+cluster-free cycle rare. Promoted to HARD LESSON 30 in STRATEGY-LEDGER.md. RESET condition 1 (the model
+flip) remains unimplemented pending a user-confirmed bias/model definition (the same blocker as the
+deferred Type 2 gate, 0-V26) — implementing it is one of the two live paths forward; the other is
+re-reading the source for a looser take on RESET condition 2. Neither the swing rule nor the 3M
+candle's anatomy were touched this cycle and remain genuinely absent from the transcripts.
