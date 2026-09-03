@@ -2617,9 +2617,42 @@ const DATA = [
       "verifiedAt": "2026-09-03T00:00:00Z"
     },
     "notes": "21 trades, all long, non-degenerate (HARD LESSON 19). PF 1.15 sits between e50b's anchor (1.219 at 12960) and E56's coarse upper neighbour (1.08 at 25920) -- avgBarsWinning 5911.5/14400=41.0%, cap binds less here than at 12960 (56.5%). Companion: E60a."
+  },
+  {
+    "id": "wf-e61-e47-cold-rerun3",
+    "name": "WF E61: e47-alcm-long-cap12960.pine cold re-run #3 (root-cause diagnostic)",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "both",
+    "status": "research",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Byte-identical re-run of pine/e47-alcm-long-cap12960.pine (unchanged source, full short leg + coilPrev present), new session, to test HARD LESSON 25/27s open root-cause question: does this file reproduce its own original documented headline (PF 1.21869905/21 all-long), E50s re-run (PF 0.58008733/24, 9L 15S), or a fourth number.",
+    "metrics": {
+      "netProfitPct": -9.40602112,
+      "profitFactor": 0.58008733,
+      "maxDrawdownPct": 18.86871179,
+      "totalTrades": 24,
+      "winRatePct": 12.5,
+      "avgTradePct": -0.39191755,
+      "longTrades": 9,
+      "shortTrades": 15,
+      "longWinning": 2,
+      "shortWinning": 1
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1KDR1RV777X0VYY1PVYJGFH",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KDR1RV777X0VYY1PVYJGFH",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "notes": "EXACT match to E50s re-run of the same file to 8 decimal places (PF 0.58008733, DD 18.86871179%, 24 trades, 9L/15S, 2/1 winning split) -- NOT a match to the originally-documented E47 headline (PF 1.21869905/21 all-long), and NOT a fourth number. Two independent cold re-runs (E50, this one, different sessions) now agree exactly: the file as currently saved on disk is deterministic and stable, and what it deterministically produces is E50s number, never the original E47 headline. This rules out per-call engine non-determinism as the mechanism. Combined with HARD LESSON 27 (a structurally different file, e50b, independently reproduces the ORIGINAL E47 number 3x including cross-session), the evidence now points specifically at: the file saved under the e47 name was never the code that generated the number recorded under that name -- e50bs construction was. Root cause of HOW that mismatch happened (editing after the run, wrong file saved, etc.) remains unknown and unknowable from here, but the practical question (does e47.pine reproduce itself) is answered: no, consistently, twice. Does not change any working anchor -- e50b (E53=E54=E55) and e58a (E58=E59) remain this labs only reproducible ALCM directions. e47-alcm-long-cap12960.pine is reclassified from unreproducible/unknown to reproducible-but-mislabeled: a real, stable PF 0.58 short+long build, not the PF 1.22 long-only build its own header claims."
   }
 ];
-const BUILT = "2026-09-03 09:41";
+const BUILT = "2026-09-03 10:42";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

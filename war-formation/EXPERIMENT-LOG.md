@@ -42,7 +42,19 @@ reproduce, out of five files now checked — three data points now support book-
 (HARD LESSON 24) as that file's specific failure mechanism, not lab-wide non-determinism. E58a is still
 not a champion or candidate: reproducibility is necessary, not sufficient, and HARD LESSON 29 (its trade
 population is not a controlled comparison against e50b/e58b) and HARD LESSON 22 (no out-of-sample split
-possible on this instrument) both still apply.
+possible on this instrument) both still apply. E60 then confirmed maxBars=12960 as a real, narrow local
+optimum on a finer grid (10800/14400 either side), not worth further credits past that point. **E61
+(bottom of file, most recent) resolved E47's long-open reproducibility mystery**: a second cold re-run
+of `pine/e47-alcm-long-cap12960.pine`, new session, landed EXACT on E50's re-run (PF 0.58008733, 24
+trades, 9L/15S) — not on the file's own documented headline. The file is deterministic, just mislabeled:
+combined with HARD LESSON 27 (e50b independently reproduces the ORIGINAL E47 number three times), the
+code that generated E47's headline was e50b's construction, not what is currently saved under the e47
+name. Working anchors are unchanged: **e50b** (PF 1.21869905, 21 trades, all long, reproduced E53=E54=
+E55) and **e58a** (PF 1.24015239, 36 trades, reproduced E58=E59) remain this lab's only two directions.
+With position sizing closed (HARD LESSON 29), no new 1m data available (re-checked E61), and both the
+Oracle queue (1/5) and 950 Rule (2/4) fully worked, **this family has no further open, credit-worthy
+question on the current data window** — the honest state, stated plainly rather than spent on marginal
+re-sweeps.
 
 *(The paragraph below describes v6, kept for history — it is DEMOTED, not current.)*
 **v6 — HA cascade, LONG ONLY, structural stop (pre-A.L.C.M., WRONG EXIT MODEL).** BTCUSDT 1m,
@@ -3029,15 +3041,117 @@ a wider cap changes which trades get admitted at all, not just how the same trad
   returns per credit against the queue's other open items below.
 
 ## QUEUE
-1. **Root cause of `pine/e47-alcm-long-cap12960.pine`'s specific mismatch** — still open, still low
-   priority, e50b/e58a already supersede it as working anchors regardless of the answer. Now the
-   longest-standing open item in this log (queued since E50).
+1. ~~Root cause of `pine/e47-alcm-long-cap12960.pine`'s specific mismatch~~ — **RESOLVED, E61.**
 2. **Position sizing / risk fraction as an independently testable axis** — still closed per HARD LESSON
    29 (E58) for this single-position-book construction; would need a fundamentally different
    construction (separate simulated accounts per shieldUsd value) to reopen, not queued given the
    lift required.
 3. **If more 1m history ever becomes available**, the $3,000/$4,000 shield question E57 could not
-   answer is still the first thing to re-run on a longer window.
+   answer is still the first thing to re-run on a longer window. **Re-checked this cycle (E61,
+   `plan_backtest_window`): still clamped to 2025-12-16 → 2026-05-03. No new data.**
 4. **The maxBars axis on this construction is now well-characterized (five points, real local optimum
    at 12960) and is not worth further credits** absent a specific reason — the marginal information per
    credit has dropped sharply since E56.
+
+---
+
+# ██ E61 — E47's ROOT CAUSE RESOLVED: THE DISK FILE IS DETERMINISTIC, AND WHAT IT PRODUCES IS NOT
+# THE NUMBER RECORDED UNDER ITS OWN NAME
+
+**Numbering note:** this cycle's stored prompt is stale again (same pattern every cycle since E51) —
+it claims the 2x2 closed at E42–E46, no champion/candidate, continue numbering at E47. Per HARD LESSON
+26, the docs win: this log runs through E60. This cycle re-verified the state against origin (local
+clone had 4 stale pre-fork commits behind a force-pushed origin/main; reset to origin, which carries
+the real E1–E60 history) before doing anything else.
+
+**Tool check:** trader.dev MCP reachable, `whoami` confirmed, 712 credits at start (free tier, weekly
+grant 1000). Budget rule: above 500 → at most TWO backtests. **ONE used.**
+
+## QUEUE ITEM ADDRESSED
+E60's carried-forward item 1, the longest-standing open item in this log (queued since E50): *root
+cause of `pine/e47-alcm-long-cap12960.pine`'s specific mismatch* between its documented headline
+(PF 1.21869905, 21 trades, all long — recorded at E47) and what E50's byte-identical cold re-run of
+the same file actually returned (PF 0.58008733, 24 trades, 9 long / 15 short — HARD LESSON 25). HARD
+LESSON 27 then found a *different* file, `e50b-alcm-long-only-uncoiled.pine` (short leg deleted in
+code, `coilPrev` also removed), independently landing on E47's exact original number, three times,
+one cross-session (E53=E54=E55) — pointing at e50b's construction, not the code currently saved under
+the e47 filename, as the real source of the original E47 headline.
+
+**What was still missing:** whether `e47-alcm-long-cap12960.pine`, as it sits on disk today, is itself
+stable (same code always gives the same answer) or genuinely non-deterministic call-to-call. E50's
+0.58/24 result was one data point. A second cold re-run, in a new session, either matches E50 (file is
+stable, just mislabeled), matches the original E47 headline (session-dependent behaviour), or lands on
+a fourth number (true non-determinism in this construction).
+
+## PRE-RUN AUDIT
+No new Pine written — this is a byte-identical re-run of the file already on disk (`get_pine_codegen_
+rules` called first per standing practice; the file is unchanged since E47 and was already mcprule-
+compliant). LONG leg: R = shieldUsd = $2,000, ~2% of price, passes the 0.8% floor (HARD LESSON 3); stop
+is risk-defined, not structural, the declared ALCM deviation (LESSON 5). SHORT leg: present, unmirrored,
+unchanged since E13 (LESSON 6). Both legs unchanged from every prior run of this exact file (E47, E50).
+No new redundancy to check (LESSON 18) — nothing in the file changed.
+
+**Pre-registered outcome (HARD LESSON 17), against E47's original (1.21869905/21, all long) and E50's
+re-run (0.58008733/24, 9L/15S):**
+- Matches E50 exactly → the file is stable post-E50; the original E47 number came from different code
+  than what is currently saved (supports HARD LESSON 27's e50b-is-the-real-source reading).
+- Matches the original E47 headline → session-dependent or time-dependent behaviour (e.g. a data
+  revision that has since reverted), not a stable property of the file.
+- A fourth distinct number → genuine per-call non-determinism in this construction, independent of
+  which specific numbers came before.
+
+## THE RESULT
+[E61 report](https://mcp-api.trader.dev/backtest/01M1KDR1RV777X0VYY1PVYJGFH)
+
+| | E47 original (2026-09-02) | E50 re-run (2026-09-03) | **E61 (this cycle, new session)** |
+|---|---|---|---|
+| PF | 1.21869905 | 0.58008733 | **0.58008733** |
+| Trades | 21 (all long) | 24 (9L/15S) | **24 (9L/15S)** |
+| Max DD | — | — | **18.86871179%** |
+| Win rate | 42.86% | — | **12.5% (3W: 2 long, 1 short)** |
+
+**Exact match to E50, to eight decimal places, across every field reported.** Not the original E47
+headline, not a fourth number.
+
+## WHAT THIS ESTABLISHES
+- **The first pre-registered branch landed.** `e47-alcm-long-cap12960.pine`, as it currently sits on
+  disk, is deterministic: two independent cold re-runs, different sessions, agree exactly. Per-call
+  engine non-determinism is ruled out as the mechanism for this file.
+- **The file is real and reproducible — it is simply not the file its own header describes.** Its
+  header claims "long-only, uncoiled... PF 1.21869905... 21 trades... all long," and running the exact
+  code on disk today gives a 9-long/15-short, PF 0.58 result instead. Combined with HARD LESSON 27
+  (e50b independently reproduces the ORIGINAL number three times, including cross-session), the
+  evidence is now as complete as it can get from this side: **the code that generated the number
+  recorded under the "E47" name was e50b's construction (short leg absent, `coilPrev` absent), not the
+  code currently saved in `e47-alcm-long-cap12960.pine`.** How that mismatch happened — a later edit to
+  the file, a wrong save, a copy-paste error at the time — is not recoverable from here and is not
+  worth further credits to chase; the practical question (does this file reproduce itself) is answered.
+- **`e47-alcm-long-cap12960.pine` is reclassified**, not deleted (HARD LESSON 21's own instruction):
+  from "unreproducible, mechanism unknown" to "reproducible, but mislabeled" — a real, stable PF 0.58
+  short+long build under whatever name, not the PF 1.22 long-only build its header claims to be.
+
+## WHAT THIS DOES NOT DO
+- **Does not change any working anchor.** `e50b-alcm-long-only-uncoiled.pine` (E53=E54=E55) and
+  `e58a-shield1000-maxbars6480.pine` (E58=E59) remain this lab's only two reproducible ALCM directions,
+  unaffected by this finding — they were already the numbers this file's mismatch pointed away from.
+- **Does not promote anything to champion or candidate.** Still no validated strategy in this lab; both
+  working anchors sit at or near the ~20-trade interpretability floor with no out-of-sample split
+  available on this instrument's 4.5-month window (HARD LESSON 22).
+- **Does not identify the mechanical cause of the original mismatch** (edit-after-run vs. wrong-file-
+  saved vs. something else) — explicitly out of scope per this cycle's pre-registration, and E60 already
+  flagged this item as low priority regardless of the answer, which this result does not change.
+
+## QUEUE
+1. **Position sizing / risk fraction as an independently testable axis** — still closed per HARD LESSON
+   29; would need a fundamentally different construction (separate simulated accounts per shieldUsd
+   value) to reopen.
+2. **If more 1m history ever becomes available**, the $3,000/$4,000 shield question is still the first
+   thing to re-run on a longer window. Re-checked this cycle via `plan_backtest_window`: still clamped
+   to 2025-12-16 → 2026-05-03, unchanged since the last check.
+3. **This family (maxBars, shieldUsd, and now E47's own reproducibility) is now exhaustively
+   characterized on the data available.** With items 1 and 2 both structurally blocked and no other
+   open thread in `ORACLE-RULES.md` (the Oracle queue finished 1/5, the 950 Rule finished 2/4, both
+   fully worked before this cycle), the honest state is: **this lab has no further productive move on
+   the current data window without either new 1m history or a genuinely new source (another trader
+   rule, another annotated chart) to mine.** Say so plainly rather than spending credits on marginal
+   re-sweeps of an axis HARD LESSON 29 already closed.
