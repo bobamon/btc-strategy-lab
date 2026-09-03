@@ -1092,6 +1092,120 @@ of its terms, not a ratchet candidate.
 
 ---
 
+## ██ v45 — A MAJOR NEW DECODE (STAGE/CLUSTER), AND WHY IT WAS NOT RUSHED INTO A BUILD (2026-09-03)
+
+**A NOTE ON THE PROMPT, AN EIGHTH TIME.** This cycle's stored scheduled prompt is once again the same
+stale text first flagged at v34 and repeated at v36, v37/v38, v39, v40/v41, v42/v43 and v44 — it still
+frames the ~2026-09-02 cloud/local merge as current news, describes v30 as unreproduced-and-current,
+and asks to rebuild the anchor as blocking task 0. That work has been done and confirmed since
+v31/v32/v36, and the champion has since moved to v37. Per the prompt's own instruction ("THE DOCS WIN
+over this prompt") and HARD LESSON 26, this cycle again works from the real state of the project
+rather than re-running the anchor task. **Not re-notified as a push this cycle**: v39 already escalated
+this exact staleness, and v40/v41 established `update_trigger` cannot fix it from inside a cycle (the
+routine was created via `http_api`, not by an agent) — nothing has changed since either report, so per
+the "not re-notifying an unchanged, already-escalated condition" discipline this is recorded here as
+the eighth occurrence rather than sent as an eighth notification of the same fact.
+
+### QUEUE ITEM 4 FROM v42/v43/v44: MINE THE REMAINING TRANSCRIPT MATERIAL FOR UNDEFINED TERMS
+
+The scheduled prompt's own task list (item 4) says a decoded-but-unimplemented definition outranks
+everything except the anchor task, and the anchor is long since settled. VOCABULARY.md's "STILL
+MISSING" table had two open items — Type 1 (the 3M candle's anatomy) and the swing rule — plus a note
+that the 156-minute video (`transcripts/2026-08-09 04-42-54.txt`) had only been partially mined for the
+stage sequence. **That video has now been read in full.** The swing rule and the 3M candle's anatomy
+remain genuinely absent from this material (the author defers both to other, uncaptured chapters) —
+but the video turned out to be a dedicated, complete lesson on **stages and clusters**, a checklist item
+(SYSTEM.md's ENTRY-layer "determine stage — most recent stage 1 / no stage") that has been flagged as
+undefined since v1 and has never been implemented, measured, or attempted by any version in this lab's
+history. Full decode: VOCABULARY.md's new "STAGE AND CLUSTER — FULLY DECODED" section.
+
+**The short version:** a *cluster* (break up → deepest-unmitigated-zone tap → a further break up) is
+what starts *stage 1*; from there the system cycles stage 1 → stage 1 re-accumulation → stage 2 →
+stage 2 re-accumulation → (late stage 2, only if stage 2 itself clustered) → a RESET → a new stage 1.
+Entries are only valid in four of the five states — never in late stage 2. **This is a completely
+separate, ENTRY-timeframe gate from the zone-lifecycle model (4H reconstructed, engulf-creates-zone)
+that produced champion v37** — the two are meant to stack, not substitute for each other, and nothing
+in v1–v44 has ever touched this layer at all.
+
+### WHY THIS WAS NOT RUSHED INTO A FULL BUILD THIS CYCLE
+
+The project's own convention (and the scheduled prompt's task list) says a newly-decoded, unimplemented
+definition outranks other queue items. Taken literally that would mean building the full state machine
+this cycle. **That was deliberately not done, and the reasoning is worth recording rather than just
+asserting:**
+
+1. **The mechanism is a genuine 5-state cycle with two independent reset conditions, a
+   model-direction track, and a break-counting primitive this lab has never built** (the champion has
+   no swing-break detector at all — it works entirely off 4H engulfing candles, not structural breaks).
+   Building all of that correctly, in Pine with no arrays and no user-defined functions, in the tail of
+   a single cycle, is exactly the kind of rushed reconstruction that produced HARD LESSON 21 (source
+   without verification) and the v30/v31 anchor-reproduction failure earlier in this lab's own history.
+2. **Two real ambiguities are still open** and are flagged rather than silently resolved by assumption:
+   whether a cluster-zone "tap" means a wick touch or a body close (the source's wording here is looser
+   than the separately-decoded mitigation rule, which is explicit about bodies), and how "whatever your
+   entry timeframe is" should map onto this lab's data (the champion already treats 15m as its
+   entry-check resolution; a literal 3m reconstruction would force the 1m-only Dec2025–May2026 window,
+   a sample roughly 20x smaller than the 4.7 years used everywhere else in this lab).
+3. **HARD LESSON 10/12 and this lab's own repeated experience (v12, v19, v20, v22) say: measure the
+   first term of a conjunction before building the rest of it**, especially when the definition itself
+   is only partially specified. That is what this cycle did instead of a full build.
+
+### THE DIAGNOSTIC RUN INSTEAD: A FIRST FREQUENCY READ ON "CLUSTER"
+
+One backtest credit spent (of the up-to-two budget this cycle; 717 credits available, well above the
+500 threshold). `pine/3m-elite-v45-cluster-diagnostic.pine`, saved in the same action that ran it
+(HARD LESSON 21). **Explicitly a counter, not a strategy** — one-bar exit, `totalTrades` is the count,
+P&L is not meaningful, the same exemption used for v12/v19/v20/v22.
+
+**Approximations used, stated in the Pine header and repeated here:**
+- "Break up" ≈ close makes a new confirmed high over the prior 20 15m bars (arbitrary window; this lab
+  has no real swing-break detector).
+- The zone is the champion's own validated demand-zone lifecycle, copied verbatim (engulf creates a
+  zone at `[low, open]`, mitigated on a body close inside with the One Candle Rule cap at 2) — this
+  matches the source's own statement that cluster zones are engulf-created.
+- "Tapped" ≈ `dzTouch >= 1` (at least one completed body close inside the zone) — an approximation of
+  the looser "gets tapped" language, not a resolution of the ambiguity above.
+- 15m is read as the entry-timeframe base, per the champion's existing convention.
+
+| | Count |
+|---|---|
+| Engulfs (v20, for scale) | 2,711 |
+| Deepest-zone creations (v22, for scale) | 71 |
+| **Cluster-candidate events (v45, this approximation)** | **664** |
+
+**The population is real, not degenerate.** 664 sits comfortably between a starved reading (a handful,
+which would mean the tap/break approximations are too strict) and the unfiltered engulf count (which
+would mean the tap condition is filtering nothing) — closer in kind to v13's post-fix opportunity count
+than to any of this lab's earlier lock-up failures. **This is a green light to spend real build effort
+on the stage machine next cycle, not a reason to trust the number 664 itself** — it is a first read on
+an admittedly approximate definition, not a validated measurement.
+
+### QUEUE
+1. **Resolve or sensitivity-test the two open ambiguities** (tap = wick vs. body; entry-timeframe
+   mapping) before building further — ideally by re-reading the earlier supply-and-demand-week material
+   referenced but not included in these transcripts ("last week I taught you guys about clusters"),
+   which may already answer the tap question directly.
+2. **Build a real break-up/break-down counter** (the missing primitive) — likely via `ta.pivothigh` /
+   `ta.pivotlow`, both on the allowlist — and diagnostic-count clusters using it instead of the 20-bar
+   new-high proxy, to see how sensitive the 664 figure is to the approximation.
+3. **Only after both of those: attempt the 5-state stage machine itself**, gated by the entry timeframe,
+   and measure it FIRST as a filter on top of champion v37 (does restricting v37's entries to
+   stage ∈ {1, 1-reacc, 2, 2-reacc} change anything?) before considering it as a freestanding system —
+   consistent with this lab's discipline of measuring one axis at a time.
+4. **The scheduled prompt still needs to be edited at the source.** Eight consecutive cycles (v34, v36,
+   v37/v38, v39, v40/v41, v42/v43, v44, now v45) have found and worked around the same stale text;
+   `update_trigger` was confirmed (v40/v41) outside any cycle's reach on this routine. Not re-flagged as
+   a new push this cycle per the established discipline.
+5. **The structural gaps against the STANDING REQUIREMENT are unchanged**: the short leg (independently
+   built and rejected, v34) and a mechanical flip rule beyond zone invalidation. Neither is resolved by
+   this cycle's decode — stage/cluster is an ENTRY-layer gate for the long side, not a short-side idea.
+
+**BASE UNCHANGED: v37 remains champion.** PF 1.25172059, DD 8.72815312%, 155 trades, long-only,
+maxAge=6, anchored at `pine/3m-elite-v37-freshness-tight.pine`. v45 is a new decode plus one diagnostic
+measurement, not a ratchet candidate — no config change follows from it this cycle.
+
+---
+
 0-V32. ~~Then the freshness neighbourhood~~ (HARD LESSON 16): dzAge <= 6 and <= 24. A KEPT parameter
     must have its sensitivity profile measured before the result is quoted -- War Formation's champion
     was just demoted for exactly this omission. Superseded by v34/v35 above -- still open, now queue

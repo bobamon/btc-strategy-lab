@@ -100,16 +100,14 @@ Applies to structural-break zones *and* fractal zones — "this goes for every t
 
 ---
 
-## ✅ CLUSTER AND STAGE ONE — PARTIALLY DECODED
+## ✅ CLUSTER AND STAGE ONE — SUPERSEDED, SEE FULL DECODE BELOW
 > "A **cluster** is what puts us into **stage one**."
 > "The cluster zone is **the deepest zone of any given range** that you're in."
 > "This break right here is what creates the cluster, and it's also what puts us into stage one."
 
-Stage progression seen: **stage one → stage one re-accumulation**, the latter entered on a breakdown.
-> "This break down right here is what puts us into stage one re-accumulation."
-
-The full stage list is taught in the 156-minute video (`2026-08-09 04-42-54.txt`) and has not been
-fully extracted yet. Clusters themselves were taught in an **earlier week** not included here.
+This was a partial read of the 156-minute video (`2026-08-09 04-42-54.txt`). **The full video has now
+been mined (2026-09-03) — see "STAGE AND CLUSTER — FULLY DECODED" below for the complete cycle,
+including stage two, both re-accumulation states, late stage two, and the reset rules.**
 
 ---
 
@@ -118,7 +116,7 @@ fully extracted yet. Clusters themselves were taught in an **earlier week** not 
 |---|---|
 | **3M candle (triple M)** | **Anatomy never defined in these ten videos.** It is assumed knowledge from an earlier chapter and is detected automatically by their indicator. This is the single most important gap — Type 1 validation *is* this candle. |
 | **Swing rule** | **Explicitly deferred by the author**: "you guys are going to learn about the swing rule, **I think next week**". Confirmed absent from this material, twice. |
-| **Full stage sequence** | Partially decoded (stage one, stage one re-accumulation). The rest is in the 156-minute video, not yet fully mined. |
+| **Full stage sequence** | **DECODED 2026-09-03 — see the STAGE AND CLUSTER section below.** Was partially decoded (stage one, stage one re-accumulation only); the 156-minute video (`transcripts/2026-08-09 04-42-54.txt`) has now been fully mined and the complete cycle, cluster definition and reset rules are recorded below. |
 
 ---
 
@@ -383,3 +381,101 @@ mitigation cap (`dzTouch < 2`) has been load-bearing since v13, `dzAge >= 1` is 
 (v43), and `close > dzBot` is now confirmed redundant (v44) — implied by another term, not independently
 doing any work. Type 1 (the 3M candle's anatomy) and the swing rule remain undefined and still do not
 block the working engulf-based entry.
+
+---
+
+## ✅ STAGE AND CLUSTER — FULLY DECODED, 2026-09-03 (v45)
+
+Source: `transcripts/2026-08-09 04-42-54.txt`, the 156-minute video, mined in full for the first time
+this cycle. Quotes are the author's own words (lightly cleaned of filler).
+
+**This is on the ENTRY timeframe, not the structure/zone/bias timeframes the champion's zone-lifecycle
+model uses.** The author is explicit: "the one minute time frame is going to be the only time frame
+that we actually pay attention to the stages on... whatever your entry time frame is." For 3M ELITE
+that is the 3m entry per SYSTEM.md's shape table. **This decode is new vocabulary, not yet implemented
+in any Pine — see SYSTEM.md's v45 entry for the scoping discussion and why a full build was deferred.**
+
+### The cluster — the atomic event
+
+> "The cluster zone is the deepest zone of any given range that you're in."
+> "This candle is a wick, this candle would need to be an engulfing candle for this to be a zone."
+
+A cluster requires, in order:
+1. A **break up** (a structural break to a new high — the source never gives a mechanical definition
+   of "break" beyond this; it is assumed knowledge from an earlier, uncaptured chapter).
+2. That break leaves behind the **deepest unmitigated zone in the current range** — same primitive as
+   this lab's already-validated demand zone (engulf-created; a non-engulfing candle "can't be a zone").
+   **Only breaks UP can leave a cluster zone** — never a breakdown, never a fractal zone: "you can only
+   ever get clusters from breaks up... do not draw out fractal zones... as cluster zones."
+3. That zone gets **tapped** (touched — the source does not say body-close specifically here, unlike
+   the separately-decoded mitigation rule: "all that needs to happen is that the zone gets tapped...
+   it doesn't need to hold").
+4. **Then** a further break up to a new high. That break is the cluster: "this break right here is what
+   creates the cluster."
+
+**A cluster can occur on any break in a sequence** — "the cluster can be on the eighth break up... it
+still counts as a stage one beginning" — and if the current range has **zero unmitigated zones to
+target** (everything already mitigated), the rule degrades: no zone needs to be drawn, and a plain
+pullback followed by the next break up is itself a cluster. There is also a rarer double-break form
+(break, break, return to the FIRST break's zone, then deliver) that the author flags as advanced and
+does not fully specify.
+
+### The five stages
+
+> "There's gonna be five stages that we are always going to be in at any given time... sometimes we
+> are in no stage."
+
+| Stage | Entered when | Entries allowed? |
+|---|---|---|
+| **No stage** | Price chopping with no cluster yet (e.g. mid-distribution, no bullish break has clustered) | No |
+| **Stage 1** | A cluster occurs | **Yes** |
+| **Stage 1 re-accumulation** | At least one break down after stage 1, entering a re-accumulation model | **Yes** |
+| **Stage 2** | The re-accumulation completes (breaks up again) | **Yes** |
+| **Stage 2 re-accumulation** | At least one break down after stage 2 | **Yes** |
+| **Late stage 2** | Stage 2 contained a cluster, its re-accumulation delivers, and the system is now waiting for a RESET | **No — never traded** |
+
+> "We always have to be in one of these four stages... in order to actually enter a trade."
+> "We never take entries in late stage two ever... because we're waiting for that reset."
+
+**Stages and the model (accumulation/distribution) are independent.** A cluster can start stage 1
+while the model is still bearish; a stage-1 entry is only actually taken once the model also agrees:
+"we can be in a not valid model but be in a valid stage... we always wait until both of them are valid
+to take a trade."
+
+**In stage 2, clusters are not required for entries at all** — "we do not need clusters in stage two at
+all, we could just buy stop any breaks in stage two." The cluster requirement is specific to stage 1.
+
+### The cycle-back rule (stage 2 → new stage 1), and why it needs a RESET
+
+Whether a **new** stage 1 can begin immediately after a stage-2 react depends on one binary fact:
+**did stage 2 itself contain a cluster?**
+
+- **If stage 2 had NO cluster:** the very next break up (with a new cluster) is immediately a new stage
+  1. No reset needed.
+- **If stage 2 DID have a cluster:** the system enters **late stage 2** on delivery of that react, and a
+  **RESET** is required before a new stage 1 can be recognised. There are exactly two forms of reset:
+  1. **The model turns bearish, then bullish again** ("switches to distribution... then we can wait for
+     a new cluster"), or
+  2. **A full set of breaks up with NO cluster in it, followed by another react** — i.e. an entire
+     stage-2-shaped cycle that itself fails to cluster.
+
+> "If stage two does not contain clusters, then the first break up after the stage two react can be a
+> new stage one... [but] if stage two does contain clusters, then we need a reset before looking for a
+> new stage one."
+
+**One break up in stage 2 followed by an instant break down resets everything to no-stage / distribution**
+regardless of clusters — the same "one break the wrong way flips the whole model" rule already used
+elsewhere in this project's model-direction logic.
+
+### Why this matters for this lab specifically
+
+**None of v1 through v44 have ever implemented this gate.** SYSTEM.md's original ENTRY-layer checklist
+item ("determine stage — most recent stage 1 / no stage") was flagged as undefined from v1 onward and
+every build since has instead pursued a *different* mechanism — the zone-lifecycle model on the
+STRUCTURE/ZONE timeframe (4H reconstructed, engulf-creates-zone, mitigation, freshness), which is the
+model that produced the validated champion v37. **Stage/cluster is a separate, ENTRY-timeframe gate
+layered on top of — not a replacement for — that model.** It has never been measured, tested, or even
+attempted, and per this project's own standing instruction ("a decoded definition not yet implemented
+outranks other queue items"), it is now the highest-priority open item. See SYSTEM.md's v45 entry for
+why a full implementation was deferred rather than rushed this cycle, and for the diagnostic that was
+run instead (a first frequency read on an explicitly-approximate reading of "cluster").

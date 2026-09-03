@@ -1,0 +1,118 @@
+//@version=6
+// 3M ELITE v45 - CLUSTER DIAGNOSTIC (APPROXIMATE COUNTER, NOT A STRATEGY).
+//   Counts an APPROXIMATION of the newly-decoded "cluster" event (VOCABULARY.md, STAGE AND CLUSTER
+//   section, decoded 2026-09-03 from transcripts/2026-08-09 04-42-54.txt, the 156-minute video).
+//   A cluster is the event that starts Stage 1 on the source's ENTRY timeframe: a structural break-up
+//   leaves behind an unmitigated (engulf-created) zone, that zone gets tapped, and THEN price breaks
+//   up again to a new high. This file measures ONLY that atomic event's frequency -- not the full
+//   5-stage cycle (stage 1 / stage 1 re-accumulation / stage 2 / stage 2 re-accumulation / late stage
+//   2), not the model bearish/bullish tracking, not the reset rules. Per this lab's own established
+//   discipline (HARD LESSON 10/12, and this lab's own v12/v19/v20/v22): measure the first term of a
+//   conjunction before building the rest of it, especially on a brand-new, only-partially-specified
+//   mechanism. One-bar exit -- totalTrades on this run IS the count. P&L from this run is NOT
+//   meaningful and must not be read as a result (same exemption this lab has used for every prior
+//   counter build).
+//
+// APPROXIMATIONS, STATED EXPLICITLY (see SYSTEM.md's v45 entry for the full discussion):
+//   1. "Break up" -- the source ties clusters to structural swing breaks; this lab's code has no
+//      swing-break detector. Approximated here as: close makes a new confirmed high over the prior
+//      `breakLookback` 15m bars. This is an arbitrary window, not derived from the source, and is the
+//      single biggest source of uncertainty in this measurement.
+//   2. The zone lifecycle is copied VERBATIM from the validated champion (pine/3m-elite-v37-
+//      freshness-tight.pine): an engulf on the 4H reconstruction (body containment, no gap) creates a
+//      demand zone at [low, open] of that candle, mitigated on a body close inside with the One
+//      Candle Rule cap at 2. This matches the source's own statement that cluster zones are
+//      engulf-created ("this candle would need to be an engulfing candle for this to be a zone").
+//   3. "Tapped" is approximated as dzTouch >= 1 (at least one COMPLETED 4H body-close inside the
+//      zone) -- not necessarily the source's exact "zone gets tapped", which may mean any wick touch,
+//      not a body close. Open question, not resolved by this run.
+//   4. Entry timeframe: the source says stages/clusters are read on "whatever your entry timeframe
+//      is". This lab's champion already treats 15m as its base/entry-check resolution (every 15m bar
+//      is checked for entry), so this diagnostic reads the break/cluster condition on the same 15m
+//      base rather than reconstructing a separate 3m timeframe (which would force the 1m-only
+//      Dec2025-May2026 data window per SYSTEM.md's DATA LIMIT section, a 20x smaller sample). Stated
+//      as a convention choice, not a claim that it matches the source's literal timeframe.
+//   5. No freshness cap, no R floor, no stage-machine, no model-direction (accumulation/distribution)
+//      tracking, no reset rules -- this measures ONLY the candidate-cluster event, nothing downstream.
+//
+// AUDIT (LESSON 17): this is a diagnostic counter, not a strategy -- LESSON 3 (R floor) and LESSON 5
+// (structural stop) do not apply, there is no real stop or target, exactly as exempted for this lab's
+// prior counter builds (v12, v19, v20, v22). Stated before running: if the count is near zero, the
+// break-lookback approximation or the zone-tap definition is too strict and needs re-measuring before
+// any further build; if the count is comparable to the ~2,711 engulfs measured at v20, the population
+// is real and a full stage-machine build is worth the next cycle's budget.
+strategy("3M ELITE v45 cluster diagnostic (approx)", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+breakLookback = input.int(20, "New-high lookback (approximation of 'break up')")
+
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+// ---------- reconstruct the 4H candle from 15m bars: in-progress OHLC ----------
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+// ---------- snapshots of the two most recently COMPLETED 4H candles ----------
+var float pO  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+// ---------- engulf on the just-completed 4H candle vs the one before it (body containment, no gap) ----------
+bullEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC < ppO and pC > pO and pC > ppO
+
+// ---------- demand zone lifecycle: create on bull engulf, mitigate on a body close inside (One Candle Rule) ----------
+var float dzTop   = na
+var float dzBot   = na
+var bool  dzLive  = false
+var int   dzTouch = 0
+
+if new4h
+    if dzLive and not na(pC) and pC <= dzTop
+        dzTouch := dzTouch + 1
+        if dzTouch >= 2
+            dzLive := false
+    if bullEngulf
+        dzTop   := pO
+        dzBot   := pL
+        dzLive  := true
+        dzTouch := 0
+
+// ---------- cluster candidate: zone live and tapped at least once, THEN a new-high break ----------
+tapped   = dzLive and dzTouch >= 1
+newHigh  = close > ta.highest(close[1], breakLookback)
+clusterCandidate = tapped and newHigh
+clusterEvent = clusterCandidate and not clusterCandidate[1]
+
+// ---------- one-bar-exit counter: totalTrades IS the cluster-candidate count ----------
+if strategy.position_size == 0 and clusterEvent
+    strategy.entry("C", strategy.long)
+
+if strategy.position_size != 0
+    strategy.close_all()
+
+plot(dzLive ? 1 : 0, title="DemandZoneLive")
+plot(clusterEvent ? 1 : 0, title="ClusterEvent")
