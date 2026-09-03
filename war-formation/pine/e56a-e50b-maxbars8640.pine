@@ -1,0 +1,149 @@
+//@version=6
+// WAR FORMATION E56a — e50b's maxBars neighbourhood, TIGHT SIDE (12960 -> 8640).
+//
+// Carried-forward queue item 1 from E53/E54/E55: "The maxBars neighbourhood (8640 / 25920) on
+// e50b, run together in one cycle so HARD LESSON 16/19 is actually satisfied." e50b
+// (pine/e50b-alcm-long-only-uncoiled.pine) is now this lab's first PF > 1.0 anchor confirmed
+// reproducible 3/3 including cross-session (E53=E54=E55, PF 1.21869905, 21 trades, all long).
+// The ONLY change here is maxBars: 12960 -> 8640 (six days instead of nine). Nothing else in
+// e50b's construction is touched.
+//
+// WHY THIS QUEUE ITEM EXISTS: HARD LESSON 16 requires a load-bearing parameter's threshold to be
+// tested in BOTH directions before trusting the headline, and HARD LESSON 19 requires recording
+// whether each neighbour is a real reading (measurably worse/better, similar trade count) or a
+// degenerate one (trade count collapses -- that bounds the DATA, not the parameter). This file is
+// the tight-side probe; its sibling e56b (25920) is the loose side. Both must be read together.
+//
+// PRE-REGISTERED OUTCOME (HARD LESSON 17), against e50b's PF 1.21869905 / 21 trades:
+//   - Similar trade count, PF close to 1.22 -> maxBars is not load-bearing in this neighbourhood;
+//     the cap rarely binds and 12960 was not doing much. e50b's number is robust to this choice.
+//   - Meaningfully FEWER trades AND markedly worse PF -> tightening the cap is forcing winners to
+//     close before reaching the 2:1 target (the E46 failure mode returning at a shorter cap) --
+//     evidence the cap still binds even at 12960 and the exit has not fully resolved.
+//   - Trade count collapses toward single digits -> per HARD LESSON 19 this is a DEGENERATE
+//     neighbour (bounds the data, not the parameter) and must be reported as a count, not a result.
+//
+// THE SPECIFICATION: War Formation has NO STOP LOSS. The exit is the A.L.C.M. shield -- a fixed
+// dollar gap to liquidation. The position ends at target or at liquidation. NEVER add to a losing
+// trade.
+//
+// PRE-RUN AUDIT:
+//   LONG (only leg) -- R = shieldUsd = $2,000, ~2% of BTC price: PASSES the 0.8% floor (HARD
+//     LESSON 3). Stop is RISK-DEFINED, not structural -- the declared ALCM deviation (HARD LESSON
+//     5). SL/TP fixed at entry, no trailing. Latch order unchanged from e50b (HARD LESSON 8).
+//     coilPrev remains absent (e50b's own binding test already showed removing it does not
+//     regress vs e50a in isolation -- this file does not re-open that question).
+//   SHORT -- DELETED (identical to e50a/e50b): no short entry can fire; position_size can never
+//     be negative.
+//   Redundancy (HARD LESSON 18): unchanged from e50b -- atrFast/atrSlow/coilK/coiled stay deleted,
+//     not left dead in the file.
+//
+// SAMPLE CEILING: ~3 days per trade across 4.5 months of 1m data (2025-12-16 to 2026-05-03) caps
+// this family near 20-30 trades. A ratio below ~20 trades is reported as a COUNT, not read as a
+// result.
+strategy("War Formation E56a e50b maxBars8640", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+greenBull = input.int(4,     "Green 1h candles for BULL")
+skipOpen  = input.int(60,    "Skip first N minutes of 6h block")
+skipClose = input.int(60,    "Skip last N minutes of 6h block")
+velK      = input.float(0.8, "Velocity: min reclaim as multiple of atr(30)")
+midLo     = input.float(400, "Whole-number middles low")
+midHi     = input.float(600, "Whole-number middles high")
+etOffset  = input.int(-4,    "ET offset from UTC")
+witchOn   = input.bool(true, "Ban longs in witching hour 1-4am ET")
+shieldUsd = input.float(2000,"THE SHIELD: fixed dollar gap to liquidation")
+rr        = input.float(2.0, "Reward:risk")
+maxBars   = input.int(8640,  "Max bars in trade -- six days, E56a tight probe")
+
+MS6H = 21600000
+MS1H = 3600000
+MS15 = 900000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+b15 = math.floor(time / MS15)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+new15 = b15 != b15[1]
+
+var float h1o     = na
+var int   grnCur  = 0
+var int   cntCur  = 0
+var int   grnPrev = 0
+var int   cntPrev = 0
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    grnCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(h1o)
+        cntCur := cntCur + 1
+        if close[1] > h1o
+            grnCur := grnCur + 1
+    h1o := open
+
+regimeReady = cntPrev >= 5
+bullRegime  = regimeReady and grnPrev >= greenBull
+
+minsIn    = (time - b6 * MS6H) / 60000
+timeGate  = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+h1Bull = not na(h1o) and close > h1o
+
+var float c15l = na
+var float p15l = na
+
+if new15
+    p15l := c15l
+    c15l := low
+else
+    c15l := na(c15l) ? low : math.min(c15l, low)
+
+brokeBelow = not na(p15l) and c15l < p15l
+
+velMin = na(ta.atr(30)) ? na : ta.atr(30) * velK
+
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+hUTC     = math.floor(time / MS1H) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+longBan  = witchOn and witching
+
+longTrig  = not na(p15l) and not na(velMin) and ta.crossover(close, p15l) and (close - p15l) >= velMin
+
+goLong  = bullRegime and timeGate and h1Bull and brokeBelow and not inMiddle and not longBan and longTrig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+longR = shieldUsd
+
+if flat and goLong and longR > 0
+    strategy.entry("L", strategy.long)
+    slPx   := close - longR
+    tpPx   := close + longR * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")

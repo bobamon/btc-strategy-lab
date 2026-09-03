@@ -2436,3 +2436,114 @@ genuine engine or data non-determinism and contradicting E51/E52's "narrowing" c
 3. **Root cause of `pine/e47-alcm-long-cap12960.pine`'s specific mismatch** — open, low priority, e50b
    already supersedes it as the anchor.
 4. **Position sizing / risk fraction:** unchanged, still open, still not the priority.
+
+---
+
+# ██ E56 — e50b's maxBars NEIGHBOURHOOD, BOTH SIDES: A REAL BUT SHALLOW LOCAL OPTIMUM AT 12960
+
+**Numbering note:** this cycle's stored prompt is stale again — it describes a closed 2x2 at E42-E46,
+says there is no champion/candidate, and asks for numbering to continue at E47. The docs win, per the
+prompt's own instruction: this log already ran through E55 with three anchors confirmed reproducible
+(HARD LESSON 25/27) and a carried-forward queue. This cycle picked up that queue's own item 1.
+
+**Credits: 729 at start (free tier). Budget rule: above 500 → at most TWO backtests. Both used, on the
+one decisive pair the carried-forward queue named.**
+
+## QUEUE ITEM ADDRESSED
+E53/54/55's carried-forward item 1: run e50b's maxBars neighbourhood (8640 and 25920) together, in one
+cycle, so HARD LESSON 16 (test both sides of a load-bearing parameter) and HARD LESSON 19 (distinguish
+a real neighbour from a degenerate one) are both actually satisfied — not one side alone, which is what
+the stale prompt's item 4 ("does the cap or the target bind?") had been sitting on since E46.
+
+## PRE-RUN AUDIT
+Both files are byte-identical to `pine/e50b-alcm-long-only-uncoiled.pine` except `maxBars`. LONG (only
+leg): R = shieldUsd = $2,000, ~2% of BTC price, passes the 0.8% floor (LESSON 3); stop is risk-defined,
+not structural, the declared ALCM deviation (LESSON 5); one leg only, short mechanically deleted,
+`position_size` can never go negative (LESSON 6, trivially satisfied); no redundant terms, coilPrev
+stays removed (LESSON 18). Saved to `pine/e56a-e50b-maxbars8640.pine` and
+`pine/e56b-e50b-maxbars25920.pine` in the same action as this record (LESSON 21).
+
+**Pre-registered outcome (HARD LESSON 17), against e50b's PF 1.21869905 / 21 trades:**
+- Similar trade count and PF close to 1.22 on both sides → maxBars is not load-bearing in this
+  neighbourhood, e50b's number is robust.
+- Fewer trades and markedly worse PF at 8640 → the cap still binds and is cutting winners short (E46's
+  failure mode persisting at a shorter cap).
+- Better PF at 25920 with similar/lower trade count → the exit was still partially bound even at 12960.
+- Trade count collapsing toward single digits on either side → HARD LESSON 19 degenerate neighbour,
+  report as a count, not a result.
+
+## THE RESULT
+
+| maxBars | PF | Trades | Max DD | Win rate | Cap hits (get_trades) |
+|---|---|---|---|---|---|
+| 8640 (E56a) | **1.03751749** | 22 | 21.28% | 36.36% | **5 of 22** (barsInTrade=8641) |
+| 12960 (e50b anchor, E53–55) | **1.21869905** | 21 | 17.45% | 42.86% | 2 of 9 winners (per E55) |
+| 25920 (E56b) | **1.07927810** | 19 | 19.49% | 36.84% | **0 of 19** |
+
+[E56a report](https://mcp-api.trader.dev/backtest/01M1JWFWR78568T01AP9209P04) ·
+[E56b report](https://mcp-api.trader.dev/backtest/01M1JWG7X8YR3ERTA4BG8AD2H1)
+
+**Neither pre-registered outcome landed cleanly — the actual shape is a third case not enumerated in
+advance: both neighbours are real (non-degenerate) readings, both are worse than 12960, and the gap is
+shallow (1.04 / 1.22 / 1.08), not a HARD LESSON 16 narrow-spike collapse.** That gap between what was
+pre-registered and what happened is recorded here rather than smoothed over, per HARD LESSON 17.
+
+## WHAT get_trades ADDS THAT THE HEADLINE NUMBERS DON'T
+
+Pulled both completed results' trade lists (free reads, no credit spent) to check whether the cap still
+binds, per this cycle's own instruction not to declare a caveat without measuring it (HARD LESSON 11).
+
+- **At 8640, the cap still meaningfully binds**: 5 of 22 trades hit it exactly (`barsInTrade` = 8641),
+  2 winners and 3 losers. **Trade seq 1 is the direct demonstration of the E46 failure mode returning**:
+  identical entry (entryTime 1766151300000, entryPrice 87943) in both E56a and E56b. At the 8640 cap it
+  is force-closed at 8641 bars for a small **loss** (exitPrice 87577.8, −$51). At the 25920 cap the same
+  entry is held to 23644 bars and resolves as a **+$442 win** (exitPrice 91943). One trade, two outcomes,
+  purely a function of when the cap forces the exit.
+- **At 25920, the cap never binds at all** — 0 of 19 trades, longest hold 23644 bars against a 25920
+  cap. The "does the cap or target bind" question from the stale prompt's item 4 is now answered
+  directly rather than inferred from `avgBarsWinning`: **at 12960 and above the cap is a rare, not a
+  dominant, constraint; below roughly 8640–9000 it starts cutting real winners.**
+- **Yet PF does not keep improving as the cap loosens past 12960 — it goes 1.22 → 1.08.** The
+  explanation is not "the target doesn't resolve" (it clearly does, more often, as the cap loosens) but
+  **book-occupancy** (HARD LESSON 24): once trade 1's exit time changes, every downstream entry's flat-book
+  window shifts, so E56a/e50b/E56b are not testing the same trades held for different lengths — past the
+  first trade they are testing genuinely different ADMITTED trade sets. Confirmed directly: E56a's and
+  E56b's trade 2 onward have different `entryTime`/`entryPrice` values from each other and from e50b's
+  own 21-trade list, diverging exactly where trade 1's exit bar diverges.
+
+## WHAT THIS ESTABLISHES
+- **maxBars=12960 sits at a real, non-degenerate local optimum among the three points tested on this
+  construction.** Both neighbours are genuine readings (comparable trade counts: 19, 21, 22 — none
+  collapsing toward the interpretability floor per HARD LESSON 19), and both are worse.
+- **This is NOT a HARD LESSON 16 curve-fit spike.** That pattern was a narrow peak with steep falloff on
+  a load-bearing term (1.69 → 0.41 one step off). Here the range across all three points is 1.04–1.22 —
+  shallow, not a spike. The parameter is mildly sensitive, not fragile.
+- **The stale prompt's item 4 question ("does the cap or the target bind?") is resolved for this
+  construction, with a real number instead of an inference**: the cap binds hard below ~8640, is rare by
+  12960, and is absent by 25920 — but resolving the cap does not, by itself, produce a better strategy,
+  because loosening the cap changes which trades get taken at all (occupancy), and the newly admitted
+  trades are not uniformly better than the ones they displace.
+
+## WHAT THIS DOES NOT DO
+- **Not promoted to champion or candidate.** All three trade counts (19–22) sit at or just past the
+  ~20-trade interpretability floor (HARD LESSON 19) on a 4.5-month, single-instrument window (HARD
+  LESSON 22) — directions, not validated results.
+- **Does not touch the shield sweep** (old queue item 2/3) — both credits this cycle went to the pair
+  the queue explicitly asked to be run together; per HARD LESSON 16/19 that was the one decisive,
+  interpretable use of two credits, not the shield sweep, which needs its own paired runs.
+- **Does not re-open coilPrev or the short leg** — unchanged from e50b, not this cycle's question.
+- **Does not resolve why 12960 in particular is the local optimum, only that it is one on the range
+  tested.** A finer grid (10800, 14400) could still distinguish a broad plateau centred near 12960 from
+  a narrower one, but is not queued ahead of the shield sweep, which HARD LESSON 19's own prior finding
+  (E48: shield and maxBars are coupled) makes the more informative next two credits.
+
+## QUEUE
+1. **The shield sweep, varying maxBars WITH each shield width (E48's coupling finding), on e50b at
+   maxBars=12960** — now the top item. e50b's 12960 is confirmed both reproducible (E53–55) and a real
+   local optimum in its own neighbourhood (this cycle), so it is the correct anchor to couple the shield
+   sweep against.
+2. **A finer maxBars grid (10800 / 14400) around 12960** — lower priority than the shield sweep; would
+   only sharpen how broad this cycle's shallow optimum is, not change the qualitative finding.
+3. **Root cause of `pine/e47-alcm-long-cap12960.pine`'s specific mismatch** — still open, still low
+   priority, e50b already supersedes it as the anchor regardless of the answer.
+4. **Position sizing / risk fraction:** unchanged, still open, still not the priority.

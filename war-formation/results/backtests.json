@@ -2130,5 +2130,63 @@
       "verifiedAt": "2026-09-03T00:00:00Z"
     },
     "notes": "EXACT MATCH to E53/E54, to the cent: PF 1.21869905, netProfit $663.034467500007, DD 17.44898097%, 21 trades, all long (longTrades 21, shortTrades 0), 42.86% win rate. This is e50b's first CROSS-SESSION reproduction check -- the specific bar E47 itself failed on (E47 matched once via get_trades verification, then broke on a later re-run from a different session). e50b now clears that bar: 3 of 3 runs across at least two sessions all land on the identical number. Combined with alcm-reference.pine (2/2, E44=E51) and e50a (2/2, E50=E52), this lab now has three files confirmed reproducible under cold re-run, and e50b is the first to clear it cross-session specifically. Still NOT promoted: 21 trades sits at the ~20-trade interpretability floor (HARD LESSON 19) and no out-of-sample split exists on this 4.5-month instrument (HARD LESSON 22) -- PF 1.219 remains a direction, not a validated result, exactly as before this check. This spent 1 of this cycle's 2-backtest budget (732 credits at start, free tier, >500 -> at most two); the second was deliberately not spent, since queue item 2 (the maxBars neighbourhood, 8640/25920) requires both sides run together for HARD LESSON 16/19 interpretability and only one credit remained after this check -- a half-finished neighbourhood test would itself violate HARD LESSON 17 (state the outcome before a decisive run, then honour it). Left for a future cycle with a fresh 2-credit budget."
+  },
+  {
+    "id": "wf-e56a-e50b-maxbars8640",
+    "name": "WF E56a: maxBars neighbourhood tight probe on e50b (12960 -> 8640)",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Carried-forward queue item 1 from E53/E54/E55: 'The maxBars neighbourhood (8640/25920) on e50b, run together in one cycle so HARD LESSON 16/19 is actually satisfied.' e50b (pine/e50b-alcm-long-only-uncoiled.pine) is the lab's first PF>1.0 anchor confirmed reproducible 3/3 including cross-session (PF 1.21869905, 21 trades, all long, maxBars=12960). This file changes ONLY maxBars: 12960 -> 8640, nothing else. Saved as pine/e56a-e50b-maxbars8640.pine before running.",
+    "metrics": {
+      "netProfitPct": 1.23030186,
+      "profitFactor": 1.03751749,
+      "maxDrawdownPct": 21.28076829,
+      "totalTrades": 22,
+      "winRatePct": 36.36363636,
+      "avgTradePct": 0.05592281
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JWFWR78MTPXB6SZSXKAY6E",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JWFWR78568T01AP9209P04",
+      "verifiedAt": "2026-09-03T05:00:00Z"
+    },
+    "notes": "PF 1.038 vs e50b's 1.219 at maxBars=12960 -- WORSE. Trade count 22 (up from 21), not degenerate (HARD LESSON 19: a real reading, not a data-bound one). get_trades confirms 5 of 22 trades hit the 8640 cap exactly (barsInTrade=8641, seq 1/2/3/11/22), 2 of them winners and 3 losers. Critically, seq1's entry (identical entryTime/entryPrice to E56b's seq1) resolves as a small LOSS here (cap-forced exit at 8641 bars, exitPrice 87577.8) but as a +$442 WIN in E56b at the same entry once held to 23644 bars -- direct evidence the 8640 cap still cuts at least one genuine winner short, the E46 failure mode persisting at a shorter cap. Downstream trades also diverge from e50b/E56b because closing positions earlier frees the book sooner (HARD LESSON 24 occupancy effect), so part of the PF delta reflects a different admitted trade set, not purely earlier exits on the same trades."
+  },
+  {
+    "id": "wf-e56b-e50b-maxbars25920",
+    "name": "WF E56b: maxBars neighbourhood loose probe on e50b (12960 -> 25920)",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Sibling of E56a. Carried-forward queue item 1: the loose side of e50b's maxBars neighbourhood. This file changes ONLY maxBars: 12960 -> 25920, nothing else. Saved as pine/e56b-e50b-maxbars25920.pine before running.",
+    "metrics": {
+      "netProfitPct": 2.57927535,
+      "profitFactor": 1.0792781,
+      "maxDrawdownPct": 19.49362481,
+      "totalTrades": 19,
+      "winRatePct": 36.84210526,
+      "avgTradePct": 0.13575133
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JWG7X8NZY2YS150M1AYPWM",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JWG7X8YR3ERTA4BG8AD2H1",
+      "verifiedAt": "2026-09-03T05:00:00Z"
+    },
+    "notes": "PF 1.079 vs e50b's 1.219 at maxBars=12960 -- WORSE, despite the cap essentially never binding: get_trades shows the longest trade (seq1) runs 23644 bars, well short of the 25920 cap, and NONE of the 19 trades hit the cap at all (max barsInTrade 23644). So loosening the cap fully resolves the 'cap forces early exit' failure mode (0/19 vs E56a's 5/22), yet PF does not improve past e50b's 12960 anchor -- it lands between E56a (1.038) and e50b (1.219). Trade count 19, not degenerate. Combined with E56a: 12960 sits at a real (non-degenerate) local optimum among the three tested points, both neighbours genuinely worse, but the gap (1.04-1.22-1.08) is shallow, not a HARD LESSON 16 narrow-spike collapse -- and part of the differences between all three runs reflects book-occupancy-driven changes in WHICH trades are admitted (HARD LESSON 24), not purely exit-timing changes on an identical trade set, since entries after the first diverge across the three files once one file's earlier trade closes sooner and frees the book."
   }
 ]
