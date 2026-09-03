@@ -1579,9 +1579,39 @@ const DATA = [
     },
     "pineSource": "three-m-elite/pine/3m-elite-v43-dzage-binding-test.pine",
     "notes": "DECISIVE -- dzAge >= 1 IS binding, and removing it makes the strategy unprofitable. PF 1.25172059 (v37) -> 0.96009862, DD 8.72815312% -> 12.50793264%, trades 155 -> 199 (+44), win rate 42.58% -> 37.69%. Allowing entry on the SAME 4H bar a zone is created (rather than requiring at least one bar of confirmation first) adds trades that are worse on every axis -- lower win rate, larger drawdown, net loss over the full sample. This confirms HARD LESSON 8's rationale empirically rather than by inference: the term exists specifically to keep zone creation and entry off the same bar, and the binding test shows that guard is load-bearing, not decorative. v37 (with dzAge >= 1 intact) remains champion; this term stays in the signal. The other remaining term, close > dzBot, is unchanged and still untested -- it is duplicated in the entry block itself (line checking close > dzBot before strategy.entry), so isolating it requires removing it from both places, deferred to a future cycle."
+  },
+  {
+    "id": "3m-elite-v44-dzbot-binding-test",
+    "name": "3M Elite v37 binding test: close > dzBot removed (both occurrences)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Queue item from v42/v43 (open since v36): the last untested signal term, close > dzBot, appears TWICE in v37 (inside longCond and again in the entry guard), so removing it from longCond alone would not isolate anything -- the entry guard occurrence would still gate every entry. This run removes both. Byte-identical to v37 otherwise, full 4.7-year sample.",
+    "metrics": {
+      "netProfitPct": 29.75955671,
+      "profitFactor": 1.25172059,
+      "maxDrawdownPct": 8.72815312,
+      "totalTrades": 155,
+      "winRatePct": 42.58064516,
+      "avgTradePct": 0.19199714
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1K486BSK6YJV6EGK4QSYQH2",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1K486BS0487DYGPGCR20PZR",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v44-dzbot-binding-test.pine",
+    "notes": "PREDICTED BEFORE RUNNING, IN THE PINE HEADER: rBig = (close - dzBot) >= minR, and minR = close * minRpct/100 with minRpct fixed at 0.80 (> 0 for any positive price), so rBig already entails close - dzBot >= minR > 0, i.e. close > dzBot, as a strict algebraic consequence of the code -- not an empirical claim about the data. PREDICTION CONFIRMED EXACTLY: PF 1.25172059, DD 8.72815312%, 155 trades, net +29.75955671% -- byte-identical to v37 to eight decimal places. close > dzBot is proven REDUNDANT with rBig (HARD LESSON 18 in its purest form: a term that looks load-bearing in isolation can be doing zero independent work because a partner elsewhere in the conjunction already implies it). This closes the last open item in the v36-era signal-term queue (dzTouch < 2 tested at v29-equivalent work, dzAge >= 1 tested and confirmed load-bearing at v43, close > dzBot now tested and confirmed redundant/inert). v37 remains champion unchanged -- this is a redundancy finding, not a ratchet candidate, since removing a provably-implied term cannot change behavior."
   }
 ];
-const BUILT = "2026-09-03 06:55";
+const BUILT = "2026-09-03 07:55";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

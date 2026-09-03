@@ -369,3 +369,17 @@ trigger must not share a bar) is now confirmed empirically, not just by the mech
 to prevent. Type 1 and the swing rule remain undefined and still do not block the working engulf-
 based entry. `close > dzBot`, the last untested signal term, is unchanged and still open — it is
 duplicated in the entry block itself, so testing it needs removal from both places at once.
+
+## ✅ UPDATE, 2026-09-03 — THE LAST SIGNAL TERM IS TESTED: `close > dzBot` IS REDUNDANT, NOT LOAD-BEARING (v44)
+
+No new vocabulary term was decoded this cycle. One measurement against the existing model instead
+(SYSTEM.md's v44 entry has the full numbers): `close > dzBot` was removed from both its occurrences in
+the champion's source (it appears once inside the entry conjunction and again in the entry guard). The
+result was predicted algebraically before running — the R-floor check already in the conjunction
+(`close - dzBot >= minR`, with `minR` strictly positive) mathematically guarantees `close > dzBot` on
+its own — and the backtest confirmed the prediction exactly: byte-identical PF 1.25172059, DD
+8.72815312%, 155 trades. This closes the three-term signal queue opened at v36: the One Candle Rule
+mitigation cap (`dzTouch < 2`) has been load-bearing since v13, `dzAge >= 1` is confirmed load-bearing
+(v43), and `close > dzBot` is now confirmed redundant (v44) — implied by another term, not independently
+doing any work. Type 1 (the 3M candle's anatomy) and the swing rule remain undefined and still do not
+block the working engulf-based entry.

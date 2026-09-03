@@ -1024,6 +1024,74 @@ evidence, not ratchet candidates — neither changes the champion.
 
 ---
 
+## ██ v44 — THE LAST SIGNAL TERM IS CLOSED: `close > dzBot` IS PROVEN REDUNDANT, NOT LOAD-BEARING (2026-09-03)
+
+**A NOTE ON THE PROMPT, A SEVENTH TIME.** This cycle's stored scheduled prompt is again the same stale
+text first flagged at v34 and repeated at v36, v37/v38, v39, v40/v41 and v42/v43 — it still frames the
+~2026-09-02 cloud/local merge as current news, describes v30 as unreproduced-and-current, and asks to
+rebuild the anchor as blocking task 0. That work has been done and confirmed since v31/v32/v36, and the
+champion has since moved to v37. Per the prompt's own instruction ("THE DOCS WIN over this prompt") and
+HARD LESSON 26, this cycle again continues the real queue (v42/v43's queue item 1) rather than
+re-running the anchor. **Not re-notified this cycle**: v39 already escalated this staleness as a push
+notification, v40/v41 established `update_trigger` cannot fix it from inside a cycle (the routine was
+created via `http_api`, not by an agent), and nothing has changed since either report — this is recorded
+here rather than sent as a seventh notification of the same unaddressed, already-escalated fact.
+
+### QUEUE ITEM 1 FROM v42/v43: THE LAST UNTESTED SIGNAL TERM, `close > dzBot`
+
+Unlike `dzAge >= 1` (tested cleanly at v43), `close > dzBot` appears TWICE in `pine/3m-elite-v37-freshness-tight.pine`
+— once inside `longCond`, once again in the entry guard (`if flat and longCond and not na(dzBot) and
+close > dzBot`) — so isolating it needs both occurrences removed together. One change from v37: both
+instances deleted, everything else byte-identical, full 4.7-year sample.
+
+**Stated BEFORE running, in the Pine header itself (HARD LESSON 17):** `rBig = (close - dzBot) >= minR`,
+and `minR = close * minRpct/100` with `minRpct` fixed at 0.80 — strictly positive for any positive price.
+So `rBig` already entails `close - dzBot >= minR > 0`, i.e. `close > dzBot`, as an algebraic consequence
+of the code, not an empirical claim about the data. `rBig` is required in `longCond` with or without the
+change. **Prediction: removing the explicit checks changes nothing — byte-identical 155 trades, PF
+1.25172059, DD 8.72815312%.**
+
+| | v37 (champion) | **v44 (`close > dzBot` removed x2)** |
+|---|---|---|
+| Profit factor | 1.25172059 | **1.25172059** |
+| Max drawdown | 8.72815312% | **8.72815312%** |
+| Trades | 155 | **155** |
+| Net return | +29.75955671% | **+29.75955671%** |
+
+**The prediction held exactly, to eight decimal places.** `close > dzBot` does zero independent work —
+it is strictly implied by `rBig`, which was already in the conjunction. This is HARD LESSON 18 in its
+purest form: a term that looks like it could be load-bearing (it reads as a real gate — "price must be
+above the zone floor") is actually inert because a partner elsewhere in the same conjunction (`rBig`,
+the R-floor check) already guarantees it as a matter of algebra, not market behaviour.
+
+**This closes the signal-term queue opened at v36.** All three terms named there have now been measured:
+`dzTouch < 2` (the One Candle Rule mitigation cap) was load-bearing by construction from v13 onward,
+`dzAge >= 1` is confirmed load-bearing (v43, PF 1.25 → 0.96 when removed), and `close > dzBot` is now
+confirmed redundant (v44). No code change follows from a redundant-term finding — deleting dead-but-
+harmless logic is a cleanliness question, not a ratchet one, so v37's source is left as-is and remains
+champion unchanged.
+
+### QUEUE
+1. **The scheduled prompt still needs to be edited at the source.** Seven consecutive cycles (v34, v36,
+   v37/v38, v39, v40/v41, v42/v43, now v44) have found and worked around the same stale text;
+   `update_trigger` was confirmed (v40/v41) outside any cycle's reach on this routine. No further
+   action possible from inside a cycle; not re-flagged as a new push per the "not re-notifying an
+   unchanged condition" discipline.
+2. **Sensitivity/robustness work on the long leg is now fully exhausted**, not merely "largely"
+   exhausted: R floor bounded both sides (v35/v36), freshness bounded on three points either side
+   (v37/v38/v40), split-tested (v39), cold-reproduced (v36), both regimes measured (v41/v42), and now
+   every signal term in the entry conjunction individually tested (v43/v44). The only remaining gaps
+   against the STANDING REQUIREMENT are structural: the short leg (independently built and rejected,
+   v34) and a mechanical flip rule beyond zone invalidation. Neither is a backtest-budget item — both
+   need new short-side ideas or a user decision on whether long-only with documented regime evidence is
+   an acceptable interim state. No further parametric queue item is open on this base.
+
+**BASE UNCHANGED: v37 remains champion.** PF 1.25172059, DD 8.72815312%, 155 trades, long-only,
+maxAge=6, anchored at `pine/3m-elite-v37-freshness-tight.pine`. v44 is a redundancy finding about one
+of its terms, not a ratchet candidate.
+
+---
+
 0-V32. ~~Then the freshness neighbourhood~~ (HARD LESSON 16): dzAge <= 6 and <= 24. A KEPT parameter
     must have its sensitivity profile measured before the result is quoted -- War Formation's champion
     was just demoted for exactly this omission. Superseded by v34/v35 above -- still open, now queue
