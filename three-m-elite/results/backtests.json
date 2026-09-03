@@ -1293,5 +1293,65 @@
     },
     "pineSource": "three-m-elite/pine/3m-elite-v41-bear-regime-split.pine",
     "notes": "PF clears 1.0 in an isolated bear year -- the first purpose-built bear-regime evidence this lab (or either sister lab) has produced. 52 trades is above the ~30-trade interpretability floor. FLAG: max drawdown is byte-identical to the full 4.7-year sample's (8.72815312% to eight decimal places), meaning the single worst drawdown of the entire backtest occurred inside this one bear year -- the strategy was profitable through it but felt its full worst-case pain during the hardest regime, not spread across the sample. Advances the STANDING REQUIREMENT's 'both regimes' cell from 'no isolated regime evidence' to 'one isolated bear year measured, PF>1.0' but does not supply an isolated pure-bull year, and does not touch the rejected short leg (v34). v37 remains champion; this is evidence about the champion's behaviour in one regime, not a ratchet candidate."
+  },
+  {
+    "id": "3m-elite-v42-bull-regime-split",
+    "name": "3M Elite v37 isolated bull-regime split, 2023 calendar year",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2023-01-01",
+    "backtestEnd": "2023-12-31",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Queue item 2 from v40/v41: the natural other half of the bear-regime split (v41, 2022 calendar year), completing the STANDING REQUIREMENT's 'both regimes' evidence with an isolated pure-bull-year. Byte-identical pine/3m-elite-v37-freshness-tight.pine, window narrowed to 2023 (BTC ~$16.5k -> ~$42k). Caveat carried from v40/v41: 2023 is a post-crash recovery year into a fresh uptrend, not a clean established uptrend from a stable base.",
+    "metrics": {
+      "netProfitPct": 10.07435275,
+      "profitFactor": 1.62141981,
+      "maxDrawdownPct": 4.33298381,
+      "totalTrades": 24,
+      "winRatePct": 45.83333333,
+      "avgTradePct": 0.4197647
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1K0QRGWP90VRMSQM00MQH3E",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1K0QRGWQHVDAJ82JWHFQQZZ",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v42-bull-regime-split.pine",
+    "notes": "PF 1.62 clears 1.0 comfortably in an isolated pure(ish)-bull year -- stronger than both the 2022 bear year (v41, PF 1.17) and the full 4.7-year sample (v37, PF 1.25). Drawdown (4.33%) is well below the bear year's 8.73% and the full sample's 8.73%, consistent with the STANDING REQUIREMENT's expectation that a two-sided system should look calmer in the regime its long leg is built for. FLAG: 24 trades sits just under HARD LESSON 19's ~30-trade interpretability floor -- directionally informative, not a fully powered read. Completes the STANDING REQUIREMENT's regime-evidence cell with both an isolated bear year (v41) and an isolated bull year (v42) now measured; does not touch the long-only status or the rejected short leg (v34), which remain the two structural gaps against the full requirement. v37 remains champion; this is evidence about the champion's behaviour in one regime, not a ratchet candidate."
+  },
+  {
+    "id": "3m-elite-v43-dzage-binding-test",
+    "name": "3M Elite v37 binding test: dzAge >= 1 removed",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Queue item 3, open since v36: the remaining signal terms (close > dzBot, dzAge >= 1) have never had the binding test applied. This run removes dzAge >= 1 alone from v37's longCond conjunction, byte-identical otherwise to pine/3m-elite-v37-freshness-tight.pine, full 4.7-year sample.",
+    "metrics": {
+      "netProfitPct": -5.55298806,
+      "profitFactor": 0.96009862,
+      "maxDrawdownPct": 12.50793264,
+      "totalTrades": 199,
+      "winRatePct": 37.68844221,
+      "avgTradePct": -0.02790446
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1K0STYFPE45TR9BVADJHPND",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1K0STYFR9BJAJPYT2GFKTEN",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v43-dzage-binding-test.pine",
+    "notes": "DECISIVE -- dzAge >= 1 IS binding, and removing it makes the strategy unprofitable. PF 1.25172059 (v37) -> 0.96009862, DD 8.72815312% -> 12.50793264%, trades 155 -> 199 (+44), win rate 42.58% -> 37.69%. Allowing entry on the SAME 4H bar a zone is created (rather than requiring at least one bar of confirmation first) adds trades that are worse on every axis -- lower win rate, larger drawdown, net loss over the full sample. This confirms HARD LESSON 8's rationale empirically rather than by inference: the term exists specifically to keep zone creation and entry off the same bar, and the binding test shows that guard is load-bearing, not decorative. v37 (with dzAge >= 1 intact) remains champion; this term stays in the signal. The other remaining term, close > dzBot, is unchanged and still untested -- it is duplicated in the entry block itself (line checking close > dzBot before strategy.entry), so isolating it requires removing it from both places, deferred to a future cycle."
   }
 ]

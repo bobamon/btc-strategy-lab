@@ -354,3 +354,18 @@ blends regimes) either this lab or either sister lab has produced — though its
 full sample's worst exactly, meaning the champion's single worst drawdown occurred inside that bear
 year. Type 1 and the swing rule remain undefined and still do not block the working engulf-based
 entry.
+
+## ✅ UPDATE, 2026-09-03 — THE BULL-YEAR HALF LANDS, AND dzAge >= 1 IS CONFIRMED LOAD-BEARING (v42/v43)
+
+No new vocabulary term was decoded this cycle either. Two more measurements against the existing
+model (SYSTEM.md's v42/v43 entry has the full numbers): the isolated-regime pair is now complete —
+2023 (byte-identical v37 source, window narrowed to the calendar year) clears PF 1.62 on 24 trades,
+stronger and calmer than both the 2022 bear year (PF 1.17) and the full sample (PF 1.25), completing
+the STANDING REQUIREMENT's regime-evidence cell alongside v41. And the binding test finally reached
+`dzAge >= 1` (open since v36): removing it from the entry conjunction — allowing a zone to fire on
+the same 4H bar it is created, not just on a later one — turns the champion unprofitable (PF 1.25 →
+0.96, DD 8.73% → 12.51%, on 44 more trades). HARD LESSON 8's rationale for this term (setup and
+trigger must not share a bar) is now confirmed empirically, not just by the mechanism it was written
+to prevent. Type 1 and the swing rule remain undefined and still do not block the working engulf-
+based entry. `close > dzBot`, the last untested signal term, is unchanged and still open — it is
+duplicated in the entry block itself, so testing it needs removal from both places at once.

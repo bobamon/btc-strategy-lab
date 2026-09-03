@@ -928,6 +928,102 @@ maxAge=6, anchored at `pine/3m-elite-v37-freshness-tight.pine`.
 
 ---
 
+## ██ v42/v43 — THE BULL-YEAR HALF LANDS, AND dzAge >= 1 IS CONFIRMED LOAD-BEARING (2026-09-03)
+
+**A NOTE ON THE PROMPT, A SIXTH TIME.** This cycle's stored scheduled prompt is again the same stale
+text first flagged at v34 and repeated at v36, v37/v38, v39 and v40/v41 — it still frames the
+~2026-09-02 cloud/local merge as current news, describes v30 as unreproduced-and-current, and asks to
+rebuild the anchor as blocking task 0. That work has been done and confirmed since v31/v32/v36, and
+the champion has since moved to v37. Per the prompt's own instruction ("THE DOCS WIN over this
+prompt") and HARD LESSON 26, this cycle again continues the real queue (v40/v41's items 2 and 3)
+rather than re-running the anchor. **Not re-notified this cycle**: v39 already escalated this exact
+staleness as a push notification, and v40/v41 additionally established that `update_trigger` cannot
+fix it from inside a cycle (the routine was created via `http_api`, not by an agent). Nothing has
+changed since either report, so this cycle applies the same "not re-notifying an unchanged, already-
+escalated condition" discipline the BTC lab uses for its board-halt checks and records the sixth
+occurrence here rather than sending a seventh report of the same fact.
+
+### QUEUE ITEM 2 FROM v40/v41: THE ISOLATED PURE-BULL-YEAR SPLIT
+
+Completes the regime-evidence pair alongside v41's isolated 2022 bear year. Byte-identical
+`pine/3m-elite-v37-freshness-tight.pine`, window narrowed to the calendar year flagged as the
+nearest bull-regime candidate: **2023-01-01 to 2023-12-31**, BTC ~$16.5k → ~$42k.
+
+| | Full sample (v37, 2022–2026) | 2022 bear year (v41) | **2023 bull year (v42)** |
+|---|---|---|---|
+| Profit factor | 1.25172059 | 1.17318184 | **1.62141981** |
+| Max drawdown | 8.72815312% | 8.72815312% | **4.33298381%** |
+| Trades | 155 | 52 | **24** |
+| Win rate | 42.58% | 38.46% | **45.83%** |
+| Net return | +29.76% | +6.96% | **+10.07%** |
+
+**Stronger and calmer than both the full sample and the bear year, on every axis.** PF is the highest
+this lab has recorded in any window; drawdown is the lowest. This is the shape the STANDING
+REQUIREMENT's "both regimes" clause is asking for: a two-sided-in-principle system with a long leg
+that performs best in the regime it is built for, while still clearing 1.0 in the regime it is not.
+
+**One caveat, carried forward as instructed rather than dropped:** 2023 is a post-crash recovery year
+into a fresh uptrend, not a clean established uptrend from a stable base — the same caveat v40/v41
+attached when nominating this window. **A second caveat, new this cycle:** 24 trades sits just under
+HARD LESSON 19's ~30-trade interpretability floor. This is directionally informative — consistent
+with, not contradicting, the bear-year and full-sample numbers — but should be read as a thinner
+sample than the other two rows in this table, not as a fully powered result on its own.
+
+**This completes the STANDING REQUIREMENT's regime-evidence requirement for the long leg**: an
+isolated bear year (v41) and an isolated bull year (v42) are both now measured, both clear PF 1.0,
+and neither number was cherry-picked after the fact — the bull-year window was nominated by name in
+v40/v41's own queue before this cycle ran it. It does not touch the long-only status or the rejected
+short leg (v34), which remain the two structural gaps against the full four-part requirement.
+
+### QUEUE ITEM 3 FROM v36/v37/v38/v39/v40/v41: THE BINDING TEST ON `dzAge >= 1`
+
+Following the BTC lab's Attack 15 method (HARD LESSON — remove one term from the signal conjunction
+and read the trade count, rather than assume a term is load-bearing): one change from v37,
+`dzAge >= 1` removed from `longCond`, full 4.7-year sample, everything else byte-identical.
+
+| | v37 (champion, `dzAge >= 1` present) | **v43 (`dzAge >= 1` removed)** |
+|---|---|---|
+| Profit factor | 1.25172059 | **0.96009862** |
+| Max drawdown | 8.72815312% | **12.50793264%** |
+| Trades | 155 | **199** |
+| Win rate | 42.58% | **37.69%** |
+| Net return | +29.76% | **-5.55%** |
+
+**Decisive: `dzAge >= 1` is load-bearing.** Removing it — allowing a zone to fire on the SAME 4H
+candle that creates it, rather than requiring at least one bar of confirmation first — adds 44 trades
+that are worse on every axis and flips the strategy from profitable to a net loser over the full
+sample. **This confirms HARD LESSON 8's rationale empirically rather than by inference**: the term
+was written specifically to keep setup and trigger off the same bar, and the binding test shows that
+guard is actually doing work, not just theoretically justified. The term stays in the signal; v37 is
+unchanged and remains champion.
+
+**The other remaining signal term, `close > dzBot`, is still untested.** Unlike `dzAge >= 1`, it
+appears TWICE in the source — once inside `longCond` and again in the entry block's own guard
+(`if flat and longCond and not na(dzBot) and close > dzBot`) — so removing it from `longCond` alone
+would not isolate anything; the second occurrence would still gate every entry. Testing it properly
+needs both instances removed together, which this cycle's two-backtest budget did not reach.
+
+### QUEUE
+1. **`close > dzBot`, the last untested signal term** — needs removal from both occurrences in the
+   source (the conjunction AND the entry guard) to isolate cleanly, unlike `dzAge >= 1` above.
+2. **The scheduled prompt still needs to be edited at the source.** Six consecutive cycles (v34, v36,
+   v37/v38, v39, v40/v41, now v42/v43) have found and worked around the same stale text; `update_trigger`
+   was confirmed (v40/v41) to be outside any cycle's reach on this routine. No further action possible
+   from inside a cycle; not re-flagged as a new push this cycle per the "not re-notifying an unchanged
+   condition" discipline — see the note at the top of this section.
+3. **Sensitivity/robustness work now largely exhausted on the long leg** (R floor bounded both sides,
+   freshness bounded both sides, split-tested, cold-reproduced, and now both regimes measured). The
+   highest-value remaining gaps against the STANDING REQUIREMENT are structural, not parametric: the
+   short leg (rejected, v34) and a mechanical flip rule beyond zone invalidation — neither is a
+   backtest-budget item, both need either new short-side ideas or a user decision on whether long-only
+   with documented regime evidence is an acceptable interim state.
+
+**BASE UNCHANGED: v37 remains champion.** PF 1.25172059, DD 8.72815312%, 155 trades, long-only,
+maxAge=6, anchored at `pine/3m-elite-v37-freshness-tight.pine`. v42 and v43 are both regime/robustness
+evidence, not ratchet candidates — neither changes the champion.
+
+---
+
 0-V32. ~~Then the freshness neighbourhood~~ (HARD LESSON 16): dzAge <= 6 and <= 24. A KEPT parameter
     must have its sensitivity profile measured before the result is quoted -- War Formation's champion
     was just demoted for exactly this omission. Superseded by v34/v35 above -- still open, now queue
@@ -1094,7 +1190,7 @@ configuration must say explicitly that the short leg and the regime evidence are
 |---|---|---|---|---|---|
 | BTC | yes, but PF 1.36 early / 0.66 late | built, PF 0.58, fails | yes — VWAP cross, stand down 60 bars | no — the base REQUIRES close above the 600 EMA, so it only trades bull conditions | **NO** |
 | War Formation | yes, PF 1.69 full / 0.89 recent | four attempts, best PF 0.75 | yes — 6h regime recomputes each block | no — requires 4+ green HA 1h candles, so bull conditions only | **NO** |
-| 3M Elite | yes, v37 PF 1.25 full / 1.34 H1 / 1.12 H2 | built independently, PF 0.74, fails (v34) | yes — zone invalidation on a body close | ONE isolated bear year measured (2022, v41): PF 1.17318184, 52 trades — clears 1.0, but its drawdown equals the full sample's worst (8.73%). No isolated pure-bull year yet | **NO — long leg validated, short leg built and rejected, one regime measured** |
+| 3M Elite | yes, v37 PF 1.25 full / 1.34 H1 / 1.12 H2 | built independently, PF 0.74, fails (v34) | yes — zone invalidation on a body close | BOTH regimes now isolated: bear year (2022, v41) PF 1.17318184/52 trades, bull year (2023, v42) PF 1.62141981/24 trades. Bear year's drawdown equals the full sample's worst (8.73%); bull year is calmer (4.33%) and its 24 trades sit just under the ~30-trade floor | **NO — long leg validated with both regimes measured, short leg built and rejected** |
 
 **The blunt version: two of the three labs are structurally bull-only.** The BTC base gates on price
 above a long EMA and War Formation gates on green Heikin Ashi hourly candles — those are not filters
@@ -1102,12 +1198,15 @@ that happen to favour uptrends, they are conditions that make a downtrend un-tra
 construction. Meeting this requirement means changing the systems, not tuning them.
 
 **3M Elite is the closest in structure**, because supply and demand zones are inherently two-sided.
-**UPDATE 2026-09-03 (v34/v39/v41):** the long leg now works and is split-tested (v37, PF 1.25 full
-sample, both halves clear 1.0) with one isolated bear year also clearing 1.0 (v41). The supply-side
-entry was built from its own independent geometry, never mirrored, and honestly loses (v34, PF 0.74) —
-so the remaining gap is not "the entry doesn't work in either direction" any more, it is specifically
-that the short side of this mechanism has no edge on this instrument over this window, plus no
-isolated pure-bull-year split yet to complete the regime evidence.
+**UPDATE 2026-09-03 (v34/v39/v41/v42):** the long leg now works and is split-tested (v37, PF 1.25 full
+sample, both halves clear 1.0) with BOTH an isolated bear year (v41, PF 1.17318184, 52 trades) and an
+isolated bull year (v42, PF 1.62141981, 24 trades) now clearing 1.0 — the regime-evidence half of the
+requirement is complete for the long leg. The supply-side entry was built from its own independent
+geometry, never mirrored, and honestly loses (v34, PF 0.74) — so the remaining gap is not "the entry
+doesn't work in either direction" any more, it is specifically that the short side of this mechanism
+has no edge on this instrument over this window. That, plus long-only status itself, are the two
+structural items left against the full four-part requirement — both are now sensitivity/robustness-
+exhausted on the long leg and need new short-side ideas or a user decision, not another backtest.
 
 
 ---
