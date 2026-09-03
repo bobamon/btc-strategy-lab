@@ -1985,5 +1985,63 @@
       "verifiedAt": "2026-09-03T01:22:23Z"
     },
     "notes": "Run BEFORE the reproduction check above, and the result that triggered it: this construction is a strict subset of e47's own logic (only the short leg removed) yet returned 10 trades against E47's documented 21 -- a difference that should have been impossible if E47's own 0-short claim were true and the short leg were genuinely inert. That contradiction is what forced the byte-identical e47 re-run (wf-e50-e47-reproduction-check), which showed E47 itself no longer reproduces its own number (24 trades, 15 of them short, this run). Against THAT re-run's 9 long trades, this file's 10 long trades are close but not identical -- consistent with removing the short leg shifting book-occupancy timing by exactly one trade, not with a construction bug in this file. PF 0.45694023, 10 trades, 20% win rate: not a candidate, and not comparable to E47's old number since that number is itself unreproducible now."
+  },
+  {
+    "id": "wf-e51-alcm-reference-reproduction-check",
+    "name": "WF E51 reproduction check: byte-identical alcm-reference.pine",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "E50's queue item 1: is this lab's backtest process stable under re-run at all, before anything is built on any anchor? Exact byte-identical re-run of pine/alcm-reference.pine (E44's anchor), unmodified. E44 documented PF 0.34584164, DD 20.39372123%, 28 trades, long 12 (3W, -$1100.20), short 16 (1W, -$448.20).",
+    "metrics": {
+      "netProfitPct": -15.48402996,
+      "profitFactor": 0.34584164,
+      "maxDrawdownPct": 20.39372123,
+      "totalTrades": 28,
+      "winRatePct": 14.28571429,
+      "avgTradePct": -0.55300107
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JJ6ARXHZSKAMSP3BYKA3AH",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JJ6ARXR1RPKYXTTC341V5Y",
+      "verifiedAt": "2026-09-03T02:19:58Z"
+    },
+    "notes": "EXACT MATCH to E44's documented headline: PF 0.34584164, DD 20.39372123%, 28 trades, longNetProfit -$1100.20 (12 trades, 3W), shortNetProfit -$448.20 (16 trades, 1W) -- reproduced to the cent. This resolves E50's queue item 1 favorably: the process is NOT universally unstable. alcm-reference.pine is genuinely reproducible. This narrows E38/E47's earlier reproduction failures to something specific to those files/constructions (E47's short leg is entangled with book-occupancy timing, per HARD LESSON 24) rather than a global engine or data-revision problem -- though the root cause of THOSE two specific failures is still not isolated. See companion result wf-e52 (same cycle) for the second half of this check."
+  },
+  {
+    "id": "wf-e52-e50a-reproduction-check",
+    "name": "WF E52 reproduction check: byte-identical e50a-alcm-long-only-coiled.pine",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "E50's queue item 2: 'if re-runs prove stable, re-derive a real long-only, no-short-leg anchor.' wf-e51 (this cycle) showed alcm-reference.pine reproduces exactly, so this checks whether the already-built single-leg anchor (pine/e50a-alcm-long-only-coiled.pine, short leg mechanically deleted from e47's code) also reproduces its own E50 number: PF 0.45694023, DD 19.37557338%, 10 trades, 20% win rate.",
+    "metrics": {
+      "netProfitPct": -10.52084427,
+      "profitFactor": 0.45694023,
+      "maxDrawdownPct": 19.37557338,
+      "totalTrades": 10,
+      "winRatePct": 20.0,
+      "avgTradePct": -1.05208443
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JJ8RZPPXFN1BEE9Q5T03RC",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JJ8RZN1P2576556CM0KHR4",
+      "verifiedAt": "2026-09-03T02:21:18Z"
+    },
+    "notes": "EXACT MATCH to E50's documented e50a headline: PF 0.45694023, DD 19.37557338%, 10 trades (2W/8L), all long, netProfitPct -10.52084427% -- reproduced to eight decimal places. Combined with wf-e51, this lab now has ITS FIRST TWO results ever confirmed stable under a cold byte-identical re-run (prior base rate was 0 of 2: E38 and E47 both failed). pine/e50a-alcm-long-only-coiled.pine is now a verified-reproducible, genuinely single-leg (short entry mechanically deleted, position_size can never go negative) long-only anchor. PF 0.457 on 10 trades is still below the ~20-trade interpretability floor (HARD LESSON 19) and PF < 1.0, so this is NOT a candidate -- it is a trustworthy base to sweep maxBars/shield on next, which the lab has not had until now."
   }
 ]

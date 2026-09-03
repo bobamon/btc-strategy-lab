@@ -2130,3 +2130,97 @@ whether IT still reproduces 28 trades).
 3. **Position sizing / risk fraction:** unchanged, still open, still not the priority while the anchor
    itself is unresolved.
    Unchanged, still open, sharpened by E48's coupling finding.
+
+---
+
+# ██ E51/E52 — THE PROCESS IS STABLE. BOTH ANCHORS REPRODUCE EXACTLY.
+
+**Numbering note:** this scheduled cycle inherited a stale prompt written before E47-E50 happened (it
+referenced "the 2x2 closed at E42-E46" and told this cycle to continue numbering at E47). The docs win:
+EXPERIMENT-LOG.md already runs through E50, with a full reproducibility crisis (E38 and E47 both
+unreproducible, HARD LESSON 25) that the stale prompt did not know about. This cycle picked up E50's
+actual queue item 1, not the stale prompt's item.
+
+**Credits: 740 at start (free tier, weekly grant). Budget rule: above 500 → at most TWO backtests. Both
+used, both spent on E50's own queue, not on new strategy design.**
+
+## QUEUE ITEM ADDRESSED
+E50's queue item 1: *"Determine whether this lab's backtest results are stable under re-run at all,
+before trusting any anchor further. Cheapest test: re-run alcm-reference.pine (E44's anchor) unmodified
+and check it still returns PF 0.34584164 / 28 trades."* Item 2 continues: *"If re-runs prove stable
+going forward, re-derive a real long-only, no-short-leg anchor from scratch."*
+
+## E51 — `pine/alcm-reference.pine`, BYTE-IDENTICAL RE-RUN, NO CHANGES
+
+| | E44 (documented, 2026-09-02) | E51 (this cycle, 2026-09-03) |
+|---|---|---|
+| Profit factor | 0.34584164 | **0.34584164** |
+| Max drawdown | 20.39372123% | **20.39372123%** |
+| Trades | 28 | **28** |
+| Long (wins) | 12 (3) | **12 (3)** |
+| Short (wins) | 16 (1) | **16 (1)** |
+| Long net profit | -$1,100.20 | **-$1,100.201935699996** |
+| Short net profit | -$448.20 | **-$448.201060049999** |
+
+**EXACT MATCH, to the cent.**
+
+## E52 — `pine/e50a-alcm-long-only-coiled.pine`, BYTE-IDENTICAL RE-RUN, NO CHANGES
+
+| | E50 (documented, 2026-09-03) | E52 (this cycle, 2026-09-03, hours later) |
+|---|---|---|
+| Profit factor | 0.45694023 | **0.45694023** |
+| Max drawdown | 19.37557338% | **19.37557338%** |
+| Trades | 10 | **10** |
+| Win rate | 20% | **20%** |
+| Net profit % | -10.52084427% | **-10.52084427%** |
+
+**EXACT MATCH, to eight decimal places.**
+
+## WHAT THIS RESOLVES
+
+**The process is not universally unstable.** Two different files, run cold, hours apart, both
+reproduced their own prior documented numbers exactly. This lab's prior base rate for "a result
+survives a re-run" was 0 of 2 (E38, E47). It is now 2 of 2 for these two files specifically.
+
+**This does NOT explain E38 or E47's failures — it narrows them.** If the engine were generally
+non-deterministic or the underlying 1m data had been broadly revised since 2026-09-02, `alcm-reference`
+and `e50a` should plausibly have drifted too, since they share most of the same computation
+(regime/coil/level logic) over the same window. They did not drift at all. Whatever went wrong with
+E47 (HARD LESSON 25) is either localized to bars only E47's specific trade sequence touches, or was a
+one-time event (a transient data patch, a mid-flight engine hiccup) that has since settled — not
+evidence of an ongoing, general unreliability. **The root cause of E47's specific failure remains
+unidentified**; this cycle did not have budget left to chase it further (2 of 2 backtests spent).
+
+## WHAT THIS ESTABLISHES GOING FORWARD
+
+- **`pine/alcm-reference.pine` stands confirmed as a reproducible anchor** (now verified twice: E44,
+  E51). Not a candidate — PF 0.35, well below 1.0 — but trustworthy as a comparison point.
+- **`pine/e50a-alcm-long-only-coiled.pine` is now this lab's first VERIFIED-REPRODUCIBLE, genuinely
+  single-leg (short entry mechanically deleted, `strategy.position_size` can never go negative)
+  long-only anchor.** E49/E50's top queue item — get a trustworthy single-leg base to sweep
+  maxBars/shield on — is now actually satisfied. PF 0.457 on 10 trades is not a result (below the ~20
+  floor, HARD LESSON 19) and is not read as one.
+- **Per HARD LESSON 25's own instruction** ("treat every future headline PF as provisional until it has
+  been re-run at least once, cold"): both of these anchors have now cleared that bar. Nothing else in
+  this log has.
+
+## WHAT THIS DOES NOT DO
+- Does not re-derive the shield sweep, the maxBars neighbourhood, or e50b (the genuinely uncoiled
+  variant) — no credits remained this cycle (2 of 2 spent on the reproducibility check itself).
+- Does not explain E47's specific failure. That stays an open question, now appropriately scoped as
+  "this one construction/window interaction," not "this lab's whole result set is unreliable."
+- Does not produce a champion or a candidate. **There is still no champion and no candidate.**
+
+## QUEUE — CARRIED FORWARD FROM E50, NOW UNBLOCKED
+1. **Run e50b** (`pine/e50b-alcm-long-only-uncoiled.pine`, already saved, never run) against e50a —
+   the genuinely single-leg, coil-removed variant, to test whether `coilPrev` is a liability on the
+   long leg alone (E45 found it was a liability when both legs carried it).
+2. **Then the maxBars neighbourhood** (8640 / 25920) on the now-trustworthy e50a source — the clean
+   version of E49's item, finally satisfiable on a file proven both single-leg AND reproducible.
+3. **Then the shield sweep**, varying maxBars WITH each shield width (E48's coupling finding), on the
+   same trustworthy source.
+4. **If a future anchor ever fails to reproduce again**, that is real evidence worth chasing (which
+   specific bars/trades moved, whether `engineVersion` differs) rather than a re-statement of HARD
+   LESSON 25 — this cycle's finding is that such failures are the exception, not the rule, so the next
+   one deserves investigation, not a shrug.
+5. **Position sizing / risk fraction:** unchanged, still open, still not the priority.
