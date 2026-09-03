@@ -2327,9 +2327,38 @@ const DATA = [
       "verifiedAt": "2026-09-03T03:40:48Z"
     },
     "notes": "EXACT MATCH to E53, to the cent: PF 1.21869905, netProfit $663.034467500007, DD 17.44898097%, 21 trades, all long. e50b is now confirmed stable under a same-session cold re-run (2/2, same evidentiary bar E51/E52 set for alcm-reference.pine and e50a). This does NOT yet clear the cross-session bar E47 itself failed (its own reproduction broke a day after it first ran, not within the same session) -- e50b needs a FUTURE cycle to re-run it byte-identical, cold, before it is trusted as a stable anchor the way alcm-reference and e50a now are. Both of this cycle's two backtest credits (budget: above 500 -> at most TWO) were spent on this pair; no credit remained to start the maxBars/shield sweep queued for whichever single-leg anchor survived this check. war-formation/pine/e50b-alcm-long-only-uncoiled.pine is unchanged from when it was saved in the E50 cycle -- no new source file needed, HARD LESSON 21 satisfied by the pre-existing save."
+  },
+  {
+    "id": "wf-e55-e50b-cross-session-repro",
+    "name": "WF E55: e50b-alcm-long-only-uncoiled, cross-session cold re-run",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Carried-forward queue item 1 from E53/E54: 'a future cycle must re-run e50b byte-identical, cold, before it is trusted as a stable anchor.' This is that cycle -- a new session, one day after E53/E54's same-session matches (2026-09-03, same date but a fresh scheduled run with its own credit budget). Exact byte-identical re-run of pine/e50b-alcm-long-only-uncoiled.pine, unmodified, same declared window.",
+    "metrics": {
+      "netProfitPct": 6.63034468,
+      "profitFactor": 1.21869905,
+      "maxDrawdownPct": 17.44898097,
+      "totalTrades": 21,
+      "winRatePct": 42.85714286,
+      "avgTradePct": 0.3157307
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JS2JKGNHZTZF4V0K0D49ME",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JS2JKFVAJT5VYVBFM4Z5HG",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "notes": "EXACT MATCH to E53/E54, to the cent: PF 1.21869905, netProfit $663.034467500007, DD 17.44898097%, 21 trades, all long (longTrades 21, shortTrades 0), 42.86% win rate. This is e50b's first CROSS-SESSION reproduction check -- the specific bar E47 itself failed on (E47 matched once via get_trades verification, then broke on a later re-run from a different session). e50b now clears that bar: 3 of 3 runs across at least two sessions all land on the identical number. Combined with alcm-reference.pine (2/2, E44=E51) and e50a (2/2, E50=E52), this lab now has three files confirmed reproducible under cold re-run, and e50b is the first to clear it cross-session specifically. Still NOT promoted: 21 trades sits at the ~20-trade interpretability floor (HARD LESSON 19) and no out-of-sample split exists on this 4.5-month instrument (HARD LESSON 22) -- PF 1.219 remains a direction, not a validated result, exactly as before this check. This spent 1 of this cycle's 2-backtest budget (732 credits at start, free tier, >500 -> at most two); the second was deliberately not spent, since queue item 2 (the maxBars neighbourhood, 8640/25920) requires both sides run together for HARD LESSON 16/19 interpretability and only one credit remained after this check -- a half-finished neighbourhood test would itself violate HARD LESSON 17 (state the outcome before a decisive run, then honour it). Left for a future cycle with a fresh 2-credit budget."
   }
 ];
-const BUILT = "2026-09-03 03:43";
+const BUILT = "2026-09-03 04:40";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

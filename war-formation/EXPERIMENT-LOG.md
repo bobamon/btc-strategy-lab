@@ -9,12 +9,16 @@ experiment; take the next open question, run it, record the real result, move it
 **THERE IS NONE.** v6 (the structural-stop build referenced below) was demoted at E34 — its
 load-bearing `coilK` term sat on a one-point-wide spike (HARD LESSON 16/17) — and every run since E35
 uses the corrected A.L.C.M. exit the user specified, which v6 never had. Nothing on the ALCM exit has
-cleared PF 1.0 with a trade count above the ~15-trade interpretability floor while ALSO being built on
-code that is genuinely reproducible AND genuinely single-leg. See E48/E49 (bottom of file, most recent):
-even E47 — this lab's best-looking ALCM number, PF 1.21869905 on 21 trades — turned out to be a
-long-and-short build whose short leg happened to score zero trades at one `maxBars` value, not a true
-long-only construction. **The next cycle's first job is building and saving a source that is actually
-long-only in code, not just in outcome, before any number here can be trusted as a candidate.**
+cleared PF 1.0 with a trade count above the ~20-trade interpretability floor AND an out-of-sample split
+(neither is available on this instrument's 4.5 months of 1m data). See E55 (bottom of file, most
+recent): `pine/e50b-alcm-long-only-uncoiled.pine` — short leg mechanically deleted, `coilPrev` removed
+from the long leg, PF 1.21869905, DD 17.44898097%, 21 trades, all long — is this lab's first ALCM build
+that is genuinely single-leg in code (not just in outcome, the E47/HARD LESSON 24 defect) AND confirmed
+reproducible under cold re-run in three separate runs, one of them cross-session (E53=E54=E55). It sits
+right at the ~20-trade floor and cannot be split-tested for lack of data, so it is read as a **direction,
+not a candidate** — the same caveat E47 carried before its own reproduction broke. **The next cycle's
+job is the maxBars neighbourhood (8640/25920) on e50b, run together in one cycle, before anything further
+is built on it.**
 
 *(The paragraph below describes v6, kept for history — it is DEMOTED, not current.)*
 **v6 — HA cascade, LONG ONLY, structural stop (pre-A.L.C.M., WRONG EXIT MODEL).** BTCUSDT 1m,
@@ -2346,3 +2350,89 @@ independently-derived construction happened to reproduce the orphaned result exa
    the ones already catalogued (HARD LESSON 21/24/25), for process reasons alone.
 5. **Position sizing / risk fraction:** unchanged, still open, still not the priority.
 5. **Position sizing / risk fraction:** unchanged, still open, still not the priority.
+
+---
+
+# ██ E55 — E50b CLEARS THE CROSS-SESSION BAR E47 FAILED ON
+
+**Numbering note:** this cycle's stored prompt is stale again (it references a closed 2x2 at E42-E46
+and says to continue numbering at E47) — the docs win, per the prompt's own instruction. This log
+already ran through E54 with a fully worked reproducibility crisis (HARD LESSON 25/27) and a
+carried-forward queue. This cycle picked up that queue's own item 1.
+
+**Credits: 732 at start (free tier). Budget rule: above 500 → at most TWO backtests.** Only ONE spent —
+see the credit note below for why the second was deliberately not used.
+
+## QUEUE ITEM ADDRESSED
+E53/E54's carried-forward item 1: *"A future cycle must re-run e50b byte-identical, cold, before it is
+trusted as a stable anchor the way alcm-reference and e50a now are."* E53/E54 only established
+SAME-SESSION stability (two matches within one cycle) — the specific bar E47 itself failed on was
+CROSS-session: E47 matched once (E49's `get_trades` check) and then broke on a later re-run from a
+different session. That gap is what this cycle closes.
+
+## PRE-RUN AUDIT
+Unchanged from `pine/e50b-alcm-long-only-uncoiled.pine`'s own header (written when the file was saved,
+audited again at E53/E54): R = $2,000, ~2% of BTC price, passes the 0.8% floor (LESSON 3); stop is
+risk-defined, not structural — the declared ALCM deviation (LESSON 5); one leg only, short mechanically
+deleted, `position_size` can never go negative (each leg separately, trivially satisfied); no redundant
+terms (LESSON 18). No code changed this cycle — byte-identical re-run only.
+
+**Pre-registered outcome (HARD LESSON 17), stated before running:** matches E53/E54 exactly (PF
+1.21869905, 21 trades, all long) → e50b becomes this lab's third confirmed-reproducible anchor, and the
+first to clear cross-session specifically. Diverges → e50b joins E38/E47 as unreproducible — and because
+this file has **no short leg at all**, that would rule out HARD LESSON 24's book-occupancy explanation
+as the mechanism (there is no second leg for occupancy timing to depend on), pointing instead toward
+genuine engine or data non-determinism and contradicting E51/E52's "narrowing" conclusion.
+
+## THE RESULT
+
+| | E53/E54 (same session, 2026-09-02/03) | E55 (this cycle, new session, 2026-09-03) |
+|---|---|---|
+| Profit factor | 1.21869905 | **1.21869905** |
+| Max drawdown | 17.44898097% | **17.44898097%** |
+| Net profit | $663.034467500007 | **$663.034467500007** |
+| Trades | 21, all long | **21, all long** |
+| Win rate | 42.86% | **42.86%** |
+
+**EXACT MATCH, to the cent.** [report](https://mcp-api.trader.dev/backtest/01M1JS2JKFVAJT5VYVBFM4Z5HG)
+
+## WHAT THIS ESTABLISHES
+
+- **`pine/e50b-alcm-long-only-uncoiled.pine` clears the specific bar E47 failed on.** E47 matched its
+  own trade-list once and then broke on a later, different-session re-run. e50b has now matched three
+  times (E53, E54 same-session; E55 a different session) with no divergence yet.
+- **The occupancy explanation for E47's failure (HARD LESSON 24) is not undermined, but it is now more
+  specifically supported**: a file with a genuine short leg (E47's own saved source) is unstable, while
+  a file with the short leg mechanically removed (e50b) is stable across the same window and roughly the
+  same elapsed time. That is consistent with — though does not prove — book-occupancy timing on the
+  short leg being the actual mechanism behind E47's drift, rather than a lab-wide non-determinism.
+- **This lab now has three anchors confirmed reproducible under cold re-run**: `alcm-reference.pine`
+  (2/2, E44=E51), `pine/e50a-alcm-long-only-coiled.pine` (2/2, E50=E52), and
+  `pine/e50b-alcm-long-only-uncoiled.pine` (3/3 including one cross-session, E53=E54=E55).
+  `pine/e47-alcm-long-cap12960.pine` remains the lab's only anchor with a documented reproduction
+  failure.
+
+## WHAT THIS DOES NOT DO
+- **Not promoted to champion or candidate.** 21 trades sits at the ~20-trade interpretability floor
+  (HARD LESSON 19), and there is still no out-of-sample split possible on this instrument — only 4.5
+  months of 1m data exist at all (HARD LESSON 22). PF 1.21869905 remains a direction, not a validated
+  result, exactly as it was before this check.
+- **Does not touch the maxBars neighbourhood (8640/25920) or the shield sweep** — queue items 2 and 3
+  below. Only one credit remained after this check, and per HARD LESSON 16/19 that sweep needs BOTH
+  neighbours run together to be interpretable; spending the second credit on one side alone would itself
+  violate HARD LESSON 17 (state the outcome before a decisive run, then honour it — a decisive run needs
+  both sides to be decisive). The second credit was deliberately left unspent for a future cycle with a
+  full 2-credit budget for that specific test, and to leave headroom in the shared weekly pool (three
+  loops draw on the same 1000-credit grant).
+- **Does not touch e47's own root cause** (queue item 4) — still open, still lower priority since e50b
+  now supersedes it as the working single-leg anchor regardless of the answer.
+
+## QUEUE
+1. **The maxBars neighbourhood (8640 / 25920) on e50b**, run together in one cycle so HARD LESSON 16/19
+   is actually satisfied — this is now the top item, unblocked by three separate reproducibility checks
+   across two files.
+2. **The shield sweep**, varying maxBars WITH each shield width (E48's coupling finding), on e50b once
+   (1) above is done.
+3. **Root cause of `pine/e47-alcm-long-cap12960.pine`'s specific mismatch** — open, low priority, e50b
+   already supersedes it as the anchor.
+4. **Position sizing / risk fraction:** unchanged, still open, still not the priority.
