@@ -177,5 +177,49 @@
    "verifiedAt": "2026-09-03T12:22:00Z"
   },
   "notes": "PASSES - REPRODUCED TO THE DIGIT. Recorded champion: PF 1.25172059 / DD 8.72815312% / 155 trades. Cold re-run: PF 1.25172059 / DD 8.72815312% / 155 trades, long 155 short 0. Identical. WHY THIS RUN MATTERED. HARD LESSON 25 was written twice today at real cost: E38's source was never saved and a rebuild returned PF 0.346 on 28 trades against a recorded 1.502 on 21, voiding two cycles of comparisons; and E47's source WAS saved and still failed to reproduce (24 trades, PF 0.58 against 21 and 1.22), after that result had already been promoted and reported to the user. v32 had a reproducibility check on record. v37 - the only split-tested champion this project has, and the anchor for every downstream decision - did not. That is precisely the gap E47 fell through. WHAT IT ESTABLISHES: v37 is now the FIRST result in this project to clear BOTH gates - an out-of-sample split (H1 1.33630490 on 96 trades, H2 1.12058245 on 59, both above 1.0) AND a cold reproduction to the digit. Nothing else in three labs and roughly 150 recorded backtests has done both. THE CAVEATS THAT DO NOT GO AWAY: H2 remains the weak half (Sharpe 0.90 -> 0.16, net return over 2.25 years essentially flat), the edge is concentrated in H1, and v37 is LONG-ONLY - six independent short constructions have failed, so the standing requirement (both directions, all regimes) is still not met. A verified champion is not a finished system."
+ },
+ {
+  "id": "3m-v53-supply-zone-short-mirror",
+  "name": "3M v53: the SHORT leg as the source describes it -- supply zone, exact mirror",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "short",
+  "status": "research",
+  "createdDate": "2026-09-03",
+  "lastTestedDate": "2026-09-03",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "specPath": "three-m-elite/pine/3m-elite-v53-supply-mirror.pine",
+  "description": "USER DIRECTIVE 2026-09-03: 3M must work long AND short, go back to the source. The source answers it directly -- transcripts/2026-08-09 04-18-22.txt [06:19]: 'all these advance models are the same thing on the bearish side just upside down'. So this is the EXACT structural mirror of the v37 champion: 4H bearish engulf creates a supply zone [pO, pH], price taps up into it, stop at the zone high. Every parameter held at v37 (rTarget 2.0, maxBars 96, maxAge 6, minRpct 0.80, two-touch invalidation, one-entry-per-zone latch). bearEngulf was already computed in v37 and never wired to anything.",
+  "metrics": {
+   "netProfitPct": -24.80312467,
+   "profitFactor": 0.7051283,
+   "maxDrawdownPct": 31.07505566,
+   "totalTrades": 255,
+   "winRatePct": 13.7254902,
+   "avgTradePct": -0.09726716,
+   "sharpeRatio": -0.81864949,
+   "commissionPaid": 1585.0562667,
+   "avgWinningTrade": 169.462421397143,
+   "avgLosingTrade": -38.234078252727,
+   "avgBarsWinning": 46.57142857,
+   "avgBarsLosing": 10.80909091,
+   "longTrades": 0,
+   "shortTrades": 255
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "01M1KMEZKG6JJ45FKGW23MVDNJ",
+   "strategyId": "01M1KMEZZ1S3R5B7YQ431XDM54",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KMEZKG6JJ45FKGW23MVDNJ",
+   "engineVersion": "tv_jul26_mc7",
+   "cascadeRatio": 1.4655172413793103,
+   "uniqueEntries": 174,
+   "totalRows": 255,
+   "maxCascadeDepth": 4,
+   "verifiedAt": "2026-09-03T12:38:00Z"
+  },
+  "verdict": "REJECTED",
+  "notes": "PF 0.7051283 on 255 trades, 13.73% win rate against an rr of 2.0 that needs 33% to break even. The pure mirror does not work on BTC. BUT THIS IS THE MOST INFORMATIVE SHORT FAILURE THE LAB HAS PRODUCED, for three reasons. (1) It is the first short built from the source's LITERAL statement rather than an invented geometry -- v34's 0.736 was a fade-into-the-zone construction nobody in the source described -- so it closes the mirror hypothesis SPECIFICALLY rather than vaguely. (2) IT POINTS DIRECTLY AT WHAT IS MISSING, AND IT IS MISSING FROM BOTH LEGS: the source says repeatedly that the model IS the higher timeframe ('the model is just going to be the same thing that the hard time frame is', [05:12]; a break down is distribution in a bearish context and redistribution in a bullish one, throughout 04-18-22). v37 IMPLEMENTS NO BIAS GATE AT ALL. So this build shorted supply zones straight through the 2023-2025 bull advance -- exactly what the source forbids -- and the 13.73% win rate is what that looks like. The champion has been getting away with the omission because a long-only strategy in a rising market does not need a bias gate to avoid the worst trades; the short leg cannot. (3) TECHNICAL FLAG, SECOND SIGHTING: cascadeRatio 1.4655 -- 255 rows from 174 unique entries, max depth 4. v51 showed the same signature at 1.419. The one-entry-per-zone latch is not holding on the short side, so the headline is computed over more rows than there were entries. This must be understood before ANY short number from this lab is believed, including this one."
  }
 ]

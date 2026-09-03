@@ -1,0 +1,126 @@
+//@version=6
+// BTC ATTACK 36 - NARROW-RANGE DAY EXPANSION (BARE).
+// NUMBERING: ran as Attack 35; renumbered on merge after the cloud routine claimed 35 the same
+// hour for a 1.5R sweep on Attack 34 (both halves cleared 1.0, REVERTED for not touching the
+// drawdown). Same collision class as the v50 clash in 3M. Volatility compression, not a price level.
+//
+// WHY IT EXISTS. The board's queue after Attack 34 is explicit: "the 46.88% drawdown is the
+// DISQUALIFYING number here, not the profit factor. Any successor should be judged on that first."
+// Attack 34 cleared both halves and is still untradeable, because its stop sits at the previous
+// WEEK'S LOW - a full weekly range, 10-20% of price, so ONE loser costs a fifth of the account.
+// The drawdown is not incidental to that mechanism; it is the direct arithmetic of its stop width.
+//
+// CLAIM: a day whose range CONTRACTS well below its own recent average is storing an imbalance, and
+// the first close beyond that compressed day's high resolves it directionally. What is exploited is
+// a VOLATILITY REGIME (compression preceding expansion), not a level participants watch.
+//
+// GENUINELY DISTINCT from the three mechanisms already tried:
+//   - VWAP pullback-continuation (RETIRED, Attack 32: ~0.9 bare on 1,658 trades) - an intraday MEAN.
+//   - Attack 33 channel breakout (DISCARDED on cost) - a ROLLING N-bar extreme, no volatility state.
+//   - Attack 34 weekly break-and-hold (advanced weakly) - a CALENDAR LEVEL, no volatility state.
+// Here the price event is secondary: the setup only exists on days that follow a contraction, and
+// the reference level is a by-product of that contraction rather than the mechanism itself.
+//
+// AND IT IS THE DRAWDOWN FIX, BY CONSTRUCTION, NOT BY FILTERING. R is the compressed day's range -
+// SMALL BY DEFINITION, since the setup requires it to be under 70% of the recent daily average. The
+// stop is still fully structural (the far side of the compression), so LESSON 5 holds while the
+// per-trade loss falls by roughly an order of magnitude versus a weekly range. This is not a filter
+// bolted onto Attack 34 - the board forbids that, and with 23 trades in a half it would manufacture
+// exactly the number Attack 32 exposed. It is a different mechanism whose risk geometry is tighter.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3)  - enforced by EXCLUSION, never by clamping, so the stop stays structural.
+//                           NOTE THE TENSION: this mechanism DELIBERATELY selects small ranges, so
+//                           the R floor may bind hard here. If it does, that is a real finding about
+//                           the mechanism's headroom, not a nuisance to tune away.
+//   Stop beyond STRUCTURE (LESSON 5) - the compressed day's LOW, the opposite edge of the range
+//                           being broken, not the signal level.
+//   Each leg separately (LESSON 6)   - LONG ONLY. A breakdown short is a SEPARATE construction and
+//                           mirroring is forbidden; it is not smuggled in here.
+//   BINDING (E17)         - narrowK 0.70 must reject most days or the mechanism is just "buy the
+//                           prior day's high". Trade count is the binding evidence and is reported.
+//   REDUNDANCY (E14)      - two terms only, and they are not proxies for each other: one is a
+//                           volatility state on COMPLETED data, one is a price event on live data.
+//   LATCH IN SEQUENCE (LESSON 8) - the setup is fixed when the day boundary closes it; the trigger
+//                           is a crossover on a LATER bar. They cannot share a bar.
+//   avgRange is read BEFORE it is updated with the day just completed, so a day is never compared
+//                           against a mean that already contains it.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17):
+//   * pre-2024 half below 1.0            -> DISCARD outright. No filter stack, no rescue.
+//   * both halves >= 1.0 AND drawdown well under Attack 34's 46.88% -> this is the better candidate
+//     on the board's OWN stated criterion, and becomes the lab's base.
+//   * both halves >= 1.0 but drawdown comparable to Attack 34 -> the compression thesis did NOT
+//     deliver the risk fix, and this is just another thin-sample breakout. Say so.
+//   * trade count far above ~300 -> the cost problem is back and this is Attack 33 again.
+//   * any half under ~30 trades -> the ratio is a DIRECTION, not a result (LESSON 12).
+strategy("BTC Attack36 narrow-range day expansion", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rr      = input.float(2.0,  "Reward:risk")
+minRpct = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+narrowK = input.float(0.70, "Compression: day range below this fraction of the recent average")
+alpha   = input.float(0.10, "Daily-range mean smoothing (~20 completed days)")
+maxBars = input.int(480,    "Max bars in trade -- 5 days on 15m")
+
+MS1D = 86400000
+b1d  = math.floor(time / MS1D)
+newDay = b1d != b1d[1]
+
+var float dHi     = na
+var float dLo     = na
+var float avgRng  = na
+var bool  setupOn = false
+var float sHi     = na
+var float sLo     = na
+
+if newDay
+    pRng = na(dHi) or na(dLo) ? na : dHi - dLo
+    // read the mean BEFORE folding this day into it
+    setupOn := not na(pRng) and not na(avgRng) and pRng < avgRng * narrowK
+    sHi     := dHi
+    sLo     := dLo
+    avgRng  := na(pRng) ? avgRng : (na(avgRng) ? pRng : avgRng * (1 - alpha) + pRng * alpha)
+    dHi     := high
+    dLo     := low
+else
+    dHi := na(dHi) ? high : math.max(dHi, high)
+    dLo := na(dLo) ? low  : math.min(dLo, low)
+
+breakUp = setupOn and not na(sHi) and ta.crossover(close, sHi)
+
+minR  = close * minRpct / 100
+rLong = na(sLo) ? na : close - sLo
+rBig  = not na(rLong) and rLong >= minR
+
+goLong = breakUp and rBig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong and rLong > 0
+    strategy.entry("L", strategy.long)
+    slPx   := sLo
+    tpPx   := close + rLong * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(sHi,            title="CompressedDayHigh")
+plot(sLo,            title="CompressedDayLow")
+plot(avgRng,         title="AvgDailyRange")

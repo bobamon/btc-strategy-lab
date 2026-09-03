@@ -2401,3 +2401,64 @@ strict sense across separate runs — worth flagging, not worth chasing at n≈3
    losing streak examined here (those losses closed well before the cap).
 3. **Do not re-test target multiple on this mechanism.** This cycle closes that question with a
    pair of real runs, not a guess.
+
+---
+
+# ██ ATTACK 36 — NARROW-RANGE DAY EXPANSION. DISCARDED, AND IT CORRECTS THE BOARD'S OWN QUEUE ITEM.
+
+Attack 34 advanced weakly and the board's queue was explicit: *"the 46.88% drawdown is the
+DISQUALIFYING number here, not the profit factor. Any successor should be judged on that first."*
+Attack 36 was built to attack that number at its root.
+
+**NUMBERING NOTE.** This ran locally as "Attack 35" while the cloud routine, in the same hour,
+independently claimed 35 for a 1.5R target sweep on Attack 34 (PF 1.277564 / 31 trades and
+1.08255083 / 24 trades, **REVERTED** because a lower target does not touch the drawdown — the
+correct call, and consistent with this board's queue). Renumbered to 36 on merge. Same collision
+class as the v50 clash in 3M: two lineages numbering into the same space.
+
+**What it claims to exploit:** a day whose range **contracts** well below its own recent average is
+storing an imbalance, and the first close beyond that compressed day's high resolves it directionally.
+The exploited thing is a **volatility regime**, not a level participants watch — genuinely distinct
+from the VWAP family (an intraday mean, retired), Attack 33 (a rolling N-bar extreme) and Attack 34
+(a calendar level), in all of which the price event *is* the mechanism.
+
+**And it was the drawdown fix by CONSTRUCTION, not by filtering** — which the board forbids at this
+sample size. Attack 34's stop sits at the previous week's low, a full weekly range, so one loser costs
+a fifth of the account. Attack 36's stop is the compressed day's low, small by definition, while
+staying fully structural.
+
+| | 36a · NEVER-TUNED |
+|---|---|
+| Window | 2022 → Jun 2024 |
+| Profit factor | **0.83969095** |
+| Max drawdown | 52.82763659% |
+| Trades | 118 |
+| Win rate | 33.90% |
+| Commission | $989.06 |
+| Avg loser | **-$208.33** (Attack 34: -$772) |
+
+**DISCARDED** by the kill rule written into the Pine header before the run: the never-tuned half came
+in below 1.0, so no filter stack was added and the second half was never run.
+
+## THE RISK FIX WORKED. THE EDGE DID NOT EXIST. SEPARATING THOSE IS THE FINDING.
+Per-trade risk fell roughly **4x** exactly as designed — and drawdown still came in at **52.83%**,
+*worse* than Attack 34's 46.88%, because it accumulated from a **steady bleed** (-26.05% net on a
+33.90% win rate) rather than from a few large losses.
+
+**Shrinking R does not fix a drawdown caused by a negative edge.** So the board's queue item 3 —
+"judge successors on drawdown first" — **is only half a criterion.** Drawdown has to be read together
+with *where it came from*: a large-R drawdown is a sizing problem and fixable; a bleed drawdown is an
+edge problem and is not.
+
+## AND THE FREQUENCY WINDOW IS CONFIRMED
+$989 across 118 trades, against Attack 33's $6,460 across 757. Cost was never the issue here. The
+workable band between Attack 33's ruinous frequency and Attack 34's unprovable thinness is real, and
+this run sat comfortably inside it — **118 trades in a single half, versus Attack 34's 30 and 23.**
+That part of the search is not the constraint any more.
+
+## QUEUE
+1. **The next mechanism must be judged on WHY its drawdown occurs, not just its size.** Record avg
+   loser and win rate alongside max drawdown from now on; 35a's headline drawdown would otherwise
+   have looked like a *worse* version of 34's identical problem when it is a different problem.
+2. Attack 34 remains the only mechanism to clear 1.0 on both halves, and remains untradeable at
+   46.88%. It is still the base to beat and still nothing to trade.

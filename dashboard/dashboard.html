@@ -340,9 +340,48 @@ const DATA = [
       "verifiedAt": "2026-09-03T13:10:00Z"
     },
     "notes": "REVERTED - RATCHET v2 clause 1 fails on both halves. See vwm-attack35a-weekly-break-15rr-h1 for the full pair writeup. This half's headline number: max drawdown 32.24854336% is IDENTICAL TO THE CENT to Attack 34b's 32.24854336%, proving the drawdown-setting trade in this window is a stop-loss unaffected by the target change. Target multiple is eliminated as a drawdown lever for the weekly break-and-hold mechanism."
+  },
+  {
+    "id": "attack36a-narrow-day-expansion-h1",
+    "name": "Attack 36a: narrow-range day expansion, NEVER-TUNED half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "research",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack36-narrow-day-expansion.pine",
+    "description": "Discovery mechanism #4 (numbered 36 after the cloud routine claimed 35 for a 1.5R sweep on Attack 34) for the invented lab, and the first aimed at the board's OWN stated queue item: 'the 46.88% drawdown is the disqualifying number, not the profit factor.' Claim: a day whose range contracts below 70% of its ~20-day mean is storing an imbalance that the first close above that compressed day's high resolves directionally. Distinct from all three predecessors -- VWAP (an intraday mean, retired), Attack 33 (a rolling N-bar extreme), Attack 34 (a calendar level) -- because the price event is secondary to a VOLATILITY STATE. Stop at the compressed day's low, so R is small BY CONSTRUCTION rather than by filtering.",
+    "metrics": {
+      "netProfitPct": -26.05023196,
+      "profitFactor": 0.83969095,
+      "maxDrawdownPct": 52.82763659,
+      "totalTrades": 118,
+      "winRatePct": 33.89830508,
+      "avgTradePct": -0.22076468,
+      "sharpeRatio": -0.4205437,
+      "commissionPaid": 989.0555959,
+      "avgWinningTrade": 341.1246084825,
+      "avgLosingTrade": -208.333429938461,
+      "longTrades": 118,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1KM0QZ4P0WVYX45ZZX22XHD",
+      "strategyId": "01M1KM0R5YRNERG3XFJ3X5KHD4",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KM0QZ4P0WVYX45ZZX22XHD",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-03T12:31:00Z"
+    },
+    "verdict": "DISCARDED",
+    "notes": "NUMBERING: run as \"Attack 35\" locally, renumbered to 36 on merge -- the cloud routine independently claimed 35 the same hour for a 1.5R target sweep on Attack 34 (PF 1.277564/31 and 1.08255083/24, REVERTED because it does not touch the drawdown). Same collision class as the v50 clash. DISCARDED by the kill rule registered in the Pine header BEFORE the run: the never-tuned half came in at 0.83969095, below 1.0, so no filter stack was added and the second half was never run. THE RISK-GEOMETRY FIX WORKED AND THE EDGE STILL DID NOT EXIST -- and separating those two things is the finding. Average loser -$208.33 against Attack 34's -$772, so the tight structural stop cut per-trade risk by roughly 4x exactly as designed. Drawdown still came in at 52.83%, WORSE than Attack 34's 46.88%, because it accumulated from a steady bleed (-26.05% net on a 33.90% win rate) rather than from a few large losses. SHRINKING R DOES NOT FIX A DRAWDOWN CAUSED BY A NEGATIVE EDGE, and the board's queue item 3 -- 'judge successors on drawdown first' -- is therefore only half a criterion: drawdown has to be read together with WHERE it came from. Cost was never the issue here either ($989 across 118 trades, versus Attack 33's $6,460 across 757), so the frequency window between Attack 33 and Attack 34 is confirmed workable and is not what killed this."
   }
 ];
-const BUILT = "2026-09-03 12:38";
+const BUILT = "2026-09-03 06:43";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

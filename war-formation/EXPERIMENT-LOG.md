@@ -3381,3 +3381,62 @@ is part of the user's strategy, not an optional extra this lab gets to retire.
 Before proposing a change in War Formation or 3M Elite, ask: **is this a small tweak that perfects the
 strategy the user gave me, or am I rebuilding it into something else?** If the second, it does not
 belong in that lab. Ideas of that kind belong in the BTC lab, which exists precisely to be invented.
+
+
+---
+
+# ██ E64 — THE BIDIRECTIONAL CASCADE, AT LAST. AND THE SOURCE'S OWN RULE LOSES TO THE LAB'S PROXY.
+
+**User directive, 2026-09-03:** *"War Formation should work in both directions... 6Hr is the direction,
+so if red we look for shorts."*
+
+`ORACLE-RULES.md` L179-180 had prescribed exactly this build and it had never been run. Two legs, run
+separately per LESSON 6, both from the confirmed-reproducible parent **e58a** (PF 1.24015239 /
+DD 9.82519609% / 36 trades), with shield $1,000 and cap 6480 held fixed so nothing else moved.
+
+| | E64a · SHORT | E64b · LONG (control) | e58a · parent |
+|---|---|---|---|
+| Direction rule | 2+ consecutive **red** 6h | 2+ consecutive **green** 6h | 4+ green 1h in prior 6h |
+| Profit factor | **0.45442725** | **0.95884068** | 1.24015239 |
+| Max drawdown | 10.97440232% | 10.63382724% | 9.82519609% |
+| Trades | 43 | 28 | 36 |
+| Win rate | 6.98% | 35.71% | 41.67% |
+
+**NEITHER IS KEPT.** E64b fails RATCHET v2 clause 1 outright.
+
+## THE DECOMPOSITION, WHICH IS THE POINT OF RUNNING TWO
+E64a changed two things against e58a — the leg **and** the direction source. Read alone it would have
+been confounded (HARD LESSON 10). E64b holds the leg and changes only the direction source, so:
+
+- **direction-rule penalty:** 1.24015239 → 0.95884068 (e58a → E64b)
+- **leg penalty:** 0.95884068 → 0.45442725 (E64b → E64a)
+
+Both are real and they are separate. The short leg is genuinely about half the long leg **even when
+the direction rule is held identical** — which is the first time this lab has been able to say that.
+
+## THE UNCOMFORTABLE FINDING: THE SOURCE'S LITERAL RULE IS WORSE
+`ORACLE-RULES.md` L215-216 has asserted that the straight 6h-candle count is *"simpler and better
+specified"* than the 4-green-1h proxy. **Measured, it is simpler and worse** — 1.240 → 0.959, with the
+count falling 36 → 28. The likely reason: *"4 of the last ~6 1h candles green"* is a **persistence**
+condition, whereas *"2 consecutive 6h candles green"* is satisfied by two barely-green blocks.
+
+**Reported rather than buried.** Mastering the user's strategy means measuring its stated rules
+including when the measurement is inconvenient. The source rule is **not adopted** (it fails the
+ratchet) and **not discarded** on one 4.5-month window. **e58a's proxy remains the reference build.**
+
+## THE DIRECTION RULE DOES BIND
+43 short entries against 28 long under the identical rule. "Red 6h" is a live, frequently-satisfied
+condition, not an inert gate — so E64a's 0.454 is a statement about the short mechanics, not about a
+filter that never fired.
+
+## WINDOW CAVEAT, STATED NOT EXCUSED
+4.5 months of 1m data is **one regime**. A short leg tested only inside it cannot be distinguished
+from a short leg tested in a bull market. This is the 1m data ceiling the mandate correction told this
+lab to live with rather than engineer away, and it is the honest limit on both numbers above.
+
+## QUEUE
+1. **Build the short on the PROXY, not the raw 6h colour.** E64b proved the proxy is the better
+   direction rule; E64a used the worse one. `4+ RED 1h candles in the prior 6h block` + the mirrored
+   sweep isolates the leg against a direction rule that demonstrably works. **This is E65.**
+2. The entry terms (`brokeBelow`, `h1Bull`, `timeGate`, `inMiddle`, the velocity gate) still have
+   never been binding-tested — every axis since E35 has been exit-or-filter.

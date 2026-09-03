@@ -1460,3 +1460,95 @@ is part of the user's strategy, not an optional extra this lab gets to retire.
 Before proposing a change in War Formation or 3M Elite, ask: **is this a small tweak that perfects the
 strategy the user gave me, or am I rebuilding it into something else?** If the second, it does not
 belong in that lab. Ideas of that kind belong in the BTC lab, which exists precisely to be invented.
+
+
+---
+
+# ██████ USER DIRECTIVE, 2026-09-03 (second of the day) — BOTH LABS, BOTH DIRECTIONS
+
+> "my 3M and War Formation should work in both directions not just longs or shorts. 6Hr is the
+> direction for War formation so if red we look for shorts but also depends on the information that
+> I provided, and same for 3M — they should work on both long and shorting, just look over the
+> information I provided for that also."
+
+**This is not a new requirement, it is an unmet one.** The standing requirement of 2026-09-02 already
+said both directions, all regimes. What this directive adds is the instruction to **stop inventing
+short geometries and read what the user already supplied**, plus one concrete rule: in War Formation
+the **6H candle is the direction**, and red means shorts.
+
+**Acted on the same cycle.** Both labs went back to the source, and in both the source turned out to
+have already answered the question — and in both the lab had been ignoring the answer.
+
+## ██ HARD LESSON 31 — WHEN A LAB CANNOT BUILD A LEG, CHECK WHETHER THE SOURCE ALREADY DEFINED IT
+## BEFORE INVENTING A SEVENTEENTH GEOMETRY (BOTH USER LABS, 2026-09-03)
+
+Between them, War Formation and 3M Elite had failed **sixteen** short constructions. Every one was
+designed by this project: where to short, what confirms it, what invalidates it. The two labs then
+generalised those failures into a rule — *never mirror the short off the long* (LESSON 6) — and, in
+3M's case, into a decision that the short leg could be shelved.
+
+**Both labs had source material that specified the short, and neither had implemented it.**
+
+- **War Formation.** `ORACLE-RULES.md` L204-216 records the author's own rule — *"The six hour is the
+  God of direction... Clear direction is either more than one green bar on the six hour"*, and
+  explicitly **"Mirrored for short."** The file even flags, in its own words, that this is *"simpler
+  and better specified than the current build's 4+ green HA 1h candles"*. The lab had written that
+  down and kept running the proxy anyway. L179-180 goes further and prescribes the exact build:
+  *"a single strategy that takes longs when the 6h is bullish and shorts when it is bearish...
+  reported with both legs split out."* **That build had never been run.**
+- **3M Elite.** `transcripts/2026-08-09 04-18-22.txt` [06:19]: *"all these advance models are the same
+  thing on the bearish side just upside down."* The source states the mirror as the design. Worse,
+  `bearEngulf` **was already computed in the v37 champion and wired to nothing** — the champion had
+  been carrying half of its own short leg, unused, the whole time.
+
+**The lesson is about the direction of inference.** Sixteen failed constructions felt like strong
+evidence that the short side was hard. It was actually strong evidence that **this project keeps
+guessing at a thing the source states plainly.** A rule earned from failed inventions (LESSON 6) is a
+rule about inventions — it says nothing about a specification, and it must not be used to override
+one. **LESSON 6 is hereby scoped: it governs geometries this project invents. It does not govern a
+mirror the user's own source material prescribes.**
+
+**And the corollary, which cost real credits today:** neither source-faithful build worked. E64a
+returned 0.454 and v53 returned 0.705. **That does not weaken the lesson, it sharpens it** — because
+for the first time the failures are attributable. A failed invention tells you nothing except that
+one guess was wrong. A failed *specification* tells you exactly which stated rule does not survive
+contact with the data, and both runs pointed at the same missing piece (below).
+
+## ██ HARD LESSON 32 — THE THING BOTH USER LABS ARE MISSING IS THE BIAS GATE, AND THE LONG LEG HID IT
+
+Three runs this cycle, three failures, **one shared cause.**
+
+| | mechanism | PF | trades | what it shorted into |
+|---|---|---|---|---|
+| WF E64a | 6h-red direction, mirrored sweep | 0.45442725 | 43 | one 4.5-month window |
+| 3M v53 | supply zone, exact source mirror | 0.70512830 | 255 | the 2023-2025 bull advance |
+| BTC 35a | narrow-day expansion (long) | 0.83969095 | 118 | n/a — control |
+
+**3M v53 is the clean case.** It shorted supply zones straight through 4.7 years that were mostly a
+bull market, and returned a 13.73% win rate against an rr of 2.0 that needs 33% to break even. The
+source forbids exactly this — *"the model is just going to be the same thing that the hard time frame
+is"* [05:12], and the whole of 04-18-22 turns on whether a break is read in a bullish or bearish
+context. **v37, the project's only split-tested champion, implements NO bias gate on either leg.**
+
+**The long leg concealed the omission for months.** A long-only strategy in a rising market does not
+need a bias gate to avoid its worst trades — the market supplies the filter. The moment the same
+geometry is pointed the other way, the missing gate is the whole result.
+
+**So the shared finding is: the short leg is not the problem. The absence of a regime gate is, and it
+has been a latent defect in the LONG leg the entire time.** The next work in both user labs is the
+same and it is a small, source-faithful tweak rather than a new mechanism:
+
+1. **3M** — implement the bias gate the source keeps insisting on (12H/24H model direction), then
+   re-run BOTH legs against it. If the long leg's numbers move at all, v37's headline was partly the
+   bull market, and that is worth knowing before anything is promoted.
+2. **War Formation** — E64b showed the source's literal 6h-colour rule (0.959) is WORSE than the
+   lab's own 4-green-1h proxy (1.240). Build the short on the **proxy** rather than the raw colour,
+   which isolates the leg against a direction rule that demonstrably works.
+
+## ██ OPEN TECHNICAL FLAG — THE CASCADE SIGNATURE, SECOND SIGHTING
+
+3M v53 returned `cascadeRatio` **1.4655** — 255 rows from 174 unique entries, max depth 4. v51 showed
+the same signature at 1.419. **Both are short builds.** The one-entry-per-zone latch is not holding on
+the short side, which means the headline is computed over more rows than there were entries.
+**No short number from this lab should be believed until this is understood** — including v53's own
+0.705, which is recorded with that caveat attached rather than as a clean reading.

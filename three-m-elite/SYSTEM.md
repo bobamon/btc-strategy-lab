@@ -2605,3 +2605,69 @@ is part of the user's strategy, not an optional extra this lab gets to retire.
 Before proposing a change in War Formation or 3M Elite, ask: **is this a small tweak that perfects the
 strategy the user gave me, or am I rebuilding it into something else?** If the second, it does not
 belong in that lab. Ideas of that kind belong in the BTC lab, which exists precisely to be invented.
+
+
+---
+
+# ██ v53 — THE SHORT LEG, FROM THE SOURCE'S OWN WORDS. IT FAILS, AND IT NAMES WHAT IS MISSING.
+
+**User directive, 2026-09-03:** *"3M should work on both long and shorting — just look over the
+information I provided."*
+
+So I did, and **the source answers it directly.** `transcripts/2026-08-09 04-18-22.txt` [06:19]:
+
+> *"all these advance models are the same thing on the bearish side just upside down, so one two one
+> would be one down two up one down"*
+
+**The source specifies a MIRROR.** That resolves the tension with LESSON 6 ("never mirror the short off
+the long"), which was earned in the BTC and War Formation labs from *invented* geometries and then
+imported here as if universal. It is not universal, and the ledger now scopes it (HARD LESSON 31).
+
+v53 is therefore the **exact structural mirror of the v37 champion** — not of some older long build,
+of the verified one. Every parameter held at v37: rTarget 2.0, maxBars 96, maxAge 6, minRpct 0.80, the
+two-touch invalidation, the one-entry-per-zone latch. **`bearEngulf` was already computed in v37 and
+wired to nothing — the champion has been carrying half of its own short leg, unused, all along.**
+
+| | v53 SHORT | v34 (prior supply attempt) | v37 champion (LONG) |
+|---|---|---|---|
+| Profit factor | **0.70512830** | 0.736 | 1.25172059 |
+| Max drawdown | 31.07505566% | — | 8.72815312% |
+| Trades | 255 (all short) | — | 155 (all long) |
+| Win rate | 13.73% | — | — |
+
+**REJECTED.** PF 0.705, and a 13.73% win rate against an rr of 2.0 that needs 33% to break even.
+
+## THIS IS THE MOST INFORMATIVE SHORT FAILURE THIS LAB HAS PRODUCED
+
+**1. It closes the mirror hypothesis specifically.** v34 was an invented fade-into-the-zone
+construction nobody in the source described. v53 is what the source actually says. A failed invention
+tells you one guess was wrong; a failed specification tells you which stated rule does not survive.
+
+**2. IT NAMES WHAT IS MISSING — AND IT IS MISSING FROM BOTH LEGS.** The source says over and over that
+the model **is** the higher timeframe: *"the model is just going to be the same thing that the hard
+time frame is"* [05:12], and the whole of 04-18-22 turns on whether a break is read in a bullish or
+bearish **context** — the same break is accumulation in one and distribution in the other.
+
+**v37 implements NO bias gate at all.** So v53 shorted supply zones straight through the 2023-2025
+bull advance, which is precisely what the source forbids, and 13.73% is what that looks like.
+
+**The long leg concealed this for months.** A long-only strategy in a rising market does not need a
+bias gate to avoid its worst trades — the market supplies the filter. Point the same geometry the
+other way and the missing gate becomes the entire result. **This is a latent defect in the CHAMPION,
+not a defect in the short leg.**
+
+**3. Technical flag, second sighting.** `cascadeRatio` **1.4655** — 255 rows from 174 unique entries,
+max depth 4. v51 showed 1.419. Both are short builds, so the one-entry-per-zone latch is not holding
+on the short side and the headline spans more rows than there were entries. **No short number from
+this lab should be believed until this is understood, v53's own 0.705 included.**
+
+## QUEUE — REORDERED BY THIS RESULT
+1. **Implement the bias gate the source specifies** (12H/24H model direction), then re-run **BOTH**
+   legs against it. This is a small, source-faithful tweak, not a new mechanism.
+2. **Re-measure v37 with the gate.** If the long leg's numbers move at all, part of its 1.25172059 was
+   the bull market rather than the setup — and that must be known before anything is promoted.
+3. **Resolve the cascade signature** before believing any short reading.
+
+**CHAMPION UNCHANGED: v37** (PF 1.25172059 / DD 8.72815312% / 155 trades; H1 1.33630490 / H2
+1.12058245), now carrying an additional honest caveat: **it has no regime gate, and the source says it
+should.**

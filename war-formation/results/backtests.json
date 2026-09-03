@@ -346,5 +346,83 @@
    "verifiedAt": "2026-09-03T12:12:00Z"
   },
   "notes": "BOTH HALVES FAIL. E63a PF 0.70674847 / DD 31.81350346% / 95 trades / 29.47% win. E63b PF 0.83434289 / DD 16.01925213% / 73 trades / 32.88% win. That is the third of three outcomes registered before the runs. THE CEILING IS GONE AND THE EDGE WENT WITH IT: 168 trades across the two halves against the 20-30 this family had been capped at since E35, and neither half clears 1.0. THE SHARPER POINT IS IN THE BAR COUNTS: avgBarsInTrade is 225.71 and 292.85 against a 1296 cap - 17% and 23%. THE CAP DOES NOT BIND AT 5m. Every previous ALCM measurement had winners pinned at 56-93% of their cap, which is the entire reason E47 existed. So this is the FIRST measurement in this lab's history where the exit actually resolves at target or shield as the specification requires - and it returns 0.71 and 0.83. ON WHICH READING IS RIGHT: 'the ALCM family is 1m-specific' is one explanation. The simpler one is that e58a's 1.24 on 36 trades was SMALL-SAMPLE NOISE and 168 trades is the more trustworthy number. This lab's own docs have warned for weeks that 20-30 trades cannot support a ratio; this is what it looks like when that warning is finally tested. RATCHET v2 clause 5, regime spread reported: 0.12759442, H2 the better half."
+ },
+ {
+  "id": "wf-e64a-6h-direction-short",
+  "name": "WF E64a: the SHORT leg under the source's own 6h direction rule",
+  "symbol": "BTCUSDT",
+  "timeframe": "1m",
+  "direction": "short",
+  "status": "research",
+  "createdDate": "2026-09-03",
+  "lastTestedDate": "2026-09-03",
+  "backtestStart": "2025-12-16",
+  "backtestEnd": "2026-05-03",
+  "specPath": "war-formation/pine/e64a-6h-direction-short.pine",
+  "description": "USER DIRECTIVE 2026-09-03: War Formation must work in both directions and the 6H is the direction. Implements ORACLE-RULES L204-216 literally -- direction = 2+ consecutive RED 6h candles, replacing the lab's own '4+ green 1h candles in the prior 6h block' proxy. Short mechanics are the structural mirror of the long's sweep-and-reclaim (15m higher high, then rejection back below). Shield $1,000 and cap 6480 held at e58a exactly so only the direction rule and the leg change.",
+  "metrics": {
+   "netProfitPct": -7.81203272,
+   "profitFactor": 0.45442725,
+   "maxDrawdownPct": 10.97440232,
+   "totalTrades": 43,
+   "winRatePct": 6.97674419,
+   "avgTradePct": -0.18167518,
+   "sharpeRatio": -2.78849887,
+   "commissionPaid": 421.6564718,
+   "avgWinningTrade": 216.897476633332,
+   "avgLosingTrade": -35.7973925425,
+   "longTrades": 0,
+   "shortTrades": 43
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "01M1KM717WQKYA8668ET1KVTG0",
+   "strategyId": "01M1KM71FM0139W7BF1FQ1QT0A",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KM717WQKYA8668ET1KVTG0",
+   "engineVersion": "tv_jul26_mc7",
+   "cascadeRatio": 1,
+   "verifiedAt": "2026-09-03T12:34:00Z"
+  },
+  "verdict": "REJECTED",
+  "notes": "Short construction #12, and the FIRST driven by the source's own direction rule rather than by a location this lab chose. PF 0.454 on 43 trades, 6.98% win rate. THE DIRECTION RULE BINDS AND IS NOT THE PROBLEM: 43 short entries against the long leg's 28 under the identical rule (E64b), so 'red 6h' is a live, frequently-satisfied condition, not an inert gate. THE DECOMPOSITION IS THE POINT -- E64b holds the direction rule constant and runs the LONG leg at 0.959, so the leg penalty (0.959 -> 0.454) is real and separate from the direction-rule penalty (e58a's 1.240 -> E64b's 0.959). Fourteen prior mirrored shorts failed and this makes fifteen, but for the first time the failure is isolated to the MECHANICS rather than confounded with the direction. WINDOW CAVEAT, stated not excused: 4.5 months of 1m data is ONE regime, and a short leg tested only inside it cannot be distinguished from a short leg tested in a bull market."
+ },
+ {
+  "id": "wf-e64b-6h-direction-long",
+  "name": "WF E64b: the LONG leg under the same 6h direction rule -- the CONTROL",
+  "symbol": "BTCUSDT",
+  "timeframe": "1m",
+  "direction": "long",
+  "status": "research",
+  "createdDate": "2026-09-03",
+  "lastTestedDate": "2026-09-03",
+  "backtestStart": "2025-12-16",
+  "backtestEnd": "2026-05-03",
+  "specPath": "war-formation/pine/e64b-6h-direction-long.pine",
+  "description": "The control that makes E64a interpretable (HARD LESSON 10). Holds the LEG at e58a's long and changes ONLY the direction source: 2+ consecutive GREEN 6h candles instead of 4+ green 1h candles inside the prior 6h block. Shield, cap, velK, whole-number band, time gate and witching ban all held at e58a.",
+  "metrics": {
+   "netProfitPct": -1.06093465,
+   "profitFactor": 0.95884068,
+   "maxDrawdownPct": 10.63382724,
+   "totalTrades": 28,
+   "winRatePct": 35.71428571,
+   "avgTradePct": -0.03789052,
+   "sharpeRatio": -0.07791906,
+   "commissionPaid": 281.0934655,
+   "avgWinningTrade": 247.15356876,
+   "avgLosingTrade": -143.201619616666,
+   "longTrades": 28,
+   "shortTrades": 0
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "01M1KMB74E2CEGPPMX8SV8W8M5",
+   "strategyId": "01M1KMB7AWNQ4W0PNKHWJVHARC",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KMB74E2CEGPPMX8SV8W8M5",
+   "engineVersion": "tv_jul26_mc7",
+   "cascadeRatio": 1,
+   "verifiedAt": "2026-09-03T12:36:00Z"
+  },
+  "verdict": "REJECTED",
+  "notes": "NOT KEPT -- RATCHET v2 clause 1 fails outright: PF 1.24015239 (e58a) -> 0.95884068, and the count drops 36 -> 28. AND THIS IS THE UNCOMFORTABLE FINDING OF THE CYCLE: the source's OWN literal direction rule performs WORSE than the proxy this lab invented to stand in for it. ORACLE-RULES L215-216 has been asserting for some time that the straight 6h-candle count is 'simpler and better specified' than the 4-green-1h proxy. Measured, it is simpler and WORSE on this window. The proxy was doing real work -- most likely because '4 of the last ~6 1h candles green' is a persistence condition, while '2 consecutive 6h candles green' can be satisfied by two barely-green blocks. Reported plainly rather than buried: mastering the user's strategy means measuring its stated rules, INCLUDING when the measurement is inconvenient. The source rule is NOT adopted and it is NOT discarded on one 4.5-month window; e58a's proxy remains the reference build."
  }
 ]
