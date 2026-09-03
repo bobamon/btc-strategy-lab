@@ -2052,3 +2052,40 @@ at check #7), not a second consecutive tick.
    spanning roughly eight hours.
 
 **BASE: still RETIRED. No champion, no candidate, no base. Nothing changed this cycle.**
+
+
+---
+
+# ███ CYCLE CHECK #10, 2026-09-03 10:11 UTC — SAME STALE PROMPT, SAME HALT. NOT RE-NOTIFYING.
+
+Tenth consecutive firing of the same unedited stored mandate (still anchored on PF 1.47184908 / 56
+trades / `coolBars` 150 / "no champion" / continue numbering at Attack 31 / split Attack 30's 15m
+build at 2024-06-08, and still citing 21 hard lessons — the ledger now holds 29). Superseded before
+cycle check #1, for the reasons recorded there and in Attacks 31/32: the split already ran and failed
+out-of-sample (PF 0.799 on 77 never-seen trades), and the bare mechanism was then shown to lose money
+on both halves of the full 4.7-year window (1,658 trades, PF 0.930 / 0.880), which retired the base
+outright.
+
+`get_credits` returned 712 — budget has never been the blocker across ten checks now
+(744 → 740 → 736 → 732 → 729 → 725 → 721 → 718 → 716 → 712; the drift with no BTC backtest run
+reflects the other two labs sharing the same pool). `git log` confirms no BTC lab commit landed
+between cycle check #9 and this firing — only War Formation (E60) and 3M Elite (v46/v47) activity —
+so there is nothing new on this lab's own board to react to. Per this lab's own rule that the board
+outranks the stored prompt: no attack ran, no Pine was written, no board state changed beyond this
+note.
+
+**Not sending another push notification.** Cycle check #7 paged the user at 07:18 after a four-hour
+silence. This check lands ~2h53m after that page — shorter than the four-hour gap that triggered it,
+and check #8/#9 already held that same-order-of-magnitude gaps since the last page are not the "many
+more firings, still no response" threshold. Nothing about the blocker has moved since check #9.
+
+**Still waiting on the user, unchanged since Attack 32 / cycle check #3:**
+1. What replaces the retired VWAP pullback-continuation mechanism — a new mechanism on BTCUSDT, or
+   the same measure/split/keep discipline applied to a different instrument.
+2. The three open rule questions (drawdown-tolerance band, regime-spread ratchet term, minimum-sample
+   floor) — moot for this retired strategy, but they would govern any successor.
+3. The stored scheduled prompt itself is stale and should be updated or paused so the loop stops
+   re-asking for work the board already closed. This is now ten identical firings since the halt,
+   spanning roughly nine hours.
+
+**BASE: still RETIRED. No champion, no candidate, no base. Nothing changed this cycle.**
