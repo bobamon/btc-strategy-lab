@@ -1,0 +1,153 @@
+//@version=6
+// WAR FORMATION E65b — BINDING-TEST THE ENTRY, NOT THE EXIT. velK 0.8 -> 1.0.
+//
+// MANDATE CORRECTION (2026-09-03) restored 1m as the specified entry timeframe and named the
+// standing gap directly: "Every axis explored since E35 has been about the exit or a filter."
+// E63's own queue item 1 said the same thing before the mandate corrected its timeframe choice:
+// "Test the entry, not the exit... the entry itself (brokeBelow + a velocity-gated reclaim of the
+// previous 15m low) can finally be binding-tested term by term." This is the second half of the
+// first entry-side binding test run under the A.L.C.M. exit model, paired with e64a (velK 0.6) per
+// HARD LESSON 16 -- neither side alone is decisive. E23 tested velK 0.6 (not this side) on the OLD
+// structural-stop exit (pre-E35, ORACLE-RULES.md) and found it "degrades gracefully" -- that result
+// is under a different, since-invalidated exit model and does not carry over to either side here.
+//
+// PARENT: pine/e58a-shield1000-maxbars6480.pine (PF 1.24015239, DD 9.82519609%, 36 trades, 41.67%
+// win, confirmed reproducible cross-session E58=E59) -- this lab's best-sample, lowest-drawdown
+// reproducible ALCM anchor, per the task's own instruction to name the parent and say which.
+//
+// CHANGE: velK 0.8 -> 1.0 ONLY. velMin = atr(30)*velK gates longTrig: ta.crossover(close, p15l) AND
+// (close - p15l) >= velMin. Tightening velK requires a stronger reclaim of the prior 15m low before
+// an entry is admitted. Everything else byte-identical to e58a: shieldUsd=1000, maxBars=6480, rr=2.0,
+// greenBull=4, skipOpen/skipClose=60, midLo/midHi=400/600, witchOn=true, etOffset=-4.
+//
+// OCCUPANCY CONFOUND, NAMED IN ADVANCE (HARD LESSON 29, generalized per the task's own instruction
+// to name it before running, not after): velK is an ENTRY gate, not an exit-timing parameter, but
+// tightening it can still skip an entry that velK=0.8 would have taken, which shifts when the book
+// goes flat again and can change which downstream signals get admitted. This run is therefore NOT a
+// controlled "same trades, one more/fewer filtered out" comparison against e58a -- it may be a
+// different trade population from the first divergence onward, exactly as E58 found for shieldUsd.
+// That will be checked with get_trades if the headline numbers diverge meaningfully, not assumed.
+//
+// PRE-RUN AUDIT: LONG (only leg) -- R = shieldUsd = $1,000 (~1.0% of BTC price), PASSES the 0.8%
+// floor (HARD LESSON 3), unchanged from e58a. Stop risk-defined, not structural -- the declared ALCM
+// deviation (HARD LESSON 5). SL/TP fixed at entry, no trailing. SHORT -- deleted, identical to
+// e50a/e50b/e58a (HARD LESSON 6, trivially satisfied). Redundancy (HARD LESSON 18): none introduced,
+// single-parameter change from e58a.
+//
+// PRE-REGISTERED OUTCOME (HARD LESSON 17), against e58a's PF 1.24015239 / 36 trades / DD 9.82519609%,
+// to be read together with e64a (velK 0.6) per HARD LESSON 16 -- neither side alone is decisive:
+//   - PF improves or holds near 1.24 on this side AND trade count does not collapse (>=20, ideally
+//     >=30 per RATCHET v2) -> a stricter velocity gate is a real, source-faithful tweak worth keeping
+//     if e64a also does not show 0.8 was already optimal.
+//   - PF degrades meaningfully with adequate trade count -> requiring a stronger reclaim removes real
+//     signal along with noise; 0.8 is closer to calibrated on this side.
+//   - Trade count collapses toward single digits -> HARD LESSON 19 degenerate neighbour, report as a
+//     count, not a result.
+// If e64a and e64b bracket 0.8 with 0.8 sitting at the peak of the three, that is this construction's
+// first confirmed-optimal ENTRY term, the mirror of maxBars=12960 on the exit side (E60).
+strategy("War Formation E65b e58a velK1.0", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+greenBull = input.int(4,     "Green 1h candles for BULL")
+skipOpen  = input.int(60,    "Skip first N minutes of 6h block")
+skipClose = input.int(60,    "Skip last N minutes of 6h block")
+velK      = input.float(1.0, "Velocity: min reclaim as multiple of atr(30)")
+midLo     = input.float(400, "Whole-number middles low")
+midHi     = input.float(600, "Whole-number middles high")
+etOffset  = input.int(-4,    "ET offset from UTC")
+witchOn   = input.bool(true, "Ban longs in witching hour 1-4am ET")
+shieldUsd = input.float(1000,"THE SHIELD: fixed dollar gap to liquidation")
+rr        = input.float(2.0, "Reward:risk")
+maxBars   = input.int(6480,  "Max bars in trade -- unchanged from e58a")
+
+MS6H = 21600000
+MS1H = 3600000
+MS15 = 900000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+b15 = math.floor(time / MS15)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+new15 = b15 != b15[1]
+
+var float h1o     = na
+var int   grnCur  = 0
+var int   cntCur  = 0
+var int   grnPrev = 0
+var int   cntPrev = 0
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    grnCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(h1o)
+        cntCur := cntCur + 1
+        if close[1] > h1o
+            grnCur := grnCur + 1
+    h1o := open
+
+regimeReady = cntPrev >= 5
+bullRegime  = regimeReady and grnPrev >= greenBull
+
+minsIn    = (time - b6 * MS6H) / 60000
+timeGate  = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+h1Bull = not na(h1o) and close > h1o
+
+var float c15l = na
+var float p15l = na
+
+if new15
+    p15l := c15l
+    c15l := low
+else
+    c15l := na(c15l) ? low : math.min(c15l, low)
+
+brokeBelow = not na(p15l) and c15l < p15l
+
+velMin = na(ta.atr(30)) ? na : ta.atr(30) * velK
+
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+hUTC     = math.floor(time / MS1H) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+longBan  = witchOn and witching
+
+longTrig  = not na(p15l) and not na(velMin) and ta.crossover(close, p15l) and (close - p15l) >= velMin
+
+goLong  = bullRegime and timeGate and h1Bull and brokeBelow and not inMiddle and not longBan and longTrig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+longR = shieldUsd
+
+if flat and goLong and longR > 0
+    strategy.entry("L", strategy.long)
+    slPx   := close - longR
+    tpPx   := close + longR * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")

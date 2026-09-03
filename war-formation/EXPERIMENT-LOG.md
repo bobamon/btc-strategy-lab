@@ -3437,6 +3437,175 @@ lab to live with rather than engineer away, and it is the honest limit on both n
 ## QUEUE
 1. **Build the short on the PROXY, not the raw 6h colour.** E64b proved the proxy is the better
    direction rule; E64a used the worse one. `4+ RED 1h candles in the prior 6h block` + the mirrored
-   sweep isolates the leg against a direction rule that demonstrably works. **This is E65.**
+   sweep isolates the leg against a direction rule that demonstrably works. **RENUMBERED TO E66** — a
+   concurrent same-window session took E65 for its own item (entry-side `velK` binding test on e58a,
+   run in parallel with this cascade build); see E65's own numbering note below for how the collision
+   was resolved. This item is unchanged, only its label moved.
 2. The entry terms (`brokeBelow`, `h1Bull`, `timeGate`, `inMiddle`, the velocity gate) still have
-   never been binding-tested — every axis since E35 has been exit-or-filter.
+   never been binding-tested — every axis since E35 has been exit-or-filter. **PARTIALLY ADDRESSED at
+   E65**: `velK` is now done; `brokeBelow`, `h1Bull`, `timeGate`, `inMiddle` remain open.
+
+---
+
+# ██ E65 — THE FIRST ENTRY-SIDE BINDING TEST UNDER THE A.L.C.M. EXIT. velK=0.8 CONFIRMED A REAL PEAK.
+
+**NUMBERING NOTE.** This cycle's `git pull --rebase origin main` was run first and came back clean —
+no local divergence, nothing pending. This entry was then drafted and both backtests run against that
+state as **E64**. Before committing, a second `git pull --rebase` (standard practice before push)
+found `origin/main` had moved: a concurrent session had landed its own **E64** — the bidirectional
+cascade build the second 2026-09-03 user directive prompted (`ORACLE-RULES.md` L179-180, HARD LESSON
+31/32) — in the meantime. That is a genuine same-window collision, not a stale-prompt duplicate: two
+different, non-overlapping experiments were run in parallel and both are real. Per this log's own
+practice of the docs (now, execution order) winning over a pre-announced label, **this entry and its
+two runs are renumbered E65** (files, strategy titles, and this write-up all updated accordingly) so
+the numbering stays a record of what actually ran, in order. The other session's own queue item 1 had
+pre-labeled its next planned build "E65" (short leg on the 4-green-1h PROXY direction rule rather than
+raw 6h colour) — **that item is renumbered E66 below**, since it had not yet run when this renumbering
+happened. Nothing was duplicated: the two cycles worked genuinely different, complementary items (the
+entry side here; the bidirectional cascade there), both required by standing instructions, at the same
+time.
+
+**MANDATE CORRECTION (2026-09-03, both EXPERIMENT-LOG.md and STRATEGY-LEDGER.md) READ FIRST.** It
+reverses E63's timeframe move: **the 1m entry is part of the specification**, not a free choice, and
+work returns to 1m, 2025-12-16 to 2026-05-03. E63 itself is not withdrawn — it stands as a diagnostic
+that the 20-30 trade ceiling is real and that thin-sample readings should be flagged as such — but 5m
+is not the base. This cycle worked on 1m as the mandate requires.
+
+**Credits: 692 at the start of this cycle's work (free tier, shared pool). Budget rule: above 500 ->
+at most TWO backtests. Both used, on one decisive pair.**
+
+## PARENT, NAMED PER THE MANDATE'S OWN INSTRUCTION
+
+**`pine/e58a-shield1000-maxbars6480.pine`** — PF 1.24015239, DD 9.82519609%, 36 trades (all long),
+41.67% win rate, confirmed reproducible cross-session (E58=E59). Of the three confirmed-reproducible
+ALCM families (`alcm-reference.pine` PF 0.35, `e50a`/`e50b` PF 0.457/1.219, `e58a` PF 1.240), e58a has
+the best PF, the largest sample, and the lowest drawdown — the correct base to binding-test against.
+
+## QUEUE ITEM ADDRESSED
+
+The mandate's own instruction, echoing E63's queue item 1 (which the timeframe correction did not
+retract): **"Binding-test the ENTRY terms too, not just the exit: brokeBelow, h1Bull, timeGate,
+inMiddle, the velocity gate. Every axis explored since E35 has been about the exit or a filter."**
+This is the first run against that instruction. `velK` (the velocity gate — `velMin = atr(30)*velK`,
+requiring `close - p15l >= velMin` on the crossover) was chosen because it is the one entry term this
+lab has a prior (pre-ALCM, now-invalidated) reading for to contrast against: E23 tested velK 0.6 on
+the OLD structural-stop exit model (pre-E35) and found it "degrades gracefully" (PF 1.686->1.458,
+trades 32->46). **That result is under a different, since-invalidated exit model and does not carry
+over** — this is a fresh measurement under the ALCM exit, the first of its kind on this term.
+
+## PRE-RUN AUDIT
+
+Both files byte-identical to `pine/e58a-shield1000-maxbars6480.pine` except `velK`. LONG (only leg):
+R = shieldUsd = $1,000 (~1.0% of BTC price), passes the 0.8% floor (HARD LESSON 3); stop risk-defined,
+not structural, the declared ALCM deviation (LESSON 5); one leg only, short mechanically deleted,
+`position_size` can never go negative (LESSON 6, trivially satisfied); no new redundancy (LESSON 18) —
+single-parameter change from e58a. Saved to `pine/e65a-e58a-velk06.pine` (velK 0.6) and
+`pine/e65b-e58a-velk10.pine` (velK 1.0) in the same action as this record (LESSON 21).
+
+**Occupancy confound named in advance, per the mandate's own instruction** ("name it in advance"):
+`velK` is an entry gate, not an exit-timing parameter, so HARD LESSON 29 does not apply verbatim — but
+loosening or tightening it can still admit or skip a DIFFERENT first trade than e58a's own, which
+shifts every downstream book-flat window. This was stated as a real possibility before running, not
+assumed either way, and checked below with `get_trades`.
+
+**Pre-registered outcome (HARD LESSON 17), against e58a's PF 1.24015239 / 36 trades / DD 9.82519609%,
+both sides read together per HARD LESSON 16 — neither alone is decisive:**
+- PF improves or holds near 1.24 on one or both sides with adequate trade count -> the velocity gate
+  is not calibrated at 0.8, a real source-faithful tweak is available.
+- PF degrades on both sides with adequate trade count -> 0.8 is a real local optimum on this entry
+  term, the mirror of maxBars=12960 on the exit side.
+- Trade count collapsing toward single digits on either side -> HARD LESSON 19 degenerate neighbour,
+  report as a count, not a result.
+
+## THE RESULT
+
+| velK | PF | Trades | Max DD | Win rate | avgBarsWinning / cap |
+|---|---|---|---|---|---|
+| 0.6 (E65a) | **0.87342782** | **48** | **14.81858269%** | 33.33% | 1991.6/6480 = 30.7% |
+| 0.8 (e58a anchor) | **1.24015239** | 36 | **9.82519609%** | 41.67% | 2066.7/6480 = 31.9% |
+| 1.0 (E65b) | **1.07620160** | **31** | **11.62737811%** | 38.71% | 1848.3/6480 = 28.5% |
+
+[E65a report](https://mcp-api.trader.dev/backtest/01M1KMKER0N05Y0CHPKYZTTAGR) ·
+[E65b report](https://mcp-api.trader.dev/backtest/01M1KMMBK1KRYG542YY6M9CTSX)
+
+**The second pre-registered branch landed.** PF degrades on both sides of 0.8, and neither side is
+degenerate (48 and 31 trades, both clear of the ~20 floor; E65b's 31 clears the RATCHET v2 30-trade
+floor on its own, E65a's 48 clears it comfortably). Trade count moves the way a tightening velocity
+gate should: 48 -> 36 -> 31 as velK rises 0.6 -> 0.8 -> 1.0, monotonic. The cap barely binds anywhere
+in this family (28.5%-31.9% of 6480), so this is not a repeat of the maxBars cap-truncation failure
+mode — the PF differences are about which entries the gate admits, not about the exit resolving early.
+
+## WHAT get_trades ADDS: THE OCCUPANCY POINT NAMED IN ADVANCE IS REAL, ON ONE SIDE ONLY
+
+Pulled e58a's own trade list (`jobId 01M1K3J6GDK0Z51MFX60ECM75F`, free read, no credit spent) to check
+the named-in-advance possibility directly, per HARD LESSON 11 (measure a mechanism, don't declare it).
+e58a's trade 1: `entryTime 1766151300000, entryPrice 87943, entryBar 5108`.
+
+- **E65a (velK 0.6) does NOT share this first trade** — its `effectiveTradeRange.firstTradeEntryTs` is
+  `1765892400000`, earlier than e58a's. The looser gate admits a weaker reclaim as a valid entry
+  before e58a's own first signal ever fires, so E65a is a genuinely different trade population from
+  the very first trade — not "e58a's 36 trades plus 12 more," a distinct admitted set throughout.
+- **E65b (velK 1.0) DOES share this first trade exactly** — `firstTradeEntryTs 1766151300000`, matching
+  e58a to the millisecond. The stricter gate did not exclude e58a's own first (and strongest-qualifying)
+  reclaim; it only started removing entries later in the window, where E65b's trade count (31) falls
+  below e58a's (36).
+- **This confirms the concern was worth naming, and that it does not uniformly apply**: tightening a
+  gate from an already-passing threshold can leave early structure untouched while thinning the tail;
+  loosening one can rewrite the sequence from the first trade on. Both are real mechanisms, not
+  interchangeable, and a future cycle should not assume "widen vs narrow" behaves symmetrically here.
+
+## WHAT THIS ESTABLISHES
+
+- **`velK=0.8` is now confirmed a real, non-degenerate local optimum on this construction's entry
+  side.** Three points (0.6, 0.8, 1.0), all non-degenerate trade counts (48, 36, 31), PF peaks at the
+  middle (0.873 / **1.240** / 1.076). This is this lab's first characterized entry term, the mirror of
+  E56/E60's maxBars=12960 finding on the exit side.
+- **Not a HARD LESSON 16 curve-fit spike.** The falloff (1.240 -> 0.873 on the loose side, a 30% drop;
+  1.240 -> 1.076 on the tight side, a 13% drop) is asymmetric and the loose side's drop is the largest
+  single-step PF change in this family since the original shield-width sweeps — worth flagging as
+  moderately narrow, not dismissing, but it is not the 1.69->0.41 one-step cliff HARD LESSON 16 named.
+- **The task's standing observation — "every axis explored since E35 has been about the exit or a
+  filter" — no longer describes this term.** `velK` is now measured under the ALCM exit model with a
+  real neighbourhood check on both sides, something no entry term in this family had before this
+  cycle.
+
+## WHAT THIS DOES NOT DO
+
+- **REVERTED under RATCHET v2 clause 1** (PF must improve to be kept): both E65a and E65b score below
+  e58a's 1.24015239, so neither replaces velK=0.8 as the working value. e58a's own number (PF
+  1.24015239, 36 trades) is unchanged and unchallenged by this cycle.
+- **Does not promote anything to champion or candidate.** e58a's 36 trades and E65b's 31 both clear
+  the RATCHET v2 30-trade floor on their own terms, but there is still no out-of-sample split possible
+  on this 4.5-month, single-instrument window (HARD LESSON 22) — a ratio here is a direction, not a
+  validated result, per the mandate's own restatement of that limit for 1m.
+- **Does not touch `brokeBelow`, `h1Bull`, `timeGate`, or `inMiddle`** — the other entry terms the
+  mandate named. velK was the one with a prior (if invalidated) reading to contrast against; the
+  others are still fully open.
+- **Does not re-open the shieldUsd/maxBars axis** — closed per HARD LESSON 29/E61/E62, unchanged by
+  this cycle's entry-side finding.
+
+## QUEUE
+
+**Merged with the concurrent E64 (bidirectional cascade) session's own carried-forward queue** — both
+items are live, neither supersedes the other; they answer different standing instructions (the second
+2026-09-03 user directive for E66, the mandate correction's entry-term instruction for item 2 below).
+
+1. **[renumbered from the other session's "E65"] Build the short leg on the PROXY direction rule, not
+   the raw 6h colour — this is E66.** E64 (the bidirectional cascade entry) found the source's literal
+   "2+ consecutive red/green 6h candles" rule (PF 0.959 on the long control) is WORSE than this lab's
+   own 4-green-1h-candle proxy (e58a's PF 1.240). `4+ RED 1h candles in the prior 6h block` + the
+   mirrored sweep isolates the short leg against a direction rule that demonstrably works, rather than
+   the one just shown to underperform. Not attempted this cycle — no budget remained after the velK
+   pair (both credits spent) and it is a new construction, not a rerun.
+2. **Binding-test the remaining entry terms one at a time on e58a**, per the mandate's own list:
+   `brokeBelow` (is the 15m structural-low break itself load-bearing, or would any local low do?),
+   `h1Bull` (does the 1h-close-above-open confirmation add anything beyond the 6h regime?), `timeGate`
+   (are `skipOpen`/`skipClose`=60 the right widths, or is 60 minutes arbitrary?), `inMiddle` (does the
+   400-600 whole-number-middle ban still earn its place under the ALCM exit, given it was designed
+   under the old structural-stop model?). velK is now closed for this cycle; a future cycle should
+   pick ONE of these four, run its neighbourhood (both sides, per HARD LESSON 16), and report the
+   count.
+3. **Position sizing / risk fraction** — still closed per HARD LESSON 29, unchanged.
+4. **If more 1m history ever becomes available**, the $3,000/$4,000 shield question is still the first
+   exit-side item to re-run on a longer window. Not re-checked this cycle (both credits spent on the
+   entry-side item above); last confirmed clamped to 2025-12-16 -> 2026-05-03 at E62.

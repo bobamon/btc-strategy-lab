@@ -1,428 +1,486 @@
 [
- {
-  "id": "wf-e51-alcm-reference-reproduction-check",
-  "name": "WF E51 reproduction check: byte-identical alcm-reference.pine",
-  "symbol": "BTCUSDT",
-  "timeframe": "1m",
-  "direction": "both",
-  "status": "rejected",
-  "createdDate": "2026-09-03",
-  "lastTestedDate": "2026-09-03",
-  "backtestStart": "2025-12-16",
-  "backtestEnd": "2026-05-03",
-  "specPath": "war-formation/ORACLE-RULES.md",
-  "description": "E50's queue item 1: is this lab's backtest process stable under re-run at all, before anything is built on any anchor? Exact byte-identical re-run of pine/alcm-reference.pine (E44's anchor), unmodified. E44 documented PF 0.34584164, DD 20.39372123%, 28 trades, long 12 (3W, -$1100.20), short 16 (1W, -$448.20).",
-  "metrics": {
-   "netProfitPct": -15.48402996,
-   "profitFactor": 0.34584164,
-   "maxDrawdownPct": 20.39372123,
-   "totalTrades": 28,
-   "winRatePct": 14.28571429,
-   "avgTradePct": -0.55300107
+  {
+    "id": "wf-e51-alcm-reference-reproduction-check",
+    "name": "WF E51 reproduction check: byte-identical alcm-reference.pine",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "E50's queue item 1: is this lab's backtest process stable under re-run at all, before anything is built on any anchor? Exact byte-identical re-run of pine/alcm-reference.pine (E44's anchor), unmodified. E44 documented PF 0.34584164, DD 20.39372123%, 28 trades, long 12 (3W, -$1100.20), short 16 (1W, -$448.20).",
+    "metrics": {
+      "netProfitPct": -15.48402996,
+      "profitFactor": 0.34584164,
+      "maxDrawdownPct": 20.39372123,
+      "totalTrades": 28,
+      "winRatePct": 14.28571429,
+      "avgTradePct": -0.55300107
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JJ6ARXHZSKAMSP3BYKA3AH",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JJ6ARXR1RPKYXTTC341V5Y",
+      "verifiedAt": "2026-09-03T02:19:58Z"
+    },
+    "notes": "EXACT MATCH to E44's documented headline: PF 0.34584164, DD 20.39372123%, 28 trades, longNetProfit -$1100.20 (12 trades, 3W), shortNetProfit -$448.20 (16 trades, 1W) -- reproduced to the cent. This resolves E50's queue item 1 favorably: the process is NOT universally unstable. alcm-reference.pine is genuinely reproducible. This narrows E38/E47's earlier reproduction failures to something specific to those files/constructions (E47's short leg is entangled with book-occupancy timing, per HARD LESSON 24) rather than a global engine or data-revision problem -- though the root cause of THOSE two specific failures is still not isolated. See companion result wf-e52 (same cycle) for the second half of this check."
   },
-  "provenance": {
-   "source": "trader.dev",
-   "jobId": "adhoc_01M1JJ6ARXHZSKAMSP3BYKA3AH",
-   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JJ6ARXR1RPKYXTTC341V5Y",
-   "verifiedAt": "2026-09-03T02:19:58Z"
+  {
+    "id": "wf-e53-e50b-uncoiled",
+    "name": "WF E53: pine/e50b-alcm-long-only-uncoiled.pine, first run",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Queue item 1 carried forward from E51/E52: run e50b (short leg mechanically deleted AND coilPrev removed from goLong -- the genuinely uncoiled, single-leg construction E46/E47 described in prose but never actually built) against e50a (short leg deleted, coilPrev still present), to test whether coilPrev binds on the long leg alone.",
+    "metrics": {
+      "netProfitPct": 6.63034468,
+      "profitFactor": 1.21869905,
+      "maxDrawdownPct": 17.44898097,
+      "totalTrades": 21,
+      "winRatePct": 42.85714286,
+      "avgTradePct": 0.3157307
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JNJXH6NCS85MWQXWCT934T",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JNJXH5EA8ZYP1PNTVEA2C5",
+      "verifiedAt": "2026-09-03T03:39:16Z"
+    },
+    "notes": "NOT a fresh number -- it is BIT-FOR-BIT IDENTICAL to E47's ORIGINAL documented headline (PF 1.21869905, DD 17.44898097%, 21 trades, all long, 42.86% win, dated 2026-09-02), even though pine/e47-alcm-long-cap12960.pine -- E47's own saved file, still containing coilPrev and the full intact short leg -- does NOT reproduce that number when re-run today (wf-e50-e47-reproduction-check: PF 0.58008733, 24 trades, 9 long/15 short). get_trades on this result (free read, no credit spent) confirms all 21 rows direction=long, matching E47's per-trade description exactly. The most parsimonious explanation: the code that actually generated E47's original number was equivalent to e50b's construction (uncoiled, short leg genuinely absent) -- not to what is currently saved under the e47 filename. That file appears to have drifted from, or was never actually, the source of its own headline -- a new variant of HARD LESSON 21 (saved source that does not match its own result), not the engine non-determinism E50 left open as the leading hypothesis. Against e50a (coiled, PF 0.45694023, 10 trades): meaningfully more trades (21 vs 10) and a different PF, so per the pre-registered outcomes in e50b's own header, coilPrev DOES bind on the long leg alone, consistent with E45's finding that the coil is a liability on this leg. This is the first PF > 1.0 result in the ALCM family since the reproducibility crisis began (E44 HARD LESSON 25) at 21 trades, right at the ~20-trade floor -- read cautiously, and not yet trusted without a same-cycle cold re-run (see wf-e54)."
   },
-  "notes": "EXACT MATCH to E44's documented headline: PF 0.34584164, DD 20.39372123%, 28 trades, longNetProfit -$1100.20 (12 trades, 3W), shortNetProfit -$448.20 (16 trades, 1W) -- reproduced to the cent. This resolves E50's queue item 1 favorably: the process is NOT universally unstable. alcm-reference.pine is genuinely reproducible. This narrows E38/E47's earlier reproduction failures to something specific to those files/constructions (E47's short leg is entangled with book-occupancy timing, per HARD LESSON 24) rather than a global engine or data-revision problem -- though the root cause of THOSE two specific failures is still not isolated. See companion result wf-e52 (same cycle) for the second half of this check."
- },
- {
-  "id": "wf-e53-e50b-uncoiled",
-  "name": "WF E53: pine/e50b-alcm-long-only-uncoiled.pine, first run",
-  "symbol": "BTCUSDT",
-  "timeframe": "1m",
-  "direction": "long",
-  "status": "testing",
-  "createdDate": "2026-09-03",
-  "lastTestedDate": "2026-09-03",
-  "backtestStart": "2025-12-16",
-  "backtestEnd": "2026-05-03",
-  "specPath": "war-formation/ORACLE-RULES.md",
-  "description": "Queue item 1 carried forward from E51/E52: run e50b (short leg mechanically deleted AND coilPrev removed from goLong -- the genuinely uncoiled, single-leg construction E46/E47 described in prose but never actually built) against e50a (short leg deleted, coilPrev still present), to test whether coilPrev binds on the long leg alone.",
-  "metrics": {
-   "netProfitPct": 6.63034468,
-   "profitFactor": 1.21869905,
-   "maxDrawdownPct": 17.44898097,
-   "totalTrades": 21,
-   "winRatePct": 42.85714286,
-   "avgTradePct": 0.3157307
+  {
+    "id": "wf-e54-e50b-repro-check",
+    "name": "WF E54: immediate cold reproduction check of E53/e50b",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Per HARD LESSON 25 ('treat every future headline PF as provisional until it has been re-run at least once, cold'), and given E53's match to E47's original number is exactly the kind of anomaly that lesson says deserves investigation rather than a shrug: an immediate, byte-identical re-run of e50b, same session, same file, same window, no changes.",
+    "metrics": {
+      "netProfitPct": 6.63034468,
+      "profitFactor": 1.21869905,
+      "maxDrawdownPct": 17.44898097,
+      "totalTrades": 21,
+      "winRatePct": 42.85714286,
+      "avgTradePct": 0.3157307
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JNNQDXHMYZMXJQJCWZ1KXQ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JNNQDXVM6424KMRW8DZRTT",
+      "verifiedAt": "2026-09-03T03:40:48Z"
+    },
+    "notes": "EXACT MATCH to E53, to the cent: PF 1.21869905, netProfit $663.034467500007, DD 17.44898097%, 21 trades, all long. e50b is now confirmed stable under a same-session cold re-run (2/2, same evidentiary bar E51/E52 set for alcm-reference.pine and e50a). This does NOT yet clear the cross-session bar E47 itself failed (its own reproduction broke a day after it first ran, not within the same session) -- e50b needs a FUTURE cycle to re-run it byte-identical, cold, before it is trusted as a stable anchor the way alcm-reference and e50a now are. Both of this cycle's two backtest credits (budget: above 500 -> at most TWO) were spent on this pair; no credit remained to start the maxBars/shield sweep queued for whichever single-leg anchor survived this check. war-formation/pine/e50b-alcm-long-only-uncoiled.pine is unchanged from when it was saved in the E50 cycle -- no new source file needed, HARD LESSON 21 satisfied by the pre-existing save."
   },
-  "provenance": {
-   "source": "trader.dev",
-   "jobId": "adhoc_01M1JNJXH6NCS85MWQXWCT934T",
-   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JNJXH5EA8ZYP1PNTVEA2C5",
-   "verifiedAt": "2026-09-03T03:39:16Z"
+  {
+    "id": "wf-e55-e50b-cross-session-repro",
+    "name": "WF E55: e50b-alcm-long-only-uncoiled, cross-session cold re-run",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Carried-forward queue item 1 from E53/E54: 'a future cycle must re-run e50b byte-identical, cold, before it is trusted as a stable anchor.' This is that cycle -- a new session, one day after E53/E54's same-session matches (2026-09-03, same date but a fresh scheduled run with its own credit budget). Exact byte-identical re-run of pine/e50b-alcm-long-only-uncoiled.pine, unmodified, same declared window.",
+    "metrics": {
+      "netProfitPct": 6.63034468,
+      "profitFactor": 1.21869905,
+      "maxDrawdownPct": 17.44898097,
+      "totalTrades": 21,
+      "winRatePct": 42.85714286,
+      "avgTradePct": 0.3157307
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JS2JKGNHZTZF4V0K0D49ME",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JS2JKFVAJT5VYVBFM4Z5HG",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "notes": "EXACT MATCH to E53/E54, to the cent: PF 1.21869905, netProfit $663.034467500007, DD 17.44898097%, 21 trades, all long (longTrades 21, shortTrades 0), 42.86% win rate. This is e50b's first CROSS-SESSION reproduction check -- the specific bar E47 itself failed on (E47 matched once via get_trades verification, then broke on a later re-run from a different session). e50b now clears that bar: 3 of 3 runs across at least two sessions all land on the identical number. Combined with alcm-reference.pine (2/2, E44=E51) and e50a (2/2, E50=E52), this lab now has three files confirmed reproducible under cold re-run, and e50b is the first to clear it cross-session specifically. Still NOT promoted: 21 trades sits at the ~20-trade interpretability floor (HARD LESSON 19) and no out-of-sample split exists on this 4.5-month instrument (HARD LESSON 22) -- PF 1.219 remains a direction, not a validated result, exactly as before this check. This spent 1 of this cycle's 2-backtest budget (732 credits at start, free tier, >500 -> at most two); the second was deliberately not spent, since queue item 2 (the maxBars neighbourhood, 8640/25920) requires both sides run together for HARD LESSON 16/19 interpretability and only one credit remained after this check -- a half-finished neighbourhood test would itself violate HARD LESSON 17 (state the outcome before a decisive run, then honour it). Left for a future cycle with a fresh 2-credit budget."
   },
-  "notes": "NOT a fresh number -- it is BIT-FOR-BIT IDENTICAL to E47's ORIGINAL documented headline (PF 1.21869905, DD 17.44898097%, 21 trades, all long, 42.86% win, dated 2026-09-02), even though pine/e47-alcm-long-cap12960.pine -- E47's own saved file, still containing coilPrev and the full intact short leg -- does NOT reproduce that number when re-run today (wf-e50-e47-reproduction-check: PF 0.58008733, 24 trades, 9 long/15 short). get_trades on this result (free read, no credit spent) confirms all 21 rows direction=long, matching E47's per-trade description exactly. The most parsimonious explanation: the code that actually generated E47's original number was equivalent to e50b's construction (uncoiled, short leg genuinely absent) -- not to what is currently saved under the e47 filename. That file appears to have drifted from, or was never actually, the source of its own headline -- a new variant of HARD LESSON 21 (saved source that does not match its own result), not the engine non-determinism E50 left open as the leading hypothesis. Against e50a (coiled, PF 0.45694023, 10 trades): meaningfully more trades (21 vs 10) and a different PF, so per the pre-registered outcomes in e50b's own header, coilPrev DOES bind on the long leg alone, consistent with E45's finding that the coil is a liability on this leg. This is the first PF > 1.0 result in the ALCM family since the reproducibility crisis began (E44 HARD LESSON 25) at 21 trades, right at the ~20-trade floor -- read cautiously, and not yet trusted without a same-cycle cold re-run (see wf-e54)."
- },
- {
-  "id": "wf-e54-e50b-repro-check",
-  "name": "WF E54: immediate cold reproduction check of E53/e50b",
-  "symbol": "BTCUSDT",
-  "timeframe": "1m",
-  "direction": "long",
-  "status": "testing",
-  "createdDate": "2026-09-03",
-  "lastTestedDate": "2026-09-03",
-  "backtestStart": "2025-12-16",
-  "backtestEnd": "2026-05-03",
-  "specPath": "war-formation/ORACLE-RULES.md",
-  "description": "Per HARD LESSON 25 ('treat every future headline PF as provisional until it has been re-run at least once, cold'), and given E53's match to E47's original number is exactly the kind of anomaly that lesson says deserves investigation rather than a shrug: an immediate, byte-identical re-run of e50b, same session, same file, same window, no changes.",
-  "metrics": {
-   "netProfitPct": 6.63034468,
-   "profitFactor": 1.21869905,
-   "maxDrawdownPct": 17.44898097,
-   "totalTrades": 21,
-   "winRatePct": 42.85714286,
-   "avgTradePct": 0.3157307
+  {
+    "id": "wf-e56a-e50b-maxbars8640",
+    "name": "WF E56a: maxBars neighbourhood tight probe on e50b (12960 -> 8640)",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Carried-forward queue item 1 from E53/E54/E55: 'The maxBars neighbourhood (8640/25920) on e50b, run together in one cycle so HARD LESSON 16/19 is actually satisfied.' e50b (pine/e50b-alcm-long-only-uncoiled.pine) is the lab's first PF>1.0 anchor confirmed reproducible 3/3 including cross-session (PF 1.21869905, 21 trades, all long, maxBars=12960). This file changes ONLY maxBars: 12960 -> 8640, nothing else. Saved as pine/e56a-e50b-maxbars8640.pine before running.",
+    "metrics": {
+      "netProfitPct": 1.23030186,
+      "profitFactor": 1.03751749,
+      "maxDrawdownPct": 21.28076829,
+      "totalTrades": 22,
+      "winRatePct": 36.36363636,
+      "avgTradePct": 0.05592281
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JWFWR78MTPXB6SZSXKAY6E",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JWFWR78568T01AP9209P04",
+      "verifiedAt": "2026-09-03T05:00:00Z"
+    },
+    "notes": "PF 1.038 vs e50b's 1.219 at maxBars=12960 -- WORSE. Trade count 22 (up from 21), not degenerate (HARD LESSON 19: a real reading, not a data-bound one). get_trades confirms 5 of 22 trades hit the 8640 cap exactly (barsInTrade=8641, seq 1/2/3/11/22), 2 of them winners and 3 losers. Critically, seq1's entry (identical entryTime/entryPrice to E56b's seq1) resolves as a small LOSS here (cap-forced exit at 8641 bars, exitPrice 87577.8) but as a +$442 WIN in E56b at the same entry once held to 23644 bars -- direct evidence the 8640 cap still cuts at least one genuine winner short, the E46 failure mode persisting at a shorter cap. Downstream trades also diverge from e50b/E56b because closing positions earlier frees the book sooner (HARD LESSON 24 occupancy effect), so part of the PF delta reflects a different admitted trade set, not purely earlier exits on the same trades."
   },
-  "provenance": {
-   "source": "trader.dev",
-   "jobId": "adhoc_01M1JNNQDXHMYZMXJQJCWZ1KXQ",
-   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JNNQDXVM6424KMRW8DZRTT",
-   "verifiedAt": "2026-09-03T03:40:48Z"
+  {
+    "id": "wf-e56b-e50b-maxbars25920",
+    "name": "WF E56b: maxBars neighbourhood loose probe on e50b (12960 -> 25920)",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Sibling of E56a. Carried-forward queue item 1: the loose side of e50b's maxBars neighbourhood. This file changes ONLY maxBars: 12960 -> 25920, nothing else. Saved as pine/e56b-e50b-maxbars25920.pine before running.",
+    "metrics": {
+      "netProfitPct": 2.57927535,
+      "profitFactor": 1.0792781,
+      "maxDrawdownPct": 19.49362481,
+      "totalTrades": 19,
+      "winRatePct": 36.84210526,
+      "avgTradePct": 0.13575133
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JWG7X8NZY2YS150M1AYPWM",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JWG7X8YR3ERTA4BG8AD2H1",
+      "verifiedAt": "2026-09-03T05:00:00Z"
+    },
+    "notes": "PF 1.079 vs e50b's 1.219 at maxBars=12960 -- WORSE, despite the cap essentially never binding: get_trades shows the longest trade (seq1) runs 23644 bars, well short of the 25920 cap, and NONE of the 19 trades hit the cap at all (max barsInTrade 23644). So loosening the cap fully resolves the 'cap forces early exit' failure mode (0/19 vs E56a's 5/22), yet PF does not improve past e50b's 12960 anchor -- it lands between E56a (1.038) and e50b (1.219). Trade count 19, not degenerate. Combined with E56a: 12960 sits at a real (non-degenerate) local optimum among the three tested points, both neighbours genuinely worse, but the gap (1.04-1.22-1.08) is shallow, not a HARD LESSON 16 narrow-spike collapse -- and part of the differences between all three runs reflects book-occupancy-driven changes in WHICH trades are admitted (HARD LESSON 24), not purely exit-timing changes on an identical trade set, since entries after the first diverge across the three files once one file's earlier trade closes sooner and frees the book."
   },
-  "notes": "EXACT MATCH to E53, to the cent: PF 1.21869905, netProfit $663.034467500007, DD 17.44898097%, 21 trades, all long. e50b is now confirmed stable under a same-session cold re-run (2/2, same evidentiary bar E51/E52 set for alcm-reference.pine and e50a). This does NOT yet clear the cross-session bar E47 itself failed (its own reproduction broke a day after it first ran, not within the same session) -- e50b needs a FUTURE cycle to re-run it byte-identical, cold, before it is trusted as a stable anchor the way alcm-reference and e50a now are. Both of this cycle's two backtest credits (budget: above 500 -> at most TWO) were spent on this pair; no credit remained to start the maxBars/shield sweep queued for whichever single-leg anchor survived this check. war-formation/pine/e50b-alcm-long-only-uncoiled.pine is unchanged from when it was saved in the E50 cycle -- no new source file needed, HARD LESSON 21 satisfied by the pre-existing save."
- },
- {
-  "id": "wf-e55-e50b-cross-session-repro",
-  "name": "WF E55: e50b-alcm-long-only-uncoiled, cross-session cold re-run",
-  "symbol": "BTCUSDT",
-  "timeframe": "1m",
-  "direction": "long",
-  "status": "testing",
-  "createdDate": "2026-09-03",
-  "lastTestedDate": "2026-09-03",
-  "backtestStart": "2025-12-16",
-  "backtestEnd": "2026-05-03",
-  "specPath": "war-formation/ORACLE-RULES.md",
-  "description": "Carried-forward queue item 1 from E53/E54: 'a future cycle must re-run e50b byte-identical, cold, before it is trusted as a stable anchor.' This is that cycle -- a new session, one day after E53/E54's same-session matches (2026-09-03, same date but a fresh scheduled run with its own credit budget). Exact byte-identical re-run of pine/e50b-alcm-long-only-uncoiled.pine, unmodified, same declared window.",
-  "metrics": {
-   "netProfitPct": 6.63034468,
-   "profitFactor": 1.21869905,
-   "maxDrawdownPct": 17.44898097,
-   "totalTrades": 21,
-   "winRatePct": 42.85714286,
-   "avgTradePct": 0.3157307
+  {
+    "id": "wf-e58a-shield1000-maxbars6480",
+    "name": "WF E58a: shield sweep DOWN leg 1 -- $1,000 shield, maxBars scaled to 6480",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "research",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "e50b with shieldUsd 2000->1000 and maxBars scaled 12960->6480 (linear, 0.5x) -- the shield sweep going DOWN, never tested before (E38-41/E47/E48/E57 only tested up, toward or past ORACLE-RULES' stated $3,000/$4,000). Saved as pine/e58a-shield1000-maxbars6480.pine before running.",
+    "metrics": {
+      "netProfitPct": 7.47495942,
+      "profitFactor": 1.24015239,
+      "maxDrawdownPct": 9.82519609,
+      "totalTrades": 36,
+      "winRatePct": 41.66666667,
+      "avgTradePct": 0.20763776
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1K3J6GDK0Z51MFX60ECM75F",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1K3J6GDK0Z51MFX60ECM75F",
+      "verifiedAt": "2026-09-03T06:00:00Z"
+    },
+    "notes": "36 trades (all long) is the largest sample and lowest drawdown of this entire ALCM family, and PF stays above 1.0 -- the first individually-legitimate reading this axis has produced. BUT get_trades confirms the SAME occupancy confound (HARD LESSON 24/28) found on maxBars now generalizes to shieldUsd: e58a's and e58b's (sibling, $1,500) trade sequences diverge starting at trade 2 because trade 1's exit time shifts with the stop/target distance, cascading through every downstream admission. So this is NOT a controlled 'risk fraction held constant, R varied' comparison against e50b or e58b -- each shieldUsd value admits a genuinely different trade population, exactly as maxBars sweeps do. Read as an individually valid, unreproduced-yet (HARD LESSON 25 requires a cold re-run before trust) direction, not as evidence that smaller shields beat larger ones. Companion: E58b ($1,500/9720, PF 0.860, 28 trades)."
   },
-  "provenance": {
-   "source": "trader.dev",
-   "jobId": "adhoc_01M1JS2JKGNHZTZF4V0K0D49ME",
-   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JS2JKFVAJT5VYVBFM4Z5HG",
-   "verifiedAt": "2026-09-03T00:00:00Z"
+  {
+    "id": "wf-e59-e58a-reproduction-check",
+    "name": "WF E59: cross-session cold re-run of E58a (shield1000/maxbars6480)",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "research",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Byte-identical cold re-run of pine/e58a-shield1000-maxbars6480.pine, new session, per E58's carried-forward queue item 1 (the same reproducibility bar e50b cleared over E53/E54/E55 and E47 failed). No code changed.",
+    "metrics": {
+      "netProfitPct": 7.47495942,
+      "profitFactor": 1.24015239,
+      "maxDrawdownPct": 9.82519609,
+      "totalTrades": 36,
+      "winRatePct": 41.66666667,
+      "avgTradePct": 0.20763776
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1K6RQGRDM9RJZHT3JAH72FF",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1K6RQGRDM9RJZHT3JAH72FF",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "notes": "EXACT MATCH to E58a's original documented result (PF 1.24015239, DD 9.82519609%, 36 trades, 41.67% win rate, all long) -- to eight decimal places. e58a is now this lab's THIRD file confirmed reproducible on a cold re-run (after alcm-reference: E44=E51, and e50a/e50b: E50=E52, E53=E54=E55 cross-session). pine/e47-alcm-long-cap12960.pine remains the lab's only anchor with a documented reproduction failure. Still not promoted to champion or candidate: 36 trades clears the ~20 floor comfortably, but per HARD LESSON 24/28/29 (this cycle, E58) e58a's trade population is not comparable to e50b's or e58b's on a controlled 'R varied, book otherwise identical' basis -- each shieldUsd value admits a different trade set via the shared single-position book. No out-of-sample split is possible on this instrument (only 4.5 months of 1m data, HARD LESSON 22)."
   },
-  "notes": "EXACT MATCH to E53/E54, to the cent: PF 1.21869905, netProfit $663.034467500007, DD 17.44898097%, 21 trades, all long (longTrades 21, shortTrades 0), 42.86% win rate. This is e50b's first CROSS-SESSION reproduction check -- the specific bar E47 itself failed on (E47 matched once via get_trades verification, then broke on a later re-run from a different session). e50b now clears that bar: 3 of 3 runs across at least two sessions all land on the identical number. Combined with alcm-reference.pine (2/2, E44=E51) and e50a (2/2, E50=E52), this lab now has three files confirmed reproducible under cold re-run, and e50b is the first to clear it cross-session specifically. Still NOT promoted: 21 trades sits at the ~20-trade interpretability floor (HARD LESSON 19) and no out-of-sample split exists on this 4.5-month instrument (HARD LESSON 22) -- PF 1.219 remains a direction, not a validated result, exactly as before this check. This spent 1 of this cycle's 2-backtest budget (732 credits at start, free tier, >500 -> at most two); the second was deliberately not spent, since queue item 2 (the maxBars neighbourhood, 8640/25920) requires both sides run together for HARD LESSON 16/19 interpretability and only one credit remained after this check -- a half-finished neighbourhood test would itself violate HARD LESSON 17 (state the outcome before a decisive run, then honour it). Left for a future cycle with a fresh 2-credit budget."
- },
- {
-  "id": "wf-e56a-e50b-maxbars8640",
-  "name": "WF E56a: maxBars neighbourhood tight probe on e50b (12960 -> 8640)",
-  "symbol": "BTCUSDT",
-  "timeframe": "1m",
-  "direction": "long",
-  "status": "rejected",
-  "createdDate": "2026-09-03",
-  "lastTestedDate": "2026-09-03",
-  "backtestStart": "2025-12-16",
-  "backtestEnd": "2026-05-03",
-  "specPath": "war-formation/ORACLE-RULES.md",
-  "description": "Carried-forward queue item 1 from E53/E54/E55: 'The maxBars neighbourhood (8640/25920) on e50b, run together in one cycle so HARD LESSON 16/19 is actually satisfied.' e50b (pine/e50b-alcm-long-only-uncoiled.pine) is the lab's first PF>1.0 anchor confirmed reproducible 3/3 including cross-session (PF 1.21869905, 21 trades, all long, maxBars=12960). This file changes ONLY maxBars: 12960 -> 8640, nothing else. Saved as pine/e56a-e50b-maxbars8640.pine before running.",
-  "metrics": {
-   "netProfitPct": 1.23030186,
-   "profitFactor": 1.03751749,
-   "maxDrawdownPct": 21.28076829,
-   "totalTrades": 22,
-   "winRatePct": 36.36363636,
-   "avgTradePct": 0.05592281
+  {
+    "id": "wf-e60a-e50b-maxbars10800",
+    "name": "WF E60a: finer maxBars grid around e50b's 12960, lower side (10800)",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "research",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "e50b (pine/e50b-alcm-long-only-uncoiled.pine) with maxBars 12960->10800, no other changes. Run together with sibling E60b (maxBars=14400) per HARD LESSON 16/19, to sharpen E56's coarse neighbourhood (8640/25920) into a finer grid around the confirmed local optimum.",
+    "metrics": {
+      "netProfitPct": 3.39464857,
+      "profitFactor": 1.1024153,
+      "maxDrawdownPct": 18.75509075,
+      "totalTrades": 22,
+      "winRatePct": 40.90909091,
+      "avgTradePct": 0.15430221
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1KA8CNA3QKKCAMGES5A3CFS",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KA8CNA3QKKCAMGES5A3CFS",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "notes": "22 trades, all long, non-degenerate (HARD LESSON 19). PF 1.10 sits between e50b's anchor (1.219 at 12960) and E56's coarse lower neighbour (1.04 at 8640) -- avgBarsWinning 6848.4/10800=63.4%, the cap binds more here than at 12960 (56.5%) but less than at 8640. Companion: E60b."
   },
-  "provenance": {
-   "source": "trader.dev",
-   "jobId": "adhoc_01M1JWFWR78MTPXB6SZSXKAY6E",
-   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JWFWR78568T01AP9209P04",
-   "verifiedAt": "2026-09-03T05:00:00Z"
+  {
+    "id": "wf-e60b-e50b-maxbars14400",
+    "name": "WF E60b: finer maxBars grid around e50b's 12960, upper side (14400)",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "research",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "e50b (pine/e50b-alcm-long-only-uncoiled.pine) with maxBars 12960->14400, no other changes. Run together with sibling E60a (maxBars=10800) per HARD LESSON 16/19.",
+    "metrics": {
+      "netProfitPct": 5.07034979,
+      "profitFactor": 1.15285243,
+      "maxDrawdownPct": 19.50624629,
+      "totalTrades": 21,
+      "winRatePct": 38.0952381,
+      "avgTradePct": 0.24144523
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1KA99PCVQGV3G19KCZNC6P0",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KA99PCVQGV3G19KCZNC6P0",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "notes": "21 trades, all long, non-degenerate (HARD LESSON 19). PF 1.15 sits between e50b's anchor (1.219 at 12960) and E56's coarse upper neighbour (1.08 at 25920) -- avgBarsWinning 5911.5/14400=41.0%, cap binds less here than at 12960 (56.5%). Companion: E60a."
   },
-  "notes": "PF 1.038 vs e50b's 1.219 at maxBars=12960 -- WORSE. Trade count 22 (up from 21), not degenerate (HARD LESSON 19: a real reading, not a data-bound one). get_trades confirms 5 of 22 trades hit the 8640 cap exactly (barsInTrade=8641, seq 1/2/3/11/22), 2 of them winners and 3 losers. Critically, seq1's entry (identical entryTime/entryPrice to E56b's seq1) resolves as a small LOSS here (cap-forced exit at 8641 bars, exitPrice 87577.8) but as a +$442 WIN in E56b at the same entry once held to 23644 bars -- direct evidence the 8640 cap still cuts at least one genuine winner short, the E46 failure mode persisting at a shorter cap. Downstream trades also diverge from e50b/E56b because closing positions earlier frees the book sooner (HARD LESSON 24 occupancy effect), so part of the PF delta reflects a different admitted trade set, not purely earlier exits on the same trades."
- },
- {
-  "id": "wf-e56b-e50b-maxbars25920",
-  "name": "WF E56b: maxBars neighbourhood loose probe on e50b (12960 -> 25920)",
-  "symbol": "BTCUSDT",
-  "timeframe": "1m",
-  "direction": "long",
-  "status": "rejected",
-  "createdDate": "2026-09-03",
-  "lastTestedDate": "2026-09-03",
-  "backtestStart": "2025-12-16",
-  "backtestEnd": "2026-05-03",
-  "specPath": "war-formation/ORACLE-RULES.md",
-  "description": "Sibling of E56a. Carried-forward queue item 1: the loose side of e50b's maxBars neighbourhood. This file changes ONLY maxBars: 12960 -> 25920, nothing else. Saved as pine/e56b-e50b-maxbars25920.pine before running.",
-  "metrics": {
-   "netProfitPct": 2.57927535,
-   "profitFactor": 1.0792781,
-   "maxDrawdownPct": 19.49362481,
-   "totalTrades": 19,
-   "winRatePct": 36.84210526,
-   "avgTradePct": 0.13575133
+  {
+    "id": "wf-e63a-5m-rescale-h1",
+    "name": "WF E63a 5m rescale H1",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2025-07-20",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "The timeframe rescale. e58a (shield $1,000, the family's largest sample at 36 trades and confirmed reproducible by E59's cold re-run) moved from a 1m to a 5m entry. 15m was rejected in design: the 15m level is reconstructed from timestamps, so on a 15m entry each bar IS one bucket, p15l collapses to the previous bar's low and brokeBelow stops being a structural level. Scaling: maxBars 6480->1296 and ta.atr(30)->atr(6), both preserving wall clock. skipOpen/skipClose are minutes, greenBull counts 1h candles, shield/rr/velK are dollars or ratios - all unscaled. Split at 2025-07-20, the BTC lab's Attack 16 boundary, a pre-existing date not chosen from this data. First half.",
+    "metrics": {
+      "netProfitPct": -22.05511655,
+      "profitFactor": 0.70674847,
+      "maxDrawdownPct": 31.81350346,
+      "totalTrades": 95,
+      "winRatePct": 29.47368421,
+      "avgTradePct": -0.23215912
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1KJMNNKETC9VVPGWWBG2F5M",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KJMNNJV95QMD3WRVERSN9T",
+      "verifiedAt": "2026-09-03T12:12:00Z"
+    },
+    "notes": "BOTH HALVES FAIL. E63a PF 0.70674847 / DD 31.81350346% / 95 trades / 29.47% win. E63b PF 0.83434289 / DD 16.01925213% / 73 trades / 32.88% win. That is the third of three outcomes registered before the runs. THE CEILING IS GONE AND THE EDGE WENT WITH IT: 168 trades across the two halves against the 20-30 this family had been capped at since E35, and neither half clears 1.0. THE SHARPER POINT IS IN THE BAR COUNTS: avgBarsInTrade is 225.71 and 292.85 against a 1296 cap - 17% and 23%. THE CAP DOES NOT BIND AT 5m. Every previous ALCM measurement had winners pinned at 56-93% of their cap, which is the entire reason E47 existed. So this is the FIRST measurement in this lab's history where the exit actually resolves at target or shield as the specification requires - and it returns 0.71 and 0.83. ON WHICH READING IS RIGHT: 'the ALCM family is 1m-specific' is one explanation. The simpler one is that e58a's 1.24 on 36 trades was SMALL-SAMPLE NOISE and 168 trades is the more trustworthy number. This lab's own docs have warned for weeks that 20-30 trades cannot support a ratio; this is what it looks like when that warning is finally tested. RATCHET v2 clause 5, regime spread reported: 0.12759442, H2 the better half."
   },
-  "provenance": {
-   "source": "trader.dev",
-   "jobId": "adhoc_01M1JWG7X8NZY2YS150M1AYPWM",
-   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JWG7X8YR3ERTA4BG8AD2H1",
-   "verifiedAt": "2026-09-03T05:00:00Z"
+  {
+    "id": "wf-e63b-5m-rescale-h2",
+    "name": "WF E63b 5m rescale H2",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-07-20",
+    "backtestEnd": "2026-09-01",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "The timeframe rescale. e58a (shield $1,000, the family's largest sample at 36 trades and confirmed reproducible by E59's cold re-run) moved from a 1m to a 5m entry. 15m was rejected in design: the 15m level is reconstructed from timestamps, so on a 15m entry each bar IS one bucket, p15l collapses to the previous bar's low and brokeBelow stops being a structural level. Scaling: maxBars 6480->1296 and ta.atr(30)->atr(6), both preserving wall clock. skipOpen/skipClose are minutes, greenBull counts 1h candles, shield/rr/velK are dollars or ratios - all unscaled. Split at 2025-07-20, the BTC lab's Attack 16 boundary, a pre-existing date not chosen from this data. Second half, the control.",
+    "metrics": {
+      "netProfitPct": -9.55805201,
+      "profitFactor": 0.83434289,
+      "maxDrawdownPct": 16.01925213,
+      "totalTrades": 73,
+      "winRatePct": 32.87671233,
+      "avgTradePct": -0.13093222
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1KJND79MXMQ4KHV06CG29H3",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KJND79NQ4WEQ4QY6H7ZCDH",
+      "verifiedAt": "2026-09-03T12:12:00Z"
+    },
+    "notes": "BOTH HALVES FAIL. E63a PF 0.70674847 / DD 31.81350346% / 95 trades / 29.47% win. E63b PF 0.83434289 / DD 16.01925213% / 73 trades / 32.88% win. That is the third of three outcomes registered before the runs. THE CEILING IS GONE AND THE EDGE WENT WITH IT: 168 trades across the two halves against the 20-30 this family had been capped at since E35, and neither half clears 1.0. THE SHARPER POINT IS IN THE BAR COUNTS: avgBarsInTrade is 225.71 and 292.85 against a 1296 cap - 17% and 23%. THE CAP DOES NOT BIND AT 5m. Every previous ALCM measurement had winners pinned at 56-93% of their cap, which is the entire reason E47 existed. So this is the FIRST measurement in this lab's history where the exit actually resolves at target or shield as the specification requires - and it returns 0.71 and 0.83. ON WHICH READING IS RIGHT: 'the ALCM family is 1m-specific' is one explanation. The simpler one is that e58a's 1.24 on 36 trades was SMALL-SAMPLE NOISE and 168 trades is the more trustworthy number. This lab's own docs have warned for weeks that 20-30 trades cannot support a ratio; this is what it looks like when that warning is finally tested. RATCHET v2 clause 5, regime spread reported: 0.12759442, H2 the better half."
   },
-  "notes": "PF 1.079 vs e50b's 1.219 at maxBars=12960 -- WORSE, despite the cap essentially never binding: get_trades shows the longest trade (seq1) runs 23644 bars, well short of the 25920 cap, and NONE of the 19 trades hit the cap at all (max barsInTrade 23644). So loosening the cap fully resolves the 'cap forces early exit' failure mode (0/19 vs E56a's 5/22), yet PF does not improve past e50b's 12960 anchor -- it lands between E56a (1.038) and e50b (1.219). Trade count 19, not degenerate. Combined with E56a: 12960 sits at a real (non-degenerate) local optimum among the three tested points, both neighbours genuinely worse, but the gap (1.04-1.22-1.08) is shallow, not a HARD LESSON 16 narrow-spike collapse -- and part of the differences between all three runs reflects book-occupancy-driven changes in WHICH trades are admitted (HARD LESSON 24), not purely exit-timing changes on an identical trade set, since entries after the first diverge across the three files once one file's earlier trade closes sooner and frees the book."
- },
- {
-  "id": "wf-e58a-shield1000-maxbars6480",
-  "name": "WF E58a: shield sweep DOWN leg 1 -- $1,000 shield, maxBars scaled to 6480",
-  "symbol": "BTCUSDT",
-  "timeframe": "1m",
-  "direction": "long",
-  "status": "research",
-  "createdDate": "2026-09-03",
-  "lastTestedDate": "2026-09-03",
-  "backtestStart": "2025-12-16",
-  "backtestEnd": "2026-05-03",
-  "specPath": "war-formation/ORACLE-RULES.md",
-  "description": "e50b with shieldUsd 2000->1000 and maxBars scaled 12960->6480 (linear, 0.5x) -- the shield sweep going DOWN, never tested before (E38-41/E47/E48/E57 only tested up, toward or past ORACLE-RULES' stated $3,000/$4,000). Saved as pine/e58a-shield1000-maxbars6480.pine before running.",
-  "metrics": {
-   "netProfitPct": 7.47495942,
-   "profitFactor": 1.24015239,
-   "maxDrawdownPct": 9.82519609,
-   "totalTrades": 36,
-   "winRatePct": 41.66666667,
-   "avgTradePct": 0.20763776
+  {
+    "id": "wf-e64a-6h-direction-short",
+    "name": "WF E64a: the SHORT leg under the source's own 6h direction rule",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "short",
+    "status": "research",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/pine/e64a-6h-direction-short.pine",
+    "description": "USER DIRECTIVE 2026-09-03: War Formation must work in both directions and the 6H is the direction. Implements ORACLE-RULES L204-216 literally -- direction = 2+ consecutive RED 6h candles, replacing the lab's own '4+ green 1h candles in the prior 6h block' proxy. Short mechanics are the structural mirror of the long's sweep-and-reclaim (15m higher high, then rejection back below). Shield $1,000 and cap 6480 held at e58a exactly so only the direction rule and the leg change.",
+    "metrics": {
+      "netProfitPct": -7.81203272,
+      "profitFactor": 0.45442725,
+      "maxDrawdownPct": 10.97440232,
+      "totalTrades": 43,
+      "winRatePct": 6.97674419,
+      "avgTradePct": -0.18167518,
+      "sharpeRatio": -2.78849887,
+      "commissionPaid": 421.6564718,
+      "avgWinningTrade": 216.897476633332,
+      "avgLosingTrade": -35.7973925425,
+      "longTrades": 0,
+      "shortTrades": 43
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1KM717WQKYA8668ET1KVTG0",
+      "strategyId": "01M1KM71FM0139W7BF1FQ1QT0A",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KM717WQKYA8668ET1KVTG0",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-03T12:34:00Z"
+    },
+    "verdict": "REJECTED",
+    "notes": "Short construction #12, and the FIRST driven by the source's own direction rule rather than by a location this lab chose. PF 0.454 on 43 trades, 6.98% win rate. THE DIRECTION RULE BINDS AND IS NOT THE PROBLEM: 43 short entries against the long leg's 28 under the identical rule (E64b), so 'red 6h' is a live, frequently-satisfied condition, not an inert gate. THE DECOMPOSITION IS THE POINT -- E64b holds the direction rule constant and runs the LONG leg at 0.959, so the leg penalty (0.959 -> 0.454) is real and separate from the direction-rule penalty (e58a's 1.240 -> E64b's 0.959). Fourteen prior mirrored shorts failed and this makes fifteen, but for the first time the failure is isolated to the MECHANICS rather than confounded with the direction. WINDOW CAVEAT, stated not excused: 4.5 months of 1m data is ONE regime, and a short leg tested only inside it cannot be distinguished from a short leg tested in a bull market."
   },
-  "provenance": {
-   "source": "trader.dev",
-   "jobId": "01M1K3J6GDK0Z51MFX60ECM75F",
-   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1K3J6GDK0Z51MFX60ECM75F",
-   "verifiedAt": "2026-09-03T06:00:00Z"
+  {
+    "id": "wf-e64b-6h-direction-long",
+    "name": "WF E64b: the LONG leg under the same 6h direction rule -- the CONTROL",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "research",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/pine/e64b-6h-direction-long.pine",
+    "description": "The control that makes E64a interpretable (HARD LESSON 10). Holds the LEG at e58a's long and changes ONLY the direction source: 2+ consecutive GREEN 6h candles instead of 4+ green 1h candles inside the prior 6h block. Shield, cap, velK, whole-number band, time gate and witching ban all held at e58a.",
+    "metrics": {
+      "netProfitPct": -1.06093465,
+      "profitFactor": 0.95884068,
+      "maxDrawdownPct": 10.63382724,
+      "totalTrades": 28,
+      "winRatePct": 35.71428571,
+      "avgTradePct": -0.03789052,
+      "sharpeRatio": -0.07791906,
+      "commissionPaid": 281.0934655,
+      "avgWinningTrade": 247.15356876,
+      "avgLosingTrade": -143.201619616666,
+      "longTrades": 28,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1KMB74E2CEGPPMX8SV8W8M5",
+      "strategyId": "01M1KMB7AWNQ4W0PNKHWJVHARC",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KMB74E2CEGPPMX8SV8W8M5",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-03T12:36:00Z"
+    },
+    "verdict": "REJECTED",
+    "notes": "NOT KEPT -- RATCHET v2 clause 1 fails outright: PF 1.24015239 (e58a) -> 0.95884068, and the count drops 36 -> 28. AND THIS IS THE UNCOMFORTABLE FINDING OF THE CYCLE: the source's OWN literal direction rule performs WORSE than the proxy this lab invented to stand in for it. ORACLE-RULES L215-216 has been asserting for some time that the straight 6h-candle count is 'simpler and better specified' than the 4-green-1h proxy. Measured, it is simpler and WORSE on this window. The proxy was doing real work -- most likely because '4 of the last ~6 1h candles green' is a persistence condition, while '2 consecutive 6h candles green' can be satisfied by two barely-green blocks. Reported plainly rather than buried: mastering the user's strategy means measuring its stated rules, INCLUDING when the measurement is inconvenient. The source rule is NOT adopted and it is NOT discarded on one 4.5-month window; e58a's proxy remains the reference build."
   },
-  "notes": "36 trades (all long) is the largest sample and lowest drawdown of this entire ALCM family, and PF stays above 1.0 -- the first individually-legitimate reading this axis has produced. BUT get_trades confirms the SAME occupancy confound (HARD LESSON 24/28) found on maxBars now generalizes to shieldUsd: e58a's and e58b's (sibling, $1,500) trade sequences diverge starting at trade 2 because trade 1's exit time shifts with the stop/target distance, cascading through every downstream admission. So this is NOT a controlled 'risk fraction held constant, R varied' comparison against e50b or e58b -- each shieldUsd value admits a genuinely different trade population, exactly as maxBars sweeps do. Read as an individually valid, unreproduced-yet (HARD LESSON 25 requires a cold re-run before trust) direction, not as evidence that smaller shields beat larger ones. Companion: E58b ($1,500/9720, PF 0.860, 28 trades)."
- },
- {
-  "id": "wf-e59-e58a-reproduction-check",
-  "name": "WF E59: cross-session cold re-run of E58a (shield1000/maxbars6480)",
-  "symbol": "BTCUSDT",
-  "timeframe": "1m",
-  "direction": "long",
-  "status": "research",
-  "createdDate": "2026-09-03",
-  "lastTestedDate": "2026-09-03",
-  "backtestStart": "2025-12-16",
-  "backtestEnd": "2026-05-03",
-  "specPath": "war-formation/ORACLE-RULES.md",
-  "description": "Byte-identical cold re-run of pine/e58a-shield1000-maxbars6480.pine, new session, per E58's carried-forward queue item 1 (the same reproducibility bar e50b cleared over E53/E54/E55 and E47 failed). No code changed.",
-  "metrics": {
-   "netProfitPct": 7.47495942,
-   "profitFactor": 1.24015239,
-   "maxDrawdownPct": 9.82519609,
-   "totalTrades": 36,
-   "winRatePct": 41.66666667,
-   "avgTradePct": 0.20763776
+  {
+    "id": "wf-e65a-e58a-velk06",
+    "name": "WF E65a e58a velK0.6",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "First entry-side binding test under the A.L.C.M. exit model, per the mandate correction's own instruction to test the entry, not only the exit. Parent: pine/e58a-shield1000-maxbars6480.pine (PF 1.24015239, 36 trades, confirmed reproducible E58=E59). Change: velK (velocity gate multiplier on atr(30) for the 15m-low reclaim) 0.8 -> 0.6, loosening the gate. Paired with E65b (velK 1.0) per HARD LESSON 16. Numbered E65 (originally run as E64 before a concurrent session's bidirectional-cascade build claimed that number on push; see EXPERIMENT-LOG.md's E65 numbering note).",
+    "metrics": {
+      "netProfitPct": -5.6255575,
+      "profitFactor": 0.87342782,
+      "maxDrawdownPct": 14.81858269,
+      "totalTrades": 48,
+      "winRatePct": 33.33333333,
+      "avgTradePct": -0.11719911
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1KMKER0PDXNN72HAWNQECD9",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KMKER0N05Y0CHPKYZTTAGR",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "notes": "REJECTED under RATCHET v2 clause 1: PF 0.87342782 < parent e58a's 1.24015239. Trade count rose 36->48 (not degenerate, HARD LESSON 19) but DD also worsened 9.83%->14.82%. get_trades on e58a (jobId 01M1K3J6GDK0Z51MFX60ECM75F) shows e58a's own trade 1 enters at 1766151300000; this run's effectiveTradeRange.firstTradeEntryTs is 1765892400000 -- an EARLIER entry the stricter gate does not admit. Confirms the named-in-advance occupancy point: loosening an entry gate does not merely add trades to the same set, it can change trade 1 itself, so this is a different trade population from the first entry onward, not a controlled subset comparison."
   },
-  "provenance": {
-   "source": "trader.dev",
-   "jobId": "01M1K6RQGRDM9RJZHT3JAH72FF",
-   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1K6RQGRDM9RJZHT3JAH72FF",
-   "verifiedAt": "2026-09-03T00:00:00Z"
-  },
-  "notes": "EXACT MATCH to E58a's original documented result (PF 1.24015239, DD 9.82519609%, 36 trades, 41.67% win rate, all long) -- to eight decimal places. e58a is now this lab's THIRD file confirmed reproducible on a cold re-run (after alcm-reference: E44=E51, and e50a/e50b: E50=E52, E53=E54=E55 cross-session). pine/e47-alcm-long-cap12960.pine remains the lab's only anchor with a documented reproduction failure. Still not promoted to champion or candidate: 36 trades clears the ~20 floor comfortably, but per HARD LESSON 24/28/29 (this cycle, E58) e58a's trade population is not comparable to e50b's or e58b's on a controlled 'R varied, book otherwise identical' basis -- each shieldUsd value admits a different trade set via the shared single-position book. No out-of-sample split is possible on this instrument (only 4.5 months of 1m data, HARD LESSON 22)."
- },
- {
-  "id": "wf-e60a-e50b-maxbars10800",
-  "name": "WF E60a: finer maxBars grid around e50b's 12960, lower side (10800)",
-  "symbol": "BTCUSDT",
-  "timeframe": "1m",
-  "direction": "long",
-  "status": "research",
-  "createdDate": "2026-09-03",
-  "lastTestedDate": "2026-09-03",
-  "backtestStart": "2025-12-16",
-  "backtestEnd": "2026-05-03",
-  "specPath": "war-formation/ORACLE-RULES.md",
-  "description": "e50b (pine/e50b-alcm-long-only-uncoiled.pine) with maxBars 12960->10800, no other changes. Run together with sibling E60b (maxBars=14400) per HARD LESSON 16/19, to sharpen E56's coarse neighbourhood (8640/25920) into a finer grid around the confirmed local optimum.",
-  "metrics": {
-   "netProfitPct": 3.39464857,
-   "profitFactor": 1.1024153,
-   "maxDrawdownPct": 18.75509075,
-   "totalTrades": 22,
-   "winRatePct": 40.90909091,
-   "avgTradePct": 0.15430221
-  },
-  "provenance": {
-   "source": "trader.dev",
-   "jobId": "01M1KA8CNA3QKKCAMGES5A3CFS",
-   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KA8CNA3QKKCAMGES5A3CFS",
-   "verifiedAt": "2026-09-03T00:00:00Z"
-  },
-  "notes": "22 trades, all long, non-degenerate (HARD LESSON 19). PF 1.10 sits between e50b's anchor (1.219 at 12960) and E56's coarse lower neighbour (1.04 at 8640) -- avgBarsWinning 6848.4/10800=63.4%, the cap binds more here than at 12960 (56.5%) but less than at 8640. Companion: E60b."
- },
- {
-  "id": "wf-e60b-e50b-maxbars14400",
-  "name": "WF E60b: finer maxBars grid around e50b's 12960, upper side (14400)",
-  "symbol": "BTCUSDT",
-  "timeframe": "1m",
-  "direction": "long",
-  "status": "research",
-  "createdDate": "2026-09-03",
-  "lastTestedDate": "2026-09-03",
-  "backtestStart": "2025-12-16",
-  "backtestEnd": "2026-05-03",
-  "specPath": "war-formation/ORACLE-RULES.md",
-  "description": "e50b (pine/e50b-alcm-long-only-uncoiled.pine) with maxBars 12960->14400, no other changes. Run together with sibling E60a (maxBars=10800) per HARD LESSON 16/19.",
-  "metrics": {
-   "netProfitPct": 5.07034979,
-   "profitFactor": 1.15285243,
-   "maxDrawdownPct": 19.50624629,
-   "totalTrades": 21,
-   "winRatePct": 38.0952381,
-   "avgTradePct": 0.24144523
-  },
-  "provenance": {
-   "source": "trader.dev",
-   "jobId": "01M1KA99PCVQGV3G19KCZNC6P0",
-   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KA99PCVQGV3G19KCZNC6P0",
-   "verifiedAt": "2026-09-03T00:00:00Z"
-  },
-  "notes": "21 trades, all long, non-degenerate (HARD LESSON 19). PF 1.15 sits between e50b's anchor (1.219 at 12960) and E56's coarse upper neighbour (1.08 at 25920) -- avgBarsWinning 5911.5/14400=41.0%, cap binds less here than at 12960 (56.5%). Companion: E60a."
- },
- {
-  "id": "wf-e63a-5m-rescale-h1",
-  "name": "WF E63a 5m rescale H1",
-  "symbol": "BTCUSDT",
-  "timeframe": "5m",
-  "direction": "long",
-  "status": "rejected",
-  "createdDate": "2026-09-03",
-  "lastTestedDate": "2026-09-03",
-  "backtestStart": "2024-06-08",
-  "backtestEnd": "2025-07-20",
-  "specPath": "war-formation/ORACLE-RULES.md",
-  "description": "The timeframe rescale. e58a (shield $1,000, the family's largest sample at 36 trades and confirmed reproducible by E59's cold re-run) moved from a 1m to a 5m entry. 15m was rejected in design: the 15m level is reconstructed from timestamps, so on a 15m entry each bar IS one bucket, p15l collapses to the previous bar's low and brokeBelow stops being a structural level. Scaling: maxBars 6480->1296 and ta.atr(30)->atr(6), both preserving wall clock. skipOpen/skipClose are minutes, greenBull counts 1h candles, shield/rr/velK are dollars or ratios - all unscaled. Split at 2025-07-20, the BTC lab's Attack 16 boundary, a pre-existing date not chosen from this data. First half.",
-  "metrics": {
-   "netProfitPct": -22.05511655,
-   "profitFactor": 0.70674847,
-   "maxDrawdownPct": 31.81350346,
-   "totalTrades": 95,
-   "winRatePct": 29.47368421,
-   "avgTradePct": -0.23215912
-  },
-  "provenance": {
-   "source": "trader.dev",
-   "jobId": "adhoc_01M1KJMNNKETC9VVPGWWBG2F5M",
-   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KJMNNJV95QMD3WRVERSN9T",
-   "verifiedAt": "2026-09-03T12:12:00Z"
-  },
-  "notes": "BOTH HALVES FAIL. E63a PF 0.70674847 / DD 31.81350346% / 95 trades / 29.47% win. E63b PF 0.83434289 / DD 16.01925213% / 73 trades / 32.88% win. That is the third of three outcomes registered before the runs. THE CEILING IS GONE AND THE EDGE WENT WITH IT: 168 trades across the two halves against the 20-30 this family had been capped at since E35, and neither half clears 1.0. THE SHARPER POINT IS IN THE BAR COUNTS: avgBarsInTrade is 225.71 and 292.85 against a 1296 cap - 17% and 23%. THE CAP DOES NOT BIND AT 5m. Every previous ALCM measurement had winners pinned at 56-93% of their cap, which is the entire reason E47 existed. So this is the FIRST measurement in this lab's history where the exit actually resolves at target or shield as the specification requires - and it returns 0.71 and 0.83. ON WHICH READING IS RIGHT: 'the ALCM family is 1m-specific' is one explanation. The simpler one is that e58a's 1.24 on 36 trades was SMALL-SAMPLE NOISE and 168 trades is the more trustworthy number. This lab's own docs have warned for weeks that 20-30 trades cannot support a ratio; this is what it looks like when that warning is finally tested. RATCHET v2 clause 5, regime spread reported: 0.12759442, H2 the better half."
- },
- {
-  "id": "wf-e63b-5m-rescale-h2",
-  "name": "WF E63b 5m rescale H2",
-  "symbol": "BTCUSDT",
-  "timeframe": "5m",
-  "direction": "long",
-  "status": "rejected",
-  "createdDate": "2026-09-03",
-  "lastTestedDate": "2026-09-03",
-  "backtestStart": "2025-07-20",
-  "backtestEnd": "2026-09-01",
-  "specPath": "war-formation/ORACLE-RULES.md",
-  "description": "The timeframe rescale. e58a (shield $1,000, the family's largest sample at 36 trades and confirmed reproducible by E59's cold re-run) moved from a 1m to a 5m entry. 15m was rejected in design: the 15m level is reconstructed from timestamps, so on a 15m entry each bar IS one bucket, p15l collapses to the previous bar's low and brokeBelow stops being a structural level. Scaling: maxBars 6480->1296 and ta.atr(30)->atr(6), both preserving wall clock. skipOpen/skipClose are minutes, greenBull counts 1h candles, shield/rr/velK are dollars or ratios - all unscaled. Split at 2025-07-20, the BTC lab's Attack 16 boundary, a pre-existing date not chosen from this data. Second half, the control.",
-  "metrics": {
-   "netProfitPct": -9.55805201,
-   "profitFactor": 0.83434289,
-   "maxDrawdownPct": 16.01925213,
-   "totalTrades": 73,
-   "winRatePct": 32.87671233,
-   "avgTradePct": -0.13093222
-  },
-  "provenance": {
-   "source": "trader.dev",
-   "jobId": "adhoc_01M1KJND79MXMQ4KHV06CG29H3",
-   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KJND79NQ4WEQ4QY6H7ZCDH",
-   "verifiedAt": "2026-09-03T12:12:00Z"
-  },
-  "notes": "BOTH HALVES FAIL. E63a PF 0.70674847 / DD 31.81350346% / 95 trades / 29.47% win. E63b PF 0.83434289 / DD 16.01925213% / 73 trades / 32.88% win. That is the third of three outcomes registered before the runs. THE CEILING IS GONE AND THE EDGE WENT WITH IT: 168 trades across the two halves against the 20-30 this family had been capped at since E35, and neither half clears 1.0. THE SHARPER POINT IS IN THE BAR COUNTS: avgBarsInTrade is 225.71 and 292.85 against a 1296 cap - 17% and 23%. THE CAP DOES NOT BIND AT 5m. Every previous ALCM measurement had winners pinned at 56-93% of their cap, which is the entire reason E47 existed. So this is the FIRST measurement in this lab's history where the exit actually resolves at target or shield as the specification requires - and it returns 0.71 and 0.83. ON WHICH READING IS RIGHT: 'the ALCM family is 1m-specific' is one explanation. The simpler one is that e58a's 1.24 on 36 trades was SMALL-SAMPLE NOISE and 168 trades is the more trustworthy number. This lab's own docs have warned for weeks that 20-30 trades cannot support a ratio; this is what it looks like when that warning is finally tested. RATCHET v2 clause 5, regime spread reported: 0.12759442, H2 the better half."
- },
- {
-  "id": "wf-e64a-6h-direction-short",
-  "name": "WF E64a: the SHORT leg under the source's own 6h direction rule",
-  "symbol": "BTCUSDT",
-  "timeframe": "1m",
-  "direction": "short",
-  "status": "research",
-  "createdDate": "2026-09-03",
-  "lastTestedDate": "2026-09-03",
-  "backtestStart": "2025-12-16",
-  "backtestEnd": "2026-05-03",
-  "specPath": "war-formation/pine/e64a-6h-direction-short.pine",
-  "description": "USER DIRECTIVE 2026-09-03: War Formation must work in both directions and the 6H is the direction. Implements ORACLE-RULES L204-216 literally -- direction = 2+ consecutive RED 6h candles, replacing the lab's own '4+ green 1h candles in the prior 6h block' proxy. Short mechanics are the structural mirror of the long's sweep-and-reclaim (15m higher high, then rejection back below). Shield $1,000 and cap 6480 held at e58a exactly so only the direction rule and the leg change.",
-  "metrics": {
-   "netProfitPct": -7.81203272,
-   "profitFactor": 0.45442725,
-   "maxDrawdownPct": 10.97440232,
-   "totalTrades": 43,
-   "winRatePct": 6.97674419,
-   "avgTradePct": -0.18167518,
-   "sharpeRatio": -2.78849887,
-   "commissionPaid": 421.6564718,
-   "avgWinningTrade": 216.897476633332,
-   "avgLosingTrade": -35.7973925425,
-   "longTrades": 0,
-   "shortTrades": 43
-  },
-  "provenance": {
-   "source": "trader.dev",
-   "jobId": "01M1KM717WQKYA8668ET1KVTG0",
-   "strategyId": "01M1KM71FM0139W7BF1FQ1QT0A",
-   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KM717WQKYA8668ET1KVTG0",
-   "engineVersion": "tv_jul26_mc7",
-   "cascadeRatio": 1,
-   "verifiedAt": "2026-09-03T12:34:00Z"
-  },
-  "verdict": "REJECTED",
-  "notes": "Short construction #12, and the FIRST driven by the source's own direction rule rather than by a location this lab chose. PF 0.454 on 43 trades, 6.98% win rate. THE DIRECTION RULE BINDS AND IS NOT THE PROBLEM: 43 short entries against the long leg's 28 under the identical rule (E64b), so 'red 6h' is a live, frequently-satisfied condition, not an inert gate. THE DECOMPOSITION IS THE POINT -- E64b holds the direction rule constant and runs the LONG leg at 0.959, so the leg penalty (0.959 -> 0.454) is real and separate from the direction-rule penalty (e58a's 1.240 -> E64b's 0.959). Fourteen prior mirrored shorts failed and this makes fifteen, but for the first time the failure is isolated to the MECHANICS rather than confounded with the direction. WINDOW CAVEAT, stated not excused: 4.5 months of 1m data is ONE regime, and a short leg tested only inside it cannot be distinguished from a short leg tested in a bull market."
- },
- {
-  "id": "wf-e64b-6h-direction-long",
-  "name": "WF E64b: the LONG leg under the same 6h direction rule -- the CONTROL",
-  "symbol": "BTCUSDT",
-  "timeframe": "1m",
-  "direction": "long",
-  "status": "research",
-  "createdDate": "2026-09-03",
-  "lastTestedDate": "2026-09-03",
-  "backtestStart": "2025-12-16",
-  "backtestEnd": "2026-05-03",
-  "specPath": "war-formation/pine/e64b-6h-direction-long.pine",
-  "description": "The control that makes E64a interpretable (HARD LESSON 10). Holds the LEG at e58a's long and changes ONLY the direction source: 2+ consecutive GREEN 6h candles instead of 4+ green 1h candles inside the prior 6h block. Shield, cap, velK, whole-number band, time gate and witching ban all held at e58a.",
-  "metrics": {
-   "netProfitPct": -1.06093465,
-   "profitFactor": 0.95884068,
-   "maxDrawdownPct": 10.63382724,
-   "totalTrades": 28,
-   "winRatePct": 35.71428571,
-   "avgTradePct": -0.03789052,
-   "sharpeRatio": -0.07791906,
-   "commissionPaid": 281.0934655,
-   "avgWinningTrade": 247.15356876,
-   "avgLosingTrade": -143.201619616666,
-   "longTrades": 28,
-   "shortTrades": 0
-  },
-  "provenance": {
-   "source": "trader.dev",
-   "jobId": "01M1KMB74E2CEGPPMX8SV8W8M5",
-   "strategyId": "01M1KMB7AWNQ4W0PNKHWJVHARC",
-   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KMB74E2CEGPPMX8SV8W8M5",
-   "engineVersion": "tv_jul26_mc7",
-   "cascadeRatio": 1,
-   "verifiedAt": "2026-09-03T12:36:00Z"
-  },
-  "verdict": "REJECTED",
-  "notes": "NOT KEPT -- RATCHET v2 clause 1 fails outright: PF 1.24015239 (e58a) -> 0.95884068, and the count drops 36 -> 28. AND THIS IS THE UNCOMFORTABLE FINDING OF THE CYCLE: the source's OWN literal direction rule performs WORSE than the proxy this lab invented to stand in for it. ORACLE-RULES L215-216 has been asserting for some time that the straight 6h-candle count is 'simpler and better specified' than the 4-green-1h proxy. Measured, it is simpler and WORSE on this window. The proxy was doing real work -- most likely because '4 of the last ~6 1h candles green' is a persistence condition, while '2 consecutive 6h candles green' can be satisfied by two barely-green blocks. Reported plainly rather than buried: mastering the user's strategy means measuring its stated rules, INCLUDING when the measurement is inconvenient. The source rule is NOT adopted and it is NOT discarded on one 4.5-month window; e58a's proxy remains the reference build."
- }
+  {
+    "id": "wf-e65b-e58a-velk10",
+    "name": "WF E65b e58a velK1.0",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Second half of the first entry-side binding test under the A.L.C.M. exit model. Parent: pine/e58a-shield1000-maxbars6480.pine (PF 1.24015239, 36 trades, confirmed reproducible E58=E59). Change: velK 0.8 -> 1.0, tightening the gate. Paired with E65a (velK 0.6) per HARD LESSON 16. Numbered E65 (originally run as E64 before a concurrent session's bidirectional-cascade build claimed that number on push; see EXPERIMENT-LOG.md's E65 numbering note).",
+    "metrics": {
+      "netProfitPct": 2.09552799,
+      "profitFactor": 1.0762016,
+      "maxDrawdownPct": 11.62737811,
+      "totalTrades": 31,
+      "winRatePct": 38.70967742,
+      "avgTradePct": 0.06759768
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1KMMBK1SKPW3XASKFZK6DG6",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KMMBK1KRYG542YY6M9CTSX",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "notes": "REJECTED under RATCHET v2 clause 1: PF 1.0762016 < parent e58a's 1.24015239, though better than E65a. DD 11.63% vs e58a's 9.83% (worse); trades 36->31 (not degenerate, clears RATCHET v2's own 30-trade floor). effectiveTradeRange.firstTradeEntryTs 1766151300000 matches e58a's own trade 1 (jobId 01M1K3J6GDK0Z51MFX60ECM75F) exactly -- the stricter gate did not exclude e58a's first entry, only later ones. Together with E65a, velK=0.8 (e58a) is now confirmed the peak of three non-degenerate points (48/36/31 trades, PF 0.873/1.240/1.076) -- a real local optimum on the ENTRY side, the mirror of maxBars=12960 on the exit side (E56/E60). Neither side is a curve-fit spike (HARD LESSON 16): both are meaningfully worse but not a cliff collapse."
+  }
 ]

@@ -650,9 +650,67 @@ const DATA = [
     },
     "verdict": "REJECTED",
     "notes": "NOT KEPT -- RATCHET v2 clause 1 fails outright: PF 1.24015239 (e58a) -> 0.95884068, and the count drops 36 -> 28. AND THIS IS THE UNCOMFORTABLE FINDING OF THE CYCLE: the source's OWN literal direction rule performs WORSE than the proxy this lab invented to stand in for it. ORACLE-RULES L215-216 has been asserting for some time that the straight 6h-candle count is 'simpler and better specified' than the 4-green-1h proxy. Measured, it is simpler and WORSE on this window. The proxy was doing real work -- most likely because '4 of the last ~6 1h candles green' is a persistence condition, while '2 consecutive 6h candles green' can be satisfied by two barely-green blocks. Reported plainly rather than buried: mastering the user's strategy means measuring its stated rules, INCLUDING when the measurement is inconvenient. The source rule is NOT adopted and it is NOT discarded on one 4.5-month window; e58a's proxy remains the reference build."
+  },
+  {
+    "id": "wf-e65a-e58a-velk06",
+    "name": "WF E65a e58a velK0.6",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "First entry-side binding test under the A.L.C.M. exit model, per the mandate correction's own instruction to test the entry, not only the exit. Parent: pine/e58a-shield1000-maxbars6480.pine (PF 1.24015239, 36 trades, confirmed reproducible E58=E59). Change: velK (velocity gate multiplier on atr(30) for the 15m-low reclaim) 0.8 -> 0.6, loosening the gate. Paired with E65b (velK 1.0) per HARD LESSON 16. Numbered E65 (originally run as E64 before a concurrent session's bidirectional-cascade build claimed that number on push; see EXPERIMENT-LOG.md's E65 numbering note).",
+    "metrics": {
+      "netProfitPct": -5.6255575,
+      "profitFactor": 0.87342782,
+      "maxDrawdownPct": 14.81858269,
+      "totalTrades": 48,
+      "winRatePct": 33.33333333,
+      "avgTradePct": -0.11719911
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1KMKER0PDXNN72HAWNQECD9",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KMKER0N05Y0CHPKYZTTAGR",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "notes": "REJECTED under RATCHET v2 clause 1: PF 0.87342782 < parent e58a's 1.24015239. Trade count rose 36->48 (not degenerate, HARD LESSON 19) but DD also worsened 9.83%->14.82%. get_trades on e58a (jobId 01M1K3J6GDK0Z51MFX60ECM75F) shows e58a's own trade 1 enters at 1766151300000; this run's effectiveTradeRange.firstTradeEntryTs is 1765892400000 -- an EARLIER entry the stricter gate does not admit. Confirms the named-in-advance occupancy point: loosening an entry gate does not merely add trades to the same set, it can change trade 1 itself, so this is a different trade population from the first entry onward, not a controlled subset comparison."
+  },
+  {
+    "id": "wf-e65b-e58a-velk10",
+    "name": "WF E65b e58a velK1.0",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Second half of the first entry-side binding test under the A.L.C.M. exit model. Parent: pine/e58a-shield1000-maxbars6480.pine (PF 1.24015239, 36 trades, confirmed reproducible E58=E59). Change: velK 0.8 -> 1.0, tightening the gate. Paired with E65a (velK 0.6) per HARD LESSON 16. Numbered E65 (originally run as E64 before a concurrent session's bidirectional-cascade build claimed that number on push; see EXPERIMENT-LOG.md's E65 numbering note).",
+    "metrics": {
+      "netProfitPct": 2.09552799,
+      "profitFactor": 1.0762016,
+      "maxDrawdownPct": 11.62737811,
+      "totalTrades": 31,
+      "winRatePct": 38.70967742,
+      "avgTradePct": 0.06759768
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1KMMBK1SKPW3XASKFZK6DG6",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KMMBK1KRYG542YY6M9CTSX",
+      "verifiedAt": "2026-09-03T00:00:00Z"
+    },
+    "notes": "REJECTED under RATCHET v2 clause 1: PF 1.0762016 < parent e58a's 1.24015239, though better than E65a. DD 11.63% vs e58a's 9.83% (worse); trades 36->31 (not degenerate, clears RATCHET v2's own 30-trade floor). effectiveTradeRange.firstTradeEntryTs 1766151300000 matches e58a's own trade 1 (jobId 01M1K3J6GDK0Z51MFX60ECM75F) exactly -- the stricter gate did not exclude e58a's first entry, only later ones. Together with E65a, velK=0.8 (e58a) is now confirmed the peak of three non-degenerate points (48/36/31 trades, PF 0.873/1.240/1.076) -- a real local optimum on the ENTRY side, the mirror of maxBars=12960 on the exit side (E56/E60). Neither side is a curve-fit spike (HARD LESSON 16): both are meaningfully worse but not a cliff collapse."
   }
 ];
-const BUILT = "2026-09-03 06:40";
+const BUILT = "2026-09-03 12:47";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
