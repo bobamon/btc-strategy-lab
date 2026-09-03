@@ -1818,9 +1818,38 @@ const DATA = [
       "verifiedAt": "2026-09-03T12:05:00Z"
     },
     "notes": "RENUMBERED v50 -> v51: the cloud routine independently used v50 for its purpose-built regime-flip split while this was being written. Same run, same provenance, new number. REJECTED, AND THE HYPOTHESIS IS CLEANLY FALSIFIED. v34 (fade into the zone): PF 0.73634167 / DD 29.25265633% / 256 trades / 13.28% win. v50 (require a failed reclaim): PF 0.68150476 / DD 31.03294550% / 176 trades / 13.06818182% win. THE WIN RATE DID NOT MOVE -- 13.28% to 13.07%. The reasoning was that demanding EVIDENCE the supply zone rejected price would remove most of v34's 222 losers. It removed 80 trades and kept the same hit rate, so the zone-rejection question was never the problem. Profit factor went DOWN, so this fails RATCHET v2 clause 1 outright. WHAT DID CHANGE: the payoff ratio is 4.53348821 (avg win $218.52 against avg loss $48.20) against v34's roughly 1:1 shape, and avgBarsWinning 36.48 vs avgBarsLosing 8.01. Confirmation buys a much better payoff and cannot use it at a 13% hit rate. THE REGISTERED CONSEQUENCE, HONOURED: this is the SIXTH short-leg failure across the two labs that have tried, and confirmation did not even help. The honest statement is that the short side may not be viable on this instrument in this era -- not that a seventh construction is needed. Long-only starts to look like a property of BTCUSDT 2022-2026 rather than a gap in effort. ANOMALY FLAGGED RATHER THAN INTERPRETED: cascadeRatio came back 1.4193548387096775 -- 176 rows from 124 UNIQUE entries, histogram {1:81, 2:35, 3:7, 4:1}, the first non-unit cascade this lab has produced. The headline trade count overstates distinct decisions. It still clears the 30-trade floor either way, but the trigger needs checking before any future short build reuses it."
+  },
+  {
+    "id": "3m-elite-v52-champion-repro-check",
+    "name": "3M Elite v52 champion reproducibility check",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "passed",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Cold reproducibility check on v37, the project's only split-tested champion. v32 had a check on record and passed; v37 never did. Re-runs pine/3m-elite-v37-freshness-tight.pine unchanged on the identical window. Nothing was altered - this is verification, not an experiment.",
+    "metrics": {
+      "netProfitPct": 29.75955671,
+      "profitFactor": 1.25172059,
+      "maxDrawdownPct": 8.72815312,
+      "totalTrades": 155,
+      "winRatePct": 42.58064516,
+      "avgTradePct": 0.19199714
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1KK3GVDKM8RXNTQDT79ZSNA",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KK3GVDNAXD6H49EPEBBDTG",
+      "verifiedAt": "2026-09-03T12:22:00Z"
+    },
+    "notes": "PASSES - REPRODUCED TO THE DIGIT. Recorded champion: PF 1.25172059 / DD 8.72815312% / 155 trades. Cold re-run: PF 1.25172059 / DD 8.72815312% / 155 trades, long 155 short 0. Identical. WHY THIS RUN MATTERED. HARD LESSON 25 was written twice today at real cost: E38's source was never saved and a rebuild returned PF 0.346 on 28 trades against a recorded 1.502 on 21, voiding two cycles of comparisons; and E47's source WAS saved and still failed to reproduce (24 trades, PF 0.58 against 21 and 1.22), after that result had already been promoted and reported to the user. v32 had a reproducibility check on record. v37 - the only split-tested champion this project has, and the anchor for every downstream decision - did not. That is precisely the gap E47 fell through. WHAT IT ESTABLISHES: v37 is now the FIRST result in this project to clear BOTH gates - an out-of-sample split (H1 1.33630490 on 96 trades, H2 1.12058245 on 59, both above 1.0) AND a cold reproduction to the digit. Nothing else in three labs and roughly 150 recorded backtests has done both. THE CAVEATS THAT DO NOT GO AWAY: H2 remains the weak half (Sharpe 0.90 -> 0.16, net return over 2.25 years essentially flat), the edge is concentrated in H1, and v37 is LONG-ONLY - six independent short constructions have failed, so the standing requirement (both directions, all regimes) is still not met. A verified champion is not a finished system."
   }
 ];
-const BUILT = "2026-09-03 06:04";
+const BUILT = "2026-09-03 06:15";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

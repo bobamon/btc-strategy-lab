@@ -2495,3 +2495,51 @@ trigger needs checking before any future short build reuses it, and no conclusio
 2. **Check the v51 cascade** before any short work reuses the failed-reclaim trigger.
 3. **The short leg is paused, not queued.** Six constructions have failed. Reopening it needs a reason
    from outside this lab — new source material, or a different instrument — not another geometry.
+
+
+---
+
+## ██ v52 — THE CHAMPION REPRODUCES TO THE DIGIT. BOTH GATES CLEARED. (2026-09-03)
+
+| | Recorded | Cold re-run |
+|---|---|---|
+| Profit factor | 1.25172059 | **1.25172059** |
+| Max drawdown | 8.72815312% | **8.72815312%** |
+| Trades | 155 | **155** |
+
+Long 155, short 0. **Identical.**
+
+### WHY THIS RUN MATTERED
+HARD LESSON 25 was written twice today, at real cost:
+- **E38** — source never saved; a best-faith rebuild returned PF 0.346 on 28 trades against a recorded
+  1.502 on 21, and **two cycles of comparisons were voided.**
+- **E47** — source *was* saved and still failed to reproduce (24 trades, PF 0.58 against 21 and 1.22).
+  That result had already been promoted and reported to the user before anyone re-ran it.
+
+v32 had a reproducibility check on record. **v37 — the only split-tested champion this project has,
+and the anchor for every downstream decision — did not.** That is exactly the gap E47 fell through.
+
+### WHAT IT ESTABLISHES
+**v37 is the first result in this project to clear BOTH gates:**
+1. **An out-of-sample split** — H1 1.33630490 (96 trades), H2 1.12058245 (59), both above 1.0.
+2. **A cold reproduction to the digit.**
+
+Nothing else across three labs and roughly 150 recorded backtests has done both.
+
+### THE CAVEATS THAT DO NOT GO AWAY
+- **H2 is still the weak half** — Sharpe falls 0.90 → 0.16 and net return over 2.25 years is
+  essentially flat. The edge is concentrated in H1.
+- **v37 is LONG-ONLY.** Six independent short constructions have now failed (v34, v51 and four
+  earlier), so the standing requirement — both directions, all regimes — is **not met**.
+
+**A verified champion is not a finished system, and this document should not start describing it as
+one.**
+
+### QUEUE
+1. **The short side is paused, not queued.** Six constructions failed; reopening needs a reason from
+   outside this lab — new source material or a different instrument — not a seventh geometry.
+2. **Decompose H1's crash leg from its recovery leg** if a sharper regime claim is wanted. Note the
+   cloud has already run isolated bear (1.17318184 / 52 trades), bull (1.62141981 / 24) and
+   regime-flip (1.60921150 / 22) splits — but the bull and flip samples are **below the 30-trade
+   floor** and cannot be quoted as results under RATCHET v2.
+3. **Check the v51 cascade** before any future short build reuses the failed-reclaim trigger.
