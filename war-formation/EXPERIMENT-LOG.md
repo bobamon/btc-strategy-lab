@@ -6,12 +6,21 @@ experiment; take the next open question, run it, record the real result, move it
 > Research specification for backtesting. Not a trade recommendation.
 
 ## Current champion
-**v6 — HA cascade, LONG ONLY.** BTCUSDT 1m, 2025-12-16 → 2026-05-03.
-*(Config updated 2026-09-02 after E17: `minRpct` is now 0.80%, not 0.15%. Behaviour is unchanged to
-nine significant figures — the floor never bound — but the code now states its true risk floor.)*
-`+7.8% · PF 1.69 · win rate 56.3% · Sharpe 2.19 · max DD 3.10% · 32 trades` — status **testing**.
+**THERE IS NONE.** v6 (the structural-stop build referenced below) was demoted at E34 — its
+load-bearing `coilK` term sat on a one-point-wide spike (HARD LESSON 16/17) — and every run since E35
+uses the corrected A.L.C.M. exit the user specified, which v6 never had. Nothing on the ALCM exit has
+cleared PF 1.0 with a trade count above the ~15-trade interpretability floor while ALSO being built on
+code that is genuinely reproducible AND genuinely single-leg. See E48/E49 (bottom of file, most recent):
+even E47 — this lab's best-looking ALCM number, PF 1.21869905 on 21 trades — turned out to be a
+long-and-short build whose short leg happened to score zero trades at one `maxBars` value, not a true
+long-only construction. **The next cycle's first job is building and saving a source that is actually
+long-only in code, not just in outcome, before any number here can be trusted as a candidate.**
 
-Pine: `war-formation/pine/war-formation-ha.pine` (long-only variant; short leg removed).
+*(The paragraph below describes v6, kept for history — it is DEMOTED, not current.)*
+**v6 — HA cascade, LONG ONLY, structural stop (pre-A.L.C.M., WRONG EXIT MODEL).** BTCUSDT 1m,
+2025-12-16 → 2026-05-03. `+7.8% · PF 1.69 · win rate 56.3% · Sharpe 2.19 · max DD 3.10% · 32 trades`.
+Pine: `war-formation/pine/war-formation-ha.pine`. Read `ORACLE-RULES.md` before trusting this number —
+War Formation has NO STOP LOSS; the real exit is the A.L.C.M. shield, and this build does not use it.
 
 ## The two things that are settled
 1. **The cascade is the edge.** Stripping the 6h/1h/15m/3m vetoes takes PF from 1.40 to 0.68 and
@@ -1918,13 +1927,116 @@ confounds rather than two:
 3. **Risk-per-trade varying with width** - under `percent_of_equity = 100`, a $2,000 shield risks 2%
    of equity per trade and $3,000 risks 3%. The sweep varied risk and exit geometry together.
 
-## QUEUE
-1. **Raise the cap until avgBarsWinning stops pinning AT EACH SHIELD WIDTH SEPARATELY, then compare.**
-   That is the only honest way to sweep the shield, and it is now the top item.
-2. **The maxBars neighbourhood at $2,000** (8640 and 25920) - still open, and the cloud routine was
-   working it at :37.
-3. **Risk fraction:** is 2% per trade right, and should it scale with shield width? The coupling found
-   here makes that question sharper, not softer.
+## QUEUE — SUPERSEDED, see the consolidated queue at the end of E49 below
+(Left in place for history. E48 and E49 were run concurrently by two loops sharing this repo, each
+against E47, without seeing each other's result. See E49 for the merge and the combined queue.)
 
 **Base unchanged: E47, PF 1.21869905, DD 17.44898097%, 21 trades, $2,000 shield, cap 12960,
 long-only, anchored at pine/e47-alcm-long-cap12960.pine. No champion, no candidate.**
+
+
+---
+
+# ██ E49 — THE "NO SHORT LEG" BUILD NEVER HAD THE SHORT LEG DELETED. E47's ZERO SHORTS WAS AN
+# OCCUPANCY ACCIDENT, NOT A CONSTRUCTION GUARANTEE.
+
+**Numbering note:** this ran as "E48" in the session that produced it, concurrently with the E48
+above (shield/cap coupling) from a separate loop sharing this repo — neither saw the other's result
+before running. Renumbered E49 on merge; the two are independent findings on the same file and both
+stand. Same base as the E48 above: `pine/e47-alcm-long-cap12960.pine`.
+
+Queue item 1 (as it stood before this cycle): the maxBars neighbourhood, both sides of E47's 12960
+together (HARD LESSON 16 + 19). Two runs, one change each from `pine/e47-alcm-long-cap12960.pine`:
+`maxBars` 12960 -> 8640 (E49a) and 12960 -> 25920 (E49b). Pre-registered before either ran (HARD
+LESSON 17): a plateau on both sides confirms E47 is a genuine reading; a collapse with healthy trade
+counts moves the optimum; degeneracy (< ~15 trades) bounds the data, not the parameter.
+
+| | E49a (cap 8640) | E47 (cap 12960, anchor) | E49b (cap 25920) |
+|---|---|---|---|
+| Profit factor | **0.43029399** | 1.21869905 | **0.60321667** |
+| Max drawdown | 19.66051373% | 17.44898097% | 18.49745344% |
+| Trades | 31 | 21 | 24 |
+| Win rate | 9.68% | 42.86% | 12.5% |
+| **Long trades (wins)** | **10 (2)** | **21 (9)** | **8 (2)** |
+| **Short trades (wins)** | **21 (1)** | **0** | **16 (1)** |
+
+**Both neighbours collapsed hard.** Read against HARD LESSON 16 alone this looks like E47 sits on a
+spike. **It does not, and the reason is more serious than a spike.**
+
+## THE REAL FINDING: THE SHORT LEG WAS NEVER ACTUALLY DELETED FROM THIS CODE
+
+E45's log entry says, in its own words, *"the short leg was deleted from the anchored reference
+build."* E46's says the missing 2x2 cell is *"uncoiled longs with no short leg."* Both describe a
+CONSTRUCTION change — the short entry block removed from the Pine.
+
+**`pine/e47-alcm-long-cap12960.pine`, the only version of this file ever committed (`git log`
+confirms one commit), still contains the full short leg** — `goShort`, `bearRegime`, `coilPrev` on
+the short side, `shortTrig`, and the `strategy.entry("S", ...)` block are all present and live. It was
+never removed. E49a and E49b inherited that intact short leg unchanged, because they are one-line
+diffs of this exact file — and so did the E48 above (shield $3,000, same cap): its `get_trades` was
+also pulled on merge (a free read, no credit spent) and its 15 trades are genuinely all long too, so
+at `maxBars = 12960` the occupancy accident held at BOTH shield widths tested so far. That is one data
+point toward it being a property of the cap, not a coincidence specific to $2,000 — still to be
+confirmed properly once the leg is actually deleted (queue item 1 below).
+
+**E47's 21 trades were verified against the raw trade list** (`get_trades` on its actual result,
+`01M1JAFMHE0GAA4EF22DVSYRKE` — not re-run, a free read of the completed backtest) — all 21 rows read
+`"direction": "long"`. So E47's headline number is real and its long/short split is now confirmed,
+not inferred from a trade count matching a different build (the inference method E46 used, and the
+thing E43's confound note already warned is fragile).
+
+**What changed the read is WHY it was zero.** `flat = strategy.position_size == 0` gates every entry,
+long or short, on the whole strategy — not per leg. At `maxBars = 12960`, this window's long trades
+happen to occupy the position for long enough, and often enough, that no bear-regime short setup ever
+finds the book flat. At 8640 the same trades close sooner, positions come free more often, and 21 of
+the next 31 entries are shorts — the exact dead-weight leg the reproducible set (E42/E43/E44/E45)
+already showed wins about 2 of every 73 times it fires. At 25920 the same thing happens on a smaller
+scale (16 of 24). **The short leg was never gone. `maxBars = 12960` just happened to be wide enough,
+and shaped right, to starve it of a flat book on this specific 4.5-month window.**
+
+## WHY THIS IS NOT THE SAME AS A CURVE-FIT SPIKE
+
+HARD LESSON 16's spike (`coilK`) and this collapse look identical in a results table and are a
+different failure underneath. A curve-fit spike means the EDGE itself is fragile to the parameter. This
+collapse means **the parameter change re-admits a leg that the entry conjunction never actually
+excludes** — a construction gap, not a fragile edge. The distinction matters for what fixes it:
+retuning `maxBars` cannot fix a leg that was supposed to be deleted and was not. Deleting the leg can.
+
+## WHAT THIS DOES AND DOES NOT CHANGE
+
+- **E47's own number stands, verified**: PF 1.21869905, DD 17.44898097%, 21 trades, all long, on the
+  code as actually saved and run. It is not withdrawn.
+- **E47's claim to being a robust, long-only construction is withdrawn.** It was never a long-only
+  BUILD — it was a long-and-short build that happened to score zero shorts at one cap value on one
+  window. The neighbourhood check this queue item asked for could not be completed on this file,
+  because the thing meant to be held fixed (no short leg) was not actually fixed in the code.
+- **E45 and E46's own numbers are now suspect for the identical reason**, and were not re-verified
+  this cycle (no credits spent re-running them — this finding was read from provenance, not a new
+  backtest). Their descriptions also say "short leg deleted"; whether their SAVED sources (if any
+  exist beyond this file) actually did that has not been checked.
+- **This generalises past `maxBars`.** The E48 above found the shield and the cap are coupled; this
+  finding says the SAME FILE also has a leg that isn't actually gone. Any future sweep on this file —
+  shield, cap, or anything else that changes hold time — can silently re-admit the short leg the same
+  way. Nothing swept on `pine/e47-alcm-long-cap12960.pine` is clean until item 1 below is done.
+- **Added to `STRATEGY-LEDGER.md` as HARD LESSON 24** — a result whose source is on disk can still not
+  match its own description; "zero trades on a leg" is an outcome to verify against the code, not a
+  construction to take on faith from a trade count.
+
+## QUEUE — CONSOLIDATED (replaces both the E48 queue above and this entry's own)
+1. **Build the true long-only source: take `pine/e47-alcm-long-cap12960.pine` and DELETE the short
+   leg from the code** — remove `goShort`, the `bearRegime`/`h1Bear`/`brokeAbove`/`shortTrig`
+   computation feeding it, and the `if flat and goShort ...` entry block, not merely leave it unused.
+   Save it to `pine/` as the new anchor BEFORE running anything else (HARD LESSON 21). Re-run it once
+   to confirm it reproduces E47's 21 long trades at `maxBars = 12960` — if it does not, E47's number
+   itself needs re-deriving on the corrected code. **This is now the top item for both open questions
+   below — neither can be swept cleanly until it is done.**
+2. **Then re-run the maxBars neighbourhood (8640 / 25920) on that corrected, genuinely single-leg
+   source.** The clean version of E49's item, and the only way to actually satisfy HARD LESSON 16 for
+   `maxBars`.
+3. **Then re-derive the shield sweep, varying maxBars WITH each shield width rather than holding it
+   fixed** (E48's finding) — raise the cap until `avgBarsWinning` stops pinning AT EACH SHIELD WIDTH
+   SEPARATELY, then compare — on the corrected single-leg source (E49's finding). Three confounds now
+   apply to E38-E41's old $2,000 conclusion: unreproducible code (E44), a cap that binds differently at
+   each shield width (E48), and a short leg that was never actually removed (E49).
+4. **Risk fraction, correctly stated:** is 2% per trade right, and should it scale with shield width?
+   Unchanged, still open, sharpened by E48's coupling finding.

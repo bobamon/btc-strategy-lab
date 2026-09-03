@@ -2095,9 +2095,67 @@ const DATA = [
       "verifiedAt": "2026-09-03T00:52:00Z"
     },
     "notes": "REVERTED ON THE RATCHET BUT INCONCLUSIVE ON THE SHIELD, AND THE DISTINCTION IS THE FINDING. E47 (2000): PF 1.21869905 / DD 17.44898097% / 21 trades / avgBarsWinning 7317 of 12960 = 56%. E48 (3000): PF 0.76633130 / DD 28.92342722% / 15 trades / avgBarsWinning 10900 of 12960 = 84%. TWO REASONS THIS DOES NOT SETTLE THE QUESTION. First, 15 trades is below the ~20 floor registered before the run, so the COUNT is reported and 0.766 is NOT read as a profit factor -- the revert rests on did-not-improve, not on that number. Second, THE CAP BINDS AGAIN AT 3000 at 84% of the maximum hold: E47 proved 12960 was long enough for a 2000 shield at 56%, but a wider shield needs longer to resolve, so E48 measures a NINE-DAY HOLD rather than the 3000 ALCM. That is exactly the failure E47 fixed, re-appearing one shield-width up. THE SHIELD AND THE CAP ARE COUPLED AND CANNOT BE SWEPT INDEPENDENTLY -- any shield comparison at a fixed cap is confounded, because the wider shield is the one the cap truncates. E38-E41's 2000 conclusion is therefore NEITHER CONFIRMED NOR REFUTED, and it now carries THREE known confounds rather than two: unreproducible code (E44), a binding cap that bound differently at each width, and risk-per-trade varying with shield width (2% of equity at 2000, 3% at 3000, under percent_of_equity 100)."
+  },
+  {
+    "id": "wf-e49a-maxbars-8640",
+    "name": "WF E49a maxBars 8640",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Queue item 1, left neighbour: maxBars neighbourhood check paired with E49b (HARD LESSON 16/19). One change from E47: maxBars 12960 -> 8640. Same file otherwise (pine/e47-alcm-long-cap12960.pine).",
+    "metrics": {
+      "netProfitPct": -14.01302945,
+      "profitFactor": 0.43029399,
+      "maxDrawdownPct": 19.66051373,
+      "totalTrades": 31,
+      "winRatePct": 9.67741935,
+      "avgTradePct": -0.45203321
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JBFPVE4MMFH011KKHEKAPJ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JBFPVDSQ8Y4QRC1J0KY7GQ",
+      "verifiedAt": "2026-09-03T00:42:00Z"
+    },
+    "notes": "REVERTED, but not for the reason the run was designed to test. longTrades 10 (2W), shortTrades 21 (1W) -- the short leg, believed deleted from this build per E45/E46's own descriptions, is still fully present in pine/e47-alcm-long-cap12960.pine and fired hard once the shorter cap freed up the book more often. PF collapsed to 0.43029399 because 21 of 31 trades were the dead-weight short leg (this lab's reproducible set already showed shorts win ~2 of 73). This is NOT evidence that maxBars=12960 is a curve-fit spike (HARD LESSON 16) -- see E48's writeup and HARD LESSON 24: E47's zero short trades was an occupancy accident on a single-position engine, not a construction guarantee. Paired with wf-e49b-maxbars-25920."
+  },
+  {
+    "id": "wf-e49b-maxbars-25920",
+    "name": "WF E49b maxBars 25920",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Queue item 1, right neighbour: maxBars neighbourhood check paired with E49a (HARD LESSON 16/19). One change from E47: maxBars 12960 -> 25920. Same file otherwise (pine/e47-alcm-long-cap12960.pine).",
+    "metrics": {
+      "netProfitPct": -8.6767197,
+      "profitFactor": 0.60321667,
+      "maxDrawdownPct": 18.49745344,
+      "totalTrades": 24,
+      "winRatePct": 12.5,
+      "avgTradePct": -0.36152999
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1JBHQ881DBJP1CR5VS1YGMD",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1JBHQ8846VJQPX6SK6B4BH0",
+      "verifiedAt": "2026-09-03T00:44:00Z"
+    },
+    "notes": "REVERTED, same mechanism as wf-e49a-maxbars-8640. longTrades 8 (2W), shortTrades 16 (1W) -- the supposedly deleted short leg fired again at this cap too. PF 0.60321667. Confirms the E49a finding is not noise: at BOTH neighbours of E47's 12960, the intact short leg reasserts itself once the longer/shorter hold changes book occupancy. See EXPERIMENT-LOG.md E48 and STRATEGY-LEDGER.md HARD LESSON 24. E47 itself (PF 1.21869905, 21 trades) was independently verified via get_trades to be genuinely all-long on its own result -- that number stands -- but its 'long-only' status is an outcome of this window at this maxBars value, not a property of the code."
   }
 ];
-const BUILT = "2026-09-02 18:44";
+const BUILT = "2026-09-03 00:50";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

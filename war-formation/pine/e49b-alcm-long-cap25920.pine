@@ -1,0 +1,191 @@
+//@version=6
+// WAR FORMATION E49b — maxBars NEIGHBOURHOOD CHECK, RIGHT SIDE. One change from E47: 12960 -> 25920.
+//
+// WHY THIS RUN: HARD LESSON 16 requires both neighbours of a load-bearing parameter before its
+// value is trusted, and E47's maxBars change (4320 -> 12960) was decisive -- REVERTED-shaped
+// (PF 0.925) became KEPT (PF 1.219). Neither side of 12960 has been measured. This is the right
+// side (18 days); e49a-alcm-long-cap8640.pine is the left side, run as the paired other half
+// (HARD LESSON 16: the two tests are a pair, neither complete alone).
+//
+// PRE-REGISTERED OUTCOMES (HARD LESSON 17), WRITTEN BEFORE EITHER RUN:
+//   1. avgBarsWinning plateaus near the same absolute value (~7000-8000 bars) at BOTH 8640 and 25920,
+//      with PF/DD in a similar range to E47 (1.219 / 17.45%) -> confirms E47 sits on a genuine
+//      plateau, not a spike; HARD LESSON 16 is satisfied for this parameter.
+//   2. avgBarsWinning keeps scaling roughly proportionally with the cap (still pinning near 90%+ at
+//      8640, or still climbing at 25920) -> the cap has not finished binding and E47 is not yet a
+//      clean read of the specified exit.
+//   3. Trade count collapses toward degeneracy (below the ~15 floor already registered, most likely
+//      HERE at 25920, where a much longer hold leaves far fewer bars in which a prior trade can be
+//      flat and a new one can open) -> HARD LESSON 19: a degenerate neighbour bounds the DATA, not
+//      the parameter, and any PF at that point is not read as a result.
+//   4. If PF at ONE side is clearly better than 12960 with a HEALTHY trade count (>= 15), the true
+//      optimum is not 12960 and should shift toward that side -- the direction, not 12960 itself,
+//      becomes the queue's next anchor.
+//
+// AUDIT (HARD LESSON 6, one line per leg):
+//   LONG  -- R = $2,000, ~2% of BTC price: PASSES the 0.8% floor (LESSON 3). Stop is RISK-DEFINED,
+//            not structural -- the DECLARED deviation from LESSON 5 the A.L.C.M. spec requires (no
+//            stop loss; exit is the shield or the target). Fixed SL/TP at entry, no trailing.
+//   SHORT -- bearRegime/coilPrev/brokeAbove/shortTrig logic is UNCHANGED from the anchored codebase
+//            and NOT mirrored off the long (unchanged since E13); across the reproducible set the
+//            shorts won 2 of 73 trades and E46/E47's "direction": "long" confirms this exact entry
+//            construction produces zero short fills on this window -- present in code, dormant here.
+// REDUNDANCY (E14): no new gate added -- only the exit-cap VALUE changes, so there is no filter being
+// stacked and no redundancy question to check for this run.
+// SAMPLE CEILING: ~20-30 trades on 4.5 months of 1m data. A result under ~15 trades is reported as a
+// count, not read as a ratio (HARD LESSON 19). At 25920 bars (18 days) per trade this is the most
+// likely of any run in this lab to hit that floor -- flagged before running, per HARD LESSON 17.
+//
+// E47 ANCHOR (parent of this file):
+//   https://mcp-api.trader.dev/backtest/01M1JAFMHE0GAA4EF22DVSYRKE
+//   PF 1.21869905 | DD 17.44898097% | 21 trades | 42.86% win | payoff 1.62493207 | +6.63%
+//   avgBarsWinning 7317 of a 12960 cap = 56% -- PLATEAUED rather than scaling from E46's 93%, which
+//   is what proved the OLD 4320 cap was binding. This run asks whether 12960 itself still binds.
+//
+// LINEAGE (all on the anchored codebase, alcm-reference.pine):
+//   E44 coil both legs        0.34584164 / 28    E45 coiled longs only  0.39407279 / 12
+//   E42 coil neither          0.64544502 / 68    E43 coil shorts only   0.92252113 / 39
+//   E46 uncoiled longs, no shorts  0.92509109 / 25
+//   E47 same, cap 4320 -> 12960    1.21869905 / 21   <- E47, the anchor for this pair
+//   E49a same, cap 12960 -> 8640   (paired file)
+//   E49b same, cap 12960 -> 25920  (this file)
+//
+// NOT A CANDIDATE REGARDLESS OF OUTCOME: there is NO out-of-sample period available on this
+// instrument -- 1m coverage is only 2025-12-16 to 2026-05-03. BTC's Attack 31 showed the same day
+// that an in-sample profit factor can be worthless (2.077 in the tuning window against 0.799
+// outside it). No maxBars value here can be split-tested.
+// A.L.C.M. REFERENCE BUILD — the anchored baseline for this lab (E44, 2026-09-02).
+strategy("War Formation E49b long cap25920", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+greenBull = input.int(4,     "Green 1h candles for BULL")
+greenBear = input.int(2,     "Green 1h candles at or below for BEAR")
+skipOpen  = input.int(60,    "Skip first N minutes of 6h block")
+skipClose = input.int(60,    "Skip last N minutes of 6h block")
+coilK     = input.float(0.85,"3m coil: atr(3) < atr(30) * K")
+velK      = input.float(0.8, "Velocity: min reclaim as multiple of atr(30)")
+midLo     = input.float(400, "Whole-number middles low")
+midHi     = input.float(600, "Whole-number middles high")
+etOffset  = input.int(-4,    "ET offset from UTC")
+witchOn   = input.bool(true, "Ban longs in witching hour 1-4am ET")
+shieldUsd = input.float(2000,"THE SHIELD: fixed dollar gap to liquidation")
+rr        = input.float(2.0, "Reward:risk")
+maxBars   = input.int(25920, "Max bars in trade -- EIGHTEEN DAYS. E49b: right neighbour of E47's 12960")
+
+MS6H = 21600000
+MS1H = 3600000
+MS15 = 900000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+b15 = math.floor(time / MS15)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+new15 = b15 != b15[1]
+
+var float h1o     = na
+var int   grnCur  = 0
+var int   cntCur  = 0
+var int   grnPrev = 0
+var int   cntPrev = 0
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    grnCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(h1o)
+        cntCur := cntCur + 1
+        if close[1] > h1o
+            grnCur := grnCur + 1
+    h1o := open
+
+regimeReady = cntPrev >= 5
+bullRegime  = regimeReady and grnPrev >= greenBull
+bearRegime  = regimeReady and grnPrev <= greenBear
+
+minsIn    = (time - b6 * MS6H) / 60000
+timeGate  = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+h1Bull = not na(h1o) and close > h1o
+h1Bear = not na(h1o) and close < h1o
+
+var float c15h = na
+var float c15l = na
+var float p15h = na
+var float p15l = na
+
+if new15
+    p15h := c15h
+    p15l := c15l
+    c15h := high
+    c15l := low
+else
+    c15h := na(c15h) ? high : math.max(c15h, high)
+    c15l := na(c15l) ? low  : math.min(c15l, low)
+
+brokeBelow = not na(p15l) and c15l < p15l
+brokeAbove = not na(p15h) and c15h > p15h
+
+atrFast = ta.atr(3)
+atrSlow = ta.atr(30)
+coiled  = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK
+coilPrev = coiled[1]
+velMin   = na(atrSlow) ? na : atrSlow * velK
+
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+hUTC     = math.floor(time / MS1H) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+longBan  = witchOn and witching
+
+longTrig  = not na(p15l) and not na(velMin) and ta.crossover(close, p15l)  and (close - p15l) >= velMin
+shortTrig = not na(p15h) and not na(velMin) and ta.crossunder(close, p15h) and (p15h - close) >= velMin
+
+goLong  = bullRegime and timeGate and h1Bull and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig
+goShort = bearRegime and timeGate and h1Bear and brokeAbove and coilPrev and not inMiddle and shortTrig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+longR  = shieldUsd
+shortR = shieldUsd
+
+if flat and goLong and longR > 0
+    strategy.entry("L", strategy.long)
+    slPx   := close - longR
+    tpPx   := close + longR * rr
+    barsIn := 0
+
+if flat and goShort and shortR > 0
+    strategy.entry("S", strategy.short)
+    slPx   := close + shortR
+    tpPx   := close - shortR * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong  ? 1 : 0, title="LongSignal")
+plot(goShort ? 1 : 0, title="ShortSignal")

@@ -1012,3 +1012,53 @@ requires raising the POSITION, which the specification's own liquidation-gap log
 - **The engine's parity profile is part of the model.** `margin_long/short = 100` is not a limitation
   to apologise for in every summary; it fixes notional at 1x equity, which is what makes the recorded
   drawdowns readable in the first place.
+
+
+---
+
+## ██ HARD LESSON 24 — "ZERO TRADES ON THE OTHER LEG" IS AN OUTCOME, NOT A CONSTRUCTION, UNTIL THE
+## CODE IS READ
+
+*(War Formation E48, 2026-09-02)*
+
+E45 and E46 both describe deleting the short leg from the entry conjunction. The saved source that
+inherited their lineage, `e47-alcm-long-cap12960.pine`, still had the full short leg live in code —
+`goShort`, its regime/coil/trigger terms, and its `strategy.entry` block, all present and reachable.
+E47's 21 trades were genuinely all long, but not because the code excluded shorts: on a single-position
+engine (`pyramiding=1`, one `flat` gate shared by both directions), a long leg whose trades happen to
+occupy the book for long enough, often enough, can starve every short setup of a flat book across an
+entire 4.5-month window without a single line of code saying so. Changing an unrelated exit parameter
+(`maxBars`, 12960 → 8640 or → 25920) shortened those occupancies just enough to let the short leg back
+in — 21 of 31 trades at one neighbour, 16 of 24 at the other — and PF collapsed from 1.22 to 0.43–0.60
+purely because the dead-weight leg (which this lab had already shown wins about 2 of every 73 times it
+fires) got the chance to trade again.
+
+**Why this is not the same failure as a curve-fit spike (HARD LESSON 16).** A spike means the edge
+itself is fragile to the parameter. This means the parameter change re-admits a leg the entry
+conjunction never actually excluded — the "long-only" description was true of the OUTCOME at one
+parameter value, never true of the CODE. Retuning the parameter that exposed it cannot fix this;
+deleting the leg can.
+
+**How this was caught.** Not by re-running anything — by reading the actual entry logic in the saved
+Pine file before trusting a neighbourhood-sensitivity result built from it, and separately by pulling
+the real trade-level `direction` field for the anchor result (`get_trades`, a free read of an already
+completed backtest, not a new one) instead of trusting a trade-COUNT match to a different build as
+proof of composition. HARD LESSON 21 already warned that a result without its source on disk is not a
+result; this is the sharper form — **a result whose source IS on disk can still not say what its
+description claims, and the only way to know is to read the entry conditions, leg by leg, against the
+prose that describes them.**
+
+**How to apply:**
+- **"Leg X was removed" is a claim about the code, not about a trade count.** Before trusting it, open
+  the saved source and confirm the leg's entry condition cannot fire — not that it happened not to.
+- **On any single-position engine, a trade count of zero for one leg is consistent with two entirely
+  different facts:** the leg was excluded, or the leg was merely never offered a flat book. These are
+  distinguishable only by reading the code or by testing a parameter that changes occupancy (as this
+  neighbourhood check did, by accident of what it was meant to test for something else).
+- **Before running a sensitivity sweep on a build described as single-leg, verify the description
+  against the code first.** A sweep run on a mislabelled build measures the mislabelling, not the
+  parameter.
+- **Prefer reading the trade list's own `direction`/`entryId` field over inferring composition from a
+  trade-count match to a different run.** E46's "no shorts" claim rested on its count matching E43's
+  long-only count — plausible, but a coincidence, not a verification; this cycle's actual check of
+  E47 used the real per-trade field and only then could rule out one explanation from the other.
