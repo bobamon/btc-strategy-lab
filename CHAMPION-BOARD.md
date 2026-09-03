@@ -2210,3 +2210,62 @@ invented to explain a bad number.
    years rather than 1,478 — a daily or weekly structural level, not an intraday channel.
 2. **Do not revisit the breakout by changing its parameters.** If it returns, it returns as a
    low-frequency construction with its own split test, and it says so.
+
+
+---
+
+# ██ ATTACK 34 — WEEKLY BREAK-AND-HOLD. BOTH HALVES CLEAR 1.0, AND THE SAMPLE FLOOR BITES.
+
+Attack 33 was discarded on **cost, not signal** — $6,460.27 of commission against a $217.09 net loss
+across 757 trades. The board's queue turned that into a design constraint: **the next mechanism must
+be naturally low-frequency.** This is that mechanism.
+
+**What it claims to exploit:** that a decisive break of the **prior week's high** marks continuation at
+a timeframe where real positioning happens — a level participants actually watch, rather than an
+arbitrary rolling extreme. Entry on the first close above last week's high; stop at last week's low
+(genuine structure); 2R; four-week hold cap. Bare.
+
+| | 34a · NEVER-TUNED | 34b · recent |
+|---|---|---|
+| Window | 2022 → Jun 2024 | Jun 2024 → 2026 |
+| Profit factor | **1.48290761** | **1.13703696** |
+| Max drawdown | 46.88451809% | 32.24854336% |
+| Trades | **30** | **23** |
+| Win rate | 50.00% | 43.48% |
+| Commission | $292.22 | $243.50 |
+
+**BOTH HALVES CLEAR 1.0 — the first mechanism in this lab's history to do so.**
+
+## THE FREQUENCY FIX WORKED COMPLETELY
+$292 and $243 of commission, against Attack 33's $6,460.27. **The cost problem that killed Attack 33
+is solved outright.**
+
+## AND THE TENSION REGISTERED BEFORE THE RUN IS EXACTLY WHAT HAPPENED
+The Pine header said, in advance: *"the low-frequency fix for the cost problem runs straight into the
+sample floor."*
+
+**34a lands on exactly 30 trades — the thinnest possible pass of RATCHET v2 clause 3 — and 34b's 23
+is below it.** So **1.13703696 on 23 trades is a DIRECTION, not a result**, and it is not quoted as
+one (LESSON 12).
+
+## THE VERDICT
+**ADVANCES** by the mandate's own words — both halves cleared 1.0 — **but as the weakest possible
+advance.** One half at the floor, one below it, and **drawdowns of 46.88% and 32.25% against 3M's
+verified champion at 8.73%.** A strategy that loses nearly half its equity is not tradeable whatever
+its profit factor says.
+
+## THE STRUCTURAL FINDING IS BIGGER THAN THE MECHANISM
+**On 4.7 years of 15m data, a strategy apparently cannot be both cheap enough to be profitable and
+frequent enough to be provable.** Attack 33 had 757 trades and died on costs. Attack 34 is
+effectively cost-free and cannot reach a sample. **That is a constraint on the entire search**, not on
+either candidate — and it was written down before this run rather than discovered to excuse it.
+
+## QUEUE
+1. **Do NOT add a filter stack to Attack 34 yet.** It technically earned one, but with 23 trades in
+   one half every filter would cut an already-unprovable sample. Filters here would manufacture
+   exactly the kind of number Attack 32 exposed.
+2. **The real question is now the search space, not the next mechanism.** Either accept ~30-trade
+   samples and judge on drawdown and logic rather than profit factor, or find more data — a longer
+   history, or the same mechanism across several instruments so the samples pool.
+3. **The 46.88% drawdown is the disqualifying number here**, not the profit factor. Any successor to
+   Attack 34 should be judged on that first.

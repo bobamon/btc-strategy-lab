@@ -1,0 +1,102 @@
+//@version=6
+// BTC ATTACK 34 — WEEKLY BREAK-AND-HOLD. First mechanism to clear BOTH halves. Advances, weakly.
+//   34a NEVER-TUNED 2022-01-01 -> 2024-06-08
+//       https://mcp-api.trader.dev/backtest/01M1KKAAWKKNJDCTM1S8KR5VTC
+//       PF 1.48290761 | DD 46.88451809% | 30 trades | 50.00% win | +55.93% | commission $292.22
+//   34b recent      2024-06-08 -> 2026-09-01
+//       https://mcp-api.trader.dev/backtest/01M1KK8VE37TA0YGZENDN9BDDE
+//       PF 1.13703696 | DD 32.24854336% | 23 trades | 43.48% win | +14.20% | commission $243.50
+//
+// WHY IT EXISTS. Attack 33 (20-bar intraday channel) was discarded on COST, not signal: $6,460.27 of
+// commission against a $217.09 net loss across 757 trades. The board turned that into a design
+// constraint - the next mechanism must be naturally low-frequency. This is it.
+//
+// CLAIM: a decisive break of the PRIOR WEEK'S HIGH marks continuation at a timeframe where real
+// positioning happens, rather than at an arbitrary rolling extreme.
+//
+// HONEST ABOUT FAMILY: shares breakout DNA with Attack 33. What differs is the LEVEL TYPE
+// (calendar-anchored weekly structure, not a rolling N-bar extreme) and the FREQUENCY - the variable
+// Attack 33 proved decisive. Not a rescue: a rescue would re-tune Attack 33's channel length, which
+// the mandate forbids and this does not do.
+//
+// THE FREQUENCY FIX WORKED COMPLETELY: $292 and $243 against $6,460.
+//
+// AND IT RAN STRAIGHT INTO THE SAMPLE FLOOR, AS PREDICTED IN WRITING BEFORE THE RUN. 34a lands on
+// EXACTLY 30 trades - the thinnest possible pass of RATCHET v2 clause 3 - and 34b's 23 is BELOW it,
+// so 1.137 is a DIRECTION and not a result (LESSON 12).
+//
+// **THE STRUCTURAL FINDING IS BIGGER THAN THE MECHANISM**: on 4.7 years of 15m data a strategy
+// apparently cannot be both cheap enough to be profitable AND frequent enough to be provable.
+//
+// **THE DISQUALIFYING NUMBER IS THE DRAWDOWN, NOT THE PROFIT FACTOR.** 46.88% and 32.25%, against
+// 3M's verified champion at 8.73%. A strategy that loses nearly half its equity is not tradeable.
+// DO NOT add a filter stack yet: with 23 trades in one half, every filter cuts an already-unprovable
+// sample and manufactures exactly the number Attack 32 exposed.
+//
+// AUDIT: LONG only - mirroring forbidden (LESSON 6); a weekly-low breakdown short is a SEPARATE
+// construction. Stop at the previous completed week's LOW: genuine structure, beyond it rather than
+// at the signal level (LESSON 5). R floor 0.8% by EXCLUSION so the stop stays on the weekly low
+// (LESSON 3) - clamping would breach LESSON 5 while fixing LESSON 3. NO R ceiling: a weekly range is
+// wide, so losses are large in absolute terms (34a's average loser was $772) - reported, not clamped.
+// The weekly snapshot completes when a new week opens and the trigger fires on a LATER bar, so setup
+// and trigger cannot share a bar (HARD LESSON 8). SL and TP fixed at entry, no trailing.
+strategy("BTC Attack34 weekly break-and-hold", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rr      = input.float(2.0,  "Reward:risk")
+minRpct = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars = input.int(2688,   "Max bars in trade -- 4 weeks on 15m")
+
+MS1W = 604800000
+b1w  = math.floor(time / MS1W)
+newWeek = b1w != b1w[1]
+
+var float wHi  = na
+var float wLo  = na
+var float pwHi = na
+var float pwLo = na
+
+if newWeek
+    pwHi := wHi
+    pwLo := wLo
+    wHi  := high
+    wLo  := low
+else
+    wHi := na(wHi) ? high : math.max(wHi, high)
+    wLo := na(wLo) ? low  : math.min(wLo, low)
+
+breakUp = not na(pwHi) and ta.crossover(close, pwHi)
+
+minR  = close * minRpct / 100
+rLong = na(pwLo) ? na : close - pwLo
+rBig  = not na(rLong) and rLong >= minR
+
+goLong = breakUp and rBig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong and rLong > 0
+    strategy.entry("L", strategy.long)
+    slPx   := pwLo
+    tpPx   := close + rLong * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(pwHi,           title="PrevWeekHigh")
+plot(pwLo,           title="PrevWeekLow")

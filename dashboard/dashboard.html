@@ -2295,9 +2295,67 @@ const DATA = [
       "verifiedAt": "2026-09-03T12:18:00Z"
     },
     "notes": "DISCARDED under the kill rule. 33a (never-tuned, 2022-01-01 to 2024-06-08): PF 0.99624764 / DD 45.17285673% / 757 trades / 42.54% win. 33b (recent half): PF 0.87574157 / DD 71.63985626% / 721 trades / 39.81% win. The pre-2024 half is below 1.0, so the mechanism is discarded and NOT rescued with filters - that rule exists because a filter stack manufactured Attack 31b's 2.077 out of a distribution that returned ~0.9 bare. THE NUMBER THAT CHANGES WHAT THIS MEANS: commissionPaid was $6,460.27 against a NET LOSS of $217.09. Costs are roughly thirty times the net result. At 757 trades on a $10,000 account with 100%-of-equity sizing and 0.05% per side, the 20-bar 15m breakout is trading itself to death rather than signalling badly. That is a finding about FREQUENCY, not about momentum persistence, and it plausibly applies to any fast mechanism this lab tries. 33a's 0.996 is close enough to break-even that the signal may carry a real gross edge which the cost structure consumes entirely. THE MANDATE IS STILL HONOURED: this is recorded as a diagnostic, not used to justify tuning the channel length or the timeframe, because the mandate forbids a parameter search before a split is cleared. The NEXT mechanism should be chosen for a naturally lower trade frequency, and that is now a standing design constraint rather than a discovery. A fixed 2R target was also named as a handicap BEFORE the run: a trend system normally earns its keep from the rare very large winner, which 2R truncates. Both explanations stand; neither was invented afterwards."
+  },
+  {
+    "id": "vwm-attack34a-weekly-break-h1",
+    "name": "BTC Attack34a weekly break H1",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "Weekly break-and-hold, the direct consequence of Attack 33's diagnostic. Entry: first close above the PRIOR COMPLETED WEEK'S HIGH. Stop: the prior week's LOW - genuine structure. 2R fixed, 4-week hold cap. Claims that a decisive break of the prior week's high marks continuation at a timeframe where real positioning happens, rather than at an arbitrary rolling extreme. Honest about family: shares breakout DNA with Attack 33, but differs in LEVEL TYPE (calendar-anchored, not rolling) and FREQUENCY - the variable Attack 33 proved decisive. Bare: no trend, volatility, session or cooldown filter. This is the NEVER-TUNED half, the one that decides discard or advance.",
+    "metrics": {
+      "netProfitPct": 55.9300084,
+      "profitFactor": 1.48290761,
+      "maxDrawdownPct": 46.88451809,
+      "totalTrades": 30,
+      "winRatePct": 50.0,
+      "avgTradePct": 1.86433361
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1KKAAWMVDFBEVTTK9Z61ZFN",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KKAAWKKNJDCTM1S8KR5VTC",
+      "verifiedAt": "2026-09-03T12:31:00Z"
+    },
+    "notes": "BOTH HALVES CLEAR 1.0 - THE FIRST MECHANISM IN THIS LAB'S HISTORY TO DO SO. 34a (never-tuned, 2022-01-01 to 2024-06-08): PF 1.48290761 / DD 46.88451809% / 30 trades / 50.00% win / +55.93% / commission $292.22. 34b (recent): PF 1.13703696 / DD 32.24854336% / 23 trades / 43.48% win / +14.20% / commission $243.50. THE FREQUENCY FIX WORKED COMPLETELY: $292 and $243 of commission against Attack 33's $6,460.27 on 757 trades. The cost problem that killed Attack 33 is solved. AND THE TENSION REGISTERED BEFORE THE RUN IS EXACTLY WHAT HAPPENED. The Pine header stated in advance: 'the low-frequency fix for the cost problem runs straight into the sample floor'. 34a lands on EXACTLY 30 trades - the thinnest possible pass of RATCHET v2 clause 3 - and 34b's 23 trades is BELOW it. So 1.13703696 on 23 trades is a DIRECTION, not a result, and is not quoted as one (LESSON 12). VERDICT: ADVANCES by the mandate's own words, since both halves cleared 1.0 - but as the WEAKEST POSSIBLE ADVANCE. One half sits at the floor, one below it, and the drawdowns are severe: 46.88% and 32.25%, against 3M's verified champion at 8.73%. A strategy losing nearly half its equity is not tradeable regardless of profit factor. THE STRUCTURAL FINDING IS BIGGER THAN THE MECHANISM: on 4.7 years of 15m data a strategy apparently cannot be BOTH cheap enough to be profitable AND frequent enough to be provable. Attack 33 had 757 trades and died on costs; Attack 34 is cost-free and cannot reach a sample. That is a constraint on the whole search, not on either candidate, and it was predicted in writing before this run rather than discovered afterwards."
+  },
+  {
+    "id": "vwm-attack34b-weekly-break-h2",
+    "name": "BTC Attack34b weekly break H2",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-03",
+    "lastTestedDate": "2026-09-03",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "CHAMPION-BOARD.md",
+    "description": "Weekly break-and-hold, the direct consequence of Attack 33's diagnostic. Entry: first close above the PRIOR COMPLETED WEEK'S HIGH. Stop: the prior week's LOW - genuine structure. 2R fixed, 4-week hold cap. Claims that a decisive break of the prior week's high marks continuation at a timeframe where real positioning happens, rather than at an arbitrary rolling extreme. Honest about family: shares breakout DNA with Attack 33, but differs in LEVEL TYPE (calendar-anchored, not rolling) and FREQUENCY - the variable Attack 33 proved decisive. Bare: no trend, volatility, session or cooldown filter. The recent half and the control. Its 23 trades sit BELOW the 30-trade floor, so its ratio is a direction rather than a result.",
+    "metrics": {
+      "netProfitPct": 14.20466615,
+      "profitFactor": 1.13703696,
+      "maxDrawdownPct": 32.24854336,
+      "totalTrades": 23,
+      "winRatePct": 43.47826087,
+      "avgTradePct": 0.61759418
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1KK8VE3KNB62NZM8HFVJ59E",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1KK8VE37TA0YGZENDN9BDDE",
+      "verifiedAt": "2026-09-03T12:31:00Z"
+    },
+    "notes": "BOTH HALVES CLEAR 1.0 - THE FIRST MECHANISM IN THIS LAB'S HISTORY TO DO SO. 34a (never-tuned, 2022-01-01 to 2024-06-08): PF 1.48290761 / DD 46.88451809% / 30 trades / 50.00% win / +55.93% / commission $292.22. 34b (recent): PF 1.13703696 / DD 32.24854336% / 23 trades / 43.48% win / +14.20% / commission $243.50. THE FREQUENCY FIX WORKED COMPLETELY: $292 and $243 of commission against Attack 33's $6,460.27 on 757 trades. The cost problem that killed Attack 33 is solved. AND THE TENSION REGISTERED BEFORE THE RUN IS EXACTLY WHAT HAPPENED. The Pine header stated in advance: 'the low-frequency fix for the cost problem runs straight into the sample floor'. 34a lands on EXACTLY 30 trades - the thinnest possible pass of RATCHET v2 clause 3 - and 34b's 23 trades is BELOW it. So 1.13703696 on 23 trades is a DIRECTION, not a result, and is not quoted as one (LESSON 12). VERDICT: ADVANCES by the mandate's own words, since both halves cleared 1.0 - but as the WEAKEST POSSIBLE ADVANCE. One half sits at the floor, one below it, and the drawdowns are severe: 46.88% and 32.25%, against 3M's verified champion at 8.73%. A strategy losing nearly half its equity is not tradeable regardless of profit factor. THE STRUCTURAL FINDING IS BIGGER THAN THE MECHANISM: on 4.7 years of 15m data a strategy apparently cannot be BOTH cheap enough to be profitable AND frequent enough to be provable. Attack 33 had 757 trades and died on costs; Attack 34 is cost-free and cannot reach a sample. That is a constraint on the whole search, not on either candidate, and it was predicted in writing before this run rather than discovered afterwards."
   }
 ];
-const BUILT = "2026-09-03 06:13";
+const BUILT = "2026-09-03 06:20";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
