@@ -943,3 +943,40 @@ base; two of the three could not have produced one on demand. The defect is invi
 forces a reproduction, and by then the comparisons built on it are already void.
 
 **Audit the sources whenever a base is promoted, not only when a reproduction fails.**
+
+
+---
+
+## ██ HARD LESSON 22 — AN AGGREGATE THAT SPANS TUNED AND UNTUNED DATA REPORTS THE TUNED PART
+
+*(BTC Attacks 30–31, 2026-09-02)*
+
+Attack 30 ran the base over 4.7 years of 15m data and returned **PF 1.232 on 141 trades**. It was
+recorded as the first evidence the edge survives out of period. Attack 31 split that same window at
+the date the tuning data begins:
+
+| | Profit factor | Trades |
+|---|---|---|
+| Never-seen half | **0.799** | 77 |
+| Tuning-era half | **2.077** | 64 |
+
+**The aggregate was a blend of a losing strategy and a fitted one, and it read as mildly positive.**
+
+**Why:** a profit factor pools gross profit and gross loss across the whole span. A strongly fitted
+segment can carry a losing one to a number above 1.0 while hiding that half the record is negative.
+The pooled figure is not a compromise between the halves — it is dominated by whichever half has the
+larger gross flows, and the fitted half usually does.
+
+**How to apply:**
+- **Split before you claim.** "Survives out of period" is a statement about the halves, and only a
+  split can support it. An aggregate that merely INCLUDES unseen data proves nothing about it.
+- **Find the date the tuning data begins and treat it as the split.** Here it was 2024-06-08, the
+  first bar of 5m coverage — an infrastructure detail that silently defined the in-sample window for
+  thirty-one experiments.
+- **Compare the drawdowns, not only the profit factors.** The combined run's max drawdown equalled
+  the losing half's to eight decimals, which alone revealed where all the risk lived.
+- **A monotone parameter with no interior optimum is a fitting signature.** `coolBars` improved the
+  score at every step as it grew more selective. That is what fitting a window looks like from the
+  inside, and HARD LESSON 20's ratchet blindness was a symptom of it.
+- **Withdraw the claim in the same words it was made in.** It was written as "the edge survives out of
+  period"; it has to be unwritten that plainly, in the same document, not softened into a caveat.

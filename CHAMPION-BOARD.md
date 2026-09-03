@@ -1638,3 +1638,62 @@ history before 2024-06-08 does not exist; 15m does, and just failed on it).**
    reason that disclosure is now mandatory, not optional.
 4. **The short leg and the both-directions requirement remain outstanding**, per the standing
    objective — untouched by this cycle.
+# ███ ATTACK 31 — THE OUT-OF-SAMPLE TEST FAILED. THIS IS THE MOST IMPORTANT ENTRY ON THE BOARD.
+
+| Half | Period | Profit factor | Max drawdown | Trades | Win rate | Return |
+|---|---|---|---|---|---|---|
+| **31a — NEVER SEEN** | 2022-01-01 → 2024-06-08 | **0.79859252** | 13.55670685% | 77 | 33.77% | **−11.12%** |
+| 31b — tuning era | 2024-06-08 → 2026-09-01 | **2.07724976** | 5.19508340% | 64 | 60.94% | +34.30% |
+
+77 + 64 = 141, reconciling against Attack 30's whole-window run.
+
+**The strategy loses money on every piece of data it was not fitted to, and returns 2.08 on the data
+it was.** The gap is **1.279 in profit factor and 27 percentage points of win rate.** That is not
+degradation; it is a different object.
+
+### THE DETAIL THAT SETTLES IT
+**Attack 30's whole-window max drawdown was 13.55670685%. That is EXACTLY 31a's drawdown, to eight
+decimals.** Every unit of risk in the combined 4.7-year result came from the out-of-sample half. The
+tuning era contributed no drawdown at all — which is precisely what a fitted window looks like.
+
+### WHAT IS WITHDRAWN
+**Attack 30 was recorded as "the edge survives out of period — the first such evidence in this
+project." IT DOES NOT, and that claim is withdrawn.** The 4.7-year aggregate was carried entirely by
+the 2.2 years the strategy was fitted on.
+
+The record deserves one piece of credit and no more: Attack 30's own note stated that the aggregate
+could not tell whether the edge was concentrated in the tuning era, and queued this exact split as the
+next item. **The process caught it within one cycle. The claim was still premature when made.**
+
+### WHAT THIS DOES TO THE FOUR KEPT CHANGES
+Attacks 15, 23, 26 and 29 were **every one of them** measured inside the window beginning 2024-06-08,
+because that is where 5m data starts and every attack ran on 5m.
+
+**There is now no evidence that any KEPT change generalises, and direct evidence that the
+configuration they produced is unprofitable outside its own window.** The board does not get to keep
+"four changes earned their place" as a summary. What earned its place, earned it in one regime.
+
+### AND IT EXPLAINS THE coolBars CURVE
+Attacks 22–29 found `coolBars` perfectly monotone — profit factor rising and sample falling at every
+step, with no interior optimum. **A parameter that has no optimum on its own data, but keeps
+improving the score as it grows more selective, is the signature of fitting the window rather than
+finding an edge.** HARD LESSON 20 and the three open rule questions were symptoms; this is the cause.
+
+### THE HONEST STATE OF THIS LAB
+- **No champion, no candidate, and now no base worth defending.** PF 1.47184908 on 5m describes a
+  configuration that loses money on unseen data.
+- **Thirty-one attacks, four kept changes, one regime.**
+- The sample problem the board has been calling "the whole problem" was the smaller half of it.
+
+### QUEUE — REWRITTEN
+1. **Nothing on the current configuration.** Further tuning inside 2024-06-08+ cannot produce evidence
+   of anything, and the ratchet as written will keep rewarding it.
+2. **Establish whether ANY version of this mechanism works pre-2024.** Take the plainest possible VWAP
+   pullback — no `coolingOff`, no `highVol`, no witching ban — and run it on 31a's window alone. If
+   even the bare mechanism is under 1.0 there, the idea is dead on this instrument and should be said
+   so plainly rather than re-tuned.
+3. **Every future claim must be split-tested before it is written down.** In-sample numbers are not
+   findings.
+
+**BASE: unchanged mechanically (PF 1.47184908, DD 6.98569615%, 56 trades, `coolBars` 150, 5m,
+long-only) but RECLASSIFIED — an in-sample-only configuration, not a result.**
