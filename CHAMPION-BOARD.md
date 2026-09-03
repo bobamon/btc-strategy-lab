@@ -1756,3 +1756,32 @@ Not a strategy. A method, and it is worth more than the strategy would have been
 
 **BASE: RETIRED. PF 1.47184908 describes a configuration whose underlying mechanism returns ~0.9 on
 1,658 trades. No champion, no candidate, and no base.**
+
+
+---
+
+# ███ CYCLE CHECK, 2026-09-03 — NO ATTACK RUN. THE BOARD'S OWN HALT STANDS.
+
+This cycle's stored mandate was written before Attack 30 and instructed continuing the numbering at
+Attack 31 and running board queue item 1 — split Attack 30's 15m build at 2024-06-08. **Both are
+already done and superseded.** Attack 31 ran exactly that split and it failed (never-seen half PF
+0.799 on 77 trades). Attack 32 then stripped the mechanism to its bare form (`vwUp and pulledBack`,
+no filters) and found it loses money on both halves of the full 4.7-year window — PF 0.930 and
+0.880 on 1,658 trades combined — and closed with: *"Do NOT run Attack 33 on this mechanism... the
+lab needs a decision from the user, not another attack."*
+
+**Per this lab's own rule that the board is authoritative over any stored prompt, no attack ran
+this cycle.** `get_credits` returned a balance of 744 — enough for the "at most two" backtest
+allowance — but spending it would mean tuning a mechanism the board has already shown, on its
+largest sample ever, returns roughly 0.9. That is the exact mistake HARD LESSON 22 and Attack 32
+were written to prevent.
+
+**Unchanged since Attack 32, and still waiting on the user:**
+1. What replaces the retired VWAP pullback-continuation mechanism — a new mechanism on BTCUSDT, or
+   the same measure/split/keep discipline applied to a different instrument.
+2. The three open rule questions, none of which a cycle may answer for itself: a drawdown-tolerance
+   band (Attack 3), a regime-spread ratchet term (Attack 27), a minimum-sample floor (Attack 29).
+   Moot for this retired strategy, but they would govern any successor and should not be closed by
+   default.
+
+**BASE: still RETIRED. No champion, no candidate, no base. Nothing changed this cycle.**
