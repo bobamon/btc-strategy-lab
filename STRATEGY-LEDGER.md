@@ -2247,3 +2247,40 @@ the reward side.** Every one of them raised the required move and expected the r
    levers for E71 are cheaper execution or a higher-frequency variant of the same edge, and **this
    harness cannot express either** at the forced 0.05%/side parity profile. That is a limit to report,
    not to engineer around.
+
+---
+
+## HARD LESSON 47 — RAISING A *SELECTION* THRESHOLD IS NOT THE SAME AS RAISING A *TARGET*, AND ONLY THE SECOND ONE SPENDS EDGE.
+
+HARD LESSON 46 says raising a required move spends edge, confirmed three times (Attack 41, Attack 42,
+WF E73). **Attack 46 is the exception, and the exception has a mechanism rather than being luck.**
+
+| build | what was raised | achieved ratio | outcome |
+|---|---|---|---|
+| Attack 41 | `rr` 2.0 → 3.0 — the **target distance** | fell | edge collapsed |
+| Attack 42 | the anchor, so R and the target both grew | 1.4452 vs nominal 2.0 | truncated |
+| WF E73 | the shield, so the target doubled | gross **+$61 → −$254** | edge destroyed |
+| **Attack 46** | the **minimum geometry a setup must already offer** | **2.41 → 3.75** | **edge rose** |
+
+**The difference is where the target comes from.** In the first three the target is computed from the
+stop, so raising anything moves the target *further away* and asks the market for a longer journey. In
+Attack 46 **the target is a fixed level** — the prior 20-bar high. Raising the floor cannot move it.
+All the floor can do is **decline setups that entered too far below it**, which selects entries
+**nearer support**. Same destination, better starting point.
+
+**The measurement that proves it is the hold time.** Across floors 1.5 → 2.5 → 3.5, `avgBarsWinning`
+went **67.94 → 76.58 → 83.44** against a 192-bar cap: **holds rose 23% while the achieved ratio rose
+56%.** Had the floor been buying reward with time, those two would have moved together.
+
+**HOW TO USE THIS:**
+1. **Before raising any reward parameter, ask whether it moves the target or filters the entry.** If
+   the target moves, Lesson 46 applies and expect to pay in win rate. If the target is fixed and only
+   the entry is filtered, it may be free — and the hold time is how you check which happened.
+2. **A fixed structural target is what makes the exemption possible.** This is the practical payoff of
+   HARD LESSON 41 (target a level, not a multiple) and the second time that choice has paid.
+
+**AND A METHODOLOGICAL CAVEAT THAT BELONGS WITH THE RESULT.** The 3.5 floor was chosen after watching
+1.5 and 2.5 **on the never-tuned half**, so that half is no longer clean for this parameter and its
+1.17245633 carries a selection effect. **The recent half never informed the choice, and it came in
+stronger at 1.58559241.** When a parameter has been selected on one window, say so, and lead with the
+window that had no part in the choice.

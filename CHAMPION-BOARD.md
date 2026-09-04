@@ -3161,3 +3161,69 @@ at 3.5 would close the remaining 0.59pp *if* the trend held, landing near 115 tr
 parameter sweeping and is named as such.** It is worth running only as a test of the mechanism - does
 the break-even gap keep closing at ~0.8pp per 1.0 of floor? - and its result is one point on a curve,
 never a champion.
+
+
+---
+
+# ATTACK 46 - BOTH HALVES CLEAR, AND THE RECENT HALF IS THE STRONGER ONE
+
+The level target with the reward:risk **floor at 3.5**. Run because HARD LESSON 46 (written in the
+sister lab minutes earlier) says raising a required move **spends** edge - and Attack 45 was the
+project's one counterexample. This asked whether the level-target family is genuinely exempt.
+
+| | **46a** never-tuned | **46b** recent |
+|---|---|---|
+| profit factor | **1.17245633** | **1.58559241** |
+| max drawdown | 23.45223579% | **13.6122535%** |
+| trades | 105 | 38 |
+| win rate | 23.80952381% | 26.31578947% |
+| achieved ratio | 3.75186026 | 4.43965875 |
+| avg loser | -$124.08 | -$124.37 |
+| Sharpe | 0.45963775 | **0.94236915** |
+
+**H2 > H1** - reversing the signature this lab has died of repeatedly (the VWAP family and Attacks
+38-40 all improved one half and broke the other).
+
+## THE FLOOR CURVE - MONOTONE ON EVERY AXIS THAT MATTERS
+All on the never-tuned half:
+
+| floor | PF | achieved ratio | gross/trade | break-even gap |
+|---|---|---|---|---|
+| 1.5 | 0.93487022 | 2.41021229 | $3.31 | -1.39pp |
+| 2.5 | 0.9677241 | 3.15783652 | $6.28 | -0.59pp |
+| **3.5** | **1.17245633** | **3.75186026** | **$26.62** | **+2.76pp** |
+
+**The break-even gap crossed to the right side.**
+
+## THE REGISTERED OUTCOME LANDED ON THE EXEMPTION SIDE, AND THE MECHANISM HELD
+`avgBarsWinning` went **67.94 -> 76.58 -> 83.44** against a 192-bar cap: holds rose **23%** across the
+whole curve while the achieved ratio rose **56%**. **The floor buys reward by selecting entries nearer
+support, not by demanding a longer journey** - which is exactly why this family escapes HARD LESSON 46
+where Attack 41, Attack 42 and WF E73 did not. Those three raised the required **move**; this raises
+the required **geometry at a fixed target**.
+
+## COST SCREEN (HARD LESSON 37, bar is ~3x the fee)
+- **46b: $65.11 gross per trade against an $11.44 fee - 5.7x. CLEARED COMFORTABLY.**
+- 46a: $26.62 against $10.32 - **2.58x, just under the bar**, and reported as such.
+- Attack 37, the previous best, ran **1.2x** and never cleared it.
+
+## THE SELECTION CAVEAT - DECLARED, NOT BURIED
+**The 3.5 floor was chosen after observing 1.5 and 2.5 on the never-tuned half.** So 46a's 1.17245633
+carries a selection effect and is **not** a clean out-of-sample number for this parameter.
+
+**46b is clean** - that window was never used to choose anything - **and it is the stronger of the two.**
+That is the most favourable form this evidence could take, and it is the number to lead with.
+
+## REMAINING WEAKNESSES
+1. **38 trades on 46b** sits just above the 30-trade floor. Thin.
+2. **Low win rate** (23.8% / 26.3%): the equity path depends on a few large winners.
+3. **No cold re-run yet.** LESSON 25 requires one to the cent before any champion claim.
+
+## VERDICT: **ADVANCES.** First mechanism in this lab to clear both halves since Attack 37 - and unlike
+Attack 37, it also clears the cost screen.
+
+## QUEUE
+1. **Cold re-run both halves to the cent** before anything else. No filter stack until that passes.
+2. **Do not run a 4.5 floor.** The curve is already three points chosen on one half; a fourth would
+   deepen the selection effect for a number that is already positive.
+3. **The honest next test is a THIRD window or another symbol**, not another parameter.
