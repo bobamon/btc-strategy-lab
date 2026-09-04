@@ -3272,3 +3272,25 @@ genuinely the thing that produced the numbers, so anyone can re-run it.
 3. **A filter stack is now permitted** by the mandate's own logic - both halves clear on a defensible,
    reproduced base - but it ranks BELOW the out-of-sample test, because a filter on an unvalidated
    edge is decoration.
+
+---
+
+## A THIRD, INDEPENDENT CONFIRMATION LANDED THE SAME HOUR (2026-09-04)
+
+This cycle's own scheduled run set out to do this exact cold re-run before discovering, on
+`git pull --rebase`, that a concurrent session had already pushed it (above). Rather than push a
+duplicate pair of records, this session's two already-completed backtest calls are recorded as a
+**second `coldRepro` entry** on `attack46a`/`attack46b` in `results/backtests.json` — no new credits
+spent to add this, since the numbers were already in hand.
+
+**The two cold-repro runs used opposite constructions on purpose (by accident of timing, not design):**
+the pushed commit re-ran the saved file as a **fresh strategy, no lineage**; this session's run
+**chained both halves under one `strategyId`** (git-commit-chain semantics — same source, no version
+bump). Both landed on **the exact same numbers, to the same digit, as the original and each other.**
+Three runs, two different session, two different construction paths, one number. That is a stronger
+form of HARD LESSON 25 than a single cold re-run gives — it rules out server-side lineage as a hidden
+variable, which is precisely the caveat the first cold-repro commit raised about itself.
+
+**Numbering note, per the stored prompt's own instruction:** this was not a new attack and needed no
+new number — it is the same verification the concurrent session already completed, recorded as
+corroborating provenance rather than a duplicate entry.

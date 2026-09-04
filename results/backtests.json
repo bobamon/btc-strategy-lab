@@ -694,13 +694,23 @@
    "engineVersion": "tv_jul26_mc7",
    "cascadeRatio": 1,
    "verifiedAt": "2026-09-04T06:17:00Z",
-   "coldRepro": {
-    "jobId": "01M1NHCK99HS4S95D4EH64SSY7",
-    "strategyId": "01M1NHCKGM0RMFH95XGZE7FH8T",
-    "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NHCK99HS4S95D4EH64SSY7",
-    "verifiedAt": "2026-09-04T06:24:00Z",
-    "result": "EXACT MATCH, all fields"
-   }
+   "coldRepros": [
+    {
+     "jobId": "01M1NHCK99HS4S95D4EH64SSY7",
+     "strategyId": "01M1NHCKGM0RMFH95XGZE7FH8T",
+     "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NHCK99HS4S95D4EH64SSY7",
+     "verifiedAt": "2026-09-04T06:24:00Z",
+     "result": "EXACT MATCH, all fields"
+    },
+    {
+     "jobId": "01M1NHG25RQ7MRZ5PTAMGXXNCQ",
+     "strategyId": "01M1NHG2CJEQX0WWH18D7196RM",
+     "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NHG25RQ7MRZ5PTAMGXXNCQ",
+     "verifiedAt": "2026-09-04T06:25:00Z",
+     "result": "EXACT MATCH, all fields",
+     "construction": "independent concurrent session, strategyId-chained (h2 run reused this strategyId, opposite lineage choice to the sibling coldRepro entry)"
+    }
+   ]
   },
   "verdict": "ADVANCES -- both halves clear, and this half carries a DECLARED selection effect | COLD REPRO PASSED",
   "notes": "BOTH HALVES CLEAR 1.0, AND THE RECENT HALF IS THE STRONGER ONE -- reversing the failure signature this lab has died of repeatedly. 46a (never-tuned, 2022-01-01 to 2024-06-08): PF 1.17245633 / DD 23.45223579% / 105 trades / 23.80952381% win / achieved ratio 3.75186026 / avg loser -$124.08 / commission $1,083.40. 46b (recent, 2024-06-08 to 2026-09-01): PF 1.58559241 / DD 13.6122535% / 38 trades / 26.31578947% win / achieved ratio 4.43965875 / avg loser -$124.37 / commission $434.78 / Sharpe 0.94236915. THE FLOOR CURVE, all on the never-tuned half, and it is monotone on every axis that matters: floor 1.5 -> PF 0.93487022, ratio 2.41021229, gross/trade $3.31, break-even gap -1.39pp. Floor 2.5 -> 0.9677241, 3.15783652, $6.28, -0.59pp. FLOOR 3.5 -> 1.17245633, 3.75186026, $26.62, +2.76pp. THE BREAK-EVEN GAP CROSSED TO THE RIGHT SIDE. THE REGISTERED OUTCOME LANDED ON THE EXEMPTION SIDE, and the proposed mechanism held: avgBarsWinning went 67.94 -> 76.58 -> 83.44 against a 192-bar cap, so holds rose only 23% across the whole curve while the achieved ratio rose 56%. The floor buys reward by selecting entries NEARER SUPPORT, not by demanding a longer journey -- which is exactly why this family escapes HARD LESSON 46 while Attack 41, Attack 42 and WF E73 did not. Those three all raised the required MOVE; this raises the required GEOMETRY at a fixed target. COST SCREEN (HARD LESSON 37, bar is ~3x the fee): 46b gross = $2,039.29 + $434.78 = $2,474.07, i.e. $65.11 per trade against an $11.44 fee -- 5.7x, CLEARED COMFORTABLY. 46a gross = $1,711.85 + $1,083.40 = $2,795.25, i.e. $26.62 per trade against $10.32 -- 2.58x, just UNDER the 3x bar and reported as such. Attack 37, the previous best, ran 1.2x and never cleared it. Cascade ratio 1 on both halves. THE SELECTION CAVEAT, DECLARED RATHER THAN BURIED: the 3.5 floor was CHOSEN after observing 1.5 and 2.5 ON THE NEVER-TUNED HALF, so 46a's 1.17245633 carries a selection effect and is NOT a clean out-of-sample number for this parameter. 46b IS CLEAN -- that window was never used to choose anything -- and it is the stronger of the two at 1.58559241. That is the most favourable form this evidence could take, and it is the number to lead with. REMAINING WEAKNESSES, stated plainly: 38 trades on 46b sits just above the 30-trade floor and is thin; the win rate is low (23.8% / 26.3%) so the equity path depends on a few large winners; and NO COLD RE-RUN HAS BEEN DONE YET, which LESSON 25 requires before any champion claim. VERDICT: ADVANCES. First mechanism in this lab to clear both halves since Attack 37, and unlike Attack 37 it also clears the cost screen. || COLD REPRODUCTION PASSED 2026-09-04 (LESSON 25). Re-run from the SAVED SPEC FILE strategies/pine/attack46-level-target-rr-floor-35.pine as a FRESH strategy with NO strategyId chaining, so what was verified is the artifact the repo actually stores rather than a server-side lineage. BOTH HALVES REPRODUCED EXACTLY, every field to the last digit: 46a PF 1.17245633, DD 23.45223579%, 105 trades, 23.80952381% win, ratio 3.75186026, commission 1083.400482050001, avgLosingTrade -124.07832440375, netProfit 1711.847417950023, finalEquity 11711.847417950023. 46b PF 1.58559241, DD 13.6122535%, 38 trades, 26.31578947% win, ratio 4.43965875, commission 434.78103475, avgLosingTrade -124.372883264285, netProfit 2039.290865250019, finalEquity 12039.29086525002. Cascade ratio 1 on both. THIS IS THE CHECK E38 AND E47 BOTH FAILED in the sister lab, which is why it is mandatory before any champion claim and why it was run before any filter stack. Attack 46 is now a DEFENSIBLE result rather than merely a recorded one. It does NOT make it a champion: the selection caveat on 46a stands (the 3.5 floor was chosen by watching this half), 46b's 38 trades is thin, and reproducibility says nothing about whether the edge persists out of sample."
@@ -747,13 +757,23 @@
    "engineVersion": "tv_jul26_mc7",
    "cascadeRatio": 1,
    "verifiedAt": "2026-09-04T06:17:00Z",
-   "coldRepro": {
-    "jobId": "01M1NHBKV622BY7Q0MJ5THM7FT",
-    "strategyId": "01M1NHBM0PQ3S4C5396SQ3PYCR",
-    "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NHBKV622BY7Q0MJ5THM7FT",
-    "verifiedAt": "2026-09-04T06:24:00Z",
-    "result": "EXACT MATCH, all fields"
-   }
+   "coldRepros": [
+    {
+     "jobId": "01M1NHBKV622BY7Q0MJ5THM7FT",
+     "strategyId": "01M1NHBM0PQ3S4C5396SQ3PYCR",
+     "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NHBKV622BY7Q0MJ5THM7FT",
+     "verifiedAt": "2026-09-04T06:24:00Z",
+     "result": "EXACT MATCH, all fields"
+    },
+    {
+     "jobId": "01M1NHH9PHX1T160SZRM9G6H90",
+     "strategyId": "01M1NHG2CJEQX0WWH18D7196RM",
+     "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NHH9PHX1T160SZRM9G6H90",
+     "verifiedAt": "2026-09-04T06:25:00Z",
+     "result": "EXACT MATCH, all fields",
+     "construction": "independent concurrent session, strategyId-chained (same strategyId as the h1 entry above)"
+    }
+   ]
   },
   "verdict": "ADVANCES -- and this is the CLEAN half, untouched by the parameter choice | COLD REPRO PASSED",
   "notes": "BOTH HALVES CLEAR 1.0, AND THE RECENT HALF IS THE STRONGER ONE -- reversing the failure signature this lab has died of repeatedly. 46a (never-tuned, 2022-01-01 to 2024-06-08): PF 1.17245633 / DD 23.45223579% / 105 trades / 23.80952381% win / achieved ratio 3.75186026 / avg loser -$124.08 / commission $1,083.40. 46b (recent, 2024-06-08 to 2026-09-01): PF 1.58559241 / DD 13.6122535% / 38 trades / 26.31578947% win / achieved ratio 4.43965875 / avg loser -$124.37 / commission $434.78 / Sharpe 0.94236915. THE FLOOR CURVE, all on the never-tuned half, and it is monotone on every axis that matters: floor 1.5 -> PF 0.93487022, ratio 2.41021229, gross/trade $3.31, break-even gap -1.39pp. Floor 2.5 -> 0.9677241, 3.15783652, $6.28, -0.59pp. FLOOR 3.5 -> 1.17245633, 3.75186026, $26.62, +2.76pp. THE BREAK-EVEN GAP CROSSED TO THE RIGHT SIDE. THE REGISTERED OUTCOME LANDED ON THE EXEMPTION SIDE, and the proposed mechanism held: avgBarsWinning went 67.94 -> 76.58 -> 83.44 against a 192-bar cap, so holds rose only 23% across the whole curve while the achieved ratio rose 56%. The floor buys reward by selecting entries NEARER SUPPORT, not by demanding a longer journey -- which is exactly why this family escapes HARD LESSON 46 while Attack 41, Attack 42 and WF E73 did not. Those three all raised the required MOVE; this raises the required GEOMETRY at a fixed target. COST SCREEN (HARD LESSON 37, bar is ~3x the fee): 46b gross = $2,039.29 + $434.78 = $2,474.07, i.e. $65.11 per trade against an $11.44 fee -- 5.7x, CLEARED COMFORTABLY. 46a gross = $1,711.85 + $1,083.40 = $2,795.25, i.e. $26.62 per trade against $10.32 -- 2.58x, just UNDER the 3x bar and reported as such. Attack 37, the previous best, ran 1.2x and never cleared it. Cascade ratio 1 on both halves. THE SELECTION CAVEAT, DECLARED RATHER THAN BURIED: the 3.5 floor was CHOSEN after observing 1.5 and 2.5 ON THE NEVER-TUNED HALF, so 46a's 1.17245633 carries a selection effect and is NOT a clean out-of-sample number for this parameter. 46b IS CLEAN -- that window was never used to choose anything -- and it is the stronger of the two at 1.58559241. That is the most favourable form this evidence could take, and it is the number to lead with. REMAINING WEAKNESSES, stated plainly: 38 trades on 46b sits just above the 30-trade floor and is thin; the win rate is low (23.8% / 26.3%) so the equity path depends on a few large winners; and NO COLD RE-RUN HAS BEEN DONE YET, which LESSON 25 requires before any champion claim. VERDICT: ADVANCES. First mechanism in this lab to clear both halves since Attack 37, and unlike Attack 37 it also clears the cost screen. || COLD REPRODUCTION PASSED 2026-09-04 (LESSON 25). Re-run from the SAVED SPEC FILE strategies/pine/attack46-level-target-rr-floor-35.pine as a FRESH strategy with NO strategyId chaining, so what was verified is the artifact the repo actually stores rather than a server-side lineage. BOTH HALVES REPRODUCED EXACTLY, every field to the last digit: 46a PF 1.17245633, DD 23.45223579%, 105 trades, 23.80952381% win, ratio 3.75186026, commission 1083.400482050001, avgLosingTrade -124.07832440375, netProfit 1711.847417950023, finalEquity 11711.847417950023. 46b PF 1.58559241, DD 13.6122535%, 38 trades, 26.31578947% win, ratio 4.43965875, commission 434.78103475, avgLosingTrade -124.372883264285, netProfit 2039.290865250019, finalEquity 12039.29086525002. Cascade ratio 1 on both. THIS IS THE CHECK E38 AND E47 BOTH FAILED in the sister lab, which is why it is mandatory before any champion claim and why it was run before any filter stack. Attack 46 is now a DEFENSIBLE result rather than merely a recorded one. It does NOT make it a champion: the selection caveat on 46a stands (the 3.5 floor was chosen by watching this half), 46b's 38 trades is thin, and reproducibility says nothing about whether the edge persists out of sample."
