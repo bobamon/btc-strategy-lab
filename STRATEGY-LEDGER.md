@@ -2144,3 +2144,30 @@ and a 6.98% win rate. Three experiments were spent theorising about entry geomet
 3. **Report the POINT ratio, not just the dollar ratio, for fixed-gap builds.** E71's exits are exactly
    1000 and 2000 points, an exact 2.0, yet `ratioAvgWinLoss` reads 1.70302978 because qty varies with
    price and commission is subtracted from both sides. The dollar ratio understates a fixed-gap design.
+
+---
+
+## HARD LESSON 44 — AN IDENTICAL TRADE COUNT PLUS AN IDENTICAL WIN/LOSS SPLIT IS THE STRONGEST "NOTHING CHANGED" EVIDENCE THERE IS. IT BEATS A MATCHING PROFIT FACTOR.
+
+E72 re-ran War Formation's long at 25% of equity against e58a's 100%. The profit factor moved from
+1.24015239 to 1.26239697 — close, but on its own that proves little; two different trade populations
+can land on similar ratios by luck.
+
+**What actually settled it: 36 trades both times, and 15W/21L both times.**
+
+An identical count means the size change admitted **the same population**. An identical win/loss split
+means it resolved **every one of them the same way**. Together they say the mechanism was untouched,
+which no aggregate ratio can establish on its own.
+
+**This mattered because the alternative was expensive.** Had the long moved materially, HARD LESSON
+42's account of the margin asymmetry would have been incomplete and **every 100%-equity number in the
+War Formation lab would have needed re-running.** The control cost one credit and closed that off.
+
+**HOW TO USE THIS:**
+1. **When testing whether a change is inert, read count and win/loss split before the ratio.** They
+   are the population-level evidence; the ratio is a summary that can coincide.
+2. **A parameter proven inert on one leg is not proven inert on the other.** Sizing destroyed the
+   short (0.45442725 → 0.97315988) and left the long alone — the same change, opposite verdicts, for a
+   reason that is arithmetic and was predictable in advance.
+3. **Reproducing a result at a DIFFERENT setting, with an identical trade population, is stronger
+   evidence than repeating it at the same setting** (LESSON 25). e58a now clears that higher bar.

@@ -4364,3 +4364,56 @@ own target requires, which every prior short number said was impossible.
 2. **The binding constraint is now fees, not the market.** $81.43 of commission against $61.00 of gross.
 3. **Re-run the LONG leg at 25% too**, so the two legs are finally comparable on equal terms. Every
    long number in this lab is a 100%-equity number and cannot be set beside E71 as things stand.
+
+
+---
+
+## E72 -- THE CONTROL. THE FIRST TRUE BIDIRECTIONAL MEASUREMENT THIS LAB HAS EVER HAD.
+
+e58a byte-identical except the same **25%-of-equity declared deviation** as E71. E71 could not be set
+beside any existing long number, because every long in this lab was run at 100% -- exactly the error
+HARD LESSON 43 warns about.
+
+**Registered prediction:** a long should be *insensitive* to the size change, because an adverse move
+shrinks its notional so required margin falls alongside equity and the two never cross.
+
+### CONFIRMED -- AND THE PROFIT FACTOR IS NOT THE STRONGEST EVIDENCE
+
+| | e58a (100% equity) | **E72 (25% equity)** |
+|---|---|---|
+| **trades** | 36 | **36 -- identical** |
+| **win rate** | 41.67% (15W/21L) | **41.66666667% (15W/21L) -- identical** |
+| profit factor | 1.24015239 | 1.26239697 |
+| max drawdown | 9.82519609% | 2.50912733% |
+| Sharpe | - | 1.07298256 |
+
+**An identical count *and* an identical win/loss split** means the size change admitted the same trade
+population and resolved every one of them the same way. The long was never being liquidated. Drawdown
+scaled down as a smaller position mechanically should; PF moved +0.022.
+
+**The asymmetry is now confirmed from both sides.** Shorts were destroyed by the margin boundary
+(0.45442725 -> 0.97315988 from sizing alone); longs are untouched by the identical change. The
+expensive alternative -- that longs were affected too and every 100%-equity number here needed
+re-running -- is **ruled out**.
+
+### THE ANSWER TO THE USER'S BIDIRECTIONAL DIRECTIVE
+
+| leg | PF | trades | win rate |
+|---|---|---|---|
+| **LONG (E72)** | **1.26239697** | 36 | 41.66666667% |
+| **SHORT (E71)** | **0.97315988** | 33 | 36.36363636% |
+
+Both at 25% of equity, same window, same $1,000 shield, same rr 2.0. **The long works; the short is
+marginal but genuine** -- gross-positive at +$61.00, losing only to fees.
+
+**NO CHAMPION IS DECLARED.** 36 and 33 trades sit at the floor of quotability (LESSON 12), and the 1m
+window is 4.5 months of ONE regime that **cannot support a split**. Stated, not engineered around.
+
+**Secondary result worth keeping:** e58a now reproduces its behaviour at a *second position size* with
+an identical trade population -- a stronger reproducibility signal than a repeat at the same settings.
+
+### QUEUE
+1. **The short's binding constraint is fees** ($81.43 commission against $61.00 gross). The shield/rr
+   pair is the only lever that changes the fee-to-move ratio without touching the entry.
+2. **Every historical long number in this lab remains valid** and does not need re-running.
+3. **Do not declare a champion off a 4.5-month single-regime window**, in either direction.

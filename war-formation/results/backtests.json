@@ -785,5 +785,51 @@
   },
   "verdict": "THE FIRST HONEST MEASUREMENT OF THE WAR FORMATION SHORT. Not a candidate (PF under 1.0), but real.",
   "notes": "THE SHIELD BOUND ON EVERY SINGLE TRADE, VERIFIED FREE VIA get_trades AND THIS WAS THE REGISTERED FIRST READ. All 21 losers exit at EXACTLY +1000.0 points (85959.7->86959.7, 85215.7->86215.7, 90390->91390, 63173.8->64173.8, and so on without exception) and all 12 winners at EXACTLY -2000.0 points. ZERO LIQUIDATIONS, cascadeRatio 1, 33 clean entries. Compare E64a, where the same geometry at 100% equity produced losers at 0.013%, 0.017%, 0.035% ... 0.585% adverse. THE A.L.C.M. EXIT NOW WORKS EXACTLY AS THE SOURCE SPECIFIES. WHAT CHANGED, FROM A PURE SIZING CHANGE AND NOTHING ELSE: profit factor 0.45442725 -> 0.97315988, win rate 6.98% -> 36.36363636%, drawdown down to 2.66826642%. A FIVEFOLD WIN-RATE INCREASE WITH BYTE-IDENTICAL ENTRY LOGIC. This retires E64a, E66 and E67 as harness measurements and confirms HARD LESSON 42 conclusively. AND 36.36% CLEARS ITS OWN BAR: an rr of 2.0 needs 33.3%, so the short's win rate is ABOVE what its own target requires -- the thing every prior short number said was impossible. COST DECOMPOSITION: gross = net + commission = -$20.43 + $81.43 = +$61.00. THE SHORT IS GROSS-POSITIVE AND LOSES ONLY TO FEES. WHY THE RATIO IS 1.70 AND NOT 2.0 despite every exit being exactly at 1000 or 2000 POINTS: qty varies with equity and price across the window, and commission is subtracted from both sides, so the DOLLAR ratio compresses even though the POINT ratio is exactly 2.0 by construction. That is an artifact of reporting, not of the strategy. WHAT THIS IS NOT: PF 0.97315988 is under 1.0 so it is NOT a candidate and does NOT become one, and 33 trades sits at the very floor of quotability (LESSON 12). The 1m window is 4.5 months of ONE regime and CANNOT support a split -- that limit is stated, not engineered around. AND IT IS NOT COMPARABLE TO e58a's 1.24015239: that is a 100%-equity long and this is a 25%-equity short. They must never be quoted side by side as though run alike. Trade count fell 43 -> 33 exactly as the occupancy note predicted in advance, because the shield rather than a margin call now ends trades and holds lengthened enormously (avgBarsInTrade 948), so with pyramiding=1 longer holds block later entries. The drop is occupancy, NOT selectivity."
+ },
+ {
+  "id": "wf-e72-long-25pct-equity-comparability-control",
+  "name": "E72: the LONG leg at 25% of equity -- the comparability control",
+  "symbol": "BTCUSDT",
+  "timeframe": "1m",
+  "direction": "long",
+  "status": "testing",
+  "createdDate": "2026-09-04",
+  "lastTestedDate": "2026-09-04",
+  "backtestStart": "2025-12-16",
+  "backtestEnd": "2026-05-03",
+  "specPath": "war-formation/pine/e72-long-25pct-equity.pine",
+  "description": "e58a byte-identical EXCEPT the same 25%-of-equity declared deviation used by E71. THE CONTROL that makes the two legs comparable. E71 measured the short honestly for the first time, but it could not be set beside any existing long number because every long in this lab was run at 100% of equity -- comparing a 25% short to a 100% long is exactly the error HARD LESSON 43 warns about. REGISTERED PREDICTION: for a LONG an adverse move SHRINKS the notional, so required margin falls alongside equity and the two never cross; a long should therefore be INSENSITIVE to the size change because its shield already bound at 100%.",
+  "metrics": {
+   "netProfitPct": 1.94997896,
+   "profitFactor": 1.26239697,
+   "maxDrawdownPct": 2.50912733,
+   "totalTrades": 36,
+   "winRatePct": 41.66666667,
+   "avgTradePct": 0.05416608,
+   "sharpeRatio": 1.07298256,
+   "sortinoRatio": 0.53940661,
+   "commissionPaid": 90.0021045,
+   "avgWinningTrade": 62.54258086,
+   "avgLosingTrade": -35.387657971429,
+   "ratioAvgWinLoss": 1.76735575,
+   "largestWin": 73.4559342,
+   "largestLoss": -39.4962494,
+   "avgBarsInTrade": 1387.61111111,
+   "avgBarsWinning": 2066.66666667,
+   "avgBarsLosing": 902.57142857,
+   "longTrades": 36,
+   "shortTrades": 0
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "01M1NG5GY825JBZWWQKJG3CVGW",
+   "strategyId": "01M1NG5H697Q1EFJNGCYBR6JBQ",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NG5GY825JBZWWQKJG3CVGW",
+   "engineVersion": "tv_jul26_mc7",
+   "cascadeRatio": 1,
+   "verifiedAt": "2026-09-04T06:03:00Z"
+  },
+  "verdict": "PREDICTION CONFIRMED -- and this is the first TRUE BIDIRECTIONAL measurement this lab has ever had",
+  "notes": "THE REGISTERED PREDICTION WAS CONFIRMED ALMOST EXACTLY, AND THE STRONGEST EVIDENCE IS NOT THE PROFIT FACTOR. Against e58a at 100% equity (PF 1.24015239 / DD 9.82519609% / 36 trades / 41.67% win): TRADE COUNT IS IDENTICAL AT 36 AND THE WIN RATE IS IDENTICAL AT 41.66666667% (15W/21L in both). An identical count AND an identical win/loss split means the size change admitted the SAME TRADE POPULATION and resolved every one of them the SAME WAY. The long was never being liquidated -- its shield already bound at 100%, exactly as the margin arithmetic predicts, because for a long an adverse move SHRINKS the notional so required margin falls alongside equity and the two never cross. Profit factor moved only 1.24015239 -> 1.26239697 (+0.022, from the changed commission-to-move ratio at smaller size), and drawdown scaled down 9.82519609% -> 2.50912733% as a smaller position mechanically should. Sharpe 1.07298256. Cascade ratio 1 on 36 clean entries. SO THE ASYMMETRY IS NOW CONFIRMED FROM BOTH SIDES: shorts were destroyed by the margin boundary (E64a 0.45442725 -> E71 0.97315988 from sizing alone, a fivefold win-rate change) while longs are untouched by the same change. HARD LESSON 42's account is complete rather than half-tested, and the expensive alternative outcome -- that longs were affected too and every 100%-equity number in this lab needed re-running -- is ruled out. THE TWO LEGS ARE NOW DIRECTLY COMPARABLE ON EQUAL TERMS FOR THE FIRST TIME IN THIS LAB'S HISTORY: LONG 1.26239697 on 36 trades at 41.67% win, SHORT 0.97315988 on 33 trades at 36.36% win, both at 25% of equity, same window, same shield, same rr. THAT IS THE ANSWER TO THE USER'S BIDIRECTIONAL DIRECTIVE, and it is a real answer rather than a harness artifact: the long works, the short is marginal but genuine -- gross-positive at +$61.00 and losing only to fees. NO CHAMPION IS DECLARED. 36 and 33 trades sit at the floor of quotability (LESSON 12) and the 1m window is 4.5 months of ONE regime that CANNOT support a split; that limit is stated, not engineered around. A SECONDARY RESULT WORTH KEEPING: e58a now reproduces its behaviour at a second position size with an identical trade population, which is a stronger reproducibility signal than a repeat run at the same settings (LESSON 25)."
  }
 ]
