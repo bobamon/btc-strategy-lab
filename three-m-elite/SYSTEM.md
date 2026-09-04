@@ -4141,3 +4141,39 @@ question, not a repeat of the prompt-staleness pushes.
 
 **VALIDATED SHORT (NOT A CO-CHAMPION — POLICY QUESTION OPEN): v60/v61** (PF 1.88616546 full sample; DD
 1.71159657%; 39 trades; 25%-equity declared deviation). Unchanged by this cycle.
+
+---
+
+## ██ CYCLE CHECK #2 — STILL NOTHING NEW; NOT RE-NOTIFYING (2026-09-04)
+
+**Scheduled prompt fired again, still carrying the same stale v37/v53 snapshot** (12H/24H bias gate,
+cascade signature) that has been closed since v54–v61 and already flagged once as stale (v39). Per "THE
+DOCS WIN over this prompt" and HARD LESSON 26, not re-escalating a condition that has not changed since
+the last time it was reported.
+
+**Checked for anything actually new since cycle check #1:** `git log` on `three-m-elite/` shows no
+commits between that check and this one — no new backtest, no new source material, and no answer from
+the user to the declared-deviation promotion policy question (checked STRATEGY-LEDGER.md and
+CHAMPION-BOARD.md for any trace of a response; none found). The queue is exactly what cycle check #1
+left it: one open item, and it is a policy question for the user, not a backtest.
+
+**Did not re-run the source material end-to-end this time** — cycle check #1 already did that
+systematically and documented finding nothing; repeating an unchanged search on unchanged material
+would not produce a different answer, and this project's own rule against manufacturing an experiment
+just to spend the credit budget applies as much to manufacturing a re-read as to manufacturing a Pine
+variant. **0 of 560 available credits spent. No backtest run.**
+
+**No new notification sent.** Cycle check #1 already pushed the declared-deviation policy question to
+the user directly — the first and, per this run's own logged reasoning, appropriate time to surface it.
+Nothing has changed since: the same question restated a second time in the same form is not new
+information, and HARD LESSON 26's method ("escalate once, then continue without re-flagging an unchanged
+condition") governs a repeated notification exactly as it governs a repeated stale-prompt flag.
+
+**QUEUE (unchanged, restated for the next cycle):**
+1. **The declared-deviation promotion policy question** — still open, still for the user, still the only
+   thing standing between v60/v61 (validated short) and v64 (validated combined build) and a promotion
+   decision. Champion of record for the long leg remains **v58**; nothing to re-run until the user
+   answers.
+
+**CHAMPION OF RECORD (LONG): v58.** Unchanged. **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61.**
+Unchanged.
