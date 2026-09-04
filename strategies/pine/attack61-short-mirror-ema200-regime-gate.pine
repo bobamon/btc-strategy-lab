@@ -1,0 +1,108 @@
+//@version=6
+// BTC ATTACK 61 - FIXING LOCATION ON ATTACK 60's SHORT MIRROR: AN EMA200 BEARISH-REGIME GATE.
+//
+// Attack 60 (Attack 46's champion geometry, mirrored to the short side, 25%-equity declared
+// deviation per HARD LESSON 42/43) failed H1 cleanly: PF 0.59338308, win rate 14.93% against a
+// 22.8% breakeven implied by its own 3.38 achieved payoff ratio. The loss-distance check passed
+// (tight 0.91%-2.41% band, cascadeRatio 1) -- the sizing fix works, the MECHANISM does not. Attack
+// 60's own verdict named the likely cause: "tap and hold" does not transfer symmetrically from
+// support to resistance on an asset with BTC's long-run upward drift across 2022-2026. The board's
+// queue (Attack 60, item 1) ranked fixing LOCATION -- not re-tuning this geometry's RR floor or
+// lookback -- as the first thing to try if the short leg is revisited.
+//
+// WHAT THIS CYCLE CLAIMS TO EXPLOIT: resistance-tap-and-reject is only a real short signal when the
+// prevailing trend is itself bearish. In an uptrend, most resistance taps are noise on the way to a
+// new high (which is exactly what a majority-long-run-drift asset does most of the time) -- the same
+// EMA200 filter that KEPT Attack 1 on the long side (0.89->0.91 PF) by rejecting counter-trend longs
+// should, mirrored, reject counter-trend shorts here. This is a REGIME GATE, not a re-tune of the
+// level-target geometry itself: Attack 60's tap/hold/RR-floor/stop/target logic is untouched.
+//
+// AUDIT, one line per leg (SHORT ONLY):
+//   R >= 0.8% (LESSON 3) - unchanged from Attack 60: rBig = rShort >= minR, EXCLUSION not clamping.
+//   Stop beyond STRUCTURE (LESSON 5) - unchanged: slPx = the tap bar's own high.
+//   Each leg separately (LESSON 6) - SHORT ONLY, not blended with Attack 46's long or Attack 60's
+//        ungated short. This is a NEW candidate, not a patch to Attack 60's saved record.
+//   BINDING (E17) - the new term is bearRegime = close < ema200; it necessarily binds (rejects
+//        setups outright) whenever price sits above its own 200-bar EMA, which trade count will show.
+//   REDUNDANCY (E14) - bearRegime (trend direction) is independent of rBig (stop-distance floor) and
+//        rrOk (reward:risk floor): a setup can fail any one of the three without failing the others.
+//   LATCH IN SEQUENCE (LESSON 8) - ema200 and res/sup are both computed from closes/highs/lows up to
+//        and including the current bar's own close for ema200 (standard non-repainting EMA read,
+//        identical construction to Attack 1's long-side gate) and [1]-shifted prior bars for res/sup;
+//        tap and hold are read on the current bar, entry fires at its close.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, unchanged from Attack 60.
+//   CASCADE / MARGIN ARTIFACT (HARD LESSON 42/43) - unchanged 25%-equity qty= fix, re-verify with
+//        get_trades before trusting any positive result (Attack 60's own check passed; this build
+//        changes nothing about sizing, only adds a gate that can only REDUCE trade count).
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17):
+//   * H1 PF >= 1.0 AND trade count still >= ~30 -> the gate fixed location as the queue predicted;
+//     run H2 per the mandate's kill-rule structure, then check RATCHET v2 against Attack 60 as the
+//     base (PF must improve, DD must not worsen beyond the 0.50pp/PF+0.02 tolerance, count >= 30, and
+//     a >50% count cut requires the split-test result itself, which this run IS).
+//   * H1 PF < 1.0 -> DISCARDED by the kill rule. No further filters on the short leg without a new
+//     location idea; the location hypothesis itself would be spent, not just this parameterisation.
+//   * TRADE COUNT collapses below ~30 even if PF improves -> a DIRECTION, not a result (LESSON 12);
+//     the EMA200 gate is known from Attack 1 to be a wide filter (35 of ~468 setups, ~7%), but Attack
+//     60's 67-trade H1 sample has much less room to give before the sample floor bites.
+//   * WIN RATE stays far below breakeven even if PF crosses 1.0 via fewer, larger losers -> the
+//     inverted-payoff-shape watch stays open; report win rate alongside achieved ratio explicitly.
+strategy("BTC Attack61 short mirror EMA200 bear-regime gate", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+lookback  = input.int(20,     "Level lookback, bars -- sets BOTH the resistance tapped and the low targeted")
+tapTol    = input.float(0.10, "Tap tolerance, % -- how close to resistance counts as a tap")
+minRRv    = input.float(3.5,  "Minimum reward:risk the GEOMETRY must offer, else skip -- mirrors Attack 46/60")
+minRpct   = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars   = input.int(192,    "Max bars in trade")
+eqFrac    = input.float(0.25, "DECLARED DEVIATION: fraction of equity per position -- HARD LESSON 42/43")
+emaLen    = input.int(200,    "EMA length for the bearish-regime gate -- mirrors Attack 1's long-side filter")
+
+ema200 = ta.ema(close, emaLen)
+bearRegime = close < ema200
+
+sup = ta.lowest(low,   lookback)[1]
+res = ta.highest(high, lookback)[1]
+
+tapped  = not na(res) and high  >= res * (1 - tapTol / 100)
+held    = not na(res) and close < res
+setupOn = tapped and held
+
+rShort = high - close
+reward = na(sup) ? na : close - sup
+minR   = close * minRpct / 100
+rBig   = rShort >= minR
+rrOk   = not na(reward) and rShort > 0 and reward / rShort >= minRRv
+
+goShort = setupOn and rBig and rrOk and bearRegime
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat   = strategy.position_size == 0
+qtyUse = strategy.equity * eqFrac / close
+
+if flat and goShort and qtyUse > 0
+    strategy.entry("S", strategy.short, qty = qtyUse)
+    slPx   := high
+    tpPx   := sup
+    barsIn := 0
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goShort ? 1 : 0, title="ShortSignal")
+plot(res, title="Resistance")
+plot(sup, title="TargetLevel")
+plot(ema200, title="EMA200RegimeLine")
