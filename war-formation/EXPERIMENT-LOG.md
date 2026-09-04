@@ -4975,3 +4975,42 @@ notification (cycle check #4) already told the user this prompt is stale and the
 their two open questions; nothing has changed since then that they don't already know, so paging again
 would be noise. Silence stands until the prompt is edited, the two open questions are answered, or new
 1m data lands.
+
+---
+
+# ██ CYCLE CHECK #7, 2026-09-04 (no credits) — NINTH IDENTICAL FIRING OF THE SAME STALE PROMPT
+
+`git pull --rebase origin main` first: the session started on a detached HEAD at `256ed1d` (already
+equal to `origin/main`'s tip at that point — the rebase there was a no-op), then `git checkout main`
+showed the local `main` ref itself was 4 commits behind; rebasing onto `origin/main` fast-forwarded it
+to the same `256ed1d` (`Attack 57`, BTC lab). No commit since the prior cycle check (`589ed57`) touches
+`war-formation/`. Credit balance 557 at start of cycle (above the 500 floor, so up to two backtests
+were available) — none spent, because there is nothing left to test without new information.
+
+Re-verified against the current board rather than re-argued from scratch, same result as the last
+eight checks:
+
+- **Queue item 1 (attack the short's entry geometry)** — still closed at E71 (25%-equity fix, HARD
+  LESSON 42) and the E74–E76 sweep. No ninth short-geometry construction is queued or implied.
+- **Queue item 2 (finish the entry-term binding sweep, both legs)** — still closed: long at
+  E69a/E69b/E70a/E70b and E77 (the band-removed cell, matched against E74 on the short at 25% equity);
+  short at E74/E75a/E75b/E76.
+- `STRATEGY-LEDGER.md`'s "RULE QUESTION FOR THE USER" section (line 2328) re-read directly: neither the
+  `inMiddle`-ratchet asymmetry (E69b) nor the drawdown-allowance-proportionality question (E74) has an
+  answer recorded. No new user directive appears anywhere in the ledger since the prior cycle check.
+- `results/backtests.json` re-counted: still 31 entries, last four E75a/E75b/E76/E77 — nothing past E77.
+- No new 1m data, no concurrent war-formation session collision.
+
+**State unchanged**: no champion, no candidate. References remain **e58a** (long, 100% equity, band
+present, PF 1.24015239, 36 trades) and **E71** (short, 25% equity, band present, PF 0.97315988, 33
+trades).
+
+**Zero backtests run. Zero credits spent.** Dashboard not rebuilt this cycle — no data changed since
+the last rebuild, and cycles #5/#6 already established that a timestamp-only rebuild carries no
+information; committing this log entry alone is enough to record the check.
+
+**No notification pushed this cycle**, same reasoning as checks #5 and #6: the one notification this
+stale condition warranted was already sent (cycle check #4), nothing has changed since that the user
+doesn't already know, and re-paging on every identical firing would train them to ignore the channel.
+Silence stands until the prompt is edited, the two open rule questions are answered, or new 1m data
+lands. If this scheduled task keeps firing unchanged, consider pausing it until one of those happens.
