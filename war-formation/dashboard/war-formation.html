@@ -887,9 +887,87 @@ const DATA = [
     },
     "verdict": "NOT KEPT -- fails RATCHET v2 clause 1 by 0.0103, and that is worth flagging",
     "notes": "NOT KEPT, and the rule is honoured rather than bent -- but this is the closest thing to a genuine tension the ratchet has produced. Against e58a (PF 1.24015239 / DD 9.82519609% / 36 trades): profit factor 1.22985003 is LOWER by 0.0103, which fails clause 1 outright. Everything else moved the right way. Drawdown IMPROVED 9.82519609% -> 9.28471029% (0.54pp better). Trade count rose 36 -> 43, +19% on a lab whose binding constraint is the 30-trade floor. Net return rose +7.47495942% -> +8.92191315%. Sharpe is 1.22326152. And the build has ONE FEWER TERM, so there is less surface to curve-fit. A change that improves drawdown, sample, net return and simplicity is rejected on a profit-factor difference of 0.0103 -- roughly 0.8% -- measured across two samples of 36 and 43 trades, which is far inside the noise those counts can support. THE TERM'S BINDING VERDICT: inMiddle BINDS but does not EARN ITS PLACE. It removes 7 of 43 setups (16%) and buys 0.0103 of profit factor at the cost of half a point of drawdown and 19% of the sample. THIS IS A RULE QUESTION FOR THE USER, NOT A DECISION FOR THIS LAB TO MAKE UNILATERALLY: should RATCHET v2 clause 1 admit a strict-equality band -- for instance, keep a change whose PF is within ~0.02 when drawdown improves AND the trade count rises? The existing clause 2 already contains the mirror of that idea (drawdown may worsen 0.50pp when PF improves by more than 0.02). There is no symmetric allowance in the other direction, and E69b is the first result to sit exactly in that gap. Raised, not acted on. OCCUPANCY named in advance; firstTradeEntryTs 1766151300000 matches e58a's trade 1 exactly, so unlike E69a this build shares its first entry with the parent and diverges only later."
+  },
+  {
+    "id": "wf-e70a-no-brokebelow-binding",
+    "name": "WF E70a: binding test -- brokeBelow removed. The source's central claim, measured.",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/pine/e70a-no-brokebelow.pine",
+    "description": "Queue item 2, run INSTEAD of the stored prompt's queue item 1 because the docs override it: E68 established the short leg is untestable on this engine (force-closed at ~0.35% adverse, below the 0.8% commission floor), so another short geometry would be uninterpretable. Parent e58a (PF 1.24015239 / DD 9.82519609% / 36 trades), confirmed reproducible E58=E59. One term removed from goLong, everything else held byte-identical. THE TERM: brokeBelow requires the current 15m bucket to sweep to a LOWER LOW than the previous bucket before the reclaim trigger can fire. It is the mechanical form of the source's central teaching -- ORACLE-RULES: 'We must let the Red Army finish', wait through the red sequence until the sellers exhaust themselves BELOW a prior level, then enter as price turns up. So this is not a parameter test, it is a test of the strategy's premise. The reclaim crossover above p15l remains; only the requirement that the bucket dipped under it first is removed.",
+    "metrics": {
+      "netProfitPct": 1.93909961,
+      "profitFactor": 1.03608397,
+      "maxDrawdownPct": 11.90079453,
+      "totalTrades": 59,
+      "winRatePct": 37.28813559,
+      "avgTradePct": 0.0328661,
+      "sharpeRatio": 0.45383933,
+      "commissionPaid": 601.0900387,
+      "avgWinningTrade": 253.08012054091,
+      "avgLosingTrade": -145.239261908108,
+      "longTrades": 59,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1ND8YK0BBBX6MG841KHP8JD",
+      "strategyId": "01M1ND8YRZMDRFXMJE2HEVMA0P",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1ND8YK0BBBX6MG841KHP8JD",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T05:11:00Z"
+    },
+    "verdict": "REJECTED -- brokeBelow BINDS. The source's premise holds.",
+    "notes": "REJECTED under RATCHET v2 clause 1. Removing brokeBelow takes PF 1.24015239 -> 1.03608397 and drawdown 9.82519609% -> 11.90079453%, while the count rises 36 -> 59 (+64%). SO THE SOURCE'S CENTRAL TEACHING IS DOING REAL WORK: 'let the Red Army finish' is not decoration, and the 23 extra entries admitted without it are on net materially worse. THAT IS A GENUINE VINDICATION OF THE USER'S STRATEGY and it deserves saying as plainly as the inversions do. BUT NOTE THE RANK. Removing brokeBelow leaves the build ABOVE 1.0 (1.036); removing h1Bull did not (0.967, E69a). So the source's own central location term is LESS load-bearing than a term the source explicitly calls optional. Cascade ratio 1, so 59 is a true position count (HARD LESSON 35). Occupancy named in advance: removing an entry filter admits more trades and shifts every downstream admission, so this is not a controlled superset of e58a's 36."
+  },
+  {
+    "id": "wf-e70b-no-timegate-binding",
+    "name": "WF E70b: binding test -- the 6h-block time gate removed. The last untested term.",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/pine/e70b-no-timegate.pine",
+    "description": "Queue item 2, run INSTEAD of the stored prompt's queue item 1 because the docs override it: E68 established the short leg is untestable on this engine (force-closed at ~0.35% adverse, below the 0.8% commission floor), so another short geometry would be uninterpretable. Parent e58a (PF 1.24015239 / DD 9.82519609% / 36 trades), confirmed reproducible E58=E59. One term removed from goLong, everything else held byte-identical. THE TERM: timeGate bans entries in the first 60 and last 60 minutes of each 6h block, keeping only the middle four hours. It is this lab's OWN mechanisation of avoiding a higher-timeframe candle's noisy open and close -- it appears nowhere in the source material -- and it had never been measured. Sibling of E70a, run together per LESSON 16. With this pair, every entry condition in the build has a binding measurement against it.",
+    "metrics": {
+      "netProfitPct": 0.38080519,
+      "profitFactor": 1.00914071,
+      "maxDrawdownPct": 13.48685394,
+      "totalTrades": 47,
+      "winRatePct": 36.17021277,
+      "avgTradePct": 0.00810224,
+      "sharpeRatio": 0.24924296,
+      "commissionPaid": 463.9194814,
+      "avgWinningTrade": 247.300829488235,
+      "avgLosingTrade": -138.86778609,
+      "longTrades": 47,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1NDA4P7DXSFR59D3ZMVF36Z",
+      "strategyId": "01M1NDA4W2ZSV3YE75SEMFSWZG",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NDA4P7DXSFR59D3ZMVF36Z",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T05:12:00Z"
+    },
+    "verdict": "REJECTED -- timeGate BINDS HARDER THAN THE SOURCE'S OWN LOCATION TERM",
+    "notes": "REJECTED under RATCHET v2 clause 1. Removing the time gate takes PF 1.24015239 -> 1.00914071 and drawdown 9.82519609% -> 13.48685394% (the worst drawdown of the whole sweep), on 36 -> 47 trades. AND THIS IS THE UNCOMFORTABLE PART: a time-of-day filter that appears NOWHERE in the user's source material binds HARDER than brokeBelow (1.036), which is the mechanical form of the source's central teaching. The lab invented this rule; measured, it is the second most load-bearing entry term in the build. Cascade ratio 1, so 47 is a true position count. Occupancy named in advance."
   }
 ];
-const BUILT = "2026-09-03 22:57";
+const BUILT = "2026-09-03 23:13";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

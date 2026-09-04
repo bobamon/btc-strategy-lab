@@ -4032,3 +4032,55 @@ symmetric band — keep a change whose PF is within ~0.02 when drawdown improves
    method, run as a pair.
 2. **Do not spend credits on short geometries** until the sizing constraint changes (E68).
 3. The clause-1 asymmetry above is open and needs the user, not another backtest.
+
+
+---
+
+# ██ E70 — THE BINDING SWEEP IS COMPLETE. EVERY ENTRY TERM IS NOW MEASURED, AND THE RANKING INVERTS
+# THE SOURCE'S OWN EMPHASIS.
+
+**The stored prompt's queue item 1 is forbidden by the docs** — E68 showed the short leg is
+untestable on this engine, so another short geometry would be uninterpretable. This ran **queue item
+2**, and with this pair **every entry condition in War Formation has a binding measurement against
+it.** All are single-term removals from `e58a` (PF 1.24015239 / DD 9.82519609% / 36 trades).
+
+| term removed | PF | Δ from 1.240 | trades | drawdown | source status |
+|---|---|---|---|---|---|
+| **`h1Bull`** (E69a) | **0.96688238** | **−0.273** | 67 | 14.80% | source calls it *"a bonus"* |
+| **`timeGate`** (E70b) | **1.00914071** | **−0.231** | 47 | **13.49%** | **not in the source at all** |
+| **`brokeBelow`** (E70a) | **1.03608397** | **−0.204** | 59 | 11.90% | the source's **central** teaching |
+| **`inMiddle`** (E69b) | 1.22985003 | −0.010 | 43 | 9.28% | a source rule (whole numbers) |
+| `velK` (E65) | 0.873 / 1.076 either side | — | 48 / 31 | — | a lab parameter |
+
+**Neither E70a nor E70b is KEPT** — both fail RATCHET v2 clause 1.
+
+## WHAT THE COMPLETED SWEEP ESTABLISHES
+
+**1. THE SOURCE'S PREMISE HOLDS, AND THAT DESERVES SAYING AS PLAINLY AS THE INVERSIONS.**
+`brokeBelow` — *"we must let the Red Army finish"* — binds. Removing it admits 23 more entries and
+costs 0.204 of profit factor. The location thesis is doing real work, not decorating the build.
+
+**2. BUT THE RANKING IS UPSIDE-DOWN RELATIVE TO THE SOURCE'S EMPHASIS.** The term the author calls
+**optional** is the most load-bearing. A term the lab **invented**, which appears nowhere in the
+user's material, is second. The author's **central** teaching is third. And one of the author's named
+rules — the whole-number band — is **near-inert**, worth 0.010.
+
+**3. THE BUILD IS NOT OVER-FILTERED.** Four of five terms earn their place, and removing any single
+one except `h1Bull` leaves the build above 1.0. It degrades gracefully — there is no hidden dead
+weight beyond `inMiddle`.
+
+## THIS IS THE FOURTH SOURCE-INVERSION IN THE PROJECT
+E64b (the literal 6h rule loses to the lab's proxy), E69a (the "bonus" 1h term is decisive),
+3M v57 (the higher-timeframe bias costs edge), and now E70's full ranking. **Four independent
+measurements across two labs and two separate bodies of source material, all pointing the same way:
+these authors describe what they do accurately but weight it wrongly.** Mining their observations
+works; taking their emphasis on trust does not.
+
+## QUEUE
+1. **The entry sweep is finished. Do not re-run it.** The next axis is the EXIT — but note the exit
+   parameters (shield, hold cap) were already swept in E56/E57/E58/E60 and are coupled (LESSONS
+   28/29), so a new exit test needs a genuinely new question, not another sweep point.
+2. **`inMiddle` is the one removable term.** E69b showed removing it improves drawdown, sample and
+   net return while costing 0.010 of profit factor — rejected only by clause 1's strict inequality.
+   **That remains an open rule question for the user**, not a decision for this lab.
+3. **No credits on short geometries** until the sizing constraint changes (E68).

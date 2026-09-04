@@ -1,0 +1,153 @@
+//@version=6
+// WAR FORMATION E70b - BINDING TEST: DOES THE 6H-BLOCK TIME GATE DO ANYTHING?
+//
+// WHY THIS AND NOT THE SHORT LEG, AGAIN. The stored prompt's queue item 1 still says attack the
+// short's entry geometry. THE DOCS OVERRIDE IT: E68 established a short sized at 100% of equity is
+// force-closed at ~0.35% adverse, below the 0.8% commission floor, so no short stop can fire and any
+// short number measures the engine rather than War Formation. E68's queue says it outright. This runs
+// QUEUE ITEM 2 - and with this pair, EVERY ENTRY TERM IN THE BUILD HAS NOW BEEN BINDING-TESTED.
+//
+// THE SWEEP SO FAR, all single-term removals from e58a (PF 1.24015239 / DD 9.82519609% / 36 trades):
+//   velK        E65   0.6 -> 0.87342782 (48 trades) ; 1.0 -> 1.07620160 (31). 0.8 is a real interior
+//                     optimum. BINDS.
+//   h1Bull      E69a  removed -> 0.96688238 on 67 trades. The single most load-bearing term, and the
+//                     source calls it optional. BINDS HARD.
+//   inMiddle    E69b  removed -> 1.22985003 on 43 trades, drawdown BETTER. Binds, but does not earn
+//                     its place; failed the ratchet by 0.0103.
+// This pair closes the remaining two.
+//
+// THE TERM UNDER TEST. `timeGate` bans entries in the first 60 and last 60 minutes of each 6h block,
+// keeping only the middle four hours. It is this lab's own mechanisation of avoiding the noisy open
+// and the close of a higher-timeframe candle - a reasonable-sounding rule that has never once been
+// measured. It is a pure FILTER: it removes setups and never creates one.
+//
+// AND IT IS THE LAST UNTESTED TERM IN THE BUILD. After this pair, every entry condition in War
+// Formation has a binding measurement against it.
+//
+// THE ONLY CHANGE: the timeGate requirement removed from goLong.
+// REDUNDANCY (E14): no obvious partner - no other term references position within the 6h block.
+//
+// PARENT: e58a, confirmed reproducible E58=E59. Shield $1,000, cap 6480, velK 0.8 and every other
+// term held EXACTLY. One term removed, nothing else touched.
+//
+// AUDIT: LONG ONLY (LESSON 6) - and the short is not merely omitted, it is currently untestable.
+// Stop risk-defined by the shield, the DECLARED deviation the spec requires (LESSON 5); R = $1,000 is
+// ~1.0% at BTC $100k, above the 0.8% floor (LESSON 3) but below it above ~$125k, a live tension.
+// BINDING (E17) is the whole point. LATCH IN SEQUENCE (LESSON 8) unchanged from e58a. OCCUPANCY
+// (LESSONS 24/28/29): removing an entry filter admits MORE trades, changing the book and shifting
+// every downstream admission, so this is NOT a controlled superset of e58a's 36 - named in advance,
+// and why the COUNT is read before the profit factor. CASCADE (HARD LESSON 35): long build, expect
+// cascadeRatio 1; verify it so the count is a true position count.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17):
+//   * COUNT BARELY MOVES -> the term is INERT and removing it is a free simplification.
+//   * COUNT RISES AND PF HOLDS OR IMPROVES -> more sample AND the same edge, which directly eases
+//     this lab's binding 30-trade constraint. KEEP under RATCHET v2.
+//   * COUNT RISES AND PF COLLAPSES -> the term BINDS and earns its place.
+//   * Fewer than 30 trades -> below clause 3, and a DIRECTION rather than a result (LESSON 12).
+strategy("War Formation E70b no-timeGate binding test", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+greenBull = input.int(4,     "Green 1h candles for BULL")
+skipOpen  = input.int(60,    "Skip first N minutes of 6h block")
+skipClose = input.int(60,    "Skip last N minutes of 6h block")
+velK      = input.float(0.8, "Velocity: min reclaim as multiple of atr(30)")
+midLo     = input.float(400, "Whole-number middles low")
+midHi     = input.float(600, "Whole-number middles high")
+etOffset  = input.int(-4,    "ET offset from UTC")
+witchOn   = input.bool(true, "Ban longs in witching hour 1-4am ET")
+shieldUsd = input.float(1000,"THE SHIELD: fixed dollar gap to liquidation")
+rr        = input.float(2.0, "Reward:risk")
+maxBars   = input.int(6480,  "Max bars in trade -- scaled linearly from E47's 12960 at $2,000")
+
+MS6H = 21600000
+MS1H = 3600000
+MS15 = 900000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+b15 = math.floor(time / MS15)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+new15 = b15 != b15[1]
+
+var float h1o     = na
+var int   grnCur  = 0
+var int   cntCur  = 0
+var int   grnPrev = 0
+var int   cntPrev = 0
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    grnCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(h1o)
+        cntCur := cntCur + 1
+        if close[1] > h1o
+            grnCur := grnCur + 1
+    h1o := open
+
+regimeReady = cntPrev >= 5
+bullRegime  = regimeReady and grnPrev >= greenBull
+
+minsIn    = (time - b6 * MS6H) / 60000
+timeGate  = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+h1Bull = not na(h1o) and close > h1o
+
+var float c15l = na
+var float p15l = na
+
+if new15
+    p15l := c15l
+    c15l := low
+else
+    c15l := na(c15l) ? low : math.min(c15l, low)
+
+brokeBelow = not na(p15l) and c15l < p15l
+
+velMin = na(ta.atr(30)) ? na : ta.atr(30) * velK
+
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+hUTC     = math.floor(time / MS1H) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+longBan  = witchOn and witching
+
+longTrig  = not na(p15l) and not na(velMin) and ta.crossover(close, p15l) and (close - p15l) >= velMin
+
+goLong  = bullRegime and h1Bull and brokeBelow and not inMiddle and not longBan and longTrig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+longR = shieldUsd
+
+if flat and goLong and longR > 0
+    strategy.entry("L", strategy.long)
+    slPx   := close - longR
+    tpPx   := close + longR * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
