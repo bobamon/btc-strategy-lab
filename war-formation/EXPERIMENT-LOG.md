@@ -4938,3 +4938,40 @@ preceding one) already sent the user a notification flagging this exact stale-pr
 nothing has changed since then that the user doesn't already know, so repeating the same page would be
 noise rather than signal. Silence is the correct response to an unchanged empty result — the flag
 stands until the prompt is edited, the two open questions are answered, or new data lands.
+
+---
+
+# ██ CYCLE CHECK, 2026-09-04 #6 (no credits) — EIGHTH IDENTICAL FIRING OF THE SAME STALE PROMPT
+
+`git pull --rebase origin main` first: already up to date (HEAD at 480aa67 after rebase; the two commits
+since this file's own prior "cycle check #5" entry — `69be09c` Attack 55 and `480aa67` Attack 56 — are
+concurrent BTC-lab activity, neither touching this lab). Credit balance is 559 at start of cycle; no
+war-formation credits have been spent since E77.
+
+This cycle's stored prompt is, once again, byte-for-byte the same pre-E67 text closed seven times
+already in this file. Re-verified against the current board rather than re-argued from scratch, same
+result:
+
+- **Queue item 1 (attack the short's entry geometry)** — still closed at E71 (25%-equity fix, HARD
+  LESSON 42) and the E74-E76 sweep. No ninth short-geometry construction is queued or implied.
+- **Queue item 2 (finish the entry-term binding sweep)** — still closed on both legs: long at
+  E69a/E69b/E70a/E70b and E77 (the band-removed cell); short at E74/E75a/E75b/E76.
+- `STRATEGY-LEDGER.md` re-checked directly (grepped for `2026-09-04` and the two open-question terms):
+  neither the `inMiddle`-ratchet asymmetry (E69b) nor the drawdown-allowance-proportionality question
+  (E74, HARD LESSON 48's "RULE QUESTION FOR THE USER") has been answered. No new user directive appears
+  anywhere in the ledger since the prior cycle check.
+- No new 1m data, no concurrent war-formation session to collide with (git log shows only 3M/BTC
+  activity since the last entry in this file).
+
+**State unchanged**: no champion, no candidate. References remain **e58a** (long, 100% equity, band
+present, PF 1.24015239, 36 trades) and **E71** (short, 25% equity, band present, PF 0.97315988, 33
+trades). `results/backtests.json` unchanged at 31 entries, last four E75a/E75b/E76/E77.
+
+**Zero backtests run. Zero credits spent.** Dashboard rebuilt for timestamp consistency only; no
+metrics changed.
+
+**No notification pushed this cycle**, consistent with cycle check #5's own reasoning: the prior
+notification (cycle check #4) already told the user this prompt is stale and the board is stalled on
+their two open questions; nothing has changed since then that they don't already know, so paging again
+would be noise. Silence stands until the prompt is edited, the two open questions are answered, or new
+1m data lands.
