@@ -3631,3 +3631,62 @@ restricts entry to never-touched zones, independent of direction), so the closed
 **CHAMPION OF RECORD: v58** (PF 1.48439273, DD 8.70519440%, 117 trades, long-only, `dzTouch==0`,
 anchored at `pine/3m-elite-v58-first-touch-only.pine`). Split-tested and PROMOTED, superseding v37 (PF
 1.25172059, DD 8.72815312%, 155 trades) as the third validated champion in this lab, after v32 and v37.
+
+---
+
+# ██ v58 COLD REPRODUCTION — CONFIRMED TO THE DIGIT. BOTH GATES NOW CLEARED, LIKE v37. (2026-09-04)
+
+**A NOTE ON THE SCHEDULED PROMPT, A THIRD TIME.** This cycle's stored prompt again asks for the 12H/24H
+bias gate and the cascade signature, citing overnight cloud runs that died at an Artifact publish
+prompt. Both items remain done (bias gate: v54-v57; cascade signature: closed for zero credits as the
+liquidation-unwind tranching of HARD LESSON 34/35). The staleness was already escalated once, at v58's
+own entry, per HARD LESSON 26 and the v39 precedent (escalate once, then record silently while nothing
+changes) — this cycle does not send a second push for the same unedited prompt and does not re-run
+either settled item. **This cycle's own instructions — never call the Artifact tool, commit and push is
+the last step — are followed exactly as given; no Artifact call was made.**
+
+## THE ACTUAL TOP QUEUE ITEM, TAKEN
+
+v58's own entry named its queue item 1 as the reproducibility check v37 got at v52 (HARD LESSON 25 — a
+result on disk can stop reproducing itself, and this project has already lost E38 and E47 to exactly
+that failure mode). One credit spent on this one question, nothing else run.
+
+Byte-identical Pine (`pine/3m-elite-v58-first-touch-only.pine`, no changes), submitted fresh via
+`quick_backtest` (a new strategyId, `01M1NPK9330DEE97KX7KCCW8MJ`, not a re-run of the original cached
+strategy) over the identical BTCUSDT/15m/2022-01-01→2026-09-01 window and parity profile.
+
+| field | Recorded (v58) | Cold re-run |
+|---|---|---|
+| Profit factor | 1.48439273 | **1.48439273** |
+| Max drawdown | 8.7051944% | **8.7051944%** |
+| Trades | 117 | **117** |
+| Win rate | 46.15384615% | **46.15384615%** |
+| avgWinningTrade | $241.40 | **$241.40** |
+| avgLosingTrade | -$139.39 | **-$139.39** |
+| Cascade ratio | 1.0 (117/117) | **1.0 (117/117)** |
+
+**Every field checked reproduces to the identical digit.** Long 117, short 0, both runs.
+
+## WHAT THIS ESTABLISHES
+
+**v58 is now the second result in this project to clear BOTH gates** — an out-of-sample split test
+(H1 1.43185806/71, H2 1.57578397/46, done last cycle) and a cold reproduction to the digit (this
+cycle) — matching v37's own standard at v52. Recorded as `3m-elite-v58-cold-reproduction` in
+`results/backtests.json`, provenance attached.
+
+This does not change the champion, the scope (still long-only; short leg remains paused pending a new
+idea from the source, unchanged since v56), or any other open finding. It closes queue item 1 from
+v58's own entry and nothing else was attempted this cycle, per the credit-budget guidance (580 on
+hand, one backtest spent).
+
+## QUEUE
+
+1. **State the split going forward as "v58, PF 1.48 blended (H1 1.43/71, H2 1.58/46), cold-reproduced"**
+   — carry the verified-both-gates status alongside the number, same framing v37 got after v52.
+2. The short leg remains paused pending a new idea from the source (unchanged since v56/v58).
+3. The remaining signal terms `close > dzBot` and `dzAge >= 1` — the binding test never yet applied to
+   either — carried forward unchanged, now against v58.
+
+**CHAMPION OF RECORD: v58** (PF 1.48439273, DD 8.70519440%, 117 trades, long-only, `dzTouch==0`,
+anchored at `pine/3m-elite-v58-first-touch-only.pine`). Split-tested AND cold-reproduced — both gates
+cleared, matching v37's standard at v52.

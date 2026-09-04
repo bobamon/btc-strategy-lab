@@ -649,5 +649,50 @@
     },
     "pineSource": "three-m-elite/pine/3m-elite-v58-first-touch-only.pine",
     "notes": "H2 clears PF 1.0 (1.57578397) on 46 trades, DD 6.61629982%, win 47.83% -- STRONGER than H1 on both PF and drawdown, the opposite pattern from v37's split (where H2 was the weaker half). See 3m-elite-v58-split-h1 for the other half."
+  },
+  {
+    "id": "3m-elite-v58-cold-reproduction",
+    "name": "3M Elite v58 cold reproduction check (HARD LESSON 25)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "passed",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/pine/3m-elite-v58-first-touch-only.pine",
+    "description": "Queue item 1 from the v58 entry: v58 needed the same cold-reproduction check v37 got at v52 (HARD LESSON 25 -- a result on disk can stop reproducing itself, verify before building on it) before being trusted as the anchor for further work. Byte-identical Pine to pine/3m-elite-v58-first-touch-only.pine, fresh strategy submission via quick_backtest (not a re-run of the cached strategyId), same window and parity settings as the original v58 run.",
+    "metrics": {
+      "netProfitPct": 42.53848648,
+      "profitFactor": 1.48439273,
+      "maxDrawdownPct": 8.7051944,
+      "totalTrades": 117,
+      "winRatePct": 46.15384615,
+      "avgTradePct": 0.36357681,
+      "sharpeRatio": 0.9292181,
+      "avgWinningTrade": 241.401230038889,
+      "avgLosingTrade": -139.393932920635,
+      "avgBarsWinning": 47.01851852,
+      "avgBarsLosing": 33.31746032,
+      "longTrades": 117,
+      "shortTrades": 0,
+      "commissionPaid": 1397.232751900001
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1NPK8TQ8W4VN5ZFN91XVPSG",
+      "strategyId": "01M1NPK9330DEE97KX7KCCW8MJ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NPK8TP8QDQC72EF0BW74YP",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "uniqueEntries": 117,
+      "totalRows": 117,
+      "maxCascadeDepth": 1,
+      "verifiedAt": "2026-09-04T00:00:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v58-first-touch-only.pine",
+    "verdict": "COLD REPRODUCTION CONFIRMED, digit-for-digit: PF 1.48439273, DD 8.7051944%, 117 trades (54W/63L, long 117/short 0) -- exact match to the originally recorded v58 run. v58 clears HARD LESSON 25 and is now, like v37 at v52, a champion verified on BOTH gates (split test + cold reproduction).",
+    "notes": "Matches the v37-at-v52 methodology exactly: fresh quick_backtest submission (new strategyId 01M1NPK9330DEE97KX7KCCW8MJ, not the original 01M1NFY98ZT5D5CX3X3BPCA78Y) of the byte-identical file on disk, same BTCUSDT/15m/2022-01-01-2026-09-01 window and parity profile (10000 capital, 0.05% commission, 100% equity sizing, margin 100/100, pyramiding 1). Every field checked -- netProfitPct, profitFactor, maxDrawdownPct, totalTrades, winRatePct, avgWinningTrade, avgLosingTrade, avgBarsWinning/Losing, commissionPaid -- reproduced to the identical digit against the recorded 3m-elite-v58-first-touch-only entry. Cascade ratio 1.0 (117 rows = 117 unique entries) also reproduced unchanged. This closes queue item 1 from the v58 entry; v58 stands confirmed as champion-of-record for 3M ELITE."
   }
 ]
