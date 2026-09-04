@@ -4015,10 +4015,7 @@ v41/v42, not a promotion candidate — v60/v61 remain the leg's actual measureme
 1. **The declared-deviation promotion policy question** (v60, unchanged) — still open, still for the
    user, still distinct from the War Formation RATCHET v2 clause-2 question it sits beside
    (STRATEGY-LEDGER.md ~line 2314).
-2. **The mechanical flip rule** (combining both legs, v24's finding that they are not independent) —
-   still untouched, still the other structural gap named at v58/v59/v60. Now carries v63's caveat: the
-   bias gate is a soft filter, not a hard veto, on the short side — the flip logic cannot assume it
-   silences the "wrong" direction outright.
+2. ~~The mechanical flip rule~~ — **BUILT AND MEASURED AT v64.** See below.
 3. ~~A dedicated regime split on the SHORT leg specifically~~ — **DONE at v62/v63.** Confirms the gate
    sorts regimes correctly in direction (bear >> bull, both PF and trade count) but is not a perfect
    filter (bull year still fires losing trades).
@@ -4030,3 +4027,70 @@ v41/v42, not a promotion candidate — v60/v61 remain the leg's actual measureme
 1.88616546 full sample; split H1 1.47025018/26, H2 3.00186566/13; DD 1.71159657%; 39 trades;
 25%-equity declared deviation; anchored at `pine/3m-elite-v60-short-declared-deviation.pine`). Unchanged
 by this cycle — v62/v63 are diagnostic regime evidence, not a re-measurement of the leg.
+
+---
+
+## v64 — QUEUE ITEM 2 DONE: THE MECHANICAL FLIP RULE, BUILT AND MEASURED
+
+This cycle's scheduled prompt again carried the stale v37/v53 snapshot (bias gate, cascade signature —
+both closed since v54–v61). Per "THE DOCS WIN over this prompt", this cycle took the actual top item
+left open in the real queue: **the mechanical flip rule**, untouched since it was first named at
+v58/v59.
+
+**WHAT WAS BUILT (LESSON 17, stated before running):** the literal union of champion long v58
+(`dzTouch==0` demand-zone state machine) and short v60 (`szTouch<2` supply-zone state machine, source's
+20/50/200 SMA-stack bias gate, 25%-equity declared-deviation sizing) in ONE script, both sides
+byte-identical to their solo builds. The two zone-lifecycle state machines already run on fully
+independent variables (`dz*` vs `sz*`); the only new element from combining them is that `pyramiding=1`
+gives both directions a SHARED single position slot. **The flip rule this implements is the simplest one
+that adds no new mechanism:** first signal to fire while flat takes the slot; the opposite-direction
+signal is not taken until the open position exits on its own stop/target/time-cap — no
+close-and-reverse, no averaging, no cancel/reorder. An explicit tie-break (long checked first, short
+re-reads live `strategy.position_size`) covers the case where both signals fire on the identical bar.
+Anchored at `pine/3m-elite-v64-combined-flip.pine`. One credit spent (568 on hand pre-run, above 500 →
+at most two).
+
+**PRE-REGISTERED OUTCOME A** (shared slot measurably binding, combined counts below the solo sum of
+117+39=156) **vs OUTCOME B** (legs are time-disjoint under current filters, combined counts equal
+117/39, the question is moot) — **A confirmed:**
+
+| | v58 solo (long) | v60 solo (short) | **v64 combined** |
+|---|---|---|---|
+| Trades | 117 | 39 | **115 long / 38 short = 153** |
+| Profit factor | 1.48439273 | 1.88616546 | **1.5576495 (blended)** |
+| Net profit | — | — | **+52.74921597%** |
+| Max drawdown | 8.7051944% | 1.71159657% | **8.70084794%** |
+| Sharpe | — | 0.83750737 | **1.09589774** |
+| Cascade ratio | — | 1.0 | **1.0 (clean, depth 1)** |
+
+**The coupling is real but SMALL**, not the large effect v24 found under the old pre-zone-lifecycle
+code (removing shorts there added dozens of long entries to an 833-trade base): only 2 long signals and
+1 short signal, across 4.7 years, were suppressed by the other direction already holding the slot. This
+makes sense — the current filters are far more selective, so simultaneous live demand and supply zones
+are rare. **Free diagnostic, zero credits** (`get_trades` on the already-run result): confirmed **zero**
+same-bar or time-overlapping entries across all 153 trades, so the explicit tie-break guard was never
+actually exercised — the effect measured here is pure slot-occupancy (one direction's open trade
+blocking the other's entry window), not same-bar contention between two live signals.
+
+**Traced the exact cost, not just the count.** Diffing v64's short entryBars against v60-solo's 39
+identifies the single suppressed short: entryBar 86086 (2024-06-13, price 67695.8), which in v60-solo
+was a **winner** (+$47.88, 1.91%). It was suppressed because a long entered two 15m bars earlier (bar
+86019, price 67522.2) was still open — and that long went on to be a **loser** (-$139.43, -1.08%). This
+is a concrete instance of the coupling costing real net profit, not a neutral bookkeeping artifact.
+
+**WHAT THIS DOES NOT SETTLE:**
+- **Not a promotion candidate.** v64 inherits v60's declared-deviation non-comparability (25%-equity
+  short beside 100%-equity long) — the same caveat v60/v61/v62/v63 already carry, so blended PF/DD are
+  not on the same scale as v58's 100%-equity-only numbers. Recorded `status: testing`.
+- **No split test run this cycle** (queue item 2 was a build-and-measure task, not a promotion attempt;
+  the standing convention for non-promotion diagnostic entries, matching v41/v42/v62/v63, is a single
+  full-sample measurement).
+- **The two suppressed long entries were not individually traced** — the short-side trace above answers
+  the queue item (does the flip rule cost anything real) without needing both sides itemised.
+- **Still open:** whether a genuinely "flipped" rule (close-and-reverse on an opposite signal, rather
+  than wait-for-exit) would perform differently is untested — this build answers "what does the
+  simplest, no-new-mechanism combination do", not "what is the best possible combination".
+
+**QUEUE ITEM 2 STATUS: DONE** (built, run, coupling magnitude measured and one concrete cost traced).
+Item 1 (declared-deviation promotion policy) remains the only open item, and remains a question for the
+user, not a backtest.

@@ -1196,9 +1196,63 @@ const DATA = [
     },
     "pineSource": "three-m-elite/pine/3m-elite-v63-short-bull-regime-split.pine",
     "notes": "PF falls to 0.39 in the isolated bull year, losing money outright (-0.89% net) on only 7 trades vs 15 in the bear year (v62) -- both counts sit under the ~30-trade individual quoting floor (HARD LESSON 19), read for DIRECTION only. Cascade ratio 1.0 (clean). CONFIRMS the source's bias gate is doing real regime-sorting work on the short leg: fewer signals AND a much weaker PF in the bull year, exactly the asymmetry v62's header predicted before running (LESSON 17). CAVEAT: the gate does not fully SILENCE the short in a bull year -- 7 qualifying zones still fired and lost money net, so stackBear (the 20/50/200 SMA stack) is a coarse regime proxy, not a perfect one; it reduces bull-year short exposure and degrades its quality, it does not eliminate it."
+  },
+  {
+    "id": "3m-elite-v64-combined-long-short-flip-rule",
+    "name": "3M Elite v64: combined long+short, shared-slot flip rule (queue item 2)",
+    "direction": "both",
+    "status": "testing",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "description": "Queue item 2, open since v58/v59/v60/v62/v63 ('the mechanical flip rule ... is still untouched'). Literal union of champion long v58 (dzTouch==0 demand-zone state machine) and short v60 (szTouch<2 supply-zone state machine, source's 20/50/200 SMA-stack bias gate, 25%-equity declared-deviation sizing per HARD LESSON 42/43) in ONE script. Both zone-lifecycle state machines are byte-identical to their solo builds and run on fully independent variables (dz* vs sz*); the only new thing is pyramiding=1 giving both directions a SHARED single position slot (flat = strategy.position_size == 0 gates both longCond and shortCond). THE FLIP RULE THIS IMPLEMENTS: first signal to fire while flat takes the slot; the opposite-direction signal is simply not taken until the open position exits on its own stop/target/time-cap -- no close-and-reverse, no averaging, no cancel/reorder. Long is checked first each bar and the short check re-reads strategy.position_size live (not the bar-open snapshot) so a same-bar long fill blocks a same-bar short fill -- an explicit, stated tie-break, verified empirically never exercised (zero same-bar or overlapping entries across all 153 trades).",
+    "pineSource": "three-m-elite/pine/3m-elite-v64-combined-flip.pine",
+    "specPath": "three-m-elite/pine/3m-elite-v64-combined-flip.pine",
+    "metrics": {
+      "netProfitPct": 52.74921597,
+      "profitFactor": 1.5576495,
+      "maxDrawdownPct": 8.70084794,
+      "totalTrades": 153,
+      "winRatePct": 49.01960784,
+      "sharpeRatio": 1.09589774,
+      "sortinoRatio": 0.22557243,
+      "avgTradePct": 0.34476612,
+      "avgWinningTrade": 196.455037408,
+      "avgLosingTrade": -121.271874466667,
+      "ratioAvgWinLoss": 1.61995548,
+      "largestWin": 687.813106500001,
+      "largestLoss": -322.345953000001,
+      "avgBarsInTrade": 40.73202614,
+      "avgBarsWinning": 50.28,
+      "avgBarsLosing": 31.55128205,
+      "longTrades": 115,
+      "shortTrades": 38,
+      "longWinning": 54,
+      "shortWinning": 21,
+      "longNetProfit": 4743.979060100033,
+      "shortNetProfit": 530.942537099994,
+      "commissionPaid": 1549.819402799999
+    },
+    "notes": "PRE-REGISTERED (LESSON 17): predicted combined long count < 117 (v58 solo) AND combined short count < 39 (v60 solo), summing below 156 -- CONFIRMED: 115 long (-2) and 38 short (-1), sum 153. The shared slot is measurably binding but the effect is SMALL, not the large coupling v24 found under the old pre-zone-lifecycle code (removing shorts there added dozens of long entries): the current, far more selective zone-lifecycle filters rarely produce simultaneous live demand and supply zones. Free diagnostic (get_trades on this result, zero credits): confirmed zero same-bar or time-overlapping entries across all 153 trades, so the explicit tie-break guard (long wins ties) was never actually exercised -- the effect is pure slot-occupancy (one direction's open trade blocking the other's entry), not same-bar contention. Traced the exact loss on each side: the missing short (entryBar 86086, 2024-06-13, price 67695.8) was a WINNER in v60-solo (+$47.88) suppressed because a long entered at bar 86019 (price 67522.2) was still open and became a LOSER (-$139.43, -1.08%) -- a concrete case of the coupling costing net profit, not neutral. The two missing longs were not individually traced (not required to answer the queue item). Cascade clean (ratio 1.0, depth 1, matches v58/v60's own margin-fix signature). STATUS: testing, not a promotion candidate -- inherits v60's declared-deviation non-comparability (25%-equity short beside 100%-equity long), same caveat v60/v61/v62/v63 already carry. This closes queue item 2's 'untouched' status: the flip rule is now built, run, and its coupling magnitude measured under current code, not assumed from the old v24 finding.",
+    "provenance": {
+      "source": "trader.dev",
+      "engineVersion": "tv_jul26_mc7",
+      "jobId": "adhoc_01M1P7YNQ81RWRK8C6X6P4MHMW",
+      "resultId": "01M1P7YNQ79QB3ZYF7XZKSE7ME",
+      "strategyId": "01M1P7YPQMMD7SWVMBT6B7W8PZ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1P7YNQ79QB3ZYF7XZKSE7ME",
+      "totalRows": 153,
+      "uniqueEntries": 153,
+      "cascadeRatio": 1,
+      "maxCascadeDepth": 1,
+      "verifiedAt": "2026-09-04T13:05:00Z"
+    }
   }
 ];
-const BUILT = "2026-09-04 11:56";
+const BUILT = "2026-09-04 13:01";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

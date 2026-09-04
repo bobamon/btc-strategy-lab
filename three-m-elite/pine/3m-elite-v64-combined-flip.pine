@@ -1,0 +1,209 @@
+//@version=6
+// 3M ELITE v64 - THE MECHANICAL FLIP RULE, FIRST BUILD. Queue item 2, open since v58/v59/v60/v62/v63
+//   ("the mechanical flip rule (combining both legs, per v24's finding that they are not independent)
+//   is still untouched"). This is the first attempt at combining the two validated legs into ONE script.
+//
+// WHAT "COMBINING" MEANS HERE, STATED BEFORE WRITING ANY CODE (LESSON 17): this script is the LITERAL
+//   UNION of champion long v58 (dz* demand-zone state machine, dzTouch==0 entry) and short v60
+//   (sz* supply-zone state machine, stackBear bias gate, 25%-equity declared-deviation sizing) --
+//   byte-identical logic on each side, nothing re-tuned. The two zone-lifecycle state machines already
+//   run on completely independent variables (dz* vs sz*) and were never coupled to each other in v58 or
+//   v60 individually. The ONLY thing that changes when they are combined into one strategy() is that
+//   pyramiding=1 gives them a SHARED single position slot: `flat = strategy.position_size == 0` gates
+//   BOTH longCond and shortCond in this build, same as it already gated each alone. THE FLIP RULE THIS
+//   IMPLEMENTS IS THE SIMPLEST ONE THAT REQUIRES NO NEW MECHANISM: first signal to fire while flat takes
+//   the slot; the opposite-direction signal is simply not taken until the open position exits on its own
+//   stop/target/time-cap (LESSON 5/maxBars) -- there is no close-and-reverse, no averaging, no
+//   cancel/reorder. This is a mechanical consequence of the shared slot, not an invented geometry
+//   (LESSON 6 as scoped by HARD LESSON 31 -- both legs are unchanged source mirrors; only their
+//   arbitration is new, and the arbitration is Pine's own pyramiding=1 default, not a new rule).
+//
+// WHY THIS MATTERS (v24's finding, restated): when both legs shared one script under the OLD
+//   pre-zone-lifecycle code, removing the short leg changed the long leg's own trade count -- the two
+//   were coupled through the shared slot even though their signal logic was independent. v58 and v60
+//   have only ever been measured ALONE (each backtest gave its own direction sole use of every bar).
+//   This build measures what each leg actually gets once the other is competing for the same slot --
+//   the real, deployable behaviour of "long-and-short 3M", not the sum of two solo runs.
+//
+// PRE-RUN AUDIT, per leg (LESSON 6/HARD LESSON 31 scoping -- unchanged from v58/v60 individually):
+//   LONG: R >= 0.8% (LESSON 3, minRpct, by exclusion via rBig) -- unchanged from v58.
+//         Stop beyond structure (LESSON 5): slPx = dzBot -- unchanged.
+//         BINDING/REDUNDANCY (E17/E14): no term added or removed from v58's longCond -- N/A this run.
+//         Latch in sequence (LESSON 8): dzAge >= 1 -- unchanged.
+//   SHORT: R >= 0.8% (LESSON 3, minRpct, by exclusion via rBig) -- unchanged from v60.
+//          Stop beyond structure (LESSON 5): slPx = szTop -- unchanged.
+//          BINDING/REDUNDANCY (E17/E14): no term added or removed from v60's shortCond -- N/A.
+//          Latch in sequence (LESSON 8): szAge >= 1 -- unchanged.
+//          Declared deviation carried forward unchanged (HARD LESSON 42/43): short qty = 25% equity.
+//   SL and TP fixed at entry on both sides. No trailing, no averaging down, no martingale, no
+//   strategy.cancel/order, no arrays, no user-defined functions, no request.security. pyramiding=1.
+//
+// PRE-REGISTERED OUTCOMES (LESSON 17), stated before running:
+//   A) Combined long trade count < 117 (v58 solo) AND combined short trade count < 39 (v60 solo), with
+//      the two counts summing to something BELOW 156 (117+39) -- the shared slot is measurably binding,
+//      confirming v24's coupling finding still holds under the current zone-lifecycle code, not just
+//      the old pre-refactor code. This is the expected outcome given the two legs' entries can and do
+//      overlap in time (both zone types can be simultaneously live).
+//   B) Combined counts equal 117 and 39 (no overlap ever occurred in 4.7 years) -- the legs are in fact
+//      time-disjoint under current filters, and v24's finding does not transfer to this code; the
+//      "flip rule" question would then be moot (there is never a competing signal to arbitrate).
+//   Either answer is informative and ends the "combining is untouched" status. PF/DD on the combined
+//   book are read as first evidence, not as a promotion candidate: the short leg is still a declared
+//   deviation (25% equity) sitting beside a 100%-equity long, so blended PF is not comparable to v58's
+//   100%-equity-only number on any shared scale (same caveat v60 already carries alone).
+//
+// 15m, 2022-01-01 -> 2026-09-01, BTCUSDT, LONG+SHORT combined.
+strategy("3M ELITE v64 combined long+short, shared-slot flip rule", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rTarget  = input.float(2.0, "Target, x R -- held at v37/v53/v57/v58/v60")
+maxBars  = input.int(96,    "Max bars in trade -- held")
+maxAge   = input.int(6,     "Zone freshness cap, 4H candles -- held")
+minRpct  = input.float(0.80,"Min stop distance as % of price (LESSON 3)")
+maFast   = input.int(20,    "SHORT'S bias stack: fast MA -- held from v60")
+maMid    = input.int(50,    "SHORT'S bias stack: middle MA -- held from v60")
+maSlow   = input.int(200,   "SHORT'S bias stack: slow MA -- held from v60")
+eqFrac   = input.float(0.25,"SHORT declared deviation: fraction of equity -- HARD LESSON 42, held from v60")
+
+sma20  = ta.sma(close, maFast)
+sma50  = ta.sma(close, maMid)
+sma200 = ta.sma(close, maSlow)
+stackBear = not na(sma200) and sma20 < sma50 and sma50 < sma200
+
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+// ---------- reconstruct the 4H candle from 15m bars (shared by both legs, one reconstruction) ----------
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+var float pO  = na
+var float pH  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pH  := h4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+bullEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC < ppO and pC > pO and pC > ppO
+bearEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC > ppO and pC < pO and pC < ppO
+
+// ---------- demand zone lifecycle (long leg, byte-identical to v58) ----------
+var float dzTop   = na
+var float dzBot   = na
+var bool  dzLive  = false
+var int   dzTouch = 0
+var int   dzAge   = 0
+var bool  dzTraded = false
+
+if new4h
+    if dzLive and not na(pC) and pC <= dzTop
+        dzTouch := dzTouch + 1
+        if dzTouch >= 2
+            dzLive := false
+    if dzLive
+        dzAge := dzAge + 1
+    if bullEngulf
+        dzTop   := pO
+        dzBot   := pL
+        dzLive  := true
+        dzTouch := 0
+        dzAge   := 0
+        dzTraded := false
+
+// ---------- supply zone lifecycle (short leg, byte-identical to v60) ----------
+var float szTop   = na
+var float szBot   = na
+var bool  szLive  = false
+var int   szTouch = 0
+var int   szAge   = 0
+var bool  szTraded = false
+
+if new4h
+    if szLive and not na(pC) and pC >= szBot
+        szTouch := szTouch + 1
+        if szTouch >= 2
+            szLive := false
+    if szLive
+        szAge := szAge + 1
+    if bearEngulf
+        szTop   := pH
+        szBot   := pO
+        szLive  := true
+        szTouch := 0
+        szAge   := 0
+        szTraded := false
+
+minR = close * minRpct / 100
+
+rBigLong  = not na(dzBot) and (close - dzBot) >= minR
+longCond  = rBigLong and dzLive and not dzTraded and dzAge >= 1 and dzTouch == 0 and low <= dzTop and close > dzBot and dzAge <= maxAge
+
+rBigShort = not na(szTop) and (szTop - close) >= minR
+shortCond = rBigShort and szLive and not szTraded and szAge >= 1 and szTouch < 2 and high >= szBot and close < szTop and szAge <= maxAge and stackBear
+
+// ---------- THE FLIP RULE: shared position slot, first signal while flat takes it, no close-and-reverse.
+//   Long is checked first each bar; the short check re-reads strategy.position_size live (not the
+//   bar-open `flat` snapshot) so a same-bar long fill blocks a same-bar short fill on the rare bar where
+//   both a demand-zone and a supply-zone touch coincide -- an explicit, stated tie-break (long wins ties),
+//   not an accidental double-fill. ----------
+flat = strategy.position_size == 0
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if flat and longCond and not na(dzBot) and close > dzBot
+    r = close - dzBot
+    if r > 0
+        strategy.entry("L", strategy.long)
+        dzTraded := true
+        slPx   := dzBot
+        tpPx   := close + r * rTarget
+        barsIn := 0
+
+if strategy.position_size == 0 and shortCond and not na(szTop) and close < szTop
+    r = szTop - close
+    if r > 0
+        strategy.entry("S", strategy.short, qty = strategy.equity * eqFrac / close)
+        szTraded := true
+        slPx   := szTop
+        tpPx   := close - r * rTarget
+        barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(dzLive ? 1 : 0,     title="DemandZoneLive")
+plot(szLive ? 1 : 0,     title="SupplyZoneLive")
+plot(stackBear ? 1 : 0,  title="StackBear")
