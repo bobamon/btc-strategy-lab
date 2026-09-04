@@ -3758,3 +3758,82 @@ target close enough to pay for it.
 4. **The out-of-sample test for Attack 46 still ranks first and still cannot be run** under
    BTCUSDT-only -- unchanged from Attack 47/48/49/50's queue, restated because this cycle did not touch
    it.
+
+---
+
+# ATTACK 52 - RSI/PRICE BULLISH DIVERGENCE, TARGET LOOKBACK SCALED 2x. ATTACK 51's OWN QUEUE ITEM 2, EXECUTED. STILL BELOW 1.0, DISCARDED BY THE KILL RULE.
+
+The stored prompt asked for Attack 37's filter stack a sixth time, describing a board state (Attack 37,
+322/196 trades) that is 15 attacks stale. **The docs override it again.** This cycle did NOT fall back to
+the mandate's "propose a genuinely new mechanism" clause -- Attack 51's own queue named a specific,
+narrower next step (item 2: scale the target lookback 2x or 3x further out) and that outranks a fresh
+mechanism proposal the same way Attack 37's filter-stack item once did.
+
+**CLAIM, UNCHANGED FROM ATTACK 51:** RSI(14)/price bullish divergence at a confirmed swing low
+(`ta.pivotlow(5,5)`, non-repainting) identifies exhaustion of selling. Attack 51 falsified the bare form
+at PF 0.72680011 (223 trades) and diagnosed the cause: the target (prior 20-bar high) shared its short
+lookback with the pivot search, so the level aimed at was not reliably far enough above the entry to
+outweigh a stop planted at a low that, by definition, had just been freshly broken.
+
+**THE ONE CHANGE:** `tgtLook` 20 -> 40. Nothing else moved -- not `leftBars`/`rightBars`, not `rsiLen`,
+not the 0.8% R floor, not `maxBars`. Pine source: `strategies/pine/attack52-rsi-divergence-scaled-target.pine`.
+
+| | **Attack 52a** (never-tuned half) |
+|---|---|
+| Profit factor | **0.84401067** |
+| Max drawdown | **35.61480218%** |
+| Trades | **228** |
+| Win rate | **44.73684211%** |
+| Achieved win/loss ratio | **1.04260142** |
+| Avg winner | $132.56 |
+| Avg loser | -$127.14 |
+| Commission paid | $1,850.99 |
+| avgBarsWinning / avgBarsLosing | 46.87 / 41.56 (cap 192) |
+
+## KILL RULE APPLIED. H2 NOT RUN, SECOND CREDIT NOT SPENT.
+
+**Still below 1.0.** 228 trades, comfortably inside the 60-350 workable band and essentially unchanged
+from Attack 51's 223 -- the wider 40-bar target is not materially harder to satisfy at entry time, so the
+count did not collapse (the "trade count collapses" outcome flagged before the run did not happen). The
+569-credit balance would otherwise permit the full pair; the kill rule overrides that when H1 fails
+outright.
+
+## THE DIAGNOSIS WAS RIGHT, THE FIX WAS NOT ENOUGH -- A TRADE-OFF, NOT A FREE LUNCH
+
+The prescribed fix worked exactly as diagnosed: the achieved win/loss ratio rose from **0.67041045**
+(Attack 51) to **1.04260142** -- avg winner $132.56 against avg loser -$127.14, now essentially
+symmetric, confirming the target genuinely was too close before. But win rate fell from **52.02% to
+44.74%** as the more distant target is reached less often, and the two effects roughly cancel: PF moves
+from 0.727 to 0.844, a real, material improvement, but still net negative.
+
+**This is HARD LESSON 46's shape again, on a new axis.** Raising a required move (here, target distance,
+not an RR floor) is not free -- it spends win rate for payoff symmetry. The level-target family (Attack
+44-46, the champion) survives specifically because its target sits close in time to the level's own
+definition; stretching an RSI-divergence target further out does not reproduce that property, it just
+trades one edge-erosion mode (bad payoff ratio) for another (bad win rate).
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Avg loser (-$127.14) with a still-negative edge is **category 2, bleed on a negative edge** -- same
+category as Attack 51, not category 3. The edge did not cross into positive territory, so it is not yet
+worth filtering.
+
+## WHAT THIS SETTLES
+
+**The RSI-divergence family is now 0-for-2**: bare (Attack 51) and with its own queue's prescribed target
+fix (Attack 52). Both discarded on the kill rule, both category 2. The remaining unexplored lever for this
+family, if it is ever revisited, is the ENTRY or STOP construction, not the target -- target-widening has
+now been shown to trade one failure mode for another rather than closing the gap to 1.0.
+
+## QUEUE
+
+1. **Do not test 3x on this same base.** Attack 51's queue named 2x and 3x as two separate,
+   independently-testable future-cycle candidates, not a sweep to run in the same cycle -- and the
+   result here (a trade-off, not a fix) makes a further stretch a low-prior guess rather than a
+   confirmed direction. If the RSI-divergence family is revisited, change the ENTRY or STOP
+   construction instead.
+2. **Attack 46 remains the sole advancing candidate on the board**, both halves clear, cold-reproduced,
+   filters exhausted per HARD LESSON 49.
+3. **The out-of-sample test for Attack 46 still ranks first and still cannot be run** under
+   BTCUSDT-only -- unchanged from Attack 47/48/49/50/51's queue, restated because this cycle did not
+   touch it.

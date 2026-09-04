@@ -1,0 +1,128 @@
+//@version=6
+// BTC ATTACK 52 - RSI/PRICE BULLISH DIVERGENCE, TARGET LOOKBACK SCALED 2x FURTHER OUT.
+//
+// THE STORED PROMPT still asks for Attack 37's filter stack (a sixth time). THE DOCS OVERRIDE IT:
+// Attack 41 closed Attack 37 as a development target, Attack 43 closed the sweep-reversal FAMILY,
+// Attack 47 died on the ~77% sample wall on the current champion (Attack 46), and Attack 51's own
+// QUEUE item 2 is the specific, named next step this cycle executes -- not a fresh "propose a new
+// mechanism" fallback, a queued, narrower variant of an already-built one.
+//
+// ==================== WHAT THIS IS ====================
+// IDENTICAL mechanism to Attack 51 (RSI(14)/price bullish divergence at a confirmed swing low,
+// ta.pivotlow(5,5), non-repainting). ONE change: the target lookback (`tgtLook`) is doubled, 20 -> 40,
+// per Attack 51's own queue item 2 ("target lookback at 2x or 3x the pivot lookback... a narrower,
+// testable variant for a future cycle"). Nothing else moves -- not leftBars/rightBars, not rsiLen, not
+// the R floor, not maxBars. This is a single-term change on an already-falsified base, evaluated fresh
+// against the kill rule, not folded into the RATCHET (Attack 51 was discarded outright, there is
+// nothing of it left to ratchet against).
+//
+// CLAIM, UNCHANGED FROM ATTACK 51: when price prints a LOWER confirmed swing low but RSI(14) prints a
+// HIGHER reading at that same swing, the new low lacks momentum confirmation and tends to resolve back
+// toward the recent range. Attack 51 falsified this at 0.72680011 PF (223 trades) with a diagnosed
+// cause: the target (prior 20-bar high) shared its short lookback with the pivot search (5/5), so the
+// level aimed at was not reliably far enough above the entry to outweigh a stop planted at a low that,
+// by definition, had just been freshly broken. THIS BUILD tests whether doubling the target search
+// window to 40 bars (roughly 2x the pivot-to-pivot span the divergence is measured over) finds a
+// genuinely more distant resistance level, without touching the entry/stop geometry that Attack 51 did
+// not diagnose as the problem.
+//
+// ==================== MECHANICS, NO ARRAYS, NO UDFs ====================
+// Same as Attack 51: ta.pivotlow(low, leftBars, rightBars), non-repainting, confirmed rightBars after
+// the actual low. Two `var float` pairs (not arrays) hold the two most recent confirmed pivot lows and
+// the RSI reading at each, both read from the identical historical bar via a [rightBars] shift.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - enforced by EXCLUSION via rBig, unchanged from Attack 51. A divergence whose
+//        stop is too close to clear the floor is SKIPPED, never widened.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = lastPivLow, the confirmed pivot-low PRICE. Unchanged.
+//   Each leg separately (LESSON 6) - LONG ONLY, unchanged. The bearish mirror remains an outstanding,
+//        separately-built leg, not assumed here.
+//   BINDING (E17) - divNow still requires TWO independently confirmed pivots in a specific relative
+//        order; doubling tgtLook does not loosen this, so the trade count is expected to land close to
+//        Attack 51's 223 on H1, not to inflate. Read the count before quoting any ratio (LESSON 12).
+//   REDUNDANCY (E14) - rBig constrains STOP distance (an absolute % floor); rrOk only checks the target
+//        sits above entry (existence, not a size threshold) -- unchanged, still non-overlapping.
+//   LATCH IN SEQUENCE (LESSON 8) - unchanged: pivot and its RSI both come from an already-confirmed,
+//        historical bar; the entry trigger uses only already-known past data.
+//   TARGET IS A LEVEL, NOT A MULTIPLE (HARD LESSON 41/47) - tpPx = res, now the prior 40-bar high
+//        instead of the prior 20-bar high. Still a level, never an rr multiple; rr is measured, not set.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17):
+//   * PRE-2024 HALF (H1, never-tuned) BELOW 1.0 -> KILL RULE. Discard, do not run H2, do not filter
+//        further (do not also try 3x -- that is a second, separate future-cycle test per the queue,
+//        not a rescue of this one).
+//   * H1 CLEARS 1.0 BUT UNDER ~30 TRADES -> a DIRECTION, not a result (LESSON 12); report as such and
+//        still run H2 since credits allow it, but neither half is quotable as a ratio.
+//   * BOTH HALVES CLEAR 1.0 WITH A DEFENSIBLE COUNT (>=30 EACH) -> the reachable-target fix worked;
+//        this becomes a second genuinely-new, both-halves-positive family alongside the sweep-reversal
+//        family (Attack 37) and queues for its own filter-stack treatment.
+//   * TRADE COUNT COLLAPSES FAR BELOW 223 -> the wider 40-bar high is now less often "above close" at
+//        the moment of entry (rrOk binds harder), which would mean the fix traded selectivity for
+//        distance rather than adding distance for free -- worth naming explicitly, not just noting.
+//   REPORT avg loser, win rate and max drawdown together on every run (the board's standing
+//   instruction after Attack 37 named the three drawdown categories).
+strategy("BTC Attack52 RSI divergence scaled target", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+leftBars  = input.int(5,   "Pivot left bars")
+rightBars = input.int(5,   "Pivot right bars -- confirmation lag")
+rsiLen    = input.int(14,  "RSI length")
+tgtLook   = input.int(40,  "Target lookback -- prior N-bar high (2x Attack 51's 20)")
+minRpct   = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars   = input.int(192, "Max bars in trade")
+
+rsiVal = ta.rsi(close, rsiLen)
+pl     = ta.pivotlow(low, leftBars, rightBars)
+
+var float lastPivLow = na
+var float lastPivRSI = na
+var float prevPivLow = na
+var float prevPivRSI = na
+var bool  divNow      = false
+
+divNow := false
+if not na(pl)
+    prevPivLow := lastPivLow
+    prevPivRSI := lastPivRSI
+    lastPivLow := pl
+    lastPivRSI := rsiVal[rightBars]
+    if not na(prevPivLow) and lastPivLow < prevPivLow and lastPivRSI > prevPivRSI
+        divNow := true
+
+res = ta.highest(high, tgtLook)[1]
+
+rLong = close - lastPivLow
+minR  = close * minRpct / 100
+rBig  = not na(lastPivLow) and rLong >= minR
+rrOk  = not na(res) and res > close
+
+goLong = divNow and rBig and rrOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := lastPivLow
+    tpPx   := res
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(lastPivLow, title="LastPivotLow")
+plot(res, title="TargetLevel")

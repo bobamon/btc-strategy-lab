@@ -1245,9 +1245,60 @@ const DATA = [
     },
     "verdict": "DISCARDED BY THE KILL RULE. H2 not run, second credit not spent, despite a 572-credit balance that would otherwise permit the full pair -- the kill rule overrides the credit-tier default when H1 fails outright.",
     "notes": "PF 0.72680011, clearly below 1.0 on a well-powered sample (223 trades, comfortably inside the lab's 60-350 workable band, so this is not a floor problem -- the mechanism itself is negative). The win rate is a MAJORITY, 52.02%, the same inverted shape Attack 50 found: the payoff ratio (0.67041045) is what kills it, not selectivity. Avg winner $80.55 against avg loser -$120.14 -- losers run 1.5x larger than winners even though winners happen more often than not. avgBarsWinning (30.0) and avgBarsLosing (36.2) are close together and well under the 192-bar cap, so HARD LESSON 38 truncation does not apply -- the target (prior 20-bar high) is simply not far enough above the entry to outweigh the stop (the confirmed pivot low) often enough. DRAWDOWN CATEGORY per the board's taxonomy: avg loser -$120.14 is the largest of any recent-attack loser (48: -$76.38, 49: -$84.57, 50: -$93.96) yet the edge is still negative overall, so this is category 2 (bleed on a negative edge), not category 1 or 3. WHAT THIS SETTLES: the oscillator axis (RSI) does not rescue this lab any more than the price-only axes did -- a divergence at a swing low identifies exhaustion of SELLING, but a level only 20 bars back is not consistently far enough away to pay for the entries where the reversal fails. QUEUE: (1) do not tune this mechanism -- do not widen the pivot lookback, do not add an RR floor, the failure is structural (target too close relative to a stop already at a fresh low), not a threshold to sweep. (2) A wider target (the prior 20-bar high was the SAME lookback as the pivot itself -- an entry-relative target scaled further out, e.g. lookback x2 or x3, is a narrower testable variant for a future cycle, not a rescue of this one, per the reachable-target qualifier Attack 50 already raised (not yet a numbered HARD LESSON). (3) Attack 46 remains the sole advancing candidate on the board, both halves clear, cold-reproduced, filters exhausted per HARD LESSON 49. (4) The out-of-sample test for Attack 46 still ranks first and still cannot be run under BTCUSDT-only."
+  },
+  {
+    "id": "attack52a-rsi-divergence-scaled-target-h1",
+    "name": "Attack 52a: RSI/price bullish divergence, target lookback 2x scaled (40-bar) -- never-tuned half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack52-rsi-divergence-scaled-target.pine",
+    "description": "Attack 51's own queue item 2, executed: identical RSI(14)/price bullish-divergence-at-a-confirmed-swing-low mechanism (ta.pivotlow(5,5), non-repainting, [rightBars]-shifted RSI comparison, stop at the confirmed pivot low, R floor 0.8% by exclusion), with ONE change -- the target lookback (prior N-bar high) doubled from 20 to 40 bars, so the resistance level searched for is genuinely more distant from the just-broken swing low than Attack 51's target, which shared its short window with the pivot search itself. Nothing else moved: not leftBars/rightBars, not rsiLen, not maxBars. Long only, bare. This is a narrower, testable variant of an already-falsified base per Attack 51's queue, evaluated fresh against the kill rule -- not a RATCHET comparison, since Attack 51 was discarded outright and there is nothing of it left to ratchet against.",
+    "metrics": {
+      "netProfitPct": -24.98976882,
+      "profitFactor": 0.84401067,
+      "maxDrawdownPct": 35.61480218,
+      "totalTrades": 228,
+      "winningTrades": 102,
+      "losingTrades": 126,
+      "winRatePct": 44.73684211,
+      "avgTradePct": -0.10960425,
+      "avgWinningTrade": 132.560800104902,
+      "avgLosingTrade": -127.144273752778,
+      "ratioAvgWinLoss": 1.04260142,
+      "largestWin": 827.145383999999,
+      "largestLoss": -659.76556275,
+      "avgBarsInTrade": 43.93859649,
+      "avgBarsWinning": 46.87254902,
+      "avgBarsLosing": 41.56349206,
+      "sharpeRatio": -0.56744478,
+      "sortinoRatio": -0.19637434,
+      "commissionPaid": 1850.99898215,
+      "grossProfit": 13521.201610700009,
+      "grossLoss": 16020.178492849993,
+      "longTrades": 228,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1P2MG7MV3RG1FQ8SJTCSETP",
+      "strategyId": "01M1P2MGFKX7ZPCWNE39Y860EE",
+      "resultId": "01M1P2MG7MWRY446H9ZDFF723P",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1P2MG7MWRY446H9ZDFF723P",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T11:25:04Z"
+    },
+    "verdict": "DISCARDED BY THE KILL RULE. H2 not run, second credit not spent, despite a 569-credit balance that would otherwise permit the full pair -- the kill rule overrides the credit-tier default when H1 fails outright.",
+    "notes": "PF 0.84401067, still below 1.0 on 228 trades (well-powered, inside the 60-350 workable band -- count did NOT collapse relative to Attack 51's 223, so the 40-bar target is not materially harder to satisfy than the 20-bar one at entry time). Doubling the target lookback worked EXACTLY as diagnosed and still was not enough: the achieved win/loss ratio rose from 0.67041045 (Attack 51) to 1.04260142 -- avg winner $132.56 vs avg loser -$127.14, essentially symmetric, confirming the target WAS too close before. But win rate fell from 52.02% to 44.74% as the wider target is reached less often, and the two effects roughly cancel: PF moves from 0.727 to 0.844, a real improvement, but still net negative. This IS a trade-off, not a free fix -- widening the target buys payoff symmetry and spends win rate, HARD LESSON 46's shape ('raising a required move spends edge') showing up again on a target-distance axis rather than an RR-floor axis. DRAWDOWN CATEGORY: avg loser -$127.14 with a still-negative edge is category 2 (bleed on a negative edge), same as Attack 51, not category 3 -- the edge did not cross into positive territory. QUEUE: (1) Do not also test 3x on this same base -- Attack 51's queue named 2x/3x as two separate future-cycle candidates, not a sweep to run together; a 3x test is available for a future cycle if the lab returns to this mechanism, but the underlying entry/stop geometry (not the target) is now the more likely remaining lever, since target-widening has been shown to trade one failure mode for another rather than closing the gap. (2) The RSI-divergence family is now 0-for-2 (Attack 51 bare, Attack 52 with the queue's own prescribed fix); a third attempt should change the ENTRY or STOP construction, not the target, if this family is revisited. (3) Attack 46 remains the sole advancing candidate on the board, both halves clear, cold-reproduced, filters exhausted per HARD LESSON 49. (4) The out-of-sample test for Attack 46 still ranks first and still cannot be run under BTCUSDT-only -- unchanged, restated because this cycle did not touch it."
   }
 ];
-const BUILT = "2026-09-04 10:16";
+const BUILT = "2026-09-04 11:26";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
