@@ -1857,9 +1857,60 @@ const DATA = [
     },
     "verdict": "DISCARDED BY THE KILL RULE. Profit factor 0.39073976 on H1 is well below 1.0, and 27 trades sits below the ~30-trade sample floor (LESSON 12) even before the ratio is read -- this would not have been promotable even had PF cleared 1.0. H2 not run, no filters, no rescue, per the mandate's explicit instruction. A prior buggy version of this filter (tautologically true on every setup, confirmed byte-identical to Attack 60's 67-trade result) was caught and corrected before being recorded; only the corrected result is filed as the verdict.",
     "notes": "get_trades on all 27 corrected-run entries confirms cascadeRatio 1 / maxCascadeDepth 1 (no slivering) and every losing trade's profitPct falls in a consistent 0.91%-2.41% band (structural stop-distance exits) -- the 25%-equity sizing fix (HARD LESSON 42/43) still holds; this is a genuine read of the mechanism, not a harness artifact. DRAWDOWN CATEGORY per the board's taxonomy: category 2, bleed on a negative edge (PF outright below 1.0; avg loser -$30.12 is small, not an outlier; not category 1 or 3). WHAT THIS SETTLES: both named location-fix candidates from Attack 60's queue have now failed -- a regime gate (Attack 61, PF 0.235) and a multi-touch structure requirement (Attack 62, PF 0.391), both worse than the bare mirror (Attack 60, PF 0.593) and both cutting the sample hard (67->15, 67->27). That consistency argues against 'the mirror's location is wrong' as the short leg's problem and toward Attack 60's original hypothesis: resistance-tap-and-reject is intrinsically rarer/weaker than support-tap-and-hold on an asset with BTC's long-run upward drift, an asymmetry no location filter on the same entry logic can fix. QUEUE: (1) the short leg's location problem is not solved by either named candidate -- the next short attempt needs a genuinely different signal shape, not another filter on the resistance-mirror entry, or the asymmetry should be reported as structural rather than chased further. (2) Attack 46 (long) remains the sole both-halves-positive candidate on the board, filters exhausted per HARD LESSON 49; unchanged. (3) The out-of-sample test for Attack 46 still cannot be run under BTCUSDT-only; unchanged. (4) The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed if revisited before a fresh mechanism. (5) The inverted-payoff-shape watch (Attacks 50/51/59) stays open on the LONG side, unaffected by this short-side cycle."
+  },
+  {
+    "id": "attack63a-lower-high-structure-breakdown-h1",
+    "name": "Attack 63a: lower-high structure breakdown SHORT -- never-tuned half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "short",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack63-lower-high-structure-breakdown.pine",
+    "description": "The stored scheduled prompt still describes a board state (Attack 37, \"earned a filter stack\") more than thirty attacks stale -- Attack 41 closed Attack 37, Attack 46 is the long champion (filters exhausted, HARD LESSON 49), and Attacks 60-62 already ran the champion's short mirror and BOTH named location fixes (an EMA200 regime gate, Attack 61; a multi-touch resistance requirement, Attack 62), both discarded and both worse than the bare mirror. THE DOCS OVERRIDE THE PROMPT, per the prompt's own instruction. Attack 62's own queue said the next short attempt needs a genuinely different SIGNAL shape, not another filter bolted onto the resistance-tap-and-reject entry -- e.g. a bearish continuation after a confirmed lower high, rather than a reversal at resistance. This build is that shape: the short-side mirror of Attack 59's long-only higher-low continuation breakout (confirmed two-point swing structure, then a breakout in the direction that structure implies), never before tested on the short side. CLAIM: when a market prints a confirmed swing high BELOW its prior confirmed swing high (a genuine lower high), a subsequent close back below the most recent confirmed swing low confirms the downtrend resumed, continuing toward a measured-move projection of the down-swing just completed. Mechanics: ta.pivothigh/pivotlow(5,5) non-repainting, two var float scalars hold the last two confirmed pivot highs, a var bool structureDown latches on the pivot-high-confirm bar (HARD LESSON 8), the trigger is a later distinct bar (ta.crossunder(close, lastPivotLow)). Stop: the pivot high (LESSON 5). Target: breakdown price minus swing amplitude (HARD LESSON 41, a level not a multiple of the stop). R floor 0.8% by exclusion (LESSON 3). SIZING: the 25%-equity declared-deviation qty= fix (HARD LESSON 42/43) applied from the start, per Attack 60's own closing note that any future BTC short should default to it rather than rediscover the margin-forced-closure artifact.",
+    "metrics": {
+      "netProfitPct": -23.02587584,
+      "profitFactor": 0.770693,
+      "maxDrawdownPct": 25.14747849,
+      "totalTrades": 518,
+      "winningTrades": 266,
+      "losingTrades": 252,
+      "winRatePct": 51.35135135,
+      "avgTradePct": -0.0444515,
+      "avgWinningTrade": 29.093677100752,
+      "avgLosingTrade": -39.847244811706,
+      "ratioAvgWinLoss": 0.73013021,
+      "largestWin": 255.90526,
+      "largestLoss": -228.81362175,
+      "avgBarsInTrade": 39.03667954,
+      "avgBarsWinning": 34.26315789,
+      "avgBarsLosing": 44.07539683,
+      "sharpeRatio": -1.47823355,
+      "sortinoRatio": -0.72765844,
+      "commissionPaid": 1172.158083750001,
+      "grossProfit": 7738.918108799997,
+      "grossLoss": 10041.505692550001,
+      "longTrades": 0,
+      "shortTrades": 518
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1Q7N12FSA9VP8DTQDCJEBQ7",
+      "strategyId": "01M1Q7N18AHAZ21VQM78MEKYGV",
+      "resultId": "01M1Q7N12FGN50GYC9J4CKYSHK",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1Q7N12FGN50GYC9J4CKYSHK",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T22:12:56Z"
+    },
+    "verdict": "DISCARDED BY THE KILL RULE. Profit factor 0.770693 on H1 is below 1.0. 518 trades ALSO breaches the settled 60-350 workable band on the high side (the worst frequency miss since Attack 59's 565) -- a stacked edge-and-frequency failure, not a clean single cause. H2 not run, second credit not spent, despite a 549-credit balance that would otherwise permit the full pair -- the kill rule overrides the credit-tier default when H1 fails outright. No filters, no rescue.",
+    "notes": "get_trades on all 518 entries confirms cascadeRatio 1 / maxCascadeDepth 1 (no slivering, matching the top-level cascade summary) and, checked individually, only 5 of 252 losers (2%) fall under the 0.8% R floor -- the rest cluster 0.9%-2.4%+, consistent structural-stop-distance exits. The 25%-equity sizing fix (HARD LESSON 42/43) holds; this is a genuine read of the mechanism, not a harness artifact. DRAWDOWN CATEGORY per the board's taxonomy: category 2, bleed on a negative edge (PF outright below 1.0; avg loser -$39.85 is not a disproportionate outlier against the largest single loss -$228.81; win rate is a majority yet the edge is still negative -- not category 1 or 3). A FOURTH CONFIRMATION OF THE INVERTED-PAYOFF SHAPE, AND THE FIRST ON THE SHORT SIDE: win rate 51.35% (a majority, 266W/252L) still loses because avg loser -$39.85 runs 1.37x avg winner $29.09 (achieved ratio 0.73013021) -- the same shape Attacks 50 (63.22%/0.44), 51 (52.02%/0.67) and 59 (53.45%/0.75) found on three structurally unrelated LONG mechanisms, now recurring on a fourth, unrelated SHORT mechanism. Attack 59's own queue held off numbering this a HARD LESSON because all three instances were single-half kills; this is a fourth single-half kill but the first cross-direction confirmation, which is new information. WHAT THIS SETTLES: the short leg's problem is not confined to Attacks 60-62's resistance-tap-and-reject entry -- a completely different signal shape (continuation after confirmed lower-high structure) fails the same way (majority win rate, target reached less often than the entry's win rate implies) AND independently breaches the frequency band, mirroring Attack 59's own two-part failure (edge miss stacked on frequency miss) on the mirrored long-side mechanism. This argues the reachable-target gap first seen in Attacks 50/51/59 is a property of measured-move/projected targets in general on this data, not of direction or of any single mechanism family. QUEUE: (1) The inverted-payoff-shape watch (Attacks 50/51/59, now +63) should be promoted to a numbered HARD LESSON next cycle -- four independent mechanisms and both directions is no longer circumstantial; the practical rule is to check ratioAvgWinLoss explicitly against 1.0 before trusting any majority-win-rate result, especially on a measured-move or projected target. (2) The short leg has now failed on THREE structurally distinct signal shapes (resistance-tap-and-reject bare/gated/multi-touch in 60-62, and lower-high continuation breakdown here) -- if pursued further, the next attempt should not be another location or structure filter but a orthogonal mechanism (e.g. volatility-state or momentum-exhaustion based, not level- or pivot-based) or the short leg should be reported as a standing structural asymmetry rather than chased further. (3) Attack 46 (long) remains the sole both-halves-positive candidate on the board, filters exhausted per HARD LESSON 49; unaffected by this cycle. (4) The out-of-sample test for Attack 46 still ranks first among long-side work and still cannot be run under BTCUSDT-only; unaffected. (5) The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed if that family is revisited before another fresh mechanism. NUMBERING: no collision detected against local commit history at time of push; if a concurrent session also used 63, this attack renumbers on the next cycle."
   }
 ];
-const BUILT = "2026-09-04 21:14";
+const BUILT = "2026-09-04 22:14";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

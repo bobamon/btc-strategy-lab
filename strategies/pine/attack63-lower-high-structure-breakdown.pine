@@ -1,0 +1,144 @@
+//@version=6
+// BTC ATTACK 63 - LOWER-HIGH STRUCTURE BREAKDOWN. THE SHORT LEG'S FIRST GENUINELY NEW SIGNAL SHAPE.
+//
+// THE STORED PROMPT still describes a board state (Attack 37, "earned a filter stack") more than
+// thirty attacks stale. THE DOCS OVERRIDE IT, per the prompt's own instruction: Attack 41 closed
+// Attack 37, Attack 46 is the long champion (filters exhausted, HARD LESSON 49), and Attacks 60-62
+// already ran the short mirror and BOTH its named location fixes (an EMA200 regime gate, Attack 61;
+// a multi-touch resistance requirement, Attack 62) -- both discarded, both worse than the bare mirror.
+// Attack 62's own queue said: the next short attempt needs a genuinely different SIGNAL shape, not
+// another filter bolted onto the resistance-tap-and-reject entry -- e.g. a bearish continuation after
+// a confirmed lower high, rather than a reversal at resistance. This build is that shape.
+//
+// ==================== WHAT THIS CLAIMS, IN ONE SENTENCE ====================
+// When a market prints a confirmed swing high BELOW its prior confirmed swing high (a genuine lower
+// high -- trend structure deteriorating, not just a local top), a subsequent close back below the
+// most recent confirmed swing low confirms the downtrend has resumed, and that resumption tends to
+// continue toward a projection of the down-swing that was just completed.
+//
+// ==================== WHY THIS IS A DIFFERENT SIGNAL SHAPE, NOT A FILTER ON 60-62 ====================
+// Attacks 60-62 all shared ONE entry logic (resistance tapped and held, i.e. a REVERSAL at a level)
+// and only varied what gated it. This build has no relationship to that entry at all: it is the exact
+// short-side mirror of Attack 59's long-only higher-low CONTINUATION breakout (confirmed two-point
+// swing structure, then a breakout in the direction that structure implies), never before tested on
+// the short side. Attack 59 itself failed on the long side (PF 0.863, frequency breach at 565 trades,
+// third confirmation of the inverted-payoff shape) -- but BTC's long-run upward drift, the same
+// asymmetry that sank Attacks 60-62, argues a downtrend-continuation shape on the short side should be
+// RARER and, if the drift argument is right, should not share Attack 59's frequency-breach problem.
+// This is an empirical question this lab has never asked, not a re-run of a known failure.
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS ====================
+// ta.pivothigh(high, 5, 5) and ta.pivotlow(low, 5, 5), confirmed 5 bars after the actual extreme,
+// non-repainting. Two `var float` scalars hold the most recent and one-before-that confirmed pivot
+// high (mirrors Attack 59's two pivot-low scalars exactly). A `var bool structureDown` LATCHES true
+// the bar a new pivot high confirms LOWER than the one before it (HARD LESSON 8: armed and held in
+// state on the pivot-confirmation bar, not re-proven on the trigger bar). The TRIGGER is a later,
+// separate bar: `ta.crossunder(close, lastPivotLow)`, price closing back below the most recent
+// confirmed pivot low while structureDown is still latched -- the pivot low is a DIFFERENT series event
+// (a low confirming) than the pivot high that latched the structure, so the two conditions cannot share
+// a bar by construction, identical to Attack 59's proven-safe pattern. Stop: the pivot high itself
+// (LESSON 5, actual structure). Target: a MEASURED-MOVE PROJECTION -- the breakdown price minus the
+// amplitude of the down-swing just completed (pivot high minus pivot low) -- a level derived from the
+// swing's own geometry, not a multiple of the stop (HARD LESSON 41), independent of R (E14: minRpct
+// constrains the stop distance; swingAmp constrains the target, drawn from a different quantity).
+// SIZING: this leg defaults to the 25%-equity declared-deviation qty= pattern (HARD LESSON 42/43) FROM
+// THE START, per Attack 60's own closing note -- any future BTC short should not re-discover the
+// margin-forced-closure artifact from scratch.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - enforced by EXCLUSION via rBig on rShort = lastPivotHigh - close, never
+//        clamped. A breakdown whose stop is too close to entry is SKIPPED, not widened.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = lastPivHigh, the actual confirmed swing extreme.
+//   Each leg separately (LESSON 6) - SHORT ONLY. Not blended with any long-side result.
+//   BINDING (E17) - structureDown AND breakdownTrigger AND rBig AND swingOk all necessarily bind;
+//        trade count is read before anything else to see how hard.
+//   REDUNDANCY (E14) - minRpct constrains the stop distance; swingAmp (the target) is independent
+//        geometry drawn from the pivot high/low spread, not derived from R.
+//   LATCH IN SEQUENCE (LESSON 8) - structureDown is latched on the bar a confirmed pivot high prints
+//        LOWER than the prior one; breakdownTrigger is read on a LATER, distinct bar (the crossunder
+//        of the separate pivot-low level). The two conditions cannot share a bar by construction.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, flat check gates every entry.
+//   CASCADE / MARGIN ARTIFACT (HARD LESSON 42/43) - the reason the 25%-equity qty= is applied from the
+//        start on this leg. VERIFY with get_trades before trusting the result: losers must exit at
+//        CONSISTENT distances near the pivot high, not scattered tiny adverse distances.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17). CODE BARE -- NO ADDED FILTER BEYOND THE MECHANISM:
+//   * BOTH HALVES ABOVE 1.0, TRADES ROUGHLY 60-350 PER HALF -> a genuinely new short-side candidate,
+//     queued for RATCHET v2 filter work under the mandate.
+//   * PRE-2024 HALF BELOW 1.0 -> DISCARDED by the kill rule. No filters, no rescue, no second half.
+//   * TRADES WELL ABOVE THE WORKABLE BAND -> reframe as a frequency/cost miss (HARD LESSON 4), as
+//     Attack 59 was on the long side, not an edge verdict.
+//   * TRADES WELL BELOW ~30 -> a DIRECTION, not a result (LESSON 12).
+//   * A MAJORITY WIN RATE WITH A POOR PAYOFF -> the inverted-payoff shape (Attacks 50, 51, 59)
+//     recurring a fourth time, now on the short side for the first time -- report explicitly.
+//   * LOSS DISTANCES SCATTERED AND SUB-0.8% -> 25% equity was insufficient; not a measurement of the
+//     mechanism, per HARD LESSON 42/43.
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside net (LESSONS 36/39 and
+//        the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack63 lower-high structure breakdown SHORT", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+pivotLeft  = input.int(5, "Pivot confirmation bars, left")
+pivotRight = input.int(5, "Pivot confirmation bars, right")
+minRpct    = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars    = input.int(192, "Max bars in trade")
+eqFrac     = input.float(0.25, "DECLARED DEVIATION: fraction of equity per position -- HARD LESSON 42/43")
+
+ph = ta.pivothigh(high, pivotLeft, pivotRight)
+pl = ta.pivotlow(low, pivotLeft, pivotRight)
+
+var float lastPivHigh   = na
+var float prevPivHigh   = na
+var float lastPivLow    = na
+var bool  structureDown = false
+
+if not na(ph)
+    prevPivHigh := lastPivHigh
+    lastPivHigh := ph
+    if not na(prevPivHigh)
+        structureDown := lastPivHigh < prevPivHigh
+
+if not na(pl)
+    lastPivLow := pl
+
+rShort = not na(lastPivHigh) ? lastPivHigh - close : na
+minR   = close * minRpct / 100
+rBig   = not na(rShort) and rShort >= minR
+
+breakdownTrigger = not na(lastPivLow) and ta.crossunder(close, lastPivLow)
+
+swingAmp = not na(lastPivHigh) and not na(lastPivLow) ? lastPivHigh - lastPivLow : na
+swingOk  = not na(swingAmp) and swingAmp > 0
+
+goShort = structureDown and breakdownTrigger and rBig and swingOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat   = strategy.position_size == 0
+qtyUse = strategy.equity * eqFrac / close
+
+if flat and goShort and qtyUse > 0
+    strategy.entry("S", strategy.short, qty = qtyUse)
+    slPx   := lastPivHigh
+    tpPx   := close - swingAmp
+    barsIn := 0
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goShort ? 1 : 0, title="ShortSignal")
+plot(lastPivHigh, title="LastPivotHigh")
+plot(lastPivLow, title="LastPivotLow")

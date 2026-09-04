@@ -4737,3 +4737,122 @@ location filters can only remove candidate setups, not change what happens after
    that family is revisited before another fresh mechanism.
 5. **The inverted-payoff-shape watch (Attacks 50/51/59) stays open on the LONG side** — unaffected by
    this cycle, which stayed on the short side throughout.
+
+---
+
+# ATTACK 63 — LOWER-HIGH STRUCTURE BREAKDOWN, THE SHORT LEG'S FIRST GENUINELY NEW SIGNAL SHAPE, AND THE INVERTED-PAYOFF SHAPE'S FOURTH CONFIRMATION, NOW CROSS-DIRECTION
+
+The stored scheduled prompt still describes a board state (Attack 37, "earned a filter stack") more
+than thirty attacks stale. **The docs override it, again**, per the prompt's own instruction: Attack 41
+closed Attack 37, Attack 46 is the long champion (filters exhausted, HARD LESSON 49), and Attacks 60-62
+already ran the champion's short mirror and BOTH named location fixes (an EMA200 regime gate, Attack
+61; a multi-touch resistance requirement, Attack 62) — both discarded, both worse than the bare mirror
+(Attack 60). Attack 62's own queue said the next short attempt needs a genuinely different SIGNAL
+shape, not another filter on the resistance-tap-and-reject entry — e.g. a bearish continuation after a
+confirmed lower high, rather than a reversal at resistance. This cycle builds that shape.
+
+## THE CLAIM UNDER TEST
+
+When a market prints a confirmed swing high BELOW its prior confirmed swing high (a genuine lower high
+— structure deteriorating, not just a local top), a subsequent close back below the most recent
+confirmed swing low confirms the downtrend has resumed, and that resumption tends to continue toward a
+measured-move projection of the down-swing just completed. This is the exact short-side mirror of
+Attack 59's long-only higher-low CONTINUATION breakout, never before tested on the short side, and it
+shares NOTHING with Attacks 60-62's resistance-tap-and-reject REVERSAL entry — a different signal shape
+entirely, not a filter on the old one. Mechanics: `ta.pivothigh`/`ta.pivotlow(5,5)`, non-repainting; two
+`var float` scalars hold the last two confirmed pivot highs; a `var bool structureDown` latches on the
+pivot-high-confirm bar (HARD LESSON 8), the trigger is a later, distinct bar
+(`ta.crossunder(close, lastPivotLow)`). Stop: the pivot high itself (LESSON 5). Target: breakdown price
+minus the swing amplitude, a level derived from the swing's own geometry (HARD LESSON 41, not a
+multiple of the stop). R floor 0.8% by exclusion (LESSON 3). SIZING: the 25%-equity declared-deviation
+`qty=` fix (HARD LESSON 42/43) applied FROM THE START, per Attack 60's own closing note that any future
+BTC short should default to it rather than rediscover the margin-forced-closure artifact. Pine:
+`strategies/pine/attack63-lower-high-structure-breakdown.pine`.
+
+## AUDIT (SHORT ONLY, one line per leg)
+
+R ≥ 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rShort = lastPivotHigh - close`, never clamped. Stop
+beyond STRUCTURE (LESSON 5) — `slPx = lastPivHigh`, the actual confirmed swing extreme. Each leg
+separately (LESSON 6) — SHORT ONLY. BINDING (E17) — `structureDown` AND `breakdownTrigger` AND `rBig`
+AND `swingOk` all necessarily bind. REDUNDANCY (E14) — `minRpct` (stop distance) is independent of
+`swingAmp` (target geometry), drawn from a different quantity. LATCH IN SEQUENCE (LESSON 8) —
+`structureDown` latches on the pivot-high-confirm bar; `breakdownTrigger` reads a later, distinct bar
+(the crossunder of the separate pivot-low level) — cannot share a bar by construction, identical to
+Attack 59's proven-safe pattern. CASCADE / MARGIN ARTIFACT (HARD LESSON 42/43) — `get_trades` on all 518
+entries: `cascadeRatio` 1, `maxCascadeDepth` 1, and only 5 of 252 losers (2%) fall under the 0.8% R
+floor — the rest cluster 0.9%–2.4%+, consistent structural-stop-distance exits. The sizing fix holds;
+this is a genuine measurement, not a harness artifact.
+
+## H1 (2022-01-01 → 2024-06-08, never-tuned)
+
+| | **Attack 63a** |
+|---|---|
+| Profit factor | **0.770693** |
+| Trades | **518** |
+| Win rate | 51.35135135% (a MAJORITY) |
+| Achieved win/loss ratio | 0.73013021 |
+| Avg winner | $29.09 |
+| Avg loser | **-$39.85** |
+| Max drawdown | 25.14747849% |
+| Commission paid | $1,172.16 |
+| Largest loss | -$228.81 |
+
+H2 was not run — the mandate's kill rule fires on H1 alone.
+
+## KILL RULE APPLIED. H2 NOT RUN, ONE CREDIT SPENT THIS CYCLE.
+
+**Profit factor 0.770693, below 1.0.** The 549-credit balance would otherwise permit the full pair; the
+kill rule overrides that when H1 fails outright. No filters, no rescue, no H2. **518 trades also
+breaches the settled 60-350 workable band** on the high side — the worst frequency miss since Attack
+59's 565 — so this reads as a stacked edge-and-frequency failure, not a single clean cause, the same
+two-part shape Attack 59 found on the mirrored long-side mechanism.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Category **2, bleed on a negative edge** — PF outright below 1.0, avg loser -$39.85 is not a
+disproportionate outlier against the largest single loss (-$228.81), and win rate is a majority yet the
+edge is still negative. Not category 1 (no sizing/concentration signature) and not category 3 (the edge
+itself is negative, so no filter stack is warranted).
+
+## A FOURTH CONFIRMATION OF THE INVERTED-PAYOFF SHAPE, AND THE FIRST ON THE SHORT SIDE
+
+Attacks 50 (63.22% win / 0.44 payoff), 51 (52.02% win / 0.67 payoff) and 59 (53.45% win / 0.75 payoff)
+all found a majority win rate that still loses because losers run larger than winners, on three
+structurally unrelated LONG mechanisms. **Attack 63 is a fourth**: win rate 51.35% (a majority,
+266W/252L) still loses because avg loser -$39.85 runs **1.37x** avg winner $29.09 (achieved ratio
+0.73013021) — now on a SHORT mechanism, sharing no construction with 50, 51, or 59. Attack 59's own
+queue held off numbering this a HARD LESSON because all three instances were single-half kills; this is
+a fourth single-half kill, but the first **cross-direction** confirmation, which is new information the
+prior three could not supply.
+
+## WHAT THIS SETTLES
+
+**The short leg's problem is not confined to Attacks 60-62's resistance-tap-and-reject entry.** A
+completely different signal shape — continuation after confirmed lower-high structure, the short-side
+mirror of Attack 59 — fails the same way (majority win rate, target reached less often than the entry's
+own win rate implies) AND independently breaches the frequency band, mirroring Attack 59's own two-part
+failure (edge miss stacked on frequency miss) on the long-side original. This argues the reachable-
+target gap first seen in Attacks 50/51/59 is a property of measured-move/projected targets on this data
+in general, not of direction or of any one mechanism family. **The short leg has now failed on three
+structurally distinct signal shapes** (resistance-tap-and-reject bare/gated/multi-touch in 60-62, and
+lower-high continuation breakdown here).
+
+## QUEUE
+
+1. **The inverted-payoff-shape watch (Attacks 50/51/59, now +63) should be promoted to a numbered HARD
+   LESSON next cycle** — four independent mechanisms across both directions is no longer circumstantial.
+   The practical rule: check `ratioAvgWinLoss` explicitly against 1.0 before trusting any majority-win-
+   rate result, especially one built on a measured-move or projected target.
+2. **If the short leg is pursued further, the next attempt should not be another location or structure
+   filter** — three distinct signal shapes have now failed the same two ways (poor payoff or outright
+   negative edge, several also on bad frequency). An orthogonal mechanism class (volatility-state or
+   momentum-exhaustion based, not level- or pivot-based) ranks first, or the short leg should be reported
+   as a standing structural asymmetry rather than chased further.
+3. **Attack 46 (long) remains the sole both-halves-positive candidate on the board**, both halves clear,
+   cold-reproduced, filters exhausted per HARD LESSON 49; this cycle does not touch that verdict.
+4. **The out-of-sample test for Attack 46 still ranks first among long-side work** and still cannot be
+   run under BTCUSDT-only — unchanged, restated because this cycle did not touch it.
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+
+---
