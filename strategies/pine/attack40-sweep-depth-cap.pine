@@ -1,0 +1,112 @@
+//@version=6
+// BTC ATTACK 40 - ATTACK 37 + ONE FILTER: MAXIMUM SWEEP DEPTH (THE MIRROR OF ATTACK 39).
+//
+// QUEUE ITEM 1, filter-stack term 3 on Attack 37 (37a 1.02423271/322 trades, 37b 1.01155847/196).
+// Attack 38 (EMA200 trend gate) was REJECTED for helping H1 and breaking H2, culling ~80% of the
+// sample. Attack 39 (minimum sweep depth, floor at 0.15%) was REJECTED on H1 alone: it kept the
+// DEEP sweeps (sweepDepth >= 0.15%) and removed the shallow ones, and profit factor FELL (1.024 ->
+// 0.982) while net return fell +5.60% -> -3.61%. The direction inverted Attack 37's own stated
+// premise: SHALLOW sweeps are the profitable ones, DEEP sweeps are worse.
+//
+// THIS IS THE PRE-REGISTERED MIRROR, RECORDED IN THE ATTACK 39 QUEUE BEFORE THIS RUN: cap the sweep
+// depth instead of flooring it -- require sweepDepth <= maxDepthPct. Attack 39's finding predicts
+// this should help, because it keeps exactly the population (shallow sweeps) that Attack 39 showed
+// was carrying the return.
+//
+// WHY THE CAP IS NOT SET TO THE SAME NUMBER (0.15%) AS ATTACK 39'S FLOOR. A literal mirror would use
+// an identical threshold, but Attack 39 already measured the population split at that value: floor
+// >=0.15% kept 280 of 322 trades (87%), so the complement (<0.15%) is only 42 trades (13%) -- a cull
+// as severe as Attack 38's ~80%, which the board explicitly does not want repeated for the same
+// reshaping reason. Attack 39 was deliberately kept LIGHT (a 13% trim) by design; this term keeps
+// that same design goal by choosing a cap well above the observed 0.15% breakpoint: 0.50%, more than
+// 3x Attack 39's floor and still meaningfully below the rBig R-floor's 0.8% (so it is a real
+// constraint, not a tautology against rBig). This is a reasoned choice, not the untested guess it
+// would be without Attack 39's result to calibrate against -- but the exact trade count this removes
+// is unmeasured until the run, and is read first per HARD LESSON 12/E17 before the profit-factor
+// number is trusted.
+//
+// REDUNDANCY (E14), stated the same way as Attack 39: sweepDepth is bounded above by rLong (since
+// close > swingLow > low), which rBig already floors at 0.8%. A cap below that ceiling is not
+// automatically inert, but if this term barely binds, that bound is the first explanation to check.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - unchanged from Attack 37, enforced by EXCLUSION via rBig, never clamped.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = the sweep bar's own low, the actual flush extreme.
+//        Unchanged.
+//   Each leg separately (LESSON 6) - LONG ONLY, as Attack 37 is. Per HARD LESSON 34 a short leg is
+//        currently untestable on this engine at this sizing, so this is not an omission to fix.
+//   BINDING (E17) - the new term is shallowEnough (sweepDepth <= 0.50%). THE TRADE COUNT IS READ
+//        FIRST: a cull toward Attack 38's ~80% would mean this term reshapes the sample rather than
+//        trims it, exactly the failure mode this design was chosen to avoid.
+//   LATCH IN SEQUENCE (LESSON 8) - swingLow is ta.lowest(low, 20)[1], strictly prior bars; the sweep
+//        and reclaim are measured on the current bar and the entry fires at its close. Unchanged.
+//   CASCADE (HARD LESSON 35) - long build, expect cascadeRatio 1. Verify it, because only then is the
+//        reported count a true position count that RATCHET v2 clause 3 can be applied to.
+//   SPLIT (clause 4) - BOTH HALVES ARE RUN IN THIS SAME CYCLE, so a >50% count cut is split-tested
+//        before any keep decision by construction, not after.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17):
+//   * PF IMPROVES ON BOTH HALVES, both counts stay >= 30, drawdown does not worsen -> KEEP under
+//     RATCHET v2. This confirms Attack 39's finding and becomes the first filter term this lab has
+//     kept on a provable sample.
+//   * IMPROVES ONE HALF AND HURTS THE OTHER -> REJECTED, NOT AVERAGED, per the mandate and Attack 38's
+//     precedent.
+//   * EITHER HALF FALLS BELOW ~30 TRADES -> the ratio is a DIRECTION, not a result (LESSON 12), and
+//     the term is rejected on sample grounds regardless of what the profit factor says.
+//   * COUNT BARELY MOVES -> the term is INERT, most likely because the 0.50% cap sits above where
+//     sweepDepth naturally clusters given rBig's 0.8% ceiling -- a finding about the redundancy noted
+//     above, not a failure of the hypothesis.
+//   * BOTH HALVES CLEAR 1.0 BUT WORSE THAN THIS -> read against Attack 37's own numbers directly, not
+//     just against 1.0, since the goal is improvement on the base, not merely staying positive.
+strategy("BTC Attack40 sweep-depth cap", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+lookback    = input.int(20,     "Swing-low lookback, bars -- held at Attack 37")
+rr          = input.float(2.0,  "Reward:risk -- held at Attack 37")
+minRpct     = input.float(0.80, "Min stop distance as % of price (LESSON 3) -- held at Attack 37")
+maxBars     = input.int(192,    "Max bars in trade -- held at Attack 37")
+maxDepthPct = input.float(0.50, "THE ONE NEW TERM: max sweep depth below the swing low, % of price")
+
+swingLow = ta.lowest(low, lookback)[1]
+
+sweep   = not na(swingLow) and low < swingLow
+reclaim = not na(swingLow) and close > swingLow
+setupOn = sweep and reclaim
+
+sweepDepth   = na(swingLow) ? na : (swingLow - low) / close * 100
+shallowEnough = not na(sweepDepth) and sweepDepth <= maxDepthPct
+
+minR  = close * minRpct / 100
+rLong = close - low
+rBig  = rLong >= minR
+
+goLong = setupOn and rBig and shallowEnough
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong and rLong > 0
+    strategy.entry("L", strategy.long)
+    slPx   := low
+    tpPx   := close + rLong * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(swingLow,       title="SwingLow")
+plot(sweepDepth,     title="SweepDepthPct")

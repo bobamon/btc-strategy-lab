@@ -2709,3 +2709,66 @@ to make visible.
    predicts it should help. **Recorded before the run so the next cycle is a test, not a search.**
 2. If the cap works, the mechanism should be renamed and re-described: it is not a stop-run
    continuation, it is a **marginal-break failure**, and Attack 37's header should be corrected.
+
+---
+
+# ██ ATTACK 40 — THE PRE-REGISTERED MIRROR OF ATTACK 39. WINS BIG ON H1, BREAKS ON H2. REJECTED.
+
+**Queue item 1, filter-stack term 3 on Attack 37.** The prediction was recorded in Attack 39's own
+queue before this cycle ran: cap the sweep depth instead of flooring it. Not a literal same-threshold
+mirror — Attack 39's 0.15% floor happened to be the exact breakpoint that split the H1 sample 87%/13%,
+so a cap at that same value would cull to the 13% tail, as severe as Attack 38's rejected ~80% cull.
+Set instead at **0.50%** (3x Attack 39's floor, still below the rBig 0.8% ceiling that bounds
+`sweepDepth`) to keep the term a trim rather than a cull. Full source:
+`strategies/pine/attack40-sweep-depth-cap.pine`.
+
+## BOTH HALVES, SIDE BY SIDE
+
+| | 37a control · H1 | 40a · H1 + depth≤0.50% | | 37b control · H2 | 40b · H2 + depth≤0.50% |
+|---|---|---|---|---|---|
+| Window | 2022→Jun 2024 | 2022→Jun 2024 | | Jun 2024→2026 | Jun 2024→2026 |
+| Profit factor | 1.02423271 | **1.2109064** | | 1.01155847 | **0.96154789** |
+| Max drawdown | 31.63538941% | **18.51736836%** | | 24.31004442% | **26.40097989%** |
+| Trades | 322 | **182** | | 196 | **137** |
+| Win rate | 38.20% | 39.01% | | 37.24% | 37.23% |
+| Avg loser | -$116.19 | -$134.15 | | -$127.81 | -$120.67 |
+| Net return | +5.60% | **+31.40%** | | +1.82% | **-3.99%** |
+
+## THE VERDICT — REJECTED, PER THE MANDATE'S OWN WORDS
+
+**H1 alone is the best single-term result this lab has ever produced on this base**: PF +0.187,
+drawdown cut nearly in half (31.64%→18.52%), net return 5.6x. Read in isolation this would be an easy
+KEEP. **H2 falls BELOW 1.0** (1.012→0.962) and drawdown **worsens** by 2.09pp — both ratchet clauses 1
+and 2 fail on this half alone. The mandate is explicit, and Attack 38 is the direct precedent:
+*"a term that improves one half and hurts the other is rejected, not averaged."* **REJECTED**, full
+stop — the H1 result does not buy anything back, however large.
+
+## THE FINDING THAT SURVIVES — ATTACK 39's CONCLUSION WAS HALF-SAMPLE, AND IT DID NOT TRAVEL
+
+Attack 39 (run on H1 only, by its own kill-rule design) concluded "shallow sweeps are the profitable
+ones, deep sweeps are worse." Attack 40 tests that claim's complement on both halves and finds it is
+**true on H1 and false on H2**: restricting H2 to shallow sweeps only removes trades that were, in
+aggregate, net-positive enough that PF falls and drawdown rises when they're excluded. **This is the
+same shape as Attack 38's EMA200 gate** — spectacular in one half, actively harmful in the other — and
+it is the second filter term in a row on this mechanism to show that shape. Per HARD LESSON 12
+(Attacks 12–14), a gate's half-sample verdict travels only as far as it fails to bind hard; this one
+removed 43% of H1's trades and 30% of H2's, a meaningful re-selection in both, and the two halves
+disagree about what that re-selection is worth. **A conclusion drawn from a kill-rule half that was
+never re-run on the other half is not yet a finding about the mechanism — it is a finding about that
+half.** Attack 39 should be read that way retroactively: its H1-only verdict was correctly scoped as
+"REJECTED on H1," never generalised to "deep sweeps are bad," and Attack 40 confirms that caution was
+warranted.
+
+## QUEUE
+1. **Two filter-stack terms in a row (38 trend gate, 40 depth cap) have now shown the identical
+   failure shape**: a term that looks like the best change this lab has ever made, judged on H1 alone,
+   and breaks on H2. **Any future filter-stack term on Attack 37 should be run on both halves before
+   its H1 number is trusted or even reported as promising** — H1-only framing has now twice produced a
+   result that reads as a breakthrough and isn't one.
+2. **Attack 37's bare numbers remain the base**: PF 1.02423271/1.01155847, DD 31.64%/24.31%, 322/196
+   trades. Three filter-stack attempts (38 trend, 39 depth floor, 40 depth cap) have now all failed to
+   clear the ratchet. The base is unchanged and still the best provable-sample candidate on the board.
+3. **A genuinely new mechanism is now due**, per the mandate's own sequencing — the filter stack has
+   had three tries and none has passed clause 1 on both halves. The next cycle should propose one,
+   distinct from the VWAP family and from every rejected/discarded construction (33 channel breakout,
+   34/35 weekly break, 36 narrow-range day, and Attack 37's own three failed filter terms).

@@ -576,9 +576,91 @@ const DATA = [
     },
     "verdict": "REJECTED -- and the DIRECTION of the failure inverts Attack 37's stated premise",
     "notes": "REJECTED on the never-tuned half alone, and the second credit was DELIBERATELY NOT SPENT. Against Attack 37a (PF 1.02423271 / DD 31.63538941% / 322 trades / 38.20% win): profit factor falls to 0.98206513, BELOW 1.0. The discovery mandate's kill rule is explicit that a pre-2024 half under 1.0 is discarded and not rescued, so confirming a dead term on the recent half would have bought nothing. THE FILTER WAS LIGHT AS DESIGNED -- 322 -> 280, a 13% trim against Attack 38's ~80% cull -- so this is NOT the Attack 38 failure repeated. It is a cleaner and more interesting failure. THE DIRECTION IS THE FINDING, AND IT INVERTS THE MECHANISM'S OWN STATED PREMISE. The term KEEPS deep sweeps and REMOVES shallow ones. Removing the shallow ones took the half from +5.60% to -3.61% -- roughly 9 percentage points of return lived in the 42 trades that were discarded. SHALLOW SWEEPS ARE THE PROFITABLE ONES; DEEP SWEEPS ARE WORSE. Attack 37's Pine header reasons that a deeper penetration means more resting stops were flushed and therefore more fuel for the reversal. The data says the opposite: a deep flush is GENUINE SUPPLY finding real sellers, while a marginal poke that is immediately reclaimed is the cleaner failed-breakdown. The edge is in the FAILURE of the break, and the more decisively price actually broke, the less of a failure it was. DRAWDOWN IMPROVED WHILE PROFIT FACTOR FELL (31.64% -> 29.34%), which is consistent: the filter removed genuinely profitable but volatile trades, leaving a smoother and poorer set. Read against the three drawdown categories, Attack 37 is category 3 (bleed on a POSITIVE edge) so a filter is supposed to remove LOSERS from a winning distribution -- this one removed winners, which is exactly the diagnostic the category framing exists to make visible. THE NEXT TERM IS THE MIRROR OF THIS ONE and is now queued: CAP the sweep depth rather than flooring it (require sweepDepth <= some maximum), which this result predicts should help. That prediction is recorded BEFORE the run so the next cycle is a test rather than a search. Cascade ratio 1, so 280 is a true position count (HARD LESSON 35). NUMBERING: Attack 39, continuing after the cloud routine's Attack 38 the same hour."
+  },
+  {
+    "id": "attack40a-sweep-depth-cap-h1",
+    "name": "Attack 40a: sweep-depth CAP on Attack 37 (mirror of Attack 39), NEVER-TUNED half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack40-sweep-depth-cap.pine",
+    "description": "Queue item 1, third filter term for Attack 37, and the pre-registered MIRROR of Attack 39. Attack 39 (floor sweepDepth>=0.15%) was REJECTED on H1 alone, keeping deep sweeps and removing shallow ones, and profit factor fell 1.024->0.982 while net return fell +5.60%->-3.61%: shallow sweeps carried the return. This term caps instead of floors: require (swingLow-low)/close*100 <= 0.50% (kept above Attack 39's 0.15% breakpoint, which alone separated 87%/13% of the sample, so a literal same-value mirror would cull to ~13% -- as severe as Attack 38's rejected ~80% cull). One term added to Attack 37, everything else held byte-identical.",
+    "metrics": {
+      "netProfitPct": 31.40474127,
+      "profitFactor": 1.2109064,
+      "maxDrawdownPct": 18.51736836,
+      "totalTrades": 182,
+      "winRatePct": 39.01098901,
+      "avgTradePct": 0.17255352,
+      "sharpeRatio": 0.84481365,
+      "commissionPaid": 2130.87917275,
+      "avgWinningTrade": 253.955539040845,
+      "avgLosingTrade": -134.147469771621,
+      "largestLoss": -260.00712625,
+      "largestWin": 524.338874,
+      "longTrades": 182,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1NDMAZXAVKTTEEKZMXEKJM8",
+      "strategyId": "01M1NDMB576SPN9C6EF02BJZNZ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NDMAZXAVKTTEEKZMXEKJM8",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T00:00:00Z"
+    },
+    "verdict": "H1 alone: strong improvement on both ratchet terms -- see H2 for the REJECTED verdict",
+    "notes": "H1 in isolation is the best single-term result this lab has produced on Attack 37: PF 1.02423271 -> 1.2109064, drawdown 31.63538941% -> 18.51736836%, trades 322 -> 182 (43% cut, under the clause-4 50% threshold). Confirms Attack 39's direction-of-effect finding on H1: shallow sweeps outperform deep ones. But see the H2 record (attack40b) for why the combined verdict is REJECTED, not KEPT -- the effect does not survive the second half."
+  },
+  {
+    "id": "attack40b-sweep-depth-cap-h2",
+    "name": "Attack 40b: sweep-depth CAP on Attack 37 (mirror of Attack 39), recent half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "strategies/pine/attack40-sweep-depth-cap.pine",
+    "description": "Queue item 1, third filter term for Attack 37, and the pre-registered MIRROR of Attack 39. Attack 39 (floor sweepDepth>=0.15%) was REJECTED on H1 alone, keeping deep sweeps and removing shallow ones, and profit factor fell 1.024->0.982 while net return fell +5.60%->-3.61%: shallow sweeps carried the return. This term caps instead of floors: require (swingLow-low)/close*100 <= 0.50% (kept above Attack 39's 0.15% breakpoint, which alone separated 87%/13% of the sample, so a literal same-value mirror would cull to ~13% -- as severe as Attack 38's rejected ~80% cull). One term added to Attack 37, everything else held byte-identical.",
+    "metrics": {
+      "netProfitPct": -3.99050021,
+      "profitFactor": 0.96154789,
+      "maxDrawdownPct": 26.40097989,
+      "totalTrades": 137,
+      "winRatePct": 37.22627737,
+      "avgTradePct": -0.02912774,
+      "sharpeRatio": -0.0788372,
+      "commissionPaid": 1387.1128208,
+      "avgWinningTrade": 195.662643734314,
+      "avgLosingTrade": -120.672614549418,
+      "largestLoss": -264.7300698,
+      "largestWin": 418.754130400001,
+      "longTrades": 137,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1NDMYRPGRT2S0FXP0MAE0K9",
+      "strategyId": "01M1NDMB576SPN9C6EF02BJZNZ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NDMYRPGRT2S0FXP0MAE0K9",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T00:05:00Z"
+    },
+    "verdict": "REJECTED -- PF falls below 1.0 and drawdown worsens on the recent half",
+    "notes": "Against Attack 37b (PF 1.01155847 / DD 24.31004442% / 196 trades / 37.24% win): profit factor FALLS to 0.96154789, BELOW 1.0, and max drawdown WORSENS to 26.40097989% (+2.09pp). Both ratchet clause-1 and clause-2 fail on this half alone, so combined with H1's strong gain (PF 1.024->1.211, DD 31.64%->18.52%) this is a textbook 'improves one half and hurts the other' case -- REJECTED per the mandate's own words, not averaged, same disposition as Attack 38's EMA200 gate. The finding that survives: Attack 39's H1-only conclusion that 'shallow sweeps are the profitable ones' does NOT generalise to H2 -- restricting to shallow sweeps only, H2's deep-sweep trades that this term discards were apparently net-positive enough that removing them both lowers PF and raises drawdown. That is the same shape as Attack 38's EMA200 gate (great in an obvious historical regime, worse in the choppier recent one) and reinforces HARD LESSON 12/Attack 12-14's rule: a half-sample-derived filter's effect is a property of the regime it selects for, not a fixed property of the underlying mechanism, and must be checked on the OTHER half before being trusted. Cascade ratio 1 on both halves, so 182 and 137 are true position counts."
   }
 ];
-const BUILT = "2026-09-03 23:09";
+const BUILT = "2026-09-04 05:19";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
