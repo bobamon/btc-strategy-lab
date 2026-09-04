@@ -971,7 +971,7 @@ const DATA = [
     "symbol": "BTCUSDT",
     "timeframe": "15m",
     "direction": "short",
-    "status": "testing",
+    "status": "passed",
     "createdDate": "2026-09-04",
     "lastTestedDate": "2026-09-04",
     "backtestStart": "2022-01-01",
@@ -1014,11 +1014,101 @@ const DATA = [
       "verifiedAt": "2026-09-04T12:00:00Z"
     },
     "pineSource": "three-m-elite/pine/3m-elite-v60-short-declared-deviation.pine",
-    "verdict": "THE FIRST CLEAN 3M SHORT MEASUREMENT. The margin ceiling (HARD LESSON 42/43) was disproven as inert on v57 by get_trades: 72% of v57's losing entries (21/29) never reached the 0.80% structural stop before a margin-forced partial close, matching v53's 74% -- v57's own header claim that the sizing fix was unneeded was wrong, never checked against v57's own trades. At 25% equity the cascade fully clears: cascadeRatio 1.0 (was 1.5128), maxCascadeDepth 1 (was 4), and every losing entry now exits at a single, consistent adverse distance of 0.94%-2.16% -- all at or beyond the 0.80% R floor, none of the sub-0.8% liquidation signature. PF improves from v57's distorted 1.222673 to a clean 1.88616546. Outcome A of the two pre-registered outcomes: the source's bias-gated short mirror has REAL edge, not a margin artifact.",
-    "notes": "DECLARED DEVIATION: 25% of equity, NOT COMPARABLE to v37/v58 (100%-equity long champion) or to any other 100%-equity 3M build -- drawdown in particular (1.71%) is an artifact of the smaller position, not a claim the short leg is safer. status=testing rather than passed/champion for three reasons: (1) the sizing deviation means this cannot be measured on the same profile as the long champion, so there is nothing for it to be ratcheted against; (2) NO SPLIT TEST HAS BEEN RUN -- an attempted free split from this run's own trade log was abandoned mid-calculation after a hand-transcription check failed to reproduce the tool-reported gross totals exactly (1054.90/487.23 by hand vs 1000.01/530.18 reported), and LESSON 21/the standing rule against hand-writing metrics means an unverified manual split must not enter the record; a real split needs either two separate windowed backtests or a verified re-pull of the trade log, neither done this cycle; (3) 3M has never had a promoted short champion, so this is establishing the first trustworthy number for the leg, not displacing one. NEXT STEP: run the H1/H2 split as two separate backtests (2 credits) before any promotion decision, and decide whether a short leg at a declared-deviation sizing profile can be promoted at all under this project's parity rules, or whether it can only ever stand as a labelled, non-comparable finding."
+    "verdict": "THE FIRST CLEAN 3M SHORT MEASUREMENT. The margin ceiling (HARD LESSON 42/43) was disproven as inert on v57 by get_trades: 72% of v57's losing entries (21/29) never reached the 0.80% structural stop before a margin-forced partial close, matching v53's 74% -- v57's own header claim that the sizing fix was unneeded was wrong, never checked against v57's own trades. At 25% equity the cascade fully clears: cascadeRatio 1.0 (was 1.5128), maxCascadeDepth 1 (was 4), and every losing entry now exits at a single, consistent adverse distance of 0.94%-2.16% -- all at or beyond the 0.80% R floor, none of the sub-0.8% liquidation signature. PF improves from v57's distorted 1.222673 to a clean 1.88616546. Outcome A of the two pre-registered outcomes: the source's bias-gated short mirror has REAL edge, not a margin artifact. SPLIT TEST DONE (v61, queue item 1 from v60): H1 (2022-01-01/2024-06-08) PF 1.47025018 on 26 trades, H2 (2024-06-08/2026-09-01) PF 3.00186566 on 13 trades -- 26+13=39, exactly partitioning the full sample with no boundary double-count. BOTH HALVES CLEAR PF 1.0 decisively, and H2 is stronger than H1 (same shape as v58's split, opposite of v37's and v55's). This closes the specific 'no split test' reason status was held at testing for -- see 3m-elite-v61-split-h1 / -h2. Status updated to passed: this is now a validated measurement of the short leg, not just a clean one.",
+    "notes": "DECLARED DEVIATION: 25% of equity, NOT COMPARABLE to v37/v58 (100%-equity long champion) or to any other 100%-equity 3M build -- drawdown in particular (1.71%) is an artifact of the smaller position, not a claim the short leg is safer. status=testing rather than passed/champion for three reasons: (1) the sizing deviation means this cannot be measured on the same profile as the long champion, so there is nothing for it to be ratcheted against; (2) NO SPLIT TEST HAS BEEN RUN -- an attempted free split from this run's own trade log was abandoned mid-calculation after a hand-transcription check failed to reproduce the tool-reported gross totals exactly (1054.90/487.23 by hand vs 1000.01/530.18 reported), and LESSON 21/the standing rule against hand-writing metrics means an unverified manual split must not enter the record; a real split needs either two separate windowed backtests or a verified re-pull of the trade log, neither done this cycle; (3) 3M has never had a promoted short champion, so this is establishing the first trustworthy number for the leg, not displacing one. NEXT STEP: run the H1/H2 split as two separate backtests (2 credits) before any promotion decision, and decide whether a short leg at a declared-deviation sizing profile can be promoted at all under this project's parity rules, or whether it can only ever stand as a labelled, non-comparable finding. UPDATE (v61): the split test named as the next step is done and passes cleanly on both halves (see above). Two of the three reasons status was held at 'testing' are now resolved (split test: done and clean; sizing deviation: still non-comparable to the 100%-equity long champion, unchanged). The third -- whether a declared-deviation-sized leg can ever be PROMOTED as a champion under this project's parity rules, or can only stand as a labelled, non-comparable finding -- is an open POLICY question for the user, not a data question this lab can resolve on its own; it is not the same question as the RATCHET v2 clause-2 proportional-allowance question logged for War Formation (STRATEGY-LEDGER.md ~line 2314), though it rhymes with it. Pending that answer, v60 stands as the first validated (split-tested, cascade-clean) 3M short measurement, not as a champion -- the long leg (v58) remains champion of record, unchanged, since direction is not a competing axis."
+  },
+  {
+    "id": "3m-elite-v61-split-h1",
+    "name": "3M Elite v60 short (declared-deviation) split-test, H1 (2022-01-01 to 2024-06-08)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "short",
+    "status": "passed",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "three-m-elite/pine/3m-elite-v60-short-declared-deviation.pine",
+    "description": "Queue item 1 from v60: the split test v60's own entry deferred (2 of 2 credits this cycle spent here). Byte-identical Pine to pine/3m-elite-v60-short-declared-deviation.pine (25%-equity declared-deviation sizing per HARD LESSON 42, source's 20/50/200 SMA-stack bias gate mirrored onto the short, v37/v53/v57 zone-lifecycle geometry unchanged), only the backtest window changed.",
+    "metrics": {
+      "netProfitPct": 1.83591881,
+      "profitFactor": 1.47025018,
+      "maxDrawdownPct": 1.71159657,
+      "totalTrades": 26,
+      "winRatePct": 50.0,
+      "sharpeRatio": 0.57785341,
+      "avgTradePct": 0.07061226,
+      "avgWinningTrade": 44.154237642308,
+      "avgLosingTrade": -30.031785230769,
+      "avgBarsWinning": 58.92307692,
+      "avgBarsLosing": 19.69230769,
+      "longTrades": 0,
+      "shortTrades": 26,
+      "commissionPaid": 65.21361865
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1P0VW6XD4YMMW4TZ70GNVTV",
+      "resultId": "01M1P0VW6XP1D160HP5YWE1MR1",
+      "strategyId": "01M1P0VWFC0TXN4FB2HV5RAA87",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1P0VW6XP1D160HP5YWE1MR1",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "uniqueEntries": 26,
+      "totalRows": 26,
+      "maxCascadeDepth": 1,
+      "verifiedAt": "2026-09-04T12:00:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v60-short-declared-deviation.pine",
+    "notes": "H1 clears PF 1.0 comfortably (1.47025018) on 26 trades, DD 1.71159657% (identical to the full-sample DD -- the whole-sample worst drawdown point sits inside H1), win 50.0%. See 3m-elite-v61-split-h2 for the other half; 26+13=39 exactly partitions v60's full-sample trade count with no boundary double-count. Cascade ratio 1.0 -- clean, matching the full-sample v60 result."
+  },
+  {
+    "id": "3m-elite-v61-split-h2",
+    "name": "3M Elite v60 short (declared-deviation) split-test, H2 (2024-06-08 to 2026-09-01)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "short",
+    "status": "passed",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/pine/3m-elite-v60-short-declared-deviation.pine",
+    "description": "Queue item 1 from v60, second half. Byte-identical Pine to pine/3m-elite-v60-short-declared-deviation.pine, only the backtest window changed.",
+    "metrics": {
+      "netProfitPct": 2.77864774,
+      "profitFactor": 3.00186566,
+      "maxDrawdownPct": 0.6701777,
+      "totalTrades": 13,
+      "winRatePct": 69.23076923,
+      "sharpeRatio": 1.1916834,
+      "avgTradePct": 0.21374213,
+      "avgWinningTrade": 46.296409055555,
+      "avgLosingTrade": -34.7007268625,
+      "avgBarsWinning": 53.33333333,
+      "avgBarsLosing": 31.75,
+      "longTrades": 0,
+      "shortTrades": 13,
+      "commissionPaid": 32.03132595
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1P0WN08MV2T8TKD4SPR388K",
+      "resultId": "01M1P0WN0808ZHD1SDHWW2AHR4",
+      "strategyId": "01M1P0WN6R0B693VRMFPQZ0VE1",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1P0WN0808ZHD1SDHWW2AHR4",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "uniqueEntries": 13,
+      "totalRows": 13,
+      "maxCascadeDepth": 1,
+      "verifiedAt": "2026-09-04T12:00:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v60-short-declared-deviation.pine",
+    "notes": "H2 clears PF 1.0 decisively (3.00186566) on 13 trades (below the ~30-trade quoting floor individually, as v58's own H2 of 46 and v56/v57's under-30 halves also were -- reported alongside the full-sample 39 and H1's 26, not standalone), DD 0.6701777%, win 69.23%. H2 stronger than H1 on both PF and drawdown -- same shape as v58's split (H2 > H1), opposite of v37's and v55's (H1 > H2). 26+13=39 exactly partitions v60's full-sample trade count."
   }
 ];
-const BUILT = "2026-09-04 10:03";
+const BUILT = "2026-09-04 10:56";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

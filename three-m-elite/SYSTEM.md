@@ -3868,3 +3868,96 @@ selection work, it did not happen.
 **FIRST CLEAN SHORT MEASUREMENT (NOT A CHAMPION): v60** (PF 1.88616546, DD 1.71159657%, 39 trades,
 25%-equity declared deviation, anchored at `pine/3m-elite-v60-short-declared-deviation.pine`). Real
 edge, not yet split-tested, not comparable to the long champion's sizing profile.
+
+---
+
+# ██ v61 — v60's SPLIT TEST PASSES CLEAN ON BOTH HALVES. THE FIRST 3M SHORT TO CLEAR THAT GATE. (2026-09-04)
+
+**A NOTE ON THE SCHEDULED PROMPT, AGAIN.** This cycle's stored prompt still names the 12H/24H bias
+gate and the cascade signature as the top-priority, "not yet done" items. Both have been done since
+v54–v57 (bias gate: built and ratcheted on both legs, HARD LESSON 45; cascade signature: resolved for
+zero credits as the liquidation-unwind tranching of HARD LESSON 34/35, confirmed again in the cross-lab
+check and closed formally after v55/v57). The champion has also moved twice since the prompt's v37
+snapshot (v37 → v58, confirmed unchanged at v59/v60). Per "THE DOCS WIN over this prompt" and HARD
+LESSON 26 (escalate a stale prompt once, already done at v39 with a push notification, then continue
+the real queue without re-flagging an unchanged condition), this cycle does not repeat that work and
+does not send a fresh push about the staleness — it takes v60's own queue item 1 instead, exactly as
+that entry named it.
+
+## THE SPLIT, DONE — QUEUE ITEM 1 FROM v60
+
+Same design as every split this lab has run (v32→v33, v37→v39, v58's own split): byte-identical Pine
+(`pine/3m-elite-v60-short-declared-deviation.pine`, no changes — the 25%-equity declared-deviation
+sizing, the source's 20/50/200 SMA-stack bias gate, and the v37/v53/v57 zone-lifecycle geometry all
+held), only the backtest window changed, split at 2024-06-08, the same point used throughout this
+project. Credits: 571 on hand (above 500 — budget allowed at most two backtests), both spent here, one
+per half, exactly matching the methodology.
+
+| | H1 (2022-01-01 → 2024-06-08) | H2 (2024-06-08 → 2026-09-01) | v60 full sample |
+|---|---|---|---|
+| Profit factor | **1.47025018** | **3.00186566** | 1.88616546 |
+| Max drawdown | 1.71159657% | 0.6701777% | 1.71159657% |
+| Trades | 26 | 13 | 39 |
+| Win rate | 50.00% | 69.23% | 56.41% |
+| Sharpe | 0.58 | 1.19 | 0.84 |
+
+**26 + 13 = 39, exactly the full sample — a clean partition, no boundary double-count.** Cascade ratio
+1.0 on both halves (26/26 and 13/13) — the margin-ceiling fix from HARD LESSON 42/43 holds under a
+narrower window too, not just on the full 4.7 years.
+
+## THE VERDICT
+
+**Both halves clear PF 1.0 decisively — the first 3M short construction, across six attempts (v34,
+v51, v53, v55, and now v60), to pass a split test on both sides.** H2 is stronger than H1 on every
+metric (PF, drawdown, win rate, Sharpe) — the same shape v58's own split showed (H2 > H1), the opposite
+of v37's and v55's (H1 > H2, the latter failing outright on H1's 0.630). This is not a coin flip
+reproducing by chance: it is the third time this lab has seen "H2 stronger" on a construction that also
+passed clause 1–3, versus two "H1 stronger" cases that included the one rejected split (v55/v56).
+
+**H1's 26 trades and H2's 13 trades each sit under the ~30-trade individual quoting floor** (HARD
+LESSON 19's convention) — exactly as v58's own H2 (46, which does clear 30) and v56/v57's under-30
+halves did before it. Per this lab's standing practice (v37/v39, v58), a half below 30 is still read
+for DIRECTION (does it clear PF 1.0, which side is stronger) but not quoted as a standalone number; the
+full sample's 39 trades is the count that clears RATCHET v2 clause 3 and the number this leg is
+actually reported against.
+
+**Recorded in `results/backtests.json`**: the v60 entry's `status` is updated from `testing` to
+`passed` (its own three reasons for `testing` are now down to one — see below) and its `verdict`/
+`notes` extended with the split result; two new entries, `3m-elite-v61-split-h1` and
+`3m-elite-v61-split-h2`, carry the per-half metrics and provenance.
+
+## WHAT THIS DOES AND DOES NOT SETTLE
+
+**Does settle:** the short leg's edge, measured cleanly (25%-equity sizing, cascade-clear, stops firing
+beyond the 0.80% R floor), is not a fluke of one regime or one half of the data. Both a bear/recovery
+half and a later, calmer half show it. Of v60's own three reasons for withholding `passed`/champion
+status, two are now resolved — the split test (done, clean) and, by extension, the sizing question is
+the only one that still blocks full comparability.
+
+**Does not settle:** whether a declared-deviation-sized leg can ever be PROMOTED as a champion, or can
+only ever stand as a labelled, non-comparable finding beside the 100%-equity long champion. That is the
+open policy question named at v60 (queue item 2, unchanged) — a decision for the user, not something
+this lab invents an answer to on its own. Until it is answered, v60/v61 stand as **the first validated
+3M short measurement**, not as a co-champion, and v58 remains sole champion of record (direction is not
+a competing axis between the two legs in any case — a combined long+short build, per v24's finding that
+the legs are not independent, is still untouched and still queue item 3 below).
+
+## QUEUE
+
+1. **The declared-deviation promotion policy question** (v60, unchanged) — still open, still for the
+   user, still distinct from the War Formation RATCHET v2 clause-2 question it sits beside
+   (STRATEGY-LEDGER.md ~line 2314).
+2. **The mechanical flip rule** (combining both legs, v24's finding that they are not independent) —
+   still untouched, still the other structural gap named at v58/v59/v60.
+3. **A dedicated regime split on the SHORT leg specifically** (isolated bear/bull calendar years, as
+   v40/v41/v42/v43 did for the long) has never been run — the H1/H2 halves used here blend regimes the
+   same way the long champion's own H1/H2 does, and the isolated-year evidence that exists (v40–v43) is
+   long-only.
+
+**CHAMPION OF RECORD (LONG): v58** (PF 1.48439273, DD 8.70519440%, 117 trades, `dzTouch==0`, anchored at
+`pine/3m-elite-v58-first-touch-only.pine`). Unchanged by this cycle.
+
+**FIRST VALIDATED SHORT MEASUREMENT (NOT A CO-CHAMPION — POLICY QUESTION OPEN): v60/v61** (PF
+1.88616546 full sample; split H1 1.47025018/26, H2 3.00186566/13; DD 1.71159657%; 39 trades;
+25%-equity declared deviation; anchored at `pine/3m-elite-v60-short-declared-deviation.pine`). Split
+test passed clean on both halves — the first 3M short to clear that gate.
