@@ -5146,3 +5146,48 @@ warranted went out at cycle check #4, and nothing has changed in the eight check
 second one. The recommendation is unchanged: answer the two open rule questions in
 `STRATEGY-LEDGER.md:2328`, supply new 1m data, hand this lab a new queue item, or pause the schedule —
 none of which this session can do on its own authority.
+
+---
+
+# ██ CYCLE CHECK #11, 2026-09-04 (no credits) — THIRTEENTH IDENTICAL FIRING OF THE SAME STALE PROMPT
+
+`git pull --rebase origin main`: reported a forced update of `origin/main` (old tip `6e1cbb0` →
+new tip `8736a83`) but the local branch was already equal to the new tip — no-op for this session.
+Nothing since this file's own prior "cycle check #10" entry (`d416517`) touches `war-formation/`.
+Credit balance 553 at start of cycle (above the 500 floor, up to two backtests available) — none
+spent, same reason as the last seven checks: there is no open hypothesis to spend them on.
+
+Independently re-verified rather than trusting the chain of ten prior self-reports:
+- `git log --oneline -- war-formation/` — `cb98a53` (E77) is still the last real experiment commit;
+  everything after it, including this entry, is cycle-check bookkeeping.
+- `war-formation/results/backtests.json` — still exactly 31 entries, last eight ending at E77.
+  `e58a` (long, 100% equity, band present): PF **1.24015239**, 36 trades, DD **9.82519609%**. `E71`
+  (short, 25% equity, band present, the DECLARED DEVIATION build): PF **0.97315988**, 33 trades, DD
+  **2.66826642%**. Both match every prior cycle-check's citation exactly — no drift.
+- `STRATEGY-LEDGER.md:2328`, "RULE QUESTION FOR THE USER" — re-read directly (lines 2304–2343), both
+  open items still unanswered: HARD LESSON 48's `inMiddle`-band asymmetry (E69b: PF short by 0.0103
+  on the long; E74: PF +0.194 on the short) and the RATCHET v2 clause-2 drawdown-proportionality
+  question (E74's DD over the 0.50pp allowance by 0.45pp on a build whose absolute drawdowns are only
+  2.67%/3.61%, where a flat allowance behaves very differently than on the 8–45%-drawdown builds it
+  was calibrated on). No new `USER DIRECTIVE` or dated entry postdating the 2026-09-03 mandate
+  correction appears anywhere in the ledger.
+- This session's own stored prompt is, once again, byte-for-byte the pre-E67 text: it cites
+  E64a/E64b/E66 as the state of the short leg (superseded by E71/E74–E76's margin-sizing fix, HARD
+  LESSON 42/43), asks for exactly the two queue items (short entry geometry; the entry-term binding
+  sweep) that closed at E71/E74–E76 and E69a/E69b/E70a/E70b/E77 respectively, and does not mention
+  E67 onward at all.
+- No new 1m data, no concurrent war-formation session collision (git log shows only other-lab
+  activity — 3M Elite and BTC Attack cycle numbers — since this file's own last commit).
+
+**State unchanged**: no champion, no candidate. References remain **e58a** (long, 100% equity, band
+present) and **E71** (short, 25% equity, band present, declared deviation per HARD LESSON 42),
+exactly as the last nine checks reported.
+
+**Zero backtests run. Zero credits spent.** Dashboard not rebuilt — no metric has changed since the
+last rebuild and a timestamp-only rebuild carries no information, per checks #5–#10.
+
+**No notification pushed.** Thirteenth firing of an unedited prompt; the one notification this
+condition warranted went out at cycle check #4, and nothing has changed in the nine checks since to
+justify a second one. The recommendation is unchanged: answer the two open rule questions in
+`STRATEGY-LEDGER.md:2328`, supply new 1m data, hand this lab a new queue item, or pause the schedule
+— none of which this session can do on its own authority.
