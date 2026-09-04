@@ -1963,3 +1963,45 @@ Two "obvious next levers" are now closed by measurement rather than by opinion �
 and **shield width in War Formation**. Both were queued by me on HARD LESSON 37's logic, and both were
 wrong for the same unaccounted reason. **The lesson is stronger for having been falsified in its first
 two applications than it would have been if they had worked.**
+
+
+---
+
+## ██ HARD LESSON 39 — THE ACHIEVED WIN/LOSS RATIO AGAINST THE NOMINAL TARGET IS THE ONE NUMBER THAT
+## SEPARATES A WORKING MECHANISM FROM A FAILING ONE, AND IT IS FREE (ALL LABS, 2026-09-04)
+
+HARD LESSON 37 proposed gross edge per trade as the screen. HARD LESSON 38 qualified it: raising R
+only helps if holds do not lengthen into the cap. Attack 42 then showed the screen **cannot rule a
+design in**, because its `rr` term must be the ACHIEVED win/loss ratio and that is unknown before
+running. **This lesson names the number to read afterwards, and it is decisive.**
+
+| build | nominal target | **achieved gross win/loss** | shortfall | verdict |
+|---|---|---|---|---|
+| **3M v37** (champion) | 2.0 | **1.9422** | **3%** | works — net 1.252 |
+| BTC Attack 42 | 2.0 | **1.4452** | **28%** | fails — net 1.013, discarded |
+| BTC Attack 41 (rr 3.0) | 3.0 | — (win rate collapsed 38%→31%) | — | fails — net 0.973 |
+| WF e50b ($2,000 shield) | 2.0 | — (3 of 21 trades capped) | — | worse gross PF than e58a |
+
+**A mechanism whose achieved ratio tracks its nominal target is resolving as designed. One whose
+achieved ratio falls well short is being truncated — by the hold cap, by slow resolution, or by
+reversals before the target — and no amount of filtering or R-widening fixes that.**
+
+### WHY THIS IS THE RIGHT NUMBER
+It collapses three separate failure modes into one observable:
+- **Cap truncation** — winners time out (Attack 42: winners at 49% of cap, 13.5% capped).
+- **Slow resolution** — the target is simply too far for the timeframe (Attack 41).
+- **Occupancy loss** — long holds block entries and shrink the sample (e50b).
+
+All three show up as **achieved < nominal**, and the gap size is proportional to the damage.
+
+### THE PRACTICAL RULE, AND IT COSTS NOTHING
+**On every result, compute `avgWinningTrade / |avgLosingTrade|` on GROSS figures and compare it to the
+nominal reward:risk.** Both are in the backtest response; the gross split needs one free `get_trades`
+call. **Within ~5% of nominal means the exit model is working. Below ~85% of nominal means the design
+is being truncated and the profit factor is measuring the truncation, not the idea.**
+
+### AND IT REFRAMES WHAT v37 IS GOOD AT
+The project has been reading v37's advantage as a better entry. **Its measured advantage is a cleaner
+EXIT**: 1.9422 achieved against 2.0 nominal, the best ratio anywhere in three labs. Every BTC-lab
+mechanism that failed did so with a truncated exit, not obviously a worse entry. **That is where the
+invented lab should be looking.**

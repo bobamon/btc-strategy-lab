@@ -3148,3 +3148,67 @@ If winners resolve well inside the cap, the sweep is safe and the HARD LESSON 37
 
 **Either way this is a free check that decides whether to spend a credit at all** — and it is exactly
 the check that would have saved the two failed experiments above.
+
+
+---
+
+# ██ THE TWO QUEUED FREE CHECKS ON v37 — ONE STOPS A BAD EXPERIMENT, ONE REVISES A CAVEAT (2026-09-04)
+
+Both were queued last cycle to be run **before spending a credit**. Both came free from `get_trades`
+on the existing champion result.
+
+## CHECK 1 — DOES THE HOLD CAP BITE? YES, MILDLY. AND v37 RESOLVES CLEANER THAN ANYTHING ELSE HERE.
+
+| v37, 155 trades, `maxBars` 96 | |
+|---|---|
+| `avgBarsInTrade` | 37.0 |
+| `avgBarsWinning` | 47.0 — **49% of the cap** |
+| Trades at or over the cap | **21 of 155 (13.5%)** — 14 winners, 7 losers |
+| **Achieved gross win/loss ratio** | **1.9422** against a nominal `rTarget` of **2.0** |
+
+**That last number is the important one, and it is the best in the project.** v37's winners actually
+reach their target: the achieved ratio is within **3%** of nominal. Compare the BTC lab, where
+Attack 42's achieved ratio was **1.445 against the same nominal 2.0** — 28% short — because its
+winners were truncated by the cap.
+
+**This is what distinguishes a working mechanism from a failing one, and it is not R size.** It is
+whether the exit resolves before the cap. HARD LESSON 38 named the failure mode; v37 is the
+counter-example that shows what passing looks like.
+
+## AND IT ANSWERS THE QUEUED rTarget SWEEP — DO NOT RUN IT AS A SINGLE-VARIABLE CHANGE
+**13.5% of trades already sit at the cap, and winners already run half of it.** A 3R target needs
+roughly 50% more room than a 2R one, so it would push a large share of winners past 96 bars and
+truncate exactly the trades it was meant to enlarge. **That is the Attack 41 / Attack 42 / e50b
+failure, and it would be the fourth instance.**
+
+**The sweep is therefore NOT safe as queued.** Either drop it, or run `rTarget` and `maxBars` together
+as a declared two-variable change — which the ratchet can still judge, but which must not be
+described as a single-term test.
+
+## CHECK 2 — H2's GROSS PROFIT FACTOR. THE "EDGE CONCENTRATED IN H1" CAVEAT IS PARTLY A COST ARTIFACT.
+
+| | H1 (2022-01 → 2024-06-08) | H2 (2024-06-08 → 2026-09) |
+|---|---|---|
+| Trades | 96 | 59 |
+| **Profit factor GROSS** | **1.52225639** | **1.30996828** |
+| Profit factor NET | 1.33630491 | 1.11952501 |
+| **Commission as % of gross** | 30.0% | **57.4%** |
+| **Gross edge per trade** | **$36.08** | **$21.92** |
+
+**H2's raw mechanism runs at 1.310** — a healthy profit factor, and **86% of H1's 1.522**. The net
+figures (1.336 vs 1.120) make the gap look far worse because **fee drag nearly doubled**, from 30.0%
+of gross to 57.4%, as gross edge per trade fell 39% while the per-trade fee stayed flat.
+
+**So the caveat is revised, not withdrawn.** H2 IS genuinely weaker — gross 1.310 against 1.522 is a
+real 14% decline in the mechanism itself. But **the net numbers overstate it**, and the sentence
+"the edge is concentrated in H1" is too strong: the edge is *present and healthy* in H2 and is being
+eaten by cost, not absent.
+
+## QUEUE
+1. **Do not run the rTarget sweep as a single-variable change.** See Check 1.
+2. **State the H2 caveat in gross terms from now on**: "H2's mechanism runs at 1.310 gross against
+   H1's 1.522 — genuinely weaker, but its net 1.120 overstates the decline because fee drag doubles."
+3. The bias-gate question is closed (v57). R-floor and freshness axes stay closed.
+4. **The most promising untried lever is anything that raises gross edge per trade WITHOUT lengthening
+   holds** — the one combination that has never failed in this project. v37 already has the clean
+   resolution; it needs more edge per trade, not more time.

@@ -2981,3 +2981,36 @@ as a cheap veto; it is not a green light.
 3. **Attack 34 remains the only mechanism whose achieved ratio was near nominal** (win rate 50%, clean
    ±R resolutions, 30 trades). Its defect was sample, and the daily rescale did not fix that without
    introducing the truncation problem. **A weekly anchor with a wider cap is the untried corner.**
+
+
+---
+
+# ██ WHAT v37 HAS THAT THIS LAB DOES NOT — A CLEAN EXIT (cross-lab, 2026-09-04, no credits)
+
+3M's champion was measured this cycle on the same axis that killed Attacks 41 and 42:
+
+| | nominal target | **achieved gross win/loss ratio** | shortfall |
+|---|---|---|---|
+| **3M v37** | 2.0 | **1.9422** | **3%** |
+| **BTC Attack 42** | 2.0 | **1.4452** | **28%** |
+
+**v37's winners actually reach their target. This lab's do not.**
+
+That is the difference, and it is not R size — v37's R is a 4H demand-zone depth, comparable to or
+smaller than Attack 42's full daily range. It is **whether the exit resolves before the cap**.
+v37 runs `avgBarsWinning` 47 against a 96-bar cap with 13.5% capped; Attack 42 runs 330 against 672
+with a far worse achieved ratio.
+
+**THE DESIGN CONSTRAINT FOR THE NEXT MECHANISM IS NOW SPECIFIC** (and recorded as HARD LESSON 39):
+the target must be reachable in a small fraction of the hold cap, so the achieved win/loss ratio lands
+within ~5% of nominal. Every mechanism this lab has built failed that test:
+
+| | achieved vs nominal | outcome |
+|---|---|---|
+| Attack 41 (rr 3.0) | win rate collapsed 38% → 31% | 0.973 |
+| Attack 42 (daily break) | 1.445 vs 2.0 | 1.013, discarded on the screen |
+| Attack 37 (sweep reversal) | thin edge, 83.5% eaten by cost | 1.024, closed |
+
+**Screen the next candidate on reachability, not just on R size.** A mechanism with a modest R whose
+target is hit quickly beats a large-R mechanism whose target times out — which is precisely what 3M's
+champion demonstrates and this lab has not yet built.
