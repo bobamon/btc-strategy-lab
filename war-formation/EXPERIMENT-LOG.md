@@ -5054,3 +5054,51 @@ check #4). Nothing has changed in the eight checks since: same two open question
 prompt edit. Repeating that notification an eighth time would be pure noise. The recommendation stands
 as stated in check #4 and repeated in #7: either answer the two open rule questions, supply new 1m data
 or a new queue item, or pause this scheduled task — it cannot move itself past this point.
+
+---
+
+# ██ CYCLE CHECK #9, 2026-09-04 (no credits) — ELEVENTH IDENTICAL FIRING OF THE SAME STALE PROMPT
+
+`git pull --rebase origin main`: local `main` was a stale detached-HEAD lineage 4 commits behind and 50
+ahead of a force-updated `origin/main` (the remote history was rewritten at some point this session did
+not witness); reset to `origin/main` rather than rebase, since the local-only commits were early
+ancestors already folded into the rewritten history. HEAD landed on `64c24c7` (BTC lab `Attack 59`).
+Two commits have landed since this file's own prior "cycle check #8" entry (`0a07db5`), neither touching
+`war-formation/`: `55f0e77` (3M cycle check #5, itself a no-op) and `64c24c7` (BTC Attack 59). Credit
+balance 555 at start of cycle (above the 500 floor) — none spent, for the same reason as the last four
+checks: there is no open hypothesis to spend them on.
+
+Independently re-verified rather than trusting the chain of eight prior self-reports:
+- `git log --oneline -- war-formation/` — `cb98a53` (E77) is still the last real experiment commit;
+  everything after it, including this entry, is cycle-check bookkeeping.
+- `war-formation/results/backtests.json` — still exactly 31 entries, last four
+  E75a/E75b/E76/E77. `e58a` (long, 100% equity, band present): PF **1.24015239**, 36 trades, DD
+  **9.82519609%**. `E71` (short, 25% equity, band present, the DECLARED DEVIATION build): PF
+  **0.97315988**, 33 trades, DD **2.66826642%**. Both match every prior cycle-check's citation exactly.
+- `STRATEGY-LEDGER.md:2328`, "RULE QUESTION FOR THE USER" — re-read directly. Both open items are still
+  unanswered: E69b's `inMiddle`-ratchet asymmetry (PF short by 0.0103, everything else improved) and
+  E74's drawdown-allowance-proportionality question (DD over the 0.50pp allowance by 0.45pp on a leg
+  whose absolute drawdowns are only 2.67%/3.61%, where a flat 0.50pp allowance is a quarter of the whole
+  drawdown rather than the rounding error it was calibrated as on 8–45%-drawdown builds). Grepped the
+  whole ledger for `2026-09-04`/`2026-09-05` and `USER DIRECTIVE` — nothing postdates the 2026-09-03
+  mandate correction and both-directions directive already on the board; no new answer recorded anywhere.
+- This session's own stored prompt is, once again, byte-for-byte the same pre-E67 text: it names
+  E64a/E64b/E66 as the state of the short leg (superseded by E71/E74–E76), asks for exactly the two
+  queue items (short entry geometry; the entry-term binding sweep) that are already closed, and does not
+  mention E67 onward at all.
+- Queue item 1 (short entry geometry) — closed at E71 (25%-equity fix, HARD LESSON 42) and the E74–E76
+  sweep. Queue item 2 (entry-term binding sweep, both legs) — closed: long at E69a/E69b/E70a/E70b and
+  E77; short at E74/E75a/E75b/E76.
+- No new 1m data, no concurrent war-formation session collision.
+
+**State unchanged**: no champion, no candidate. References remain **e58a** (long) and **E71** (short),
+exactly as the last five checks reported.
+
+**Zero backtests run. Zero credits spent.** Dashboard not rebuilt — no metric has changed since the last
+rebuild and a timestamp-only rebuild carries no information, per checks #5–#8.
+
+**No notification pushed.** Eleventh firing of an unedited prompt; the one notification this condition
+warranted went out at cycle check #4, and nothing has changed in the seven checks since to justify a
+second one. The recommendation is unchanged: answer the two open rule questions in
+`STRATEGY-LEDGER.md:2328`, supply new 1m data, hand this lab a new queue item, or pause the schedule —
+none of which this session can do on its own authority.
