@@ -809,9 +809,87 @@ const DATA = [
     },
     "verdict": "DIAGNOSTIC -- CONFIRMS THE SHIELD IS INERT ON SHORTS",
     "notes": "NUMBERING: run locally as E67 and renumbered to E68 on merge -- the cloud routine independently claimed E67 the same hour for a cycle-position-gate short (PF 0.00 on 12 trades, 0 winners). THAT RESULT IS FURTHER EVIDENCE FOR THIS ONE: twelve shorts and not a single winner is exactly what a leg whose adverse side is truncated by liquidation looks like. THE PRE-REGISTERED OUTCOME 'LOSERS UNCHANGED' IS WHAT HAPPENED. Multiplying the shield 5x moved the average loser from -$35.80 (E64a) to -$33.43, and the largest loss from -$72.80 to -$76.46. A five-fold wider stop produced statistically identical losses. THE SHIELD IS INERT ON THE SHORT SIDE. The supporting evidence came free from get_trades and is stronger than the aggregate: on e58a (LONG) every one of 36 trades exits at EXACTLY -$1,000 or +$2,000 of price, and the loss is SMALLER than the trade's max adverse excursion (seq 1 lost $113 against a `drawdown` of $138.99) -- the stop fired before the worst point, correctly. On E64a (SHORT) not one loser reaches +$1,000, the adverse exits run +$8.20 to +$503.10 in a smooth continuous distribution, and for EVERY losing short `grossProfit` equals `drawdown` to the cent. Exiting at precisely the max adverse excursion is the signature of a FORCED CLOSE, not a stop. THE MECHANISM: the engine forces percent_of_equity 100 and margin_short 100, so a short has zero excess margin AND its notional grows as price rises against it while equity falls -- the position is closed almost immediately. THE ARITHMETIC THAT CLOSES THE QUESTION: liquidation lands at roughly -$33 on $10,000, about 0.33% of equity and 0.33% of price. LESSON 3's commission floor requires a stop of at least 0.8%. SO NO VALID SHORT STOP CAN EVER FIRE BEFORE LIQUIDATION ON THIS ENGINE AT THIS SIZING -- there is no shield width that is both wide enough to clear the R floor and tight enough to bind. DO NOT READ THE 1.03088936 AS AN IMPROVEMENT. It is 2 winners in 44 trades (4.55% win rate), and both are outsized only because the target moved to $10,000; avgBarsWinning is 6,442 and one winner hit the maxBars cap. The Pine header registered in advance that winners carry no signal in this test and that only the losers do. WHAT THIS INVALIDATES: all fifteen short constructions in this lab -- E9, E9b, E13, E25, E26, E27, E64a, E66 and the rest -- were never testing the A.L.C.M. exit model. Their 4-7% win rates are an artefact of the harness, not a fact about BTC. The user's both-directions requirement CANNOT be tested for War Formation under this parity profile, and that is the honest state of the lab. WHAT IT DOES NOT INVALIDATE: every LONG result stands untouched -- e58a, e50a/e50b, alcm-reference and the rest all exit exactly on the shield, verified trade by trade. CROSS-LAB HYPOTHESIS, NOT YET A CONCLUSION: 3M's shorts (v53 0.705, v55 0.722) and the BTC lab's short attempts use STRUCTURAL stops rather than a dollar shield, so the same arithmetic may or may not apply -- their stop distances must be measured against the ~0.33% liquidation threshold before any of those results is trusted. That check is free via get_trades and is the next thing to do in both labs."
+  },
+  {
+    "id": "wf-e69a-no-h1bull-binding",
+    "name": "WF E69a: binding test -- h1Bull removed. The source calls it a bonus; it is load-bearing.",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/pine/e69a-no-h1bull.pine",
+    "description": "Queue item 2, run INSTEAD of the stored prompt's queue item 1 because the docs override it: E68 established the short leg is untestable on this engine, so another short geometry would be uninterpretable. Binding test on the long side. e58a with h1Bull (current close above the current 1h open) removed from goLong, nothing else changed. Chosen first because the SOURCE ITSELF calls this term optional -- ORACLE-RULES L211, 'Singularity = 6h and 1h the same colour. A bonus, not a requirement' -- and because bullRegime (4+ green 1h in the prior 6h block) is a prime E14 redundancy suspect saying the same thing.",
+    "metrics": {
+      "netProfitPct": -2.09530141,
+      "profitFactor": 0.96688238,
+      "maxDrawdownPct": 14.79601157,
+      "totalTrades": 67,
+      "winRatePct": 35.82089552,
+      "avgTradePct": -0.03127316,
+      "sharpeRatio": -0.01290963,
+      "commissionPaid": 687.5301414,
+      "avgWinningTrade": 254.888263345834,
+      "avgLosingTrade": -147.136010737209,
+      "longTrades": 67,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1NC9SDBH1AZV2H6R0183CDP",
+      "strategyId": "01M1NC9SMBQ62SMZSRMNYXV4YY",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NC9SDBH1AZV2H6R0183CDP",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T04:54:00Z"
+    },
+    "verdict": "REJECTED -- h1Bull BINDS HARD",
+    "notes": "The third of four pre-registered outcomes landed: COUNT RISES AND PF COLLAPSES, so the term BINDS and earns its place. Removing h1Bull nearly doubles the sample (36 -> 67) and destroys the edge (PF 1.24015239 -> 0.96688238), with drawdown worsening 9.82519609% -> 14.79601157%. REJECTED under RATCHET v2 clause 1. AND IT CONTRADICTS THE SOURCE, WHICH IS THE POINT WORTH RECORDING: ORACLE-RULES L211 relays the author calling 1h agreement 'a bonus, not a requirement'. Measured, it is the single most load-bearing entry term this lab has tested -- the ONLY one whose removal takes the build from profitable to unprofitable. It is not redundant with bullRegime either, despite both meaning 'price is rising': bullRegime reads the PRIOR COMPLETED 6h block (a persistence condition on history) while h1Bull reads the CURRENT 1h candle (a liveness condition on now). One says the regime was bullish; the other says it still is. THIS IS THE SECOND TIME THE SOURCE'S OWN WEIGHTING HAS INVERTED UNDER MEASUREMENT. E64b found the source's literal 6h direction rule (0.95884068) loses to the lab's 1h-based proxy (1.24015239). E69a finds the 1h term the source calls optional is indispensable. Both point the same way: THE 1-HOUR TIMEFRAME CARRIES MORE OF THIS STRATEGY'S EDGE THAN THE SOURCE'S FRAMING SUGGESTS, even though the source names the 6h 'the God of direction'. That is a finding about the user's strategy, produced by measuring it faithfully rather than by redesigning it. OCCUPANCY (LESSONS 24/28/29) named in advance: removing an entry filter admits more trades and shifts every downstream admission, so this is NOT a controlled superset of e58a's 36 -- firstTradeEntryTs 1766007600000 against e58a's 1766151300000 confirms trade 1 itself differs."
+  },
+  {
+    "id": "wf-e69b-no-whole-number-band-binding",
+    "name": "WF E69b: binding test -- the whole-number band removed. A near-miss that questions the ratchet.",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/pine/e69b-no-whole-number-band.pine",
+    "description": "Sibling of E69a, run together per LESSON 16. e58a with the inMiddle whole-number band (ban entries sitting 400-600 into a thousand) removed from goLong, nothing else changed. A pure filter that removes setups and never creates one, never binding-tested in this lab's history.",
+    "metrics": {
+      "netProfitPct": 8.92191315,
+      "profitFactor": 1.22985003,
+      "maxDrawdownPct": 9.28471029,
+      "totalTrades": 43,
+      "winRatePct": 41.86046512,
+      "avgTradePct": 0.20748635,
+      "sharpeRatio": 1.22326152,
+      "commissionPaid": 460.8086855,
+      "avgWinningTrade": 265.211944283334,
+      "avgLosingTrade": -155.264947304,
+      "longTrades": 43,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1NCB4JKFEXGRDE3W2SEC6GG",
+      "strategyId": "01M1NCB4SXEHJW1YWFCDZ1D7XB",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NCB4JKFEXGRDE3W2SEC6GG",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T04:55:00Z"
+    },
+    "verdict": "NOT KEPT -- fails RATCHET v2 clause 1 by 0.0103, and that is worth flagging",
+    "notes": "NOT KEPT, and the rule is honoured rather than bent -- but this is the closest thing to a genuine tension the ratchet has produced. Against e58a (PF 1.24015239 / DD 9.82519609% / 36 trades): profit factor 1.22985003 is LOWER by 0.0103, which fails clause 1 outright. Everything else moved the right way. Drawdown IMPROVED 9.82519609% -> 9.28471029% (0.54pp better). Trade count rose 36 -> 43, +19% on a lab whose binding constraint is the 30-trade floor. Net return rose +7.47495942% -> +8.92191315%. Sharpe is 1.22326152. And the build has ONE FEWER TERM, so there is less surface to curve-fit. A change that improves drawdown, sample, net return and simplicity is rejected on a profit-factor difference of 0.0103 -- roughly 0.8% -- measured across two samples of 36 and 43 trades, which is far inside the noise those counts can support. THE TERM'S BINDING VERDICT: inMiddle BINDS but does not EARN ITS PLACE. It removes 7 of 43 setups (16%) and buys 0.0103 of profit factor at the cost of half a point of drawdown and 19% of the sample. THIS IS A RULE QUESTION FOR THE USER, NOT A DECISION FOR THIS LAB TO MAKE UNILATERALLY: should RATCHET v2 clause 1 admit a strict-equality band -- for instance, keep a change whose PF is within ~0.02 when drawdown improves AND the trade count rises? The existing clause 2 already contains the mirror of that idea (drawdown may worsen 0.50pp when PF improves by more than 0.02). There is no symmetric allowance in the other direction, and E69b is the first result to sit exactly in that gap. Raised, not acted on. OCCUPANCY named in advance; firstTradeEntryTs 1766151300000 matches e58a's trade 1 exactly, so unlike E69a this build shares its first entry with the parent and diverges only later."
   }
 ];
-const BUILT = "2026-09-03 22:46";
+const BUILT = "2026-09-03 22:57";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

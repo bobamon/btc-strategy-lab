@@ -3975,3 +3975,60 @@ engine at this sizing.**
 2. **Stop spending credits on War Formation short geometries.** Any result is uninterpretable.
 3. The long-side entry terms (`brokeBelow`, `h1Bull`, `timeGate`, `inMiddle`) remain untested for
    binding and are now the only legitimate axis left in this lab. E65 opened it; finish it.
+
+
+---
+
+# ██ E69 — THE BINDING SWEEP REACHES THE ENTRY SIDE, AND THE SOURCE'S OWN WEIGHTING INVERTS AGAIN
+
+**The stored prompt's queue item 1 said to attack the short's entry geometry. THE DOCS OVERRIDE IT.**
+E68 established that a short sized at 100% of equity is force-closed at ~0.35% adverse, below the
+0.8% commission floor, so no short stop can fire and any short number measures the engine rather than
+the strategy. E68's own queue says it: *"Stop spending credits on War Formation short geometries."*
+So this cycle ran **queue item 2** — the long-side entry terms, the only legitimate axis left.
+
+Two single-term removals from **e58a** (PF 1.24015239 / DD 9.82519609% / 36 trades, reproducible),
+run together per LESSON 16.
+
+| | e58a parent | E69a — no `h1Bull` | E69b — no whole-number band |
+|---|---|---|---|
+| Profit factor | **1.24015239** | **0.96688238** | **1.22985003** |
+| Max drawdown | 9.82519609% | 14.79601157% | **9.28471029%** |
+| Trades | 36 | **67** | **43** |
+| Win rate | 41.67% | 35.82% | 41.86% |
+| Net return | +7.47% | −2.10% | **+8.92%** |
+
+## E69a — `h1Bull` IS THE MOST LOAD-BEARING TERM IN THE BUILD, AND THE SOURCE CALLS IT OPTIONAL
+Removing it nearly doubles the sample and takes the strategy from profitable to unprofitable. It is
+**not** redundant with `bullRegime` despite both meaning "price is rising": `bullRegime` reads the
+**prior completed** 6h block — a persistence condition on history — while `h1Bull` reads the
+**current** 1h candle — a liveness condition on now. One says the regime *was* bullish; the other says
+it *still is*.
+
+**THIS IS THE SECOND INVERSION.** E64b found the source's literal 6h direction rule (0.959) loses to
+the lab's 1h-based proxy (1.240). E69a finds the 1h term the source calls "a bonus" is indispensable.
+**Both point the same way: the 1-hour timeframe carries more of this strategy's edge than the source's
+framing suggests**, even though the source names the 6h *"the God of direction."* That is a finding
+about the user's strategy, produced by measuring it faithfully rather than redesigning it.
+
+## E69b — A NEAR-MISS THAT EXPOSES AN ASYMMETRY IN THE RATCHET
+`inMiddle` **binds but does not earn its place**: it removes 7 of 43 setups and buys **0.0103** of
+profit factor at the cost of **0.54pp of drawdown and 19% of the sample** — on a lab whose binding
+constraint is the 30-trade floor.
+
+**NOT KEPT.** Clause 1 requires PF to improve and it does not. The rule is honoured, not bent.
+
+**But it is the first result to sit exactly in a gap in the rule.** Clause 2 already allows drawdown
+to worsen by 0.50pp when PF improves by more than 0.02. **There is no mirror of that allowance in the
+other direction** — nothing lets a change through when PF is *statistically indistinguishable* and
+drawdown, sample size, net return and simplicity all improve. A 0.0103 difference across samples of 36
+and 43 is far inside what those counts can resolve.
+
+**This is raised for the user as a rule question, not decided here.** Should clause 1 admit a
+symmetric band — keep a change whose PF is within ~0.02 when drawdown improves AND the count rises?
+
+## QUEUE
+1. **`brokeBelow` and `timeGate` are still untested for binding** — the last two entry terms. Same
+   method, run as a pair.
+2. **Do not spend credits on short geometries** until the sizing constraint changes (E68).
+3. The clause-1 asymmetry above is open and needs the user, not another backtest.
