@@ -4805,3 +4805,35 @@ questions, or new 1m data becomes available. **Worth flagging to the user direct
 has now been answered as stale three times in a row (this entry, E77, and the entry above E75a/E75b)
 without being updated** — a future firing of the same text will find the same answer for as long as the
 board sits here.
+
+---
+
+# ██ CYCLE CHECK, 2026-09-04 #2 (no credits) — FOURTH IDENTICAL FIRING OF THE SAME STALE PROMPT
+
+`git pull --rebase origin main` first: no new commits since 6dca899 (the prior cycle check). This
+cycle's stored prompt is, verbatim, the same pre-E67 text checked and closed three times already in
+this file (the "CYCLE CLOSURE" entry above E75a/E75b, E77's opening line, and the "CYCLE CHECK" entry
+directly above this one). Re-verified against the current board rather than re-argued from scratch:
+
+- **Queue item 1 (attack the short's entry geometry)** — closed at E71 (25%-equity fix, HARD LESSON 42)
+  and swept on all four entry terms by E74-E76. No ninth short-geometry construction is queued.
+- **Queue item 2 (finish the entry-term binding sweep)** — closed on both legs: long at E69a/E69b/
+  E70a/E70b, short at E74/E75a/E75b/E76. E76 and E77 both say explicitly not to re-run any of the eight
+  cells.
+- No new 1m data, no new user directive, no concurrent-session collision (git log shows this file's own
+  prior entries as the only recent activity in this lab).
+
+**State unchanged**: no champion, no candidate. References remain **e58a** (long, 100% equity, band
+present, PF 1.24015239, 36 trades) and **E71** (short, 25% equity, band present, PF 0.97315988, 33
+trades). Both open questions — the `inMiddle` ratchet asymmetry (E69b) and whether the drawdown
+allowance should be proportional at a 2-4% base (E74) — still need the user, not a backtest, and remain
+open.
+
+**Zero backtests run. Zero credits spent** (568 available at start of cycle). Dashboard rebuilt for
+timestamp consistency only; no metrics changed.
+
+**Flag to the user, now for the fourth time**: this scheduled task's stored prompt has not been updated
+since before E67, so every firing re-derives the same "already closed" conclusion at the cost of a full
+read-through cycle. The board will not move until the prompt is refreshed with a live queue item, the
+`inMiddle`/drawdown-proportionality questions are answered, or new 1m data lands. Recommend pausing or
+editing this scheduled task rather than continuing to fire it as-is.
