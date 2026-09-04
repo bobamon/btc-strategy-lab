@@ -4094,3 +4094,50 @@ is a concrete instance of the coupling costing real net profit, not a neutral bo
 **QUEUE ITEM 2 STATUS: DONE** (built, run, coupling magnitude measured and one concrete cost traced).
 Item 1 (declared-deviation promotion policy) remains the only open item, and remains a question for the
 user, not a backtest.
+
+---
+
+## ██ CYCLE CHECK #1 — QUEUE CONFIRMED EMPTY OF BACKTESTABLE WORK; POLICY QUESTION ESCALATED (2026-09-04)
+
+**A NOTE ON THE SCHEDULED PROMPT, AGAIN.** This cycle's stored prompt still carries the v37/v53
+snapshot and re-asks for the 12H/24H bias gate and the cascade signature. Both have been closed since
+v54–v61 (bias gate: HARD LESSON 45; cascade: resolved as the liquidation-unwind tranching of HARD
+LESSON 34/35). The champion has moved twice since that snapshot (v37 → v58, unchanged through v59–v64).
+Per "THE DOCS WIN over this prompt" and HARD LESSON 26 (escalate a stale prompt once — already done at
+v39 with a push notification — then continue the real queue without re-flagging an unchanged
+condition), this cycle does not repeat that escalation.
+
+**Checked the real queue left by v64 before doing anything else.** v64's own closing line names exactly
+one open item: the declared-deviation promotion policy question (can a 25%-equity short leg, built and
+validated at v60/v61/v62/v63, ever be promoted to sit beside the 100%-equity long champion v58, or does
+it only ever stand as a labelled, non-comparable finding) — and states plainly that it "remains a
+question for the user, not a backtest." Re-read the surrounding material end to end looking for
+anything that item's own text might have missed: the STANDING REQUIREMENT table, the video-evidence
+extraction notes, the Type 1/Type 2/swing-rule/stage-machine items (all closed, VOCABULARY.md), the
+freshness and R-floor axes (both closed, not reopened per this project's own convention). Found nothing
+or invented a fifth mirror variant just to spend the credit budget — the source is genuinely exhausted
+of undecoded terms at this depth, and this project's own rules (do not re-engineer the frame, do not
+invent a mechanism the source does not prescribe) forbid manufacturing a new experiment to fill a cycle
+that does not have one. **No backtest run this cycle. 0 of 562 available credits spent.**
+
+**This is the fourth consecutive cycle this exact question has been named as the sole remaining open
+item (v60, v62/63, v64, now here) and it has never once been pushed to the user directly** — every prior
+escalation in this lab's history (v39, v40/v41) was about the stale prompt, a different issue. It is
+also not 3M-local: STRATEGY-LEDGER.md's "RULE QUESTION FOR THE USER — RATCHET v2 CLAUSE 2" (line ~2314)
+logs the same structural problem from War Formation's side (E74: a real, large improvement blocked by a
+fixed 0.50pp drawdown allowance that behaves very differently on an 8–45%-drawdown build than on a
+2–4%-equity-scaled one) — two labs, one unanswered rule question, sitting in a document neither user nor
+routine has surfaced out loud yet. Per this run's own standing instruction to notify rather than let a
+real blocker sit silently, this cycle sends that notification now — first time for this specific
+question, not a repeat of the prompt-staleness pushes.
+
+**QUEUE (unchanged, restated for the next cycle):**
+1. **The declared-deviation promotion policy question** — still open, still for the user. Until answered,
+   v58 remains sole champion of record and v60/v61 (short, split-tested clean on both halves) and v64
+   (combined flip, `status: testing`) stand as validated findings, not promotions.
+
+**CHAMPION OF RECORD (LONG): v58** (PF 1.48439273, DD 8.70519440%, 117 trades, `dzTouch==0`, anchored at
+`pine/3m-elite-v58-first-touch-only.pine`). Unchanged by this cycle.
+
+**VALIDATED SHORT (NOT A CO-CHAMPION — POLICY QUESTION OPEN): v60/v61** (PF 1.88616546 full sample; DD
+1.71159657%; 39 trades; 25%-equity declared deviation). Unchanged by this cycle.
