@@ -2550,3 +2550,79 @@ stated criterion — but 24–32% is still **UNTRADEABLE**. This is not a champi
    loser (-$772). Attack 37 has a weaker PF margin (1.024/1.012) on a large, provable sample (322/196)
    and a much smaller avg loser (-$116/-$128). Neither is tradeable. Whichever earns a filter stack
    first should be judged against the other's numbers, not in isolation.
+
+---
+
+# ██ ATTACK 38 — ATTACK 37'S FIRST FILTER-STACK TERM (EMA200 TREND GATE). REJECTED — HELPS H1, BREAKS H2.
+
+**Queue item 1, cycle 1 of the filter stack.** One change from Attack 37, byte-identical otherwise:
+require `close > EMA200` at entry — a long-only regime gate. Full source:
+`strategies/pine/attack38-sweep-trend-filter.pine`.
+
+**Why this term, first.** The mandate's own queue said aim the next filter at the STREAKINESS of the
+losing stretches (a regime or session gate), not at R — R is already near the floor this construction
+allows. Both user labs (HARD LESSON 32, STRATEGY-LEDGER.md) found the same defect independently: a
+long-only fade/reversal construction can look fine for months while concealing the fact that it has no
+regime gate, because the prevailing bull regime supplies the filter for free. Attack 37 is exactly that
+shape — long-only, never regime-gated — so this tests whether the same concealment is happening here.
+
+## BOTH HALVES, SIDE BY SIDE
+
+| | 37a control · H1 | 38a · H1 + EMA200 | | 37b control · H2 | 38b · H2 + EMA200 |
+|---|---|---|---|---|---|
+| Window | 2022→Jun 2024 | 2022→Jun 2024 | | Jun 2024→2026 | Jun 2024→2026 |
+| Profit factor | 1.02423271 | **1.19654848** | | 1.01155847 | **0.90073247** |
+| Max drawdown | 31.63538941% | **9.40407373%** | | 24.31004442% | **11.91392838%** |
+| Trades | 322 | **65** | | 196 | **40** |
+| Win rate | 38.20% | 40.00% | | 37.24% | 37.50% |
+| Avg loser | -$116.19 | -$132.93 | | -$127.81 | -$124.43 |
+| Avg winner | $192.53 | $238.59 | | $217.83 | $186.79 |
+| Net return | +5.60% | **+10.19%** | | +1.82% | **-3.09%** |
+
+## THE VERDICT — REJECTED, PER THE MANDATE'S OWN WORDS
+
+**H1: both ratchet terms improve strongly** — PF +0.172, drawdown cut more than two-thirds
+(31.64%→9.40%). Read alone, this would be the best single change this lab has ever produced. **H2: PF
+falls BELOW 1.0** (1.012→0.901), even though drawdown also improves there (24.31%→11.91%).
+
+The mandate said it in advance: *"a term that improves one half and hurts the other is rejected, not
+averaged."* **REJECTED**, full stop — the H1 result does not buy anything back, however large.
+
+## WHY THIS IS THE INTERESTING RESULT, NOT JUST A FAILED ONE
+
+**The gate binds almost identically hard on both halves** — 65/322 = 20.2% kept in H1, 40/196 = 20.4%
+kept in H2. Per HARD LESSON 12, a gate that removes 80% of trades is re-selecting the sample, not
+lightly pruning it, so its effect is a property of the regime being selected FOR, not a fixed property
+of the gate. And the two regimes it selects for are opposite in character:
+
+- **H1 (2022→Jun 2024) contains the entire 2022 bear crash.** An EMA200 gate excludes almost all of
+  that period's trades by construction — price was below its 200-period average for most of it — so
+  what H1's "improvement" actually measures is that **failed-breakdown reversals traded during a
+  confirmed bear regime were the bulk of Attack 37's H1 losses**, exactly the HARD LESSON 32 mechanism.
+- **H2 (Jun 2024→2026) is choppier and does not have one dominant regime the same way.** Here the
+  EMA200-only trades are WORSE than the unfiltered set (PF 0.901 vs 1.012) — the opposite prediction.
+  Whatever the gate is selecting for in this half, it is not "the good trades."
+
+**So the trend-gate hypothesis is only half right, and the half that's right is the half that was
+easiest to get right — excluding an already-obvious bear market.** It does not generalise to a market
+that is not in a clean directional regime, which is most of H2's window. This is a real, useful
+negative result: **a single trend gate is not the fix for Attack 37's streakiness**, and the 80% cut
+rate on both halves means any future gate this hard-binding should be treated the same way — checked on
+both halves before being trusted, never on one alone.
+
+**RATCHET v2 clause 4 note.** Both halves cut trade count by >50% (322→65, 196→40). The split test the
+clause requires is exactly what this cycle already is — both halves run independently — so the clause
+is satisfied by construction, but it doesn't matter here since clause 1 (PF improves) already fails on
+H2 in isolation.
+
+## QUEUE
+1. **Filter-stack term 2 should target something that does NOT collapse to a single clean regime.** A
+   session/time-of-day gate (the other candidate the previous queue named) removes a fixed slice of
+   bars regardless of trend direction, so it is less likely to reproduce this trend-gate's "great in an
+   obvious bear market, worse everywhere else" pattern. Try that next, not a second trend/regime
+   variant.
+2. **Do not retry a trend filter on Attack 37 with a different EMA length or threshold.** This was not
+   a narrow-optimum problem (HARD LESSON 16) — the direction of the effect flipped between halves, which
+   a parameter tweak on the same gate will not fix.
+3. Attack 37 remains the base for the filter stack, unchanged, at PF 1.02423271/1.01155847 on
+   322/196 trades. Still not tradeable, still the best provable-sample candidate on the board.

@@ -457,9 +457,87 @@ const DATA = [
     },
     "verdict": "ADVANCES (weakly)",
     "notes": "See attack37a-liquidity-sweep-reversal-h1 for the full pair writeup. This half: PF 1.01155847 / DD 24.31004442% / 196 trades / 37.24% win / avg loser -$127.81 / avg winner $217.83 / +1.82% / commission $2,006.22. Largest single loss -$284.38, far below the $2,800 max drawdown, confirming the bleed-type source on this half too."
+  },
+  {
+    "id": "attack38a-sweep-ema200-trend-gate-h1",
+    "name": "Attack 38a: liquidity sweep + EMA200 trend gate, never-tuned half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack38-sweep-trend-filter.pine",
+    "description": "Queue item 1: Attack 37's first filter-stack term. One change from Attack 37 (byte-identical otherwise): require close > EMA200 at entry (long-only regime gate), on the theory that a failed-breakdown reversal traded against the prevailing regime is the situation HARD LESSON 32 (both user labs) showed needs a bias gate, concealed by a long-only construction. Never-tuned half.",
+    "metrics": {
+      "netProfitPct": 10.18972373,
+      "profitFactor": 1.19654848,
+      "maxDrawdownPct": 9.40407373,
+      "totalTrades": 65,
+      "winRatePct": 40.0,
+      "avgTradePct": 0.15676498,
+      "sharpeRatio": 0.45733791,
+      "commissionPaid": 682.10092675,
+      "avgWinningTrade": 238.588595367308,
+      "avgLosingTrade": -132.931566828205,
+      "longTrades": 65,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1N9Q3X40A28CQ9TJXSWWE2M",
+      "strategyId": "01M1N9Q43EX5N9MH0TBN77XFRV",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1N9Q3X40A28CQ9TJXSWWE2M",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T00:00:00Z"
+    },
+    "verdict": "REJECTED",
+    "notes": "Control (Attack 37a): PF 1.02423271 / DD 31.63538941% / 322 trades. This run: PF 1.19654848 / DD 9.40407373% / 65 trades / 40.0% win / avg loser -$132.93 / avg winner $238.59 / +10.19%. Both ratchet terms improve strongly here in isolation -- but the gate removes 80% of trades (322->65) and Attack 38b (the recent half) shows the opposite direction, so the pair is rejected as a whole per the board's own rule: a term that improves one half and hurts the other is rejected, not averaged."
+  },
+  {
+    "id": "attack38b-sweep-ema200-trend-gate-h2",
+    "name": "Attack 38b: liquidity sweep + EMA200 trend gate, recent half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "strategies/pine/attack38-sweep-trend-filter.pine",
+    "description": "Queue item 1: Attack 37's first filter-stack term, recent half. Same single change as 38a (close > EMA200 gate added to Attack 37), byte-identical code, tested on the recent half and the control for the 38a result.",
+    "metrics": {
+      "netProfitPct": -3.08787511,
+      "profitFactor": 0.90073247,
+      "maxDrawdownPct": 11.91392838,
+      "totalTrades": 40,
+      "winRatePct": 37.5,
+      "avgTradePct": -0.07719688,
+      "sharpeRatio": -0.20535219,
+      "commissionPaid": 409.6111114,
+      "avgWinningTrade": 186.791487333334,
+      "avgLosingTrade": -124.426392856,
+      "longTrades": 40,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1N9QN0840ZFH41QQ4RKJB3D",
+      "strategyId": "01M1N9Q43EX5N9MH0TBN77XFRV",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1N9QN0840ZFH41QQ4RKJB3D",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T00:00:00Z"
+    },
+    "verdict": "REJECTED",
+    "notes": "Control (Attack 37b): PF 1.01155847 / DD 24.31004442% / 196 trades. This run: PF 0.90073247 / DD 11.91392838% / 40 trades / 37.5% win / avg loser -$124.43 / avg winner $186.79 / -3.09%. Drawdown improves a lot but profit factor drops BELOW 1.0 -- the gate cuts 80% of trades (196->40) here too, but in the opposite direction from 38a: the trades it keeps are worse than the trades it removes. See attack38a for the paired verdict."
   }
 ];
-const BUILT = "2026-09-03 21:51";
+const BUILT = "2026-09-04 04:11";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

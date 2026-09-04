@@ -1,0 +1,102 @@
+//@version=6
+// BTC ATTACK 38 — ATTACK 37'S FILTER STACK, TERM 1: EMA200 TREND GATE.
+// Queue item 1 from the board: Attack 37 (liquidity sweep reversal) cleared PF 1.0 on BOTH halves
+// (1.02423271 / 322 trades, 1.01155847 / 196 trades) for the first time on a provable sample, and
+// earned a filter stack -- one term at a time, re-split on every addition, keep only under RATCHET v2.
+// This is term 1. Base is byte-identical to attack37-liquidity-sweep-reversal.pine except for the
+// single added gate below.
+//
+// THE ONE CHANGE: require close > EMA200 (long-only regime gate) at the moment of entry.
+//
+// WHAT IT CLAIMS TO EXPLOIT / WHY THIS TERM, NOT ANOTHER ONE: the board's own queue said aim the next
+// filter at the STREAKINESS of the losing stretches (a regime or session gate), not at R -- R is
+// already close to the floor this construction allows (LESSON 3 audit below). A failed breakdown
+// that reclaims a swing low is the same chart pattern whether the broader trend is up or down, but
+// the two contexts are not the same trade: in an uptrend a failed breakdown is a dip getting bought
+// by the dominant flow; in a downtrend it is a single failed rescue attempt inside a market that is
+// still net supplying, and the mandate's own cross-lab finding (HARD LESSON 32, both user labs) is
+// that a fade/reversal construction pointed against the prevailing regime is exactly the situation a
+// bias/trend gate is needed for, discovered there only after a long-only version had concealed it for
+// months. Attack 37 is long-only and has never been regime-gated -- this tests whether that same
+// concealment is happening here.
+//
+// AUDIT, one line per leg (LESSON 6 -- single leg, long only, unchanged from Attack 37):
+//   R >= 0.8% (LESSON 3)      — unchanged from Attack 37, enforced by EXCLUSION, not clamping.
+//   Stop beyond STRUCTURE (LESSON 5) — unchanged: sweep bar's own low, strictly below the reclaimed
+//                                 swing-low signal level.
+//   BINDING (E17)             — the new term is trendOk = close > ema200. Reported via trade count:
+//                                 if it removes few trades, it is inert (HARD LESSON 12/18 apply); if
+//                                 it removes many, read it as regime-dependent, not "harmful" or
+//                                 "helpful" from the count alone.
+//   REDUNDANCY (E14)          — trendOk (a moving-average trend read) is not a proxy for sweep or
+//                                 reclaim (both intrabar structural price comparisons); it is a new,
+//                                 independent axis (slow trend vs. fast structural failure).
+//   LATCH IN SEQUENCE (LESSON 8) — unchanged: swingLow uses [1] shift, trigger fires on a later bar.
+//                                 ema200 is a running series with no lookahead; trendOk is checked on
+//                                 the same entry bar as the reclaim, which is legitimate (it is a
+//                                 state read, not a second latch that needs its own sequencing).
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale. Unchanged.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17):
+//   * PF improves on BOTH halves, materially (not noise-scale) -> KEEP under RATCHET v2 clause 1;
+//     check clauses 2 (DD band) and 3 (30-trade floor) before calling it kept.
+//   * PF improves on one half and worsens on the other -> REJECTED per the board's own instruction:
+//     "a term that improves one half and hurts the other is rejected, not averaged." Not eligible for
+//     a tolerance band regardless of magnitude.
+//   * PF worsens or is flat on both -> REVERTED, recorded in the tried-and-reverted table, and the
+//     next filter-stack term should target something other than trend (a session/time-of-day gate is
+//     the other candidate the queue named).
+//   * trade count falls by more than 50% on either half -> a split test is already what this cycle IS
+//     (both halves independently re-run), so RATCHET v2 clause 4 is satisfied by construction; still
+//     report the removal count explicitly per HARD LESSON 12/18.
+strategy("BTC Attack38 sweep + EMA200 trend gate", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+lookback = input.int(20,     "Swing-low lookback, bars")
+rr       = input.float(2.0,  "Reward:risk")
+minRpct  = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars  = input.int(192,    "Max bars in trade -- 2 days on 15m")
+trendLen = input.int(200,    "EMA trend length (NEW TERM)")
+
+ema200 = ta.ema(close, trendLen)
+trendOk = close > ema200
+
+swingLow = ta.lowest(low, lookback)[1]
+
+sweep   = not na(swingLow) and low < swingLow
+reclaim = not na(swingLow) and close > swingLow
+setupOn = sweep and reclaim
+
+minR  = close * minRpct / 100
+rLong = close - low
+rBig  = rLong >= minR
+
+goLong = setupOn and rBig and trendOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong and rLong > 0
+    strategy.entry("L", strategy.long)
+    slPx   := low
+    tpPx   := close + rLong * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(swingLow,       title="SwingLow")
+plot(ema200,         title="EMA200")
