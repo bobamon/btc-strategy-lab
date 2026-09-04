@@ -1744,3 +1744,62 @@ the strategy as specified.
 ~0.35% of equity.** If it sits at or below that, the stop did not fire and the number is not measuring
 the strategy. This check is free, takes one `get_trades` call, and would have saved sixteen
 constructions across two labs.
+
+
+---
+
+## ██ HARD LESSON 35 — THE CASCADE SIGNATURE IS THE LIQUIDATION, SEEN FROM THE TRADE LOG. IT INFLATES
+## TRADE COUNT AND CRUSHES WIN RATE, BUT LEAVES PROFIT FACTOR ALONE (3M ELITE, 2026-09-04)
+
+Three short builds carried an unexplained `cascadeRatio` — v51 at 1.419, v53 at 1.4655 (255 rows from
+174 unique entries, max depth 4), v55 at 90 rows from 62 entries. The standing instruction was that
+**no short number from that lab should be believed until it was understood.** It is now understood,
+and it is the same defect as HARD LESSON 34 viewed from a different angle.
+
+### WHAT THE ROWS ACTUALLY ARE
+One v53 entry at 20915.50 produces **four rows**, all with the same `entryTime` and `entryPrice`:
+
+| seq | qty | exit | P&L |
+|---|---|---|---|
+| 51 | 0.004 | 20956.0 | −$0.25 |
+| 52 | 0.004 | 21050.0 | −$0.62 |
+| 53 | 0.008 | 21141.5 | −$1.98 |
+| 54 | **0.466** | 21189.0 | **−$137.26** |
+
+That is not four trades. It is **one position of 0.482 BTC unwound in tranches at progressively worse
+prices** — the engine closing a sliver, re-checking margin, closing more, and finally dumping 97% of
+the position at the worst price. **The cascade signature is the margin unwind.**
+
+### WHICH METRICS IT BREAKS, MEASURED RATHER THAN ASSUMED
+Recomputing v53 by aggregating tranches back into positions:
+
+| | rows (as reported) | positions (true) |
+|---|---|---|
+| Count | 255 | **174** |
+| Winners | 35 | **35 — identical** |
+| Win rate | 13.73% | **20.11%** |
+| Profit factor | 0.70512830 | **0.70360999** |
+| Net P&L | −$2,480.312467 | −$2,480.312467 |
+
+**Only losers are ever tranched** — the winner count does not move, which is exactly what a forced
+unwind on the adverse side predicts and is independent confirmation of HARD LESSON 34. **77 of 255
+rows (30.2%) are sub-$5 nibbles, and all 77 are losers.**
+
+### THE PRACTICAL RULES THIS CREATES
+1. **PROFIT FACTOR IS SAFE.** It is dollar-weighted, so splitting one loss into four changes it by
+   0.0015. Every PF quoted from a cascaded run stands as a PF.
+2. **WIN RATE IS NOT.** 13.73% was really 20.11% — a 6.4-point error, and always in the pessimistic
+   direction. Any win rate from a run with `cascadeRatio > 1` is wrong and must be recomputed.
+3. **TRADE COUNT IS NOT, AND THIS ONE MATTERS FOR THE RULES.** RATCHET v2 clause 3 requires at least
+   30 trades. On short builds the reported count has been inflated by ~46% (255 vs 174; v55's 90 vs
+   62). **A short build reported at 40 "trades" may hold only 27 real positions and should never have
+   passed clause 3.** Every short result near the floor needs its count re-derived before its keep
+   decision is trusted.
+4. **`cascadeRatio` in the result is the tell, and it is free.** Any value above 1.0 means rows exceed
+   positions. Read it on every run; recompute count and win rate whenever it is not 1.
+
+### WHAT THIS RETIRES AND WHAT IT LEAVES STANDING
+The blanket instruction *"no short number from this lab should be believed"* is now **too broad and is
+narrowed**: profit factors survive, win rates and counts do not. What still stands against those
+shorts is HARD LESSON 34 — 74% of their losses were truncated before the stop — and that remains the
+reason v53 and v55 are not measurements of the specified system.

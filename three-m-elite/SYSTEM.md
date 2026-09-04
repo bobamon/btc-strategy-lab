@@ -2862,3 +2862,51 @@ neither figure measures the system the source describes.
    inflated, or is the lab's 12H/24H proxy too strict for what the source means?
 3. The cascade signature (v53 ratio 1.4655, v55 90 rows from 62 entries) is still unexplained and is
    a SECOND reason short numbers here are unreliable.
+
+
+---
+
+# ██ QUEUE ITEM 2 CLOSED — THE CASCADE SIGNATURE IS THE LIQUIDATION UNWIND (2026-09-04, no credits)
+
+v51 (1.419), v53 (1.4655) and v55 (90 rows / 62 entries) all carried an unexplained cascade ratio, and
+the standing rule was that no short number here could be trusted until it was explained. **It is
+explained.**
+
+**One v53 entry at 20915.50 produces four rows** — same `entryTime`, same `entryPrice`, quantities
+0.004, 0.004, 0.008 and **0.466**, exiting at progressively worse prices. That is a single 0.482 BTC
+position being **unwound in tranches**: the engine closes a sliver, re-checks margin, closes more, and
+finally dumps 97% of the position at the worst price. **The cascade IS the margin liquidation from
+HARD LESSON 34, seen from the trade-log side.**
+
+## THE CORRECTED NUMBERS FOR v53
+
+| | rows (as recorded) | positions (true) |
+|---|---|---|
+| Count | 255 | **174** |
+| Winners | 35 | **35 — unchanged** |
+| Win rate | 13.73% | **20.11%** |
+| Profit factor | 0.70512830 | **0.70360999** |
+| Net P&L | −$2,480.312467 | −$2,480.312467 (identical) |
+
+**Only losers get tranched.** The winner count does not move — exactly what a forced unwind on the
+adverse side predicts, and independent confirmation of the liquidation finding. **77 of 255 rows
+(30.2%) are sub-$5 nibbles, every one a loser.**
+
+## WHAT THIS CHANGES HERE
+- **Profit factor survives.** 0.705 → 0.704. Every PF this lab has quoted from a cascaded run stands.
+- **Win rate does not.** v53's real short win rate is **20.11%**, not 13.73%. Still far below the ~33%
+  a 2R target needs, so the conclusion is unchanged — but the number was wrong and is now corrected.
+- **Trade count does not, and this one touches the rules.** RATCHET v2 clause 3 needs 30 trades.
+  Reported short counts here run ~46% above the true position count. **v55's "90 rows" is 62
+  positions.** Any short keep decision made near the floor must have its count re-derived.
+- **The blanket "believe no short number" is narrowed**, not lifted: PFs are usable, win rates and
+  counts are not, and HARD LESSON 34's truncation still means v53/v55 are not measurements of the
+  system as specified.
+
+## QUEUE
+1. **Read `cascadeRatio` on every future run.** Anything above 1.0 means rows exceed positions;
+   recompute count and win rate before applying the ratchet. Free, one field in the result.
+2. Queue item 1 — what the bias-gate result means for the LONG leg (v54: 1.25172059 → 1.15861551 on
+   155 → 48 trades) — is **untouched by this** and remains the lab's real open question. v54 is long
+   and long builds do not cascade, so its 48 is a true count.
+3. **CHAMPION UNCHANGED: v37.** Long, uncascaded, unaffected by both defects.
