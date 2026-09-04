@@ -2209,3 +2209,41 @@ than the gate I was criticising. A 200-SMA on 15m spans ~50 hours, and demand-zo
 pullbacks — exactly when the fast averages are dipping toward the slow one. **The gate and the entry
 were competing for the same moments**, which is the redundancy the E14 audit line names but which I
 did not weigh heavily enough when predicting the count.
+
+---
+
+## HARD LESSON 46 — DILUTING A FIXED COST BY DEMANDING A BIGGER MOVE IS NOT A FREE TRADE. IT SPENDS EDGE TO BUY A FEE SAVING.
+
+E71 established that War Formation's short is **gross-positive at +$61.00** and pays **$81.43** in
+commission — it loses *only* to fees. Since commission is a percentage of notional and does **not**
+scale with the shield, doubling the shield looked like a way to halve the fee's share for free.
+
+**It is not free.** E73 doubled the shield and the gross flipped sign:
+
+| | shield $1,000 | shield $2,000 |
+|---|---|---|
+| commission **per trade** | $2.47 | **$2.49** — flat, exactly as predicted |
+| **gross** | **+$61.00** | **−$254.00** |
+| win rate | 36.36% (above rr 2.0's 33.3% bar) | **30.43%** (below it) |
+
+**The fee arithmetic was right and the conclusion drawn from it was wrong.** The cost side behaved
+exactly as modelled; what the model omitted is that **a wider stop implies a proportionally wider
+target, and the win rate pays for it.** A 2R target on a $2,000 shield is a 4.3–6.3% move against
+2.2–3.2% at $1,000 — a different thing to ask of the market, not the same thing scaled.
+
+**This is the same error as BTC's Attack 41 and Attack 42, arrived at from the cost side instead of
+the reward side.** Every one of them raised the required move and expected the ratio to survive it.
+
+**HOW TO USE THIS:**
+1. **A cost-share argument is only half an argument.** `cost_share = c/g` improves when `g` rises —
+   but `g` is not a free parameter; raising it changes which trades win. Model the win rate *with* it.
+2. **Check the fee's own scaling before assuming a cost lever exists at all.** Here the fee genuinely
+   was independent of the shield, so the reasoning was sound and the *conclusion* still failed. A
+   correct premise is not a result.
+3. **Both directions of the shield axis are now closed** — the long at 100% equity (E57), the short at
+   25% (E73). **$1,000 is at or near the useful maximum**, which makes E71 the good configuration
+   rather than a starting point.
+4. **When a mechanism is fee-bound and the fee cannot be diluted, say so and stop.** The remaining
+   levers for E71 are cheaper execution or a higher-frequency variant of the same edge, and **this
+   harness cannot express either** at the forced 0.05%/side parity profile. That is a limit to report,
+   not to engineer around.

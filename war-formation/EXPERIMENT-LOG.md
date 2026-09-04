@@ -4417,3 +4417,48 @@ an identical trade population -- a stronger reproducibility signal than a repeat
    pair is the only lever that changes the fee-to-move ratio without touching the entry.
 2. **Every historical long number in this lab remains valid** and does not need re-running.
 3. **Do not declare a champion off a 4.5-month single-regime window**, in either direction.
+
+
+---
+
+## E73 -- THE SHIELD AXIS CLOSES ON THE SHORT TOO, FOR THE OPPOSITE REASON TO THE ONE I PROPOSED
+
+E71 with the shield **1000 -> 2000** and the cap **6480 -> 12960** (the lab's own documented linear
+coupling, from e58a's header). Target: the one constraint E71 identified -- the short is
+**gross-positive at +$61.00** and pays **$81.43** in commission, so it loses only to fees.
+
+### THE SAMPLE FIRST
+**23 trades is below the 30-trade floor, so the profit factor is a DIRECTION, not a result**, and is
+not quoted as one. E71's 33 was already at the floor, and the Pine header predicted this drop **in
+advance**: holds went 948 -> **3421** average bars, and `pyramiding=1` means longer holds block later
+entries. **Occupancy, not selectivity.**
+
+### THE GROSS SIGN FLIP IS ROBUST TO THAT, BECAUSE IT IS A SIGN CHANGE
+
+| | E71 (shield 1000) | **E73 (shield 2000)** |
+|---|---|---|
+| commission **per trade** | $2.47 | **$2.49** -- flat, as predicted |
+| **gross** | **+$61.00** | **−$254.00** |
+| gross per trade | +$1.85 | **−$11.04** |
+| win rate | 36.36363636% | **30.43478261%** |
+| profit factor | 0.97315988 | 0.73133932 |
+
+**My hypothesis was wrong, and instructively so.** The fee-saving mechanism worked *exactly* as
+predicted -- commission per trade was flat to two cents, confirming the fee does not scale with the
+shield. **But the edge did not survive being asked for a bigger move.** Win rate fell below the 33.3%
+that rr 2.0 requires, where E71 was above it. A 2R target on a $2,000 shield is a **$4,000 move,
+4.3%-6.3% of price**, against $2,000 (2.2%-3.2%) at E71's setting.
+
+**The cap is not the culprit**, and this was checked before concluding: `avgBarsWinning` 5839 against a
+12,960 cap is 45% of the budget, so HARD LESSON 38's truncation confound does not apply.
+
+### WHAT THIS CLOSES
+**The shield axis is now closed on the SHORT as well as the long** -- and for the opposite reason to
+the one I proposed. **Fees are real but they are not the lever:** widening the shield to dilute them
+destroys more edge than it saves. **$1,000 is at or near the useful maximum for this geometry**, which
+makes E71's configuration the good one rather than a starting point.
+
+**What remains true:** E71's short is gross-positive with a win rate above its own break-even, and it
+is **fee-bound in a way that cannot be fixed by widening**. The remaining honest levers are lower-cost
+execution or a higher-frequency variant of the same edge -- **neither of which this harness can express**
+at the forced 0.05%/side parity profile. That is a limit to state, not to engineer around.

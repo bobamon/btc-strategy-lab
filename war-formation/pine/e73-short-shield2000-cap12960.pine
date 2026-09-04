@@ -1,0 +1,121 @@
+//@version=6
+// WAR FORMATION E73 - SHIELD 1000->2000 AND CAP 6480->12960 ON THE SHORT, AT 25%% EQUITY.
+// Attacks the ONE constraint E71 identified: the short is GROSS-POSITIVE at +$61.00 and pays $81.43
+// in commission, so it loses only to fees. Commission is ~0.05%% of notional per side REGARDLESS of
+// the shield, so doubling the shield should double the dollars per trade at a flat fee.
+// SHIELD AND CAP ARE COUPLED AND MOVE TOGETHER BY THE LAB'S OWN PRECEDENT: e58a's header records
+// maxBars 6480 as "scaled linearly from E47's 12960 at $2,000". Holding the cap would confound the
+// test with truncation, which is what destroyed e50b. Declared as two coupled parameters.
+// The shield axis was CLOSED on the LONG at 100%% equity (E57). This is the SHORT at 25%%, where the
+// binding constraint is demonstrably different.
+// AUDIT: $2000 shield is 2.2-3.2%% of price here, well above the LESSON 3 floor; risk-defined stop is
+// the ALCM declared deviation (LESSON 5); SHORT leg alone (LESSON 6 scoped); the shield necessarily
+// binds, setting both exits (E17); no term added or removed (E14); latches unchanged from E71
+// (LESSON 8); OCCUPANCY NAMED IN ADVANCE AND IT WILL BITE - E71 already averaged 948 bars, a doubled
+// shield lengthens holds and pyramiding=1 blocks entries, SO THE COUNT WILL FALL FROM 33 AND THAT IS
+// OCCUPANCY NOT SELECTIVITY (LESSONS 24/28/29); expect cascadeRatio 1 (LESSON 35).
+// RESULT: 23 trades, BELOW the floor, so PF 0.73133932 is a DIRECTION not a result. But the GROSS
+// SIGN FLIPPED: +$61.00 -> -$254.00. Commission per trade was flat (.47 -> .49) exactly as
+// predicted, so the fee mechanism worked and the EDGE did not survive the bigger move: win rate
+// 36.36%% -> 30.43%%, below the 33.3%% that rr 2.0 needs. avgBarsWinning 5839 of 12960 so the cap is
+// NOT truncating. SHIELD AXIS CLOSED ON THE SHORT. $1,000 is at or near its useful maximum.
+strategy("War Formation E64a 6h-direction SHORT", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+run6      = input.int(2,     "Consecutive 6h candles for CLEAR DIRECTION (source: more than one)")
+skipOpen  = input.int(60,    "Skip first N minutes of 6h block")
+skipClose = input.int(60,    "Skip last N minutes of 6h block")
+velK      = input.float(0.8, "Velocity: min rejection as multiple of atr(30)")
+midLo     = input.float(400, "Whole-number middles low")
+midHi     = input.float(600, "Whole-number middles high")
+shieldUsd = input.float(2000,"THE SHIELD: fixed dollar gap to liquidation")
+rr        = input.float(2.0, "Reward:risk")
+eqFrac    = input.float(0.25,"DECLARED DEVIATION: fraction of equity per position -- HARD LESSON 42")
+maxBars   = input.int(12960,  "Max bars in trade -- held at e58a value")
+
+MS6H = 21600000
+MS1H = 3600000
+MS15 = 900000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+b15 = math.floor(time / MS15)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+new15 = b15 != b15[1]
+
+var float o6   = na
+var int   grn6 = 0
+var int   red6 = 0
+
+if new6
+    if not na(o6)
+        if close[1] > o6
+            grn6 := grn6 + 1
+            red6 := 0
+        else if close[1] < o6
+            red6 := red6 + 1
+            grn6 := 0
+    o6 := open
+
+bearRegime = red6 >= run6
+
+var float h1o = na
+if new1h
+    h1o := open
+
+h1Bear = not na(h1o) and close < h1o
+
+minsIn   = (time - b6 * MS6H) / 60000
+timeGate = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+var float c15h = na
+var float p15h = na
+
+if new15
+    p15h := c15h
+    c15h := high
+else
+    c15h := na(c15h) ? high : math.max(c15h, high)
+
+brokeAbove = not na(p15h) and c15h > p15h
+
+velMin = na(ta.atr(30)) ? na : ta.atr(30) * velK
+
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+shortTrig = not na(p15h) and not na(velMin) and ta.crossunder(close, p15h) and (p15h - close) >= velMin
+
+goShort = bearRegime and timeGate and h1Bear and brokeAbove and not inMiddle and shortTrig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+shortR = shieldUsd
+qtyUse = strategy.equity * eqFrac / close
+
+if flat and goShort and shortR > 0 and qtyUse > 0
+    strategy.entry("S", strategy.short, qty = qtyUse)
+    slPx   := close + shortR
+    tpPx   := close - shortR * rr
+    barsIn := 0
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goShort ? 1 : 0, title="ShortSignal")
+plot(red6,            title="ConsecRed6h")

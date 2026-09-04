@@ -831,5 +831,51 @@
   },
   "verdict": "PREDICTION CONFIRMED -- and this is the first TRUE BIDIRECTIONAL measurement this lab has ever had",
   "notes": "THE REGISTERED PREDICTION WAS CONFIRMED ALMOST EXACTLY, AND THE STRONGEST EVIDENCE IS NOT THE PROFIT FACTOR. Against e58a at 100% equity (PF 1.24015239 / DD 9.82519609% / 36 trades / 41.67% win): TRADE COUNT IS IDENTICAL AT 36 AND THE WIN RATE IS IDENTICAL AT 41.66666667% (15W/21L in both). An identical count AND an identical win/loss split means the size change admitted the SAME TRADE POPULATION and resolved every one of them the SAME WAY. The long was never being liquidated -- its shield already bound at 100%, exactly as the margin arithmetic predicts, because for a long an adverse move SHRINKS the notional so required margin falls alongside equity and the two never cross. Profit factor moved only 1.24015239 -> 1.26239697 (+0.022, from the changed commission-to-move ratio at smaller size), and drawdown scaled down 9.82519609% -> 2.50912733% as a smaller position mechanically should. Sharpe 1.07298256. Cascade ratio 1 on 36 clean entries. SO THE ASYMMETRY IS NOW CONFIRMED FROM BOTH SIDES: shorts were destroyed by the margin boundary (E64a 0.45442725 -> E71 0.97315988 from sizing alone, a fivefold win-rate change) while longs are untouched by the same change. HARD LESSON 42's account is complete rather than half-tested, and the expensive alternative outcome -- that longs were affected too and every 100%-equity number in this lab needed re-running -- is ruled out. THE TWO LEGS ARE NOW DIRECTLY COMPARABLE ON EQUAL TERMS FOR THE FIRST TIME IN THIS LAB'S HISTORY: LONG 1.26239697 on 36 trades at 41.67% win, SHORT 0.97315988 on 33 trades at 36.36% win, both at 25% of equity, same window, same shield, same rr. THAT IS THE ANSWER TO THE USER'S BIDIRECTIONAL DIRECTIVE, and it is a real answer rather than a harness artifact: the long works, the short is marginal but genuine -- gross-positive at +$61.00 and losing only to fees. NO CHAMPION IS DECLARED. 36 and 33 trades sit at the floor of quotability (LESSON 12) and the 1m window is 4.5 months of ONE regime that CANNOT support a split; that limit is stated, not engineered around. A SECONDARY RESULT WORTH KEEPING: e58a now reproduces its behaviour at a second position size with an identical trade population, which is a stronger reproducibility signal than a repeat run at the same settings (LESSON 25)."
+ },
+ {
+  "id": "wf-e73-short-shield2000-cap12960-25pct",
+  "name": "E73: short with the shield 1000->2000 and cap 6480->12960, at 25% equity",
+  "symbol": "BTCUSDT",
+  "timeframe": "1m",
+  "direction": "short",
+  "status": "rejected",
+  "createdDate": "2026-09-04",
+  "lastTestedDate": "2026-09-04",
+  "backtestStart": "2025-12-16",
+  "backtestEnd": "2026-05-03",
+  "specPath": "war-formation/pine/e73-short-shield2000-cap12960.pine",
+  "description": "E71 with the shield doubled and the hold cap doubled with it, the lab's own documented linear coupling (e58a's header records maxBars 6480 as 'scaled linearly from E47's 12960 at $2,000'). Attacks the ONE constraint E71 identified: the short is GROSS-POSITIVE at +$61.00 but pays $81.43 in commission, so it loses only to fees. Commission is ~0.05% of notional per side regardless of the shield, so doubling the shield should roughly double the dollars per trade while the fee per trade stays flat. The shield axis was recorded CLOSED on the LONG at 100% equity (E57); this is the SHORT at 25%, where the binding constraint is demonstrably different.",
+  "metrics": {
+   "netProfitPct": -3.11222999,
+   "profitFactor": 0.73133932,
+   "maxDrawdownPct": 6.96196075,
+   "totalTrades": 23,
+   "winRatePct": 30.43478261,
+   "avgTradePct": -0.13531435,
+   "sharpeRatio": -1.12341183,
+   "sortinoRatio": -0.69190032,
+   "commissionPaid": 57.222999,
+   "avgWinningTrade": 121.028723614286,
+   "avgLosingTrade": -72.40150401875,
+   "ratioAvgWinLoss": 1.67163273,
+   "largestWin": 145.5725817,
+   "largestLoss": -84.6311258,
+   "avgBarsInTrade": 3421.04347826,
+   "avgBarsWinning": 5839.28571429,
+   "avgBarsLosing": 2363.0625,
+   "longTrades": 0,
+   "shortTrades": 23
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "01M1NGRYJS84ZTS3KBXY2QXZV0",
+   "strategyId": "01M1NGRYR54117CQ0WK45TV3YZ",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NGRYJS84ZTS3KBXY2QXZV0",
+   "engineVersion": "tv_jul26_mc7",
+   "cascadeRatio": 1,
+   "verifiedAt": "2026-09-04T06:13:00Z"
+  },
+  "verdict": "REJECTED. 23 trades is a DIRECTION not a result -- but the GROSS SIGN FLIP is robust to that, and it closes the shield axis on the short too.",
+  "notes": "FIRST, THE SAMPLE: 23 trades is BELOW the 30-trade floor, so the profit factor is a DIRECTION and NOT a result, and it is not quoted as one (LESSON 12). E71's 33 was already at the floor and the occupancy note in the Pine header predicted this drop IN ADVANCE -- holds went from 948 to 3421 average bars, a 3.6x increase, and with pyramiding=1 longer holds block later entries. The count fall is OCCUPANCY, not selectivity. THE GROSS SIGN FLIP IS ROBUST TO THE SAMPLE PROBLEM, HOWEVER, BECAUSE IT IS A CHANGE OF SIGN AND NOT A MARGINAL RATIO: E71 gross = -$20.43 + $81.43 = +$61.00, i.e. +$1.85 per trade. E73 gross = -$311.22 + $57.22 = -$254.00, i.e. -$11.04 per trade. THE WIDER SHIELD TURNED A GROSS-POSITIVE SHORT INTO A GROSS-NEGATIVE ONE. MY HYPOTHESIS WAS WRONG, AND IN AN INSTRUCTIVE WAY. The fee-saving mechanism worked EXACTLY as predicted -- commission per trade was $2.47 at a $1,000 shield and $2.49 at $2,000, flat to two cents, confirming that the fee does not scale with the shield. But the edge did not survive being asked for a bigger move: win rate fell 36.36363636% to 30.43478261%, dropping BELOW the 33.3% that an rr of 2.0 requires, where E71 was above it. A 2R target on a $2,000 shield is a $4,000 move, 4.3%-6.3% of price across this window, against $2,000 (2.2%-3.2%) at E71's setting. THAT IS THE REGISTERED OUTCOME 'GROSS PER TRADE DOUBLES BUT PF DOES NOT CROSS' with a sharper edge than registered: the target became unreachable rather than merely harder. THE CAP IS NOT THE CULPRIT and this was checked before concluding: avgBarsWinning 5839 against a 12,960 cap is 45% of the budget, so HARD LESSON 38's truncation confound does NOT apply and the comparison is clean. WHAT THIS CLOSES: the shield axis is now CLOSED ON THE SHORT as well as the long, and for the OPPOSITE reason to the one I proposed. Fees are real but they are not the lever -- widening the shield to dilute them destroys more edge than it saves. $1,000 sits at or near the useful maximum for this geometry, which makes E71's configuration the good one rather than a starting point. WHAT REMAINS TRUE: E71's short is gross-positive with a win rate above its own break-even, and it is fee-bound in a way that CANNOT be fixed by widening. The remaining honest levers are lower-cost execution or a higher-frequency variant of the same edge, neither of which this harness can express at the forced 0.05%/side parity profile. The 1m window is 4.5 months of ONE regime and cannot support a split; stated, not engineered around."
  }
 ]
