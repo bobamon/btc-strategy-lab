@@ -2655,3 +2655,57 @@ untestable on this engine at this sizing** unless its stop sits below ~0.35% —
 forbids, because commission alone needs 0.8%. So a short leg here is blocked by the same wall, and
 that should be stated when the requirement is next reviewed rather than discovered by spending credits
 on a short that cannot be measured.
+
+
+---
+
+# ██ ATTACK 39 — THE SWEEP-DEPTH FILTER FAILS, AND ITS FAILURE INVERTS ATTACK 37's OWN PREMISE
+
+Queue item 1, second filter term on Attack 37. **Not a duplicate of the cloud routine's Attack 38**
+(EMA200 trend gate, rejected the same hour for helping H1 and breaking H2) — and deliberately much
+lighter, because Attack 38's real lesson was in its counts: it culled 322 → 65 and 196 → 40, roughly
+80%, on a mechanism whose margin is 1.024 / 1.012.
+
+**The term.** Attack 37 claims a failed break below a 20-bar swing low is a **stop-run**. That claim
+has a testable implication: a break that barely dips below the level flushed nothing, so require a
+minimum penetration — `(swingLow − low) / close ≥ 0.15%`.
+
+| | Attack 37a | **Attack 39a** |
+|---|---|---|
+| Profit factor | **1.02423271** | **0.98206513** |
+| Max drawdown | 31.63538941% | 29.34003832% |
+| Trades | 322 | 280 |
+| Win rate | 38.20% | 37.86% |
+| Net return | +5.60% | **−3.61%** |
+
+**REJECTED on the never-tuned half, and the second credit was deliberately not spent** — the kill rule
+discards a pre-2024 half under 1.0 rather than rescuing it, so confirming a dead term on the recent
+half buys nothing.
+
+## THE FILTER WAS LIGHT AS DESIGNED. THAT MAKES THE FAILURE CLEANER, NOT WORSE.
+322 → 280 is a **13% trim**, not a cull. So this is not Attack 38's mistake in a new coat.
+
+## THE DIRECTION IS THE FINDING, AND IT INVERTS THE MECHANISM'S STATED PREMISE
+The term **keeps deep sweeps and removes shallow ones.** Removing the shallow ones took the half from
+**+5.60% to −3.61%** — about **nine percentage points of return lived in the 42 discarded trades.**
+
+**Shallow sweeps are the profitable ones. Deep sweeps are worse.**
+
+Attack 37's own header reasons that deeper penetration flushes more resting stops and therefore fuels
+a bigger reversal. **The data says the opposite:** a deep flush is *genuine supply* finding real
+sellers, while a marginal poke that is immediately reclaimed is the cleaner failed breakdown. **The
+edge is in the FAILURE of the break — and the more decisively price actually broke, the less of a
+failure it was.**
+
+## THE DRAWDOWN MOVED THE OTHER WAY, AND THAT CONFIRMS IT
+Drawdown *improved* (31.64% → 29.34%) while profit factor fell. The filter removed genuinely
+profitable but volatile trades, leaving a smoother and poorer set. Attack 37 is drawdown **category 3**
+— bleed on a positive edge — where a filter is supposed to remove **losers** from a winning
+distribution. This one removed winners. That is precisely the diagnostic the category framing exists
+to make visible.
+
+## QUEUE — THE NEXT TERM IS THE MIRROR OF THIS ONE, AND THE PREDICTION IS RECORDED FIRST
+1. **CAP the sweep depth instead of flooring it** — require `sweepDepth <= some maximum`. This result
+   predicts it should help. **Recorded before the run so the next cycle is a test, not a search.**
+2. If the cap works, the mechanism should be renamed and re-described: it is not a stop-run
+   continuation, it is a **marginal-break failure**, and Attack 37's header should be corrected.

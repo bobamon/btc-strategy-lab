@@ -535,9 +535,50 @@ const DATA = [
     },
     "verdict": "REJECTED",
     "notes": "Control (Attack 37b): PF 1.01155847 / DD 24.31004442% / 196 trades. This run: PF 0.90073247 / DD 11.91392838% / 40 trades / 37.5% win / avg loser -$124.43 / avg winner $186.79 / -3.09%. Drawdown improves a lot but profit factor drops BELOW 1.0 -- the gate cuts 80% of trades (196->40) here too, but in the opposite direction from 38a: the trades it keeps are worse than the trades it removes. See attack38a for the paired verdict."
+  },
+  {
+    "id": "attack39a-sweep-depth-filter-h1",
+    "name": "Attack 39a: sweep-depth filter on Attack 37, NEVER-TUNED half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack39-sweep-depth-filter.pine",
+    "description": "Queue item 1, second filter term for Attack 37, and deliberately LIGHT after Attack 38's EMA200 trend gate culled ~80% of the sample (322->65, 196->40) and broke H2. THE TERM: minimum sweep depth. Attack 37 claims a break below a prior 20-bar swing low that closes back above it is a STOP-RUN rather than genuine supply, and that claim implies a break which barely dips below the level flushed nothing and should not count. So: require (swingLow - low) / close * 100 >= 0.15%. One term added to Attack 37, everything else held byte-identical.",
+    "metrics": {
+      "netProfitPct": -3.61138343,
+      "profitFactor": 0.98206513,
+      "maxDrawdownPct": 29.34003832,
+      "totalTrades": 280,
+      "winRatePct": 37.85714286,
+      "avgTradePct": -0.0128978,
+      "sharpeRatio": 0.02482331,
+      "commissionPaid": 2396.8775433,
+      "avgWinningTrade": 186.556255880189,
+      "avgLosingTrade": -115.724721072414,
+      "largestLoss": -608.351121,
+      "largestWin": 426.69991,
+      "longTrades": 280,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1ND23D57PY3851E9D56VN2X",
+      "strategyId": "01M1ND23J528XFAW7FQ3NE0G2C",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1ND23D57PY3851E9D56VN2X",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T05:08:00Z"
+    },
+    "verdict": "REJECTED -- and the DIRECTION of the failure inverts Attack 37's stated premise",
+    "notes": "REJECTED on the never-tuned half alone, and the second credit was DELIBERATELY NOT SPENT. Against Attack 37a (PF 1.02423271 / DD 31.63538941% / 322 trades / 38.20% win): profit factor falls to 0.98206513, BELOW 1.0. The discovery mandate's kill rule is explicit that a pre-2024 half under 1.0 is discarded and not rescued, so confirming a dead term on the recent half would have bought nothing. THE FILTER WAS LIGHT AS DESIGNED -- 322 -> 280, a 13% trim against Attack 38's ~80% cull -- so this is NOT the Attack 38 failure repeated. It is a cleaner and more interesting failure. THE DIRECTION IS THE FINDING, AND IT INVERTS THE MECHANISM'S OWN STATED PREMISE. The term KEEPS deep sweeps and REMOVES shallow ones. Removing the shallow ones took the half from +5.60% to -3.61% -- roughly 9 percentage points of return lived in the 42 trades that were discarded. SHALLOW SWEEPS ARE THE PROFITABLE ONES; DEEP SWEEPS ARE WORSE. Attack 37's Pine header reasons that a deeper penetration means more resting stops were flushed and therefore more fuel for the reversal. The data says the opposite: a deep flush is GENUINE SUPPLY finding real sellers, while a marginal poke that is immediately reclaimed is the cleaner failed-breakdown. The edge is in the FAILURE of the break, and the more decisively price actually broke, the less of a failure it was. DRAWDOWN IMPROVED WHILE PROFIT FACTOR FELL (31.64% -> 29.34%), which is consistent: the filter removed genuinely profitable but volatile trades, leaving a smoother and poorer set. Read against the three drawdown categories, Attack 37 is category 3 (bleed on a POSITIVE edge) so a filter is supposed to remove LOSERS from a winning distribution -- this one removed winners, which is exactly the diagnostic the category framing exists to make visible. THE NEXT TERM IS THE MIRROR OF THIS ONE and is now queued: CAP the sweep depth rather than flooring it (require sweepDepth <= some maximum), which this result predicts should help. That prediction is recorded BEFORE the run so the next cycle is a test rather than a search. Cascade ratio 1, so 280 is a true position count (HARD LESSON 35). NUMBERING: Attack 39, continuing after the cloud routine's Attack 38 the same hour."
   }
 ];
-const BUILT = "2026-09-04 04:11";
+const BUILT = "2026-09-03 23:09";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
