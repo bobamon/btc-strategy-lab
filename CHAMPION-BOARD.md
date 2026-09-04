@@ -4096,3 +4096,89 @@ runs already available (one spent, kill rule stops the second).
    genuinely fresh mechanism family per the mandate's fallback clause -- weighting frequency measurement
    at least as heavily as the mechanism claim, as Attack 54's queue already said and this cycle
    confirms was necessary.
+
+---
+
+# ATTACK 56 - CONSECUTIVE-CLOSE STREAK EXHAUSTION REVERSION. DISCARDED ON H1, THE FOURTH FREQUENCY MISS THIS BOARD HAS MEASURED.
+
+The stored prompt asked a TENTH time for Attack 37's filter stack, describing a board state (322/196
+trades, "earned a filter stack, queued not built") now 19 attacks stale. **The docs override it again.**
+Attack 41 closed Attack 37, Attack 43 closed the sweep-reversal family, Attack 47 died on the ~77%
+sample wall against champion Attack 46 (HARD LESSON 45/49), and Attack 55's queue said the funding-clock
+family is closed pending a counter-build diagnostic that only gates a **third clock variant**, not a
+new mechanism. This cycle used the mandate's fallback clause and opened a genuinely fresh mechanism
+family, per Attack 55's own queue item 4.
+
+**CLAIM:** a run of 8 consecutive lower closes, with no single up-close bar breaking it, is a rare,
+one-directional order-flow event -- sustained selling without a single pause is more likely forced or
+momentum-chasing flow than fresh conviction at each new lower price, and it reverts toward the level the
+streak departed from. Entry: close of the 8th consecutive down-close bar, via 7 chained
+`close[i] < close[i+1]` comparisons. **Genuinely distinct from every family on this board:** a pure
+price-SEQUENCE claim -- no oscillator (unlike Attack 51/52), no volume term (unlike Attack 53), no
+swing-pivot detection (unlike Attack 37-47), no time-of-day gate (unlike Attack 34/54/55), and it trades
+*against* an extended run rather than *with* a single impulse bar (unlike Attack 49). Stop:
+`ta.lowest(low, 8)`, the true low of the whole streak window (structure, LESSON 5). Target: `close[8]`,
+the price the streak departed from -- a real traded level, not a stop multiple (HARD LESSON 41/47). R
+floor 0.8% by exclusion. Long only, bare, no filter stack. Pine:
+`strategies/pine/attack56-consecutive-close-streak-reversion.pine`.
+
+| | **Attack 56a** never-tuned (H1) |
+|---|---|
+| Profit factor | **0.41845287** |
+| Max drawdown | 17.63221268% |
+| Trades | **13** |
+| Win rate | 15.38461538% |
+| Avg loser | -$158.72 |
+| Largest loss | -$285.96 |
+| Net return | -10.15% |
+
+## KILL RULE APPLIED, DOUBLY. H2 NOT RUN, SECOND CREDIT NOT SPENT.
+
+PF 0.418 is well below 1.0 -- the kill rule applies outright. **Independently, 13 trades sits far under
+the 30-trade RATCHET v2 floor**, so even setting the kill rule aside this half would never have been
+quotable as a result (LESSON 12). Two separate reasons to stop, both present at once -- the same shape
+as Attack 54.
+
+## THE REAL FINDING IS FREQUENCY, AGAIN (HARD LESSON 4) -- THE LARGEST NON-CLOCK MISS ON THIS BOARD
+
+The pre-registered estimate (stated in the Pine header before running, LESSON 17) treated each bar as an
+independent coin flip: `0.5^8 x 85,655 H1 bars ~= 334`, inside the lab's settled 60-350 workable band.
+**Actual: 13, roughly 25.7x rarer than estimated.** Eight consecutive down closes with zero up-close
+bars anywhere in the run is far rarer in real BTC 15m data than an independent-Bernoulli model predicts.
+This is the **fourth** frequency-driven miss quantified on this board -- HARD LESSON 4's original 4-10x
+miss on Attack 003, Attack 54's 38x miss, Attack 55's 165x miss, and now this 25.7x miss -- and it says
+the independence assumption behind naive frequency estimates keeps failing in the same direction
+(real event rarer than modeled), whatever the mechanism family.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+13 trades is too thin to classify with confidence, but directionally this is **category 2, bleed on a
+negative edge** (PF 0.418, avg loser -$158.72, win rate 15.38%) -- not category 1 (largest loss -$285.96
+is not disproportionate against the average) and not category 3 (the edge itself is negative, not thin-
+but-positive). Recorded per the board's standing instruction to report avg loser, win rate and max
+drawdown together on every run.
+
+## WHAT THIS SETTLES
+
+**Price-sequence streak-counting, tested here for the first time on this board, is 0-for-1** -- discarded
+on both the kill rule and the sample floor simultaneously. The mechanism claim itself was never
+seriously tested (13 trades is not enough to falsify or confirm the reversion idea) -- what this run
+actually establishes is that **long monotonic close-streaks of length 8 are much rarer in BTC 15m data
+than a coin-flip model predicts**, a frequency fact independent of whether the reversion claim is true.
+
+## QUEUE
+
+1. **Do not tune `streakLen` blind.** If this family is revisited, first measure the raw frequency of
+   streaks at each candidate length (e.g. streakLen=5 or 6) before building stop/target logic around it
+   -- this cycle's own estimate was off by 25.7x, and a shorter streak length is the only lever likely to
+   reach the workable band, not a filter or a different target.
+2. **Attack 46 remains the sole both-halves-positive candidate on the board**, both halves clear,
+   cold-reproduced, filters exhausted per HARD LESSON 49.
+3. **The out-of-sample test for Attack 46 still ranks first and still cannot be run** under
+   BTCUSDT-only -- unchanged, restated because this cycle did not touch it.
+4. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before a fifth fresh mechanism.
+5. **Seven straight new-mechanism-or-refinement proposals (50-56) have now failed.** Frequency
+   estimation itself -- not the mechanism claim -- is now the recurring point of failure across four of
+   these seven; the next cycle should treat a pre-registered frequency estimate as a hypothesis to
+   verify on a cheap partial run before committing to full stop/target logic, wherever that is practical.

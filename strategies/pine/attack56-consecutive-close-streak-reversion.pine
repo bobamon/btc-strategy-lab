@@ -1,0 +1,137 @@
+//@version=6
+// BTC ATTACK 56 - CONSECUTIVE-CLOSE STREAK EXHAUSTION REVERSION. LONG LEG. BARE, NO FILTER STACK.
+//
+// THE STORED PROMPT still asks for Attack 37's filter stack (a TENTH time), describing a board state
+// (Attack 37, 322/196 trades, "earned a filter stack, queued not built") now 19 attacks stale. THE DOCS
+// OVERRIDE IT: Attack 41 closed Attack 37 as a development target, Attack 43 closed the whole
+// sweep-reversal FAMILY (37-43), Attack 47 -- the one filter tried on the current champion, Attack 46 --
+// died on the ~77% sample wall (HARD LESSON 45/49), and Attack 55's own queue said the funding-clock
+// family is closed pending a counter-build diagnostic that only gates a THIRD clock variant, not a
+// wholly new mechanism. This cycle uses the mandate's fallback clause: propose one genuinely new
+// mechanism, per Attack 55's queue item 4 ("open a genuinely fresh mechanism family... weighting
+// frequency measurement at least as heavily as the mechanism claim").
+//
+// ==================== THE CLAIM ====================
+// A run of N consecutive lower closes, with no single up-close bar breaking it, is a statistically rare,
+// one-directional order-flow event. It depletes willing short-term sellers faster than it depletes
+// buying interest waiting on the sidelines, because sustained selling without any pause is more likely
+// to represent forced or momentum-chasing flow than fresh conviction at each new lower price. Long only:
+// enter at the close of the Nth consecutive down bar, targeting the price level the streak departed
+// from -- not a stop multiple. Genuinely distinct from every family on this board: not a failed-break
+// swing-low reversal (Attack 37-43, single-bar arm+trigger off a swing low), not a bounce off a fixed
+// structural support level (Attack 44-47, level found via ta.lowest of a fixed window, held for the
+// argument), not a single-bar range/volume impulse continuation (Attack 49), not a session-range
+// breakout (Attack 50), not an RSI/price divergence at a swing pivot (Attack 51/52, which requires an
+// oscillator), not an order-flow volume-delta proxy (Attack 53), and not a calendar/clock trigger
+// (Attack 34/54/55). This is a pure PRICE-SEQUENCE exhaustion claim: N consecutive same-direction closes
+// with no oscillator, no volume term, no swing-pivot detection, and no time-of-day gate.
+//
+// ==================== AUDIT, ONE LINE PER LEG (LONG ONLY -- LESSON 6) ====================
+//   R >= 0.8% (LESSON 3) -- rFloorOk, entry close to streakLow, enforced by EXCLUSION (a shallow streak
+//        is skipped, never widened to force a trade through).
+//   Stop beyond STRUCTURE (LESSON 5) -- slPx = ta.lowest(low, streakLen), the true low of the whole
+//        streak window, not just the entry bar's own low -- a real structural extreme the streak
+//        printed, not an arbitrary offset.
+//   Each leg separately (LESSON 6) -- LONG ONLY this cycle. The short mirror (a streak of consecutive
+//        UP closes fading back down) is a deliberate next step, not assumed here: HARD LESSON 48 says a
+//        filter or mechanism proven on one leg does not transfer automatically to the other, and this is
+//        the first run of the family on either leg.
+//   BINDING (E17) -- ONE condition, streakDown, evaluated on a single bar via streakLen-1 chained
+//        historical close[] comparisons (close[i] < close[i+1] for i = 0..streakLen-2). Trade count is
+//        read before any ratio is quoted (LESSON 12).
+//   REDUNDANCY (E14) -- rFloorOk constrains STOP distance (>= 0.8% of price); rrOk only checks tpPx
+//        exists above close (existence, not a size threshold). Non-overlapping, same construction as
+//        every prior level-target build on this board (Attack 44-47, 54, 55).
+//   LATCH IN SEQUENCE (LESSON 8) -- N/A BY DESIGN, stated explicitly: streakDown is a single-bar lookback
+//        check across streakLen fixed historical close[] references, not a stateful arm-then-trigger
+//        construction across bars, so there is no var-latch to sequence (unlike the sweep-reversal
+//        family, Attack 37-43).
+//   SL and TP FIXED AT ENTRY -- slPx/tpPx captured once at entry from the streak's own low and the
+//        pre-streak close. No trailing, no averaging down, no martingale.
+//   CASCADE (HARD LESSON 35/50) -- 100% equity, single fixed stop/target, pyramiding=1; expect
+//        cascadeRatio 1 if this advances far enough to need get_trades verification before RATCHET v2
+//        clause 3.
+//
+// ==================== FREQUENCY ESTIMATE, A HYPOTHESIS TO BE SCORED (HARD LESSON 4) ====================
+// streakLen = 8. Naive independent-coin-flip model: P(8 consecutive down closes ending at a given bar)
+// = 0.5^8 = 1/256 ~= 0.0039. Attack 55's own count put H1 at ~85,655 15m bars, giving a naive estimate
+// of ~334 raw signal bars -- inside, but near the top of, the lab's settled 60-350-per-half workable
+// band. THIS ESTIMATE IS FLAGGED IN ADVANCE AS UNRELIABLE IN EITHER DIRECTION: real BTC returns are not
+// an independent coin flip -- momentum/trending regimes would make long down-streaks MORE common than
+// the binomial model predicts (inflating the raw signal count above ~334), while the fact that only
+// FLAT-position bars can generate a new trade (pyramiding=1, no re-entry while a position from an
+// earlier bar in the same super-streak is still open) collapses many of those raw signal bars into a
+// single trade (deflating the realized trade count below the raw estimate). Both effects work in the
+// same net direction (fewer realized trades than the raw ~334), so the actual count is the finding, not
+// the ~334 figure -- read directly off the result, per HARD LESSON 4, not asserted from this estimate.
+//
+// ==================== OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17) ====================
+//   * PRE-2024 HALF (H1, never-tuned, 2022-01-01 -> 2024-06-08) BELOW 1.0 -> KILL RULE. Discard
+//     outright, do NOT run H2, do NOT add filters to rescue it.
+//   * H1 >= 1.0 AND TRADE COUNT >= 30 -> run H2 as the second credit; a genuine new both-halves candidate
+//     if H2 also clears 1.0.
+//   * H1 >= 1.0 BUT TRADE COUNT < 30 -> HARD LESSON 12/RATCHET v2 clause 3: the ratio is a direction, not
+//     a quotable result, even if positive. Credits allow the full pair (balance > 500) so H2 still runs
+//     for completeness, but neither half is claimed as a candidate at that sample size.
+//   * TRADE COUNT FAR ABOVE 350 -> a cost problem in Attack 33's/48's shape is the first thing to check
+//     (commission vs net P&L), not a filter-stack rescue.
+//   * A MAJORITY OF HOLDS AT maxBars 192 -> HARD LESSON 38 truncation, reported before any conclusion is
+//     drawn from the achieved win/loss ratio.
+//   REPORT gross, commission, achieved ratio, avg loser, win rate and max drawdown together, per the
+//   board's standing instruction since Attack 37 named the three drawdown categories.
+
+strategy("BTC Attack56 consecutive-close streak reversion", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+streakLen = input.int(8,    "Consecutive down closes required")
+minRpct   = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars   = input.int(192,  "Max bars in trade")
+
+// streakLen-1 chained comparisons: close[i] < close[i+1] for i = 0..streakLen-2 (streakLen = 8 -> 7 terms)
+c0 = close[0] < close[1]
+c1 = close[1] < close[2]
+c2 = close[2] < close[3]
+c3 = close[3] < close[4]
+c4 = close[4] < close[5]
+c5 = close[5] < close[6]
+c6 = close[6] < close[7]
+
+streakDown = c0 and c1 and c2 and c3 and c4 and c5 and c6
+
+flat = strategy.position_size == 0
+
+slCand = ta.lowest(low, streakLen)
+tpCand = close[streakLen]
+
+rLong    = close - slCand
+minR     = close * minRpct / 100
+rFloorOk = rLong >= minR
+rrOk     = not na(tpCand) and tpCand > close
+
+goLong = flat and streakDown and rFloorOk and rrOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := slCand
+    tpPx   := tpCand
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(slPx, title="StopPx")
+plot(tpPx, title="TargetPx")
