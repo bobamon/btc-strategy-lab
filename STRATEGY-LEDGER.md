@@ -1572,3 +1572,45 @@ any build (this lab's or a sibling's) where `get_backtest_result`'s `cascade` bl
 1.0, those specific fields should be read alongside `uniqueEntries`, not instead of it. **Open and
 low-priority: why the artefact appears on short builds (v51, v53, v55) and not the long ones (v37, v52,
 v54, all ratio 1.0) is unexplained** — worth a look if it recurs on a fourth build, not before.
+
+---
+
+## ██ HARD LESSON 33 — AN AUTOMATED CYCLE THAT ENDS IN A PERMISSION PROMPT DOES ALL THE WORK AND
+## SAVES NONE OF IT (ALL THREE LABS, 2026-09-03/04)
+
+**Overnight, roughly nine consecutive hourly cloud runs across the three labs each did a complete,
+correct research cycle — and threw every bit of it away.**
+
+The stored prompts ended with: *"...build the dashboard, republish it with url=..., update the log,
+commit, pull --rebase, push."* The publish step came **before** the commit. A cloud run cannot approve
+its own `Artifact` publish permission prompt, so every run reached that call and **hung there
+permanently** — `worker_status: requires_action` — and never reached `git commit`, let alone `push`.
+
+**The cost, measured not estimated.** Credits went 690 → 623 across the window, **67 spent**, against
+**three** surviving commits. The runs pulled the repo, read the docs, wrote correct Pine, spent a
+credit on a real backtest, recorded it with provenance, updated the log and built the dashboard — all
+of it inside a sandbox that was then discarded.
+
+### WHY THIS WAS INVISIBLE FOR HOURS
+Nothing failed. There was no error, no red status, no alert. `git log` simply showed no new commits,
+which is indistinguishable from "the routines had nothing to do." **The failure mode of a blocked
+permission prompt is silence**, and silence is exactly what a healthy idle loop looks like. It was
+found only by checking `last_fired_at` on the routine against the newest commit timestamp and noticing
+a fifteen-hour gap — then by reading a run log and seeing it end mid-sentence on a permission prompt.
+
+### THE RULE
+1. **In an unattended run, ORDER THE STEPS BY DURABILITY.** Persist first — commit and push — then do
+   anything that could block. The push is what makes work real; everything after it is decoration.
+2. **Never put a tool that can raise a permission prompt in the tail of an automated cycle.** For
+   these labs the fix is absolute: cloud routines do not call `Artifact` at all. The dashboard HTML is
+   committed to git, and a local session with a human present republishes it.
+3. **A silent loop is not a healthy loop.** Verify an automated cycle by comparing the routine's
+   `last_fired_at` against the newest artefact it should have produced — a commit, a row, a file. "No
+   news" from an unattended agent is a claim to be checked, not a state to be trusted.
+
+### THE GENERAL FORM, WHICH IS BIGGER THAN THIS BUG
+**Capability granted to an unattended process must be checked against what that process can actually
+approve.** Handing a cloud routine a tool that requires interactive consent is not a partial
+capability — it is a **trap**, because the routine will reach for it, block, and lose everything it
+did beforehand. The right question when designing an automated loop is not "can it do this step" but
+**"what happens to the work already done if this step never returns."**
