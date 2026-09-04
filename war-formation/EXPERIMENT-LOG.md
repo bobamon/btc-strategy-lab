@@ -4252,3 +4252,58 @@ left to solve, an engine sizing constraint (HARD LESSON 34) outside what any Pin
 Unchanged from the prior entry — no axis reopened. Hold here until either new 1m data becomes
 available, the engine's short-side sizing constraint changes, or the user answers the two questions
 above.
+
+
+---
+
+## E64a RE-OPENED BY TRADE-LEVEL FORENSICS -- THE SHORT LEG HAS NEVER ACTUALLY BEEN TESTED (2026-09-04, no credit)
+
+The standing queue item said: *"Three shorts failed at 0.454, 0.300 and below 1.0, all with 4-7% win
+rates against an rr of 2.0 that needs 33%. A 4-7% win rate means the stop is hit almost every time -- a
+statement about WHERE and WHEN the short enters."*
+
+`get_trades` is free, so before spending a credit on entry geometry I read E64a's 43 trades. **The
+premise is wrong, and so was my own earlier conclusion that "the short's problem is the mechanics."**
+
+### THE WINNERS ARE PERFECT. THE LOSERS ARE NOT SHIELD EXITS AT ALL.
+
+**All three winners exit at exactly 2000.0 points of profit** -- 91938.7 to 89938.7, 89266.2 to
+87266.2, 81226.4 to 79226.4. The fixed dollar target works exactly as the A.L.C.M. specifies.
+
+**The forty losers exit at inconsistent and absurdly small adverse distances:**
+
+| entry | exit | adverse move |
+|---|---|---|
+| 63173.8 | 63182.0 | **+0.013%** |
+| 67927.6 | 67939.0 | **+0.017%** |
+| 66878.8 | 66902.3 | +0.035% |
+| 86396.7 | 86436.8 | +0.046% |
+| 86018.3 | 86521.4 | +0.585% |
+
+**A shield is a fixed dollar gap and would produce a consistent loss distance. These are not shield
+exits.** They are margin liquidations firing wherever the engine's margin check happens to trip, and
+the observed 0.013%-0.585% band brackets HARD LESSON 34's ~0.35% ceiling exactly. **The strategy's own
+exit never gets to run.**
+
+`cascadeRatio` is 1 and all 43 rows are distinct entries, so unlike the 3M short there is no sliver
+artifact -- the 6.98% win rate is arithmetically real. It is just not a fact about War Formation.
+
+### WHY IT HITS SHORTS AND NOT LONGS -- the part that was not understood before
+For a **short**, an adverse move raises the loss **and raises the notional**, so required margin climbs
+while equity falls; at 100% of equity with `margin_short=100` the two cross almost at once. For a
+**long**, an adverse move **shrinks** the notional, so required margin falls alongside equity and they
+never cross. **The asymmetry is a property of the margin formula** -- not a bug, and not a defect in the
+user's strategy.
+
+### WHAT THIS OVERTURNS
+- **"The short's problem is the mechanics, not the direction" is WRONG.** It is neither. It is **position size**.
+- E64a's achieved win/loss ratio is roughly **6:1** (avg winner ~$217, avg loser ~$35.80), whose
+  break-even win rate is **14.2%**. **The geometry is not even bad. It never gets a fair trial.**
+- E64a, E66 and E67 differ from one another by **noise on top of a harness artifact**, and **no
+  entry-geometry change can fix any of them.** The queue item asking for one is retired.
+
+### THE ONLY WAY FORWARD FOR THE USER'S BIDIRECTIONAL REQUIREMENT
+Test the short at **reduced position size (~25-50% of equity)** so the margin boundary sits outside the
+shield. That is a **DECLARED DEVIATION** from the forced parity profile: it must be labelled on every
+run that uses it, never applied silently, and **never compared against a 100%-equity long without
+saying so.** Queued as the next War Formation experiment.

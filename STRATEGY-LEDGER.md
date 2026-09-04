@@ -2041,3 +2041,75 @@ moving equity base**. Attack 43's −$92.37 average loss looks *smaller* than At
 equity fell 47.81% during the run, so later trades sized off a much smaller base. **Compare
 percentage fields across runs with different equity paths, never dollar averages.** Ratios like
 `ratioAvgWinLoss` are safe because the base cancels.
+
+
+---
+
+## HARD LESSON 41 - A TARGET DEFINED AS A MULTIPLE OF THE STOP IS A DISTANCE THE MARKET HAS NO REASON TO TRAVEL. TARGET A LEVEL INSTEAD.
+
+**HARD LESSON 39 said the achieved-vs-nominal ratio is the number that separates working from failing,
+and five builds confirmed it. Attack 44 found the CAUSE, and it is fixable.**
+
+Every one of those five set its target as `rr x R`:
+
+| build | achieved ratio |
+|---|---|
+| Attack 41 (rr 3.0) | win rate collapsed |
+| Attack 42 (daily anchor, 2R) | 1.4452 |
+| Attack 43 (1h, 2R) | 1.5071 |
+| WF e50b (wider shield) | capped |
+| **Attack 44 (prior 20-bar HIGH)** | **2.41021229** |
+
+**Twice the stop distance corresponds to nothing.** Price is not aiming at it, so it is reached only
+when a move happens to be large enough - which is why the achieved ratio kept landing 25-28% short no
+matter what was done to R, to the anchor, or to the bar size. **A level price traded at an hour ago is
+something price demonstrably returns to.**
+
+**HOW TO USE THIS:** prefer an exit at a STRUCTURAL LEVEL over an exit at a multiple of risk. Then let
+reward:risk be an OUTPUT of the geometry and merely DECLINE setups whose geometry is poor, rather than
+making rr an input and imposing it on every trade.
+
+**AND THE CONSTRAINT MOVES RATHER THAN DISAPPEARING.** Fixing the exit did not produce a winner - it
+relocated the binding constraint to the ENTRY. Attack 44's ratio is excellent and its win rate (27.95%)
+is 1.39pp under the 29.33% break-even that ratio implies, with gross edge per trade of $3.31 against an
+$8.24 fee. **Exit geometry and entry quality are separate problems and fixing one exposes the other.**
+
+**ENGINE FIELD CORRECTION, worth keeping:** the returned `grossProfit` / `grossLoss` are sums of *net*
+trade P&L - their quotient reproduces the reported `profitFactor` exactly. **True pre-commission gross
+must be computed as `netProfit + commissionPaid`.** Do not read those two fields as pre-cost figures.
+
+
+---
+
+## HARD LESSON 42 - THE SHORT-SIDE MARGIN CEILING IS A PROPERTY OF THE MARGIN FORMULA, AND IT HAS BEEN SILENTLY FAKING SHORT RESULTS IN BOTH USER LABS.
+
+HARD LESSON 34 observed that shorts at 100% equity are force-closed at ~0.35% adverse. **Trade-level
+forensics in two labs on the same day now show the mechanism, the signature, and the reason it is
+asymmetric -- and confirm that every short number this project has produced measured the harness.**
+
+**THE MECHANISM.** For a SHORT, an adverse move increases the loss AND increases the notional, so
+required margin rises while equity falls and at `percent_of_equity 100` with `margin_short=100` the two
+cross almost immediately. For a LONG, an adverse move SHRINKS the notional, so required margin falls
+alongside equity and they never cross. **Longs are safe and shorts are not, by arithmetic.**
+
+**TWO DISTINCT SIGNATURES, and they look nothing alike:**
+
+| | 3M v53 | WF e64a |
+|---|---|---|
+| signature | `cascadeRatio` 1.4655 | `cascadeRatio` **1** |
+| what happens | position sheds ~2% slivers to meet margin, remainder closes later | position is closed outright |
+| how to spot it | first row of a group is under 10% of size, always short | **losers exit at wildly inconsistent tiny adverse distances (0.013%-0.585%) while winners exit exactly on target** |
+
+**The second signature is the dangerous one, because `cascadeRatio 1` looks clean.** The tell is not the
+cascade ratio -- it is that a build with a FIXED exit distance produces losses at INCONSISTENT
+distances. A fixed shield or a fixed stop must produce a consistent loss size. **If it does not, the
+strategy's exit is not the thing closing the trade.**
+
+**HOW TO USE THIS:**
+1. **On any short build, check loss-distance consistency before believing the win rate.** Read
+   `get_trades` -- it is free -- and compare the adverse distance across losers.
+2. **Never diagnose a low short win rate as an entry-timing problem until this is ruled out.** Both labs
+   did exactly that and both were wrong; War Formation spent three experiments on it.
+3. **The only fix is reduced position size (~25-50% of equity), and it is a DECLARED DEVIATION** from
+   the forced parity profile. Label it on every run, and never compare such a run against a
+   100%-equity long without saying so.

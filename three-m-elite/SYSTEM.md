@@ -3212,3 +3212,61 @@ eaten by cost, not absent.
 4. **The most promising untried lever is anything that raises gross edge per trade WITHOUT lengthening
    holds** — the one combination that has never failed in this project. v37 already has the clean
    resolution; it needs more edge per trade, not more time.
+
+
+---
+
+## CASCADE SIGNATURE RESOLVED -- AND THE PREMISE BEHIND THE QUESTION WAS WRONG (2026-09-04, no credit spent)
+
+The standing queue item read: *"All are SHORT builds, so the one-entry-per-zone latch is not holding on
+the short side. NO SHORT NUMBER FROM THIS LAB SHOULD BE BELIEVED UNTIL THIS IS UNDERSTOOD."*
+
+`get_trades` is free, so this was answered by decomposing **all 255 rows of v53** by
+`(entryBar, entryPrice)` rather than by spending a credit.
+
+### THE LATCH IS FINE. THE MULTIPLICITY IS ON THE EXIT SIDE.
+
+255 rows come from **174 unique entries** (depth 107 / 54 / 12 / 1). Every row inside a multi-row group
+shares the **same entryBar and the same entryPrice** -- one entry per zone, exactly as specified.
+
+| evidence | value |
+|---|---|
+| first row of a multi-row group, as a share of position size | median **2.28%**, max 7.34% |
+| groups where that first row is under 10% of size | **100%** (67 of 67) |
+| direction of all 148 multi-rows | **short, without exception** |
+| groups whose successive exits are each equal-or-worse | 64.2% |
+
+A short is opened, moves adverse, the engine **sheds a ~2% sliver to meet margin**, and the remainder
+closes later. This is a **margin-call unwind** -- HARD LESSONS 34 and 35 confirmed at trade level
+instead of inferred from aggregate ratios.
+
+### WHAT IS CONTAMINATED, AND WHAT IS NOT
+
+| | by rows | **by entry** |
+|---|---|---|
+| profit factor | 0.70512830 | **0.70360999** |
+| win rate | 13.73% | **20.11%** |
+
+**Profit factor was never distorted** -- the two differ by 0.0015, so every short PF this lab has
+quoted stands. **The win rate was.** Sliver rows are almost always losses, so they inflate the loss
+count: **every short win rate this lab has reported is understated by roughly 6pp.** v53's real win
+rate is 20.11%, not 13.73%.
+
+Liquidated entries average **-$15.32** against **-$13.59** for clean ones, so the unwind is not where
+the money went either.
+
+### THE DECISIVE NUMBER
+
+**Gross P&L is -$895.26 -- before a single cent of commission**, against $1,585.06 of commission.
+
+**The 3M short loses money at zero cost.** That closes the "it is just fees" reading for good. The
+mirror is a **mechanism failure, not a harness artifact**, and no amount of cost engineering or
+cascade correction reaches it.
+
+### WHAT THIS CHANGES FOR THE QUEUE
+1. **Short numbers are now believable on PF and quotable.** The blocking caveat is lifted.
+2. **Re-quote short win rates by entry, not by row.** v55's 90 rows / 62 entries carries the same
+   correction and its win rate is likewise understated.
+3. **The gated short (v55, 0.72183885) is not a cost problem and cannot be rescued by one.** Since the
+   ungated mirror is gross-negative, the honest next question is whether the SHORT'S ENTRY GEOMETRY --
+   not its bias gate and not its costs -- is what the source actually prescribes.

@@ -3078,3 +3078,53 @@ cleanly; 3M's v37 (achieved 1.9422 against 2.0) remains the only build in the pr
    does with a 4H demand-zone tap and a 2R target hit in 47 of 96 bars.
 3. **Do not raise R again without a mechanism for reaching the target faster.** Three attempts have
    now failed on exactly that.
+
+
+---
+
+# XX ATTACK 44 - THE TARGET DEFINITION *WAS* THE PROBLEM. AXIS BROKEN, MECHANISM DISCARDED.
+
+The first build in this lab **designed backwards from the exit**. Five mechanisms had died on the
+achieved-vs-nominal axis and every one set its target as `rr x R` - a distance the market has no
+particular reason to travel. So this one picks a **reachable target first**: the **prior 20-bar high**,
+a level price traded at within the last five hours. Entry taps the prior 20-bar low and closes back
+above it; stop is the tap bar's own low; reward:risk is *not a parameter*, just whatever the geometry
+offers, with setups under 1.5:1 declined.
+
+| | Attack 42 | Attack 43 | **Attack 44** |
+|---|---|---|---|
+| target type | daily anchor, 2R | 1h, 2R | **the prior 20-bar HIGH** |
+| **achieved win/loss ratio** | 1.4452 | 1.5071 | **2.41021229** |
+| profit factor | 0.9524 | 0.7535 | **0.93487022** |
+| win rate | - | 33.33% | 27.94759825% |
+| trades | - | 315 | 229 |
+| max drawdown | - | 60.78% | 37.75354674% |
+
+## THE REGISTERED NUMBER LANDED ON THE GOOD SIDE
+**ratioAvgWinLoss 2.41** - avg winner $253.18 against avg loser -$105.04. Every multiple-target build
+in this project sat at 1.44-1.51. **HARD LESSON 39's axis is not a law of the market; it was a property
+of defining the target as a multiple of the stop.**
+
+And the ratio is **real, not a cap artifact**: `avgBarsWinning` **67.94** against a 192-bar cap -
+winners resolve in about a third of the budget, which is exactly the condition HARD LESSON 38 requires
+before a ratio can be trusted.
+
+## WHY IT STILL LOSES - AND IT IS NOT THE RATIO
+Break-even for a 2.41 ratio is 1/(1+2.41) = **29.33%**. The mechanism runs **27.95%**.
+
+**It is 1.39 percentage points of win rate from break-even** - the closest this lab has come to a live
+edge on a first bare run.
+
+**Cost decomposition:** gross = -$1,128.86 + $1,886.60 = **+$757.74**, so unlike Attack 43 this is
+**gross-positive**. But gross edge per trade is **$3.31 against an $8.24 fee** - a 0.40x cost ratio,
+*worse* than Attack 37's 1.2x. By HARD LESSON 37's screen it fails on per-trade edge even while
+carrying the best exit geometry the lab has produced.
+
+## QUEUE - THE NEXT TERM IS WELL-MOTIVATED FOR THE FIRST TIME
+1. **Raise the minimum RR floor above 1.5.** It attacks *both* binding constraints at once: it lifts
+   gross edge per trade **and** raises the ratio.
+2. **And it is NOT Attack 41 repeated.** Attack 41 moved the target further away and asked price to
+   travel further in the same bar budget. Raising an RR floor on a **level** target selects setups that
+   already offer more room - which can come from entering *nearer support* rather than demanding a
+   longer journey. **It need not lengthen holds.** Recorded before the run so the next cycle is a test.
+3. **Do not build a filter stack on this yet.** The family is one run old and its half is under 1.0.
