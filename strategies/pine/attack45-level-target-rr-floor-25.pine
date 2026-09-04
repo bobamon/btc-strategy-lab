@@ -1,0 +1,121 @@
+//@version=6
+// BTC ATTACK 44 - THE TARGET IS A LEVEL, NOT A MULTIPLE. THE FIRST BUILD IN THIS LAB DESIGNED
+// BACKWARDS FROM THE EXIT.
+//
+// THE STORED PROMPT says build Attack 37's filter stack. THE DOCS OVERRIDE IT: Attack 41 closed
+// Attack 37 as a development target after four single-term rejections, and Attack 43 closed the
+// sweep-reversal FAMILY across both timeframes. The board's live queue item is the one this build
+// implements.
+//
+// ==================== THE ONE THING EVERY FAILURE IN THIS LAB HAS IN COMMON ====================
+// FIVE mechanisms have now died on the ACHIEVED-vs-NOMINAL axis (HARD LESSON 39, five confirmations):
+//   Attack 37   closed on cost - gross edge only 1.2x the fee
+//   Attack 41   rr 2.0 -> 3.0, win rate collapsed, gross edge per trade fell 43%
+//   Attack 42   daily anchor, R rose exactly as designed, achieved 1.4452 against nominal 2.0
+//   WF e50b     sister lab, 3 of 21 trades pinned at the cap, gross PF fell
+//   Attack 43   same geometry on 1h, achieved 1.5071 against nominal 2.0, gross went NEGATIVE
+// EVERY ONE OF THEM SET ITS TARGET AS rr x R. That is the shared term, and it is the suspect.
+// A target defined as a MULTIPLE OF THE STOP is a distance the market has no particular reason to
+// travel. Nothing about "twice the stop distance" corresponds to anything price is aiming at, so the
+// target is reached only when a move happens to be big enough - which is why the achieved ratio keeps
+// landing 25-28% below nominal no matter what is done to R or to the bar size.
+//
+// THE ONLY BUILD IN THIS PROJECT THAT RESOLVES ITS TARGET CLEANLY IS 3M's v37, achieved 1.9422 against
+// nominal 2.0, and its entry is a tap of a 4H DEMAND ZONE - a place where a directional move begins.
+//
+// ==================== SO THIS BUILD INVERTS THE DESIGN ORDER ====================
+// PICK A TARGET THE MARKET REACHES QUICKLY AND OFTEN FIRST, THEN FIND AN ENTRY THAT PRECEDES IT.
+//   THE TARGET IS THE PRIOR 20-BAR HIGH - a level price traded at within the last five hours. It is
+//   reachable BY CONSTRUCTION, because price was just there. It is not a fabricated distance.
+//   THE ENTRY is a pullback that TAPS the prior 20-bar low and CLOSES BACK ABOVE IT - support held.
+//   THE STOP is the tap bar's own low, beyond the structure that was just tested (LESSON 5).
+// Reward:risk is therefore NOT A PARAMETER. It is whatever the geometry hands over on each trade, and
+// the build simply DECLINES any setup whose geometry is worse than 1.5:1.
+//
+// THIS IS A GENUINELY NEW FAMILY FOR THIS LAB, stated plainly so it is not mistaken for a rerun:
+// Attack 33 traded a rolling breakout, 34 a calendar break, 36 a volatility state, 37/43 a failed
+// break. NONE of them targeted a LEVEL. All five targeted a multiple.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - enforced by EXCLUSION via rBig, never clamped. A tap that is too shallow to
+//        clear the floor is SKIPPED rather than having its stop widened.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = the tap bar's own low, the actual extreme of the test of
+//        support. Not an ATR, not a percentage, not the signal price.
+//   Each leg separately (LESSON 6) - LONG ONLY. A short is untestable at this sizing (HARD LESSON 34,
+//        and now confirmed at trade level in the 3M lab: the engine sheds ~2% slivers to meet margin).
+//        Its absence is a harness limit, not a design choice.
+//   BINDING (E17) - the RR floor NECESSARILY binds, since it rejects setups outright. The trade count
+//        is the evidence of how hard, and it is read before anything else.
+//   REDUNDANCY (E14) - the two floors are independent: minRpct constrains the ABSOLUTE stop distance,
+//        minRR constrains the REWARD GEOMETRY. A wide stop can pass one and fail the other.
+//   LATCH IN SEQUENCE (LESSON 8) - sup and res are both [1]-shifted, strictly prior bars; the tap and
+//        the reclaim are the current bar; entry fires at its close. Setup and trigger cannot share a bar.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, so an open position blocks later entries. Named in
+//        advance because a level target produces VARIABLE hold times by construction.
+//   CASCADE (HARD LESSON 35) - long build, expect cascadeRatio 1; verify before applying clause 3.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17). THE ACHIEVED RATIO IS READ FIRST, AND HERE IT IS
+// READ AGAINST THE GEOMETRY'S OWN AVERAGE RATHER THAN AGAINST A NOMINAL rr, SINCE THERE ISN'T ONE:
+//   * BOTH HALVES ABOVE 1.0 AND ratioAvgWinLoss AT OR ABOVE ~1.5 -> a level target IS reached when a
+//     multiple target is not, the design-backwards-from-the-exit principle is vindicated, and this
+//     becomes the lab's first candidate built on it.
+//   * ratioAvgWinLoss WELL BELOW 1.5 -> even a level price just traded at is not being reached, which
+//     would mean the problem is NOT the target definition but the entry's inability to precede a move.
+//     That is the SIXTH confirmation and would redirect the lab entirely onto entry timing.
+//   * PRE-2024 HALF BELOW 1.0 -> DISCARDED by the kill rule. No filters, no rescue, no second half.
+//   * FEWER THAN ~30 TRADES -> a DIRECTION, not a result (LESSON 12).
+//   * A LARGE SHARE OF HOLDS AT maxBars 192 -> the cap is truncating and the comparison is confounded
+//     (HARD LESSON 38). Report it before drawing any conclusion.
+//   REPORT GROSS, COMMISSION AND ACHIEVED RATIO alongside net - required since LESSONS 36 and 39.
+strategy("BTC Attack45 level target RR floor 2.5", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+lookback = input.int(20,     "Level lookback, bars -- sets BOTH the support tapped and the high targeted")
+tapTol   = input.float(0.10, "Tap tolerance, % -- how close to support counts as a tap")
+minRRv   = input.float(2.5,  "Minimum reward:risk -- THE ONE CHANGE, 1.5 -> 2.5")
+minRpct  = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars  = input.int(192,    "Max bars in trade")
+
+sup = ta.lowest(low,   lookback)[1]
+res = ta.highest(high, lookback)[1]
+
+tapped = not na(sup) and low  <= sup * (1 + tapTol / 100)
+held   = not na(sup) and close > sup
+setupOn = tapped and held
+
+rLong  = close - low
+reward = na(res) ? na : res - close
+minR   = close * minRpct / 100
+rBig   = rLong >= minR
+rrOk   = not na(reward) and rLong > 0 and reward / rLong >= minRRv
+
+goLong = setupOn and rBig and rrOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := low
+    tpPx   := res
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(sup, title="Support")
+plot(res, title="TargetLevel")

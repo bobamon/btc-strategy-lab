@@ -4307,3 +4307,60 @@ Test the short at **reduced position size (~25-50% of equity)** so the margin bo
 shield. That is a **DECLARED DEVIATION** from the forced parity profile: it must be labelled on every
 run that uses it, never applied silently, and **never compared against a 100%-equity long without
 saying so.** Queued as the next War Formation experiment.
+
+
+---
+
+## E71 -- THE SHORT LEG, MEASURED HONESTLY FOR THE FIRST TIME
+
+E64a byte-identical except **position size cut to 25% of equity** (explicit Pine `qty`; the parity
+profile overrides `default_qty_value`). A **DECLARED DEVIATION**, made necessary by HARD LESSON 42.
+Direction is the source's **literal** rule -- 2+ consecutive red 6H -- per the user's directive.
+
+### THE REGISTERED FIRST READ: DID THE SHIELD BIND?
+**Yes, on every single trade.** All **21 losers exit at exactly +1000.0 points**; all **12 winners at
+exactly -2000.0**. Zero liquidations, `cascadeRatio` 1.
+
+| entry | exit | gap |
+|---|---|---|
+| 85959.7 | 86959.7 | **+1000.0** |
+| 90390.0 | 91390.0 | **+1000.0** |
+| 63173.8 | 64173.8 | **+1000.0** |
+| 91938.7 | 89938.7 | **-2000.0** |
+| 67605.9 | 65605.9 | **-2000.0** |
+
+Against E64a's losers at 0.013%, 0.017%, 0.035% ... 0.585%. **The A.L.C.M. exit now works exactly as
+the source specifies.**
+
+### WHAT A PURE SIZING CHANGE DID
+
+| | E64a (100% equity) | **E71 (25% equity)** |
+|---|---|---|
+| profit factor | 0.45442725 | **0.97315988** |
+| win rate | 6.98% | **36.36363636%** |
+| max drawdown | - | **2.66826642%** |
+| trades | 43 | 33 |
+
+**A fivefold win-rate increase with byte-identical entry logic.** E64a, E66 and E67 are formally
+retired as harness measurements.
+
+**And 36.36% clears its own bar** -- an rr of 2.0 needs 33.3%. The short's win rate is *above* what its
+own target requires, which every prior short number said was impossible.
+
+**Gross = -$20.43 + $81.43 = +$61.00. The short is gross-positive and loses only to fees.**
+
+### WHAT THIS IS NOT
+- **Not a candidate.** PF 0.97315988 is under 1.0.
+- **33 trades sits at the very floor of quotability** (LESSON 12), and the 1m window is 4.5 months of
+  ONE regime that **cannot support a split**. Stated, not engineered around.
+- **Not comparable to e58a's 1.24015239** -- that is a 100%-equity long, this a 25%-equity short.
+- The 43 -> 33 count drop is **occupancy, not selectivity**: holds exploded to 948 bars average once the
+  shield rather than a margin call ended trades, and `pyramiding=1` blocks entries while open. Predicted
+  in the header before the run.
+
+### QUEUE
+1. **The ratio reads 1.70 against a nominal 2.0 only because qty varies with price and commission hits
+   both sides.** In POINTS it is exactly 2.0 by construction. Report the point ratio for shield builds.
+2. **The binding constraint is now fees, not the market.** $81.43 of commission against $61.00 of gross.
+3. **Re-run the LONG leg at 25% too**, so the two legs are finally comparable on equal terms. Every
+   long number in this lab is a 100%-equity number and cannot be set beside E71 as things stand.

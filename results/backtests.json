@@ -605,5 +605,51 @@
   },
   "verdict": "DISCARDED by the kill rule -- but it BREAKS the axis that killed the last five builds",
   "notes": "DISCARDED: 0.93487022 on the never-tuned half, below 1.0. Second credit NOT spent. THE REGISTERED NUMBER LANDED, AND IT LANDED ON THE GOOD SIDE. ratioAvgWinLoss = 2.41021229 (avg winner $253.18, avg loser -$105.04). Every multiple-target build in this project came in at 1.44 to 1.51 against a nominal 2.0 -- Attack 42 at 1.4452, Attack 43 at 1.5071, Attack 41's collapse, WF e50b's cap truncation. THIS ONE CLEARS 2.4. The pre-registered outcome was explicit that this would mean a level target IS reached when a multiple target is not, and that is what happened. HARD LESSON 39's axis is not a law of the market; it was a property of defining the target as a MULTIPLE OF THE STOP. THE CAP IS NOT BITING, so the ratio is real and not an artifact: avgBarsWinning 67.94 against a 192-bar cap, i.e. winners resolve in about a third of the budget, which is the condition HARD LESSON 38 says must hold before a ratio can be trusted. Losers take 23.25 bars. WHY IT STILL LOSES, AND IT IS NOT THE RATIO: win rate 27.94759825%. Break-even for a 2.41 ratio is 1/(1+2.41) = 29.33%. THE MECHANISM IS 1.39 PERCENTAGE POINTS OF WIN RATE AWAY FROM BREAK-EVEN -- the closest this lab has come to a live edge from a first bare run. COST DECOMPOSITION (LESSON 36): gross = net + commission = -$1,128.86 + $1,886.60 = +$757.74, so the mechanism is GROSS-POSITIVE, unlike Attack 43 which went gross-negative. But gross edge per trade is only $757.74/229 = $3.31 against a per-trade fee of $8.24 -- a cost ratio of 0.40x, WORSE than Attack 37's 1.2x. So by HARD LESSON 37's screen it fails on per-trade edge even though its exit geometry is the best this lab has produced. NOTE ON THE ENGINE FIELDS: grossProfit/grossLoss as returned are sums of NET trade P&L and reproduce the reported profit factor exactly, so true pre-commission gross must be computed as net + commissionPaid. Drawdown 37.75% is worse than Attack 37's 31.64%. Cascade ratio 1 on 229 entries, so the count is true (HARD LESSON 35). THE NEXT TERM IS NOW WELL-MOTIVATED FOR THE FIRST TIME: raise the minimum RR floor above 1.5. It attacks BOTH binding constraints at once -- it lifts gross edge per trade AND raises the ratio -- and crucially it is NOT Attack 41 repeated. Attack 41 moved the target further away and asked price to travel further in the same bar budget. Raising an RR FLOOR on a LEVEL target selects setups that already offer more room, which can come from entering NEARER SUPPORT rather than from demanding a longer journey, so it need not lengthen holds. That distinction is recorded BEFORE the run so the next cycle is a test and not a search."
+ },
+ {
+  "id": "attack45a-level-target-rr-floor-25-h1",
+  "name": "Attack 45a: level target with the RR floor raised 1.5 -> 2.5, NEVER-TUNED half",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "long",
+  "status": "rejected",
+  "createdDate": "2026-09-04",
+  "lastTestedDate": "2026-09-04",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2024-06-08",
+  "specPath": "strategies/pine/attack45-level-target-rr-floor-25.pine",
+  "description": "ONE term moved from Attack 44: the minimum reward:risk the geometry must offer, 1.5 -> 2.5. Everything else byte-identical. Attack 44 established that a LEVEL target is reached where a MULTIPLE target is not (achieved 2.41 against the 1.44-1.51 of every rr x R build) but still lost on two selection constraints: a win rate 1.39pp under break-even and a gross edge per trade of $3.31 against an $8.24 fee. Raising the RR floor attacks both at once. THE REGISTERED DISCRIMINATOR against this being Attack 41 repeated: Attack 41 moved the target further away and asked price to travel further in the same bar budget, so if avgBarsWinning climbs toward the 192 cap here then the floor is buying reward with time and the distinction drawn last cycle was wrong.",
+  "metrics": {
+   "netProfitPct": -4.28500094,
+   "profitFactor": 0.9677241,
+   "maxDrawdownPct": 33.94238674,
+   "totalTrades": 162,
+   "winRatePct": 23.45679012,
+   "avgTradePct": -0.02645062,
+   "sharpeRatio": 0.00129162,
+   "sortinoRatio": 0.0003558,
+   "commissionPaid": 1445.25439415,
+   "avgWinningTrade": 338.096335371053,
+   "avgLosingTrade": -107.065813211693,
+   "ratioAvgWinLoss": 3.15783652,
+   "largestWin": 707.594315,
+   "largestLoss": -292.279875,
+   "avgBarsInTrade": 34.21604938,
+   "avgBarsWinning": 76.57894737,
+   "avgBarsLosing": 21.23387097,
+   "longTrades": 162,
+   "shortTrades": 0
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "01M1NFSFR872KEEGBZ27PKWKG7",
+   "strategyId": "01M1NFSFY00300QSWFRFRY9PMW",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NFSFR872KEEGBZ27PKWKG7",
+   "engineVersion": "tv_jul26_mc7",
+   "cascadeRatio": 1,
+   "verifiedAt": "2026-09-04T05:56:00Z"
+  },
+  "verdict": "DISCARDED by the kill rule -- but the discriminator cleared and every lever moved the right way",
+  "notes": "DISCARDED: 0.9677241 on the never-tuned half, below 1.0. Second credit NOT spent. THE REGISTERED DISCRIMINATOR CLEARED, WHICH IS THE POINT OF THE RUN. avgBarsWinning went 67.94 -> 76.58, a 12.7% rise, still only 40% of the 192-bar cap. THIS IS NOT ATTACK 41 IN ANOTHER COSTUME: a 12.7% increase in holding time bought a 31% increase in the achieved ratio, so on a LEVEL target the RR floor genuinely does buy reward mostly by selecting entries nearer support rather than by demanding a longer journey. The distinction registered last cycle was correct and is now measured rather than asserted. EVERY LEVER MOVED THE RIGHT WAY, MONOTONICALLY: achieved ratio 2.41021229 -> 3.15783652 (+31%); gross = net + commission = -$428.50 + $1,445.25 = +$1,016.75 against Attack 44's +$757.74, so gross edge per trade nearly doubled from $3.31 to $6.28 and the cost ratio went 0.40x -> 0.70x; max drawdown 37.75% -> 33.94%; profit factor 0.93487022 -> 0.9677241. AND THE BREAK-EVEN GAP NARROWED: a 3.158 ratio needs 24.05% and the build runs 23.45679012%, a shortfall of 0.59pp against Attack 44's 1.39pp. Win rate fell 27.95% -> 23.46% as expected, but by LESS than the ratio gained. Trade count 229 -> 162, a 29% cut, so RATCHET v2 clause 4 (the >50% split-test requirement) is not triggered and the count stays well above the 30 floor. Cascade ratio 1 on 162 entries. STILL DISCARDED, AND THE DISCIPLINE MATTERS HERE: two points on a monotone trend is a DIRECTION, not a law, and both points are already below 1.0. A third point at 3.5 would close the remaining 0.59pp if the trend held linearly, and the count would land near 115, still provable -- but running it to see whether a number crosses 1.0 IS parameter sweeping, and it is named as such rather than dressed up. It is justified only as a test of the MECHANISM (does the break-even gap keep closing at ~0.8pp per 1.0 of floor?) and its result must be read as one point on a curve, never as a champion."
  }
 ]

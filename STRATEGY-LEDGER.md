@@ -2113,3 +2113,34 @@ strategy's exit is not the thing closing the trade.**
 3. **The only fix is reduced position size (~25-50% of equity), and it is a DECLARED DEVIATION** from
    the forced parity profile. Label it on every run, and never compare such a run against a
    100%-equity long without saying so.
+
+
+---
+
+## HARD LESSON 43 - HARD LESSON 42's FIX WORKS, AND THE SIZE OF THE CORRECTION IS THE WARNING.
+
+E71 cut War Formation's short from 100% to 25% of equity and **changed nothing else**. Byte-identical
+entry logic, same window, same direction rule.
+
+| | 100% equity | **25% equity** |
+|---|---|---|
+| profit factor | 0.45442725 | **0.97315988** |
+| win rate | 6.98% | **36.36363636%** |
+| loser exit distances | 0.013% - 0.585%, inconsistent | **exactly +1000.0 points, all 21** |
+
+**A fivefold win-rate change from a sizing parameter.** Verified free with `get_trades`: every loser
+exits at exactly the shield and every winner at exactly the target, with zero liquidations.
+
+**THE WARNING IS THE MAGNITUDE.** A harness artifact did not shade this result, it INVERTED it - a
+gross-positive mechanism with a win rate above its own break-even was reading as a 0.45 profit factor
+and a 6.98% win rate. Three experiments were spent theorising about entry geometry on top of it.
+
+**HOW TO USE THIS:**
+1. **On any short build, verify loss-distance consistency BEFORE interpreting anything else.** It is
+   free. A build with a fixed exit distance must produce a consistent loss size.
+2. **Reduced size is a DECLARED DEVIATION.** Label it on every run and never place such a run beside a
+   100%-equity run as though they were comparable. Every long number in the War Formation lab is a
+   100%-equity number and none of them can currently be set beside E71.
+3. **Report the POINT ratio, not just the dollar ratio, for fixed-gap builds.** E71's exits are exactly
+   1000 and 2000 points, an exact 2.0, yet `ratioAvgWinLoss` reads 1.70302978 because qty varies with
+   price and commission is subtracted from both sides. The dollar ratio understates a fixed-gap design.

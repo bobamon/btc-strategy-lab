@@ -739,5 +739,51 @@
   },
   "verdict": "REJECTED -- timeGate BINDS HARDER THAN THE SOURCE'S OWN LOCATION TERM",
   "notes": "REJECTED under RATCHET v2 clause 1. Removing the time gate takes PF 1.24015239 -> 1.00914071 and drawdown 9.82519609% -> 13.48685394% (the worst drawdown of the whole sweep), on 36 -> 47 trades. AND THIS IS THE UNCOMFORTABLE PART: a time-of-day filter that appears NOWHERE in the user's source material binds HARDER than brokeBelow (1.036), which is the mechanical form of the source's central teaching. The lab invented this rule; measured, it is the second most load-bearing entry term in the build. Cascade ratio 1, so 47 is a true position count. Occupancy named in advance."
+ },
+ {
+  "id": "wf-e71-short-25pct-equity-declared-deviation",
+  "name": "E71: the War Formation SHORT at 25% of equity -- DECLARED DEVIATION",
+  "symbol": "BTCUSDT",
+  "timeframe": "1m",
+  "direction": "short",
+  "status": "testing",
+  "createdDate": "2026-09-04",
+  "lastTestedDate": "2026-09-04",
+  "backtestStart": "2025-12-16",
+  "backtestEnd": "2026-05-03",
+  "specPath": "war-formation/pine/e71-short-25pct-equity.pine",
+  "description": "E64a byte-identical EXCEPT position size cut to 25% of equity via an explicit Pine qty, because the parity profile overrides default_qty_value. A DECLARED DEVIATION from the forced parity profile, made necessary by HARD LESSON 42: at 100% equity the engine's margin call fires long before the A.L.C.M. shield does, so all three prior shorts measured the harness rather than the strategy. Serves the user's 2026-09-03 directive that War Formation must work in both directions, with the 6H candle as the direction and red meaning shorts -- this build uses the source's LITERAL rule (2+ consecutive red 6h) rather than the lab's proxy.",
+  "metrics": {
+   "netProfitPct": -0.20431733,
+   "profitFactor": 0.97315988,
+   "maxDrawdownPct": 2.66826642,
+   "totalTrades": 33,
+   "winRatePct": 36.36363636,
+   "avgTradePct": -0.00619143,
+   "sharpeRatio": -0.11260373,
+   "sortinoRatio": -0.04470078,
+   "commissionPaid": 81.4317327,
+   "avgWinningTrade": 61.733886816666,
+   "avgLosingTrade": -36.249446404762,
+   "ratioAvgWinLoss": 1.70302978,
+   "largestWin": 71.535581699999,
+   "largestLoss": -42.546952,
+   "avgBarsInTrade": 948.3030303,
+   "avgBarsWinning": 1186.16666667,
+   "avgBarsLosing": 812.38095238,
+   "longTrades": 0,
+   "shortTrades": 33
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "01M1NFX7YNWMQAZJDVVWRJAWRZ",
+   "strategyId": "01M1NFX84KVKYDT3BWSAY4YMDB",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NFX7YNWMQAZJDVVWRJAWRZ",
+   "engineVersion": "tv_jul26_mc7",
+   "cascadeRatio": 1,
+   "verifiedAt": "2026-09-04T05:58:00Z"
+  },
+  "verdict": "THE FIRST HONEST MEASUREMENT OF THE WAR FORMATION SHORT. Not a candidate (PF under 1.0), but real.",
+  "notes": "THE SHIELD BOUND ON EVERY SINGLE TRADE, VERIFIED FREE VIA get_trades AND THIS WAS THE REGISTERED FIRST READ. All 21 losers exit at EXACTLY +1000.0 points (85959.7->86959.7, 85215.7->86215.7, 90390->91390, 63173.8->64173.8, and so on without exception) and all 12 winners at EXACTLY -2000.0 points. ZERO LIQUIDATIONS, cascadeRatio 1, 33 clean entries. Compare E64a, where the same geometry at 100% equity produced losers at 0.013%, 0.017%, 0.035% ... 0.585% adverse. THE A.L.C.M. EXIT NOW WORKS EXACTLY AS THE SOURCE SPECIFIES. WHAT CHANGED, FROM A PURE SIZING CHANGE AND NOTHING ELSE: profit factor 0.45442725 -> 0.97315988, win rate 6.98% -> 36.36363636%, drawdown down to 2.66826642%. A FIVEFOLD WIN-RATE INCREASE WITH BYTE-IDENTICAL ENTRY LOGIC. This retires E64a, E66 and E67 as harness measurements and confirms HARD LESSON 42 conclusively. AND 36.36% CLEARS ITS OWN BAR: an rr of 2.0 needs 33.3%, so the short's win rate is ABOVE what its own target requires -- the thing every prior short number said was impossible. COST DECOMPOSITION: gross = net + commission = -$20.43 + $81.43 = +$61.00. THE SHORT IS GROSS-POSITIVE AND LOSES ONLY TO FEES. WHY THE RATIO IS 1.70 AND NOT 2.0 despite every exit being exactly at 1000 or 2000 POINTS: qty varies with equity and price across the window, and commission is subtracted from both sides, so the DOLLAR ratio compresses even though the POINT ratio is exactly 2.0 by construction. That is an artifact of reporting, not of the strategy. WHAT THIS IS NOT: PF 0.97315988 is under 1.0 so it is NOT a candidate and does NOT become one, and 33 trades sits at the very floor of quotability (LESSON 12). The 1m window is 4.5 months of ONE regime and CANNOT support a split -- that limit is stated, not engineered around. AND IT IS NOT COMPARABLE TO e58a's 1.24015239: that is a 100%-equity long and this is a 25%-equity short. They must never be quoted side by side as though run alike. Trade count fell 43 -> 33 exactly as the occupancy note predicted in advance, because the shield rather than a margin call now ends trades and holds lengthened enormously (avgBarsInTrade 948), so with pyramiding=1 longer holds block later entries. The drop is occupancy, NOT selectivity."
  }
 ]

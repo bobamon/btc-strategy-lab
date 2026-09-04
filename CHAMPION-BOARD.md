@@ -3128,3 +3128,36 @@ carrying the best exit geometry the lab has produced.
    already offer more room - which can come from entering *nearer support* rather than demanding a
    longer journey. **It need not lengthen holds.** Recorded before the run so the next cycle is a test.
 3. **Do not build a filter stack on this yet.** The family is one run old and its half is under 1.0.
+
+
+---
+
+# ATTACK 45 - THE RR FLOOR IS A REAL LEVER, AND IT IS NOT ATTACK 41 IN DISGUISE
+
+One term moved from Attack 44: the minimum reward:risk the geometry must offer, **1.5 -> 2.5**.
+
+| | Attack 44 | **Attack 45** | direction |
+|---|---|---|---|
+| achieved win/loss ratio | 2.41021229 | **3.15783652** | +31% |
+| **avgBarsWinning** (cap 192) | 67.94 | **76.58** | +12.7% |
+| gross edge per trade | $3.31 | **$6.28** | +90% |
+| cost ratio vs the fee | 0.40x | **0.70x** | better |
+| break-even gap | 1.39pp | **0.59pp** | narrower |
+| profit factor | 0.93487022 | **0.9677241** | +0.033 |
+| max drawdown | 37.75354674% | **33.94238674%** | better |
+| trades | 229 | 162 | -29% |
+
+**DISCARDED by the kill rule** (0.968 < 1.0). Second credit not spent.
+
+## THE DISCRIMINATOR CLEARED
+Registered before the run: *if `avgBarsWinning` climbs toward 192, this is Attack 41 repeated and the
+floor buys reward with time.* It went **67.94 -> 76.58** - a 12.7% rise for a 31% ratio gain, still only
+40% of the cap. **On a level target the RR floor buys reward mainly by selecting entries nearer
+support, not by demanding a longer journey.** Last cycle's distinction was right, and is now measured.
+
+## AND THE DISCIPLINE, STATED PLAINLY
+Two points on a monotone trend is a **direction, not a law**, and both are already under 1.0. A third
+at 3.5 would close the remaining 0.59pp *if* the trend held, landing near 115 trades. **That is
+parameter sweeping and is named as such.** It is worth running only as a test of the mechanism - does
+the break-even gap keep closing at ~0.8pp per 1.0 of floor? - and its result is one point on a curve,
+never a champion.
