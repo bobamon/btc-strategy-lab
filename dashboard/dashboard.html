@@ -658,9 +658,52 @@ const DATA = [
     },
     "verdict": "REJECTED -- PF falls below 1.0 and drawdown worsens on the recent half",
     "notes": "Against Attack 37b (PF 1.01155847 / DD 24.31004442% / 196 trades / 37.24% win): profit factor FALLS to 0.96154789, BELOW 1.0, and max drawdown WORSENS to 26.40097989% (+2.09pp). Both ratchet clause-1 and clause-2 fail on this half alone, so combined with H1's strong gain (PF 1.024->1.211, DD 31.64%->18.52%) this is a textbook 'improves one half and hurts the other' case -- REJECTED per the mandate's own words, not averaged, same disposition as Attack 38's EMA200 gate. The finding that survives: Attack 39's H1-only conclusion that 'shallow sweeps are the profitable ones' does NOT generalise to H2 -- restricting to shallow sweeps only, H2's deep-sweep trades that this term discards were apparently net-positive enough that removing them both lowers PF and raises drawdown. That is the same shape as Attack 38's EMA200 gate (great in an obvious historical regime, worse in the choppier recent one) and reinforces HARD LESSON 12/Attack 12-14's rule: a half-sample-derived filter's effect is a property of the regime it selects for, not a fixed property of the underlying mechanism, and must be checked on the OTHER half before being trusted. Cascade ratio 1 on both halves, so 182 and 137 are true position counts."
+  },
+  {
+    "id": "attack41a-rr3-gross-edge-h1",
+    "name": "Attack 41a: rr 2.0 -> 3.0 on Attack 37, NEVER-TUNED half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack41-rr3-gross-edge.pine",
+    "description": "The first test in this lab motivated by a COST measurement rather than a price-action hunch. HARD LESSON 37 showed Attack 37 earns only $10.58 of gross edge per trade against $8.84 of commission, while the two mechanisms that work (WF e58a, 3M v37) both earn about $31 against about $11. Raising gross edge per trade is therefore the whole problem. AND IT CORRECTS THIS BOARD'S OWN QUEUE: last cycle queued a COOLDOWN on the reasoning that cost is binding so trade count should fall. The algebra does not support that -- commission share of gross is (n*c)/(n*g) = c/g, and THE COUNT CANCELS. Halving the count halves gross profit, gross loss and commission together, leaving profit factor and the 83.5% cost share unchanged. The only lever on the cost ratio is gross edge per trade, which means rr. One change from Attack 37: rr 2.0 -> 3.0, stop untouched (structural, the sweep bar's own low).",
+    "metrics": {
+      "netProfitPct": -5.86448198,
+      "profitFactor": 0.97335577,
+      "maxDrawdownPct": 45.26897815,
+      "totalTrades": 307,
+      "winRatePct": 30.94462541,
+      "avgTradePct": -0.01910255,
+      "sharpeRatio": 0.01984679,
+      "commissionPaid": 2427.586698250001,
+      "avgWinningTrade": 225.514528778948,
+      "avgLosingTrade": -103.822303925707,
+      "largestWin": 721.253005,
+      "largestLoss": -518.684856,
+      "avgBarsWinning": 77.94736842,
+      "avgBarsLosing": 31.14150943,
+      "longTrades": 307,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1NE7R0YWQPBD85176MSJ9P5",
+      "strategyId": "01M1NE7R7QCB76YDBREBB2A1GH",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NE7R0YWQPBD85176MSJ9P5",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T05:29:00Z"
+    },
+    "verdict": "REJECTED -- and gross edge per trade FELL, the opposite of the hypothesis",
+    "notes": "REJECTED on the never-tuned half; the second credit was DELIBERATELY NOT SPENT, per the kill rule. Against Attack 37a (PF 1.02423271 / DD 31.63538941% / 322 trades / 38.20% win): profit factor falls to 0.97335577, BELOW 1.0; drawdown worsens sharply 31.64% -> 45.27%; win rate falls 38.20% -> 30.94%. THE PRE-REGISTERED SECOND OUTCOME LANDED, IN ITS STRONGER FORM. The hypothesis was that a wider target would raise gross edge per trade. IT FELL. Computing gross as net + commission: -$586.45 + $2,427.59 = $1,841.14 over 307 trades = $6.00 PER TRADE, against Attack 37a's $10.58. The wider target did not merely fail to help, it destroyed 43% of the per-trade edge. WHY, AND IT IS A COUPLING THIS LAB HAD NOT NAMED: maxBars caps holds at 192 bars, and avgBarsWinning rose from 48.99 to 77.95. A 3R target frequently is NOT REACHED INSIDE THE CAP, so trades that would have closed as clean 2R winners instead time out somewhere in between or reverse into losses. WIDENING THE TARGET WITHOUT WIDENING THE HOLD CAP CONVERTS WINNERS INTO TIME-EXITS. That is the same target/cap coupling War Formation documented as HARD LESSONS 28/29 for shield-and-cap, now confirmed in a second lab with a different exit model -- so it is a property of capped-hold strategies generally, not of the ALCM. CONSEQUENCE: the rr axis is CLOSED for Attack 37 at 2.0. Re-testing it would require widening maxBars simultaneously, which is a confounded two-variable change. AND THIS IS THE FOURTH CONSECUTIVE SINGLE-TERM CHANGE REJECTED ON THIS BASE (38 EMA200 gate, 39 depth floor, 40 depth cap, 41 rr). The Pine header registered in advance what a fourth failure would mean: Attack 37 cannot be improved by any single term and the lab should return to discovery. That is now the position. Cascade ratio 1, so 307 is a true position count (HARD LESSON 35)."
   }
 ];
-const BUILT = "2026-09-04 05:19";
+const BUILT = "2026-09-03 23:30";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

@@ -2848,3 +2848,72 @@ roughly double the net profit factor, and it would do so without touching the me
 2. **Do NOT add a fourth price-action filter selected on H1 PF.** Three have failed the same way.
 3. **Record gross P&L and commission alongside net on every future run in this lab.** Attack 37's
    real character was invisible for four cycles because only net numbers were being read.
+
+
+---
+
+# ██ ATTACK 41 — THE TARGET AXIS CLOSES, A COUPLING IS NAMED, AND ATTACK 37 IS DONE
+
+**First, a correction to this board's own queue.** The Attack 37 diagnosis queued a **cooldown**, on
+the reasoning that cost is binding so trade count should fall. **The algebra does not support that:**
+
+> commission share of gross = (n × c) / (n × g) = **c / g** — **the count cancels.**
+
+Halving the trade count halves gross profit, gross loss and commission together, leaving profit factor
+and the 83.5% cost share **unchanged**. A cooldown could only help by removing below-average trades,
+which is a filter-quality question, not a cost one. **The only lever on the cost ratio is gross edge
+per trade** — which means `rr`. That is what was tested.
+
+| | Attack 37a | **Attack 41a** (rr 3.0) |
+|---|---|---|
+| Profit factor | 1.02423271 | **0.97335577** |
+| Max drawdown | 31.63538941% | **45.26897815%** |
+| Trades | 322 | 307 |
+| Win rate | 38.20% | **30.94%** |
+| Avg winner / loser | $192.53 / −$116.19 | $225.51 / −$103.82 |
+| **Gross edge per trade** | **$10.58** | **$6.00** |
+
+**REJECTED on the never-tuned half. The second credit was not spent** — the kill rule discards a
+sub-1.0 pre-2024 half rather than confirming it.
+
+## THE HYPOTHESIS WAS BACKWARDS, AND THE MEASUREMENT SAYS SO CLEANLY
+A wider target was supposed to **raise** gross edge per trade. Computing gross as net + commission —
+−$586.45 + $2,427.59 = **$1,841.14** over 307 trades — gives **$6.00 per trade against Attack 37's
+$10.58.** It did not merely fail to help; **it destroyed 43% of the per-trade edge.**
+
+## AND THE REASON IS A COUPLING THIS LAB HAD NOT NAMED
+`maxBars` caps holds at 192 bars, and **`avgBarsWinning` rose from 48.99 to 77.95.** A 3R target is
+frequently **not reached inside the cap**, so trades that would have closed as clean 2R winners
+instead time out partway or reverse into losses.
+
+**WIDENING THE TARGET WITHOUT WIDENING THE HOLD CAP CONVERTS WINNERS INTO TIME-EXITS.**
+
+This is the same target/cap coupling War Formation documented as **HARD LESSONS 28/29** for shield and
+hold cap — now confirmed in a **second lab with a completely different exit model**. It is therefore a
+property of **capped-hold strategies in general**, not of the A.L.C.M.
+
+## THE rr AXIS IS CLOSED, AND SO IS ATTACK 37
+Re-testing `rr` would require widening `maxBars` at the same time — a confounded two-variable change.
+
+**This is the fourth consecutive single-term change rejected on this base:**
+
+| | term | outcome |
+|---|---|---|
+| Attack 38 | EMA200 trend gate | helps H1, breaks H2 |
+| Attack 39 | sweep-depth floor | breaks H1 |
+| Attack 40 | sweep-depth cap | helps H1, breaks H2 |
+| Attack 41 | rr 2.0 → 3.0 | breaks H1, gross edge falls |
+
+**Attack 41's Pine header registered in advance what a fourth failure would mean: Attack 37 cannot be
+improved by any single term, and the lab should return to discovery. That is now the position.**
+
+Attack 37 stays on the board as what it is — a real but **too-thin** edge (gross 1.159, net 1.024)
+whose per-trade edge is a third of what the two working mechanisms in this project earn. It is not a
+champion and it is no longer a development target.
+
+## QUEUE — RESET TO DISCOVERY
+1. **Propose a new mechanism, screened by HARD LESSON 37 BEFORE it is built.** Estimate expected gross
+   move per trade against the fixed ~0.1% cost from the design alone. A mechanism whose R is ~1% and
+   whose win rate barely clears break-even has nothing left after fees — that can be seen on paper.
+2. **Do not add a fifth term to Attack 37.**
+3. The target/cap coupling above is now a design constraint for every capped-hold build in this lab.

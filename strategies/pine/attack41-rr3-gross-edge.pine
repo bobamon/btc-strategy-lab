@@ -1,0 +1,110 @@
+//@version=6
+// BTC ATTACK 41 - ATTACK 37 WITH rr 2.0 -> 3.0. THE ONLY REAL LEVER ON THE COST RATIO.
+//
+// FIRST, A CORRECTION TO THIS BOARD'S OWN QUEUE, WRITTEN LAST CYCLE AND WRONG.
+// The Attack 37 diagnosis closed by queueing a COOLDOWN between entries, on the reasoning that
+// "cost is the binding constraint, so reduce trade count". THE ALGEBRA DOES NOT SUPPORT THAT:
+//
+//     commission share of gross  =  (n * c) / (n * g)  =  c / g
+//
+// where n is the trade count, c the fixed per-trade commission and g the gross edge per trade. THE
+// COUNT CANCELS. Halving the trade count halves gross profit, gross loss AND commission together, so
+// profit factor is unchanged and the 83.5% cost share is unchanged. A cooldown can only help if the
+// trades it removes happen to be WORSE THAN AVERAGE - which is a filter-quality question, not a cost
+// question, and would need its own justification.
+//
+// THE COST RATIO HAS EXACTLY ONE LEVER: GROSS EDGE PER TRADE. HARD LESSON 37 measured it:
+//     WF e58a       $31.17 gross / $10.40 commission   keeps two-thirds   gross PF 1.388
+//     3M v37        $30.69 gross / $11.49 commission   keeps two-thirds   gross PF 1.440
+//     BTC Attack 37 $10.58 gross /  $8.84 commission   keeps a sixth      gross PF 1.159
+// Attack 37's per-trade edge is three times smaller than the two mechanisms that work. Raising it is
+// the whole problem.
+//
+// THE TERM: rr 2.0 -> 3.0. The stop is structural and unchanged (the sweep bar's own low), so R is
+// untouched; only the target moves out. Expected gross per trade goes from
+//     0.38 * 2R - 0.62 * R = 0.14R      at the observed 38.20% win rate
+// to  w * 3R - (1-w) * R                at whatever win rate a 3R target actually achieves.
+// The trade is worth making if the win rate holds above 25%: at w = 0.25, 0.25*3R - 0.75*R = 0.00R,
+// so 25% IS THE BREAK-EVEN WIN RATE for a 3R target and Attack 37 currently runs 38%. There is real
+// headroom, and this is the first test in this lab motivated by a cost measurement rather than by a
+// price-action hunch.
+//
+// WHY NOT A FOURTH PRICE-ACTION FILTER: three have failed (Attacks 38, 39, 40), two of them by
+// helping H1 and breaking H2 - the signature the VWAP family died of. The board's own queue forbids
+// selecting a fourth on H1 profit factor.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - unchanged from Attack 37, enforced by EXCLUSION via rBig, never clamped.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = the sweep bar's own low. UNCHANGED - this build does
+//        not touch the stop at all, only the target.
+//   Each leg separately (LESSON 6) - LONG ONLY, as Attack 37 is; a short leg is untestable on this
+//        engine at this sizing (HARD LESSON 34).
+//   BINDING (E17) - rr necessarily binds, since every winner's exit price moves. The question is not
+//        whether it binds but whether the win rate survives the wider target.
+//   REDUNDANCY (E14) - no new term is added; an existing parameter is moved. Nothing to overlap.
+//   LATCH IN SEQUENCE (LESSON 8) - entry logic is byte-identical to Attack 37. Unchanged.
+//   OCCUPANCY (LESSONS 24/28/29) - NAMED IN ADVANCE AND IT MATTERS HERE. A wider target means trades
+//        stay open longer, and with pyramiding=1 a position that is still open BLOCKS later entries.
+//        So the admitted trade population WILL differ from Attack 37's even though the entry rule is
+//        identical. This is NOT a controlled "same trades, different exit" comparison, and the trade
+//        count is expected to FALL for that reason alone - which must not be misread as a filter.
+//   CASCADE (HARD LESSON 35) - long build, expect cascadeRatio 1; verify before applying clause 3.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17):
+//   * GROSS EDGE PER TRADE RISES AND NET PF IMPROVES ON BOTH HALVES -> KEEP under RATCHET v2, and
+//     the cost screen from HARD LESSON 37 is vindicated as a design tool rather than just a
+//     diagnosis. This would be the first term ever kept on this base.
+//   * GROSS EDGE PER TRADE RISES BUT NET PF DOES NOT -> the win rate fell far enough to cancel the
+//     wider target, which locates rr 2.0 at or near its optimum and CLOSES this axis. A real result.
+//   * IMPROVES ONE HALF AND BREAKS THE OTHER -> REJECTED, NOT AVERAGED. Fourth time; and at that
+//     point the honest conclusion is that Attack 37 cannot be improved by any single term and the
+//     lab should return to discovery.
+//   * EITHER HALF BELOW ~30 TRADES -> a DIRECTION, not a result (LESSON 12).
+//   REPORT GROSS AND COMMISSION ALONGSIDE NET on both halves - the board now requires it.
+strategy("BTC Attack41 rr3 gross-edge", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+lookback = input.int(20,     "Swing-low lookback, bars -- held at Attack 37")
+rr       = input.float(3.0,  "Reward:risk -- THE ONE CHANGE, 2.0 -> 3.0")
+minRpct  = input.float(0.80, "Min stop distance as % of price (LESSON 3) -- held at Attack 37")
+maxBars  = input.int(192,    "Max bars in trade -- held at Attack 37")
+
+swingLow = ta.lowest(low, lookback)[1]
+
+sweep   = not na(swingLow) and low < swingLow
+reclaim = not na(swingLow) and close > swingLow
+setupOn = sweep and reclaim
+
+minR  = close * minRpct / 100
+rLong = close - low
+rBig  = rLong >= minR
+
+goLong = setupOn and rBig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong and rLong > 0
+    strategy.entry("L", strategy.long)
+    slPx   := low
+    tpPx   := close + rLong * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(swingLow,       title="SwingLow")
