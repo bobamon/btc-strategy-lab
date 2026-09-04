@@ -3522,3 +3522,38 @@ the data.**
 2. **Stop proposing bias gates.** Three of four cells now show the same sample collapse.
 3. **The short's real result is the gross sign flip, not the profit factor** — that finding is
    sample-robust in a way the ratio is not, and it stands on its own.
+
+
+---
+
+## v57 BY-ENTRY CONFIRMATION -- THE PROFIT FACTOR HOLDS, TWO OTHER FIELDS DO NOT (free, no credit)
+
+Closing the queue item opened when v57 was recorded. All 59 rows grouped by `(entryBar, entryPrice)`
+into **39 unique entries**, each entry's rows summed.
+
+| field | by row | **by entry** | verdict |
+|---|---|---|---|
+| **profit factor** | 1.222673 | **1.22409** | **safe** — differs by 0.0014 |
+| win rate | 16.94915254% | **25.64102564%** | must be recomputed |
+| avgWinningTrade | $208.44 | **$207.35** | **safe** — barely moves |
+| avgLosingTrade | −$34.79 | **−$58.41** | **understated by 40%** |
+| **ratioAvgWinLoss** | 5.9910977 | **3.55** | **overstated by 69%** |
+
+**The profit factor survives the artifact, as predicted** — 0.0014, almost exactly the 0.0015 measured
+independently on v53. **So v57's headline reads as printed and the gross sign flip stands unqualified.**
+
+**But the ratio caveat was right by a much larger margin than the wording implied.** 5.99 against a
+true 3.55.
+
+### THE MECHANISM BEHIND THE ASYMMETRY
+`avgWinningTrade` barely moves while `avgLosingTrade` moves 40%, because **the engine sheds slivers
+only from positions moving against you.** Winners are rarely fragmented. So the artifact lands
+*entirely on the loss side* of every statistic — which is exactly why profit factor (a ratio of sums)
+survives while any per-trade loss average does not.
+
+### GENERAL RULE FOR THIS LAB
+On any short build with `cascadeRatio` above 1:
+- **safe as printed:** profit factor, `avgWinningTrade`, gross
+- **must be recomputed by entry:** win rate, `avgLosingTrade`, `ratioAvgWinLoss`
+
+**Champion unchanged: v37.**

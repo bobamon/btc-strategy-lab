@@ -2365,3 +2365,35 @@ being fitted on both.
 Three filters, two labs, two unrelated mechanisms, **the same wall at ~77%**. Any condition true less
 than roughly a quarter of the time takes these mechanisms below the sample floor. **Stop adding
 filters on this data.** The constraint is not the terms; it is the amount of data.
+
+---
+
+## HARD LESSON 50 — THE MARGIN-UNWIND ARTIFACT LANDS ENTIRELY ON THE LOSS SIDE. PROFIT FACTOR SURVIVES IT; EVERY PER-TRADE LOSS STATISTIC DOES NOT.
+
+Two independent by-entry decompositions (3M v53 and v57) now agree on exactly which reported fields a
+short build's `cascadeRatio > 1` corrupts, and **the pattern is not uniform** — which is why "read it
+by entry" was too vague a rule and is replaced by this one.
+
+| field | v57 by row | **v57 by entry** | corrupted? |
+|---|---|---|---|
+| profit factor | 1.222673 | **1.22409** | **no** — 0.0014 (v53: 0.0015) |
+| avgWinningTrade | $208.44 | **$207.35** | **no** |
+| win rate | 16.94915254% | **25.64102564%** | **yes** |
+| avgLosingTrade | −$34.79 | **−$58.41** | **yes, by 40%** |
+| ratioAvgWinLoss | 5.9910977 | **3.55** | **yes, by 69%** |
+
+**THE MECHANISM EXPLAINS THE ASYMMETRY.** The engine sheds margin slivers **only from positions moving
+against you**. Winners are essentially never fragmented; losers are fragmented constantly. So every
+extra row is a small loss, which:
+- **inflates the loss count** → win rate falls
+- **dilutes the average loss** → `avgLosingTrade` shrinks toward zero
+- **inflates the win/loss ratio** → because its denominator shrank
+- **leaves sums untouched** → so profit factor, a ratio of *sums*, is unaffected
+
+**HOW TO USE THIS:**
+1. **Safe as printed on a cascaded short:** profit factor, `avgWinningTrade`, gross P&L.
+2. **Never quote without recomputing:** win rate, `avgLosingTrade`, `ratioAvgWinLoss`.
+3. **A too-good win/loss ratio on a cascaded short is a red flag, not a feature.** v57's 5.99 looked
+   like an exceptional geometry; it was an artifact of a shrunken denominator, and the real figure is
+   3.55 — still good, but a different claim.
+4. **The check is free.** `get_trades`, group by `(entryBar, entryPrice)`, sum each group.
