@@ -2752,10 +2752,61 @@ short builds should be read alongside the cascade block's `uniqueEntries`, not i
 forward. **Why the asymmetry between long and short remains open** — not blocking, since the mechanism
 itself is now understood and no longer a reason to distrust a short PF.
 
-## QUEUE
-1. **Split-test v55 before any keep decision** — RATCHET v2 clause 4 is outstanding on a 64% trade cut.
+## QUEUE (superseded by v56 below)
+1. ~~Split-test v55 before any keep decision~~ — **DONE, v56 below. FAILS. v55 REJECTED.**
 2. **The long leg's bias-gate result is closed, not open** — v54 is a REVERTED, informative negative;
    no further tuning of the gate on the long side is queued unless new source material changes the
    mechanical definition of "model."
 3. **Why cascade rows appear on short builds and not long ones** is unexplained and low-priority — it
    does not affect any PF already on record.
+
+---
+
+# ██ v56 — v55's SPLIT TEST FAILS. THE BIAS-GATED SHORT IS REJECTED. (2026-09-04)
+
+**Queue item 1 from v54/v55, and the only outstanding RATCHET v2 gate on the short leg.** v55's trade
+count fell 64% versus v53 (174 unique entries → 62), which is a >50% cut and triggers clause 4: a split
+test is required *before* any keep decision, not after. Credits: 623 (above 500, budget allows at most
+two backtests — both spent here, one per half, exactly matching the v37→v39 methodology). Byte-identical
+Pine to `pine/3m-elite-v55-bias-gate-short.pine`; only the backtest window changed, split at 2024-06-08.
+
+| | H1 (2022-01-01 → 2024-06-08) | H2 (2024-06-08 → 2026-09-01) | v55 full sample |
+|---|---|---|---|
+| Profit factor | **0.63003790** | **1.43721863** | 0.72183885 |
+| Max drawdown | 11.97717238% | 2.67541071% | 14.65750079% |
+| Trades (rows / unique) | 62 / 38 | 28 / 24 | 90 / 62 |
+| Win rate | 9.68% | 21.43% | 11.11% |
+
+**38 + 24 = 62** unique entries — an exact partition of the full sample's 62, the same clean-split check
+v37/v39 used, confirming no boundary double-count.
+
+## THE VERDICT: REJECTED
+RATCHET v2's split-test clause requires **both** halves to clear PF 1.0. H1 does not — 0.63, decisively
+worse than even v53's own unsplit 0.70512830 — while H2 clears comfortably at 1.44. **v55's aggregate
+PF of 0.72183885 was never a stable number; it is a blend of a badly losing bear/recovery half and a
+modestly winning recent half**, which is exactly the concentration-in-one-half failure mode RATCHET v2's
+split-test clause exists to catch (the same shape v37's own H1/H2 showed in miniature, but there both
+halves at least cleared 1.0 — here one does not clear it at all).
+
+**v55 is REJECTED, not kept, not promoted.** The bias gate is a real, measured improvement over the raw
+v53 mirror (PF +0.017, drawdown −16.4pp, both real effects) but it does not rescue the short leg into
+something that survives an honest split. **Champion remains v37, long-only, unchanged.**
+
+## WHERE THE SHORT LEG NOW STANDS
+Four constructions tried this project (v34 fade-into-zone, v51 failed-reclaim, v53 source mirror, v55
+mirror + bias gate) — **none has passed a split test**, and v55 is the first to have one actually run
+against it and fail. The bias gate is confirmed load-bearing in the sense HARD LESSON 32 predicted (it
+measurably helps), but "helps and still fails a split test" is a different, weaker claim than "works."
+Per the MANDATE CORRECTION, the short leg stays REOPENED (it is the user's own source material, not an
+optional extra to retire) — but the next attempt needs a reason from the source, not a fifth mirror
+variant tried on faith.
+
+## QUEUE
+1. **The short leg needs a new idea from the source, not another parameter tweak on the same mirror.**
+   Four variants of "mirror the demand-zone geometry, optionally gate it" have now been tried and none
+   has passed a split test. Re-reading the transcripts for something not yet decoded (Type 1/Type 2 on
+   the short side, the swing rule, or stage machine — see the still-open items near the top of this
+   file) is higher-value than a fifth gate/parameter variant on the existing mirror.
+2. **The long leg's bias-gate result stays closed** — v54 is a settled, informative negative.
+3. **Cascade-row asymmetry (short vs. long)** — still open, still low-priority, does not affect any PF
+   on record.

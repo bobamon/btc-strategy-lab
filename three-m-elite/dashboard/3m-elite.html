@@ -533,11 +533,99 @@ const DATA = [
       "verifiedAt": "2026-09-04T00:00:00Z"
     },
     "pineSource": "three-m-elite/pine/3m-elite-v55-bias-gate-short.pine",
-    "verdict": "NOT YET KEPT -- RATCHET v2 clause 4 (>50% trade cut) requires a split test before promotion",
-    "notes": "THE BIAS GATE HELPS THE SHORT LEG, BUT DOES NOT FIX IT. Versus v53: profit factor 0.70512830 -> 0.72183885 (improved, but by only 0.017 -- under the 0.02 threshold clause 2's drawdown band needs, though clause 2 is moot here since drawdown IMPROVED, not worsened). Drawdown fell sharply: 31.07505566% -> 14.65750079%, a 16.4pp improvement. Trade count fell from 174 unique entries (255 rows) to 62 unique entries (90 rows) -- a 64% cut on either basis, which is >50% and triggers RATCHET v2 clause 4: a split test is required BEFORE this can be kept, not after. That split has not been run this cycle (credit budget: two backtests, both spent on v54/v55 themselves). By clauses 1-3 alone the change looks like a pass (PF up, DD down, 90/62 trades clear the 30-trade floor), but clause 4 is binding and unmet, so status is 'testing', not 'passed', and this must NOT be described as a kept or validated change yet. MOST IMPORTANTLY: even if kept, PF 0.72183885 is still BELOW 1.0 -- the short leg remains net unprofitable. The bias gate improved the construction (removed the worst trading-into-the-bull-market losses) but did not turn the mirror into a working strategy. THE CASCADE SIGNATURE IS RESOLVED (see STRATEGY-LEDGER.md): 90 rows from 62 unique entries, ratio 1.4516, matches the same signature seen in v51 (1.419) and v53 (1.4655) -- all short builds. Investigation via get_trades on v53's raw trade list found the szTraded/dzTraded one-entry-per-zone latch IS holding; the extra rows are the parity engine reporting each PARTIAL EXIT FILL of a single bracket order as its own trade-list row (confirmed: cascade groups share identical entryBar/entryTime/entryPrice and differ only in qty/exit -- e.g. one entry at bar 20139 split into 4 exit rows of qty 0.004/0.004/0.008/0.466 closing at different bars/prices). This does not change profitFactor or netProfit (both are dollar sums, invariant to row-splitting) but DOES inflate totalTrades and can distort avgBarsWinning/avgBarsLosing and win-rate denominators -- read totalTrades/winRatePct on short builds alongside the cascade block's uniqueEntries, not instead of it. Why this shows up on shorts and not longs (v54's cascade ratio was a clean 1.0) remains an open sub-question, but the mechanism itself -- an engine partial-fill reporting artifact, not a re-entry-storm defect in this lab's Pine -- is now understood and no longer an open flag against believing PF/net-profit numbers."
+    "verdict": "REJECTED -- RATCHET v2 clause 4 split test now run, and it fails",
+    "notes": "THE BIAS GATE HELPS THE SHORT LEG, BUT DOES NOT FIX IT. Versus v53: profit factor 0.70512830 -> 0.72183885 (improved, but by only 0.017 -- under the 0.02 threshold clause 2's drawdown band needs, though clause 2 is moot here since drawdown IMPROVED, not worsened). Drawdown fell sharply: 31.07505566% -> 14.65750079%, a 16.4pp improvement. Trade count fell from 174 unique entries (255 rows) to 62 unique entries (90 rows) -- a 64% cut on either basis, which is >50% and triggers RATCHET v2 clause 4: a split test is required BEFORE this can be kept, not after. THE CASCADE SIGNATURE IS RESOLVED (see STRATEGY-LEDGER.md): 90 rows from 62 unique entries, ratio 1.4516, matches the same signature seen in v51 (1.419) and v53 (1.4655) -- all short builds, confirmed to be the parity engine reporting each partial-exit fill of a single bracket order as its own trade-list row, not a latch failure or re-entry storm; profitFactor/netProfit are unaffected (dollar sums), totalTrades/winRatePct/avgBars* are row-level and should be read alongside uniqueEntries on short builds going forward. SPLIT TEST NOW RUN (see 3m-elite-v55-split-h1 / -h2): H1 (2022-01-01 to 2024-06-08) PF 0.63003790 on 62 rows/38 unique entries, DD 11.97717238%, win rate 9.68% -- FAILS PF 1.0 badly, worse even than v53's own unsplit 0.70512830. H2 (2024-06-08 to 2026-09-01) PF 1.43721863 on 28 rows/24 unique entries, DD 2.67541071%, win rate 21.43% -- clears 1.0 comfortably. 38+24=62 unique entries exactly partitions the full sample's 62, confirming a clean split with no boundary double-count. THE VERDICT: clause 4 requires a split test BEFORE promotion, and this one is a clear fail -- the aggregate PF of 0.72183885 is not a stable number, it is a blend of a badly losing bear/recovery half and a modestly winning recent half, the same concentration-in-one-half shape RATCHET v2 was written to catch. REJECTED, not kept, not promoted. Champion remains v37, long-only, unchanged. The short leg's status across every construction tried (v34, v51, v53, v55) is now: none has passed a split test; the bias gate is a real, measured improvement over the raw mirror but does not rescue the leg."
+  },
+  {
+    "id": "3m-elite-v55-split-h1",
+    "name": "3M Elite v55 split-test, H1 (2022-01-01 to 2024-06-08)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "short",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "RATCHET v2 clause 4 (v55's trade count fell >50% vs v53) requires a split test before any keep decision. Byte-identical Pine to pine/3m-elite-v55-bias-gate-short.pine, only the backtest window changed, split at 2024-06-08 exactly as v37 was split-tested.",
+    "metrics": {
+      "netProfitPct": -7.06474513,
+      "profitFactor": 0.6300379,
+      "maxDrawdownPct": 11.97717238,
+      "totalTrades": 62,
+      "winRatePct": 9.67741935,
+      "avgTradePct": -0.1139475,
+      "sharpeRatio": -0.66292389,
+      "avgWinningTrade": 200.518610916667,
+      "avgLosingTrade": -34.099753189286,
+      "avgBarsWinning": 61.83333333,
+      "avgBarsLosing": 8.94642857,
+      "longTrades": 0,
+      "shortTrades": 62,
+      "commissionPaid": 380.2067131
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1N8WBBV0VRRSV62WDWVNGWC",
+      "strategyId": "01M1N8WBHTN89X4WH7NWKJ8DC6",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1N8WBBVEW7P6WFYSQX4CX4N",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1.631578947368421,
+      "uniqueEntries": 38,
+      "totalRows": 62,
+      "maxCascadeDepth": 4,
+      "verifiedAt": "2026-09-04T03:55:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v55-bias-gate-short.pine",
+    "notes": "FAILS PF 1.0 decisively -- 0.63003790 on 62 rows (38 unique entries), DD 11.97717238%, win rate 9.68%, worse than even v53's own unsplit aggregate (0.70512830). This is the half that carries the 2022 crash and the 2023-2024 recovery -- the bias gate does not rescue the short leg here. See 3m-elite-v55-split-h2 for the other half; 38+24=62 exactly partitions v55's full-sample unique-entry count."
+  },
+  {
+    "id": "3m-elite-v55-split-h2",
+    "name": "3M Elite v55 split-test, H2 (2024-06-08 to 2026-09-01)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "short",
+    "status": "testing",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "RATCHET v2 clause 4 (v55's trade count fell >50% vs v53) requires a split test before any keep decision. Byte-identical Pine to pine/3m-elite-v55-bias-gate-short.pine, only the backtest window changed, split at 2024-06-08 exactly as v37 was split-tested.",
+    "metrics": {
+      "netProfitPct": 3.9408364,
+      "profitFactor": 1.43721863,
+      "maxDrawdownPct": 2.67541071,
+      "totalTrades": 28,
+      "winRatePct": 21.42857143,
+      "avgTradePct": 0.14074416,
+      "sharpeRatio": 0.49325055,
+      "avgWinningTrade": 215.904321683333,
+      "avgLosingTrade": -40.970104081818,
+      "avgBarsWinning": 47.5,
+      "avgBarsLosing": 7.59090909,
+      "longTrades": 0,
+      "shortTrades": 28,
+      "commissionPaid": 243.5821597
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1N8X3NMWN72R4N3GW9PH4CF",
+      "strategyId": "01M1N8X3W17SF43QJNYA9V1924",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1N8X3NM0V13EXX4F2VR4RQF",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1.1666666666666667,
+      "uniqueEntries": 24,
+      "totalRows": 28,
+      "maxCascadeDepth": 2,
+      "verifiedAt": "2026-09-04T03:55:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v55-bias-gate-short.pine",
+    "notes": "Clears PF 1.0 comfortably -- 1.43721863 on 28 rows (24 unique entries), DD 2.67541071%, win rate 21.43%. This half alone does NOT validate v55: RATCHET v2's split-test check requires BOTH halves to clear 1.0, and H1 fails badly (0.63003790). Status left as 'testing' rather than 'passed' or 'rejected' in isolation -- the governing verdict is recorded on the parent v55 entry (REJECTED) and on H1, since one failing half is sufficient to reject the whole. 24+38=62 exactly partitions v55's full-sample unique-entry count with H1."
   }
 ];
-const BUILT = "2026-09-03 21:51";
+const BUILT = "2026-09-04 03:57";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
