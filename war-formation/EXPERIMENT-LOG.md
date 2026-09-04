@@ -59,6 +59,22 @@ re-sweeps. **E62 (bottom of file, most recent) independently re-checked both clo
 backtest was run, and per HARD LESSON 26 this was flagged to the user rather than filed as a third
 quiet board entry.**
 
+**UPDATE, superseding the above through E76 (2026-09-04):** the halt stated at E62 was itself
+overturned — E64a's trade-level forensics found the engine forces 100%-equity margin sizing on every
+short, which liquidates it at ~0.33% adverse before the shield can ever fire (HARD LESSON 42). E71
+fixed this with a **declared deviation** (25%-of-equity short) and produced this lab's first honestly
+measured short leg: PF 0.97315988, DD 2.66826642%, 33 trades, 36.36363636% win — gross-positive,
+losing only to fees. E72 confirmed the long is unaffected by the same size change (identical 36-trade,
+15W/21L population at both 100% and 25% equity — HARD LESSON 44), so **E71 (short) and e58a (long,
+100% equity) are this lab's two current reference builds, not directly comparable to each other** on
+position size. E74 found the whole-number band hurts the short (PF 0.973→1.167 removed, but blocked
+from KEEP by RATCHET v2 clause 2 — an open rule question for the user). E75a/E75b/E76 completed the
+four-term entry binding sweep on the short leg (`h1Bear` Δ−0.191 > `brokeAbove` Δ−0.087 > `timeGate`
+Δ−0.046 > band, which helps) alongside the long's own completed sweep (E69/E70: `h1Bull` Δ−0.273 >
+`timeGate` Δ−0.231 > `brokeBelow` Δ−0.204 > `inMiddle`, mild hurt). **No champion, no candidate** —
+every entry term on both legs is now measured, the shield/rr axes are closed (E56-E62, E73, HARD
+LESSON 13), and the 1m window remains 4.5 months of one regime that cannot support a split (LESSON 22).
+
 *(The paragraph below describes v6, kept for history — it is DEMOTED, not current.)*
 **v6 — HA cascade, LONG ONLY, structural stop (pre-A.L.C.M., WRONG EXIT MODEL).** BTCUSDT 1m,
 2025-12-16 → 2026-05-03. `+7.8% · PF 1.69 · win rate 56.3% · Sharpe 2.19 · max DD 3.10% · 32 trades`.
@@ -4586,5 +4602,70 @@ support a split (LESSON 22/HARD LESSON 22).
    completes the short-side binding sweep symmetrically with the long's (E69/E70).
 2. **Re-run the LONG without the whole-number band at 25% equity** (E74's queue item 2, still open) to
    complete the E69b comparison on equal footing between the two legs.
+3. **The two open rule questions for the user remain open**: the `inMiddle` ratchet asymmetry (E69b) and
+   the E74 drawdown-allowance-should-be-proportional question. Neither is decided here.
+
+---
+
+# ██ E76 — THE SHORT-LEG BINDING SWEEP IS COMPLETE. `timeGate` BINDS, BUT WEAKER THAN PREDICTED.
+
+Single-term removal from **E71** (PF 0.97315988 / DD 2.66826642% / 33 trades / 36.36363636% win — the
+established short-leg parent): `timeGate` removed, byte-identical otherwise. This was the queue's own
+top item and the last of the four entry terms untested on this leg (band: E74; `h1Bear`: E75a;
+`brokeAbove`: E75b).
+
+**Registered prediction, stated before running:** on the long, `timeGate` was the *second* most
+load-bearing entry term (E70b, Δ −0.231, between `h1Bull`'s −0.273 and `brokeBelow`'s −0.204). If the
+mirror carries to the short the way `h1Bear` and `brokeAbove` did, PF should fall and count should
+rise, most likely landing between `brokeAbove`'s −0.087 and `h1Bear`'s −0.191.
+
+| | E71 parent | **E76 — no `timeGate`** |
+|---|---|---|
+| Profit factor | **0.97315988** | **0.92750018** |
+| Δ from parent | — | **−0.04565970** |
+| Max drawdown | 2.66826642% | 3.57912312% |
+| Trades | 33 | 42 |
+| Win rate | 36.36363636% | 35.71428571% |
+| Net return | −0.20431733% | −0.72172473% |
+| Sharpe | −0.11260373 | −0.38992773 |
+
+`cascadeRatio` 1, 0 long trades / 42 short trades — clean single-leg, as every build in this family
+since E71 has confirmed.
+
+## THE PREDICTION WAS RIGHT IN DIRECTION, WRONG IN MAGNITUDE
+`timeGate` does bind — PF fell and the count rose, exactly the shape `h1Bear` and `brokeAbove` showed
+and the whole-number band (E74) did not. But **it is the weakest of the three**, not the second-strongest
+as its long-side rank predicted: Δ −0.046, smaller than `brokeAbove`'s −0.087 and far smaller than
+`h1Bear`'s −0.191.
+
+## THE SHORT-LEG BINDING SWEEP, NOW COMPLETE AND FINAL
+
+| term removed | PF | Δ from 0.973 | trades | drawdown | long-leg rank (for comparison) |
+|---|---|---|---|---|---|
+| **`h1Bear`** (E75a) | 0.78210297 | **−0.191** | 57 | 5.5876551% | `h1Bull` was #1 (Δ −0.273) |
+| **`brokeAbove`** (E75b) | 0.88628485 | **−0.087** | 53 | 4.62621562% | `brokeBelow` was #3 (Δ −0.204) |
+| **`timeGate`** (E76) | 0.92750018 | **−0.046** | 42 | 3.57912312% | `timeGate` was #2 (Δ −0.231) |
+| **whole-number band** (E74) | 1.16714444 | **+0.194 (helps)** | 41 | 3.61455016% | `inMiddle` was #4, mild hurt (Δ −0.010) |
+
+**The short-leg order is `h1Bear` > `brokeAbove` > `timeGate` > band(helps). The long-leg order is
+`h1Bull` > `timeGate` > `brokeBelow` > band(mild hurt). Neither the ranking nor the sign transfers
+wholesale between legs** — three of four terms keep the same sign (bind on both legs) but reorder, and
+the fourth (the band) flips sign entirely. This is now measured, not assumed, for every entry term in
+the build on both legs.
+
+## WHAT THIS CLOSES
+**The four-term entry binding sweep is now complete on BOTH legs** (long: E69a/E69b/E70a/E70b; short:
+E74/E75a/E75b/E76). No entry term remains untested on either leg. Per HARD LESSON 44, an unchanged win
+rate alongside a rising trade count (35.71% vs 36.36%, near-flat) is itself informative: the admitted
+trades are of similar average quality to the existing population, not disproportionately worse — this
+is a genuine dilution, not a contamination.
+
+**Not a candidate or a KEEP.** PF fell (RATCHET v2 clause 1 not reached), same as E74/E75a/E75b. E71
+remains the short-leg reference build; e58a remains the long-leg reference build.
+
+## QUEUE
+1. **The entry-term binding sweep is finished on both legs. Do not re-run any of the eight cells.**
+2. Carried forward, still open: re-run the LONG without the whole-number band at 25% equity (E74's
+   queue item 2) to complete the E69b comparison on equal footing between the two legs.
 3. **The two open rule questions for the user remain open**: the `inMiddle` ratchet asymmetry (E69b) and
    the E74 drawdown-allowance-should-be-proportional question. Neither is decided here.

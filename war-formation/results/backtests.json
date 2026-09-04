@@ -1015,5 +1015,51 @@
     },
     "verdict": "PREDICTION CONFIRMED, more mildly than h1Bear. The location term binds on the short too -- PF 0.97315988 -> 0.88628485, count 33 -> 53. NOT KEPT (RATCHET v2 clause 1: PF must improve, it fell).",
     "notes": "brokeAbove binds on the short leg, mirroring brokeBelow's role as a genuine (if not the strongest) term on the long (E70a). Removing it cost 0.08687503 of profit factor and admitted 20 more trades (33 -> 53), win rate falling 36.36363636% -> 33.96226415% and net -0.20431733% -> -1.42471163%. Drawdown widened 2.66826642% -> 4.62621562%. The two location/liveness terms tested this cycle both bind on the short, unlike the whole-number band (E74), which is long-oriented. timeGate remains the last untested term on the short leg."
+  },
+  {
+    "id": "wf-e76-short-no-timegate",
+    "name": "E76: the SHORT without timeGate -- final term in the short-leg binding sweep",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "short",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/pine/e76-short-no-timegate.pine",
+    "description": "E71 byte-identical with ONE term removed: timeGate (bans entries in the first/last 60 minutes of the 6h block). On the LONG, timeGate was the SECOND most load-bearing entry term (E70b: PF 1.24015239 -> 1.00914071 when removed, delta -0.231) despite being a lab-invented gate not in the source. REGISTERED PREDICTION: if timeGate carries to the short like h1Bear/brokeAbove did, PF should fall and count should rise, most likely landing between brokeAbove's -0.087 and h1Bear's -0.191 by analogy to its long-side rank. Single-term removal from E71 (PF 0.97315988 / DD 2.66826642% / 33 trades / 36.36363636% win), the established parent for short-leg binding tests. Completes the four-term short-leg binding sweep started by E74 (band) and continued by E75a/E75b (h1Bear, brokeAbove).",
+    "metrics": {
+      "netProfitPct": -0.72172473,
+      "profitFactor": 0.92750018,
+      "maxDrawdownPct": 3.57912312,
+      "totalTrades": 42,
+      "winRatePct": 35.71428571,
+      "avgTradePct": -0.01718392,
+      "sharpeRatio": -0.38992773,
+      "sortinoRatio": -0.1721315,
+      "commissionPaid": 104.4464728,
+      "avgWinningTrade": 61.554160553333,
+      "avgLosingTrade": -36.869810411111,
+      "ratioAvgWinLoss": 1.66950033,
+      "largestWin": 71.535581699999,
+      "largestLoss": -42.546952,
+      "avgBarsInTrade": 933.42857143,
+      "avgBarsWinning": 911.06666667,
+      "avgBarsLosing": 945.85185185,
+      "longTrades": 0,
+      "shortTrades": 42
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1NS5CNMB5GV5TXMW9RK451M",
+      "strategyId": "01M1NS5CYJENRTNA4SZJH1SFR8",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NS5CNMB5GV5TXMW9RK451M",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T08:39:39Z"
+    },
+    "verdict": "PREDICTION PARTLY CONFIRMED: timeGate binds in the predicted direction (PF falls, count rises) but more mildly than predicted -- weaker than both h1Bear and brokeAbove, not between them. NOT KEPT (RATCHET v2 clause 1: PF must improve, it fell 0.97315988 -> 0.92750018).",
+    "notes": "timeGate binds on the short leg but is the WEAKEST of the three location/liveness terms, unlike its long-side rank (second most load-bearing there, E70b delta -0.231). Delta from E71: -0.04565970, count 33 -> 42 (+9, occupancy-consistent with the other admits), win rate 36.36363636% -> 35.71428571% (essentially flat), drawdown widened 2.66826642% -> 3.57912312%. Completes the short-leg binding sweep: h1Bear (-0.191) > brokeAbove (-0.087) > timeGate (-0.046) > inMiddle (+0.194, band is long-oriented and HURTS the short). The short-leg binding order is NOT a mirror of the long-leg order (h1Bull > timeGate > brokeBelow > inMiddle) -- timeGate drops from 2nd to 3rd of four. Term-specific, leg-specific; neither leg's order transfers wholesale to the other. cascadeRatio 1, 0 long trades / 42 short trades confirmed clean single-leg."
   }
 ]
