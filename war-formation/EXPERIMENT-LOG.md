@@ -4084,3 +4084,48 @@ works; taking their emphasis on trust does not.
    net return while costing 0.010 of profit factor — rejected only by clause 1's strict inequality.
    **That remains an open rule question for the user**, not a decision for this lab.
 3. **No credits on short geometries** until the sizing constraint changes (E68).
+
+
+---
+
+# ██ e58a's REAL EDGE IS 1.39, NOT 1.24 — THE COST DECOMPOSITION (2026-09-04, no credits)
+
+Applying HARD LESSON 36's rule to this lab's reference build, using `get_trades` (free):
+
+| WF e58a, 36 trades | |
+|---|---|
+| Gross P&L | $1,122.00 |
+| Commission | $374.50 — **33.4% of the gross edge** |
+| Net P&L | $747.50 |
+| **Profit factor BEFORE commission** | **1.38769869** |
+| Profit factor AFTER commission | 1.24015239 |
+
+The decomposition reproduces the recorded net profit factor **exactly** (1.24015239), so the arithmetic
+is verified rather than asserted.
+
+**This lab's mechanism is better than its headline says.** A third of the edge goes to cost even at
+only 36 trades, because the A.L.C.M. shield of $1,000 on ~$80-95k BTC makes R about 1.2% of equity
+while a round trip costs about 0.1% — so **each trade pays roughly a twelfth of its own risk in fees
+before it starts.**
+
+**GROSS EDGE PER TRADE: $31.17 against $10.40 of commission** — almost exactly the same ratio as 3M's
+champion ($30.69 against $11.49), and three times better than the BTC lab's Attack 37 ($10.58 against
+$8.84). By the screen in HARD LESSON 37, this build sits where a workable mechanism should.
+
+## WHAT IT CHANGES
+- **Nothing is kept or reverted** — this is a measurement of an existing build, not a change to it.
+- **It reframes the shield/hold-cap sweeps** (E56/E57/E58/E60). Those were read as tuning a marginal
+  1.0-1.24 edge. They were in fact tuning a 1.39 mechanism whose net is dragged by a fixed cost. A
+  wider shield raises R and therefore raises gross edge per trade relative to the fixed fee — which
+  is a *different* argument for the larger shields the source specifies ($3,000/$4,000) than the one
+  E57 tested and rejected on net profit factor.
+- **That is now the most interesting open exit question in this lab**, and it is a genuinely new one
+  rather than a re-run: E57 swept shield width against NET profit factor. Nobody has asked what a
+  wider shield does to GROSS edge per trade.
+
+## QUEUE
+1. **Re-read E57's $3,000/$4,000 results against gross rather than net**, free via `get_trades`, before
+   spending anything. If gross edge per trade rises materially with shield width while net fell, the
+   source's own larger shield may be right and the earlier rejection was cost-blind.
+2. The entry binding sweep is complete (E70) — do not re-run it.
+3. No credits on short geometries until the sizing constraint changes (E68).

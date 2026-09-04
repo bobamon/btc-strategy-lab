@@ -3076,3 +3076,44 @@ the build.
 ## STATUS
 **CHAMPION UNCHANGED: v37.** Now with one caveat removed rather than added — the bull-market claim is
 withdrawn, and its existing caveats (weak H2, edge concentrated in H1) stand unaltered.
+
+
+---
+
+# ██ v37's REAL EDGE IS 1.44, NOT 1.25 — THE COST DECOMPOSITION (2026-09-04, no credits)
+
+Applying HARD LESSON 36's rule to the project's only verified champion, using `get_trades` (free):
+
+| 3M v37, 155 trades | |
+|---|---|
+| Gross P&L | $4,757.18 |
+| Commission | $1,781.22 — **37.4% of the gross edge** |
+| Net P&L | $2,975.96 |
+| **Profit factor BEFORE commission** | **1.44026949** |
+| Profit factor AFTER commission | 1.25172059 |
+
+**THE CHAMPION IS STRONGER THAN THE RECORD SHOWS.** A raw 1.44 is a solid mechanism; 37.4% of it is
+paid away in fees at the forced parity profile (0.05% per side on 100% of equity, ~$11.49 per round
+trip on this equity path).
+
+**GROSS EDGE PER TRADE: $30.69 against $11.49 of commission.** Almost identical to War Formation's
+reference build ($31.17 / $10.40), and three times better than the BTC lab's Attack 37 ($10.58 /
+$8.84). By HARD LESSON 37's screen, v37 sits comfortably where a workable mechanism should.
+
+## WHAT THIS CHANGES AND WHAT IT DOES NOT
+- **The champion does not change and no number is revised.** The net 1.25172059 is still what would
+  actually be earned; the gross is a statement about the mechanism, not the account.
+- **It does raise the value of anything that lifts edge per trade** — a wider target, a tighter
+  entry, or fewer but better trades all convert directly into net because the fee is fixed per trade.
+  The R-floor axis is closed, but the TARGET multiple (rTarget 2.0) has never been swept on this
+  champion, and it is the most direct lever on gross edge per trade.
+- **It also tempers the H2 caveat slightly.** H2's weakness (1.12058245, Sharpe 0.16) is measured net;
+  part of that flatness is fee drag on a smaller sample, not purely a decaying edge. Worth measuring
+  before the caveat is repeated again.
+
+## QUEUE
+1. **Sweep rTarget** (2.0 vs 2.5 vs 3.0) — the untested lever with the most direct effect on gross
+   edge per trade, and the fee being fixed means any gross gain lands almost fully in net.
+2. **Re-measure H2's gross profit factor** before repeating the "the edge is concentrated in H1"
+   caveat. Free, via `get_trades` on the existing H2 split result.
+3. The bias-gate question (v54/v57) is answered and closed; the R-floor and freshness axes stay closed.

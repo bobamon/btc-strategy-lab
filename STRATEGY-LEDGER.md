@@ -1859,3 +1859,60 @@ amplifies drawdowns superlinearly — but it **asymptotes**, and returns fall wi
 return-to-drawdown ratio is scale-invariant in the way that matters: you cannot size your way out of
 it.** The drawdown here came from a **14-trade losing streak costing 21.42% of equity** at an average
 loss of 1.312% — a streak problem, not a bet-size problem.
+
+
+---
+
+## ██ HARD LESSON 37 — GROSS EDGE PER TRADE IS THE SCREEN. EVERY MECHANISM IN THIS PROJECT IS
+## STRONGER THAN ITS RECORDED NUMBER, AND ONE IS FAR WEAKER THAN IT LOOKS (ALL THREE LABS, 2026-09-04)
+
+HARD LESSON 36 established that a net profit factor hides whether an edge is weak or merely expensive.
+This applies that lens to every build the project currently rests on. **All three decompositions came
+free from `get_trades`. No credits were spent.**
+
+| build | trades | **gross PF** | net PF | commission as % of gross | **gross edge / trade** | commission / trade |
+|---|---|---|---|---|---|---|
+| **3M v37** (champion) | 155 | **1.44026949** | 1.25172059 | 37.4% | **$30.69** | $11.49 |
+| **WF e58a** (reference) | 36 | **1.38769869** | 1.24015239 | 33.4% | **$31.17** | $10.40 |
+| **BTC Attack 37a** | 322 | 1.15945508 | 1.02423271 | **83.5%** | **$10.58** | $8.84 |
+
+*(e58a's decomposition was checksummed against its recorded net PF and reproduces 1.24015239 exactly.)*
+
+### THE FIRST FINDING: THE TWO WORKING MECHANISMS ARE BETTER THAN RECORDED
+**3M's champion has a raw edge of 1.44, not 1.25. War Formation's reference build is 1.39, not 1.24.**
+Roughly a third of each is paid away in commission. Neither number is wrong — the net figure is the
+one you would actually earn — but the project has been judging *mechanisms* by a number that
+conflates mechanism quality with trading cost.
+
+### THE SECOND FINDING, WHICH IS THE GENERAL ONE
+The variable that separates these builds is **not** trade count, and **not** profit factor. It is
+**GROSS EDGE PER TRADE MEASURED AGAINST A ROUGHLY FIXED PER-TRADE COST.**
+
+At the forced parity profile — 100% of equity, 0.05% per side — **commission is about 0.1% of equity
+per round trip, roughly $10 on $10,000, no matter what the trade does.** So:
+
+- **e58a earns $31.17 of gross edge per trade and pays $10.40.** It keeps two-thirds.
+- **v37 earns $30.69 and pays $11.49.** It keeps nearly two-thirds.
+- **Attack 37 earns $10.58 and pays $8.84.** It keeps a sixth.
+
+**Attack 37's per-trade edge is three times smaller than the two mechanisms that work.** That single
+number explains its 83.5% cost share, its thin net profit factor, and why three price-action filters
+selected on net PF all failed — they were tuning a quantity dominated by a cost the mechanism could
+never outrun.
+
+### THE SCREEN THIS CREATES, USABLE BEFORE ANY CREDIT IS SPENT
+**A mechanism needs gross edge per trade at least ~3x the per-trade commission to be worth building
+on.** Both working builds sit near 3x. Attack 37 sits at 1.2x.
+
+And the estimate can be made **from the design alone**, before a single backtest: expected gross move
+per trade is approximately `winRate x (rr x R) - (1 - winRate) x R`, with R the stop distance as a
+percentage of price. Against a fixed ~0.1% cost, a mechanism whose R is ~1% and whose win rate barely
+clears break-even has almost nothing left. **Estimate that ratio when the mechanism is proposed, not
+after four cycles of filters.**
+
+### WHAT THIS DOES NOT SAY
+It does not say Attack 37 has no edge — 1.159 gross on 322 trades is real. It says the edge is too
+small **relative to the cost of harvesting it at this frequency**, which is a different and more
+fixable problem: the same mechanism at a fraction of the frequency, or on a timeframe where each
+signal carries a larger move, could clear the screen. That is why the BTC queue now tests a cooldown
+rather than a fourth filter.
