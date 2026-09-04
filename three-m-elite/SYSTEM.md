@@ -3353,3 +3353,51 @@ split confirms or fails it.
 **CHAMPION OF RECORD: still v37** (PF 1.25172059, DD 8.72815312%, 155 trades, long-only, maxAge=6).
 **NEW INTERIOR BASE, pending split: v58** (PF 1.48439273, DD 8.70519440%, 117 trades), anchored at
 `pine/3m-elite-v58-first-touch-only.pine`.
+
+---
+
+## QUEUE ITEM 1 ANSWERED FROM THE SOURCE — THE BIAS GATE IS WRONG ON BOTH COUNTS (2026-09-04, no credit)
+
+The standing question was whether v54's rejected gate meant *v37's 1.25 was inflated*, or whether
+*the gate as implemented is too strict* — since "consecutive higher/lower closes on 12H AND 24H, both
+agreeing" is **this lab's own mechanical proxy**, not necessarily what the source means. The
+instruction was to check the transcripts before assuming the proxy is right. **It is not right.**
+
+`transcripts/2026-08-09 09-49-18.txt` is an entire video devoted to how direction is determined:
+
+| timestamp | what the source actually says |
+|---|---|
+| [00:28] | moving averages "are going to help mainly on the **15 minute time frame**" |
+| [01:30] | "three MAs... the **twenty, the fifty and the two hundred**" |
+| [04:20] | bullish: "the **200 is always gonna be on the bottom, then the 50, then the 20**" |
+| [04:31] | bearish: "the **200 is going to be on the top, and then the 50 and then the 20**" |
+| [02:47] | "the higher the number, so the 200 is the highest... that's more indication of the higher the overall trend, the **higher timeframe trend**" |
+| [04:59] | the reading holds "at least on **this specific timeframe** — when you switch to a different timeframe the MAs will look different" |
+
+### THE GATE IS WRONG ON BOTH THE INDICATOR AND THE TIMEFRAME
+1. **Bias is a 20/50/200 STACK ORDERING**, not consecutive closes. Bullish is `20 > 50 > 200`; bearish
+   is the exact inverse.
+2. **It is read on the 15m WORKING CHART, not on 12H/24H.** The source is explicit that MAs are
+   per-timeframe and that the **200 MA is itself how he sees the higher-timeframe trend** — he does not
+   pull a higher timeframe to get it. A companion video ([00:35], 09-49-18) even says he does not "pay
+   too much attention on the higher higher time frames."
+
+So the lab imported a **foreign, slower and far stricter** condition. That explains v54 mechanically:
+155 trades → 48 with PF 1.25172059 → 1.15861551. **A 12H/24H consecutive-close agreement is a much
+rarer state than a 15m stack ordering**, so it did not measure "bias", it measured scarcity.
+
+### WHAT THIS SETTLES AND WHAT IT DOES NOT
+- **Reading two is correct: the gate as implemented is not what the source means.** v54's REVERSION
+  under RATCHET v2 stands, and is now explained rather than merely recorded.
+- **It does NOT rehabilitate v37's headline.** v53 established that an ungated short loses through the
+  bull advance, and last cycle's forensics showed that short is **gross-negative at −$895.26 before a
+  cent of commission**. The bull-market component in v37 remains real and measured.
+- **The champion does not change.** v37 stands at 1.25172059 / 155 trades, with every existing caveat.
+
+### QUEUE — v56 IS NOW FULLY SPECIFIED BEFORE IT IS BUILT
+1. **Replace the 12H/24H consecutive-closes gate with the source's own rule: the 15m 20/50/200 stack
+   ordering.** Long requires `ema20 > ema50 > ema200`, short the inverse. One term, both legs, re-split.
+2. **Registered in advance:** this should cut far fewer trades than v54's 155 → 48, because a stack
+   ordering is a common state and a 12H/24H agreement is a rare one. **If the count still collapses,
+   the stack reading is wrong too and the whole bias axis needs rethinking rather than re-parameterising.**
+3. **The short's problem is not the gate.** It is gross-negative before fees, so no bias gate rescues it.
