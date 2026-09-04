@@ -2005,3 +2005,39 @@ The project has been reading v37's advantage as a better entry. **Its measured a
 EXIT**: 1.9422 achieved against 2.0 nominal, the best ratio anywhere in three labs. Every BTC-lab
 mechanism that failed did so with a truncated exit, not obviously a worse entry. **That is where the
 invented lab should be looking.**
+
+---
+
+## HARD LESSON 40 — TIME-TO-TARGET IS NOT A BAR-COUNT PROPERTY. GEOMETRY EXPRESSED IN BARS DOES NOT TRANSFER ACROSS TIMEFRAMES.
+
+**Attack 43 falsified this directly, on both of its specific predictions.**
+
+I took Attack 37's geometry, held **every parameter in bar units** (lookback 20 bars, maxBars 192
+bars, rr 2.0, minRpct 0.80), and changed **only the bar size**, 15m to 1h. The argument was that a
+bar-expressed geometry sees the same *shape* on any timeframe, so the achieved/nominal win-loss
+ratio would be preserved while R rose. Both halves of that argument were wrong:
+
+| prediction | result |
+|---|---|
+| achieved/nominal preserved | **1.507 vs 2.0 — still 25% short**, essentially Attack 42's 1.445 |
+| frequency falls ~4x with 4x fewer bars | **315 trades vs 322**, on 21,640 bars vs 85,655 |
+
+**Two things this establishes:**
+
+1. **The target does not get proportionally easier on a bigger bar.** A 2R move where R is set by a
+   larger bar's range is a larger *percentage* move, and percentage moves do not complete in a fixed
+   number of bars. Bar-count and price-distance are separate budgets, and rescaling one does not
+   rescale the other.
+2. **The signal itself is not scale-invariant.** A 20-bar swing low was swept roughly **four times
+   more often per bar** on 1h. So "the same rule on a different timeframe" is not a controlled
+   comparison in either direction — it admits a different population *and* a different edge.
+
+**HOW TO USE THIS:** a timeframe change is a **new mechanism**, not a rescaling of an old one, and
+must be justified and screened as one. Never argue that a result should transfer because the
+parameters are written in bars.
+
+**READING CORRECTION worth keeping:** `avgWinningTrade` and `avgLosingTrade` are in **dollars off a
+moving equity base**. Attack 43's −$92.37 average loss looks *smaller* than Attack 37's −$116.19, but
+equity fell 47.81% during the run, so later trades sized off a much smaller base. **Compare
+percentage fields across runs with different equity paths, never dollar averages.** Ratios like
+`ratioAvgWinLoss` are safe because the base cancels.

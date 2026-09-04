@@ -743,9 +743,51 @@ const DATA = [
     },
     "verdict": "DISCARDED ON THE SCREEN, NOT ON THE RATIO -- exactly as pre-registered",
     "notes": "PF 1.01316378 technically clears 1.0 on the never-tuned half, and it is DISCARDED anyway. The Pine header registered in advance that a mechanism failing the cost screen would be discarded ON THE SCREEN rather than on the profit factor, and that is what happened. THE SCREEN: gross = net + commission = $320.42 + $1,157.68 = $1,478.10 over 165 trades = $8.96 GROSS EDGE PER TRADE against $7.02 of commission per trade -- a ratio of 1.28x against the 3x bar. Commission takes 78.3% of the gross edge. That is WORSE than Attack 37 ($10.58 per trade, 1.20x), which the screen was built to reject. Drawdown 55.35% is also the worst figure in this lab's history. The second credit was NOT spent: the screen already fails and the drawdown disqualifies it regardless of what H2 would print. WHY THE PREDICTION MISSED, AND IT IS A REAL DEFECT IN MY OWN SCREEN. The design predicted about $55 of gross edge per trade from R x (w(1+rr) - 1) with R ~2.5% and w ~40%. R WAS RIGHT (avgLosingTrade -$250.94 on $10,000 is 2.5%) and THE WIN RATE WAS RIGHT (41.21% against the 40% assumed). The term that was wrong is rr. The formula used the NOMINAL reward:risk of 2.0. The ACHIEVED ratio was 1.44524833, because winners exit before reaching a 2R target -- avgBarsWinning is 330 against a 672-bar cap, so the hold cap and slow resolution truncate the upside exactly as HARD LESSON 38 describes. Substituting the achieved ratio reproduces the result: 2.5% x (0.4121 x 1.445 - 0.5879) = 2.5% x 0.0076 = 0.019% per trade, which matches the observed avgTradePct of 0.019%. THE CONSEQUENCE FOR THE SCREEN, WHICH IS THE REAL OUTPUT OF THIS CYCLE: the rr term must be the ACHIEVED win/loss ratio, not the nominal target multiple -- and the achieved ratio is ALWAYS below nominal on a capped-hold strategy and CANNOT BE KNOWN BEFORE RUNNING. So HARD LESSON 37's screen is only a ONE-WAY filter: it can rule a design OUT when even the nominal arithmetic fails, but it CANNOT rule one IN. Attack 42 passed on nominal and failed on achieved. That is the third consecutive cycle in which a lever I queued was falsified by measurement, and the third refinement of the same lesson. Cascade ratio 1, so 165 is a true position count (HARD LESSON 35)."
+  },
+  {
+    "id": "attack43a-sweep-reversal-1h-h1",
+    "name": "Attack 43a: Attack 37's geometry on 1h bars, NEVER-TUNED half",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack43-sweep-reversal-1h.pine",
+    "description": "Attack 37's EXACT geometry with every parameter held in BAR units (lookback 20, maxBars 192, rr 2.0, minRpct 0.80) and only the bar size changed, 15m to 1h. The hypothesis, from HARD LESSONS 37/38/39: this is the one change that raises R (a 20-bar swing low spans 20 hours instead of 5) WITHOUT lengthening holds in BAR terms, so the achieved/nominal win-loss ratio should be preserved rather than degraded -- the thing Attack 41 (wider target) and Attack 42 (bigger anchor) could not do, because both asked for more time within the same bar budget. Not a new mechanism: the cleanest possible test of whether this lab's repeated failures were about the IDEA or the TIMEFRAME it was harvested on.",
+    "metrics": {
+      "netProfitPct": -47.80612301,
+      "profitFactor": 0.75354306,
+      "maxDrawdownPct": 60.77517893,
+      "totalTrades": 315,
+      "winRatePct": 33.33333333,
+      "avgTradePct": -0.15176547,
+      "sharpeRatio": -0.88363238,
+      "commissionPaid": 1811.032200649999,
+      "avgWinningTrade": 139.207055002381,
+      "avgLosingTrade": -92.368347980476,
+      "ratioAvgWinLoss": 1.50708612,
+      "avgBarsWinning": 27.72380952,
+      "avgBarsLosing": 14.04285714,
+      "longTrades": 315,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1NEZ9M941QZG4HK1PQE9QYY",
+      "strategyId": "01M1NEZ9V2G7B14S6158XXDZSP",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NEZ9M941QZG4HK1PQE9QYY",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T05:41:00Z"
+    },
+    "verdict": "DISCARDED -- and it CLOSES the sweep-reversal family, exactly as pre-registered",
+    "notes": "DISCARDED by the kill rule: the never-tuned half returns 0.75354306, far below 1.0, with a 60.78% drawdown and -47.81% net. The second credit was NOT spent. THE PRE-REGISTERED OUTCOME THAT LANDED IS THE CONSEQUENTIAL ONE: 'ACHIEVED RATIO STILL WELL BELOW NOMINAL -> the truncation is not a 15m artifact, the target is genuinely hard to reach for this geometry at any scale, and the sweep-reversal FAMILY CLOSES.' The achieved gross win/loss ratio is 1.50708612 against a nominal 2.0 -- 25% short, essentially the same shortfall Attack 42 showed (1.4452). Changing the bar size did NOT preserve it. MY HYPOTHESIS WAS FALSIFIED ON BOTH OF ITS PREDICTIONS, and both misses are worth recording because they were specific. (1) I predicted the achieved ratio would be PRESERVED because the geometry is expressed in bars. It was not -- it stayed truncated at 1.507. Time-to-target is evidently NOT a pure bar-count property; a 2R target on a longer bar is a proportionally harder move to complete in the same number of bars, so the bar-unit framing does not transfer the way I argued. (2) I predicted frequency would fall roughly 4x with 4x fewer bars, to 80-120 trades. It barely moved: 315 against Attack 37's 322, on 21,640 evaluated bars against 85,655. So the 20-bar swing low is swept roughly FOUR TIMES more often per bar on 1h than on 15m -- the signal is not scale-invariant either. A NOTE ON THE DOLLAR FIGURES: avgLosingTrade -$92.37 looks SMALLER than Attack 37's -$116.19, but that comparison is confounded -- equity fell 47.81% over this run, so later trades sized off a much smaller base and the dollar averages are dragged down. Percentage terms (avgTradePct -0.152%) are the honest reading. WHAT THIS CLOSES: the sweep-reversal family, across two timeframes. And it is the FIFTH mechanism in this lab to die on the achieved-ratio axis (Attack 41, Attack 42, WF e50b in the sister lab, Attack 37 closed on cost, now Attack 43). THE AXIS IS THE FINDING, and HARD LESSON 39 is now carrying five confirmations. Cascade ratio 1, so 315 is a true position count (HARD LESSON 35)."
   }
 ];
-const BUILT = "2026-09-03 23:37";
+const BUILT = "2026-09-03 23:44";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

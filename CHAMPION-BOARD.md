@@ -3014,3 +3014,67 @@ within ~5% of nominal. Every mechanism this lab has built failed that test:
 **Screen the next candidate on reachability, not just on R size.** A mechanism with a modest R whose
 target is hit quickly beats a large-R mechanism whose target times out — which is precisely what 3M's
 champion demonstrates and this lab has not yet built.
+
+
+---
+
+# ██ ATTACK 43 — THE TIMEFRAME WAS NOT THE ANSWER. THE SWEEP-REVERSAL FAMILY CLOSES.
+
+Attack 37's **exact** geometry, every parameter held in **bar units** (lookback 20, maxBars 192,
+rr 2.0, minRpct 0.80), with only the bar size changed **15m → 1h**. The hypothesis, built from
+LESSONS 37/38/39: this is the one change that raises R *without* lengthening holds in bar terms, so
+the achieved/nominal ratio should survive — the thing Attack 41 and Attack 42 could not do.
+
+| | Attack 37 (15m) | **Attack 43 (1h)** |
+|---|---|---|
+| **Achieved / nominal win-loss** | — | **1.50708612 / 2.0 — 25% short** |
+| Profit factor | 1.02423271 | **0.75354306** |
+| Win rate | 38.20% | 33.33% |
+| Trades | 322 | **315** |
+| Max drawdown | 31.63538941% | **60.77517893%** |
+| Net return | +5.60% | **−47.81%** |
+
+**DISCARDED by the kill rule. Second credit not spent.**
+
+## THE PRE-REGISTERED OUTCOME THAT LANDED IS THE USEFUL ONE
+> *"Achieved ratio still well below nominal → the truncation is not a 15m artifact, the target is
+> genuinely hard to reach for this geometry at any scale, and the sweep-reversal FAMILY CLOSES."*
+
+**1.507 against 2.0 is essentially the same shortfall Attack 42 showed (1.445).** Changing the bar
+size did not fix it.
+
+## MY HYPOTHESIS WAS FALSIFIED ON BOTH OF ITS SPECIFIC PREDICTIONS
+1. **"The achieved ratio will be preserved because the geometry is in bars."** It was not — it stayed
+   truncated. **Time-to-target is evidently not a pure bar-count property.** A 2R target on a longer
+   bar is a proportionally harder move to complete within the same number of bars, so the bar-unit
+   framing does not transfer the way I argued it would.
+2. **"Frequency will fall ~4× with 4× fewer bars, to 80–120 trades."** It barely moved: **315 against
+   322**, on 21,640 evaluated bars against 85,655. **The 20-bar swing low is swept roughly four times
+   more often per bar on 1h.** The signal is not scale-invariant either.
+
+**One reading correction:** `avgLosingTrade` −$92.37 looks *smaller* than Attack 37's −$116.19, but
+that comparison is confounded — equity fell 47.81% during the run, so later trades sized off a much
+smaller base. **Percentage terms (`avgTradePct` −0.152%) are the honest reading.**
+
+## THE AXIS IS THE FINDING
+**This is the fifth mechanism to die on the achieved-ratio axis:**
+
+| | how it died |
+|---|---|
+| Attack 37 | closed on cost — gross edge 1.2× the fee |
+| Attack 41 (rr 3.0) | win rate collapsed, gross edge fell 43% |
+| Attack 42 (daily anchor) | achieved 1.445 vs nominal 2.0 |
+| WF e50b (sister lab) | 3 of 21 trades capped, gross PF fell |
+| **Attack 43 (1h)** | **achieved 1.507 vs nominal 2.0** |
+
+**HARD LESSON 39 now carries five confirmations.** No mechanism this lab has built resolves its target
+cleanly; 3M's v37 (achieved 1.9422 against 2.0) remains the only build in the project that does.
+
+## QUEUE
+1. **The sweep-reversal family is CLOSED across both timeframes.** Do not revisit it.
+2. **The next mechanism must be designed backwards from the exit.** Every failure here started from an
+   entry idea and inherited whatever exit behaviour followed. **Pick a target the market reaches
+   quickly and often first, then find an entry that precedes it** — which is structurally what v37
+   does with a 4H demand-zone tap and a 2R target hit in 47 of 96 bars.
+3. **Do not raise R again without a mechanism for reaching the target faster.** Three attempts have
+   now failed on exactly that.

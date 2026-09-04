@@ -1,0 +1,119 @@
+//@version=6
+// BTC ATTACK 43 - ATTACK 37's EXACT GEOMETRY ON 1H BARS. THE ONE CHANGE THAT RAISES R WITHOUT
+// LENGTHENING HOLDS IN BAR TERMS.
+//
+// THE STORED PROMPT still says build Attack 37's filter stack. THE DOCS OVERRIDE IT: Attack 41 closed
+// Attack 37 as a development target after four consecutive single-term rejections, and the board's
+// design constraint is now HARD LESSON 39 - the target must be reachable in a small fraction of the
+// hold cap so the ACHIEVED win/loss ratio lands within ~5% of nominal.
+//
+// ============================ THE BIND THIS BUILD IS DESIGNED TO ESCAPE ============================
+// Three constraints have to hold at once, and on 15m they fight:
+//   COST (LESSON 37):  gross edge per trade  R x (w(1+rr) - 1)  must clear ~0.3% of price.
+//   RESOLUTION (39):   the target must be reached before the cap, or achieved << nominal.
+//   SAMPLE (LESSON 12 / ratchet clause 3): at least ~30 trades per half, ideally 60+.
+// Attack 37 on 15m has R ~1.2%, giving 1.2% x 0.146 = 0.175% per trade - about 1.2x the fee. Its
+// GROSS profit factor is a perfectly healthy 1.15945508; the mechanism is sound and simply too cheap
+// per trade to survive a fee that is fixed per round trip.
+// Attack 42 tried to raise R with a daily anchor. R rose exactly as predicted (2.5%) and the ACHIEVED
+// win/loss ratio collapsed to 1.4452 against a nominal 2.0, because a bigger target needs more time.
+//
+// ============================ WHY CHANGING THE BAR SIZE IS THE ESCAPE ============================
+// EVERY PARAMETER HERE IS EXPRESSED IN BARS, AND ALL OF THEM ARE HELD IDENTICAL TO ATTACK 37:
+// lookback 20 bars, maxBars 192 bars, rr 2.0, minRpct 0.80%. ONLY THE BAR SIZE CHANGES, 15m -> 1h.
+//
+// That single substitution does something none of the previous attempts could:
+//   * R RISES. A 20-BAR swing low on 1h spans 20 hours instead of 5, so the sweep depth and the
+//     bar range that sets R are roughly 3-4x larger in percent terms. Gross edge per trade should
+//     rise with it while the fee stays FIXED at ~0.1% of equity per round trip.
+//   * HOLDS DO NOT LENGTHEN IN BAR TERMS. maxBars stays 192 BARS. The ratio of time-to-target to
+//     time-to-cap is a property of the bar-count geometry, not the clock, so the ACHIEVED/NOMINAL
+//     ratio should be PRESERVED rather than degraded. THIS IS THE POINT OF THE BUILD, and it is the
+//     one thing Attack 41 (wider target, same bars) and Attack 42 (bigger anchor, same bars) could
+//     not do - both raised R by asking for more time in the same bar budget.
+//   * FREQUENCY FALLS ~4x. Attack 37 ran 322/196; expect roughly 80-120 per half. Above the floor
+//     and still provable, though nearer to it - which the count check must confirm, not assume.
+//
+// HONEST ABOUT WHAT THIS IS: NOT a new mechanism. It is Attack 37's mechanism, unchanged, on a
+// different bar size - the cleanest possible test of whether this lab's repeated failures were about
+// the IDEA or about the TIMEFRAME the idea was being harvested on. Attack 37's gross 1.159 says the
+// idea has something. If the same idea on 1h clears the cost screen with its achieved ratio intact,
+// the answer is timeframe. If the achieved ratio degrades here too, the idea is genuinely thin and
+// this whole family closes.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - unchanged, enforced by EXCLUSION via rBig, never clamped. On 1h it should
+//        bind far less often than on 15m, which is itself part of the expected improvement.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = the sweep bar's own low, the actual flush extreme.
+//        Identical to Attack 37.
+//   Each leg separately (LESSON 6) - LONG ONLY. A short is untestable at this sizing (LESSON 34).
+//   BINDING (E17) - no term is added or removed; the entry logic is byte-identical to Attack 37.
+//        What changes is the data the identical logic sees.
+//   REDUNDANCY (E14) - unchanged from Attack 37; nothing new introduced.
+//   LATCH IN SEQUENCE (LESSON 8) - swingLow is ta.lowest(low, 20)[1], strictly prior bars; the sweep
+//        and reclaim are the current bar; entry fires at its close. Unchanged.
+//   OCCUPANCY (LESSONS 24/28/29) - a different bar size admits a different trade population outright.
+//        This is NOT a controlled subset of Attack 37 and is not presented as one.
+//   CASCADE (LESSON 35) - long build, expect cascadeRatio 1; verify before applying clause 3.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17), and the ACHIEVED/NOMINAL RATIO IS READ FIRST:
+//   * ACHIEVED WIN/LOSS WITHIN ~5% OF 2.0, GROSS EDGE PER TRADE ABOVE ~0.3%, BOTH HALVES ABOVE 1.0
+//     -> the timeframe was the answer. Attack 37's idea was sound and was simply being harvested too
+//     cheaply. This becomes the lab's best candidate and earns a filter stack for the first time on
+//     a mechanism that clears the cost screen.
+//   * ACHIEVED RATIO STILL WELL BELOW NOMINAL -> the truncation is not a 15m artifact, the target is
+//     genuinely hard to reach for this geometry at any scale, and the sweep-reversal FAMILY CLOSES.
+//     That is a real and useful death, because it would be the fourth mechanism to die on the same
+//     axis and would make the axis itself the finding.
+//   * GROSS EDGE PER TRADE RISES BUT PF DOES NOT -> the win rate fell with the wider R; cost was not
+//     the binding constraint after all and LESSON 37's screen is weaker than believed.
+//   * PRE-2024 HALF BELOW 1.0 -> DISCARDED by the kill rule. No filters, no rescue, no second half.
+//   * FEWER THAN ~30 TRADES IN EITHER HALF -> a DIRECTION, not a result (LESSON 12).
+//   REPORT GROSS, COMMISSION AND ACHIEVED/NOMINAL alongside net - required since LESSONS 36 and 39.
+strategy("BTC Attack43 sweep reversal 1h", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+lookback = input.int(20,     "Swing-low lookback, BARS -- held at Attack 37")
+rr       = input.float(2.0,  "Reward:risk -- held at Attack 37")
+minRpct  = input.float(0.80, "Min stop distance as % of price (LESSON 3) -- held at Attack 37")
+maxBars  = input.int(192,    "Max BARS in trade -- held at Attack 37. Bars, not clock time.")
+
+swingLow = ta.lowest(low, lookback)[1]
+
+sweep   = not na(swingLow) and low < swingLow
+reclaim = not na(swingLow) and close > swingLow
+setupOn = sweep and reclaim
+
+minR  = close * minRpct / 100
+rLong = close - low
+rBig  = rLong >= minR
+
+goLong = setupOn and rBig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong and rLong > 0
+    strategy.entry("L", strategy.long)
+    slPx   := low
+    tpPx   := close + rLong * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(swingLow,       title="SwingLow")
