@@ -1,0 +1,140 @@
+//@version=6
+// BTC ATTACK 59 - HIGHER-LOW STRUCTURE BREAKOUT. A GENUINELY NEW MECHANISM, BARE.
+//
+// THE STORED PROMPT asks for Attack 37's filter stack (a state 21+ attacks stale). THE DOCS OVERRIDE
+// IT: Attack 41 closed Attack 37 as a development target, Attack 43 closed the whole sweep-reversal
+// family, and Attack 46 (the champion, both halves clear, cold-reproduced) has its filter stack
+// EXHAUSTED per HARD LESSON 49 -- Attack 47 died on the ~77% sample wall. The board's live queue after
+// Attack 58 says: propose a genuinely new mechanism, weighing HARD LESSON 4 (frequency) and HARD
+// LESSON 8 (trigger vs already-established-filter same-bar trap) before building. This is that build.
+//
+// ==================== WHAT THIS CLAIMS, IN ONE SENTENCE ====================
+// When a market prints a confirmed swing low ABOVE its prior confirmed swing low (a genuine higher
+// low -- trend structure improving, not just price being high), a subsequent close back above the most
+// recent confirmed swing high confirms the uptrend has resumed, and that resumption tends to continue
+// toward a projection of the swing that was just completed.
+//
+// ==================== WHY THIS IS A NEW INPUT CLASS FOR THIS LAB ====================
+// Every prior mechanism on this board used one of: rolling N-bar extremes with no structure filter
+// (33, 48), a calendar anchor (34/35), a volatility state (36), a failed break of a swing low (37-43),
+// a tap-and-reclaim of a swing level with SAME lookback for entry and target (44-47, champion), a
+// single bar's own range/volume (49), a session's own range (50), an RSI/price divergence at a
+// confirmed pivot (51/52), volume-based delayed reclaim (53), a funding-settlement clock (54/55), a
+// consecutive-close streak (56), and an EMA-slope crossover (57/58). NONE of them required a genuine
+// two-point CONFIRMED SWING STRUCTURE (this low > that low) as the gate before trading a breakout.
+// Attack 33's bare channel breakout died on COST ($6,460 commission against a $217 net loss, 757
+// trades) -- a frequency problem, not a proven edge problem. This asks whether requiring confirmed
+// higher-low structure before taking a breakout both (a) cuts frequency into the settled 60-350
+// workable band by rejecting breakouts inside choppy/non-trending structure, and (b) selects the
+// breakouts a bare channel could not tell apart from noise.
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS ====================
+// ta.pivotlow(low, 5, 5) and ta.pivothigh(high, 5, 5), confirmed 5 bars after the actual extreme,
+// non-repainting. Two `var float` scalars (not arrays, matching Attack 51's proven pattern) hold the
+// most recent and the one-before-that confirmed pivot low. A `var bool structureUp` LATCHES true the
+// bar a new pivot low confirms higher than the one before it (HARD LESSON 8: the "already established"
+// condition is armed and held in state, not re-proven on the trigger bar). The TRIGGER is a later,
+// separate bar: `ta.crossover(close, lastPivotHigh)`, price closing back above the most recent
+// confirmed pivot high while structureUp is still latched. Stop: the pivot low itself (LESSON 5,
+// actual structure, not an ATR or a percentage). Target: a MEASURED-MOVE PROJECTION -- the breakout
+// price plus the amplitude of the swing just completed (pivot high minus pivot low) -- a level derived
+// from the swing's own geometry, not a multiple of the stop (HARD LESSON 41), and independent of R
+// (E14 redundancy: minRpct constrains the ABSOLUTE stop distance; swingAmp constrains the TARGET
+// geometry, and the two are drawn from different quantities so one can pass while the other fails).
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - enforced by EXCLUSION via rBig, never clamped. A breakout whose stop is too
+//        close to the entry is SKIPPED, not widened.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = lastPivotLow, the actual confirmed swing extreme.
+//   Each leg separately (LESSON 6) - LONG ONLY. Shorts are untestable at this sizing (HARD LESSON 34,
+//        the engine sheds slivers to meet margin) -- absence is a harness limit, not a design choice.
+//   BINDING (E17) - structureUp AND breakoutTrigger AND rBig all necessarily bind; the trade count is
+//        read before anything else to see how hard.
+//   REDUNDANCY (E14) - minRpct constrains the stop distance; swingAmp (the target) is independent
+//        geometry drawn from the pivot high/low spread, not derived from R.
+//   LATCH IN SEQUENCE (LESSON 8) - structureUp is latched on the bar a confirmed pivot low prints
+//        higher than the prior one; breakoutTrigger is read on a LATER, distinct bar (the crossover
+//        of the separate pivot-high level). The two conditions cannot share a bar by construction,
+//        because a pivot low confirming and a crossover of a pivot high are different events on
+//        different series.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, flat check gates every entry.
+//   CASCADE (HARD LESSON 35) - single TP+SL, no partials; expect cascadeRatio 1.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17). CODE BARE -- NO RR FLOOR, NO ADDED FILTER:
+//   * BOTH HALVES ABOVE 1.0, TRADES ROUGHLY 60-350 PER HALF -> a genuinely new candidate, ranked
+//     alongside Attack 46 for the board, queued for RATCHET v2 filter work.
+//   * PRE-2024 HALF BELOW 1.0 -> DISCARDED by the kill rule. No filters, no rescue, no second half,
+//     no second credit spent.
+//   * TRADES WELL ABOVE THE WORKABLE BAND (roaming toward 500+) -> reframe as a frequency/cost miss
+//     (HARD LESSON 4), not an edge verdict, and say so explicitly before judging PF.
+//   * TRADES WELL BELOW ~30 -> a DIRECTION, not a result (LESSON 12); the structure gate may be too
+//        strict for a single-symbol single-timeframe test.
+//   * A LARGE SHARE OF HOLDS AT maxBars 192 -> the cap is truncating and the comparison is confounded
+//        (HARD LESSON 38). Report it before drawing any conclusion.
+//   REPORT GROSS, COMMISSION AND ACHIEVED RATIO alongside net, avg loser and win rate (LESSONS 36/39
+//        and the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack59 higher-low structure breakout", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+pivotLeft  = input.int(5, "Pivot confirmation bars, left")
+pivotRight = input.int(5, "Pivot confirmation bars, right")
+minRpct    = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars    = input.int(192, "Max bars in trade")
+
+pl = ta.pivotlow(low, pivotLeft, pivotRight)
+ph = ta.pivothigh(high, pivotLeft, pivotRight)
+
+var float lastPivLow  = na
+var float prevPivLow  = na
+var float lastPivHigh = na
+var bool  structureUp = false
+
+if not na(pl)
+    prevPivLow := lastPivLow
+    lastPivLow := pl
+    if not na(prevPivLow)
+        structureUp := lastPivLow > prevPivLow
+
+if not na(ph)
+    lastPivHigh := ph
+
+rLong = not na(lastPivLow) ? close - lastPivLow : na
+minR  = close * minRpct / 100
+rBig  = not na(rLong) and rLong >= minR
+
+breakoutTrigger = not na(lastPivHigh) and ta.crossover(close, lastPivHigh)
+
+swingAmp = not na(lastPivHigh) and not na(lastPivLow) ? lastPivHigh - lastPivLow : na
+swingOk  = not na(swingAmp) and swingAmp > 0
+
+goLong = structureUp and breakoutTrigger and rBig and swingOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := lastPivLow
+    tpPx   := close + swingAmp
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(lastPivLow, title="LastPivotLow")
+plot(lastPivHigh, title="LastPivotHigh")

@@ -4367,3 +4367,99 @@ with Attack 46's level-target family. This closes the loop HARD LESSON 8 opened 
    should propose a genuinely new mechanism per the mandate's fallback clause, having now exhausted the
    EMA-crossover retest queue item -- weighting both the frequency estimate (HARD LESSON 4) and the
    HARD LESSON 8 trigger/already-established-filter check before building.
+
+---
+
+# ATTACK 59 - HIGHER-LOW STRUCTURE BREAKOUT. A GENUINELY NEW MECHANISM, DISCARDED ON H1 -- AND A THIRD CONFIRMATION OF THE INVERTED-PAYOFF SHAPE.
+
+The stored prompt asks a TWELFTH time for Attack 37's filter stack, describing a board state 21+
+attacks stale. **The docs override it again**: Attack 41 closed Attack 37, Attack 43 closed the whole
+sweep-reversal family, and the champion Attack 46's filter stack is exhausted per HARD LESSON 49
+(Attack 47 died on the ~77% sample wall). Attack 58's queue said: twelve straight new-mechanism-or-
+refinement proposals have now failed (48-58 was eleven at the time), propose a genuinely new mechanism,
+weighing HARD LESSON 4 (frequency) and HARD LESSON 8 (trigger/already-established-filter same-bar trap)
+before building. This cycle does that.
+
+**CLAIM:** when a market prints a confirmed swing low ABOVE its prior confirmed swing low (a genuine
+higher low -- structure improving, not just price being high), a subsequent close back above the most
+recent confirmed swing high confirms the uptrend resumed, and that resumption tends to continue toward
+a measured-move projection of the swing just completed. This is the first mechanism in this lab to gate
+a breakout on a genuine two-point CONFIRMED SWING STRUCTURE test, distinct from Attack 33's bare N-bar
+channel breakout (no structure filter, died on cost, 757 trades) and from Attack 37-43's failed-break-
+of-a-single-swing-low fade. Mechanics: `ta.pivotlow(low,5,5)` / `ta.pivothigh(high,5,5)`, confirmed 5
+bars after the actual extreme, non-repainting; two `var float` scalars (no arrays, Attack 51's proven
+pattern) hold the two most recent confirmed pivot lows. A `var bool structureUp` LATCHES true the bar a
+new pivot low confirms higher than the prior one (HARD LESSON 8: latched at the pivot-low bar, read on
+a later, distinct crossover bar -- the two conditions cannot share a bar by construction). Stop: the
+pivot low itself (LESSON 5). Target: breakout price + (pivot high - pivot low), a measured-move
+projection independent of R (E14: `minRpct` constrains the stop distance, `swingAmp` constrains the
+target, drawn from different quantities, not a multiple of the stop -- HARD LESSON 41). R floor 0.8% by
+exclusion (LESSON 3). Long only, bare -- no minRR floor, no added filter. Pine:
+`strategies/pine/attack59-higher-low-structure-breakout.pine`.
+
+| | **Attack 59a** never-tuned (H1) |
+|---|---|
+| Profit factor | **0.86319537** |
+| Max drawdown | **50.89904402%** |
+| Trades | **565** |
+| Win rate | **53.45132743%** (a MAJORITY) |
+| Achieved win/loss ratio | 0.75172312 |
+| Avg winner | $85.43 |
+| Avg loser | **-$113.64** |
+| Commission paid | $3,931.82 |
+| Largest loss | -$584.55 |
+
+## KILL RULE APPLIED. H2 NOT RUN, SECOND CREDIT NOT SPENT.
+
+**Profit factor 0.86319537, below 1.0.** 556-credit balance would otherwise permit the full pair; the
+kill rule overrides that when H1 fails outright. No filters, no rescue.
+
+## A SECOND, INDEPENDENT DISQUALIFIER: FREQUENCY
+
+**565 trades sits above the settled 60-350 workable band** -- the worst frequency breach since Attack
+33's 757 (which died on cost, not edge). The structure gate cut nothing like enough from a bare 5/5
+pivot search. Commission ($3,931.82) is not far below the net loss magnitude ($4,088.78), so this reads
+as a frequency/cost miss stacked on top of an edge miss, not a single clean cause.
+
+## THE THIRD CONFIRMATION OF THE INVERTED-PAYOFF SHAPE
+
+Attack 50 (63.22% win / 0.44 payoff) and Attack 51 (52.02% win / 0.67 payoff) both found a majority win
+rate that still loses because losers run larger than winners. **Attack 59 is the third**: win rate
+53.45% (a majority), and it still loses, because avg loser -$113.64 runs **1.33x** avg winner $85.43
+(achieved ratio 0.75172312). The measured-move target is evidently not reached often enough relative to
+its own stop -- the same reachable-target gap RSI-divergence (51/52) hit, now confirmed on a third,
+structurally unrelated mechanism (pivot-structure breakout vs. divergence vs. session-range breakout).
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Category **2, bleed on a negative edge** -- PF outright below 1.0, avg loser -$113.64 is not a
+disproportionate outlier against the largest single loss (-$584.55), and win rate is a majority yet the
+edge is still negative. Not category 1 (no sizing/concentration signature) and not category 3 (the
+edge itself is negative, so a filter stack would not be warranted even at a larger sample).
+
+## WHAT THIS SETTLES
+
+**A genuine two-point confirmed-swing-structure gate, applied to a bare N-bar pivot breakout, is not by
+itself a sufficient filter against Attack 33's cost problem, nor a sufficient edge source.** The
+structure confirmation answers "is this a real higher low" but not "is the level broken far enough from
+the next resistance to be worth the stop" -- which is the same reachable-target gap the RSI-divergence
+family (51/52) hit on a different mechanism shape. Structure quality and target reachability are
+independent problems; solving one does not solve the other.
+
+## QUEUE
+
+1. **If the higher-low-structure family is revisited**, widen `pivotLeft`/`pivotRight` or require a
+   longer HH-HL sequence (more than one confirmed higher low) to cut frequency toward the workable band
+   before touching the target definition -- untested here, and ranks ahead of a fresh mechanism if this
+   family is picked back up.
+2. **Attack 46 remains the sole both-halves-positive candidate on the board**, both halves clear,
+   cold-reproduced, filters exhausted per HARD LESSON 49.
+3. **The out-of-sample test for Attack 46 still ranks first and still cannot be run** under
+   BTCUSDT-only -- unchanged, restated because this cycle did not touch it.
+4. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+5. **Twelve straight new-mechanism-or-refinement proposals (48-59) have now failed**, and the
+   inverted-payoff shape (majority win rate, larger average loser) has now recurred on THREE
+   structurally unrelated mechanisms (50, 51, 59) -- worth treating as a standing risk to check for
+   explicitly (report win rate alongside achieved ratio, not just PF) on every future proposal, not yet
+   a numbered HARD LESSON since all three instances are single-half kills.
