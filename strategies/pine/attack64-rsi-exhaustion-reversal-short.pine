@@ -1,0 +1,158 @@
+//@version=6
+// BTC ATTACK 64 - RSI MOMENTUM-EXHAUSTION REVERSAL SHORT. THE SHORT LEG'S FIRST ORTHOGONAL SIGNAL CLASS.
+//
+// THE STORED SCHEDULED PROMPT still describes a board state (Attack 37, "earned a filter stack") more
+// than sixty attacks stale, and instructs "continue numbering after 37." THE DOCS OVERRIDE IT, per the
+// prompt's own instruction: Attack 41 closed Attack 37 on cost, Attack 46 is the long champion (filters
+// exhausted, HARD LESSON 49), and the short leg has now failed on FOUR distinct signal shapes -- a bare
+// resistance-tap-and-reject mirror (Attack 60, PF 0.593), an EMA200 regime gate on it (Attack 61, PF
+// 0.235), a multi-touch resistance requirement on it (Attack 62, PF 0.391), and a lower-high structure
+// continuation breakdown (Attack 63, PF 0.771, 518 trades, also breaching the frequency band). Attack
+// 63's own queue said: if the short leg is pursued further, the next attempt should NOT be another
+// location or structure filter -- three distinct signal shapes had already failed the same two ways
+// (poor payoff or outright negative edge). It named the next class explicitly: "an orthogonal mechanism
+// class (volatility-state or momentum-exhaustion based, not level- or pivot-based)." This build is that
+// class, continuing the numbering from Attack 63 (not from Attack 37, which the docs already closed).
+//
+// ==================== WHAT THIS CLAIMS, IN ONE SENTENCE ====================
+// When RSI(14) reaches a rare overbought extreme (crossing above 80) after an extended advance,
+// momentum is exhausted; a subsequent close back below that extreme bar's OWN LOW confirms the
+// reversal has begun and price tends to continue toward the nearest recent structural support.
+//
+// ==================== WHY THIS IS ORTHOGONAL TO ATTACKS 60-63, NOT A FIFTH VARIANT ====================
+// Attacks 60-62 all shared one entry: price TAPPING A PRICE LEVEL (resistance) and reversing there.
+// Attack 63 shared a different but still purely PRICE-STRUCTURE entry: two confirmed swing pivots and a
+// breakdown through a third. This build's arming condition is a MOMENTUM-INDICATOR event (an RSI
+// threshold crossover) that does not reference any price level, swing pivot, or prior high/low for its
+// SIGNAL -- only the stop (LESSON 5, must be beyond structure) and the target (a structural level, HARD
+// LESSON 41) touch price structure, exactly as every accepted design in this lab already does. No
+// resistance level, no pivot function, no swing-amplitude projection drives the entry itself.
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS ====================
+// rsi = ta.rsi(close, 14). ARM is `ta.crossover(rsi, 80)` -- a TRANSITION event, not an "already been
+// true for N bars" filter (HARD LESSON 8's fourth confirmation: pairing a transition trigger with an
+// "already true" filter fails because the trigger fires near the START of that state; crossover(rsi,80)
+// avoids this by construction -- it IS the start of the extreme, not a claim about its duration). On
+// arming, two `var float` scalars latch the arming bar's own high (future stop) and low (future trigger
+// level), and a `var int` scalar latches the arming bar's index. INVALIDATION: the latch clears if RSI
+// falls back to 50 without the trigger firing (the exhaustion thesis is stale) or if `maxWaitBars` pass
+// with no trigger (HARD LESSON 8's generalised rule: a latch is only useful if the state it creates can
+// outlive the event that created it, so this bounds how long it may outlive it). TRIGGER, a LATER,
+// DISTINCT bar (`bar_index > armedBar` enforced explicitly, matching Attacks 59/63's proven-safe
+// pattern): `ta.crossunder(close, armedLow)` -- price closing back below the extreme bar's own low.
+// Stop: `armedHigh`, the actual bar extreme (LESSON 5, structure, not the signal level). Target: the
+// prior `targetLookback`-bar low, EXCLUDING the current bar (HARD LESSON 41: a level, not a multiple of
+// the stop; E14: an independent quantity from the stop distance, drawn from price structure rather than
+// from R). SIZING: the 25%-equity declared-deviation `qty=` pattern (HARD LESSON 42/43) applied FROM THE
+// START, per Attack 60's closing note that any future BTC short should default to it.
+//
+// AUDIT, one line per leg (SHORT ONLY):
+//   R >= 0.8% (LESSON 3) - EXCLUSION via rBig on rShort = armedHigh - close, never clamped. A trigger
+//        whose stop is too close is SKIPPED, not widened.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = armedHigh, the actual RSI-extreme bar's high.
+//   Each leg separately (LESSON 6) - SHORT ONLY, not blended with any long-side result.
+//   BINDING (E17) - armed AND (bar_index > armedBar) AND breakdownTrigger AND rBig AND targetOk all
+//        necessarily bind; trade count is read before anything else is interpreted (HARD LESSON 12).
+//   REDUNDANCY (E14) - minRpct constrains the STOP distance (armedHigh - close); targetLookback (the
+//        target) is an independent quantity, the market's own recent low, not derived from R.
+//   LATCH IN SEQUENCE (LESSON 8) - armed latches on the RSI crossover bar (a transition event, not a
+//        durational filter); breakdownTrigger reads a strictly later bar via crossunder of a level fixed
+//        at arm time. The two conditions cannot share a bar: crossunder requires close[1] >= armedLow,
+//        and the arming bar's own close is set at RSI>80 (a strong up-close), almost never below its own
+//        low on the same bar, and `bar_index > armedBar` is enforced explicitly regardless.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, `flat` check gates every entry; the latch is consumed
+//        (armed := false) the instant it fires, so it cannot re-trigger on a later bar.
+//   CASCADE / MARGIN ARTIFACT (HARD LESSON 42/43) - the reason the 25%-equity qty= is applied from the
+//        start. VERIFY with get_trades before trusting the result: losers must exit at CONSISTENT
+//        distances near armedHigh, not scattered tiny adverse distances (the margin-forced-closure tell).
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17). CODE BARE -- NO ADDED FILTER BEYOND THE MECHANISM:
+//   * H1 (2022-01-01 to 2024-06-08, never-tuned) BELOW 1.0 -> DISCARDED by the kill rule. No filters, no
+//     rescue, no H2 spent -- this is the fourth short-side signal shape and a fourth failure would argue
+//     the short leg is a standing structural asymmetry on this asset (BTC's long-run upward drift) rather
+//     than an unsolved design problem, worth reporting as such rather than chasing a fifth shape.
+//   * H1 ABOVE 1.0 AND H2 ABOVE 1.0, BOTH IN THE ~60-350 WORKABLE BAND -> the short leg's first genuine
+//     candidate, queued for RATCHET v2 filter work exactly as Attack 37 was on the long side.
+//   * TRADES WELL ABOVE THE WORKABLE BAND -> reframe as a frequency/cost miss (HARD LESSON 4), as
+//     Attacks 59 and 63 were, not an edge verdict.
+//   * TRADES WELL BELOW ~30 -> a DIRECTION, not a result (LESSON 12); RSI>80 crossovers may simply be
+//     too rare on this asset's 4.7-year up-drifting history.
+//   * A MAJORITY WIN RATE WITH A POOR PAYOFF -> the inverted-payoff shape (Attacks 50, 51, 59, 63)
+//     recurring a fifth time; report explicitly rather than treat as a new finding.
+//   * LOSS DISTANCES SCATTERED AND SUB-0.8% -> 25% equity was insufficient; not a measurement of the
+//     mechanism, per HARD LESSON 42/43.
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside net (LESSONS 36/39 and
+//        the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack64 RSI exhaustion reversal SHORT", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rsiLen        = input.int(14, "RSI length")
+rsiExtreme    = input.float(80.0, "RSI extreme threshold (arm)")
+rsiReArmBelow = input.float(50.0, "RSI level that invalidates a stale arm")
+maxWaitBars   = input.int(40, "Max bars to wait for the trigger before the arm expires")
+targetLookback= input.int(20, "Bars for the prior structural low (target)")
+minRpct       = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars       = input.int(192, "Max bars in trade")
+eqFrac        = input.float(0.25, "DECLARED DEVIATION: fraction of equity per position -- HARD LESSON 42/43")
+
+rsi = ta.rsi(close, rsiLen)
+
+var bool  armed     = false
+var float armedHigh = na
+var float armedLow  = na
+var int   armedBar  = na
+
+if ta.crossover(rsi, rsiExtreme)
+    armed     := true
+    armedHigh := high
+    armedLow  := low
+    armedBar  := bar_index
+
+if armed and rsi < rsiReArmBelow
+    armed := false
+
+if armed and not na(armedBar) and (bar_index - armedBar) > maxWaitBars
+    armed := false
+
+breakdownTrigger = armed and not na(armedBar) and bar_index > armedBar and not na(armedLow) and ta.crossunder(close, armedLow)
+
+rShort = not na(armedHigh) ? armedHigh - close : na
+minR   = close * minRpct / 100
+rBig   = not na(rShort) and rShort >= minR
+
+targetLevel = ta.lowest(low, targetLookback)[1]
+targetOk    = not na(targetLevel) and targetLevel < close
+
+goShort = breakdownTrigger and rBig and targetOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat   = strategy.position_size == 0
+qtyUse = strategy.equity * eqFrac / close
+
+if flat and goShort and qtyUse > 0
+    strategy.entry("S", strategy.short, qty = qtyUse)
+    slPx   := armedHigh
+    tpPx   := targetLevel
+    barsIn := 0
+    armed  := false
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goShort ? 1 : 0, title="ShortSignal")
+plot(armedHigh, title="ArmedHigh")
+plot(armedLow, title="ArmedLow")

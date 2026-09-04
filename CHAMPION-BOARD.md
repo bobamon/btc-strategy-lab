@@ -4856,3 +4856,91 @@ lower-high continuation breakdown here).
    that family is revisited before another fresh mechanism.
 
 ---
+
+# ATTACK 64 — RSI MOMENTUM-EXHAUSTION REVERSAL SHORT, THE FIRST ORTHOGONAL SIGNAL CLASS, AND THE FIFTH SHORT-SIDE FAILURE
+
+The stored scheduled prompt still describes a board state (Attack 37, "earned a filter stack") more
+than sixty attacks stale and instructs to continue numbering after 37. **The docs override it, again**,
+per the prompt's own instruction: Attack 41 closed Attack 37 on cost, Attack 46 is the long champion
+(filters exhausted, HARD LESSON 49), and the short leg has already failed on four distinct signal shapes
+(Attacks 60-63). Attack 63's own queue named the next class explicitly: an orthogonal mechanism —
+volatility-state or momentum-exhaustion based, not level- or pivot-based. This cycle builds that class,
+continuing numbering from 63.
+
+## THE CLAIM UNDER TEST
+When RSI(14) reaches a rare overbought extreme (crossing above 80) after an extended advance, momentum
+is exhausted; a subsequent close back below that extreme bar's own low confirms the reversal has begun
+and price tends to continue toward the nearest recent structural support. Unlike Attacks 60-63, no price
+level, swing pivot, or resistance/support tap drives the ENTRY — only the stop (LESSON 5) and the target
+(HARD LESSON 41, a level not a stop multiple) touch price structure, exactly as every accepted design in
+this lab already does. Pine: `strategies/pine/attack64-rsi-exhaustion-reversal-short.pine`.
+
+## AUDIT (SHORT ONLY, one line per leg)
+R >= 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rShort = armedHigh - close`, never clamped. Stop beyond
+STRUCTURE (LESSON 5) — `slPx = armedHigh`, the actual RSI-extreme bar's high. Each leg separately
+(LESSON 6) — SHORT ONLY. BINDING (E17) — `breakdownTrigger` AND `rBig` AND `targetOk` all necessarily
+bind (44 trades on 85,655 bars — the arm+trigger conjunction binds hard). REDUNDANCY (E14) — `minRpct`
+constrains the stop distance; the 20-bar-low target is an independent quantity, not derived from R.
+LATCH IN SEQUENCE (LESSON 8) — `armed` latches on `ta.crossover(rsi, 80)`, a transition event, not an
+"already true for N bars" filter (the fourth-confirmation failure mode); `breakdownTrigger` reads a
+strictly later bar (`bar_index > armedBar` enforced explicitly) via crossunder of a level fixed at arm
+time. CASCADE / MARGIN ARTIFACT (HARD LESSON 42/43) — the 25%-equity `qty=` fix applied from the start;
+44 trades is a small sample but `cascadeRatio` reported 1 / `maxCascadeDepth` 1, no sliver signature.
+
+## H1 (2022-01-01 → 2024-06-08, never-tuned)
+
+| | **Attack 64a** |
+|---|---|
+| Profit factor | **0.42443281** |
+| Trades | 44 |
+| Win rate | 29.54545455% (a minority) |
+| Achieved win/loss ratio | 1.01210901 (near-even payoff) |
+| Avg winner | $35.51 |
+| Avg loser | -$35.09 |
+| Max drawdown | 6.94537356% |
+| Commission paid | $105.47 |
+| Gross P&L (net + commission, HARD LESSON 41) | -$520.58 |
+
+H2 was not run — the mandate's kill rule fires on H1 alone.
+
+## KILL RULE APPLIED. H2 NOT RUN, ONE CREDIT SPENT THIS CYCLE.
+
+**Profit factor 0.42443281, well below 1.0.** The 548-credit balance would otherwise permit the full
+pair; the kill rule overrides that when H1 fails outright. No filters, no rescue, no H2.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+Category **2, bleed on a negative edge** — avg loser -$35.09 is not a concentrated outlier against the
+largest single loss (-$69.93), and true pre-commission gross P&L is **-$520.58**, itself negative:
+commission ($105.47) is a small share of that loss, so this is not Attack 37's "expensive but real"
+shape (HARD LESSON 36/37) — the edge here is negative before any fee is paid.
+
+## THIS IS NOT A FIFTH INVERTED-PAYOFF CONFIRMATION
+Attacks 50, 51, 59 and 63 all found a MAJORITY win rate that still loses because losers outrun winners.
+Attack 64 is the opposite shape: a minority win rate (29.55%) against a near-1:1 payoff (1.012) — a
+plain negative edge, not the inverted-payoff pattern. The two failure shapes are counted separately; see
+HARD LESSON 53 below for the inverted-payoff pattern's own tally.
+
+## WHAT THIS SETTLES
+**Five short-side signal shapes have now failed**, spanning BOTH classes Attack 63's queue named: level/
+pivot-based (resistance-tap-and-reject bare/gated/multi-touch in 60-62; lower-high structure continuation
+in 63) AND momentum-exhaustion-based (RSI extreme reversal, here). A pure momentum-indicator entry with
+no price-level dependency fails exactly as badly as the structure-based attempts, which weakens the
+standing hypothesis that the short leg's problem is *which* signal class drives entry — and strengthens
+the alternative the board has flagged since Attack 62: BTC's long-run upward drift across 2022-2026 makes
+short-side edges intrinsically harder to find on this data, independent of construction.
+
+## QUEUE
+1. **The short leg is now reported as a standing structural asymmetry**, not chased with a sixth signal
+   shape absent a materially different argument for why a BTC short should work on this data. Two
+   orthogonal classes (structure/level and momentum-exhaustion) have both failed; a third would need a
+   new argument, not just a new indicator.
+2. **Attack 46 (long) remains the sole both-halves-positive candidate on the board**, both halves clear,
+   cold-reproduced, filters exhausted per HARD LESSON 49; this cycle does not touch that verdict.
+3. **The out-of-sample test for Attack 46 still ranks first among long-side work** and still cannot be
+   run under BTCUSDT-only — unchanged, restated because this cycle did not touch it.
+4. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+5. **HARD LESSON 53 (this cycle)** formally numbers the inverted-payoff-shape watch (Attacks 50/51/59/63)
+   as a standing lesson, closing the board's own prior queue item to promote it. See STRATEGY-LEDGER.md.
+
+---

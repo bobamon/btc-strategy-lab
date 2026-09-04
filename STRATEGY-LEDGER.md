@@ -2491,3 +2491,48 @@ line — "before trusting any SHORT result... check the average losing trade" �
 this, and the data to catch it (`avgLosingTradeByEntry` −$58.41 against a 0.80% floor) was sitting in
 v57's own backtests.json entry the whole time. **Read the recorded numbers against the standing rule
 before trusting a header's reasoning, especially your own.**
+
+---
+
+## ██ HARD LESSON 53 — A MAJORITY WIN RATE THAT STILL LOSES IS ITS OWN FAILURE SHAPE, DISTINCT FROM AN
+## OUTRIGHT NEGATIVE EDGE, AND IT HAS NOW RECURRED FOUR TIMES ACROSS BOTH DIRECTIONS (BTC, 2026-09-04)
+
+**Promoted from a standing watch to a numbered lesson, per Attack 62/63's own queue instruction to do so
+once the pattern was no longer circumstantial.**
+
+Four structurally unrelated BTC mechanisms have now produced the same shape: a WIN RATE ABOVE 50% that
+still nets a loss, because the achieved win/loss ratio falls well short of what that win rate needs to
+break even.
+
+| build | direction | win rate | achieved payoff | verdict |
+|---|---|---|---|---|
+| Attack 50 | long | 63.22% | 0.44 | fails |
+| Attack 51 | long | 52.02% | 0.67 | fails |
+| Attack 59 | long | 53.45% | 0.75 | fails |
+| Attack 63 | short | 51.35% | 0.73 | fails |
+
+**Why this is a distinct failure shape from an outright negative edge (e.g. Attack 64: 29.55% win rate,
+~1:1 payoff, plain loser).** A majority-win-rate loser means the ENTRY is finding real, frequent
+directional edge — more than half of trades move the right way — but the EXIT is not capturing it: the
+target is reached less often, or by less, than the entry's own hit rate implies. An outright negative
+edge means the entry itself is wrong more than it needs to be, at any payoff. **The fix for one is not
+the fix for the other**: a majority-win-rate loser is an exit-design problem (HARD LESSON 39/41's
+territory — target a level, check achieved vs. nominal); an outright negative edge is an entry-design
+problem, and no exit change rescues it.
+
+**All four instances share a mechanism-agnostic tell**, confirmed across long AND short, across
+measured-move targets, RR-multiple targets, and structural-level targets: **check `ratioAvgWinLoss`
+against 1.0 explicitly before trusting any result with a win rate above 50%.** A high win rate reads as
+success at a glance; it is not evidence of profitability on its own, and this project has now measured
+that gap four separate times.
+
+**HOW TO USE THIS:**
+1. **Report win rate and achieved payoff together, always** — neither number alone determines the
+   verdict, and a majority win rate is exactly the case most likely to be misread as a pass.
+2. **When a new build shows a majority win rate and still fails, check first whether this is instance
+   five of this pattern** before treating it as a novel diagnosis — the shape recurs across unrelated
+   mechanisms and both directions, so it is a property of how targets are being set in this lab's design
+   space, not of any one mechanism.
+3. **A minority win rate with a near-even or better payoff (e.g. Attack 64, HARD LESSON territory but not
+   this one) is a DIFFERENT failure** — an entry problem, not an exit problem — and must not be folded
+   into this tally; keep the two shapes counted separately so neither dilutes the other's signal.
