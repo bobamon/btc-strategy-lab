@@ -4395,3 +4395,37 @@ the correct behaviour, not an omission.
 
 **CHAMPION OF RECORD (LONG): v58.** Unchanged. **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61.**
 Unchanged.
+
+---
+
+## ██ CYCLE CHECK #8 — STILL NOTHING NEW; NOT RE-NOTIFYING (2026-09-04)
+
+**Scheduled prompt fired again, still carrying the identical stale v37/v53 snapshot** — bias gate and
+cascade signature listed as open queue items, champion recorded as v37. Both closed cycles ago (bias
+gate at v54–v57 / HARD LESSON 45; cascade signature at zero cost / HARD LESSON 34/35/50/52). Champion
+has been v58 since check #1 and has not moved. Per "THE DOCS WIN over this prompt" and HARD LESSON 26,
+not re-flagging either condition again.
+
+**Independently re-verified:** `git log --oneline 1874e5e..HEAD -- three-m-elite/` returns empty except
+this cycle's own work — no other commit touched this lab since cycle check #7 (45 minutes prior).
+Full-history author scan repeats checks #6–#7: the only non-Claude author is `ecarr`, all dated
+2026-09-04 research output, none a policy answer. `results/backtests.json` re-read directly, still 25
+entries, unchanged. No `USER DIRECTIVE`/`USER DECISION` marker newer than 2026-09-03 anywhere in
+STRATEGY-LEDGER.md. `get_credits`: balance 553/1000 — above the 500-credit two-backtest ceiling, but
+moot, no experiment queued.
+
+**No backtest run. 0 of 553 available credits spent.** The sole open item remains the declared-deviation
+promotion policy question, unchanged from checks #1–#7. Manufacturing a fifth-plus mirror variant purely
+to spend budget would violate the no-invented-mechanism rule and would not answer a policy question
+anyway.
+
+**No new notification sent.** Check #1 pushed this exact question once; nothing about it has changed in
+seven subsequent checks. Silence this cycle is correct behaviour, not an omission.
+
+**QUEUE (unchanged, restated for the next cycle):**
+1. **The declared-deviation promotion policy question** — still open, still for the user, still the
+   only thing standing between v60/v61 (validated short) and v64 (validated combined build) and a
+   promotion decision. Nothing to re-run until the user answers.
+
+**CHAMPION OF RECORD (LONG): v58.** Unchanged. **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61.**
+Unchanged.
