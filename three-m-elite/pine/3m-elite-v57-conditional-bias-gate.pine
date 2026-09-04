@@ -1,0 +1,215 @@
+//@version=6
+// 3M ELITE v57 - THE BIAS GATE, MADE CONDITIONAL AS THE SOURCE ACTUALLY SPECIFIES.
+//
+// QUEUE ITEM 1 ASKED WHICH OF TWO READINGS WAS RIGHT. The transcripts answer it, and it is the second
+// one: THE GATE AS IMPLEMENTED IN v54/v55 IS TOO STRICT.
+//
+// transcripts/2026-08-09 04-18-22.txt, the passage that defines why the higher timeframe is consulted
+// at all:
+//   [01:44] "when a model like this is occurring we need to just check the higher time frame. So
+//            anything that has the word ADVANCED in it means that we need to check the higher time
+//            frame to give us our context"
+//   [02:41] "The reason why I make these advanced models and the reason why they are influenced by the
+//            higher time frame is because IF THINGS ARE GOING BACK AND FORTH in my head THE NEXT BREAK
+//            COULD BE EITHER DIRECTION essentially, so we are going to use the help from the higher
+//            time frames to get the overall bias"
+//   [00:38] "this is not an advanced model, this is just regular back and forth when you have one one
+//            one" - and [01:03] anything "not as simple as one one one" (1-2-1, 2-2-2, 3-3-3) IS.
+//
+// SO THE BIAS CHECK IS A TIE-BREAKER FOR AN AMBIGUOUS STRUCTURE, NOT A BLANKET FILTER. The source
+// consults the higher timeframe WHEN THE NEXT BREAK COULD GO EITHER WAY. v54 applied it to EVERY
+// entry, which is a stricter rule than the user's material states, and that alone can explain why it
+// cut the sample 155 -> 48 while dropping PF 1.25172059 -> 1.15861551.
+//
+// WHAT THIS MEANS FOR A CLAIM ALREADY IN THE DOCS, STATED PLAINLY. SYSTEM.md currently says v54
+// established that "part of v37's headline was the bull market, now measured rather than suspected."
+// THAT CLAIM IS WITHDRAWN. It rested on a gate that does not match the source. Whether v37's 1.25 is
+// inflated is once again an OPEN question, and this build is the first fair test of it.
+//
+// THE ONE CHANGE FROM v54: the 12H/24H bias requirement now applies ONLY when the recent structure is
+// ambiguous. Everything else - the zone construction, rTarget 2.0, maxBars 96, maxAge 6, minRpct 0.80,
+// the two-touch invalidation, the one-entry-per-zone latch, and the bias definition itself - is held
+// byte-identical to v54 so the conditionality is the sole variable.
+//
+// MECHANISING "ADVANCED BACK AND FORTH" WITHOUT ARRAYS, AND THE SOURCE MAKES THIS EASY. The author's
+// taxonomy IS a statement about RUN LENGTHS: "one one one" is the basic back-and-forth and is
+// explicitly NOT advanced ([00:38]); "one two one", "two up two down two up", "three up three down
+// three up" ARE advanced ([01:03]-[01:33]). So:
+//     ambiguous = the CURRENT directional run of completed 4H candles is 2 or 3 candles long.
+// A run of 1 is the basic alternation the source says needs no higher-timeframe check. A run of 4+ is
+// a sustained directional move, not back-and-forth at all. Only the middle band is the "advanced"
+// case where, in the author's words, "the next break could be either direction".
+//
+// THIS IS STILL A PROXY AND IS DECLARED AS ONE: the source counts BREAKS OF STRUCTURE, this counts
+// CONSECUTIVE 4H CANDLE DIRECTIONS. If the gate proves nearly inert, the proxy is the first suspect,
+// not the source's rule.
+//
+// ENGINE NOTE: the first version of this build used `ta.sum` over a flip marker and the engine
+// rejected it -- "unimplemented function 'ta.sum'". Rejected at validation, before execution, so no
+// credit was spent. The run-length formulation replaced it and is BOTH array-free AND closer to the
+// source's own wording, so the constraint improved the build.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - unchanged from v37, enforced by EXCLUSION via rBig so the stop stays on
+//        the zone edge, never clamped.
+//   Stop beyond STRUCTURE (LESSON 5) - dzBot, the demand candle's low. Unchanged.
+//   Each leg separately (LESSON 6) - LONG ONLY. The short leg is not run here: HARD LESSON 34 showed
+//        74% of this lab's short losses are truncated by liquidation before their stop, so a short
+//        number would not measure the strategy.
+//   BINDING (E17) - the new term is `ambiguous`. If it is almost always true this collapses to v54;
+//        if almost always false it collapses to v37. THE TRADE COUNT LANDING BETWEEN 48 AND 155 IS
+//        THE EVIDENCE THAT IT BINDS AT ALL, and is read before the profit factor.
+//   REDUNDANCY (E14) - `ambiguous` is structural (candle direction sequence); the bias terms are
+//        directional (12H/24H close comparisons). They are not proxies for one another.
+//   LATCH IN SEQUENCE (LESSON 8) - flips are computed only from COMPLETED 4H candles (pO/pC), the
+//        bias only from completed 12H/24H closes, and the tap fires on a later 15m bar.
+//   CASCADE (HARD LESSON 35) - long builds do not cascade, so the reported trade count is a true
+//        position count here and clause 3 can be applied to it directly. Verify cascadeRatio is 1.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale. 3M KEEPS ITS OWN MODEL.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17):
+//   * PF >= v37's 1.25172059 with a count between 48 and 155 -> the source's rule implemented
+//     FAITHFULLY beats the champion. That is a KEEP under RATCHET v2 and the strongest possible
+//     vindication of reading the transcripts before trusting a mechanisation.
+//   * PF between 1.15861551 and 1.25172059 -> the gate is real but costs edge; v37 stays champion and
+//     the "inflated headline" question stays open rather than being resolved either way.
+//   * COUNT ~= 155 and PF ~= 1.2517 -> `ambiguous` almost never fires. The gate is INERT as
+//     mechanised, which indicts the FLIP PROXY, not the source's rule. Say so and fix the proxy.
+//   * COUNT ~= 48 -> `ambiguous` almost always fires and this collapses to v54. Same conclusion,
+//     opposite failure mode.
+//   * PF < 1.15861551 -> the conditional gate is WORSE than the universal one, which would be
+//     genuinely surprising and would argue v54 was closer to right than the transcripts suggest.
+strategy("3M ELITE v57 conditional bias gate LONG", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rTarget     = input.float(2.0, "Target, x R -- held at v37/v54")
+maxBars     = input.int(96,    "Max bars in trade -- held at v37/v54")
+maxAge      = input.int(6,     "Zone freshness cap -- held at v37/v54")
+minRpct     = input.float(0.80,"Min stop distance as % of price -- held at v37/v54")
+runLo       = input.int(2,     "Advanced back-and-forth: shortest run length that needs the HTF check")
+runHi       = input.int(3,     "Advanced back-and-forth: longest such run length")
+
+MS4H  = 14400000
+MS12H = 43200000
+MS24H = 86400000
+b4h  = math.floor(time / MS4H)
+b12h = math.floor(time / MS12H)
+b24h = math.floor(time / MS24H)
+new4h  = b4h  != b4h[1]
+new12h = b12h != b12h[1]
+new24h = b24h != b24h[1]
+
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+var float pO  = na
+var float pH  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pH  := h4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+bullEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC < ppO and pC > pO and pC > ppO
+
+var float dzTop   = na
+var float dzBot   = na
+var bool  dzLive  = false
+var int   dzTouch = 0
+var int   dzAge   = 0
+var bool  dzTraded = false
+
+if new4h
+    if dzLive and not na(pC) and pC <= dzTop
+        dzTouch := dzTouch + 1
+        if dzTouch >= 2
+            dzLive := false
+    if dzLive
+        dzAge := dzAge + 1
+    if bullEngulf
+        dzTop   := pO
+        dzBot   := pL
+        dzLive  := true
+        dzTouch := 0
+        dzAge   := 0
+        dzTraded := false
+
+var float c12prev  = na
+var float c12prev2 = na
+if new12h
+    c12prev2 := c12prev
+    c12prev  := close[1]
+
+var float c24prev  = na
+var float c24prev2 = na
+if new24h
+    c24prev2 := c24prev
+    c24prev  := close[1]
+
+bias12Bull = not na(c12prev) and not na(c12prev2) and c12prev > c12prev2
+bias24Bull = not na(c24prev) and not na(c24prev2) and c24prev > c24prev2
+biasBullOk = bias12Bull and bias24Bull
+
+var int dir4prev = 0
+var int runLen    = 0
+if new4h
+    d = na(pC) or na(pO) ? 0 : (pC > pO ? 1 : (pC < pO ? -1 : 0))
+    if d != 0
+        runLen := d == dir4prev ? runLen + 1 : 1
+        dir4prev := d
+
+ambiguous = runLen >= runLo and runLen <= runHi
+biasOk    = not ambiguous or biasBullOk
+
+minR    = close * minRpct / 100
+rBig    = not na(dzBot) and (close - dzBot) >= minR
+
+longCond = rBig and dzLive and not dzTraded and dzAge >= 1 and dzTouch < 2 and low <= dzTop and close > dzBot and dzAge <= maxAge and biasOk
+
+flat = strategy.position_size == 0
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if flat and longCond and not na(dzBot) and close > dzBot
+    r = close - dzBot
+    if r > 0
+        strategy.entry("L", strategy.long)
+        dzTraded := true
+        slPx   := dzBot
+        tpPx   := close + r * rTarget
+        barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(dzLive ? 1 : 0,     title="DemandZoneLive")
+plot(ambiguous ? 1 : 0,  title="StructureAmbiguous")
+plot(runLen,             title="Consec4hRunLen")
+plot(biasOk ? 1 : 0,     title="BiasOk")

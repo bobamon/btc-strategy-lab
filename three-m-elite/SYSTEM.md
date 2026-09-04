@@ -3009,3 +3009,70 @@ the 2 allowed this cycle (balance was 617, above the 500 threshold).
    2023) remains the only dedicated flip-window test; further windows are optional, not blocking.
 4. **CHAMPION UNCHANGED: v37** (PF 1.25172059 / DD 8.72815312%, 155 trades, long-only). Nothing in this
    cycle's finding, nor the concurrent cascade-closure entry above, touches its numbers.
+
+---
+
+# ██ v57 — THE BIAS GATE, MADE CONDITIONAL AS THE SOURCE SPECIFIES. AND A CLAIM IS WITHDRAWN.
+
+Queue item 1 asked which of two readings was right. **The transcripts answer it, and it is the second
+one: the gate as implemented in v54/v55 was too strict.**
+
+> `04-18-22` **[01:44]** *"anything that has the word ADVANCED in it means that we need to check the
+> higher time frame to give us our context"*
+> **[02:41]** *"…because if things are going back and forth in my head **the next break could be either
+> direction** essentially, so we're going to use the help from the higher time frames"*
+> **[00:38]** *"this is **not** an advanced model, this is just regular back and forth when you have
+> one one one"*
+
+**The higher-timeframe bias is a tie-breaker for an ambiguous structure, not a blanket filter.** v54
+applied it to every entry. v57 applies it only when the current run of same-direction completed 4H
+candles is 2–3 long — the source's own *"two two two / three three three"* advanced forms.
+
+| | v37 (no gate) | v54 (universal gate) | **v57 (conditional gate)** |
+|---|---|---|---|
+| Profit factor | **1.25172059** | 1.15861551 | **1.17083258** |
+| Max drawdown | **8.72815312%** | 9.04% | 10.41361626% |
+| Trades | 155 | 48 | **125** |
+| Win rate | — | — | 40.80% |
+
+## THE GATE BINDS, AND THE FAITHFUL VERSION BEATS THE STRICT ONE
+125 trades sits cleanly between 48 and 155 — the pre-registered evidence that the conditional term
+does real work rather than collapsing to either extreme. And **1.17083258 > 1.15861551 on 2.6× the
+sample.** Reading the transcripts before trusting a mechanisation was worth the credit.
+
+**But neither beats v37 with no gate at all. REJECTED** under RATCHET v2 clause 1 — PF falls and
+drawdown worsens.
+
+## THE CLAIM THAT IS NOW WITHDRAWN
+This file has been carrying: *"part of v37's headline was the bull market, now measured rather than
+suspected."* **That is withdrawn.** It rested on v54, whose gate does not match the source — and the
+faithful version does not support it either.
+
+**The evidence points the other way.** The gate *keeps* trades whose 12H/24H context is bullish and
+drops the rest. If v37's edge were merely the bull market, dropping the non-bull-confirmed trades
+should have **raised** profit factor. It **lowered** it, twice, under two different implementations —
+so the removed trades were profitable on average, and the strategy earns in non-bullish
+higher-timeframe contexts too.
+
+**Suggestive, not conclusive:** the gate also shifts occupancy (LESSONS 24/28/29), so a different
+admitted population is not a controlled subset. But it is the opposite of what the withdrawn claim said.
+
+## THIS IS THE THIRD SOURCE-INVERSION IN THE PROJECT
+- War Formation **E64b**: the source's literal 6h direction rule loses to the lab's 1h proxy.
+- War Formation **E69a**: the 1h term the source calls *"a bonus"* is the most load-bearing in the build.
+- 3M **v57**: the higher-timeframe bias the source insists on **costs edge** on this instrument.
+
+Three independent measurements, two labs, two separate bodies of source material. **Mastering these
+strategies keeps producing the same shape of result: the authors' stated weightings do not survive
+measurement on BTCUSDT.** That is worth saying plainly, and it is not a reason to stop following the
+source — it is the reason to keep measuring it.
+
+## ENGINE CONSTRAINT DISCOVERED
+`ta.sum` is **unimplemented** in `tv_jul26_mc7` — *"Runtime: unimplemented function 'ta.sum'"*.
+Rejected at validation before execution, so **no credit was spent**. Add it to the forbidden list. The
+run-length replacement is array-free and closer to the source's wording, so the constraint improved
+the build.
+
+## STATUS
+**CHAMPION UNCHANGED: v37.** Now with one caveat removed rather than added — the bull-market claim is
+withdrawn, and its existing caveats (weak H2, edge concentrated in H1) stand unaltered.

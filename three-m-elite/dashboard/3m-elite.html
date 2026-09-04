@@ -623,9 +623,48 @@ const DATA = [
     },
     "pineSource": "three-m-elite/pine/3m-elite-v55-bias-gate-short.pine",
     "notes": "Clears PF 1.0 comfortably -- 1.43721863 on 28 rows (24 unique entries), DD 2.67541071%, win rate 21.43%. This half alone does NOT validate v55: RATCHET v2's split-test check requires BOTH halves to clear 1.0, and H1 fails badly (0.63003790). Status left as 'testing' rather than 'passed' or 'rejected' in isolation -- the governing verdict is recorded on the parent v55 entry (REJECTED) and on H1, since one failing half is sufficient to reject the whole. 24+38=62 exactly partitions v55's full-sample unique-entry count with H1."
+  },
+  {
+    "id": "3m-elite-v57-conditional-bias-gate-long",
+    "name": "3M v57: the bias gate made CONDITIONAL, as the source actually specifies",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/pine/3m-elite-v57-conditional-bias-gate.pine",
+    "description": "Queue item 1 asked which of two readings was right, and the transcripts answer it: the gate as implemented in v54/v55 is TOO STRICT. transcripts/2026-08-09 04-18-22.txt [01:44] 'anything that has the word ADVANCED in it means that we need to check the higher time frame', and [02:41] the reason is that 'if things are going back and forth... the next break could be either direction'. So the higher-timeframe bias is a TIE-BREAKER FOR AN AMBIGUOUS STRUCTURE, not a blanket filter -- and [00:38] says 'one one one' is explicitly NOT advanced. v54 applied it to every entry. ONE CHANGE from v54: the 12H/24H bias applies only when the current run of same-direction completed 4H candles is 2-3 long, matching the source's own 'two two two / three three three' advanced forms. Everything else held byte-identical to v54/v37.",
+    "metrics": {
+      "netProfitPct": 16.21810272,
+      "profitFactor": 1.17083258,
+      "maxDrawdownPct": 10.41361626,
+      "totalTrades": 125,
+      "winRatePct": 40.8,
+      "avgTradePct": 0.12974482,
+      "sharpeRatio": 0.45089908,
+      "commissionPaid": 1352.889728099999,
+      "avgWinningTrade": 217.948539303922,
+      "avgLosingTrade": -128.291422062162,
+      "longTrades": 125,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1NCTF9VF1EVDC0S242TV2EN",
+      "strategyId": "01M1NCTFGXWBF991Y23Y97J93T",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NCTF9VF1EVDC0S242TV2EN",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T05:03:00Z"
+    },
+    "verdict": "REJECTED -- the gate binds, is better implemented conditionally, and still costs edge",
+    "notes": "THE SECOND OF FIVE PRE-REGISTERED OUTCOMES LANDED. THE GATE BINDS AND IS NOT INERT: 125 trades sits cleanly between v54's 48 (universal gate) and v37's 155 (no gate), exactly the range the header named in advance as the evidence that the conditional term does real work. AND THE FAITHFUL IMPLEMENTATION BEATS THE STRICT ONE: 1.17083258 against v54's 1.15861551, on 2.6x the sample (125 vs 48). Reading the transcripts before trusting a mechanisation was worth a credit. BUT NEITHER BEATS v37 WITH NO GATE AT ALL (1.25172059 / 8.72815312% / 155). REJECTED under RATCHET v2 clause 1: PF falls and drawdown worsens 8.73% -> 10.41%. THE CLAIM THAT MUST NOW BE WITHDRAWN: SYSTEM.md has been carrying 'part of v37s headline was the bull market, now measured rather than suspected', on the strength of v54. THAT IS WITHDRAWN. It rested on a gate that does not match the source, and the faithful version does not support it either. THE EVIDENCE ACTUALLY POINTS THE OTHER WAY, and the logic is worth stating: the gate KEEPS trades whose 12H/24H context is bullish and DROPS the rest. If v37s edge were merely the bull market, dropping the non-bull-confirmed trades should have RAISED profit factor. It LOWERED it, twice, under two different implementations -- which means the trades removed were profitable on average, and the strategy earns in non-bullish higher-timeframe contexts too. That is suggestive rather than conclusive, because the gate also shifts occupancy (LESSONS 24/28/29) and a different admitted population is not a controlled subset. But it is the opposite of what the withdrawn claim asserted. THIS IS THE THIRD SOURCE-INVERSION IN THE PROJECT: War Formation E64b found the source's literal 6h direction rule loses to the lab's proxy, E69a found the 1h term the source calls 'a bonus' is load-bearing, and now 3M finds the higher-timeframe bias the source insists on costs edge on this instrument. ENGINE NOTE (new constraint): the first version used ta.sum over a flip marker and the engine rejected it -- 'unimplemented function ta.sum'. Rejected at validation before execution, so no credit was spent; the run-length formulation that replaced it is array-free AND closer to the source's own wording. CASCADE: ratio 1, so 125 is a true position count (HARD LESSON 35) and clause 3 applies to it directly."
   }
 ];
-const BUILT = "2026-09-04 05:00";
+const BUILT = "2026-09-03 23:05";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
