@@ -673,7 +673,7 @@ const DATA = [
     "symbol": "BTCUSDT",
     "timeframe": "15m",
     "direction": "long",
-    "status": "testing",
+    "status": "passed",
     "createdDate": "2026-09-04",
     "lastTestedDate": "2026-09-04",
     "backtestStart": "2022-01-01",
@@ -709,8 +709,8 @@ const DATA = [
       "verifiedAt": "2026-09-04T06:00:00Z"
     },
     "pineSource": "three-m-elite/pine/3m-elite-v58-first-touch-only.pine",
-    "verdict": "RATCHET v2 clauses 1-3 PASS decisively; clause 4 (mandatory split) not triggered but not yet checked -- new interior base, promotion to champion-of-record pending a split test",
-    "notes": "THE PREDICTION'S FIRST BRANCH LANDED, DECISIVELY. Versus champion v37: profit factor 1.25172059 -> 1.48439273 (+0.2327, far past the 0.02 threshold), max drawdown 8.72815312% -> 8.70519440% (IMPROVED, not just held), trades 155 -> 117 (a 24.5% cut -- real but under RATCHET v2 clause 4's 50% split-test trigger). All three live ratchet clauses (PF up, DD not worse, count >=30) pass at once, which last happened for this lab at v32 and v37 themselves. WHY IT WORKED AS DESIGNED: avgBarsWinning is 47.02 (49% of the 96-bar cap), essentially identical to v37's own 47.0 (49%) -- the hold profile is unchanged, confirming the entry-only filter did not achieve its PF gain by lengthening winners into the cap, exactly the lever HARD LESSON 38 said was untried and safest. Achieved win/loss ratio (HARD LESSON 39) is 1.73179151 against the same nominal rTarget=2.0 -- 86.6% of nominal, weaker than v37's 97.1% but still healthy, and win rate rose from 42.58% to 46.15%. Net effect: a genuinely untouched zone (dzTouch==0) converts at a higher rate than a zone that already absorbed one completed close-inside, which is the opposite of 'a zone that survived a test is proven' and consistent with the source's own framing of a fresher setup as a cleaner one. Cascade ratio 1.0 (117 rows = 117 unique entries) -- clean, as expected for a long build (HARD LESSON 35's tranching signature is short-specific). NOT YET A CHAMPION: this is a >24% trade-count cut on a large PF move, and while RATCHET v2's clause 4 does not mandate a split test below 50%, this lab has never promoted a result of this magnitude to 'passed' without one (v32->v33, v37->v39) -- the credit budget this cycle (1 of 2 spent on this run) did not extend to a same-cycle split, so v58 is recorded as the new interior base (status: testing) and the split (2022-01-01/2024-06-08 halves, matching the established methodology) is the top queue item for the next cycle before any promotion."
+    "verdict": "RATCHET v2 clauses 1-3 PASS decisively; clause 4 split test PASSED on both halves (H1 PF 1.43185806/71 trades, H2 PF 1.57578397/46 trades, both >30, both >1.0, H2 stronger than H1) -- PROMOTED to champion-of-record, superseding v37.",
+    "notes": "THE PREDICTION'S FIRST BRANCH LANDED, DECISIVELY. Versus champion v37: profit factor 1.25172059 -> 1.48439273 (+0.2327, far past the 0.02 threshold), max drawdown 8.72815312% -> 8.70519440% (IMPROVED, not just held), trades 155 -> 117 (a 24.5% cut -- real but under RATCHET v2 clause 4's 50% split-test trigger). All three live ratchet clauses (PF up, DD not worse, count >=30) pass at once, which last happened for this lab at v32 and v37 themselves. WHY IT WORKED AS DESIGNED: avgBarsWinning is 47.02 (49% of the 96-bar cap), essentially identical to v37's own 47.0 (49%) -- the hold profile is unchanged, confirming the entry-only filter did not achieve its PF gain by lengthening winners into the cap, exactly the lever HARD LESSON 38 said was untried and safest. Achieved win/loss ratio (HARD LESSON 39) is 1.73179151 against the same nominal rTarget=2.0 -- 86.6% of nominal, weaker than v37's 97.1% but still healthy, and win rate rose from 42.58% to 46.15%. Net effect: a genuinely untouched zone (dzTouch==0) converts at a higher rate than a zone that already absorbed one completed close-inside, which is the opposite of 'a zone that survived a test is proven' and consistent with the source's own framing of a fresher setup as a cleaner one. Cascade ratio 1.0 (117 rows = 117 unique entries) -- clean, as expected for a long build (HARD LESSON 35's tranching signature is short-specific). NOT YET A CHAMPION: this is a >24% trade-count cut on a large PF move, and while RATCHET v2's clause 4 does not mandate a split test below 50%, this lab has never promoted a result of this magnitude to 'passed' without one (v32->v33, v37->v39) -- the credit budget this cycle (1 of 2 spent on this run) did not extend to a same-cycle split, so v58 is recorded as the new interior base (status: testing) and the split (2022-01-01/2024-06-08 halves, matching the established methodology) is the top queue item for the next cycle before any promotion. SPLIT TEST DONE THIS CYCLE (see 3m-elite-v58-split-h1 / -h2): H1 (2022-01-01/2024-06-08) PF 1.43185806 on 71 trades, H2 (2024-06-08/2026-09-01) PF 1.57578397 on 46 trades -- 71+46=117 exactly, a clean partition. Both halves clear 1.0 by a wide margin and both clear the 30-trade floor; unlike v37 (H2 weaker than H1) or v56/v57 (splits unsatisfiable below 30 on one side), v58's H2 is actually STRONGER than H1 on both PF and drawdown. PROMOTED to champion-of-record: v58 supersedes v37 (PF 1.25172059/155 trades) as the strategy of record for 3M ELITE, long-only, anchored at pine/3m-elite-v58-first-touch-only.pine."
   },
   {
     "id": "3m-elite-v56-source-ma-stack-bias-long",
@@ -811,9 +811,73 @@ const DATA = [
     },
     "verdict": "THE FIRST PROFITABLE 3M SHORT. Cannot promote -- clause 4's split is unsatisfiable again -- but it answers the bidirectional directive.",
     "notes": "THE REGISTERED FIRST READ WAS GROSS, AND GROSS IS THE DECISIVE NUMBER HERE. v53 (the ungated mirror) is GROSS-NEGATIVE at -$895.26 before a cent of commission. v57 is GROSS-POSITIVE at net + commission = $379.61 + $401.17 = +$780.77. A SWING OF $1,676 FROM ONE TERM. The pre-registered outcome was explicit that a positive gross would mean 'the bias gate was the short's real problem, the source's own rule fixes it, and the mirror is viable' -- and that is what happened. THE SOURCE WAS RIGHT AND THE LAB'S PROXY WAS WRONG, now demonstrated on the leg where it matters most. Profit factor 0.70512830 -> 1.222673, drawdown 31.08% -> 8.07312248%. THIS IS THE FIRST PROFITABLE 3M SHORT IN THE PROJECT'S HISTORY and the first real answer to the user's bidirectional directive for this lab. AND HARD LESSON 48 IS CONFIRMED A SECOND TIME, IN A SECOND LAB. The identical term did opposite things by leg in terms of what it is worth: on the LONG (v56) the stack lifted profit factor to 1.62137752 but cut the sample 76% and could not promote; on the SHORT it rescues a mechanism that was losing money before costs. Predicting one from the other would have been wrong in both directions. READ THE WIN RATE BY ENTRY, NOT BY ROW. cascadeRatio is 1.5128205128205128 (59 rows from 39 unique entries, histogram 24/11/3/1, max depth 4), the margin-call unwind established at trade level on v53. Win rate by ROW is 16.94915254%; BY ENTRY it is 10/39 = 25.64102564%. The avgLosingTrade of -$34.79 is likewise contaminated by sliver rows and is NOT the true average loss per position -- the ratioAvgWinLoss of 5.9910977 is inflated by the same effect and must NOT be quoted as the geometry's ratio. Profit factor is the one aggregate shown to survive the artifact (on v53, 0.70512830 by row against 0.70360999 by entry, a difference of 0.0015), so 1.222673 is readable as printed; a by-entry confirmation from the FREE trade log is the next step and no credit is needed for it. IT CANNOT PROMOTE, AND FOR THE SAME STRUCTURAL REASON AS v56. Against v53's 174 entries this is 39 -- a 78% cut, so RATCHET v2 clause 4 requires a split test BEFORE any keep. 39 entries split at 2024-06-08 cannot put 30 on both sides, so the split is unsatisfiable exactly as it was for v56's 27/10. HARD LESSON 45 now has its second confirmation: every bias gate this lab tries, whether the lab's invention or the source's own rule, cuts the sample below what the ratchet needs. THE BINDING CONSTRAINT IS THE DATA. CHAMPION UNCHANGED: v37 at 1.25172059 / 155 trades, on a sample that can actually be split. || BY-ENTRY CONFIRMATION COMPLETED 2026-09-04, FREE via get_trades, no credit spent. This closes the queue item opened when v57 was recorded. All 59 rows were grouped by (entryBar, entryPrice) into 39 unique entries and each entry's rows summed. THE PROFIT FACTOR SURVIVES THE ARTIFACT, AS PREDICTED: 1.222673 by row against 1.22409 BY ENTRY, a difference of 0.0014 -- almost exactly the 0.0015 measured independently on v53. So v57's headline profit factor is readable as printed and the gross sign flip stands unqualified. WIN RATE BY ENTRY IS 10/39 = 25.64102564%, confirming the estimate recorded at the time rather than merely repeating it. BUT TWO REPORTED FIELDS ARE BADLY WRONG AND ARE NOW QUANTIFIED. avgLosingTrade reads -$34.79 by row; BY ENTRY it is -1693.85/29 = -$58.41, so the reported figure UNDERSTATES THE TRUE LOSS PER POSITION BY 40%. avgWinningTrade barely moves ($208.44 by row against $207.35 by entry) because winners are rarely sliver-split -- the margin unwind only fragments LOSING positions. The consequence is that ratioAvgWinLoss reads 5.9910977 by row against 3.55 BY ENTRY: THE REPORTED RATIO OVERSTATES THE GEOMETRY BY 69%. The caveat entered when v57 was recorded was correct, and it was correct by a much larger margin than the wording implied. GENERAL RULE ESTABLISHED FOR THIS LAB: on any short build with cascadeRatio above 1, profit factor and avgWinningTrade are safe, while WIN RATE, avgLosingTrade and ratioAvgWinLoss must all be recomputed by entry. The asymmetry has a mechanism: the engine sheds slivers only from positions moving against you, so the artifact lands entirely on the loss side of every statistic."
+  },
+  {
+    "id": "3m-elite-v58-split-h1",
+    "name": "3M Elite v58 split-test, H1 (2022-01-01 to 2024-06-08)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "passed",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Top queue item from v58: split-test v58 (dzTouch==0 first-touch-only entry filter) before promoting it past champion v37, mirroring the v37->v39 and v32->v33 split methodology exactly. Byte-identical Pine to pine/3m-elite-v58-first-touch-only.pine, only the backtest window changed.",
+    "metrics": {
+      "netProfitPct": 23.8809596,
+      "profitFactor": 1.43185806,
+      "maxDrawdownPct": 8.26748378,
+      "totalTrades": 71,
+      "winRatePct": 45.07042254,
+      "sharpeRatio": 0.93240968,
+      "avgTradePct": 0.33635154366197184
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1NK5GMJSPVBDD815R9AHQ72",
+      "strategyId": "01M1NK5GTDKABJ4VQYHZW1F417",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NK5GMJ3VA22MF60SC0FR8S",
+      "verifiedAt": "2026-09-04T00:00:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v58-first-touch-only.pine",
+    "notes": "H1 clears PF 1.0 comfortably (1.43185806) on 71 trades, DD 8.26748378%, win 45.07%. See 3m-elite-v58-split-h2 for the other half; 71+46=117 exactly partitions v58's full-sample trade count with no boundary double-count."
+  },
+  {
+    "id": "3m-elite-v58-split-h2",
+    "name": "3M Elite v58 split-test, H2 (2024-06-08 to 2026-09-01)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "passed",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "Top queue item from v58: split-test v58 (dzTouch==0 first-touch-only entry filter) before promoting it past champion v37, mirroring the v37->v39 and v32->v33 split methodology exactly. Byte-identical Pine to pine/3m-elite-v58-first-touch-only.pine, only the backtest window changed.",
+    "metrics": {
+      "netProfitPct": 15.10442051,
+      "profitFactor": 1.57578397,
+      "maxDrawdownPct": 6.61629982,
+      "totalTrades": 46,
+      "winRatePct": 47.82608696,
+      "sharpeRatio": 0.96753138,
+      "avgTradePct": 0.32835696760869565
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1NK6JVHKE1EFV1X8P2HFQNQ",
+      "strategyId": "01M1NK6JZXW9J9EAE8JCCMHZ1N",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NK6JVHPR2DZ69YEB8NFME5",
+      "verifiedAt": "2026-09-04T00:00:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v58-first-touch-only.pine",
+    "notes": "H2 clears PF 1.0 (1.57578397) on 46 trades, DD 6.61629982%, win 47.83% -- STRONGER than H1 on both PF and drawdown, the opposite pattern from v37's split (where H2 was the weaker half). See 3m-elite-v58-split-h1 for the other half."
   }
 ];
-const BUILT = "2026-09-04 00:38";
+const BUILT = "2026-09-04 06:57";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

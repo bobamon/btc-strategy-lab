@@ -3557,3 +3557,77 @@ On any short build with `cascadeRatio` above 1:
 - **must be recomputed by entry:** win rate, `avgLosingTrade`, `ratioAvgWinLoss`
 
 **Champion unchanged: v37.**
+
+---
+
+# ██ v58 SPLIT-TEST — PASSES ON BOTH HALVES, H2 STRONGER THAN H1. v58 IS PROMOTED, CHAMPION CHANGES. (2026-09-04)
+
+**A NOTE ON THE SCHEDULED PROMPT, AGAIN.** This cycle's stored prompt repeats the same claim already
+addressed at v58's own entry above — that the bias gate and cascade signature are undone, citing
+overnight cloud runs dying at an Artifact publish prompt. Both items are done (bias gate: v54/v55,
+re-read from source and made conditional at v56/v57; cascade signature: closed for zero credits, twice
+confirmed as a liquidation-unwind tranching, not a re-entry storm). Per "THE DOCS WIN over this prompt"
+and HARD LESSON 26, and consistent with the identical call made one entry above, this cycle does not
+re-run either and does not send a second push for the same already-escalated staleness (v39 set that
+precedent: escalate once, then record silently in the ledger while nothing changes). **This cycle's own
+instructions — never call the Artifact tool, commit and push is the last step — are followed exactly as
+given; no Artifact call was made.**
+
+## THE ACTUAL TOP QUEUE ITEM, TAKEN
+
+v58's own entry named the split test at 2024-06-08 as "top priority for the next cycle," matching the
+v37→v39 methodology exactly: byte-identical Pine (`pine/3m-elite-v58-first-touch-only.pine`, no changes),
+only the backtest window split. Two backtests, both credits spent on this one question, nothing else run.
+
+| | H1 (2022-01-01 → 2024-06-08) | H2 (2024-06-08 → 2026-09-01) | Full sample (v58) |
+|---|---|---|---|
+| Profit factor | **1.43185806** | **1.57578397** | 1.48439273 |
+| Max drawdown | 8.26748378% | 6.61629982% | 8.70519440% |
+| Trades | 71 | 46 | 117 |
+| Win rate | 45.07042254% | 47.82608696% | 46.15384615% |
+| Sharpe | 0.93240968 | 0.96753138 | 0.9292181 |
+| Net return | +23.8809596% | +15.10442051% | +42.53848648% |
+
+**71 + 46 = 117, exactly the full sample — a clean partition, no boundary double-count.**
+
+## THE CRITERION, MET — AND MET IN A PATTERN NO PRIOR SPLIT IN THIS LAB HAS SHOWN
+
+Both halves clear PF 1.0 with wide margin and both clear the 30-trade floor (71 and 46). **Unlike every
+prior split this lab has run** — v32→v33 (H1 1.35/H2 1.05, concentrated in H1), v37→v39 (H1 1.336/H2
+1.121, same pattern), v56 and v57 (splits unsatisfiable, one side below 30) — **v58's H2 is the stronger
+half**, on both profit factor (1.576 vs 1.432) and drawdown (6.62% vs 8.27%). There is no "concentrated
+in the crash-and-recovery window" caveat to carry forward here: the edge holds, and strengthens, in the
+half of the sample every prior split found weaker.
+
+**v58 is PROMOTED to `status: passed` and is now the champion of record, superseding v37.**
+
+## WHAT THIS DOES AND DOES NOT SETTLE
+
+RATCHET v2 clause 4's 50% mandatory-split-test trigger was never actually crossed here (117/155 is a
+24.5% cut), but this lab's own practice — v32 waited for v33, v37 waited for v39 — holds a result of
+this magnitude to the same bar regardless, and that bar is now cleared. All three other clauses were
+already decisive at v58's first run: PF +0.2327 (over 11x the 0.02 threshold), drawdown improved rather
+than merely held, trade count 117 well past the 30 floor. Combined with a split that does not just
+avoid collapsing but actually inverts the usual weak-half pattern, there is no remaining reason to
+withhold promotion.
+
+This does **not** touch the STANDING REQUIREMENT — v58 is still long-only (unchanged from v37's scope;
+LESSON 6 still applies, and the short leg remains paused pending a new idea from the source, unchanged
+since v56). Nor does it re-litigate the bias-gate findings: v58's filter is orthogonal to bias (it
+restricts entry to never-touched zones, independent of direction), so the closed bias-axis conclusion
+(HARD LESSON 45, three of four cells sample-collapse) is untouched.
+
+## QUEUE
+1. **v58 needs the same reproducibility (cold re-run) check v37 got at v52** before it is trusted as an
+   anchor for further work — top priority for the next cycle, per LESSON 25.
+2. **State the split going forward as "v58, PF 1.48 blended (H1 1.43/71, H2 1.58/46)"** — the H2-stronger
+   pattern is worth carrying alongside the blended number precisely because it is the exception, not the
+   rule, for this lab.
+3. The short leg remains paused pending a new idea from the source (unchanged since v56/v58's queue item
+   3) — this cycle's work was scoped to the champion (long) leg only.
+4. **The remaining signal terms** `close > dzBot` and `dzAge >= 1` — the binding test never yet applied to
+   either — carried forward unchanged from v36 onward, now against the new champion v58 rather than v37.
+
+**CHAMPION OF RECORD: v58** (PF 1.48439273, DD 8.70519440%, 117 trades, long-only, `dzTouch==0`,
+anchored at `pine/3m-elite-v58-first-touch-only.pine`). Split-tested and PROMOTED, superseding v37 (PF
+1.25172059, DD 8.72815312%, 155 trades) as the third validated champion in this lab, after v32 and v37.
