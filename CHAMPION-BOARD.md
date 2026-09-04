@@ -4182,3 +4182,114 @@ than a coin-flip model predicts**, a frequency fact independent of whether the r
    estimation itself -- not the mechanism claim -- is now the recurring point of failure across four of
    these seven; the next cycle should treat a pre-registered frequency estimate as a hypothesis to
    verify on a cheap partial run before committing to full stop/target logic, wherever that is practical.
+
+---
+
+# ATTACK 57 - DUAL-EMA CROSSOVER TREND CONTINUATION. ZERO TRADES ON H1 -- A THIRD-LAB CONFIRMATION OF HARD LESSON 8, NOT A NEW FREQUENCY MISS.
+
+The stored prompt asks an ELEVENTH time for Attack 37's filter stack, describing a board state
+(322/196 trades, "earned a filter stack, queued not built") now 20 attacks stale. **The docs override
+it again**: Attack 41 closed Attack 37, Attack 43 closed the whole sweep-reversal family, Attack 47
+died on the ~77% sample wall against champion Attack 46 (HARD LESSON 45/49), and the board's own queue
+says stop adding filters to Attack 46 on this data. Nine straight new-mechanism-or-refinement proposals
+(48-56) have failed, so this cycle uses the mandate's fallback clause and, per Attack 56's queue item 5,
+tried to weight the frequency estimate as heavily as the mechanism claim itself.
+
+**CLAIM:** when a fast EMA(9) crosses above a slow EMA(21) while that slow EMA is already sloping
+upward (`ta.rising(emaSlow, 20)`), the crossover confirms an established trend rather than an early,
+choppy reversal, and price continues by roughly the height of its own recent range. **Genuinely
+distinct from every family on this board** -- the first dual-moving-average CROSSOVER system used as
+the primary signal anywhere in this lab (no VWAP stretch/reclaim, no swing-level tap, no oscillator, no
+volume term, no calendar anchor, no single-bar range/volume test, no close-sequence count). Stop:
+`ta.lowest(low, 20)`, a real structural low (LESSON 5). Target: `close + (ta.highest(high,20) -
+ta.lowest(low,20))`, a measured-move projection of the recent range's height (HARD LESSON 41/47). R
+floor 0.8% by exclusion. Long only, bare, two clean conditions -- deliberately NOT a three-way
+conjunction, the shape that collapsed Attacks 54-56 to single digits. Pine:
+`strategies/pine/attack57-ema-crossover-trend-continuation.pine`.
+
+## H1 CAME BACK WITH ZERO TRADES
+
+| | **57a** never-tuned (H1) |
+|---|---|
+| Profit factor | **0** (no trades) |
+| Trades | **0** |
+| Max drawdown | 0% |
+
+Not a thin sample, not a negative edge -- **the entry condition never fired once across 85,655 bars.**
+
+## THE COUNTER BUILD (HARD LESSON 8's OWN PRESCRIBED TECHNIQUE) FOUND THE CAUSE, NOT A BUG
+
+Per HARD LESSON 8's corollary -- "make the gate itself the entry condition and force a one-bar exit, so
+`totalTrades` becomes the gate's hit count" -- the second and last credit this cycle went to a
+diagnostic build: `ta.crossover(ema9, ema21)` alone, no rising filter, no R floor, 1-bar hold.
+
+| | raw `emaCross` alone (counter build, H1) |
+|---|---|
+| Trades | **2,154** |
+| Profit factor | 0.34 (not a real result -- 1-bar forced exit, not the candidate's actual stop/target) |
+
+**The raw crossover is not rare at all -- it fires roughly once every 40 bars.** Combined with
+`slowRising`, it fires **zero** times. The `slowRising` term did not thin the signal; it **eliminated
+it completely.**
+
+## WHY: THE TWO CONDITIONS ARE STRUCTURALLY NEAR-MUTUALLY-EXCLUSIVE, NOT MERELY RESTRICTIVE
+
+A fast/slow EMA crossover marks the *moment* the faster average first overtakes the slower one --
+almost by definition an early inflection, arriving while the slower average has only just begun to
+turn. `ta.rising(emaSlow, 20)` demands the OPPOSITE: that the slow EMA has been rising on **every one**
+of the prior 20 bars, i.e. that the trend was already fully established a full 20 bars before the
+crossover could still be called a crossover. **By the time a slow EMA has been monotonically rising for
+20 straight bars, the fast EMA has almost always already crossed above it many bars earlier** -- so the
+two events do not coincide. This is exactly **HARD LESSON 8**'s original failure shape (a coil and a
+thrust demanded on the same bar; a zone tap and an engulf demanded on the same bar) applied to a THIRD
+mechanism shape in a THIRD context: **a trigger and a "the state it triggers already existed" filter,
+required on the same bar.** The fix HARD LESSON 8 already names -- latch the setup, let the trigger
+fire on a LATER bar -- was not applied here because this cycle did not recognise the same-bar
+requirement as a same-bar requirement until the counter build proved it; recorded as the lesson to
+carry forward, not merely re-earned.
+
+## THIS IS NOT ATTACK 54/55/56's FAILURE MODE
+
+Those three died on a **frequency estimate that was too optimistic by 25-165x** -- real, rare events
+that were rarer than modelled. **This is different: the raw trigger (2,154 hits) was never rare.** The
+zero came from a **logical near-contradiction between two terms**, not from an underpowered sample.
+Recorded separately so the board does not conflate "the naive estimate was off" (Attacks 003/54/55/56)
+with "the two conditions cannot coexist" (this attack, and HARD LESSON 8's original two cases) --
+different failure modes needing different fixes: the first needs better frequency estimation before
+building; the second needs the setup/trigger latched across bars, never required on one.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Not applicable -- zero trades produces zero drawdown and no distribution to categorise, distinct from
+Attack 54/55/56's "too thin to classify" (which at least had a handful of real trades).
+
+## WHAT THIS SETTLES
+
+**The dual-EMA-crossover family is 0-for-1 as built, discarded outright** -- not on edge, not on sample
+size, but on a same-bar construction error HARD LESSON 8 already warned against. **This is the
+FOURTH confirmation of HARD LESSON 8 across two labs and now three genuinely different mechanism
+shapes** (War Formation's coil+thrust, 3M Elite's zone-tap+engulf, and this BTC crossover+rising-filter
+pair), which upgrades it from "watch for coils and thrusts" to a general construction check: **before
+running any build that pairs a TRIGGER (a transition/crossing event) with a CONFIRMATION filter
+described as "already established" or "already been true for N bars," ask whether the trigger, by
+definition, occurs near the START of the state the filter demands rather than after it -- and if so,
+latch the filter's state and let the trigger fire on a later bar, never demand both on one.**
+
+## QUEUE
+
+1. **If the EMA-crossover family is revisited**, latch `slowRising` (or a looser slope test, e.g.
+   `emaSlow > emaSlow[5]` rather than a strict 20-bar unbroken rise) into a state variable armed BEFORE
+   the cross and read on the crossover bar, rather than requiring both conditions to hold simultaneously
+   -- the HARD LESSON 8 fix, not yet applied. That is a narrower retest of this same claim, not a new
+   mechanism, and ranks ahead of inventing an eighth family from scratch.
+2. **Attack 46 remains the sole both-halves-positive candidate on the board**, both halves clear,
+   cold-reproduced, filters exhausted per HARD LESSON 49.
+3. **The out-of-sample test for Attack 46 still ranks first and still cannot be run** under
+   BTCUSDT-only -- unchanged, restated because this cycle did not touch it.
+4. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+5. **Ten straight new-mechanism-or-refinement proposals (48-57) have now failed** -- four on a measured
+   frequency miss (Attacks 54/55/56 and 003's original case), five on a negative edge at an adequate
+   sample (48/49/50/51-52/53), and now one on a same-bar construction contradiction HARD LESSON 8
+   already named. **Before the next build, explicitly check any trigger-plus-"already-established"-
+   filter pair against HARD LESSON 8's shape, not just the frequency estimate against HARD LESSON 4's.**

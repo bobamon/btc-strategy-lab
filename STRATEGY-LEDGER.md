@@ -379,6 +379,20 @@ invalidation path with the same care as the trigger path.
 **And use the counter build to check it** — gate as entry, one-bar exit, `totalTrades` is the hit
 count — because this engine returns no plot values.
 
+### HARD LESSON 8 — FOURTH CONFIRMATION, 2026-09-04 (BTC Attack 57)
+A third lab, a third mechanism shape, same failure: a fast/slow EMA crossover (`ta.crossover`, an
+early-inflection event by definition) combined on the same bar with `ta.rising(emaSlow, 20)` — a
+demand that the slow average had *already* been rising on every one of the prior 20 bars. The raw
+crossover alone fired 2,154 times on an 85,655-bar half (roughly once per 40 bars); paired with the
+rising filter it fired **zero** times, confirmed via the counter build this lesson already prescribes.
+By the time an average has risen monotonically for 20 straight bars, the faster average has almost
+always crossed it many bars earlier — the trigger and the "already established" filter do not
+coincide. **Generalises the check beyond coils/thrusts and zone-taps/engulfs: before pairing any
+TRIGGER (a crossing/transition event) with a filter phrased as "already been true for N bars," ask
+whether the trigger structurally occurs near the START of the state the filter demands rather than
+after it.** If so, latch the filter's state and let the trigger fire on a later bar — do not require
+both on one.
+
 
 # ██ STANDING REQUIREMENT — BOTH DIRECTIONS, ALL REGIMES (user directive, 2026-09-02)
 

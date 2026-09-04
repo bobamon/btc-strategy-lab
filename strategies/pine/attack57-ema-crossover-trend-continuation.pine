@@ -1,0 +1,180 @@
+//@version=6
+// BTC ATTACK 57 - DUAL-EMA CROSSOVER TREND CONTINUATION, SLOPE-FILTERED. A GENUINELY NEW MECHANISM.
+//
+// The stored prompt asks (an eleventh time) for Attack 37's filter stack, describing a board state
+// (322/196 trades, "earned a filter stack, queued not built") now 20 attacks stale. THE DOCS OVERRIDE
+// IT AGAIN: Attack 41 closed Attack 37, Attack 43 closed the whole sweep-reversal family, Attack 47
+// died on the ~77% sample wall against champion Attack 46 (HARD LESSON 45/49), and the board's own
+// queue after Attack 47 says stop adding filters to Attack 46 on this data. Nine straight
+// new-mechanism-or-refinement proposals (48-56) have now failed -- this cycle uses the mandate's
+// fallback clause: one genuinely new mechanism, bare, split-tested on both halves before any tuning.
+//
+// Attack 56's queue (item 5) named the recurring point of failure across four of the last seven
+// attempts: a naive frequency estimate landing far above the realized trade count (4-10x on Attack
+// 003, 38x on Attack 54, 165x on Attack 55, 25.7x on Attack 56). That queue item asked for the next
+// pre-registered estimate to be treated as a hypothesis, weighted at least as heavily as the mechanism
+// claim. This design deliberately avoids the failure pattern common to 54/55/56: it does NOT stack a
+// rare calendar/statistical condition on top of another rare one. It uses exactly two conditions, both
+// on the same two well-behaved, continuously-varying series (two EMAs) that the lab has never used as
+// its PRIMARY signal before -- the same "keep it to two clean conditions" shape that worked for Attack
+// 37 (322/196 trades), not the three-way conjunctions that collapsed to single digits in Attacks 54-56.
+//
+// ==================== THE CLAIM, ONE SENTENCE ====================
+// When a fast EMA crosses above a slow EMA while that slow EMA is already sloping upward, the
+// crossover is confirming an established trend rather than calling an early, choppy reversal, and
+// price continues in the direction of the cross by roughly the height of its own recent range.
+//
+// ==================== GENUINELY DISTINCT FROM EVERY FAMILY ON THIS BOARD ====================
+// VWAP pullback-continuation (retired): a stretch-then-reclaim of ONE moving reference (VWAP) with a
+//   mean-reversion entry. This mechanism has no VWAP, no stretch/reclaim, and no single reference -- it
+//   is a crossover of TWO lagging averages, entered on continuation, not reversion.
+// Attack 33 channel breakout: a rolling N-bar HIGH/LOW price crossing. No price-vs-channel term here;
+//   the entire signal is the relationship between two smoothed EMA series, not raw price vs. a range.
+// Attack 34/35/54/55 calendar anchors (weekly break-hold, funding-settlement clock): no calendar or
+//   clock term of any kind. Every bar is eligible regardless of session or time of day.
+// Attack 36 narrow-range day expansion: required prior LOW volatility, then a break of compression. No
+//   volatility-compression precondition here at all.
+// Attack 37-43 liquidity sweep reversal: a FAILED break below a swing low that reclaims it -- trades
+//   AGAINST the immediately preceding move. This trades WITH an established slope, no swing-low tap.
+// Attack 44-47 level-target support-hold: a two-moment tap-and-reclaim of a prior swing low, targeting
+//   a prior swing HIGH directly. This has no tap/reclaim event and its target is not a raw prior level
+//   at all -- it is a measured-move projection (entry price + the height of the recent range).
+// Attack 48 round-number magnet: a fixed psychological price grid. No fixed price levels here.
+// Attack 49 impulse-bar continuation: a SINGLE bar's own range/volume vs. its own recent average. This
+//   mechanism has no single-bar range or volume test anywhere -- it is defined purely by the shape of
+//   two EMA series over many bars, and volume plays no role at all.
+// Attack 50 Asian-range breakout: a session-anchored range break. No session anchor here.
+// Attack 51/52 RSI/price divergence: an oscillator vs. price disagreement. No oscillator anywhere in
+//   this build -- only two moving averages of price itself.
+// Attack 53 order-flow absorption: a volume-delta proxy. No volume term at all in this mechanism.
+// Attack 56 consecutive-close streak: counts N chained close[i]<close[i+1] comparisons, a pure
+//   price-sequence claim trading AGAINST an extended run. This trades WITH a confirmed slope and uses
+//   no close-to-close chained comparison of any kind.
+// This is the first DUAL-MOVING-AVERAGE CROSSOVER system used as the primary entry signal anywhere on
+// this board -- classic trend-following construction, an axis this lab has not tried.
+//
+// ==================== DESIGN ====================
+// ENTRY (both terms true on the SAME bar -- a crossover is a one-bar event by definition; LESSON 8's
+//   "different bars" latch-in-sequence requirement does not apply, flagged explicitly rather than
+//   silently skipped, same treatment Attack 49 gave its own one-bar pattern):
+//   1. emaCross  -- ta.crossover(emaFast, emaSlow): the fast EMA closes above the slow EMA THIS bar,
+//                   having been at or below it the prior bar. A genuine transition, not a state test.
+//   2. slowRising-- ta.rising(emaSlow, risingLen): the slow EMA is strictly higher than it was
+//                   `risingLen` bars ago -- confirms the average the fast EMA just crossed is itself
+//                   already trending up, not flat or falling (the slope-confirmation filter the claim
+//                   depends on).
+// STOP   -- ta.lowest(low, stopLen): the true low of the last `stopLen` bars as of the signal bar, a
+//   real recent structural low (LESSON 5), not an ATR distance, not a percentage, and not merely the
+//   signal bar's own low (a crossover can fire several bars after the actual swing low that defines the
+//   trend, so the wider structural window is the correct reference here).
+// TARGET -- close + (ta.highest(high, rangeLen) - ta.lowest(low, rangeLen)): a measured-move
+//   projection using the HEIGHT of the recent multi-bar range added onto the breakout price -- a real,
+//   volatility-scaled distance (HARD LESSON 41/47's reachable-target principle), sourced from a
+//   multi-bar range rather than a single bar (Attack 49) or a raw prior level (Attack 44-47) -- a new
+//   target construction for this board.
+// R FLOOR -- LESSON 3: reward is only taken if the stop distance clears 0.8% of price, enforced by
+//   EXCLUDING the setup, never by widening the stop.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - rBig is an EXCLUSION (skip the setup), never a clamp on slPx.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = ta.lowest(low, stopLen), a real recent swing low, not
+//        derived from ATR or a fixed percentage.
+//   Each leg separately (LESSON 6) - LONG ONLY this cycle. The mirror short (fast EMA crosses below
+//        slow EMA while slow EMA is falling) is NOT built here -- CREDITS: only two runs are budgeted
+//        this cycle (H1 kill-gate, then H2 if H1 clears), so an independently-built second leg is out
+//        of scope, not assumed to work. Recorded as outstanding, per the standing bidirectional
+//        requirement.
+//   BINDING (E17) - both terms are expected to bind materially: a raw ta.crossover(9,21) fires often in
+//        chop; requiring the slow EMA to already be rising over `risingLen` bars is expected to remove
+//        a large share of those crossings (early/failed reversals in a still-falling or flat average).
+//        Trade count is read first, before any ratio, to confirm this rather than assume it.
+//   REDUNDANCY (E14) - emaCross (a discrete transition event: did the fast average just overtake the
+//        slow one) and slowRising (a continuous slope state over a longer window: has the slow average
+//        itself been climbing) are independent axes -- a cross can happen while the slow EMA is still
+//        falling (an early call against the prevailing slope) or while it is already rising (this
+//        cycle's claim), so slowRising is not restating what emaCross already tests.
+//   LATCH IN SEQUENCE (LESSON 8) - N/A by design, stated above: emaCross is a one-bar transition event,
+//        so setup and trigger necessarily share one bar. slowRising looks only at prior, already-closed
+//        EMA values (risingLen bars back), so no look-ahead is introduced by evaluating it same-bar.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, flat-check before entry, one position at a time.
+//   CASCADE (HARD LESSON 35) - long build, expect cascadeRatio 1; verify before applying clause 3.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// PRE-REGISTERED FREQUENCY ESTIMATE (LESSON 4/17, stated before running): a 9/21 EMA crossover on BTC
+// 15m is expected to fire roughly every 80-150 bars in a mixed trend/chop regime (~570-1,070 raw
+// crossings across H1's ~85,655 bars); requiring the slow EMA to already be rising over the prior 20
+// bars is expected to remove roughly half of those (early/failed reversals against a still-falling
+// average), landing near 250-500 -- inside or just above the lab's settled 60-350 workable band. Given
+// this board's repeated pattern of realized counts landing BELOW naive estimates (never above), a
+// pre-registered miss toward the low end of that band, or somewhat under it, would not be surprising
+// and is treated as the more likely outcome, not a failure of the estimate on its own.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17):
+//   * H1 (never-tuned half) BELOW 1.0 -> KILL RULE: DISCARD immediately, H2 not run, second credit not
+//     spent. No filters to rescue it (per the mandate's explicit instruction).
+//   * H1 ABOVE 1.0 AND >=30 trades -> run H2. BOTH HALVES ABOVE 1.0 -> ADVANCES, a genuinely new,
+//     uncorrelated mechanism next to Attack 46, worth a filter-stack queue item of its own once
+//     cold-reproduced. H1 above 1.0 but H2 below -> the classic sign this lab has seen repeatedly (VWAP
+//     family, Attacks 38-40): an edge that does not survive into the recent regime. Recorded as a real
+//     finding, not discarded outright, but not advanced either.
+//   * FEWER THAN ~30 TRADES IN EITHER HALF -> a DIRECTION, not a result (LESSON 12); PF not quoted as a
+//     ratio, same treatment as Attacks 54/55/56.
+//   * LARGE SHARE OF EXITS AT maxBars -> the cap is truncating winners before the measured-move target
+//     is reached (HARD LESSON 38); report avgBarsWinning against the cap before drawing any conclusion
+//     about the target's reachability.
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside PF and drawdown
+//   (LESSONS 36/39 and the board's standing drawdown-taxonomy instruction).
+strategy("BTC Attack57 EMA crossover trend continuation", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+fastLen   = input.int(9,     "Fast EMA length")
+slowLen   = input.int(21,    "Slow EMA length")
+risingLen = input.int(20,    "Bars back for the slow-EMA rising test")
+stopLen   = input.int(20,    "Structural stop lookback (bars)")
+rangeLen  = input.int(20,    "Measured-move range lookback (bars)")
+minRpct   = input.float(0.80,"Min stop distance as % of price (LESSON 3)")
+maxBars   = input.int(192,   "Max bars in trade")
+
+emaFast = ta.ema(close, fastLen)
+emaSlow = ta.ema(close, slowLen)
+
+emaCross   = ta.crossover(emaFast, emaSlow)
+slowRising = ta.rising(emaSlow, risingLen)
+
+stopPx = ta.lowest(low, stopLen)
+rngHi  = ta.highest(high, rangeLen)
+rngLo  = ta.lowest(low, rangeLen)
+
+rLong = close - stopPx
+minR  = close * minRpct / 100
+rBig  = rLong >= minR
+
+goLong = emaCross and slowRising and rBig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := stopPx
+    tpPx   := close + (rngHi - rngLo)
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(slPx, title="StopLevel")
+plot(tpPx, title="TargetLevel")
