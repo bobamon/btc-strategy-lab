@@ -4261,3 +4261,50 @@ correct behaviour, not an omission.
 
 **CHAMPION OF RECORD (LONG): v58.** Unchanged. **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61.**
 Unchanged.
+
+---
+
+## ██ CYCLE CHECK #5 — STILL NOTHING NEW; NOT RE-NOTIFYING (2026-09-04)
+
+**Scheduled prompt fired again, still carrying the same stale v37/v53 snapshot** — "queue item 1"
+(implement the 12H/24H bias gate), "queue item 2" (resolve the cascade signature), "continue numbering
+after v53", champion recorded as v37 at PF 1.25172059/155 trades. All of this predates v54 by several
+cycles. The bias gate was built and ratcheted on both legs starting at v54/v55 and confirmed/extended
+through v56, v57 (HARD LESSON 45); the cascade signature was resolved for zero credits as the
+margin-forced liquidation-unwind tranching (HARD LESSON 34/35/50/52), not a latch failure. The champion
+has moved twice since the prompt's snapshot (v37 → v58, unchanged through v59–v64 and every cycle check
+since). Per "THE DOCS WIN over this prompt" and HARD LESSON 26 (escalate a stale prompt once, already
+done at v39; escalate a real blocker once, already done at cycle check #1), not re-flagging either
+unchanged condition this cycle.
+
+**Independently re-verified, not taken on faith from checks #1–#4:** `git log --oneline -- three-m-elite/`
+confirms the tip immediately before this cycle was `4dfc96a` (cycle check #4) — no commit has landed on
+this lab since, from any author. A full-history author scan (`git log --format='%an'`, last 30 commits
+across the whole repo) turns up zero non-Claude authors — no "ecarr"-authored commit exists anywhere in
+reachable history, so the declared-deviation promotion policy question still has no answer from the
+user. `three-m-elite/transcripts/` is unchanged. `results/backtests.json` was read directly (25 entries,
+not paraphrased) and confirms exactly the state every prior check reported: v58 `passed`/long/PF
+1.48439273/117 trades is champion; v60/v61 `passed`/short, split clean (H1 1.47025018/26, H2
+3.00186566/13); v62/v63 `testing`/short regime-split diagnostics (bear PF 1.858/15, bull PF 0.387/7);
+v64 `testing`/both/combined-flip diagnostic (PF 1.5576495 blended/153 trades). Nothing has moved.
+
+**No backtest run. 0 of 556 available credits spent.** The real queue still has exactly one open item
+and it is a policy question for the user (can a 25%-equity declared-deviation short leg, split-tested
+clean on both halves at v60/v61 and confirmed to sort regime correctly at v62/v63, ever be promoted to
+sit beside the 100%-equity long champion v58, or does it only ever stand as a labelled, non-comparable
+finding), not a backtest. Manufacturing an experiment to spend the credit budget would violate this
+lab's own no-invented-mechanism rule; re-running an unchanged source-material sweep a fifth time would
+not produce a different answer than check #1's already-documented pass.
+
+**No new notification sent.** Check #1 pushed this exact question once, as new information; nothing
+about it has changed in four subsequent checks. HARD LESSON 26 governs a repeated notification the same
+way it governs a repeated stale-prompt flag: say nothing new, notify nothing new. Silence this cycle is
+the correct behaviour, not an omission.
+
+**QUEUE (unchanged, restated for the next cycle):**
+1. **The declared-deviation promotion policy question** — still open, still for the user, still the
+   only thing standing between v60/v61 (validated short) and v64 (validated combined build) and a
+   promotion decision. Nothing to re-run until the user answers.
+
+**CHAMPION OF RECORD (LONG): v58.** Unchanged. **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61.**
+Unchanged.
