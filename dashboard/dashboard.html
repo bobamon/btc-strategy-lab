@@ -1194,9 +1194,60 @@ const DATA = [
     },
     "verdict": "DISCARDED BY THE KILL RULE. H2 not run, second credit not spent, despite a 576-credit balance that would otherwise permit the full pair -- the mandate's kill rule overrides the credit-tier default when H1 fails.",
     "notes": "PF 0.75710902, clearly below 1.0. The win rate is actually high (63.22%) but the payoff ratio is poor (0.44037661): break-even at that ratio needs 69.43% wins, actual is 6.2pp short. avgBarsWinning (26.76) is LESS than avgBarsLosing (52.76) -- the OPPOSITE of HARD LESSON 5's classic 'stop in the noise' signature, and the likely mechanism is the target design itself: because the target level (asianHigh + rangeWidth) is fixed independent of WHEN the two-bar confirmation actually fires, a late confirmation (price already well above asianHigh) leaves little remaining distance to a fixed target while the stop (asianLow, the full opposite side of the session range) stays far away -- an asymmetric R created by the anchor choice, not by market noise. This qualifies HARD LESSON 41/47 (target a level, not a multiple): the level must still be reachable in proportion to how late the entry occurs, which a session-anchored level does not guarantee once a 2-bar confirmation delays entry past the level itself. SECOND, INDEPENDENT DISQUALIFIER: 707 trades in H1 alone (2022-01 to 2024-06, 2.5 years) is far above the lab's settled 60-350 workable band -- more frequent than even Attack 33's 757-trade FULL 4.7-year sample. The Asian/London hour split fires on essentially every ordinary day, so it is not a selective signal. DRAWDOWN CATEGORY per the board's taxonomy: avg loser (-$93.96) is not large in isolation (not category 1, concentrated/sizing), and the edge is negative (not category 3); this is category 2, bleed on a negative edge, but with an unusual signature -- a majority win rate undone by a payoff ratio inverted relative to typical category-2 cases. QUEUE: (1) do not tune this mechanism -- do not narrow the session window, do not change mmMult, the failure is structural to the target's anchor choice, not a threshold. (2) A session-range breakout MIGHT still work with an entry-relative target (e.g. rangeWidth added from the CONFIRMATION bar's own close, not from asianHigh) rather than a level fixed at the session boundary -- that is a narrower, testable variant for a future cycle, not a rescue of this one. (3) Attack 46 remains the sole advancing candidate on the board, both halves clear, cold-reproduced, filters exhausted per HARD LESSON 49. (4) The out-of-sample test for Attack 46 still ranks first and still cannot be run under BTCUSDT-only."
+  },
+  {
+    "id": "attack51a-rsi-divergence-swing-low-h1",
+    "name": "Attack 51a: RSI/price bullish divergence at a confirmed swing low -- never-tuned half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack51-rsi-divergence-swing-low.pine",
+    "description": "A genuinely new mechanism per the mandate's fallback (queue item 1, Attack 37's filter stack, was exhausted at Attack 41/43 and Attack 47's death on the ~77% sample wall, HARD LESSON 45/49). The stored prompt asked a fifth time for the Attack 37 filter stack; the docs override it again. First entry in this lab built from a DERIVED OSCILLATOR rather than raw price/volume/time -- every prior family (rolling extreme, calendar anchor, volatility state, failed-break-of-swing-low, swing-level tap-and-reclaim, fixed price grid, single-bar impulse, session range) used price structure alone. CLAIM: when price prints a lower confirmed swing low but RSI(14) prints a higher reading at that same swing (classic bullish divergence), the new price low lacks momentum confirmation and tends to resolve back into the recent range rather than extend. Mechanics: ta.pivotlow(low,5,5), non-repainting, confirmed 5 bars after the actual low; two var-float pairs (no arrays) hold the two most recent confirmed pivot lows and the RSI reading at each, both read from the same historical bar via [rightBars] shift. Entry fires on the confirmation bar when the new pivot low is BELOW the previous one AND its RSI is ABOVE the previous pivot's RSI. Stop: the confirmed pivot low itself (structure, LESSON 5). Target: the prior 20-bar high (a level, not a multiple -- HARD LESSON 41/47). R floor 0.8% enforced by exclusion (LESSON 3). Long only, bare -- no minRR floor, no added filter. Also answers Attack 49's queue item 4 (multi-bar/multi-moment confirmation over a single bar), though it failed too.",
+    "metrics": {
+      "netProfitPct": -35.12079893,
+      "profitFactor": 0.72680011,
+      "maxDrawdownPct": 38.81579547,
+      "totalTrades": 223,
+      "winningTrades": 116,
+      "losingTrades": 107,
+      "winRatePct": 52.01793722,
+      "avgTradePct": -0.15749237,
+      "avgWinningTrade": 80.545422463793,
+      "avgLosingTrade": -120.143447652804,
+      "ratioAvgWinLoss": 0.67041045,
+      "largestWin": 434.362306999999,
+      "largestLoss": -626.98218075,
+      "avgBarsInTrade": 32.9955157,
+      "avgBarsWinning": 30.04310345,
+      "avgBarsLosing": 36.19626168,
+      "sharpeRatio": -1.16117317,
+      "sortinoRatio": -0.34045454,
+      "commissionPaid": 1737.515393050001,
+      "grossProfit": 9343.269005800012,
+      "grossLoss": 12855.348898849994,
+      "longTrades": 223,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1NYM4DHDNGH30FTE62S1F14",
+      "strategyId": "01M1NYM4MBJRV7KTK6SSXXXY29",
+      "resultId": "01M1NYM4DHRT81VM0CNMHGPGJN",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NYM4DHRT81VM0CNMHGPGJN",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T09:34:57Z"
+    },
+    "verdict": "DISCARDED BY THE KILL RULE. H2 not run, second credit not spent, despite a 572-credit balance that would otherwise permit the full pair -- the kill rule overrides the credit-tier default when H1 fails outright.",
+    "notes": "PF 0.72680011, clearly below 1.0 on a well-powered sample (223 trades, comfortably inside the lab's 60-350 workable band, so this is not a floor problem -- the mechanism itself is negative). The win rate is a MAJORITY, 52.02%, the same inverted shape Attack 50 found: the payoff ratio (0.67041045) is what kills it, not selectivity. Avg winner $80.55 against avg loser -$120.14 -- losers run 1.5x larger than winners even though winners happen more often than not. avgBarsWinning (30.0) and avgBarsLosing (36.2) are close together and well under the 192-bar cap, so HARD LESSON 38 truncation does not apply -- the target (prior 20-bar high) is simply not far enough above the entry to outweigh the stop (the confirmed pivot low) often enough. DRAWDOWN CATEGORY per the board's taxonomy: avg loser -$120.14 is the largest of any recent-attack loser (48: -$76.38, 49: -$84.57, 50: -$93.96) yet the edge is still negative overall, so this is category 2 (bleed on a negative edge), not category 1 or 3. WHAT THIS SETTLES: the oscillator axis (RSI) does not rescue this lab any more than the price-only axes did -- a divergence at a swing low identifies exhaustion of SELLING, but a level only 20 bars back is not consistently far enough away to pay for the entries where the reversal fails. QUEUE: (1) do not tune this mechanism -- do not widen the pivot lookback, do not add an RR floor, the failure is structural (target too close relative to a stop already at a fresh low), not a threshold to sweep. (2) A wider target (the prior 20-bar high was the SAME lookback as the pivot itself -- an entry-relative target scaled further out, e.g. lookback x2 or x3, is a narrower testable variant for a future cycle, not a rescue of this one, per the reachable-target qualifier Attack 50 already raised (not yet a numbered HARD LESSON). (3) Attack 46 remains the sole advancing candidate on the board, both halves clear, cold-reproduced, filters exhausted per HARD LESSON 49. (4) The out-of-sample test for Attack 46 still ranks first and still cannot be run under BTCUSDT-only."
   }
 ];
-const BUILT = "2026-09-04 09:19";
+const BUILT = "2026-09-04 10:16";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

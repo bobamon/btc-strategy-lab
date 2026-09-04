@@ -3663,3 +3663,98 @@ category 2 has shown before (Attack 36, Attack 48, Attack 49).
 4. **The out-of-sample test for Attack 46 still ranks first and still cannot be run** under
    BTCUSDT-only -- unchanged from Attack 47/48/49's queue, restated because this cycle did not touch
    it.
+
+
+---
+
+# ATTACK 51 - RSI/PRICE BULLISH DIVERGENCE. FIRST OSCILLATOR-BASED ENTRY IN THIS LAB. FALSIFIED, SAME INVERTED-PAYOFF SHAPE AS ATTACK 50.
+
+The stored prompt asked for Attack 37's filter stack a fifth time. **The docs override it again**:
+Attack 41 closed Attack 37, Attack 43 closed the sweep-reversal family, and Attack 47 -- the one filter
+tried on the current champion, Attack 46 -- died at 24 trades on the ~77% sample wall HARD LESSON 45/49
+already confirmed across two labs. The board's own queue after Attacks 47-50 says stop adding filters
+on this data and propose a genuinely new mechanism, so this cycle built one.
+
+**CLAIM:** every mechanism on this board so far is built from raw price, volume or time -- rolling
+extremes (33), a calendar anchor (34/35), a volatility state (36), a failed break of a swing low
+(37-43), a tap-and-reclaim of a swing level (44-47, the champion), a fixed price grid (48), a single
+bar's own range/volume (49), a session's own range (50). **None used a derived oscillator.** When price
+prints a LOWER confirmed swing low but RSI(14) prints a HIGHER reading at that same swing (classic
+bullish divergence), the new low lacks momentum confirmation -- fewer participants are pushing the
+move -- and tends to resolve back into the recent range rather than extend it.
+
+**Mechanics, no arrays, no UDFs:** `ta.pivotlow(low,5,5)`, non-repainting, confirmed 5 bars after the
+actual low. Two `var float` pairs (not arrays) hold the two most recent confirmed pivot lows and the
+RSI reading at each, both read from the identical historical bar via a `[rightBars]` shift so the
+divergence is measured at the pivot itself, never at the confirmation bar. Entry fires on the
+confirmation bar when the new pivot low is below the previous one AND its RSI is above the previous
+pivot's RSI. Stop: the confirmed pivot low (structure, LESSON 5). Target: the prior 20-bar high (a
+level, not a multiple -- HARD LESSON 41/47). R floor 0.8% enforced by exclusion (LESSON 3). Long only,
+bare -- no minRR floor, no added filter. This also answers Attack 49's queue item 4 (multi-bar/
+multi-moment confirmation over a single bar), though it failed too.
+
+| | **Attack 51a** (never-tuned half) |
+|---|---|
+| Profit factor | **0.72680011** |
+| Max drawdown | **38.81579547%** |
+| Trades | **223** |
+| Win rate | **52.01793722%** (a MAJORITY) |
+| Achieved win/loss ratio | 0.67041045 |
+| Avg winner | $80.55 |
+| Avg loser | **-$120.14** |
+| Commission paid | $1,737.52 |
+| avgBarsWinning / avgBarsLosing | 30.04 / 36.20 (cap 192) |
+
+## KILL RULE APPLIED. H2 NOT RUN, SECOND CREDIT NOT SPENT.
+
+**Not a close call, and not a sample problem.** 223 trades sits comfortably inside the lab's settled
+60-350 workable band, so this failure cannot be blamed on a thin sample the way Attack 34 or Attack 47
+could be -- the mechanism itself is negative on a well-powered test. `avgBarsWinning` (30.0) and
+`avgBarsLosing` (36.2) sit close together, both well under the 192-bar cap, so HARD LESSON 38
+truncation does not apply: winners and losers both resolve in ordinary time, the target is simply not
+reached often enough relative to the stop.
+
+## THE SAME INVERTED-PAYOFF SHAPE ATTACK 50 FOUND, ON A DIFFERENT MECHANISM
+
+**52.02% of trades win -- a genuine majority -- and it still loses**, because the payoff ratio is only
+0.67: avg winner $80.55 against avg loser **-$120.14**, losers running 1.5x larger than winners even
+though winners happen more often than not. This is the second consecutive attack (after Attack 50's
+63.22% win rate / 0.44 payoff ratio) where the win rate is the encouraging number and the payoff ratio
+is the one that actually kills it -- worth flagging as a recurring shape, not yet a rule.
+
+**The likely mechanism is target distance, not market noise.** The target (the prior 20-bar high) uses
+the SAME 20-bar lookback as the pivot search itself, so the level being aimed at is drawn from the same
+short window as the swing low being faded -- there is no guarantee it sits far enough above the entry
+to outweigh a stop planted at a low that, by definition, was *just* freshly broken. A divergence at a
+swing low correctly identifies exhaustion of selling; it does not by itself guarantee a nearby level
+worth travelling to.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Avg loser (**-$120.14**) is the largest of any recent attack (48: -$76.38, 49: -$84.57, 50: -$93.96),
+yet the edge is still net negative, so this is **category 2, bleed on a negative edge** (same shape as
+Attack 36/48/49/50), not category 1 (concentrated/sizing, avg loser is not an outlier relative to the
+rest of the distribution) and not category 3 (the edge itself is negative, not thin-but-positive).
+
+## WHAT THIS SETTLES
+
+**The oscillator axis does not rescue this lab any more than the price-only axes did.** RSI divergence
+was the one genuinely untried input class left (price structure x7, a fixed grid, a single bar's own
+statistics, a session range, and now a momentum oscillator) -- and it produced the same class of
+failure as everything else: identifying a real, exhaustion-like condition is not the same as finding a
+target close enough to pay for it.
+
+## QUEUE
+
+1. **Do not tune this mechanism.** Do not widen the pivot lookback, do not add an RR floor -- the
+   failure is structural (the target and the pivot search share one lookback, so the level is not
+   reliably far enough from a stop at a just-broken low), not a threshold to sweep.
+2. **A target scaled further out from the pivot lookback** (e.g. the target lookback at 2x or 3x the
+   pivot lookback, so the level searched is genuinely more distant than the swing being faded) is a
+   narrower, testable variant for a future cycle, not a rescue of this one -- the same reachable-target
+   qualifier Attack 50 raised, now confirmed on a second, unrelated mechanism.
+3. **Attack 46 remains the sole advancing candidate on the board**, both halves clear, cold-reproduced,
+   filters exhausted per HARD LESSON 49.
+4. **The out-of-sample test for Attack 46 still ranks first and still cannot be run** under
+   BTCUSDT-only -- unchanged from Attack 47/48/49/50's queue, restated because this cycle did not touch
+   it.
