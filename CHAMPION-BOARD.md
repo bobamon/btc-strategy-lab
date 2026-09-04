@@ -4293,3 +4293,77 @@ latch the filter's state and let the trigger fire on a later bar, never demand b
    sample (48/49/50/51-52/53), and now one on a same-bar construction contradiction HARD LESSON 8
    already named. **Before the next build, explicitly check any trigger-plus-"already-established"-
    filter pair against HARD LESSON 8's shape, not just the frequency estimate against HARD LESSON 4's.**
+
+---
+
+# ATTACK 58 - EMA CROSSOVER, LATCHED SLOPE. THE HARD LESSON 8 FIX WORKS -- THE GATE REOPENED -- AND THE EDGE IS STILL NOT THERE.
+
+The stored prompt asks a TWELFTH time for Attack 37's filter stack, describing a board state (322/196
+trades, "earned a filter stack, queued not built") now 21 attacks stale. **The docs override it again**:
+Attack 41 closed Attack 37, Attack 43 closed the whole sweep-reversal family, Attack 47 died on the
+~77% sample wall against champion Attack 46, and Attack 46's own queue says stop adding filters to it
+on this data. This cycle instead executed **Attack 57's own queue item 1** -- a narrower retest of ITS
+OWN claim, ranked ahead of inventing an eighth mechanism family -- rather than proposing something new.
+
+**THE FIX:** Attack 57 required `ta.crossover(emaFast, emaSlow)` AND `ta.rising(emaSlow, 20)` on the
+SAME bar and got zero trades, because by the time a slow EMA has risen unbroken for 20 bars the
+crossover that started the rise has almost always already happened many bars earlier (HARD LESSON 8's
+fourth confirmation). This build replaces the same-bar test with a genuine **latch**: a looser
+`ta.rising(emaSlow, 5)` arms a `var bool` state that stays true until `emaSlow` ticks down bar-over-bar,
+and the crossover reads that latch -- which may have armed on an earlier bar -- instead of re-proving
+the slope on its own bar. Same two EMAs, same structural stop, same measured-move target, same 0.8% R
+floor as Attack 57; only the slope test's temporal construction changed. Pine:
+`strategies/pine/attack58-ema-crossover-latched-slope.pine`.
+
+| | **Attack 58a** never-tuned (H1) |
+|---|---|
+| Profit factor | **0.8668382** |
+| Max drawdown | 25.1770998% |
+| Trades | **149** |
+| Win rate | 44.96644295% |
+| Avg loser | -$157.25 |
+| Avg winner | $166.83 |
+| Net return | -17.17% |
+| Commission | $1,452.37 |
+
+## THE LATCH FIX IS VALIDATED. THE CANDIDATE IS NOT.
+
+**149 trades, up from zero.** The pre-registered risk was frequency landing at or above the workable
+band's top (500-1,200 estimated, cost drag a live concern) -- instead it landed comfortably inside the
+settled 60-350 band, so this is neither a frequency failure nor a cost failure. HARD LESSON 8's
+prescribed fix (latch the setup, read it on a later trigger bar) did exactly what it claims: it reopened
+a gate that a same-bar construction had killed. That is worth recording independently of whether this
+particular candidate advances, because it is the first time this lab has *applied* the fix rather than
+merely *diagnosing* the failure it corrects.
+
+**But profit factor 0.8668382 is below 1.0. KILL RULE APPLIED: DISCARD. H2 not run, second credit not
+spent.** No filters to rescue it, per the mandate's explicit instruction.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+Category **2, bleed on a negative edge** -- PF outright below 1.0, avg loser -$157.25 sits close to avg
+winner $166.83 (ratio 1.06), win rate 44.97%. Not category 1 (largest loss -$389.46 is not
+disproportionate against the average loser). Not category 3 -- the edge itself is not positive, so a
+filter stack would not be warranted here even at a larger sample.
+
+## WHAT THIS SETTLES
+**Latching does not, by itself, turn a mediocre trend-following crossover into an edge.** The
+construction defect is fixed and confirmed fixed; the underlying claim -- that a confirmed-slope EMA
+crossover continues by the height of its own recent range -- is close to break-even and not competitive
+with Attack 46's level-target family. This closes the loop HARD LESSON 8 opened on Attack 57: the
+"what if it just needed the fix" question now has a real, quotable answer, and the answer is no.
+
+## QUEUE
+1. **The dual-EMA-crossover family is now 0-for-2 as tested** (zero trades bare, sub-1.0 PF latched).
+   Do not retest a third variant of this same two-EMA claim without a materially different edge
+   hypothesis (e.g. a volatility or momentum co-filter, not another slope-test shape) -- the "just fix
+   the latch" question is now closed.
+2. **Attack 46 remains the sole both-halves-positive candidate on the board**, both halves clear,
+   cold-reproduced, filters exhausted per HARD LESSON 49.
+3. **The out-of-sample test for Attack 46 still ranks first and still cannot be run** under
+   BTCUSDT-only -- unchanged, restated because this cycle did not touch it.
+4. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+5. **Eleven straight new-mechanism-or-refinement proposals (48-58) have now failed.** The next cycle
+   should propose a genuinely new mechanism per the mandate's fallback clause, having now exhausted the
+   EMA-crossover retest queue item -- weighting both the frequency estimate (HARD LESSON 4) and the
+   HARD LESSON 8 trigger/already-established-filter check before building.

@@ -1602,9 +1602,60 @@ const DATA = [
     },
     "verdict": "DISCARDED. The candidate signal (emaCross AND slowRising AND rBig) produced 0 trades on H1 -- H2 not run, second (and last, per the mandate's two-run cap) credit spent on this counter-build diagnostic instead, which confirms the raw crossover (2,154 hits/half) is not rare; the ta.rising(emaSlow,20) term eliminated the signal completely, a same-bar trigger/already-established-filter contradiction, HARD LESSON 8's exact failure shape, now confirmed a fourth time across two labs and three mechanism shapes.",
     "notes": "Real candidate strategyId/resultId (the actual 0-trade run, for provenance): strategyId 01M1PK7B99T1QWXG3SYW1774R5, resultId 01M1PK7B17MFHTPZQHB3MP83T9, https://mcp-api.trader.dev/backtest/01M1PK7B17MFHTPZQHB3MP83T9 -- totalTrades 0, profitFactor 0, netProfitPct 0, maxDrawdownPct 0, not recordable as its own row per SCHEMA.md's zero-trade rejection. WHY: a fast/slow EMA crossover marks the moment the faster average first overtakes the slower one -- an early inflection, arriving while the slower average has only just begun to turn. ta.rising(emaSlow,20) demands the opposite: that the slow EMA has risen on EVERY one of the prior 20 bars, i.e. the trend was already fully established a full 20 bars before the crossover could still be called a crossover. By the time a slow EMA has risen monotonically for 20 straight bars, the fast EMA has almost always already crossed above it many bars earlier -- the two events structurally do not coincide. This is HARD LESSON 8's original failure shape (War Formation's coil+thrust, 3M Elite's zone-tap+engulf, both demanded on one bar) applied to a THIRD mechanism shape: a trigger paired with a filter demanding the state it triggers already existed. Distinct from Attacks 54/55/56's failure mode (a real but rare event, estimated 25-165x too optimistically) -- here the raw trigger was never rare (2,154 hits), the zero came from a logical near-contradiction between two terms, not an underpowered sample. Fix, not yet applied: latch slowRising (or use a looser slope test) into a state variable armed BEFORE the cross and read on the crossover bar, rather than requiring both simultaneously -- queued for a future retest of this same claim, ranked ahead of an eighth new mechanism family. Drawdown taxonomy: not applicable, zero real trades produced no distribution to categorise."
+  },
+  {
+    "id": "attack58a-ema-crossover-latched-slope-h1",
+    "name": "Attack 58a: dual-EMA crossover, latched slope confirmation -- never-tuned half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack58-ema-crossover-latched-slope.pine",
+    "description": "Attack 57's own queue item 1, executed: applies the HARD LESSON 8 fix Attack 57 explicitly did not apply. Attack 57 required ta.crossover(emaFast,emaSlow) AND ta.rising(emaSlow,20) on the SAME bar and produced zero trades, because by the time an EMA has risen unbroken for 20 bars the crossover that started the rise has almost always already happened. This build replaces the same-bar test with a LATCH: a looser ta.rising(emaSlow,5) arms a var bool state that stays true until emaSlow ticks down bar-over-bar, and the crossover reads that latch (which may have armed on an earlier bar) rather than re-proving the slope on its own bar. Same two EMAs, same structural stop (ta.lowest(low,20)), same measured-move range target, same 0.8% R floor as Attack 57 -- only the slope test's temporal construction changed, per Attack 57's own queue, not a new mechanism.",
+    "metrics": {
+      "netProfitPct": -17.17057186,
+      "profitFactor": 0.8668382,
+      "maxDrawdownPct": 25.1770998,
+      "totalTrades": 149,
+      "winningTrades": 67,
+      "losingTrades": 82,
+      "winRatePct": 44.96644295,
+      "avgTradePct": -0.11523874,
+      "avgWinningTrade": 166.827769952985,
+      "avgLosingTrade": -157.250216743902,
+      "ratioAvgWinLoss": 1.06090645,
+      "largestWin": 486.99238,
+      "largestLoss": -389.4553708,
+      "avgBarsInTrade": 58.18120805,
+      "avgBarsWinning": 60.20895522,
+      "avgBarsLosing": 56.52439024,
+      "sharpeRatio": -0.39545476,
+      "sortinoRatio": -0.13025395,
+      "commissionPaid": 1452.37328615,
+      "grossProfit": 11177.460586850013,
+      "grossLoss": 12894.517772999998,
+      "longTrades": 149,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1PPGMA497237RDFVHETR1XX",
+      "strategyId": "01M1PPGPZHZPYS1X91AREFHGKX",
+      "resultId": "01M1PPGMA4YW7VBXZY219QSGHS",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1PPGMA4YW7VBXZY219QSGHS",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T00:00:00Z"
+    },
+    "verdict": "DISCARDED BY THE KILL RULE. The latch fix worked -- trades went from Attack 57's zero to 149, a real and quotable sample well above the 30-trade floor -- but profit factor 0.8668382 on H1 is below 1.0. H2 not run, second credit not spent. No filters to rescue it, per the mandate's explicit instruction.",
+    "notes": "THE FIX ITSELF IS VALIDATED, EVEN THOUGH THE CANDIDATE IS NOT: this is the first construction in the EMA-crossover family to produce a real, sample-adequate trade count (149 vs. 0), confirming HARD LESSON 8's diagnosis was correct and its prescribed fix (latch the setup, read it on a later trigger bar) reopened the gate as designed. Drawdown taxonomy: category 2, bleed on a negative edge (PF 0.867 outright below 1.0, avg loser -$157.25 close to avg winner $166.83, win rate 44.97%) -- not category 3, so a filter stack would not be warranted even if the sample were larger. WHAT THIS SETTLES: latching does not, by itself, turn a mediocre trend-following crossover into an edge -- the underlying claim (fast/slow EMA continuation after a confirmed slope) is closer to break-even than Attack 45-46's level-target family, and the frequency risk flagged pre-run (500-1,200 trades, cost drag) did not materialize -- 149 sits inside the workable band, so this is a clean edge failure, not a frequency or cost failure."
   }
 ];
-const BUILT = "2026-09-04 16:18";
+const BUILT = "2026-09-04 17:13";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

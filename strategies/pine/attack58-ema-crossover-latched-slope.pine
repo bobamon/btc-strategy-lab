@@ -1,0 +1,164 @@
+//@version=6
+// BTC ATTACK 58 - DUAL-EMA CROSSOVER, LATCHED SLOPE CONFIRMATION. THE HARD LESSON 8 FIX APPLIED TO ATTACK 57.
+//
+// The stored prompt asks (a TWELFTH time) for Attack 37's filter stack, describing a board state
+// (322/196 trades, "earned a filter stack, queued not built") now 21 attacks stale. THE DOCS OVERRIDE
+// IT AGAIN: Attack 41 closed Attack 37, Attack 43 closed the whole sweep-reversal family, Attack 47
+// died on the ~77% sample wall against champion Attack 46 (HARD LESSON 45/49), and Attack 57's own
+// queue item 1 ranks a narrower retest of ITS OWN claim ahead of inventing an eighth mechanism family.
+// This build executes that queue item, not a new mechanism.
+//
+// ==================== WHAT ATTACK 57 GOT WRONG, AND WHAT CHANGES HERE ====================
+// Attack 57 required ta.crossover(emaFast, emaSlow) (a one-bar transition event) AND
+// ta.rising(emaSlow, 20) (a strict, unbroken 20-bar rise) on the SAME bar. The counter build proved
+// this is HARD LESSON 8's failure shape: the raw crossover fires ~2,154 times per H1 half (~once per
+// 40 bars), but by the time an EMA has risen on every single one of the prior 20 bars, the faster EMA
+// has almost always already crossed it many bars earlier -- so the two events do not coincide, and the
+// conjunction produced ZERO trades.
+//
+// THE FIX (HARD LESSON 8's own prescribed shape, applied here for the first time in this family):
+// latch a LOOSER slope-arming test into a state variable, armed as soon as it passes and kept live
+// until an explicit invalidation, then read the LATCH (not a same-bar recomputation) on the crossover
+// bar. This is a narrower retest of Attack 57's own claim, not a new mechanism -- same two EMAs, same
+// stop, same target, same R floor. The only change is HOW "the slow EMA is already trending up" is
+// tested: a state that can have armed on an earlier bar and persisted, instead of a condition that
+// must independently re-prove itself on the exact bar of the cross.
+//
+// ==================== DESIGN ====================
+// slopeArmingNow -- ta.rising(emaSlow, armLen), armLen = 5 (not 20): a much looser, short-horizon
+//   slope test, chosen specifically because it is short enough to plausibly become true AT OR NEAR THE
+//   SAME TIME as a crossover rather than only 20 bars after one (the mechanism Attack 57's own
+//   diagnostic identified).
+// slopeArmed -- var bool, LATCHED (HARD LESSON 8's fix): set true the bar slopeArmingNow first passes,
+//   and held true across SUBSEQUENT bars (armed before the cross, read on the crossover bar) rather
+//   than being required to hold coincidentally on the cross bar itself.
+// INVALIDATION PATH (HARD LESSON 8 GENERALISED, 2026-09-02 -- "check the invalidation path with the
+//   same care as the trigger path"): the arm is cleared the instant emaSlow ticks down bar-over-bar
+//   (emaSlow < emaSlow[1]). This is deliberately strict -- a single down-tick in a smoothed EMA is a
+//   genuine, real reversal signal, not noise, so re-arming is required after any such tick rather than
+//   letting a stale arm persist through an actual slope reversal. Declared as a design choice, not
+//   assumed safe: a looser invalidation (e.g. only clearing on N consecutive down-ticks) is the first
+//   thing to revisit if this construction also returns zero or near-zero trades.
+// emaCross -- ta.crossover(emaFast, emaSlow), UNCHANGED from Attack 57: the trigger event itself.
+// ENTRY -- emaCross AND slopeArmed (the latch, read this bar) AND rBig (R floor). slopeArmed can now
+//   have been set true on an EARLIER bar than the cross -- the same-bar mutual-exclusion Attack 57
+//   proved out is structurally no longer possible by construction.
+// STOP   -- ta.lowest(low, stopLen), UNCHANGED from Attack 57: real structural low (LESSON 5).
+// TARGET -- close + (ta.highest(high, rangeLen) - ta.lowest(low, rangeLen)), UNCHANGED from Attack 57:
+//   measured-move range projection (HARD LESSON 41/47).
+// R FLOOR -- LESSON 3, UNCHANGED: 0.8% minimum stop distance, enforced by EXCLUSION, never a clamp.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - rBig is an EXCLUSION (skip the setup), never a clamp on slPx. Unchanged
+//        from Attack 57.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = ta.lowest(low, stopLen), a real recent swing low.
+//        Unchanged from Attack 57.
+//   Each leg separately (LESSON 6) - LONG ONLY this cycle, same scope limit as Attack 57 (two runs
+//        budgeted: H1 kill-gate, then H2 if H1 clears). The short mirror (fast EMA crosses below slow
+//        EMA while a latched "slope arming" test on the DOWN side holds) is NOT built here -- recorded
+//        as outstanding, per the standing bidirectional requirement.
+//   BINDING (E17) - slopeArmed is expected to bind materially less than Attack 57's same-bar
+//        ta.rising(emaSlow,20), because the latch can satisfy on an earlier bar and persist -- trade
+//        count is read FIRST, before any ratio, specifically to confirm the fix actually reopened the
+//        gate rather than merely renaming the same dead condition.
+//   REDUNDANCY (E14) - emaCross (a discrete transition) and slopeArmed (a persisted state, now
+//        decoupled in time from the cross) remain independent axes: a cross can still fire while
+//        slopeArmed is false (e.g. the slow EMA never passed its own short-horizon rising test, or
+//        ticked down since it last did), so the filter still excludes real cases, not merely restating
+//        the trigger.
+//   LATCH IN SEQUENCE (LESSON 8) - THE FIX ITSELF. slopeArmed is a var bool armed on the bar
+//        slopeArmingNow first passes and read on a LATER bar (the crossover), with an explicit
+//        invalidation path (emaSlow ticking down), exactly the shape HARD LESSON 8 prescribes and
+//        Attack 57 explicitly did not apply.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, flat-check before entry, one position at a time.
+//   CASCADE (HARD LESSON 35) - long build, expect cascadeRatio 1; verify before applying clause 3.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// PRE-REGISTERED FREQUENCY ESTIMATE (LESSON 4/17, stated before running): the raw crossover alone
+// fired 2,154 times on H1 (Attack 57's counter build). slopeArmed is a materially looser, persisted
+// condition than the same-bar 20-bar rising test that zeroed it out -- during any sustained EMA(21)
+// uptrend the arm will typically set within the first few bars and survive until a real down-tick, so
+// a large share of the 2,154 raw crossings are expected to coincide with an already-live arm. Estimate:
+// several hundred to roughly half of the raw count, i.e. very roughly 500-1,200 -- which would land AT
+// OR ABOVE the lab's settled 60-350 workable band (Attack 33 died at 757 on cost). This is registered
+// explicitly as a competing risk to the zero-trade failure: if realized count lands near or above the
+// top of the band, cost drag (HARD LESSON, Attack 33) becomes the binding concern even if PF clears
+// 1.0, and that risk is reported alongside PF rather than only checking PF first.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17):
+//   * ZERO OR NEAR-ZERO TRADES AGAIN -> the latch fix did not reopen the gate; report the counter-build
+//     comparison (2,154 raw vs. realized) and treat the invalidation rule (down-tick clears the arm) as
+//     the next thing to loosen, not the armLen or the cross condition.
+//   * H1 (never-tuned half) BELOW 1.0 WITH A QUOTABLE SAMPLE -> KILL RULE: DISCARD immediately, H2 not
+//     run, second credit not spent. No filters to rescue it.
+//   * H1 ABOVE 1.0 AND >=30 trades -> run H2. BOTH HALVES ABOVE 1.0 -> ADVANCES. H1 above 1.0 but H2
+//     below -> the classic sign this lab has seen repeatedly (VWAP family, Attacks 38-40): recorded as
+//     a real finding, not discarded outright, but not advanced either.
+//   * FEWER THAN ~30 TRADES IN EITHER HALF -> a DIRECTION, not a result (LESSON 12); PF not quoted as a
+//     ratio.
+//   * TRADE COUNT NEAR OR ABOVE ~350-400 -> flag the cost-drag risk explicitly (Attack 33 precedent)
+//     even if PF clears 1.0; report commission paid against gross profit (HARD LESSON, cost screen).
+//   * LARGE SHARE OF EXITS AT maxBars -> the cap is truncating winners before the measured-move target
+//     is reached (HARD LESSON 38); report avgBarsWinning against the cap before drawing any conclusion.
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside PF and drawdown
+//   (LESSONS 36/39 and the board's standing drawdown-taxonomy instruction).
+strategy("BTC Attack58 EMA crossover latched slope", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+fastLen  = input.int(9,     "Fast EMA length")
+slowLen  = input.int(21,    "Slow EMA length")
+armLen   = input.int(5,     "Bars back for the looser slope-arming test")
+stopLen  = input.int(20,    "Structural stop lookback (bars)")
+rangeLen = input.int(20,    "Measured-move range lookback (bars)")
+minRpct  = input.float(0.80,"Min stop distance as % of price (LESSON 3)")
+maxBars  = input.int(192,   "Max bars in trade")
+
+emaFast = ta.ema(close, fastLen)
+emaSlow = ta.ema(close, slowLen)
+
+emaCross       = ta.crossover(emaFast, emaSlow)
+slopeArmingNow = ta.rising(emaSlow, armLen)
+
+var bool slopeArmed = false
+if slopeArmingNow
+    slopeArmed := true
+if emaSlow < emaSlow[1]
+    slopeArmed := false
+
+stopPx = ta.lowest(low, stopLen)
+rngHi  = ta.highest(high, rangeLen)
+rngLo  = ta.lowest(low, rangeLen)
+
+rLong = close - stopPx
+minR  = close * minRpct / 100
+rBig  = rLong >= minR
+
+goLong = emaCross and slopeArmed and rBig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := stopPx
+    tpPx   := close + (rngHi - rngLo)
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(slPx, title="StopLevel")
+plot(tpPx, title="TargetLevel")
