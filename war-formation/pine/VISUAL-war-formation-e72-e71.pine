@@ -1,0 +1,177 @@
+//@version=6
+// ============================================================================================
+//  WAR FORMATION -- CHART VISUALISER, BOTH LEGS.  PASTE INTO TRADINGVIEW, BTCUSDT.P, 1m.
+// ============================================================================================
+//  THIS IS NOT THE BACKTEST SCRIPT. It is an indicator() that DRAWS what E72 (long, PF
+//  1.26239697) and E71 (short, PF 0.97315988) actually reason about. The gate logic is copied
+//  line-for-line from those files; only drawing is added.
+//
+//  THE CASCADE, AND WHERE EACH STEP APPEARS ON THE CHART
+//    6H   DIRECTION   background tint. GREEN = bull regime, RED = bear regime. Nothing can
+//                     trade against it. Long uses 4+ green 1H in the PRIOR 6H block; short uses
+//                     the source's literal rule, 2+ consecutive RED 6H candles.
+//    1H   AGREEMENT   the yellow step-line is the current 1H OPEN. Longs need price above it,
+//                     shorts below it. A cross of this line is the 1H flipping side.
+//    15m  STRUCTURE   the white step-line is the PRIOR 15m extreme -- the low for longs, the
+//                     high for shorts. This is the level that must first BREAK and then RECLAIM.
+//    1m   TRIGGER     the entry arrow. It fires only when price crosses back through that 15m
+//                     level with enough VELOCITY (the reclaim must exceed 0.8 x ATR30).
+//    BAND             red shaded strip = the whole-number middle (x400-x600). Entries are BANNED
+//                     inside it. This is the "whole number band" from the rules.
+//    WITCHING         grey shading = 1-4am ET. Longs are banned there.
+//
+//  THE A.L.C.M. EXIT -- READ THIS, IT IS THE PART MOST PEOPLE GET WRONG
+//    WAR FORMATION HAS NO STOP LOSS. The RED line is not a stop; it is the SHIELD, a fixed
+//    $1,000 DOLLAR gap to liquidation, adjusted with the Bitunix Pencil. The BLUE line is the
+//    fixed 2R target. The position ends at one or the other. Nothing trails. Nothing is added
+//    to a loser.
+//
+//  ONE THING THIS CHART CANNOT SHOW YOU, AND IT MATTERS
+//    Both recorded runs use 25% OF EQUITY, not 100%. That is a DECLARED DEVIATION. At 100% the
+//    exchange margin call fires at ~0.35% adverse -- long before a $1,000 shield is reached --
+//    so the shield never got to act on the short side. Proven at trade level: at 100% the short's
+//    losers exited at 0.013%-0.585% adverse, while at 25% ALL 21 losers exit at EXACTLY the
+//    $1,000 shield and all 12 winners at EXACTLY the $2,000 target. Same entry logic, win rate
+//    6.98% -> 36.36%. If you trade this, position size is not a detail -- it is the whole result.
+// ============================================================================================
+indicator("WAR FORMATION -- VISUALISER (E72 long / E71 short)", overlay = true,
+     max_lines_count = 300, max_labels_count = 300, max_boxes_count = 100)
+
+showLong  = input.bool(true,  "Show the LONG leg (E72)")
+showShort = input.bool(true,  "Show the SHORT leg (E71)")
+greenBull = input.int(4,      "Green 1H candles in prior 6H block for BULL")
+run6      = input.int(2,      "Consecutive RED 6H candles for BEAR (source's literal rule)")
+skipOpen  = input.int(60,     "Skip first N minutes of the 6H block")
+skipClose = input.int(60,     "Skip last N minutes of the 6H block")
+velK      = input.float(0.8,  "Velocity: reclaim must exceed this x ATR30")
+midLo     = input.float(400,  "Whole-number band low")
+midHi     = input.float(600,  "Whole-number band high")
+etOffset  = input.int(-4,     "ET offset from UTC")
+shieldUsd = input.float(1000, "THE SHIELD: fixed dollar gap to liquidation")
+rr        = input.float(2.0,  "Reward:risk")
+
+MS6H = 21600000
+MS1H = 3600000
+MS15 = 900000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+b15 = math.floor(time / MS15)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+new15 = b15 != b15[1]
+
+// ---------------- 6H DIRECTION: two different rules, one per leg ----------------
+var float h1o = na
+var int grnCur = 0, var int cntCur = 0
+var int grnPrev = 0, var int cntPrev = 0
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    grnCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(h1o)
+        cntCur := cntCur + 1
+        if close[1] > h1o
+            grnCur := grnCur + 1
+    h1o := open
+
+bullRegime = cntPrev >= 5 and grnPrev >= greenBull
+
+var float o6 = na
+var int grn6 = 0, var int red6 = 0
+if new6
+    if not na(o6)
+        if close[1] > o6
+            grn6 := grn6 + 1
+            red6 := 0
+        else if close[1] < o6
+            red6 := red6 + 1
+            grn6 := 0
+    o6 := open
+
+bearRegime = red6 >= run6
+
+// ---------------- TIME GATE inside the 6H block ----------------
+minsIn   = (time - b6 * MS6H) / 60000
+timeGate = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+// ---------------- 1H AGREEMENT ----------------
+h1Bull = not na(h1o) and close > h1o
+h1Bear = not na(h1o) and close < h1o
+
+// ---------------- 15m STRUCTURE: the prior 15m extreme ----------------
+var float c15l = na, var float p15l = na
+var float c15h = na, var float p15h = na
+
+if new15
+    p15l := c15l
+    c15l := low
+    p15h := c15h
+    c15h := high
+else
+    c15l := na(c15l) ? low  : math.min(c15l, low)
+    c15h := na(c15h) ? high : math.max(c15h, high)
+
+brokeBelow = not na(p15l) and c15l < p15l
+brokeAbove = not na(p15h) and c15h > p15h
+
+// ---------------- VELOCITY and the WHOLE-NUMBER BAND ----------------
+velMin   = na(ta.atr(30)) ? na : ta.atr(30) * velK
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+hUTC     = math.floor(time / MS1H) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+
+// ---------------- 1m TRIGGERS ----------------
+longTrig  = not na(p15l) and not na(velMin) and ta.crossover(close, p15l)  and (close - p15l) >= velMin
+shortTrig = not na(p15h) and not na(velMin) and ta.crossunder(close, p15h) and (p15h - close) >= velMin
+
+goLong  = showLong  and bullRegime and timeGate and h1Bull and brokeBelow and not inMiddle and not witching and longTrig
+goShort = showShort and bearRegime and timeGate and h1Bear and brokeAbove and not inMiddle and shortTrig
+
+// ---------------- DRAW: regime, band, witching ----------------
+bgcolor(bullRegime and showLong  ? color.new(color.green, 93) : na, title = "6H bull regime")
+bgcolor(bearRegime and showShort ? color.new(color.red,   93) : na, title = "6H bear regime")
+bgcolor(witching ? color.new(color.gray, 90) : na, title = "witching 1-4am ET (longs banned)")
+bgcolor(inMiddle ? color.new(color.maroon, 85) : na, title = "whole-number band (entries banned)")
+
+// ---------------- DRAW: the levels the cascade actually watches ----------------
+plot(showLong  ? p15l : na, "15m prior LOW  (long must reclaim)",  color = color.new(color.white, 20), style = plot.style_stepline, linewidth = 1)
+plot(showShort ? p15h : na, "15m prior HIGH (short must reject)",  color = color.new(color.white, 20), style = plot.style_stepline, linewidth = 1)
+plot(h1o, "1H open (the 1H side)", color = color.new(color.yellow, 40), style = plot.style_stepline, linewidth = 1)
+
+// ---------------- DRAW: the A.L.C.M. shield and target on every entry ----------------
+if goLong
+    line.new(bar_index, close - shieldUsd, bar_index + 400, close - shieldUsd, color = color.red,  width = 2)
+    line.new(bar_index, close + shieldUsd * rr, bar_index + 400, close + shieldUsd * rr, color = color.blue, width = 2)
+    label.new(bar_index, close + shieldUsd * rr,
+         "LONG  target +$" + str.tostring(shieldUsd * rr, "#") + "   SHIELD -$" + str.tostring(shieldUsd, "#") +
+         "  (" + str.tostring(shieldUsd / close * 100, "#.##") + "% of price)",
+         style = label.style_label_down, color = color.new(color.green, 25), textcolor = color.white, size = size.tiny)
+
+if goShort
+    line.new(bar_index, close + shieldUsd, bar_index + 400, close + shieldUsd, color = color.red,  width = 2)
+    line.new(bar_index, close - shieldUsd * rr, bar_index + 400, close - shieldUsd * rr, color = color.blue, width = 2)
+    label.new(bar_index, close - shieldUsd * rr,
+         "SHORT  target -$" + str.tostring(shieldUsd * rr, "#") + "   SHIELD +$" + str.tostring(shieldUsd, "#") +
+         "  (" + str.tostring(shieldUsd / close * 100, "#.##") + "% of price)",
+         style = label.style_label_up, color = color.new(color.red, 25), textcolor = color.white, size = size.tiny)
+
+plotshape(goLong,  title = "LONG entry",  style = shape.triangleup,   location = location.belowbar, color = color.new(color.green, 0), size = size.small, text = "LONG")
+plotshape(goShort, title = "SHORT entry", style = shape.triangledown, location = location.abovebar, color = color.new(color.red,   0), size = size.small, text = "SHORT")
+
+// ---------------- DRAW: near-misses, so you can see WHICH gate blocked a setup ----------------
+blockedBand = (longTrig or shortTrig) and inMiddle
+blockedVel  = ((not na(p15l) and ta.crossover(close, p15l) and (close - p15l) < velMin) or (not na(p15h) and ta.crossunder(close, p15h) and (p15h - close) < velMin))
+blockedTime = (longTrig or shortTrig) and not timeGate
+
+plotshape(blockedBand, title = "blocked: whole-number band", style = shape.xcross, location = location.absolute, color = color.new(color.maroon, 10), size = size.tiny)
+plotshape(blockedVel,  title = "blocked: too slow (velocity)", style = shape.circle, location = location.absolute, color = color.new(color.orange, 30), size = size.tiny)
+plotshape(blockedTime, title = "blocked: 6H block edge",       style = shape.square, location = location.absolute, color = color.new(color.gray, 30), size = size.tiny)

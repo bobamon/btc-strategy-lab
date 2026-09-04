@@ -1,0 +1,176 @@
+//@version=6
+// ============================================================================================
+//  3M ELITE v37 -- CHART VISUALISER.  PASTE INTO TRADINGVIEW, BTCUSDT.P, 15m.
+// ============================================================================================
+//  THIS IS NOT THE BACKTEST SCRIPT. It is an indicator() that DRAWS exactly what the champion
+//  strategy() reasons about, so you can see every zone, every rejection and every entry on the
+//  chart. The logic below is copied line-for-line from 3m-elite-v37-freshness-tight.pine --
+//  the file that produced PF 1.25172059 / DD 8.72815312% / 155 trades. Nothing is added to the
+//  decision logic; only drawing is added.
+//
+//  WHAT YOU WILL SEE
+//   GREEN BOX      a live DEMAND zone. Top = the bull-engulfing 4H candle's OPEN, bottom = its LOW.
+//   GREY BOX       that zone after it died (mitigated by 2 body closes inside, or aged out).
+//   GREEN TRIANGLE UP   an entry. Price tapped the zone while it was still fresh.
+//   RED LINE       the stop: the zone's bottom. Fixed at entry, never trails.
+//   BLUE LINE      the 2R target. Fixed at entry.
+//   ORANGE BOX     a live SUPPLY zone from a bear-engulfing 4H candle (drawn for reference --
+//                  v37 does NOT trade it; the short leg is a separate build, see the note below).
+//   BACKGROUND     faint green while a demand zone is live and tradeable.
+//   LABEL          on each zone: its age in 4H candles and its touch count, the two things that
+//                  decide whether the next tap is taken or ignored.
+//
+//  WHY THE SUPPLY ZONES ARE DRAWN BUT NOT TRADED HERE
+//  The source says the bearish model is "the same thing on the bearish side just upside down",
+//  and we built exactly that (v53). It returned 0.70512830, and trade-level forensics showed it
+//  is GROSS-NEGATIVE at -$895.26 BEFORE a single cent of commission -- it shorts supply through
+//  the 2023-2025 bull advance. They are drawn so you can see the zones the mirror was taking.
+// ============================================================================================
+indicator("3M ELITE v37 -- VISUALISER", overlay = true,
+     max_boxes_count = 200, max_lines_count = 200, max_labels_count = 200)
+
+rTarget = input.float(2.0,  "Target, x R")
+maxAge  = input.int(6,      "Zone freshness cap, 4H candles since creation")
+minRpct = input.float(0.80, "Min stop distance as % of price")
+showSup = input.bool(true,  "Draw SUPPLY zones for reference (not traded by v37)")
+showLbl = input.bool(true,  "Draw zone age / touch labels")
+
+// ---------------- 4H candle reconstruction from 15m bars ----------------
+MS4H  = 14400000
+b4h   = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+var float pO = na, var float pH = na, var float pL = na, var float pC = na
+var float ppO = na, var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pH  := h4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+// ---------------- engulfing on the just-completed 4H candle ----------------
+bullEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC < ppO and pC > pO and pC > ppO
+bearEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC > ppO and pC < pO and pC < ppO
+
+// ---------------- DEMAND zone lifecycle (identical to the strategy) ----------------
+var float dzTop = na, var float dzBot = na
+var bool  dzLive = false
+var int   dzTouch = 0, var int dzAge = 0
+var bool  dzTraded = false
+var box   dzBox = na
+var label dzLab = na
+
+if new4h
+    if dzLive and not na(pC) and pC <= dzTop
+        dzTouch := dzTouch + 1
+        if dzTouch >= 2
+            dzLive := false
+            if not na(dzBox)
+                box.set_bgcolor(dzBox, color.new(color.gray, 88))
+                box.set_border_color(dzBox, color.new(color.gray, 40))
+    if dzLive
+        dzAge := dzAge + 1
+        if dzAge > maxAge and not na(dzBox)
+            box.set_bgcolor(dzBox, color.new(color.gray, 88))
+            box.set_border_color(dzBox, color.new(color.gray, 40))
+    if bullEngulf
+        dzTop    := pO
+        dzBot    := pL
+        dzLive   := true
+        dzTouch  := 0
+        dzAge    := 0
+        dzTraded := false
+        dzBox := box.new(bar_index, dzTop, bar_index + 1, dzBot,
+             border_color = color.new(color.green, 20), border_width = 2,
+             bgcolor = color.new(color.green, 80))
+        if showLbl
+            dzLab := label.new(bar_index, dzBot, "DEMAND", style = label.style_label_up,
+                 color = color.new(color.green, 30), textcolor = color.white, size = size.tiny)
+
+// keep the live zone box stretching to the current bar
+if dzLive and not na(dzBox)
+    box.set_right(dzBox, bar_index + 1)
+    if showLbl and not na(dzLab)
+        label.set_xy(dzLab, bar_index, dzBot)
+        label.set_text(dzLab, "DEMAND  age " + str.tostring(dzAge) + "/" + str.tostring(maxAge) +
+             "   touch " + str.tostring(dzTouch) + "/2")
+
+// ---------------- SUPPLY zones, drawn for reference only ----------------
+var float szTop = na, var float szBot = na
+var bool  szLive = false
+var box   szBox = na
+
+if new4h and showSup
+    if szLive and not na(pC) and pC >= szBot
+        szLive := false
+        if not na(szBox)
+            box.set_bgcolor(szBox, color.new(color.gray, 90))
+    if bearEngulf
+        szTop  := pH
+        szBot  := pO
+        szLive := true
+        szBox := box.new(bar_index, szTop, bar_index + 1, szBot,
+             border_color = color.new(color.orange, 30), border_width = 1,
+             bgcolor = color.new(color.orange, 88))
+
+if szLive and not na(szBox)
+    box.set_right(szBox, bar_index + 1)
+
+// ---------------- the entry condition, identical to the strategy ----------------
+minR  = close * minRpct / 100
+rBig  = not na(dzBot) and (close - dzBot) >= minR
+
+longCond = rBig and dzLive and not dzTraded and dzAge >= 1 and dzTouch < 2 and low <= dzTop and close > dzBot and dzAge <= maxAge
+
+// ---------------- draw the trade: entry marker, fixed stop, fixed target ----------------
+var line slLine = na
+var line tpLine = na
+var label tradeLab = na
+
+if longCond and not dzTraded
+    dzTraded := true
+    r = close - dzBot
+    slLine := line.new(bar_index, dzBot, bar_index + 96, dzBot,
+         color = color.red, width = 2, style = line.style_solid)
+    tpLine := line.new(bar_index, close + r * rTarget, bar_index + 96, close + r * rTarget,
+         color = color.blue, width = 2, style = line.style_solid)
+    tradeLab := label.new(bar_index, close + r * rTarget,
+         "TARGET " + str.tostring(rTarget) + "R   R=" + str.tostring(r, "#.#") +
+         " (" + str.tostring(r / close * 100, "#.##") + "%)",
+         style = label.style_label_down, color = color.new(color.blue, 30),
+         textcolor = color.white, size = size.tiny)
+
+plotshape(longCond, title = "ENTRY", style = shape.triangleup, location = location.belowbar,
+     color = color.new(color.green, 0), size = size.small, text = "BUY")
+
+// a tap that was REJECTED, and why -- this is the useful part for reading the system
+tapped   = not na(dzTop) and low <= dzTop
+rejStale = tapped and dzLive and dzAge > maxAge
+rejSmall = tapped and dzLive and not rBig
+rejUsed  = tapped and dzLive and dzTraded and not longCond
+
+plotshape(rejStale, title = "skip: zone too old", style = shape.xcross, location = location.belowbar,
+     color = color.new(color.gray, 20), size = size.tiny)
+plotshape(rejSmall, title = "skip: R under floor", style = shape.xcross, location = location.belowbar,
+     color = color.new(color.orange, 20), size = size.tiny)
+
+bgcolor(dzLive and dzAge <= maxAge and dzTouch < 2 ? color.new(color.green, 94) : na,
+     title = "demand zone tradeable")
+
+plot(dzTop, "Demand top", color = dzLive ? color.new(color.green, 30) : color.new(color.gray, 60), style = plot.style_stepline)
+plot(dzBot, "Demand bottom (the STOP)", color = dzLive ? color.new(color.red, 30) : color.new(color.gray, 60), style = plot.style_stepline)
