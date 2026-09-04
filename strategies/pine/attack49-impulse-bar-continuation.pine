@@ -1,0 +1,155 @@
+//@version=6
+// BTC ATTACK 49 - IMPULSE-BAR MOMENTUM CONTINUATION. A GENUINELY NEW MECHANISM.
+//
+// THE STORED PROMPT asks for Attack 37's filter stack. THE DOCS OVERRIDE IT A THIRD TIME: Attack 41
+// closed Attack 37 as a development target, Attack 43 closed the whole sweep-reversal family, and
+// Attack 47 -- the one filter tried on the CURRENT champion, Attack 46 -- died on the ~77% sample
+// wall HARD LESSON 49 named across two labs (v56/v57 in 3M, Attack 47 here). The board's own queue
+// says stop adding filters to Attack 46 on this data, so this cycle uses the mandate's fallback:
+// one genuinely new mechanism, bare, split-tested on both halves before any tuning.
+//
+// ==================== THE CLAIM, ONE SENTENCE ====================
+// A single bar whose true range is a large multiple of recent average range, closing near its own
+// extreme with volume well above its recent average, marks an aggressive directional push by
+// participants transacting at a worse price to get filled NOW; price tends to continue by roughly
+// its own range again before the push exhausts.
+//
+// ==================== GENUINELY DISTINCT FROM EVERY FAMILY ON THIS BOARD ====================
+// VWAP pullback-continuation (retired): required a stretch-then-reclaim of a moving reference. This
+//   mechanism has no VWAP term and no reclaim -- it trades WITH the bar that just printed, not off a
+//   return to a mean.
+// Attack 33 channel breakout: a rolling N-bar HIGH/LOW crossing. This has no channel; a single bar's
+//   OWN range against its OWN recent ATR is the entire signal, independent of where price sits
+//   relative to any lookback high or low.
+// Attack 34/35 weekly break-and-hold: a calendar anchor (prior completed week). No calendar term here.
+// Attack 36 narrow-range day expansion: required LOW volatility beforehand, then a break of that
+//   compression. This mechanism requires the OPPOSITE precondition -- nothing about prior compression
+//   is tested or needed; a large bar after an already-volatile stretch qualifies exactly as well as
+//   one after a quiet one.
+// Attack 37-43 liquidity sweep reversal: a FAILED break below a swing low that recovers -- trades
+//   AGAINST the immediately preceding move. This trades WITH the immediately preceding bar's own
+//   direction. Opposite polarity, opposite claim.
+// Attack 44-47 level-target support-hold: a two-moment setup (tap a prior swing low, then close back
+//   above it) targeting a prior swing high. This is a ONE-bar pattern with no swing lookback anywhere
+//   in the entry, and its target is sourced from the signal bar's OWN range, not a prior structural
+//   level.
+// Attack 48 round-number magnet: a fixed psychological price grid, level-agnostic to any bar's own
+//   statistics. This mechanism has no grid and no fixed price levels at all -- everything is relative
+//   to the bar's own range, its own recent ATR, and its own recent volume.
+//
+// ==================== DESIGN ====================
+// ENTRY (all four terms true on the SAME bar -- this is a one-bar pattern, not a setup+trigger pair,
+//   so LESSON 8's "different bars" requirement does not apply here; flagged explicitly rather than
+//   silently skipped):
+//   1. isImpulse   -- (high-low) >= atrMult * ATR14, ATR measured over the PRIOR 14 bars (shifted [1]
+//                     so the huge bar cannot inflate the very baseline it is being measured against).
+//   2. isBullish   -- close > open (this is the long leg only, see LESSON 6 below).
+//   3. closeNearHigh -- close sits in the top (1-closeLoc) of the bar's own range, i.e. the push did
+//                     not fail into the close.
+//   4. volConfirm  -- volume >= volMult * the PRIOR 20-bar average volume (again [1]-shifted, same
+//                     reasoning as term 1).
+// STOP  -- the impulse bar's own low (LESSON 5: the actual extreme of the push just witnessed, not an
+//   ATR distance or a percentage).
+// TARGET -- close + rewardMult * (the impulse bar's own range). A measured-move target sourced from
+//   this signal's own magnitude -- a NEW level source, applying the reachable-target principle
+//   validated by HARD LESSON 41/47 to a mechanism that has never used it before.
+// R FLOOR -- LESSON 3: reward is only taken if the stop distance clears 0.8% of price, enforced by
+//   EXCLUDING the setup, never by widening the stop.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - rBig is an EXCLUSION (skip the setup), never a clamp on slPx.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = the impulse bar's own low, the real extreme of the bar
+//        being traded, not derived from ATR or a fixed percentage.
+//   Each leg separately (LESSON 6) - LONG ONLY this cycle. The mirror short (bearish impulse bar,
+//        close near the low, target below) is NOT built here -- CREDITS: only two runs are budgeted
+//        this cycle (H1 kill-gate, then H2), so testing a second, independently-built leg is out of
+//        scope, not assumed to work. Recorded as outstanding, per the standing bidirectional
+//        requirement.
+//   BINDING (E17) - all four terms are expected to bind materially: isImpulse alone should be rare
+//        (large bars are a minority by construction), and closeNearHigh + volConfirm further cut
+//        whatever isImpulse admits. Trade count is read first, before any ratio, to confirm this
+//        rather than assume it.
+//   REDUNDANCY (E14) - isImpulse (range magnitude) and closeNearHigh (WHERE in that range the bar
+//        closed) are independent axes: a bar can be huge and close in the middle (indecision, a
+//        failed push) or huge and close at the extreme (conviction). volConfirm (participation) is
+//        independent of both -- a large, well-placed bar on thin volume is a different claim than one
+//        on heavy volume, so none of the four terms is restating another.
+//   LATCH IN SEQUENCE (LESSON 8) - N/A by design, stated explicitly above: this is a single-bar
+//        pattern, so setup and trigger necessarily share one bar. The averages the bar is measured
+//        AGAINST (ATR14, 20-bar volume) are [1]-shifted so the threshold itself is prior information;
+//        only the classification of the current bar uses the current bar.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, flat-check before entry, one position at a time.
+//   CASCADE (HARD LESSON 35) - long build, expect cascadeRatio 1; verify before applying clause 3.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17):
+//   * BOTH HALVES ABOVE 1.0, roughly 60-350 trades per half (the lab's settled workable band) ->
+//     ADVANCES. A genuinely new, uncorrelated mechanism next to Attack 46, worth a filter-stack queue
+//     item of its own once cold-reproduced.
+//   * H1 BELOW 1.0 -> KILL RULE: DISCARD immediately, H2 not run, second credit not spent. No filters
+//     to rescue it (per the mandate's explicit instruction).
+//   * H1 ABOVE 1.0 BUT H2 BELOW -> the classic sign this lab has seen repeatedly (VWAP family,
+//     Attacks 38-40): an edge that does not survive into the recent regime. Recorded as a real
+//     finding, not discarded outright, but not advanced either.
+//   * FEWER THAN ~30 TRADES IN EITHER HALF -> a DIRECTION, not a result (LESSON 12); PF not quoted
+//     as a ratio.
+//   * LARGE SHARE OF EXITS AT maxBars -> the cap is truncating winners before the measured-move
+//     target is reached (HARD LESSON 38); report avgBarsWinning against the cap before drawing any
+//     conclusion about the target's reachability.
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside PF and drawdown
+//   (LESSONS 36/39 and the board's standing drawdown-taxonomy instruction).
+strategy("BTC Attack49 impulse-bar continuation", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+atrLen    = input.int(14,    "ATR lookback for the impulse threshold")
+atrMult   = input.float(2.0, "Impulse threshold -- bar range as a multiple of prior ATR")
+closeLoc  = input.float(0.75,"Min close position in the bar's own range (0-1, near the high)")
+volLen    = input.int(20,    "Volume average lookback")
+volMult   = input.float(1.5, "Volume confirmation -- multiple of the prior volume average")
+minRpct   = input.float(0.80,"Min stop distance as % of price (LESSON 3)")
+rewardMult= input.float(2.0, "Target -- multiple of the impulse bar's own range, projected from close")
+maxBars   = input.int(192,   "Max bars in trade")
+
+rng       = high - low
+priorAtr  = ta.atr(atrLen)[1]
+priorVol  = ta.sma(volume, volLen)[1]
+
+isImpulse    = rng > 0 and not na(priorAtr) and rng >= atrMult * priorAtr
+isBullish    = close > open
+closePos     = rng > 0 ? (close - low) / rng : 0.0
+closeNearHigh= closePos >= closeLoc
+volConfirm   = not na(priorVol) and volume >= volMult * priorVol
+
+rLong = close - low
+minR  = close * minRpct / 100
+rBig  = rLong >= minR
+
+goLong = isImpulse and isBullish and closeNearHigh and volConfirm and rBig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := low
+    tpPx   := close + rewardMult * rng
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(slPx, title="StopLevel")
+plot(tpPx, title="TargetLevel")

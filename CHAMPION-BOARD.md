@@ -3475,3 +3475,86 @@ instruction to report avg loser, win rate and max drawdown together on every run
    level-crossing: round numbers may still have value as *targets* (per HARD LESSON 41/47's validated
    principle) even though they failed as a stand-alone *entry* trigger here. That is a narrower, testable
    idea for a future cycle, not a rescue of this one.
+
+
+---
+
+# ATTACK 49 - IMPULSE-BAR MOMENTUM CONTINUATION. FALSIFIED ON THE NEVER-TUNED HALF, AND OVER-FREQUENT.
+
+The stored prompt asks for Attack 37's filter stack a third time. **The docs override it again**:
+Attack 41 closed Attack 37, Attack 43 closed the sweep-reversal family, and Attack 47 -- the one
+filter tried on the current champion, Attack 46 -- died on the identical ~77% sample wall HARD LESSON
+49 already named across two labs. Queue item 4 from last cycle asked for a genuine directional filter
+set rather than a bare level-crossing, so this cycle builds one.
+
+**CLAIM:** a single bar whose true range is a large multiple of its recent average range, closing near
+its own extreme with volume well above its recent average, marks an aggressive directional push by
+participants transacting at a worse price to get filled now; price tends to continue by roughly its
+own range again before the push exhausts. Entry (all four terms on the signal bar itself): range >=
+2.0x the PRIOR 14-bar ATR, close > open, close in the top 25% of the bar's own range, volume >= 1.5x
+the PRIOR 20-bar average volume (both averages [1]-shifted so the signal bar cannot inflate its own
+baseline). Stop: the signal bar's own low (structure). Target: close + 2.0x the signal bar's own
+range -- a measured-move level sourced from the bar's own magnitude, applying the reachable-target
+principle HARD LESSON 41/47 validated to a genuinely new level source. Long only, bare, no filter
+stack.
+
+**Genuinely distinct** from every family on this board: not a VWAP mean-reversion pullback (retired),
+not a rolling-channel breakout (Attack 33), not a calendar anchor (Attack 34/35), not a
+compression-then-release state (Attack 36, which needs prior LOW volatility -- this needs none), not
+a failed-break reversal off a swing low (Attack 37-43, which trades AGAINST the preceding move -- this
+trades WITH it), not a structural swing-level bounce (Attack 44-47), and not a fixed price grid
+(Attack 48). Every term here is relative to the bar's own range, its own recent ATR and its own recent
+volume -- level-agnostic, the opposite axis from 44-48.
+
+| | **Attack 49a** (never-tuned half) |
+|---|---|
+| Profit factor | **0.74591575** |
+| Max drawdown | **70.51752638%** |
+| Trades | **427** |
+| Win rate | 31.61592506% |
+| Achieved win/loss ratio | 1.61338813 |
+| Avg loser | -$84.57 |
+| Avg winner | $136.44 |
+| avgBarsWinning (cap 192) | 66.23 |
+| Commission paid | $2,333.07 |
+
+## KILL RULE APPLIED. H2 NOT RUN, SECOND CREDIT NOT SPENT.
+
+**Not a close call.** PF 0.75 is well under 1.0. Break-even for a 1.613 achieved win/loss ratio is
+38.26%; the mechanism ran 31.62%, **6.6 percentage points short**. `avgBarsWinning` 66.2 against the
+192-bar cap rules out truncation (HARD LESSON 38 does not apply) -- winners that happen resolve well
+inside the cap, the measured-move target just is not reached often enough relative to how often the
+stop is hit first. **The claim is falsified on this data**, not merely underpowered.
+
+## A SECOND, INDEPENDENT DISQUALIFIER: FREQUENCY
+
+**427 trades in the never-tuned half alone** is above the lab's settled 60-350 workable band, in the
+same direction as Attack 48's 518-trade over-frequency finding. A level-agnostic, purely-statistical
+trigger (range vs. own ATR, volume vs. own average) fires on ordinary volatility spikes about as
+readily as on genuine informed pushes -- consistent with the weak win rate.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Avg loser (-$84.57) is not large in isolation -- not category 1 (concentrated, sizing). But 292 losers
+at a 31.6% win rate compound into a 70.52% drawdown: this is **category 2, bleed on a negative edge**,
+the same shape as Attack 36 and Attack 48, not fixable by risk changes. Recorded per the board's
+standing instruction to report avg loser, win rate and max drawdown together on every run.
+
+## QUEUE
+1. **The impulse-bar continuation mechanism is DISCARDED.** Do not tune it, do not add a stricter
+   volume or magnitude threshold -- the failure is a negative edge at high frequency, not a
+   thin-but-positive edge (Attack 37's category 3), so a filter stack is not warranted by the
+   mandate's own logic. Note for the record: a genuine directional filter set (queue item 4's ask)
+   still failed the kill rule, so the fix for the round-number/impulse family of ideas is not "add
+   more filters," it is that single-bar, level-agnostic momentum triggers do not have an edge on this
+   data at 15m.
+2. **Attack 46 remains the sole advancing candidate on the board**, both halves clear, cold-reproduced,
+   filters exhausted per HARD LESSON 49.
+3. **The out-of-sample test still ranks first and still cannot be run** under BTCUSDT-only --
+   unchanged from Attack 47/48's queue, restated because this cycle did not touch it.
+4. **Next new-mechanism attempt should look at MULTI-BAR confirmation rather than a single bar** --
+   both of this lab's two most recent single-bar/single-moment triggers (round-number crossing,
+   impulse bar) failed on frequency and edge together. The mechanisms that have cleared 1.0 in this
+   lab (the liquidity sweep, the level-target family) all require at least two bars' worth of
+   structure (a tap AND a reclaim, a level AND a hold). That pattern is now 2-for-2 against
+   single-bar triggers and worth stating as a working hypothesis, not yet a rule.
