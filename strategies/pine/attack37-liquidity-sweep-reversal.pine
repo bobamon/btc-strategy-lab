@@ -1,0 +1,103 @@
+//@version=6
+// BTC ATTACK 37 — LIQUIDITY SWEEP REVERSAL (SWING FAILURE PATTERN, BARE).
+// Continues numbering after Attack 36 (narrow-range day expansion, DISCARDED on the pre-2024 kill
+// rule at PF 0.83969095 / 118 trades). The VWAP pullback-continuation family stays RETIRED and is not
+// touched here.
+//
+// CLAIM: a break below a prior swing low that immediately FAILS — the same bar closes back above
+// that level — reflects a stop-run liquidity sweep rather than genuine new supply. Forced closeouts
+// and resting stop orders clear below the level, real buyers absorb the flush, and price reverts
+// upward because the breakdown lacked conviction.
+//
+// GENUINELY DISTINCT from every mechanism already tried:
+//   - VWAP pullback-continuation (RETIRED) — trades WITH an intraday mean, a continuation idea.
+//   - Attack 33 channel breakout / Attack 34 weekly break-and-hold / Attack 36 narrow-range day
+//     expansion — all three trade WITH the breakout direction (continuation). This trades AGAINST
+//     it: a failed breakdown, i.e. a reversal/fade, the first of that class under the new mandate.
+//   - HONEST ABOUT FAMILY: cycle 003 (LCR-1, "Liquidation Cascade Reclaim", REJECTED PF 0.69) lived in
+//     the same broad liquidity-sweep idea-space, but that was a "cascade bar" defined by range +
+//     volume + a close-position threshold, tested on 5m under the old per-cycle mandate before the
+//     15m window and the 60–300 trade frequency band were established. This is a different, minimal
+//     two-term construction (no volume, no range filter) on the current 15m protocol, split-tested
+//     properly for the first time.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3)   — enforced by EXCLUSION, never by clamping, so the stop stays structural.
+//                            NAMED TENSION: this mechanism selects the DEPTH of a wick below a swing
+//                            low, which can be shallow by construction. If the floor excludes most
+//                            signals, that is a real finding about the pattern's headroom, not a
+//                            nuisance to tune away — same posture as Attack 36's stated tension.
+//   Stop beyond STRUCTURE (LESSON 5) — the low of the sweep bar itself: the actual price extreme
+//                            reached during the flush, strictly below the swing-low level that was
+//                            reclaimed (the signal level), never at the signal level itself.
+//   Each leg separately (LESSON 6) — LONG ONLY (fade of a failed breakDOWN). The mirror — a failed
+//                            breakUP above a swing high, faded short — is a SEPARATE construction and
+//                            is not smuggled in here.
+//   BINDING (E17)          — lookback=20 must reject most bars; sweep alone is common (new lows occur
+//                            often) but sweep AND same-bar reclaim is the binding pair. Trade count is
+//                            the binding evidence and is reported, not assumed.
+//   REDUNDANCY (E14)       — two structural terms only (sweep, reclaim) plus the R floor. Sweep and
+//                            reclaim are not proxies for each other: one is "price traded lower than
+//                            the reference," the other is "price closed higher than the reference" —
+//                            independent, and their conjunction is the whole pattern definition.
+//   LATCH IN SEQUENCE (LESSON 8) — swingLow is `ta.lowest(low, lookback)[1]`, computed only from bars
+//                            strictly before the current one (shifted by one bar). The trigger (sweep
+//                            + reclaim) is evaluated on the current, later bar. They cannot share the
+//                            bar that built the reference level.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17):
+//   * pre-2024 half below 1.0             -> DISCARD outright. No filter stack, no rescue, H2 not run.
+//   * both halves >= 1.0 AND drawdown driven by a FEW LARGE LOSSES (large avg loser, not a bleed)
+//     -> a large-R drawdown is a sizing problem and is fixable; this is the better candidate.
+//   * both halves >= 1.0 but drawdown driven by a STEADY BLEED (low win rate grinding down equity,
+//     as Attack 36 showed) -> the reversal idea does not have a real edge here even though the ratio
+//     cleared 1.0; say so plainly, per the board's sharpened drawdown criterion.
+//   * trade count far outside the ~60-300 workable band -> report against Attack 33/34/36 for context.
+//   * any half under ~30 trades -> the ratio is a DIRECTION, not a result (LESSON 12).
+strategy("BTC Attack37 liquidity sweep reversal", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+lookback = input.int(20,     "Swing-low lookback, bars")
+rr       = input.float(2.0,  "Reward:risk")
+minRpct  = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars  = input.int(192,    "Max bars in trade -- 2 days on 15m")
+
+swingLow = ta.lowest(low, lookback)[1]
+
+sweep   = not na(swingLow) and low < swingLow
+reclaim = not na(swingLow) and close > swingLow
+setupOn = sweep and reclaim
+
+minR  = close * minRpct / 100
+rLong = close - low
+rBig  = rLong >= minR
+
+goLong = setupOn and rBig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong and rLong > 0
+    strategy.entry("L", strategy.long)
+    slPx   := low
+    tpPx   := close + rLong * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(swingLow,       title="SwingLow")

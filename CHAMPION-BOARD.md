@@ -2462,3 +2462,91 @@ That part of the search is not the constraint any more.
    have looked like a *worse* version of 34's identical problem when it is a different problem.
 2. Attack 34 remains the only mechanism to clear 1.0 on both halves, and remains untradeable at
    46.88%. It is still the base to beat and still nothing to trade.
+
+---
+
+# ██ ATTACK 37 — LIQUIDITY SWEEP REVERSAL. BOTH HALVES CLEAR 1.0, WEAKLY, AND A THIRD DRAWDOWN CATEGORY SHOWS UP.
+
+**CLAIM.** A break below a prior 20-bar swing low that FAILS — the same bar closes back above that
+level — is a stop-run liquidity sweep, not genuine new supply. Resting stops and forced closeouts
+clear below the level, real buyers absorb the flush, and price reverts upward because the breakdown
+lacked conviction.
+
+**GENUINELY NEW UNDER THIS MANDATE.** Attacks 33 (channel breakout), 34/35 (weekly break-and-hold) and
+36 (narrow-range day expansion) all trade WITH their breakout direction — continuation. This trades
+AGAINST it: a failed breakdown, faded long. First reversal/fade construction since the VWAP family was
+retired. **Honest about lineage:** cycle 003 (LCR-1, "Liquidation Cascade Reclaim", REJECTED PF 0.69)
+lived in the same broad liquidity-sweep idea-space, but that was a "cascade bar" defined by range +
+volume + a close-position threshold, tested on 5m under the pre-2026-09-02 mandate, before the 15m
+window and the 60–300 trade frequency band existed. Attack 37 is a different, minimal two-term
+construction (sweep + reclaim, no volume or range filter) tested for the first time under the current
+protocol — not a rescue of 003, a fresh build in the same neighbourhood.
+
+**AUDIT.** Stop at the sweep bar's own low (the real flush extreme), strictly beyond the swing-low
+signal level (LESSON 5). R floor 0.8% by EXCLUSION (LESSON 3) — flagged in advance as likely to bind
+hard, since sweep depth can be shallow by construction. Long only, mirror short is a separate
+construction (LESSON 6). `swingLow = ta.lowest(low, lookback)[1]` uses only bars strictly before the
+signal bar; the trigger fires on a later bar (LESSON 8). Two structural terms only, not proxies for
+each other (E14): sweep is "traded below the reference," reclaim is "closed above it." Full source:
+`strategies/pine/attack37-liquidity-sweep-reversal.pine`.
+
+## BOTH HALVES, SIDE BY SIDE
+
+| | 37a · NEVER-TUNED | 37b · recent |
+|---|---|---|
+| Window | 2022 → Jun 2024 | Jun 2024 → Sep 2026 |
+| Profit factor | **1.02423271** | **1.01155847** |
+| Max drawdown | 31.63538941% | 24.31004442% |
+| Trades | 322 | 196 |
+| Win rate | 38.20% | 37.24% |
+| Avg loser | **-$116.19** | **-$127.81** |
+| Avg winner | $192.53 | $217.83 |
+| Largest single loss | -$620.77 | -$284.38 |
+| Net return | +5.60% | +1.82% |
+| Commission | $2,845.60 | $2,006.22 |
+
+Both trade counts sit above the LESSON 12 floor of ~30, so both ratios are results, not directions —
+322 trades is slightly above the ~60–300 workable band's top edge, in line for a 20-bar-lookback
+pattern rather than a calendar one.
+
+## THE VERDICT — ADVANCES, WEAKLY, WEAKER THAN ATTACK 34 ON MARGIN
+
+Both halves clear 1.0, so per the mandate's own words this earns a filter stack. But the margin is
+much thinner than Attack 34's (1.483/1.137 vs 1.024/1.012) — both halves sit within 2.5% of
+break-even. On a sample this size (322/196, both comfortably above the 30-trade floor) that is a real
+edge, not noise, but it is not a strong one.
+
+## THE DRAWDOWN SOURCE — A THIRD CATEGORY THE BOARD HASN'T NAMED YET
+
+Applying Attack 36's own sharpened criterion: avg loser here (-$116/-$128) is **6x smaller** than
+Attack 34's (-$772), and the largest single loss in either half ($620.77 / $284.38) is nowhere near
+the max drawdown in dollars — so, like Attack 36, this is a **bleed-type** drawdown, built from many
+small losses rather than a few large ones, not a large-R sizing problem.
+
+**Unlike Attack 36, the edge underneath the bleed is genuinely positive** (PF > 1) on both halves, not
+negative. Attack 36's disqualifier — "shrinking R does not fix a drawdown caused by a negative edge" —
+does not apply verbatim here, because there is no negative edge to fix. What this run actually shows
+is a case the board's two-category taxonomy (large-R sizing problem vs. negative-edge bleed) does not
+cover: **a thin-but-real positive edge, traded at high frequency and 100%-of-equity compounding with a
+sub-40% win rate, still produces a large percentage drawdown from ordinary streak variance** — no
+catastrophic single loss, no negative edge, just enough consecutive losers in a row to compound equity
+down 24–32% before the next winning stretch. Max drawdown is smaller than Attack 34's on H1 (31.64% vs
+46.88%) and comparable on H2 (24.31% vs 32.25%), so it is real, incremental progress on the board's own
+stated criterion — but 24–32% is still **UNTRADEABLE**. This is not a champion.
+
+## QUEUE
+1. **Attack 37 earns a filter stack** (both halves clear 1.0) but it was NOT built this cycle. Credits
+   were spent per the schedule's own cap (626 available, "above 500 the full pair, never more than two
+   runs") on the bare-mechanism pair itself, exactly as the mandate specifies for a first pass. The
+   next cycle on this mechanism should aim a filter at the STREAKINESS of the losing stretches (a
+   regime or session gate), not at R — R is already close to the floor this construction allows.
+2. **The board's drawdown taxonomy needs a third bucket.** Large-R sizing problem (fixable by
+   shrinking R — Attack 34's case), negative-edge bleed (not fixable by shrinking R — Attack 36's
+   case), and now **thin-positive-edge streak variance at full-equity compounding** (Attack 37's case)
+   — possibly fixable by cutting position size or by a filter that removes the streaky regime, neither
+   of which has been tried yet in this lab.
+3. Attack 34 and Attack 37 are now both "advances" on the discovery track. Attack 34 has the better PF
+   margin (1.483/1.137) on a much thinner, less provable sample (30/23 trades) and a far larger avg
+   loser (-$772). Attack 37 has a weaker PF margin (1.024/1.012) on a large, provable sample (322/196)
+   and a much smaller avg loser (-$116/-$128). Neither is tradeable. Whichever earns a filter stack
+   first should be judged against the other's numbers, not in isolation.
