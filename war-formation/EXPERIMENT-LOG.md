@@ -3788,3 +3788,130 @@ implicated as a redundant term by this run; the registered-in-advance fallback w
 3. **Position sizing / risk fraction** — still closed per HARD LESSON 29, unchanged.
 4. **If more 1m history ever becomes available**, the $3,000/$4,000 shield question is still the first
    exit-side item to re-run on a longer window. Last confirmed clamped to 2025-12-16 -> 2026-05-03.
+
+---
+
+# E67 — QUEUE ITEM 1 ATTACKED: RESTORE THE CYCLE-POSITION GATE. HYPOTHESIS FALSIFIED, DECISIVELY.
+
+**Credits: 619 at the start of this cycle (free tier, shared pool). Budget rule: above 500 -> at most
+TWO backtests. One used** — the result lands cleanly in a pre-registered branch and a second run would
+not change the reading. `get_trades` also pulled (free) for diagnostic detail.
+
+## THE QUESTION AND THE ONE HYPOTHESIS, STATED BEFORE RUNNING
+
+This cycle's mandate: stop varying the direction rule (E64a raw-6h 0.454/43 trades/6.98% win, E66 proxy
+0.300/66 trades/4.55% win, both catastrophic win rates against an rr of 2.0 that needs 33%) and attack
+the short's entry GEOMETRY instead — a 4-7% win rate means the stop is being hit almost every time,
+which is a statement about WHERE/WHEN the short enters, not whether the regime was correctly identified.
+
+**The hypothesis:** both E64a and E66 enter short on `brokeAbove` (a genuine sweep above the previous
+15m high) followed by a rejection `crossunder`, with **no check on where price sits inside its recent
+range at the moment of entry**. That is exactly the failure `ORACLE-RULES.md` names as the cause of
+every short this project has built: *"even if you had direction to short you can wreck an absolutely
+perfect trade... do you want to short down here?"* — shorting after price has already fallen, at the
+bottom of the cycle, "entering the enemy's camp." This project has **one proven fix** for exactly that
+failure mode: the 3-minute cycle-position gate (`cyclePos = (close-cycleLow)/(cycleHigh-cycleLow)` over
+a rolling 30-minute window, shorts only when `cyclePos >= 0.7`, i.e. still near the top of the recent
+swing). It is the **only term in this project's entire short-construction history that ever improved a
+short leg on its own profit factor** (E13, pre-ALCM: PF 0.68 -> 0.75), and `ORACLE-RULES.md` says
+explicitly: *"Keep the gate in all future short builds."* **E64a and E66 both omitted it** — not a new
+idea, a dropped standing instruction. This run restores it and isolates it as a single-variable change.
+
+## THE BUILD
+
+`pine/e67-e66-cyclegate.pine` = `pine/e66-proxy-direction-short.pine` + `shortCycleGate` (ported
+unchanged from E13: `cycleWinMins=30`, `cycleHiThresh=0.7`, not re-tuned) added to `goShort`. Everything
+else — direction source (proxy, e58a's own `bearRegime`/`redPrev` mirror), `brokeAbove` + rejection-
+crossunder geometry, `shieldUsd=$1000`, `maxBars=6480`, `rr=2.0`, `velK=0.8`, `inMiddle` — held EXACTLY
+at E66's values (HARD LESSON 28/29: shield and hold cap are coupled, named in advance, untouched here).
+
+## PRE-RUN AUDIT
+
+R (LESSON 3) — shieldUsd $1,000, ~1.0% of BTC price, passes the 0.8% floor, live tension above ~$125k
+unchanged from every sibling. Stop placement (LESSON 5) — risk-defined by the shield, the spec's own
+exit model. Each leg separately (LESSON 6, scoped by HARD LESSON 31) — SHORT ONLY, e58a's long untouched.
+BINDING (E17) — checked against E66/E64a's counts below. REDUNDANCY (E14) — `cyclePos` (WHERE in the
+swing) is not a proxy for `inMiddle` (round-number proximity) or `velMin` (rejection magnitude); not
+redundant on its face. LATCH IN SEQUENCE (LESSON 8) — rolling `ta.highest`/`ta.lowest` over 1m bars,
+identical construction to E13, no cross-timeframe leakage. OCCUPANCY (LESSONS 24/28/29) — shield/maxBars/
+rr unchanged from E66, so this run adds exactly one gate and nothing else that could shift occupancy;
+the gate itself will by construction admit a smaller population than E66's 66, named in advance.
+
+## PRE-REGISTERED OUTCOMES (LESSON 17), READ AGAINST E66 (PF 0.300, 66 trades) AND E64a (PF 0.454, 43)
+
+- PF clears 1.0 with an adequate count -> the missing location gate WAS the binding defect.
+- PF improves over E66's 0.300 but stays below 1.0 -> helps but not sufficient alone.
+- PF at or below E66's 0.300 -> the gate's E13 benefit does not transfer to this geometry.
+- **Trades collapse toward single digits -> the proxy's already-tighter regime combined with the gate
+  is too restrictive to judge; report as a count, not a result.**
+
+## THE RESULT
+
+| Build | PF | Trades | Max DD | Win rate | Direction |
+|---|---|---|---|---|---|
+| e58a (long, proxy direction, reference) | **1.24015239** | 36 | 9.82519609% | 41.67% | long |
+| E64a (short, RAW 6h colour, no cycle gate) | 0.45442725 | 43 | 10.97440232% | 6.98% | short |
+| E66 (short, PROXY direction, no cycle gate) | 0.29987043 | 66 | 14.5611245% | 4.55% | short |
+| **E67 (short, PROXY direction + cycle gate, this run)** | **0.00000000** | **12** | **4.85413212%** | **0.00%** | short |
+
+[E67 report](https://mcp-api.trader.dev/backtest/01M1NBGP62HWSRNKC4N3DZ6S8P) — 0 winners / 12 losers.
+
+**The fourth pre-registered branch landed, and worse than stated.** Trade count collapsed 66 -> 12, well
+below both the ~20 interpretability floor and RATCHET v2's 30-trade KEEP floor. Win rate did not merely
+stay poor — it went to **exactly zero**: 0 winners out of 12. **The hypothesis is falsified, decisively.**
+Restoring the one term this project has ever shown to help a short leg did not help this construction;
+it eliminated every winner that survived in E66's population and left only losers.
+
+## WHAT get_trades ADDS
+
+Pulled this run's own trade list (`jobId 01M1NBGP62HWSRNKC4N3DZ6S8P`, free) per HARD LESSON 11. Every one
+of the 12 losses closed well short of the full $1,000 shield in price terms — the largest single-trade
+gross loss was $72.27, while a full-shield loss at the recorded position sizes (qty ~0.10-0.14 BTC)
+would run roughly $100-140. `barsInTrade` ranged 2 to 1951, nowhere near the 6480 cap, so these are not
+timeout exits either. **This is reported as an observation, not a diagnosed mechanism** — the exact fill
+path was not traced further given the result is already decisive under the pre-registered collapse
+branch, but it is worth a future cycle's attention if the shield-exit mechanics on the short side are
+revisited (none of e58a's, E64a's, or E66's own write-ups characterized individual loss magnitudes this
+closely, so it is not yet known whether this is short-specific or a general property of this exit model).
+
+## WHAT THIS ESTABLISHES
+
+- **The cycle-position gate's E13 benefit does not transfer to this geometry in isolation.** E13 paired
+  it with a 3m coil (`atrFast < atrSlow*coilK`), an HA-down confirmation on the trigger candle, and a
+  tighter structural stop clamped to 0.15-1.50% of price — none of which this build carries. The gate
+  may have been necessary but not sufficient in E13's own context, not a general-purpose short fix.
+- **Stacking a restrictive gate onto an already-restrictive proxy regime over-constrains the sample past
+  the point of being readable.** E66's proxy regime (66 trades) is already a distinct, tighter population
+  than E64a's raw-6h regime (43 trades) on the short side (EXPERIMENT-LOG, E66); adding the cycle gate on
+  top cut it by more than 80%, and what little survived was uniformly worse, not better — the opposite of
+  what a well-targeted filter should do (compare E13 itself, where the SAME gate cut 69 trades to 39 and
+  *raised* PF — the difference here is what else is (and isn't) in the construction it's added to).
+- **The short's defect remains located in the mechanics, confirmed a third way.** Direction-rule choice
+  (E64a vs E66) and now a targeted location gate (E67) have both been tried and both failed to fix it —
+  three independent axes, same failure signature (near-zero win rate against an rr of 2.0).
+
+## WHAT THIS DOES NOT DO
+
+- **REJECTED under RATCHET v2** — clause 1 (PF must improve) and the 30-trade floor both fail outright.
+  Not promoted to champion or candidate.
+- **Does not conclude the short side is unfixable** — per HARD LESSON 31, this is evidence about
+  constructions tried (now three, all under the ALCM exit), not evidence the short cannot exist.
+- **Does not touch e58a's long leg** (PF 1.240, unchanged, still the lab's reference build) or the
+  remaining long-side entry terms (`brokeBelow`, `h1Bull`, `timeGate`, `inMiddle`) — still open.
+- **Only one backtest spent** (619 credits at start, budget allowed up to two). The result is
+  unambiguous under the pre-registered branches; a reproduction check or neighbour sweep was not run.
+
+## QUEUE
+
+1. **The short's location solve may need the FULL E13 package (coil + HA-confirmation + tighter
+   structural-style stop), not the cycle gate alone**, under the ALCM exit — a genuinely new combined
+   construction, not attempted this cycle.
+2. **Reconsider `brokeAbove` + rejection-crossunder itself**, per E66's own open item — whether the 15m
+   high sweep finds real exhaustion tops or noise, mirroring E29's finding for the long-history record
+   that level-based shorts were the better half. Not attempted this cycle.
+3. **Binding-test the remaining LONG-side entry terms one at a time on e58a**: `brokeBelow`, `h1Bull`,
+   `timeGate`, `inMiddle`. velK is closed (E65a/b). Still fully open, no cycle has picked this up since
+   it was named at E65.
+4. **Position sizing / risk fraction** — still closed per HARD LESSON 29, unchanged.
+5. **If more 1m history ever becomes available**, the shield question is still the first exit-side item
+   to re-run on a longer window. Last confirmed clamped to 2025-12-16 -> 2026-05-03.

@@ -1,0 +1,187 @@
+//@version=6
+// WAR FORMATION E67 — THE SHORT'S ENTRY GEOMETRY, ATTACKED: RESTORE THE 3M CYCLE-POSITION GATE
+// ORACLE-RULES.md SAID TO KEEP IN ALL FUTURE SHORT BUILDS, AND E64a/E66 BOTH OMITTED.
+//
+// QUEUE ITEM 1 THIS CYCLE (2026-09-04 mandate): "stop varying the direction rule and attack the
+// short's entry geometry." Three source-faithful shorts have now failed under the A.L.C.M. exit --
+// E64a (raw 6h colour direction) PF 0.45442725/43 trades/6.98% win, E66 (proxy direction) PF
+// 0.29987043/66 trades/4.55% win, and a v34-era build below 1.0 -- all with catastrophic win rates
+// against an rr of 2.0 that needs 33%. Varying the direction source made the short WORSE, not better
+// (E64a 0.454 -> E66 0.300), which HARD LESSON 32/EXPERIMENT-LOG already read correctly: the defect is
+// in the MECHANICS, not the direction rule feeding them.
+//
+// THE ONE HYPOTHESIS, STATED BEFORE RUNNING: E64a and E66 both entered on brokeAbove (a genuine sweep
+// above the previous 15m high) + a rejection crossunder, with NO check on WHERE price sits inside its
+// recent range at the moment of entry. That is exactly the failure ORACLE-RULES names as the cause of
+// every short this project has ever built: "even if you had direction to short you can wreck an
+// absolutely perfect trade... do you want to short down here?" -- shorting after price has ALREADY
+// fallen, at the bottom of the cycle, "entering the enemy's camp."
+//
+// This project has ONE proven fix for exactly that failure mode: the 3-minute cycle-position gate,
+// tested once before (E13, pre-ALCM structural-stop exit) and it is the ONLY term in this project's
+// entire short-construction history that ever IMPROVED a short leg on its own profit factor (PF
+// 0.6835 -> 0.7490, ORACLE-RULES.md queue item 2: "Keep the gate in all future short builds"). E64a and
+// E66 did not carry it forward -- a direct omission of a standing instruction, not a new idea. This run
+// tests whether restoring it fixes what varying the direction rule could not.
+//
+// SINGLE-VARIABLE CHANGE FROM E66: add shortCycleGate (cyclePos >= cycleHiThresh, i.e. short only when
+// price is still in the UPPER part of its recent 30-minute range, not already deep into the drop) to
+// goShort. Everything else -- direction source (proxy, e58a's own bearRegime/redPrev mirror), brokeAbove
+// + rejection-crossunder geometry, shieldUsd, maxBars, rr, velK, inMiddle -- held EXACTLY at E66's
+// values. cycleWinMins/cycleHiThresh set to E13's own values (30 minutes, 0.7) rather than re-tuned, so
+// this is a straight port of the one proven term, not a new fit.
+//
+// PARENT: pine/e66-proxy-direction-short.pine (PF 0.29987043, DD 14.5611245%, 66 trades, short, proxy
+// direction). E66 itself is a leg-only mirror of e58a (PF 1.24015239, DD 9.82519609%, 36 trades, long,
+// confirmed reproducible E58=E59) -- e58a remains the lab's reference build regardless of this leg.
+//
+// PRE-RUN AUDIT, one line per item:
+//   R (LESSON 3) -- shieldUsd = $1,000, ~1.0% of BTC price at ~$100k, PASSES the 0.8% floor. LIVE
+//        TENSION unchanged from e58a/E64a/E66: falls BELOW the floor above ~$125k BTC -- real over this
+//        window's range, not a formality.
+//   Stop placement (LESSON 5) -- risk-defined by the shield (fixed $ gap to liquidation), the spec's own
+//        exit model, the declared deviation from a structural stop. No trailing, no averaging down.
+//   Each leg separately (LESSON 6, scoped by HARD LESSON 31) -- SHORT ONLY. e58a's long is not touched.
+//        Location is now solved EXPLICITLY (brokeAbove + rejection + cycle position), which is exactly
+//        what ORACLE-RULES L175-177 requires before a short may be symmetric with the long.
+//   BINDING (E17) -- shortCycleGate must actually admit trades or it is inert; count against E66's 66
+//        and E64a's 43 is the evidence, reported below either way.
+//   REDUNDANCY (E14) -- cyclePos (rolling 30-min high/low position) measures something inMiddle (round-
+//        number proximity) and velMin (rejection magnitude) do not: WHERE in the recent swing price
+//        sits, not WHAT price level it is at or HOW hard it rejected. Not a proxy for either existing
+//        term. If trades collapse toward zero, cycleHiThresh is the first suspect (registered here).
+//   LATCH IN SEQUENCE (LESSON 8) -- cycleHigh/cycleLow are rolling ta.highest/ta.lowest over 1m bars,
+//        updating every bar like E13's identical construction; no cross-timeframe leakage, unchanged
+//        latch order from E66 on every other term.
+//   OCCUPANCY (LESSONS 24/28/29) -- shieldUsd/maxBars/rr held EXACTLY at E66's (and e58a's) values, so
+//        this run adds exactly one gate and changes nothing else that could shift occupancy. The gate
+//        itself will admit a different (smaller, by construction) trade population than E66's 66 --
+//        named in advance, checked with get_trades if the result is promoted.
+//   SL and TP FIXED AT ENTRY. No trailing, no martingale. Position ends at target or at the shield.
+//
+// PRE-REGISTERED OUTCOMES (LESSON 17), read against E66 (PF 0.29987043, 66 trades) AND E64a (PF
+// 0.45442725, 43 trades) -- neither alone is decisive (LESSON 16):
+//   * PF clears 1.0 with an adequate count (>=20) -> the missing location gate WAS the short's binding
+//     defect, exactly as ORACLE-RULES predicted and exactly as E13 showed once before. Major finding.
+//   * PF improves over E66's 0.300 (and ideally over E64a's 0.454) but stays below 1.0 -> the gate helps
+//     but is not sufficient alone, same shape E13 itself showed under the old exit model (0.68->0.75,
+//     still short of parity) -- necessary, not sufficient.
+//   * PF at or below E66's 0.300 -> the cycle gate's benefit in E13 was specific to that construction's
+//     OTHER terms (the 3m coil, the HA-down confirmation, the tighter structural stop) and does not
+//     transfer to this shield-based geometry on its own -- the defect is deeper than location.
+//   * Trades collapse toward single digits -> the proxy direction rule's already-tighter regime (vs
+//     E64a's raw 6h count) combined with the cycle gate is too restrictive to judge on this window;
+//     reported as a count, not a result (LESSON 19).
+//   * Fewer than ~20 trades but not degenerate -> reported as a COUNT and a direction, per the mandate's
+//     restatement of the 4.5-month single-regime limit; RATCHET v2's 30-trade floor still governs KEEP.
+strategy("War Formation E67 short cyclegate restored", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+redBear      = input.int(4,     "Red 1h candles in PRIOR 6h block for BEAR (proxy, mirrors e58a greenBull)")
+skipOpen     = input.int(60,    "Skip first N minutes of 6h block")
+skipClose    = input.int(60,    "Skip last N minutes of 6h block")
+velK         = input.float(0.8, "Velocity: min rejection as multiple of atr(30)")
+midLo        = input.float(400, "Whole-number middles low")
+midHi        = input.float(600, "Whole-number middles high")
+shieldUsd    = input.float(1000,"THE SHIELD: fixed dollar gap to liquidation -- held at e58a/E66 value")
+rr           = input.float(2.0, "Reward:risk")
+maxBars      = input.int(6480,  "Max bars in trade -- held at e58a/E66 value")
+cycleWinMins = input.int(30,    "3m-cycle rolling window, minutes (10 x 3m candles) -- E13's own value")
+cycleHiThresh= input.float(0.7, "cyclePos threshold: shorts only above this -- E13's own value")
+
+MS6H = 21600000
+MS1H = 3600000
+MS15 = 900000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+b15 = math.floor(time / MS15)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+new15 = b15 != b15[1]
+
+var float h1o     = na
+var int   redCur  = 0
+var int   cntCur  = 0
+var int   redPrev = 0
+var int   cntPrev = 0
+
+if new6
+    redPrev := redCur
+    cntPrev := cntCur
+    redCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(h1o)
+        cntCur := cntCur + 1
+        if close[1] < h1o
+            redCur := redCur + 1
+    h1o := open
+
+regimeReady = cntPrev >= 5
+bearRegime  = regimeReady and redPrev >= redBear
+
+minsIn   = (time - b6 * MS6H) / 60000
+timeGate = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+h1Bear = not na(h1o) and close < h1o
+
+var float c15h = na
+var float p15h = na
+
+if new15
+    p15h := c15h
+    c15h := high
+else
+    c15h := na(c15h) ? high : math.max(c15h, high)
+
+brokeAbove = not na(p15h) and c15h > p15h
+
+velMin = na(ta.atr(30)) ? na : ta.atr(30) * velK
+
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+// ---- E67 NEW TERM: 3-minute cycle position gate, ported unchanged from E13 ----
+cycleHigh = ta.highest(high, cycleWinMins)
+cycleLow  = ta.lowest(low, cycleWinMins)
+cycleSpan = cycleHigh - cycleLow
+cyclePos  = cycleSpan > 0 ? (close - cycleLow) / cycleSpan : na
+shortCycleGate = not na(cyclePos) and cyclePos >= cycleHiThresh
+
+shortTrig = not na(p15h) and not na(velMin) and ta.crossunder(close, p15h) and (p15h - close) >= velMin
+
+goShort = bearRegime and timeGate and h1Bear and brokeAbove and not inMiddle and shortTrig and shortCycleGate
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+shortR = shieldUsd
+
+if flat and goShort and shortR > 0
+    strategy.entry("S", strategy.short)
+    slPx   := close + shortR
+    tpPx   := close - shortR * rr
+    barsIn := 0
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goShort ? 1 : 0, title="ShortSignal")
+plot(redPrev,         title="PriorRed1hCount")
+plot(cyclePos,         title="CyclePos")
+plot(shortCycleGate ? 1 : 0, title="ShortCycleGate")
