@@ -3558,3 +3558,108 @@ standing instruction to report avg loser, win rate and max drawdown together on 
    lab (the liquidity sweep, the level-target family) all require at least two bars' worth of
    structure (a tap AND a reclaim, a level AND a hold). That pattern is now 2-for-2 against
    single-bar triggers and worth stating as a working hypothesis, not yet a rule.
+
+
+---
+
+# ATTACK 50 - ASIAN-RANGE BREAKOUT, TWO-BAR CONFIRMATION. FALSIFIED, AND A NEW FAILURE MODE FOR LEVEL TARGETS.
+
+The stored prompt asked for Attack 37's filter stack a fourth time. **The docs override it again**:
+Attack 41 closed Attack 37, Attack 43 closed the sweep-reversal family, and Attack 47 died on the
+~77% sample wall HARD LESSON 45/49 already confirmed across two labs, with the board's own queue
+saying stop adding filters on this data. This cycle instead took up queue item 4 from Attack 49:
+build a genuinely MULTI-BAR confirmation mechanism, since the last two single-bar triggers
+(round-number, impulse-bar) both failed on frequency and negative edge together.
+
+**CLAIM:** the 00:00-08:00 UTC window is the thinnest-participation stretch of BTC's day, so the
+high/low it prints is a low-conviction range. When price CLOSES beyond that range on **two
+consecutive bars** during the higher-participation 08:00-24:00 UTC window, the move reflects real
+participation rather than thin-session noise and should continue more reliably than a single-bar
+poke. Entry requires bar N-1 AND bar N to both close beyond the locked Asian-session high -- a
+strict two-close latch that clears outright on any single failed bar, never a persistent arm. Stop:
+`asianLow`, the opposite side of the broken range (structural, a different object from the entry
+level). Target: `asianHigh + rangeWidth`, a measured-move LEVEL sourced from the session's own width
+(the HARD LESSON 41/47 principle), not an rr multiple. Long only, bare, no filter stack.
+
+**Genuinely distinct** from every family on this board: not the VWAP mean (retired), not a rolling
+N-bar extreme (Attack 33), not a calendar anchor (Attack 34/35), not a volatility-coil state (Attack
+36), not a failed-break reversal off a swing low (Attack 37-43), not a structural swing-level
+tap-and-hold (Attack 44-47), and not a fixed price grid or single-bar impulse (Attack 48/49). New
+anchor (time-of-day session range, never before the PRIMARY signal here -- only ever a filter, e.g.
+the VWAP witching-hour ban), new confirmation shape (2 consecutive closes, not 1), new target source
+(the broken range's own width).
+
+**ENGINE NOTE, cheap to record:** `hour()`/`minute()`/`dayofmonth()` are unimplemented on this engine
+(`Runtime: unimplemented function 'hour'`, confirmed on the first, failed call this cycle). UTC hour
+must come from arithmetic on the `time` builtin -- `math.floor(time / 3600000) % 24` -- the same
+workaround `010-vwm-tod-filter.pine` already used. Not a new limit, but worth stating plainly so a
+future cycle doesn't spend a call rediscovering it.
+
+| | **Attack 50a** (never-tuned half) |
+|---|---|
+| Profit factor | **0.75710902** |
+| Max drawdown | **59.34964879%** |
+| Trades | **707** |
+| Win rate | **63.22489392%** |
+| Achieved win/loss ratio | 0.44037661 |
+| Avg winner | $41.38 |
+| Avg loser | -$93.96 |
+| Commission paid | $3,754.07 |
+| avgBarsWinning / avgBarsLosing | 26.76 / 52.76 |
+
+## KILL RULE APPLIED. H2 NOT RUN, SECOND CREDIT NOT SPENT.
+
+**Not a close call.** PF 0.757, well under 1.0. The credit balance (576) would otherwise permit the
+full pair, but the mandate's kill rule overrides the credit-tier default when H1 fails outright: no
+filters, no rescue, move on.
+
+## THE INTERESTING PART: A MAJORITY WIN RATE, STILL A LOSING SYSTEM
+
+**63.22% of trades win, and it still loses**, because the payoff ratio is only 0.44 -- break-even at
+that ratio needs 69.43% wins, 6.2pp above what was achieved. And `avgBarsWinning` (26.76) is **less**
+than `avgBarsLosing` (52.76) -- the **opposite** of HARD LESSON 5's classic "stop in the noise"
+signature, where losers die fast and winners take time to develop.
+
+**The likely mechanism is the target's anchor, not market noise.** The target (`asianHigh +
+rangeWidth`) is fixed the moment the Asian session ends, independent of when the two-bar confirmation
+actually fires. A late confirmation -- price already well clear of `asianHigh` by the time it closes
+beyond the level twice -- leaves little remaining distance to a target that was set hours earlier,
+while the stop (`asianLow`, the full opposite side of the session range) stays exactly as far away as
+it always was. **The confirmation requirement that was added to make the signal more selective also,
+as a side effect, erodes the reward side of every trade it delays** -- an asymmetric R created by the
+anchor choice, not by chop.
+
+**This qualifies HARD LESSON 41/47, it does not contradict it.** "Target a level, not a multiple" is
+still right, but this shows the qualifier: **the level must be reachable in proportion to how late
+the entry occurs**, which a level fixed before the confirmation window does not guarantee. Attack
+44-46's level targets survived because their entry (a tap-and-reclaim) sits close in time to the
+level's own definition; this design let a 2-bar delay sit between the level being set and the entry
+being taken, and that gap is where the reward leaked out.
+
+## A SECOND, INDEPENDENT DISQUALIFIER: FREQUENCY
+
+**707 trades in H1 alone (2022-01 to 2024-06, 2.5 years)** is far above the lab's settled 60-350
+workable band -- more frequent than Attack 33's 757-trade **full 4.7-year** sample. The Asian/London
+hour split fires on essentially every ordinary day: this is not a selective signal, and $3,754.07 of
+commission against a $5,933.76 net loss shows the same cost exposure that killed Attack 33.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Avg loser (-$93.96) is not large in isolation -- not category 1 (concentrated, sizing). The edge is
+negative, so not category 3. This is **category 2, bleed on a negative edge**, but with an unusual
+signature: a majority win rate undone by an inverted payoff ratio, rather than the low-win-rate shape
+category 2 has shown before (Attack 36, Attack 48, Attack 49).
+
+## QUEUE
+1. **Do not tune this mechanism.** Do not narrow the session window, do not change the measured-move
+   multiple -- the failure is structural to the target's anchor choice relative to a delayed
+   confirmation entry, not a threshold to sweep.
+2. **A session-range breakout might still be worth one more look with an entry-relative target**
+   (e.g. rangeWidth projected from the CONFIRMATION bar's own close, not from `asianHigh`) rather
+   than a level fixed at the session boundary before the confirmation delay exists. That is a
+   narrower, testable variant for a future cycle, not a rescue of this one.
+3. **Attack 46 remains the sole advancing candidate on the board**, both halves clear, cold-reproduced,
+   filters exhausted per HARD LESSON 49.
+4. **The out-of-sample test for Attack 46 still ranks first and still cannot be run** under
+   BTCUSDT-only -- unchanged from Attack 47/48/49's queue, restated because this cycle did not touch
+   it.

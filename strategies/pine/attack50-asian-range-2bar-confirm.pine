@@ -1,0 +1,156 @@
+//@version=6
+// BTC ATTACK 50 - ASIAN-SESSION RANGE BREAKOUT, TWO-BAR CONFIRMATION, MEASURED-MOVE TARGET.
+//
+// THE STORED PROMPT asks (for the fourth time this lab has seen this exact ask) to build Attack 37's
+// filter stack. THE DOCS OVERRIDE IT AGAIN: Attack 41 closed Attack 37 as a development target, Attack
+// 43 closed the whole sweep-reversal family, and Attack 47 -- the one filter tried on the CURRENT
+// champion candidate, Attack 46 -- died on the ~77% sample wall HARD LESSON 45/49 has now confirmed
+// three times across two labs, with the board's own queue saying "stop adding filters on this data."
+// The board's live queue (Attack 49, item 4) is the instruction this build actually implements:
+// "next new-mechanism attempt should look at MULTI-BAR confirmation rather than a single bar" -- the
+// last two mechanisms (48 round-number, 49 impulse-bar) were both single-bar triggers and both failed
+// on a negative edge at high frequency (category 2 bleed). Every mechanism that has ever cleared 1.0 in
+// this lab required at least two bars of structure (37-43: a tap AND a reclaim; 44-46: a level AND a
+// hold). This build tests that pattern deliberately, on a genuinely new anchor, rather than by accident.
+//
+// ==================== THE CLAIM ====================
+// BTC trades 24/7 but participation is not uniform across the day. The 00:00-08:00 UTC window (the
+// Asia / early-London hours) is the thinnest-volume stretch of the trading day, so the high/low it
+// prints is a range set by low conviction. When price CLOSES beyond that range on TWO CONSECUTIVE bars
+// during the higher-participation 08:00-24:00 UTC window (London open through the NY close), the move
+// reflects participants who showed up for the session pushing price somewhere the thin session's own
+// noise did not, and is more likely to continue than a single-bar poke beyond the range that noise
+// alone could produce. This is a genuinely untested family: STRATEGY-LEDGER's "families still open"
+// lists time-of-day seasonality, and the only prior use of session timing in this lab (the VWAP
+// witching-hour ban) was a FILTER bolted onto an unrelated signal, never the entry mechanism itself.
+//
+// GENUINELY DISTINCT from every family on this board: not a mean-reversion pullback (VWAP, retired),
+// not a rolling N-bar channel breakout (Attack 33, no session anchor), not a calendar anchor (Attack
+// 34/35, weekly/daily, not intraday), not a volatility-coil release (Attack 36, needs prior LOW vol --
+// this needs a specific TIME window regardless of vol), not a failed-break reversal off a swing low
+// (Attack 37-43, trades AGAINST the break), not a structural swing-level bounce (Attack 44-47, trades
+// off a TAP-and-hold of a recent extreme), and not a fixed price grid or single-bar impulse (Attack
+// 48/49, both single-bar triggers). New anchor (time-of-day session range), new confirmation shape (2
+// consecutive closes beyond the level, not 1), new target source (the broken range's own width) --
+// each piece individually validated elsewhere in this project: level targets over rr multiples (HARD
+// LESSON 41/47), multi-bar confirmation over single-bar triggers (this cycle's queue item).
+//
+// ==================== AUDIT, ONE LINE PER LEG ====================
+//   R >= 0.8% (LESSON 3) -- enforced by EXCLUSION via rBig, measured from the confirm bar's close to
+//        asianLow. A breakout whose range is too shallow to clear the floor is SKIPPED, never widened.
+//   Stop beyond STRUCTURE (LESSON 5) -- slPx = asianLow, the OPPOSITE side of the very range that was
+//        broken, not the breakout level itself (asianHigh) and not the confirm bar's own low. Entry
+//        level and stop level are two different objects by construction.
+//   Each leg separately (LESSON 6) -- LONG ONLY this cycle. The mirror (breakdown below asianLow) is
+//        not built here: HARD LESSON 42/43 established that a short at 100%-equity sizing is a harness
+//        artifact, not a signal, and requires a declared 25%-equity deviation that cannot be compared
+//        to this long's 100%-equity numbers in the same run. Built next if this long clears the kill
+//        rule; its absence is a harness/scope limit, not a design choice, disclosed per the standing
+//        both-directions requirement -- this run is INTERIM, not a finished result.
+//   BINDING (E17) -- the two-bar confirmation necessarily binds relative to a one-bar version (it can
+//        only reduce the count); the trade count is read before anything else.
+//   REDUNDANCY (E14) -- minRpct (absolute stop distance) and the 2-consecutive-close shape constrain
+//        different things: a shallow range can pass the shape and fail the R floor, and vice versa.
+//   LATCH IN SEQUENCE (LESSON 8) -- `armed` holds only whether the IMMEDIATELY PRIOR bar closed beyond
+//        the level; it is read (for entry) then overwritten (for the next bar) every flat bar, so entry
+//        requires bar N-1 AND bar N to both close beyond asianHigh, and a single failed bar clears the
+//        requirement outright -- setup (bar N-1) and trigger (bar N) never share a bar, and there is no
+//        persistent state that can silently survive a failed bar.
+//   OCCUPANCY (LESSONS 24/28/29) -- pyramiding=1, flat-only entries; the Asian range recomputes once
+//        per UTC day and holds constant intraday, so slPx/tpPx are fixed at entry and never
+//        recalculated while a trade is open (also satisfies SL/TP-fixed-at-entry below).
+//   CASCADE (HARD LESSON 35) -- long build at 100% equity with a fixed stop/target; expect
+//        cascadeRatio 1, verified before applying clause 3.
+//   WEEKENDS (structural note 4) -- the UTC-hour session split applies identically on weekends; no
+//        special-casing, stated rather than silently assumed.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// ==================== OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17) ====================
+//   * PRE-2024 HALF (H1, never-tuned, 2022-01-01 -> 2024-06-08) BELOW 1.0 -> DISCARDED by the kill
+//     rule. No filters, no rescue, H2 not run, second credit not spent.
+//   * H1 >= 1.0 AND H2 >= 1.0 -> ADVANCES alongside Attack 46 as a second live candidate; multi-bar
+//     confirmation would then be 3-for-3 in this lab (liquidity sweep, level-target, session-break).
+//   * FEWER THAN ~30 TRADES in a half -> that half's ratio is a DIRECTION per LESSON 12, not a result.
+//   * A LARGE SHARE OF HOLDS AT maxBars 192 -> the cap is truncating (HARD LESSON 38); reported before
+//     any conclusion is drawn from the win/loss ratio.
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside net, per this board's
+//   standing instruction and HARD LESSON 36/39.
+
+strategy("BTC Attack50 Asian range break 2bar confirm", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+asianStartH = input.int(0, "Asian session start hour, UTC")
+asianEndH   = input.int(8, "Asian session end hour, UTC (exclusive)")
+minRpct     = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+mmMult      = input.float(1.0,  "Measured-move multiple of the Asian range width")
+maxBars     = input.int(192,    "Max bars in trade")
+
+h        = math.floor(time / 3600000) % 24   // UTC hour via arithmetic -- hour() is unimplemented on this engine
+inAsian  = h >= asianStartH and h < asianEndH
+canTrade = not inAsian
+
+var float sessHigh  = na
+var float sessLow   = na
+var float asianHigh = na
+var float asianLow  = na
+
+if inAsian and not inAsian[1]
+    sessHigh := high
+    sessLow  := low
+else if inAsian
+    sessHigh := math.max(sessHigh, high)
+    sessLow  := math.min(sessLow, low)
+
+if not inAsian and inAsian[1]
+    asianHigh := sessHigh
+    asianLow  := sessLow
+
+haveRange = not na(asianHigh) and not na(asianLow)
+isBreakUp = canTrade and haveRange and close > asianHigh
+
+flat = strategy.position_size == 0
+
+var bool armed = false
+
+longConfirm = flat and armed and isBreakUp
+
+rangeW = haveRange ? asianHigh - asianLow : na
+tpCand = haveRange ? asianHigh + rangeW * mmMult : na
+
+rawR   = longConfirm ? close - asianLow : na
+minR   = close * minRpct / 100
+rBig   = longConfirm and rawR >= minR
+rrOk   = longConfirm and not na(tpCand) and (tpCand - close) > 0
+
+goLong = longConfirm and rBig and rrOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := asianLow
+    tpPx   := tpCand
+    barsIn := 0
+    armed  := false
+else if flat
+    // setup and trigger never share a bar: this overwrites `armed` with THIS bar's own break state,
+    // so entry next bar requires bar N-1 (this bar) AND bar N to both close beyond asianHigh.
+    armed := isBreakUp
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(asianHigh, title="AsianHigh")
+plot(asianLow,  title="AsianLow")

@@ -920,5 +920,53 @@
       "cascadeRatio": 1,
       "verifiedAt": "2026-09-04T08:15:08Z"
     }
+  },
+  {
+    "id": "attack50a-asian-range-2bar-confirm-h1",
+    "name": "Attack 50a: Asian-session range breakout, two-bar confirmation, measured-move target -- never-tuned half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack50-asian-range-2bar-confirm.pine",
+    "description": "A genuinely new mechanism proposed per the mandate's fallback and the board's own queue (Attack 49, item 4: 'next new-mechanism attempt should look at MULTI-BAR confirmation rather than a single bar'). The stored prompt asked for the fourth time to build Attack 37's filter stack; the docs override it again -- Attack 41 closed Attack 37, Attack 43 closed the sweep-reversal family, and Attack 47 died on the ~77% sample wall HARD LESSON 45/49 already confirmed across two labs, with the board's queue saying stop adding filters on this data. CLAIM: the 00:00-08:00 UTC window is the thinnest-participation stretch of BTC's trading day, so the high/low it prints is a low-conviction range. When price CLOSES beyond that range on two consecutive bars during the higher-participation 08:00-24:00 UTC window, the move reflects real participation rather than thin-session noise and is more likely to continue than a single-bar poke. Entry requires bar N-1 AND bar N to both close beyond the locked-in Asian session high (a strict two-consecutive-close latch, never a persistent multi-bar arm: a single failed bar clears the requirement outright). Stop: asianLow, the opposite side of the broken range (structural, LESSON 5, a different object from the entry level). Target: asianHigh + rangeWidth x 1.0, a measured-move LEVEL sourced from the session's own width (HARD LESSON 41/47 principle), not an rr multiple. Long only, bare, no filter stack -- the short mirror (breakdown below asianLow) is deferred per HARD LESSON 42/43 (100%-equity shorts are a harness artifact, not a signal, and a 25%-equity short cannot be compared to this long's numbers in the same run); its absence is a scope limit, disclosed per the standing both-directions requirement. GENUINELY DISTINCT from every family on this board: not the VWAP mean (retired), not a rolling N-bar extreme (Attack 33), not a calendar anchor (Attack 34/35), not a volatility-coil state (Attack 36), not a failed-break reversal off a swing low (Attack 37-43), not a structural swing-level tap-and-hold (Attack 44-47), and not a fixed price grid or single-bar impulse trigger (Attack 48/49). New anchor (time-of-day session range, never before the PRIMARY signal in this lab -- only ever a filter, e.g. the VWAP witching-hour ban), new confirmation shape (2 consecutive closes, not 1), new target source (the broken range's own width). ENGINE NOTE for future cycles: hour()/minute()/dayofmonth() are unimplemented on this engine ('Runtime: unimplemented function hour') -- UTC hour must be computed by arithmetic on the `time` builtin (math.floor(time/3600000) % 24), the same workaround already used in 010-vwm-tod-filter.pine. This is not a new engine limit but is recorded here to save a future cycle the same failed call.",
+    "metrics": {
+      "netProfitPct": -59.33763556,
+      "profitFactor": 0.75710902,
+      "maxDrawdownPct": 59.34964879,
+      "totalTrades": 707,
+      "winRatePct": 63.22489392,
+      "avgTradePct": -0.08392876,
+      "sharpeRatio": -1.22737724,
+      "sortinoRatio": -0.65535059,
+      "commissionPaid": 3754.066755699997,
+      "avgWinningTrade": 41.378023189038,
+      "avgLosingTrade": -93.960538158462,
+      "ratioAvgWinLoss": 0.44037661,
+      "largestWin": 450.7146075,
+      "largestLoss": -619.35462375,
+      "avgBarsInTrade": 36.32248939,
+      "avgBarsWinning": 26.76286353,
+      "avgBarsLosing": 52.75769231,
+      "longTrades": 707,
+      "shortTrades": 0,
+      "grossProfit": 18495.97636550007,
+      "grossLoss": 24429.73992120001
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1NVAYJREECX0Z08QMATPWJZ",
+      "strategyId": "01M1NVAYRTW6T6PKFXBP077CB8",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NVAYJREECX0Z08QMATPWJZ",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T09:17:30Z"
+    },
+    "verdict": "DISCARDED BY THE KILL RULE. H2 not run, second credit not spent, despite a 576-credit balance that would otherwise permit the full pair -- the mandate's kill rule overrides the credit-tier default when H1 fails.",
+    "notes": "PF 0.75710902, clearly below 1.0. The win rate is actually high (63.22%) but the payoff ratio is poor (0.44037661): break-even at that ratio needs 69.43% wins, actual is 6.2pp short. avgBarsWinning (26.76) is LESS than avgBarsLosing (52.76) -- the OPPOSITE of HARD LESSON 5's classic 'stop in the noise' signature, and the likely mechanism is the target design itself: because the target level (asianHigh + rangeWidth) is fixed independent of WHEN the two-bar confirmation actually fires, a late confirmation (price already well above asianHigh) leaves little remaining distance to a fixed target while the stop (asianLow, the full opposite side of the session range) stays far away -- an asymmetric R created by the anchor choice, not by market noise. This qualifies HARD LESSON 41/47 (target a level, not a multiple): the level must still be reachable in proportion to how late the entry occurs, which a session-anchored level does not guarantee once a 2-bar confirmation delays entry past the level itself. SECOND, INDEPENDENT DISQUALIFIER: 707 trades in H1 alone (2022-01 to 2024-06, 2.5 years) is far above the lab's settled 60-350 workable band -- more frequent than even Attack 33's 757-trade FULL 4.7-year sample. The Asian/London hour split fires on essentially every ordinary day, so it is not a selective signal. DRAWDOWN CATEGORY per the board's taxonomy: avg loser (-$93.96) is not large in isolation (not category 1, concentrated/sizing), and the edge is negative (not category 3); this is category 2, bleed on a negative edge, but with an unusual signature -- a majority win rate undone by a payoff ratio inverted relative to typical category-2 cases. QUEUE: (1) do not tune this mechanism -- do not narrow the session window, do not change mmMult, the failure is structural to the target's anchor choice, not a threshold. (2) A session-range breakout MIGHT still work with an entry-relative target (e.g. rangeWidth added from the CONFIRMATION bar's own close, not from asianHigh) rather than a level fixed at the session boundary -- that is a narrower, testable variant for a future cycle, not a rescue of this one. (3) Attack 46 remains the sole advancing candidate on the board, both halves clear, cold-reproduced, filters exhausted per HARD LESSON 49. (4) The out-of-sample test for Attack 46 still ranks first and still cannot be run under BTCUSDT-only."
   }
 ]
