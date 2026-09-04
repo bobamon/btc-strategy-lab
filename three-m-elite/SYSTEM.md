@@ -3942,7 +3942,7 @@ this lab invents an answer to on its own. Until it is answered, v60/v61 stand as
 a competing axis between the two legs in any case — a combined long+short build, per v24's finding that
 the legs are not independent, is still untouched and still queue item 3 below).
 
-## QUEUE
+## QUEUE (AS OF v60/v61 — SUPERSEDED BELOW BY v62/v63)
 
 1. **The declared-deviation promotion policy question** (v60, unchanged) — still open, still for the
    user, still distinct from the War Formation RATCHET v2 clause-2 question it sits beside
@@ -3961,3 +3961,72 @@ the legs are not independent, is still untouched and still queue item 3 below).
 1.88616546 full sample; split H1 1.47025018/26, H2 3.00186566/13; DD 1.71159657%; 39 trades;
 25%-equity declared deviation; anchored at `pine/3m-elite-v60-short-declared-deviation.pine`). Split
 test passed clean on both halves — the first 3M short to clear that gate.
+
+---
+
+## v62/v63 — QUEUE ITEM 3 DONE: THE DEDICATED SHORT-LEG REGIME SPLIT
+
+This cycle's scheduled prompt still carried the stale v37/v53 snapshot and re-asked for the bias gate
+and the cascade signature — both closed since v54–v61 (see the note above and HARD LESSON 26: escalate
+a stale prompt once, already done at v39, then take the real queue without re-flagging an unchanged
+condition). Per "THE DOCS WIN over this prompt," this cycle took **queue item 3 from v60/v61** instead:
+the dedicated bear/bull calendar-year split on the SHORT leg that v40–v43 had only ever run for the
+long. Byte-identical to `pine/3m-elite-v60-short-declared-deviation.pine` (25%-equity declared
+deviation, HARD LESSON 42/43; source's 20/50/200 SMA-stack bias gate; v37/v53/v57/v60 zone-lifecycle
+geometry) — only the backtest window narrowed, exactly as v41/v42 did for the long. Two adhoc runs, the
+full two-credit budget for this cycle (568 on hand, above 500 → at most two per the standing rule).
+
+**PRE-REGISTERED (LESSON 17), stated in each pine header before running:** the source's bias gate
+should pass MORE signals and a STRONGER PF in the bear year (v62, 2022) than in the bull year (v63,
+2023) — if not, the gate is not doing the regime-sorting work the source's "same model, upside down,
+read in context" claim requires of it.
+
+| | v62 — bear year (2022) | v63 — bull year (2023) |
+|---|---|---|
+| Profit factor | **1.85814891** | **0.38715815** |
+| Net profit | +1.8592901% | -0.8894795% |
+| Max drawdown | 1.20666376% | 1.25091881% |
+| Trades | 15 | 7 |
+| Win rate | 53.33% | 28.57% |
+| Sharpe | 1.06054814 | -1.24721155 |
+| Cascade ratio | 1.0 (clean) | 1.0 (clean) |
+
+**CONFIRMED, in both directions predicted.** The bear year clears PF 1.0 decisively on more than twice
+the trade count of the bull year, which loses money outright. Cascade is clean on both (margin-ceiling
+fix from HARD LESSON 42/43 holds under a one-year window, matching v60's full-sample and v61's H1/H2).
+Both counts sit well under the ~30-trade individual quoting floor (HARD LESSON 19) — read for DIRECTION,
+not quoted as standalone numbers, the same convention v41/v42's under-30-adjacent long splits used.
+
+**CAVEAT, stated plainly rather than smoothed over:** the gate does not fully SILENCE the short in a
+bull year — 7 qualifying zones still fired in 2023 and lost money net. `stackBear` (a simple
+20/50/200 SMA stack read once per 4H close) reduces bull-year short exposure and degrades its quality;
+it does not eliminate it. This matches the source's own framing (a bias READ, not a hard veto) but
+means the short leg still carries live tail risk in a strong uptrend even with the gate engaged — a
+detail future work on the mechanical flip rule (queue item 2) needs to carry forward, since a combined
+long+short build will only mirror the failure mode into the flip logic if it is written as if the gate
+were binary.
+
+**Recorded in `results/backtests.json`**: two new entries, `3m-elite-v62-short-bear-regime-split` and
+`3m-elite-v63-short-bull-regime-split`, status `testing` (diagnostic regime evidence, same convention as
+v41/v42, not a promotion candidate — v60/v61 remain the leg's actual measurement of record).
+
+## QUEUE
+
+1. **The declared-deviation promotion policy question** (v60, unchanged) — still open, still for the
+   user, still distinct from the War Formation RATCHET v2 clause-2 question it sits beside
+   (STRATEGY-LEDGER.md ~line 2314).
+2. **The mechanical flip rule** (combining both legs, v24's finding that they are not independent) —
+   still untouched, still the other structural gap named at v58/v59/v60. Now carries v63's caveat: the
+   bias gate is a soft filter, not a hard veto, on the short side — the flip logic cannot assume it
+   silences the "wrong" direction outright.
+3. ~~A dedicated regime split on the SHORT leg specifically~~ — **DONE at v62/v63.** Confirms the gate
+   sorts regimes correctly in direction (bear >> bull, both PF and trade count) but is not a perfect
+   filter (bull year still fires losing trades).
+
+**CHAMPION OF RECORD (LONG): v58** (PF 1.48439273, DD 8.70519440%, 117 trades, `dzTouch==0`, anchored at
+`pine/3m-elite-v58-first-touch-only.pine`). Unchanged by this cycle.
+
+**FIRST VALIDATED SHORT MEASUREMENT (NOT A CO-CHAMPION — POLICY QUESTION OPEN): v60/v61** (PF
+1.88616546 full sample; split H1 1.47025018/26, H2 3.00186566/13; DD 1.71159657%; 39 trades;
+25%-equity declared deviation; anchored at `pine/3m-elite-v60-short-declared-deviation.pine`). Unchanged
+by this cycle — v62/v63 are diagnostic regime evidence, not a re-measurement of the leg.

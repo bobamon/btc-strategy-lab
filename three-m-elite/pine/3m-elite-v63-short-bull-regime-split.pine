@@ -1,0 +1,130 @@
+//@version=6
+// 3M ELITE v63 - SHORT LEG, PURE BULL-YEAR SPLIT. Byte-identical to v60/v62, window narrowed to
+// 2023 calendar year only (2023-01-01 -> 2023-12-31 -- the same window v42 used for the long leg's
+// bull-year isolation). Queue item 3 from v60/v61, second half: the natural counterpart to v62's
+// bear-year isolation (2022).
+//
+// PRE-REGISTERED (LESSON 17, stated before running, same prediction as v62's header): the source's
+// bias gate (stackBear) should pass FEWER signals here than in the bear year (v62) -- 2023 is a
+// recovery/uptrend year, so the 20/50/200 SMA stack should rarely satisfy sma20 < sma50 < sma200,
+// starving the short leg of qualifying zones. If v63 instead shows a comparable or larger trade count
+// than v62, the gate is not sorting regimes the way the source's "same model, upside down, but read in
+// context" claim requires. Caveat carried forward from v41/v42: 2023 is a post-crash recovery year
+// into a fresh uptrend, not a clean established uptrend from a stable base -- this caveat travels with
+// the result.
+//
+// PF/DD/trades recorded in three-m-elite/results/backtests.json (id 3m-elite-v63-short-bull-regime-split).
+// 15m, 2023-01-01 -> 2023-12-31, BTCUSDT, short-only. DECLARED DEVIATION carried unchanged from v60:
+// 25%-equity sizing (HARD LESSON 42/43), NOT comparable to any 100%-equity long number.
+//
+// AUDIT: SHORT ONLY, unchanged from v60/v62 (LESSON 6 as scoped by HARD LESSON 31). Stop = szTop
+// (supply zone high), structural (LESSON 5). R floor 0.8% unchanged, by exclusion (LESSON 3). SL/TP
+// fixed at entry. No parameter changed from v60 -- window only.
+strategy("3M ELITE v63 short bull-regime split (2023)", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rTarget  = input.float(2.0, "Target, x R -- held at v37/v53/v57/v60")
+maxBars  = input.int(96,    "Max bars in trade -- held")
+maxAge   = input.int(6,     "Zone freshness cap, 4H candles -- held")
+minRpct  = input.float(0.80,"Min stop distance as % of price (LESSON 3)")
+maFast   = input.int(20,    "THE SOURCE'S STACK: fast MA")
+maMid    = input.int(50,    "THE SOURCE'S STACK: middle MA")
+maSlow   = input.int(200,   "THE SOURCE'S STACK: slow MA -- his higher-timeframe read")
+eqFrac   = input.float(0.25,"DECLARED DEVIATION: fraction of equity per position -- HARD LESSON 42")
+
+sma20  = ta.sma(close, maFast)
+sma50  = ta.sma(close, maMid)
+sma200 = ta.sma(close, maSlow)
+stackBear = not na(sma200) and sma20 < sma50 and sma50 < sma200
+
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+var float pO  = na
+var float pH  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pH  := h4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+bearEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC > ppO and pC < pO and pC < ppO
+
+var float szTop   = na
+var float szBot   = na
+var bool  szLive  = false
+var int   szTouch = 0
+var int   szAge   = 0
+var bool  szTraded = false
+
+if new4h
+    if szLive and not na(pC) and pC >= szBot
+        szTouch := szTouch + 1
+        if szTouch >= 2
+            szLive := false
+    if szLive
+        szAge := szAge + 1
+    if bearEngulf
+        szTop   := pH
+        szBot   := pO
+        szLive  := true
+        szTouch := 0
+        szAge   := 0
+        szTraded := false
+
+minR     = close * minRpct / 100
+rBig     = not na(szTop) and (szTop - close) >= minR
+
+shortCond = rBig and szLive and not szTraded and szAge >= 1 and szTouch < 2 and high >= szBot and close < szTop and szAge <= maxAge and stackBear
+
+flat = strategy.position_size == 0
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+qtyUse = strategy.equity * eqFrac / close
+
+if flat and shortCond and not na(szTop) and close < szTop
+    r = szTop - close
+    if r > 0
+        strategy.entry("S", strategy.short, qty = qtyUse)
+        szTraded := true
+        slPx   := szTop
+        tpPx   := close - r * rTarget
+        barsIn := 0
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(szLive ? 1 : 0,     title="SupplyZoneLive")
+plot(stackBear ? 1 : 0,  title="StackBear")
