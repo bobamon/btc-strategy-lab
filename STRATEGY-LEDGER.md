@@ -1614,3 +1614,71 @@ approve.** Handing a cloud routine a tool that requires interactive consent is n
 capability — it is a **trap**, because the routine will reach for it, block, and lose everything it
 did beforehand. The right question when designing an automated loop is not "can it do this step" but
 **"what happens to the work already done if this step never returns."**
+
+
+---
+
+## ██ HARD LESSON 34 — THE SHORT LEG WAS NEVER TESTED. THE ENGINE LIQUIDATES IT BEFORE THE STOP CAN
+## FIRE, AND FIFTEEN EXPERIMENTS MEASURED THE HARNESS INSTEAD OF THE STRATEGY (WAR FORMATION, 2026-09-04)
+
+**Across this project, short constructions have failed with win rates of 4-7% against reward:risk
+ratios that need 33% to break even.** Fifteen of them in War Formation, six in 3M, several in BTC.
+The labs treated that as a fact about the market and kept redesigning the entries.
+
+**It was a fact about the test harness.**
+
+### WHAT THE TRADE LOGS SHOW — FOUND FREE, NO CREDITS SPENT
+Comparing `e58a` (long, PF 1.24015239 / 36 trades) with `E64a` (short, PF 0.45442725 / 43 trades) —
+same shield, same cap, same window, mirrored code:
+
+| | LONG e58a | SHORT E64a |
+|---|---|---|
+| Loser exit price | **exactly −$1,000**, all 36 | +$8.20, +$11.40, +$23.50 … +$503.10 |
+| Winner exit price | exactly +$2,000 | exactly −$2,000 ✓ |
+| Loss vs the trade's own max adverse excursion | −$113 vs $138.99 — **stop cut it early** | −$14.3376 vs $14.3376 — **identical, every trade** |
+
+**Every losing short exits at precisely its worst point.** A stop exits at a level you chose; a
+liquidation exits at the moment margin runs out, which is by definition the worst point reached. The
+winners prove the code is not simply broken: shorts *do* hit the −$2,000 target exactly, because when
+price falls a short's notional shrinks and margin pressure eases. **Only the adverse direction is
+truncated.**
+
+### THE CONFIRMING TEST (E67), REGISTERED BEFORE RUNNING
+Multiply the shield 5×, $1,000 → $5,000, change nothing else. Pre-registered: *losers unchanged means
+the shield is inert; losers growing toward −$5,000 means the reading is wrong and it is withdrawn.*
+
+**Average loser went from −$35.80 to −$33.43. Largest loss from −$72.80 to −$76.46.** A five-fold
+wider stop produced statistically identical losses. **Confirmed.**
+
+### THE ARITHMETIC THAT CLOSES IT
+The engine forces `percent_of_equity = 100` and `margin_short = 100`. A short so sized has **zero
+excess margin**, and unlike a long its **notional grows as price moves against it** while equity
+simultaneously falls — both sides of the margin ratio move the wrong way at once.
+
+Liquidation lands at roughly **−$33 on $10,000 — about 0.33% of price.**
+**HARD LESSON 3's commission floor requires a stop of at least 0.8%.**
+
+**So there is no shield width that is both wide enough to be valid and tight enough to bind. On this
+engine, at this sizing, a short strategy with a legitimate stop CANNOT BE TESTED AT ALL.**
+
+### WHAT THIS INVALIDATES, AND WHAT IT DOES NOT
+- **INVALIDATES:** every War Formation short — E9, E9b, E13, E25, E26, E27, E64a, E66 and the rest.
+  They never ran the A.L.C.M. exit model. Their win rates are an artefact.
+- **DOES NOT INVALIDATE:** every LONG result. e58a, e50a/e50b and alcm-reference all exit exactly on
+  the shield, verified trade by trade. The long lineage stands untouched.
+- **NOT YET DECIDED:** 3M's shorts (v53 0.70512830, v55 0.72183885) and the BTC lab's short attempts
+  use **structural** stops rather than a dollar shield. The same arithmetic may or may not apply —
+  their stop distances must be measured against the ~0.33% liquidation threshold before any of those
+  numbers is trusted. **That check is free via `get_trades` and is the next task in both labs.**
+
+### THE METHOD LESSON, WHICH IS THE PART THAT GENERALISES
+**An asymmetry between two legs of the same code is a claim about the harness until proven otherwise.**
+This lab spent fifteen experiments and many credits redesigning short *entries* because it read a
+persistent long/short performance gap as a market fact. The gap was mechanical, it was visible in
+free trade-log data the whole time, and no backtest was needed to find it — only a comparison of exit
+prices against the levels the code actually set.
+
+**Before explaining a persistent asymmetry, verify that both sides are running the model you wrote.**
+Check exits against the levels you set, and check whether a loss equals the trade's own maximum
+adverse excursion — if it does, the position was closed *for* you, and you are not measuring what you
+think you are measuring.

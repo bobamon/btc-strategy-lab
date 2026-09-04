@@ -3915,3 +3915,63 @@ closely, so it is not yet known whether this is short-specific or a general prop
 4. **Position sizing / risk fraction** — still closed per HARD LESSON 29, unchanged.
 5. **If more 1m history ever becomes available**, the shield question is still the first exit-side item
    to re-run on a longer window. Last confirmed clamped to 2025-12-16 -> 2026-05-03.
+
+---
+
+# ██ E68 — THE SHIELD IS INERT ON SHORTS. FIFTEEN SHORT EXPERIMENTS WERE NEVER TESTING THE STRATEGY.
+
+NUMBERING: run locally as E67; renumbered on merge after the cloud routine claimed E67 the same hour for a cycle-position-gate short that returned PF 0.00 on 12 trades with zero winners. Its result is independent corroboration, not a competing claim.
+
+Queue item 1 said to stop varying the direction rule and attack the short's entry geometry, because
+three shorts had failed at 0.454, 0.300 and below 1.0 with 4-7% win rates. **The cycle went one step
+further back and asked whether the exit model was running at all. It was not.**
+
+## FOUND FREE, BEFORE SPENDING ANYTHING
+`get_trades` on `e58a` (long) and `E64a` (short) — same shield, same cap, same window, mirrored code:
+
+- **LONG:** all 36 trades exit at **exactly −$1,000 or +$2,000**. And the loss is *smaller* than the
+  trade's max adverse excursion (seq 1: −$113 against a `drawdown` of $138.99) — the stop fired
+  **before** the worst point, exactly as a stop should.
+- **SHORT:** not one loser reaches +$1,000. Adverse exits run **+$8.20 to +$503.10** in a smooth
+  continuous distribution — which no fixed price level can produce. And for **every** losing short,
+  `grossProfit` equals `drawdown` **to the cent**.
+
+**Exiting at precisely the max adverse excursion is the signature of a forced close, not a stop.**
+
+## THE CONFIRMING TEST, PRE-REGISTERED
+Shield ×5, $1,000 → $5,000, nothing else changed.
+
+| | E64a ($1,000) | E68 ($5,000) |
+|---|---|---|
+| Avg losing trade | −$35.80 | **−$33.43** |
+| Largest loss | −$72.80 | **−$76.46** |
+| Losing trades | 40 | 42 |
+
+**A five-fold wider stop produced statistically identical losses. Confirmed.**
+
+**Do NOT read E68's PF 1.03088936 as an improvement.** It is 2 winners in 44 trades (4.55%), outsized
+only because the target moved to $10,000, with `avgBarsWinning` of 6,442 and one winner hitting the
+hold cap. The Pine header registered in advance that only the losers carry signal here.
+
+## THE ARITHMETIC
+The engine forces `percent_of_equity 100` and `margin_short 100`. A short so sized has zero excess
+margin and its notional **grows** as price rises against it while equity falls. Liquidation lands at
+about **−$33 on $10,000 — roughly 0.33% of price.** LESSON 3's commission floor requires **≥0.8%**.
+
+**There is no shield width that is both valid and binding. The short leg cannot be tested on this
+engine at this sizing.**
+
+## WHAT CHANGED
+- **Every War Formation short is withdrawn as a test of the strategy** — E9, E9b, E13, E25, E26, E27,
+  E64a, E66 and the cloud routine's own E67 (PF 0.00 on 12 trades, ZERO winners -- which is exactly what a leg whose adverse side is truncated looks like). Sixteen constructions, none of which ran the A.L.C.M. exit.
+- **Every LONG result stands**, verified trade by trade.
+- **The user's both-directions requirement cannot currently be met in this lab**, and that is the
+  honest state — not a short geometry problem to keep grinding at.
+
+## QUEUE — REWRITTEN BY THIS RESULT
+1. **Check 3M and BTC for the same defect. FREE, via `get_trades`.** Their shorts use structural
+   stops; measure those stop distances against the ~0.33% liquidation threshold. Until that is done,
+   3M v53 (0.705) and v55 (0.722) and every BTC short reading are provisional.
+2. **Stop spending credits on War Formation short geometries.** Any result is uninterpretable.
+3. The long-side entry terms (`brokeBelow`, `h1Bull`, `timeGate`, `inMiddle`) remain untested for
+   binding and are now the only legitimate axis left in this lab. E65 opened it; finish it.

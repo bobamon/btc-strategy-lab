@@ -1,0 +1,160 @@
+//@version=6
+// WAR FORMATION E68 — IS THE SHIELD INERT ON SHORTS? THE 5x TEST.
+// NUMBERING: ran as E67; renumbered on merge after the cloud routine claimed E67 the same
+// hour for a cycle-position-gate short (PF 0.00, 12 trades, ZERO winners -- corroboration).
+//
+// THIS IS NOT A STRATEGY CHANGE. It is a DIAGNOSTIC designed to fail loudly if a suspicion raised by
+// free trade-log analysis is wrong, because that suspicion invalidates fifteen experiments.
+//
+// WHAT get_trades SHOWED (no credits spent). Comparing e58a (long, PF 1.24015239 / 36 trades) with
+// E64a (short, PF 0.45442725 / 43 trades) — same shield, same cap, same window, mirrored code:
+//
+//   LONG  e58a: EVERY loser exits at EXACTLY -$1,000 of price and every winner at EXACTLY +$2,000.
+//               Trade 1: entry 87943 -> exit 86943. Trade 6: 92869.9 -> 91869.9. And so on, 36/36.
+//               AND the loss is SMALLER than the trade's max adverse excursion — seq 1 lost $113
+//               while `drawdown` was $138.99. The stop fired BEFORE the worst point. Correct.
+//
+//   SHORT E64a: NOT ONE loser reaches +$1,000. The adverse exits are +$8.20, +$11.40, +$23.50,
+//               +$40.10 ... +$503.10 — a smooth continuous distribution, which no fixed price level
+//               can produce. AND for every single losing short, `grossProfit` EQUALS `drawdown` to
+//               the cent (seq 1: -14.3376 / 14.3376; seq 2: -57.8565 / 57.8565; seq 8: -45.067 /
+//               45.067). EVERY LOSING SHORT EXITS AT PRECISELY ITS WORST POINT.
+//
+// Exiting at exactly the max adverse excursion is the signature of a FORCED CLOSE, not a stop order.
+// A stop exits at a level you chose; a liquidation exits at the moment you run out of margin, which
+// is by definition the worst point reached. The winners confirm it: shorts DO reach the -$2,000
+// target cleanly (3 of 3 exact), because when price FALLS a short's notional SHRINKS and margin
+// pressure eases. It is only the adverse direction that is truncated.
+//
+// THE MECHANISM. The engine forces `percent_of_equity = 100` and `margin_short = 100`. A short sized
+// at 100% of equity has ZERO excess margin, and unlike a long its notional GROWS as price moves
+// against it while equity simultaneously falls. So the margin requirement rises and the equity
+// covering it drops at the same time, and the position is closed almost immediately.
+//
+// IF THIS IS RIGHT, THE SHIELD HAS NEVER FIRED ON A SINGLE SHORT TRADE IN THIS LAB, and every short
+// result — E9, E9b, E13, E25, E26, E27, E64a, E66 and the rest, fifteen constructions — was never
+// testing the A.L.C.M. exit model at all. It was measuring the engine's margin behaviour. The 4-7%
+// win rates stop being a fact about BTC and become an artefact of the test harness.
+//
+// THE TEST. Take E64a UNCHANGED and multiply the shield 5x, $1,000 -> $5,000. Nothing else moves:
+// same entry, same direction rule, same velK, same bands, same maxBars 6480. rr stays 2.0, so the
+// target moves out with the shield ($2,000 -> $10,000) exactly as the spec's ratio requires.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17) — this is the whole point of the run:
+//   * LOSERS UNCHANGED (still exiting at their max adverse excursion, still $8-$500, PF still ~0.45)
+//     -> THE SHIELD IS INERT ON SHORTS. Confirmed. Every short result in this lab is invalid as a
+//     test of the strategy, the lab cannot test the user's both-directions requirement under this
+//     parity profile at all, and that becomes the finding rather than any short's profit factor.
+//   * LOSERS GROW toward -$5,000, or any loser lands exactly on the new shield -> THE SHIELD BINDS
+//     and the liquidation reading is WRONG. The three failed shorts stand as real results and this
+//     diagnostic is withdrawn in full. Say so plainly.
+//   * WINNERS: expect FEWER, because a $10,000 target on BTC is a ~12% move. If winners collapse to
+//     near zero that is expected and is NOT evidence either way — only the LOSERS carry the signal.
+//
+// WHAT THIS RUN IS NOT: it is not a proposed build, not a tuning step, and its profit factor is not
+// a result to keep or reject under RATCHET v2. A $5,000 shield is not the strategy. This run exists
+// only to answer whether the exit model was ever active on the short side.
+//
+// AUDIT: SHORT ONLY (LESSON 6). Stop is risk-defined by the shield, the DECLARED deviation the spec
+// requires (LESSON 5). R = $5,000 on ~$85k BTC is ~5.9%, far above the 0.8% floor (LESSON 3).
+// Latch in sequence unchanged from E64a (LESSON 8). OCCUPANCY (LESSONS 24/28/29): changing the shield
+// changes holding time and therefore admits a different trade population — named in advance, and it
+// is precisely why the test reads the EXIT PRICES rather than the aggregate.
+strategy("War Formation E68 shield-inert test SHORT 5000", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+run6      = input.int(2,     "Consecutive 6h candles for CLEAR DIRECTION")
+skipOpen  = input.int(60,    "Skip first N minutes of 6h block")
+skipClose = input.int(60,    "Skip last N minutes of 6h block")
+velK      = input.float(0.8, "Velocity: min rejection as multiple of atr(30)")
+midLo     = input.float(400, "Whole-number middles low")
+midHi     = input.float(600, "Whole-number middles high")
+shieldUsd = input.float(5000,"THE SHIELD -- 5x E64a's $1,000. THE ONLY CHANGE.")
+rr        = input.float(2.0, "Reward:risk -- held at 2.0")
+maxBars   = input.int(6480,  "Max bars in trade -- held at E64a")
+
+MS6H = 21600000
+MS1H = 3600000
+MS15 = 900000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+b15 = math.floor(time / MS15)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+new15 = b15 != b15[1]
+
+var float o6   = na
+var int   grn6 = 0
+var int   red6 = 0
+
+if new6
+    if not na(o6)
+        if close[1] > o6
+            grn6 := grn6 + 1
+            red6 := 0
+        else if close[1] < o6
+            red6 := red6 + 1
+            grn6 := 0
+    o6 := open
+
+bearRegime = red6 >= run6
+
+var float h1o = na
+if new1h
+    h1o := open
+
+h1Bear = not na(h1o) and close < h1o
+
+minsIn   = (time - b6 * MS6H) / 60000
+timeGate = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+var float c15h = na
+var float p15h = na
+
+if new15
+    p15h := c15h
+    c15h := high
+else
+    c15h := na(c15h) ? high : math.max(c15h, high)
+
+brokeAbove = not na(p15h) and c15h > p15h
+
+velMin = na(ta.atr(30)) ? na : ta.atr(30) * velK
+
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+shortTrig = not na(p15h) and not na(velMin) and ta.crossunder(close, p15h) and (p15h - close) >= velMin
+
+goShort = bearRegime and timeGate and h1Bear and brokeAbove and not inMiddle and shortTrig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+shortR = shieldUsd
+
+if flat and goShort and shortR > 0
+    strategy.entry("S", strategy.short)
+    slPx   := close + shortR
+    tpPx   := close - shortR * rr
+    barsIn := 0
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goShort ? 1 : 0, title="ShortSignal")
+plot(red6,            title="ConsecRed6h")

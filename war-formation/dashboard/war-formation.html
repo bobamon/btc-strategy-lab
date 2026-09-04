@@ -766,9 +766,52 @@ const DATA = [
       "verifiedAt": "2026-09-04T00:00:00Z"
     },
     "notes": "REJECTED under RATCHET v2 (trade count 12, well below the ~20 interpretability floor and the 30-trade KEEP floor; PF 0.00, 0 wins / 12 losses). The hypothesis is FALSIFIED, decisively: restoring the one term this project has ever shown to help a short leg did not help this construction -- it drove the win rate from E66's already-poor 4.55% (3W/63L) to literally zero (0W/12L), while cutting trades 66->12. This lands in the pre-registered 'trades collapse' branch, worse than anticipated (zero wins, not just a small sample). get_trades (jobId 01M1NBGP62HWSRNKC4N3DZ6S8P) shows every one of the 12 losses closed well short of the full $1,000 shield in price terms (largest single loss $72.27 gross; a full-shield loss at the recorded position sizes would run roughly $100-140) -- none hit the stop at its full width and none reached maxBars (barsInTrade ranged 2-1951 against a 6480 cap). WHAT THIS ESTABLISHES: the cycle-position gate's benefit in E13 was specific to that construction's OTHER terms (the 3m coil atrFast<atrSlow*coilK, the HA-down confirmation on the trigger candle, the tighter structural stop clamped to 0.15-1.50% of price) and does NOT transfer to this shield-based geometry in isolation -- necessary in E13's context, not a general fix. Combined with the proxy direction rule's already-tighter regime (E66's 66 vs E64a's 43), stacking the cycle gate on top over-restricts the sample past the point of being readable, and what little survives is no better than the trades it removed. QUEUE: the short's defect is still located in mechanics, not direction source (per HARD LESSON 32/E66), but the specific fix that worked once under the old exit model does not generalize alone under the ALCM shield -- a future cycle should test the OTHER entry terms named in the mandate (brokeBelow analogue, h1Bull analogue, timeGate) one at a time on the LONG side (e58a, still the reference build, untouched by this leg-only run), or reconsider the short's location solve as a combined package (coil + HA-confirmation + cycle position together, as E13 ran it) rather than the cycle gate alone -- not attempted this cycle, budget reserved after one decisive backtest (1 of 2 available spent; the result is unambiguous under the pre-registered outcomes and a second run would not change the reading)."
+  },
+  {
+    "id": "wf-e68-shield-inert-diagnostic-short",
+    "name": "WF E68: the shield is INERT on shorts -- the 5x diagnostic",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "short",
+    "status": "research",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/pine/e68-shield-inert-test-short.pine",
+    "description": "DIAGNOSTIC, NOT A BUILD. E64a unchanged except the shield multiplied 5x, $1,000 -> $5,000, with rr held at 2.0 so the target scales with it. Run to test a suspicion raised by free get_trades analysis: that the A.L.C.M. shield never fires on a short position under the engine's forced parity profile, and that every short result this lab has produced measured the engine's margin behaviour rather than the user's strategy.",
+    "metrics": {
+      "netProfitPct": 0.43364166,
+      "profitFactor": 1.03088936,
+      "maxDrawdownPct": 6.96864922,
+      "totalTrades": 44,
+      "winRatePct": 4.54545455,
+      "avgTradePct": 0.00985549,
+      "sharpeRatio": 0.15345053,
+      "commissionPaid": 436.68573355,
+      "avgWinningTrade": 723.6094192,
+      "avgLosingTrade": -33.425111236905,
+      "largestLoss": -76.463601799999,
+      "largestWin": 1161.081511199998,
+      "avgBarsWinning": 6442.5,
+      "avgBarsLosing": 281.42857143,
+      "longTrades": 0,
+      "shortTrades": 44
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1NBPYKPVWJS5075BFFH3SG2",
+      "strategyId": "01M1NBPYTE8YPTY45Q74B2GRM9",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NBPYKPVWJS5075BFFH3SG2",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1.0232558139534884,
+      "verifiedAt": "2026-09-04T04:44:00Z"
+    },
+    "verdict": "DIAGNOSTIC -- CONFIRMS THE SHIELD IS INERT ON SHORTS",
+    "notes": "NUMBERING: run locally as E67 and renumbered to E68 on merge -- the cloud routine independently claimed E67 the same hour for a cycle-position-gate short (PF 0.00 on 12 trades, 0 winners). THAT RESULT IS FURTHER EVIDENCE FOR THIS ONE: twelve shorts and not a single winner is exactly what a leg whose adverse side is truncated by liquidation looks like. THE PRE-REGISTERED OUTCOME 'LOSERS UNCHANGED' IS WHAT HAPPENED. Multiplying the shield 5x moved the average loser from -$35.80 (E64a) to -$33.43, and the largest loss from -$72.80 to -$76.46. A five-fold wider stop produced statistically identical losses. THE SHIELD IS INERT ON THE SHORT SIDE. The supporting evidence came free from get_trades and is stronger than the aggregate: on e58a (LONG) every one of 36 trades exits at EXACTLY -$1,000 or +$2,000 of price, and the loss is SMALLER than the trade's max adverse excursion (seq 1 lost $113 against a `drawdown` of $138.99) -- the stop fired before the worst point, correctly. On E64a (SHORT) not one loser reaches +$1,000, the adverse exits run +$8.20 to +$503.10 in a smooth continuous distribution, and for EVERY losing short `grossProfit` equals `drawdown` to the cent. Exiting at precisely the max adverse excursion is the signature of a FORCED CLOSE, not a stop. THE MECHANISM: the engine forces percent_of_equity 100 and margin_short 100, so a short has zero excess margin AND its notional grows as price rises against it while equity falls -- the position is closed almost immediately. THE ARITHMETIC THAT CLOSES THE QUESTION: liquidation lands at roughly -$33 on $10,000, about 0.33% of equity and 0.33% of price. LESSON 3's commission floor requires a stop of at least 0.8%. SO NO VALID SHORT STOP CAN EVER FIRE BEFORE LIQUIDATION ON THIS ENGINE AT THIS SIZING -- there is no shield width that is both wide enough to clear the R floor and tight enough to bind. DO NOT READ THE 1.03088936 AS AN IMPROVEMENT. It is 2 winners in 44 trades (4.55% win rate), and both are outsized only because the target moved to $10,000; avgBarsWinning is 6,442 and one winner hit the maxBars cap. The Pine header registered in advance that winners carry no signal in this test and that only the losers do. WHAT THIS INVALIDATES: all fifteen short constructions in this lab -- E9, E9b, E13, E25, E26, E27, E64a, E66 and the rest -- were never testing the A.L.C.M. exit model. Their 4-7% win rates are an artefact of the harness, not a fact about BTC. The user's both-directions requirement CANNOT be tested for War Formation under this parity profile, and that is the honest state of the lab. WHAT IT DOES NOT INVALIDATE: every LONG result stands untouched -- e58a, e50a/e50b, alcm-reference and the rest all exit exactly on the shield, verified trade by trade. CROSS-LAB HYPOTHESIS, NOT YET A CONCLUSION: 3M's shorts (v53 0.705, v55 0.722) and the BTC lab's short attempts use STRUCTURAL stops rather than a dollar shield, so the same arithmetic may or may not apply -- their stop distances must be measured against the ~0.33% liquidation threshold before any of those results is trusted. That check is free via get_trades and is the next thing to do in both labs."
   }
 ];
-const BUILT = "2026-09-04 04:44";
+const BUILT = "2026-09-03 22:46";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
