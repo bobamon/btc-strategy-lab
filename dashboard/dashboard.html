@@ -701,9 +701,51 @@ const DATA = [
     },
     "verdict": "REJECTED -- and gross edge per trade FELL, the opposite of the hypothesis",
     "notes": "REJECTED on the never-tuned half; the second credit was DELIBERATELY NOT SPENT, per the kill rule. Against Attack 37a (PF 1.02423271 / DD 31.63538941% / 322 trades / 38.20% win): profit factor falls to 0.97335577, BELOW 1.0; drawdown worsens sharply 31.64% -> 45.27%; win rate falls 38.20% -> 30.94%. THE PRE-REGISTERED SECOND OUTCOME LANDED, IN ITS STRONGER FORM. The hypothesis was that a wider target would raise gross edge per trade. IT FELL. Computing gross as net + commission: -$586.45 + $2,427.59 = $1,841.14 over 307 trades = $6.00 PER TRADE, against Attack 37a's $10.58. The wider target did not merely fail to help, it destroyed 43% of the per-trade edge. WHY, AND IT IS A COUPLING THIS LAB HAD NOT NAMED: maxBars caps holds at 192 bars, and avgBarsWinning rose from 48.99 to 77.95. A 3R target frequently is NOT REACHED INSIDE THE CAP, so trades that would have closed as clean 2R winners instead time out somewhere in between or reverse into losses. WIDENING THE TARGET WITHOUT WIDENING THE HOLD CAP CONVERTS WINNERS INTO TIME-EXITS. That is the same target/cap coupling War Formation documented as HARD LESSONS 28/29 for shield-and-cap, now confirmed in a second lab with a different exit model -- so it is a property of capped-hold strategies generally, not of the ALCM. CONSEQUENCE: the rr axis is CLOSED for Attack 37 at 2.0. Re-testing it would require widening maxBars simultaneously, which is a confounded two-variable change. AND THIS IS THE FOURTH CONSECUTIVE SINGLE-TERM CHANGE REJECTED ON THIS BASE (38 EMA200 gate, 39 depth floor, 40 depth cap, 41 rr). The Pine header registered in advance what a fourth failure would mean: Attack 37 cannot be improved by any single term and the lab should return to discovery. That is now the position. Cascade ratio 1, so 307 is a true position count (HARD LESSON 35)."
+  },
+  {
+    "id": "attack42a-daily-break-and-hold-h1",
+    "name": "Attack 42a: daily break-and-hold, NEVER-TUNED half -- the first screened-before-built mechanism",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack42-daily-break-and-hold.pine",
+    "description": "The stored prompt says build Attack 37's filter stack; the docs override it, since Attack 41 closed Attack 37 after four consecutive single-term rejections and reset the queue to DISCOVERY with the HARD LESSON 37 screen applied BEFORE building. This is that. Attack 34's calendar-anchored break-and-hold geometry rescaled from WEEKLY to DAILY anchors: entry on the first close above the prior completed day's high, stop at the prior day's low (a full daily range, roughly 2.5-3% of price and two to three times Attack 37's R), rr 2.0, hold cap 672 bars set deliberately generous per HARD LESSON 38. Stated plainly rather than dressed up as new: this is the SAME family as Attack 34, which is legitimate because Attack 34 was never rejected -- it advanced weakly on sample-size grounds, and a faster anchor fixes exactly that.",
+    "metrics": {
+      "netProfitPct": 3.20419727,
+      "profitFactor": 1.01316378,
+      "maxDrawdownPct": 55.34972365,
+      "totalTrades": 165,
+      "winRatePct": 41.21212121,
+      "avgTradePct": 0.01941938,
+      "sharpeRatio": 0.22316018,
+      "commissionPaid": 1157.67557315,
+      "avgWinningTrade": 362.668185178677,
+      "avgLosingTrade": -250.938318198969,
+      "ratioAvgWinLoss": 1.44524833,
+      "avgBarsWinning": 330.11764706,
+      "avgBarsLosing": 277.1443299,
+      "longTrades": 165,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1NEMFA6M85STXSKPM7AA3JE",
+      "strategyId": "01M1NEMG3BKDDS7TCG4415DQEK",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NEMFA6M85STXSKPM7AA3JE",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T05:36:00Z"
+    },
+    "verdict": "DISCARDED ON THE SCREEN, NOT ON THE RATIO -- exactly as pre-registered",
+    "notes": "PF 1.01316378 technically clears 1.0 on the never-tuned half, and it is DISCARDED anyway. The Pine header registered in advance that a mechanism failing the cost screen would be discarded ON THE SCREEN rather than on the profit factor, and that is what happened. THE SCREEN: gross = net + commission = $320.42 + $1,157.68 = $1,478.10 over 165 trades = $8.96 GROSS EDGE PER TRADE against $7.02 of commission per trade -- a ratio of 1.28x against the 3x bar. Commission takes 78.3% of the gross edge. That is WORSE than Attack 37 ($10.58 per trade, 1.20x), which the screen was built to reject. Drawdown 55.35% is also the worst figure in this lab's history. The second credit was NOT spent: the screen already fails and the drawdown disqualifies it regardless of what H2 would print. WHY THE PREDICTION MISSED, AND IT IS A REAL DEFECT IN MY OWN SCREEN. The design predicted about $55 of gross edge per trade from R x (w(1+rr) - 1) with R ~2.5% and w ~40%. R WAS RIGHT (avgLosingTrade -$250.94 on $10,000 is 2.5%) and THE WIN RATE WAS RIGHT (41.21% against the 40% assumed). The term that was wrong is rr. The formula used the NOMINAL reward:risk of 2.0. The ACHIEVED ratio was 1.44524833, because winners exit before reaching a 2R target -- avgBarsWinning is 330 against a 672-bar cap, so the hold cap and slow resolution truncate the upside exactly as HARD LESSON 38 describes. Substituting the achieved ratio reproduces the result: 2.5% x (0.4121 x 1.445 - 0.5879) = 2.5% x 0.0076 = 0.019% per trade, which matches the observed avgTradePct of 0.019%. THE CONSEQUENCE FOR THE SCREEN, WHICH IS THE REAL OUTPUT OF THIS CYCLE: the rr term must be the ACHIEVED win/loss ratio, not the nominal target multiple -- and the achieved ratio is ALWAYS below nominal on a capped-hold strategy and CANNOT BE KNOWN BEFORE RUNNING. So HARD LESSON 37's screen is only a ONE-WAY filter: it can rule a design OUT when even the nominal arithmetic fails, but it CANNOT rule one IN. Attack 42 passed on nominal and failed on achieved. That is the third consecutive cycle in which a lever I queued was falsified by measurement, and the third refinement of the same lesson. Cascade ratio 1, so 165 is a true position count (HARD LESSON 35)."
   }
 ];
-const BUILT = "2026-09-03 23:30";
+const BUILT = "2026-09-03 23:37";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

@@ -2917,3 +2917,67 @@ champion and it is no longer a development target.
    whose win rate barely clears break-even has nothing left after fees — that can be seen on paper.
 2. **Do not add a fifth term to Attack 37.**
 3. The target/cap coupling above is now a design constraint for every capped-hold build in this lab.
+
+
+---
+
+# ██ ATTACK 42 — THE FIRST MECHANISM SCREENED BEFORE BUILDING. IT PASSED ON PAPER AND FAILED IN FACT.
+
+The stored prompt still says build Attack 37's filter stack. **The docs override it** — Attack 41
+closed Attack 37 after four consecutive single-term rejections and reset the queue to discovery with
+one condition: **apply the HARD LESSON 37 screen before building.** This is that cycle.
+
+**The design:** Attack 34's calendar-anchored break-and-hold, rescaled from **weekly to daily**
+anchors. Same geometry, faster anchor. Stated plainly rather than dressed up as new — and legitimate
+because **Attack 34 was never rejected**; it advanced weakly on sample-size grounds, which a faster
+anchor is exactly the fix for.
+
+**The screen said it should work:** R becomes a full daily range (~2.5–3% of price, two to three times
+Attack 37's), and the anchor fires ~7× more often, so the sample should be provable.
+
+| | predicted | **measured** |
+|---|---|---|
+| R (stop distance) | ~2.5% | **~2.5%** ✅ |
+| Win rate | ~40% | **41.21%** ✅ |
+| Win/loss ratio | **2.0** (nominal rr) | **1.44524833** ❌ |
+| Gross edge per trade | ~$55 | **$8.96** |
+| Ratio to commission | ~5.5× | **1.28×** |
+| Trades | 100–250 | 165 ✅ |
+| Profit factor | — | 1.01316378 |
+| Max drawdown | — | **55.34972365%** |
+
+**DISCARDED ON THE SCREEN, NOT ON THE RATIO** — exactly as the Pine header pre-registered. Profit
+factor technically clears 1.0; the mechanism still fails the cost bar it was designed to pass, at
+**1.28× against the 3× requirement**, with commission taking **78.3%** of gross. That is *worse* than
+Attack 37, which this screen exists to reject. The second credit was not spent.
+
+## WHY THE PREDICTION MISSED — AND IT IS A DEFECT IN MY OWN SCREEN
+**Two of the three inputs were right.** R was right (avg loser −$250.94 on $10,000 is 2.5%). The win
+rate was right (41.21% against 40% assumed).
+
+**The term that was wrong is `rr`.** The formula used the **nominal** reward:risk of 2.0. The
+**achieved** win/loss ratio was **1.445**, because winners exit before reaching a 2R target —
+`avgBarsWinning` is 330 against a 672-bar cap. **HARD LESSON 38 again, a third time.**
+
+Substituting the achieved ratio reproduces the result exactly:
+`2.5% × (0.4121 × 1.445 − 0.5879) = 2.5% × 0.0076 = 0.019%` per trade — matching the observed
+`avgTradePct` of **0.019%**.
+
+## THE REAL OUTPUT OF THIS CYCLE: THE SCREEN IS ONE-WAY
+**The `rr` term must be the ACHIEVED win/loss ratio, not the nominal target multiple. The achieved
+ratio is always below nominal on a capped-hold strategy, and cannot be known before running.**
+
+So **HARD LESSON 37's screen can rule a design OUT — when even the nominal arithmetic fails — but it
+CANNOT rule one IN.** Attack 42 passed on nominal and failed on achieved. The screen remains valuable
+as a cheap veto; it is not a green light.
+
+## QUEUE
+1. **Keep using the screen as a veto only.** It correctly rejects Attack 37 and would have rejected
+   Attack 33. It cannot promise a pass.
+2. **The next mechanism must resolve FAST relative to its cap**, so the achieved ratio tracks the
+   nominal one. That is now the binding design constraint in this lab — bigger R is not enough if the
+   target takes so long that the cap truncates it. Three mechanisms have now died on this axis
+   (Attack 41, e50b in War Formation, Attack 42).
+3. **Attack 34 remains the only mechanism whose achieved ratio was near nominal** (win rate 50%, clean
+   ±R resolutions, 30 trades). Its defect was sample, and the daily rescale did not fix that without
+   introducing the truncation problem. **A weekly anchor with a wider cap is the untried corner.**

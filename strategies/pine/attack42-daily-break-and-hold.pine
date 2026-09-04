@@ -1,0 +1,137 @@
+//@version=6
+// BTC ATTACK 42 - DAILY BREAK-AND-HOLD. THE FIRST MECHANISM IN THIS LAB SCREENED BEFORE IT WAS BUILT.
+//
+// THE STORED PROMPT SAYS BUILD ATTACK 37's FILTER STACK. THE DOCS OVERRIDE IT. Attack 41 closed
+// Attack 37 as a development target after FOUR consecutive single-term rejections (38 EMA200 gate,
+// 39 depth floor, 40 depth cap, 41 rr), and reset the queue to DISCOVERY with one condition: apply
+// the HARD LESSON 37 screen BEFORE building rather than after four cycles of filters. This is that.
+//
+// ============================ THE SCREEN, APPLIED ON PAPER FIRST ============================
+// HARD LESSON 37: a mechanism needs GROSS EDGE PER TRADE of at least ~3x the per-trade commission.
+// At the forced parity profile a round trip costs ~0.1% of equity, so the bar is ~0.3% of price
+// per trade. Expected gross move is  R x (w(1+rr) - 1), with R the stop distance as % of price.
+//
+// WHERE THE EXISTING MECHANISMS LAND:
+//   Attack 37  R ~ 1.2%, w = 38.2%, rr 2  ->  1.2% x 0.146 = 0.175% per trade. ~1.8x cost. FAILS.
+//   Attack 34  R ~ 8-10% (a weekly range), w = 50%, rr 2 -> ~4-5% per trade. Passes by a mile, and
+//              its problem was never edge - it was 30 trades.
+//
+// SO THE SCREEN POINTS SOMEWHERE SPECIFIC: this lab needs LARGE R, and Attack 34 already found the
+// large-R geometry that works. Its only defect was sample size. THE FIX IS NOT A NEW GEOMETRY, IT IS
+// THE SAME GEOMETRY ON A FASTER ANCHOR.
+//
+// ATTACK 42 IS ATTACK 34 RESCALED FROM WEEKLY TO DAILY ANCHORS. Stated plainly rather than dressed up
+// as a new idea: this is the SAME calendar-anchored break-and-hold family, and it is a legitimate
+// development rather than a repeat of a rejected strategy because ATTACK 34 WAS NEVER REJECTED - it
+// ADVANCED, weakly, on sample-size grounds alone.
+//
+// THE ARITHMETIC THAT MOTIVATES IT:
+//   A BTC daily range runs roughly 2-4% of price, so R ~ 2.5-3% - about a quarter of a weekly range
+//   but still TWO TO THREE TIMES Attack 37's.
+//   At w = 40%: 2.75% x (3 x 0.40 - 1) = 2.75% x 0.20 = 0.55% per trade, about 5.5x commission. PASS.
+//   At w = 45%: 2.75% x 0.35 = 0.96% per trade, about 9.6x. Comfortable.
+//   At w = 35%: 2.75% x 0.05 = 0.14% per trade, about 1.4x. FAIL.
+//   SO THE WIN RATE IS THE WHOLE QUESTION, and it is registered here as the number to read first.
+//   Attack 34 ran 50% on H1 and 43.5% on H2 with the identical geometry on a slower anchor.
+//
+// AND FREQUENCY: a break of the PRIOR DAY'S high is available roughly 7x more often than a break of
+//   the prior week's. Attack 34 produced 30 and 23 trades; this should land in the 100-250 band per
+//   half - inside the workable window and, unlike Attack 34, PROVABLE.
+//
+// ============================ HARD LESSON 38, CHECKED IN THE DESIGN ============================
+// LESSON 38 (written hours ago, from two failures in two labs): raising R only helps if it does not
+// lengthen holds into the cap. A 2R target on a 2.75% R is a ~5.5% move, which needs real time.
+// Attack 34 used maxBars 2688 (4 weeks) for a weekly-scale R. Scaling by the 7x anchor change gives
+// ~384 bars, but that would be TIGHT - and a tight cap is exactly what destroyed Attack 41.
+// SO THE CAP IS SET DELIBERATELY GENEROUS AT 672 BARS (one week on 15m), and the fraction of trades
+// hitting it IS PART OF WHAT THIS RUN MEASURES. If a large share sit at 672, the cap is biting and
+// the result is confounded exactly as e50b's was - that would be a finding, not a nuisance.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - a daily range is comfortably above the floor, but it is ENFORCED BY
+//        EXCLUSION anyway (rBig), never clamped, because narrow-range days exist and must be skipped
+//        rather than have their stop moved.
+//   Stop beyond STRUCTURE (LESSON 5) - the PRIOR COMPLETED DAY'S LOW. Genuine structure, on the far
+//        side of the level being broken, not at the signal.
+//   Each leg separately (LESSON 6) - LONG ONLY. A short leg is untestable on this engine at this
+//        sizing (HARD LESSON 34), so its absence is a harness limit, not a design choice.
+//   BINDING (E17) - two terms only: the break, and the R floor. Trade count is the evidence that the
+//        floor is not silently gutting the sample.
+//   REDUNDANCY (E14) - the break and the R floor are independent: one is a price event, one is a
+//        range condition on the prior day.
+//   LATCH IN SEQUENCE (LESSON 8) - the daily snapshot closes when a new day opens; the trigger is a
+//        crossover on a LATER 15m bar. Setup and trigger cannot share a bar.
+//   CASCADE (HARD LESSON 35) - long build, expect cascadeRatio 1; verify before applying clause 3.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17):
+//   * GROSS EDGE PER TRADE >= ~0.3% OF PRICE AND BOTH HALVES ABOVE 1.0 -> the screen works as a
+//     design tool, not just a post-hoc diagnosis, and this becomes the lab's best candidate.
+//   * BOTH HALVES ABOVE 1.0 BUT GROSS EDGE PER TRADE BELOW ~0.3% -> the mechanism survives on
+//     something the screen does not capture, and the screen needs revisiting.
+//   * WIN RATE BELOW ~35% -> the arithmetic above says it cannot clear the cost bar regardless of
+//     what the profit factor prints, and it is DISCARDED on the screen rather than on the ratio.
+//   * PRE-2024 HALF BELOW 1.0 -> DISCARDED outright by the kill rule. No filters, no rescue.
+//   * A LARGE SHARE OF TRADES AT maxBars 672 -> the cap is biting and the comparison is confounded
+//     (HARD LESSON 38). Report it and re-run wider before drawing any conclusion about the edge.
+//   REPORT GROSS AND COMMISSION ALONGSIDE NET - the board requires it since HARD LESSON 36.
+strategy("BTC Attack42 daily break-and-hold", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rr      = input.float(2.0,  "Reward:risk")
+minRpct = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars = input.int(672,    "Max bars in trade -- one week on 15m, deliberately generous (LESSON 38)")
+
+MS1D = 86400000
+b1d  = math.floor(time / MS1D)
+newDay = b1d != b1d[1]
+
+var float dHi  = na
+var float dLo  = na
+var float pdHi = na
+var float pdLo = na
+
+if newDay
+    pdHi := dHi
+    pdLo := dLo
+    dHi  := high
+    dLo  := low
+else
+    dHi := na(dHi) ? high : math.max(dHi, high)
+    dLo := na(dLo) ? low  : math.min(dLo, low)
+
+breakUp = not na(pdHi) and ta.crossover(close, pdHi)
+
+minR  = close * minRpct / 100
+rLong = na(pdLo) ? na : close - pdLo
+rBig  = not na(rLong) and rLong >= minR
+
+goLong = breakUp and rBig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong and rLong > 0
+    strategy.entry("L", strategy.long)
+    slPx   := pdLo
+    tpPx   := close + rLong * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(pdHi,           title="PrevDayHigh")
+plot(pdLo,           title="PrevDayLow")
