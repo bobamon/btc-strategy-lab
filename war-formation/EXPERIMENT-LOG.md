@@ -5014,3 +5014,43 @@ stale condition warranted was already sent (cycle check #4), nothing has changed
 doesn't already know, and re-paging on every identical firing would train them to ignore the channel.
 Silence stands until the prompt is edited, the two open rule questions are answered, or new 1m data
 lands. If this scheduled task keeps firing unchanged, consider pausing it until one of those happens.
+
+---
+
+# ██ CYCLE CHECK #8, 2026-09-04 (no credits) — TENTH IDENTICAL FIRING OF THE SAME STALE PROMPT
+
+`git pull --rebase origin main`: already up to date. HEAD was detached at `045ed0a` (this file's own
+prior "cycle check #7" commit, already equal to `origin/main`'s tip at session start). Two commits have
+landed since then, neither touching `war-formation/`: `4dfc96a` (3M cycle check #4, also a no-op) and
+`896f7f8` (BTC Attack 58, EMA crossover). Credit balance 556 at start of cycle (above the 500 floor) —
+none spent.
+
+Independently re-verified every claim in the prior seven cycle-check entries rather than trusting them,
+since a chain of self-reported no-ops is exactly the kind of thing that should be checked rather than
+propagated:
+- `git log --oneline -- war-formation/` — E77 (`cb98a53`) is still the last real experiment commit;
+  everything after it is cycle-check bookkeeping.
+- `war-formation/results/backtests.json` — still exactly 31 entries. `E58a` (long, 100% equity, band
+  present): PF **1.24015239**, 36 trades, DD 9.82519609%. `E71` (short, 25% equity, band present, the
+  DECLARED DEVIATION build): PF **0.97315988**, 33 trades, DD 2.66826642%. Both match every prior
+  cycle-check's citation exactly — no drift.
+- `STRATEGY-LEDGER.md:2328`, "RULE QUESTION FOR THE USER" — both open items (E69b's inMiddle-ratchet
+  asymmetry; E74's drawdown-allowance-proportionality question) are still unanswered, still the only
+  thing blocking the queue.
+- Queue item 1 (short entry geometry) and queue item 2 (entry-term binding sweep) in *this session's*
+  stored prompt — both still closed at E71/E74-E76 and E69a/E69b/E70a/E70b/E77 respectively, exactly as
+  the last eight checks found. The stored prompt itself is unchanged: still the pre-E67 text that
+  predates the champion reference (e58a), both short constructions this session was asked to re-attack
+  (E64a/E64b/E66, already superseded by E71/E74-E76), and the open rule questions.
+
+**State unchanged**: no champion, no candidate. References remain e58a (long) and E71 (short), as above.
+
+**Zero backtests run. Zero credits spent** — there is no open hypothesis to spend them on; the two
+queue items this prompt names are done, and the only unresolved items are the two rule questions, which
+credits cannot answer. Dashboard not rebuilt — no metric changed since the last rebuild.
+
+**No notification pushed.** This is the tenth firing of an unedited prompt answered once already (cycle
+check #4). Nothing has changed in the eight checks since: same two open questions, no new data, no
+prompt edit. Repeating that notification an eighth time would be pure noise. The recommendation stands
+as stated in check #4 and repeated in #7: either answer the two open rule questions, supply new 1m data
+or a new queue item, or pause this scheduled task — it cannot move itself past this point.
