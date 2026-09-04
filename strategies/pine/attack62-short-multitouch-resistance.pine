@@ -1,0 +1,135 @@
+//@version=6
+// BTC ATTACK 62 - THE SHORT LEG'S LOCATION FIX, CANDIDATE 1 OF 2: MULTI-TOUCH RESISTANCE.
+//
+// STALE-PROMPT CHECK: the stored scheduled prompt describes a board state (Attack 37, "earned a
+// filter stack") more than twenty attacks stale. Attack 41 closed Attack 37, Attack 46 is the long
+// champion (filters exhausted, HARD LESSON 49), Attack 60 built the short mirror honestly (25%-equity
+// sizing fix, HARD LESSON 42/43) and it failed on H1 (PF 0.593), Attack 61 tried an EMA200 regime gate
+// on top of it and failed HARDER (PF 0.235, trades 67->15). THE DOCS OVERRIDE THE PROMPT, again, per
+// the prompt's own instruction. This cycle does not restart Attack 37's filter stack (long since done)
+// and does not propose a thirteenth long-only mechanism; it takes up Attack 61's own queue item 1,
+// now ranked first: fix the short's LOCATION with a multi-touch resistance requirement, the other
+// named candidate from Attack 60's queue that Attack 61 (regime gate) did not touch.
+//
+// ==================== THE CLAIM UNDER TEST ====================
+// Attack 60/61's resistance is the single most-recent 20-bar high -- a level that may have been set by
+// one spike and never actually defended. A level tested only once carries no information about whether
+// sellers will show up there again. A level that price has already failed to break TWICE is a level the
+// market has demonstrated it respects, which is a different (and better-motivated) claim than "the
+// trend is bearish" (Attack 61's gate, which made things worse). This is a STRUCTURE claim about the
+// level itself, not a regime claim about the market.
+//
+// ==================== CONSTRUCTION ====================
+// Everything from Attack 60 is UNCHANGED: same 20-bar resistance/support definition, same tap
+// tolerance, same RR floor (3.5), same R floor (0.8% by exclusion), same max hold (192 bars), same
+// 25%-equity declared-deviation sizing fix (HARD LESSON 42/43). The ONLY addition is one new AND term:
+// the tapped resistance level must have been tested at least MINTOUCHES times (default 2, i.e. at
+// least one prior test before today's tap) within a longer lookback window (default 100 bars). No
+// arrays, no user-defined functions -- the count uses a plain for-loop accumulator over prior bars,
+// which is native Pine control flow, not a UDF.
+//
+// AUDIT, one line per leg (SHORT ONLY, per HARD LESSON 31 scoping -- not blended with Attack 46's long):
+//   R >= 0.8% (LESSON 3) - unchanged from Attack 60, EXCLUSION via rBig, never clamped.
+//   Stop beyond STRUCTURE (LESSON 5) - unchanged, the tap bar's own high.
+//   Each leg separately (LESSON 6) - SHORT ONLY, a new candidate, not a patch to Attack 60's record.
+//   BINDING (E17) - multiTouch is a pure AND term added to Attack 60's goShort; it can only remove
+//        entries, never add them, so it necessarily binds if touchCount is ever below the floor for
+//        any historical tap. Trade count is read FIRST, before the ratio, same as every level-target
+//        build in this lab.
+//   REDUNDANCY (E14) - multiTouch (a property of the LEVEL's prior history) is independent of rBig
+//        (absolute stop distance) and rrOk (reward geometry at THIS tap) -- none of the three can stand
+//        in for either of the others.
+//   LATCH IN SEQUENCE (LESSON 8) - res is [1]-shifted (known before the current bar); the touch count
+//        loop reads high[lookback+1] through high[lookback+touchLookback] -- strictly OLDER than the
+//        20-bar window that DEFINES res -- against the same already-shifted res used for tapped/held.
+//        A FIRST DRAFT of this loop searched high[1]..high[touchLookback] and was caught before running
+//        H2: that range overlaps the very 20-bar window whose maximum IS res, so the bar that set the
+//        level always counted as its own "prior touch" and the term was tautologically true on every
+//        setup. Confirmed by a corrected-timeframe H1 landing byte-identical to Attack 60 (PF
+//        0.59338308, 67 trades, to the cent) before the fix -- an instance of HARD LESSON 10 (measure a
+//        term's own effect before trusting the conjunction). Fixed to search bars OLDER than the level's
+//        own defining window, which is what "a PRIOR test of this level" has to mean.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, unchanged.
+//   CASCADE / MARGIN ARTIFACT (HARD LESSON 42/43) - the 25%-equity fix carries over unchanged from
+//        Attack 60; VERIFY with get_trades that loser exit distances stay consistent (near the tap
+//        bar's own high) before trusting the win rate, exactly as Attack 60 required.
+//   SAMPLE-FLOOR RISK, NAMED BEFORE THE RUN (HARD LESSON 45) - Attack 60 ran 67 trades on H1. A
+//        filter requiring a SECOND test of the same level within 100 bars is a materially rarer
+//        condition than "any 20-bar high" and could plausibly cut trade count under the ~30-trade
+//        floor (LESSON 12) or under the workable 60-350 band on its own; if H1 lands under ~30 trades
+//        the result is a DIRECTION, not a verdict, regardless of what PF reads.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17):
+//   * H1 PF >= 1.0 AND trades >= 30 AND loss distances consistent -> the location fix worked where the
+//     regime gate did not; compare directly against Attack 60's 0.593/67 and Attack 61's 0.235/15, then
+//     run H2 per the mandate's kill-rule structure.
+//   * H1 PF >= 1.0 BUT trades < 30 -> a DIRECTION only (LESSON 12), not promotable, H2 still run to
+//     characterise it but the verdict stays "unprovable sample", the same fate as Attack 34.
+//   * H1 PF < 1.0 -> DISCARDED by the kill rule. No filters, no rescue, no H2. Multi-touch would then be
+//     the SECOND location-fix candidate to fail (after the regime gate), and the short leg's queue would
+//     move to "neither named candidate worked" rather than staying open on an untested guess.
+//   * Trade count collapses far below Attack 60's 67 (e.g. under ~20) even before looking at PF -> the
+//     sample-floor risk named above landed, and that alone is reportable independent of the PF sign.
+strategy("BTC Attack62 short multi-touch resistance", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+lookback      = input.int(20,     "Level lookback, bars -- sets BOTH the resistance tapped and the low targeted")
+tapTol        = input.float(0.10, "Tap tolerance, % -- how close to resistance counts as a touch")
+minRRv        = input.float(3.5,  "Minimum reward:risk the GEOMETRY must offer, else skip -- mirrors Attack 46/60")
+minRpct       = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars       = input.int(192,    "Max bars in trade")
+eqFrac        = input.float(0.25, "DECLARED DEVIATION: fraction of equity per position -- HARD LESSON 42/43")
+touchLookback = input.int(100,    "Window to search for PRIOR tests of the resistance level")
+minTouches    = input.int(2,      "Minimum total tests of the level (including today's tap) required to fire")
+
+sup = ta.lowest(low,   lookback)[1]
+res = ta.highest(high, lookback)[1]
+
+tapped  = not na(res) and high  >= res * (1 - tapTol / 100)
+held    = not na(res) and close < res
+setupOn = tapped and held
+
+touchCount = 0
+for i = lookback + 1 to lookback + touchLookback
+    if not na(res) and high[i] >= res * (1 - tapTol / 100)
+        touchCount := touchCount + 1
+multiTouch = touchCount >= (minTouches - 1)
+
+rShort = high - close
+reward = na(sup) ? na : close - sup
+minR   = close * minRpct / 100
+rBig   = rShort >= minR
+rrOk   = not na(reward) and rShort > 0 and reward / rShort >= minRRv
+
+goShort = setupOn and rBig and rrOk and multiTouch
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat   = strategy.position_size == 0
+qtyUse = strategy.equity * eqFrac / close
+
+if flat and goShort and qtyUse > 0
+    strategy.entry("S", strategy.short, qty = qtyUse)
+    slPx   := high
+    tpPx   := sup
+    barsIn := 0
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goShort ? 1 : 0, title="ShortSignal")
+plot(res, title="Resistance")
+plot(sup, title="TargetLevel")
+plot(touchCount, title="TouchCount")

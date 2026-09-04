@@ -4635,3 +4635,105 @@ the missing ingredient rather than leaving the question open.
 5. **The inverted-payoff-shape watch (Attacks 50/51/59) stays open on the LONG side** — this short
    failure is a low-win-rate/adequate-payoff shape like Attack 60, not the majority-win-rate inversion,
    and neither confirms nor denies it.
+
+---
+
+# ATTACK 62 — THE SECOND NAMED LOCATION FIX ALSO FAILS, AND A SELF-CAUGHT CONSTRUCTION BUG IS THE MORE USEFUL RESULT
+
+The stored scheduled prompt still describes a board state (Attack 37, "earned a filter stack") more
+than twenty-five attacks stale — Attack 41 closed Attack 37, Attack 46 is the long champion (filters
+exhausted, HARD LESSON 49), and Attacks 60/61 already ran the honest short mirror and its first location
+fix (an EMA200 regime gate), both discarded on H1. **The docs override the prompt, again**, per the
+prompt's own instruction. This cycle takes up Attack 61's queue item 1, the other named location-fix
+candidate: a **multi-touch resistance requirement** — the tapped level must have been tested at least
+twice within a longer lookback, not just be the single most-recent 20-bar high.
+
+## THE CLAIM UNDER TEST
+A level set by one spike carries no information about whether sellers return there; a level price has
+already failed to break TWICE is one the market has demonstrated it respects. This is a STRUCTURE claim
+about the level itself, distinct from Attack 61's REGIME claim about the trend. Everything else is
+Attack 60 byte-for-byte: 20-bar resistance/support, 0.10% tap tolerance, RR floor 3.5, R floor 0.8% by
+exclusion, 192-bar cap, the 25%-equity declared-deviation sizing fix (HARD LESSON 42/43). Pine:
+`strategies/pine/attack62-short-multitouch-resistance.pine`.
+
+## A CONSTRUCTION BUG WAS CAUGHT BEFORE IT COULD BECOME A FALSE VERDICT
+The first draft counted "prior touches" over `high[1]` through `high[touchLookback]` — a window that
+**overlaps the same 20 bars whose maximum defines `res`**. The bar that sets the level is therefore
+always inside that window and always touches it at zero distance, so the term `touchCount >= 1` was
+**tautologically true on every setup** — it could never bind. Two tells caught it before any number was
+recorded: (1) a first H1 attempt run at the wrong timeframe (1h instead of the champion family's 15m —
+an error in the run itself, not the mechanism) returned 138 trades and PF 0.75681063, and (2) re-running
+correctly at 15m returned a result **byte-identical to Attack 60 to the cent** — PF 0.59338308, 67
+trades, same win/loss split. HARD LESSON 44's own logic (an identical count plus an identical win/loss
+split is the strongest "nothing changed" evidence there is) applied directly: the filter had changed
+nothing, which is only possible if it was never actually filtering. The fix: search `high[lookback+1]`
+through `high[lookback+touchLookback]` — strictly OLDER than the window that defines the level — which
+is what "a PRIOR test of this level" has to mean. This is an instance of HARD LESSON 10 (measure a
+term's own effect before trusting the conjunction), caught free, before spending a verdict on a vacuous
+filter.
+
+## AUDIT (SHORT ONLY, one line per leg)
+R ≥ 0.8% (LESSON 3) — unchanged, EXCLUSION via `rBig`, never clamped. Stop beyond STRUCTURE (LESSON 5) —
+unchanged, the tap bar's own high. Each leg separately (LESSON 6) — SHORT ONLY, not blended with Attack
+46's long. BINDING (E17) — `multiTouch` is a pure AND term; it can only remove entries, and after the fix
+it demonstrably does (67 → 27 trades). REDUNDANCY (E14) — a property of the level's PRIOR history is
+independent of `rBig` (stop distance) and `rrOk` (today's reward geometry). LATCH IN SEQUENCE (LESSON 8)
+— corrected as above; the touch-count loop reads bars strictly older than the level's own defining
+window, no look-ahead, no self-reference. CASCADE / MARGIN ARTIFACT (HARD LESSON 42/43) — `get_trades`
+on all 27 corrected-run entries: `cascadeRatio` 1, `maxCascadeDepth` 1, and every losing trade's
+`profitPct` falls in a consistent 0.91%–2.41% band (structural stop exits) — the sizing fix still holds.
+
+## BOTH HALVES, SIDE BY SIDE — AND ALONGSIDE THE TWO PRIOR SHORT ATTEMPTS
+
+| | **Attack 60a** bare mirror | **Attack 61a** EMA200 gate | **Attack 62a (buggy)** vacuous filter | **Attack 62a (corrected)** |
+|---|---|---|---|---|
+| Profit factor | 0.59338308 | 0.23506191 | 0.59338308 (identical to 60a) | **0.39073976** |
+| Trades | 67 | 15 | 67 | **27** |
+| Win rate | 14.93% | 6.67% | 14.93% | 14.81% |
+| Achieved ratio | 3.38228354 | 3.29086671 | 3.38228354 | 2.24675363 |
+| Avg loser | -$27.91 | -$29.06 | -$27.91 | -$30.12 |
+| Max drawdown | 8.71% | 3.74% | 8.71% | 4.84% |
+
+H2 was not run — the mandate's kill rule fires on H1 alone, and the buggy intermediate run was corrected
+before any credit was spent on a second half.
+
+## KILL RULE APPLIED. H2 NOT RUN, THIRD CREDIT (the corrected H1) IS THE LAST ONE SPENT THIS CYCLE.
+
+**Profit factor 0.39073976, well below 1.0**, and **27 trades sits below the ~30-trade sample floor**
+(LESSON 12) even before the ratio is read — this result would not have been promotable even had PF
+cleared 1.0. The 550-credit balance would otherwise permit the full pair; the kill rule overrides that
+when H1 fails outright. No filters, no rescue, no H2.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Category **2, bleed on a negative edge** — PF outright below 1.0, avg loser -$30.12 is small and not an
+outlier (not category 1), and the edge is negative outright (not category 3, so no further filtering is
+warranted on this construction).
+
+## WHAT THIS SETTLES
+
+**Both named location-fix candidates from Attack 60's queue have now failed** — a regime gate (Attack
+61, PF 0.235, worse than the bare mirror) and a multi-touch structure requirement (Attack 62, PF 0.391,
+also worse than the bare mirror, on a sub-floor sample). Both cut the sample hard (67→15, 67→27) while
+making the surviving trades' PF worse, not better — the same shape twice, from two structurally different
+gates. That consistency is itself evidence: it argues against "the mirror's location is wrong" as the
+short leg's problem and toward Attack 60's own original hypothesis — resistance-tap-and-reject is
+intrinsically rarer and weaker than support-tap-and-hold on an asset with BTC's long-run upward drift
+across 2022–2026, a directional asymmetry no location filter on the SAME entry logic can fix, because
+location filters can only remove candidate setups, not change what happens after the ones that remain.
+
+## QUEUE
+
+1. **The short leg's location problem is not solved by either named candidate.** The next short attempt,
+   if pursued, needs a genuinely different SIGNAL shape (not a filter bolted onto the resistance-mirror
+   entry) — e.g. a bearish continuation after a confirmed lower high, rather than a reversal at
+   resistance — or the short leg should be set aside as a structural asymmetry to report rather than
+   solve, pending a fresh idea distinct from both attempts so far.
+2. **Attack 46 (long) remains the sole both-halves-positive candidate on the board**, both halves clear,
+   cold-reproduced, filters exhausted per HARD LESSON 49; this cycle does not touch that verdict.
+3. **The out-of-sample test for Attack 46 still ranks first among long-side work** and still cannot be
+   run under BTCUSDT-only — unchanged, restated because this cycle did not touch it.
+4. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+5. **The inverted-payoff-shape watch (Attacks 50/51/59) stays open on the LONG side** — unaffected by
+   this cycle, which stayed on the short side throughout.
