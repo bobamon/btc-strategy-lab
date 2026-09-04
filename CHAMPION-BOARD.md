@@ -3928,3 +3928,101 @@ all-history mechanism built the same way.
    oscillator, and now order flow have all been tried as PRIMARY signals and only two families
    (Attack 37's sweep-reversal, closed on cost; Attack 46's level-target tap-and-hold, the champion)
    have ever cleared 1.0 on both halves.
+
+---
+
+# ATTACK 54 - FUNDING-SETTLEMENT SQUEEZE REVERSION. KILLED ON H1 AT 7 TRADES -- A FREQUENCY FAILURE, NOT AN EDGE FINDING.
+
+The stored prompt asked for Attack 37's filter stack an EIGHTH time, describing a board state (Attack
+37, 322/196 trades, "earned a filter stack, queued not built") now 17 attacks stale. **The docs override
+it again**, per STRATEGY-LEDGER's own instruction to say so: Attack 41 closed Attack 37, Attack 43
+closed the sweep-reversal family, Attack 47 died on the ~77% sample wall (HARD LESSON 45/49) against the
+current champion, and the board's own queue after Attacks 47-53 says stop filtering Attack 46 and
+propose a genuinely new mechanism -- so this cycle built one, per the mandate's fallback clause, and per
+Attack 53's own queue item 4, went straight at both halves as a pair rather than a piecemeal single-half
+detour (four straight prior new-mechanism proposals -- 50, 51, 52, 53 -- had each failed in turn).
+
+**CLAIM:** Bybit BTCUSDT perpetuals settle funding at 00:00/08:00/16:00 UTC, a calendar-fixed mechanical
+event independent of any price level. A 15m bar that OPENS exactly at a settlement timestamp and also
+prints an outsized down move (true range >= 1.5x its trailing 20-bar average, closing below its open) is
+more likely to be forced, leverage-driven deleveraging synchronised to the settlement clock than
+information-driven selling, and reverts. This is a CLOCK trigger, not a price-structure claim (distinct
+from Attack 37-47), a session-range claim (distinct from Attack 50), or a volume-delta proxy (distinct
+from Attack 53) -- the first build in this lab to use the funding-settlement mechanism itself as the
+primary signal. Entry: same-bar (clock AND elevated range AND down close, all three independent -- no
+arm/trigger split, LATCH note states this explicitly rather than silently skipping it). Stop: the
+settlement bar's own low (structure, LESSON 5). Target: `close[4]` -- the close 1 hour before the
+settlement bar, a real pre-squeeze traded level, not a stop multiple (HARD LESSON 41/47). R floor 0.8%
+by exclusion. `hour()`/`minute()` are unimplemented on this engine (Attack 50's own finding); UTC
+hour/minute recovered via `math.floor(time / 3600000) % 24` arithmetic. Long only (LESSON 6 -- the short
+mirror is deferred, not assumed, per the same HARD LESSON 42/43 short-sizing-artifact reasoning as every
+other single-leg build on this board since Attack 50; funding mechanics ARE directionally symmetric by
+construction, unlike price-structure support/resistance per HARD LESSON 48, so the mirror is a
+low-risk future step, not an assumption baked into this run). Pine:
+`strategies/pine/attack54-funding-settlement-reversion.pine`.
+
+| | **54a** never-tuned (H1) |
+|---|---|
+| Profit factor | **0** |
+| Max drawdown | 9.80203526% |
+| Trades | **7** |
+| Win rate | 0% |
+| Avg loser | -$120.61 |
+| Largest loss | -$212.48 |
+| Net return | -8.44% |
+
+## KILL RULE APPLIED, DOUBLY. H2 NOT RUN, SECOND CREDIT NOT SPENT.
+
+Zero winners of 7 losers is unambiguously below 1.0 -- the kill rule applies outright. **Independently,
+7 trades sits nowhere near the 30-trade RATCHET v2 floor**, so even setting the PF aside this half would
+never have been quotable as a result. Two separate reasons to stop, both present at once.
+
+## THE REAL FINDING IS FREQUENCY, NOT EDGE (HARD LESSON 4)
+
+The pre-registered estimate (stated in the Pine header before running, per LESSON 17) was **~270 trades
+on H1**: a 1-in-32 settlement-clock fact x an assumed ~50% down-bar fraction x an assumed ~20% chance of
+a bar clearing 1.5x its trailing average range. **Actual: 7, roughly 38x rarer than estimated.** The
+three-way conjunction (exact settlement timestamp AND elevated range AND down close) binds far harder in
+practice than treating the three conditions as independent predicted -- whichever pairwise correlation
+was assumed independent was not, most plausibly because settlement-timestamp bars do not carry
+meaningfully different range statistics than any other bar once the trailing-average normalisation is
+applied, so requiring 1.5x on top of the exact-minute clock condition stacks two nearly-orthogonal rare
+events rather than one rare event with a loose second filter. **This is now the fourth frequency-driven
+miss quantified on this board** (HARD LESSON 4's original 4-10x miss on Attack 003, HARD LESSON 45's
+~75% cut wall, and now a 38x miss here) and the largest of the three by a wide margin.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Not applicable in the usual sense -- 7 trades is too thin to categorise as concentrated-loss,
+negative-edge bleed, or positive-edge bleed; the sample is too small to say anything about shape.
+Recorded as **category N/A, sample too thin to classify**, distinct from category 2's "negative edge
+measured at an adequate sample" (Attacks 36/48/49/50/51/52/53).
+
+## WHAT THIS SETTLES
+
+**Time-of-day seasonality tied to a real BTC-specific mechanism (the funding clock) is 0-for-1**, on a
+frequency failure rather than an edge failure -- distinct from Attack 50's Asian-range breakout (which
+had an adequate sample and failed on the kill rule with a real, measured negative edge) and from
+Attack 51/52/53 (adequate samples, negative or borderline edges). **The clock condition itself was not
+the problem; requiring an outsized range on TOP of the exact clock condition was.** A future attempt on
+this same family should drop the range-elevation requirement (trade the settlement bar's own directional
+close alone, or use a looser confirmation such as "close beyond the prior bar's range" rather than a
+multiple of a trailing average) to find out whether the funding-clock trigger alone -- without the
+compounding rarity of a second independent-seeming filter -- can reach a provable sample. That is a
+narrower, single-change retest of this same claim, not a new mechanism, and ranks ahead of inventing a
+sixth clock-based variant from scratch.
+
+## QUEUE
+
+1. **If the funding-clock family is revisited, drop the elevated-range requirement first** and measure
+   frequency alone before adding any second condition back -- this cycle stacked two conditions before
+   knowing either one's true incidence, which is exactly the estimation failure HARD LESSON 4 warns
+   against.
+2. **Attack 46 remains the sole both-halves-positive candidate on the board**, both halves clear,
+   cold-reproduced, filters exhausted per HARD LESSON 49.
+3. **The out-of-sample test for Attack 46 still ranks first and still cannot be run** under
+   BTCUSDT-only -- unchanged, restated because this cycle did not touch it.
+4. **Five straight new-mechanism proposals (50-54) have now failed** -- three on a measured negative
+   edge at an adequate sample (50, 51/52 as one family, 53) and one outright on sample size (54). The
+   search should weight frequency estimation at least as heavily as the mechanism claim itself before
+   the next build, given how large this cycle's miss was.

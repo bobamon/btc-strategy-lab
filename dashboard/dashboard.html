@@ -1398,9 +1398,60 @@ const DATA = [
     },
     "verdict": "DISCARDED. PF 0.84998262 on the recent half, below 1.0 on a well-powered, non-degenerate sample (174 trades). The order-flow absorption claim does not hold across both regimes -- it is profitable in the 2022-2024 half and a net loser in the 2024-2026 half, the mirror image of Attack 46's H2>H1 signature.",
     "notes": "PF 0.84998262, DD 34.42069125%, 174 trades, win rate 31.03%, avg winner $212.75 vs avg loser -$112.63 (ratio 1.889), net -20.28%, Sharpe -0.450. REPORT PER STANDING INSTRUCTION: avg loser, win rate, max drawdown together; gross/commission/achieved ratio (LESSONS 36/39). avgBarsWinning (163.0) sits at 84.9% of the 192-bar cap, similar to H1 -- the truncation risk flagged in H1's notes applies here too. DRAWDOWN CATEGORY per the board's taxonomy: avg loser -$112.63 is not an outlier in isolation (not category 1); the edge here is negative (H2 PF < 1.0), so this is category 2, bleed on a negative edge, the same shape as Attacks 36/48/49/50 -- not worth filtering, since filtering only earns its place on a thin-but-POSITIVE edge (category 3, Attack 37's case). WHAT THIS SETTLES: order-flow (volume-delta) as a primary signal is 0-for-1, on the same H1/H2-split axis that has now killed or qualified the majority of this board's candidates. The two-stage latch construction (arm/expire/reclaim) does not by itself protect a mechanism from regime-dependence -- Attack 46's tap-and-hold is same-bar and survives the split; this is multi-bar and does not. QUEUE: (1) Do not tune this mechanism -- do not widen maxArmBars, do not change the delta formula, do not add a trend filter (Attack 38 already showed a trend gate on a similar-shaped H1/H2 split helps one half and breaks the other). (2) Attack 46 remains the sole both-halves-positive candidate on the board, both halves clear, cold-reproduced, filters exhausted per HARD LESSON 49. (3) The out-of-sample test for Attack 46 still ranks first and still cannot be run under BTCUSDT-only -- unchanged, restated because this cycle did not touch it. (4) If order flow is revisited, the H1-only edge (PF 1.249, 174 trades, avg winner/loser ratio 2.70) is a real, well-powered directional finding on its own -- worth remembering as a fact about the 2022-2024 regime specifically, not as a basis for a new BTCUSDT-only, all-history mechanism."
+  },
+  {
+    "id": "attack54a-funding-settlement-reversion-h1",
+    "name": "Attack 54a: funding-settlement squeeze reversion -- never-tuned half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack54-funding-settlement-reversion.pine",
+    "description": "A genuinely new mechanism per the mandate's fallback clause (queue item 1, Attack 37's filter stack, was closed at Attack 41/43 and Attack 47's death on the ~77% sample wall, HARD LESSON 45/49; the board's queue after Attacks 47-53 says stop filtering Attack 46 on this data and propose a new mechanism instead). The stored prompt asked an EIGHTH time for Attack 37's filter stack, describing a board state 17 attacks stale; the docs override it again. First build in this lab to use the funding-settlement CLOCK (Bybit BTCUSDT perpetual funding settles at 00:00/08:00/16:00 UTC) as the PRIMARY trigger rather than a price level or a derived oscillator/order-flow proxy. CLAIM: a 15m bar opening exactly at a funding settlement timestamp that also prints an outsized down move (true range >= 1.5x its trailing 20-bar average, closing below its open) reflects mechanical, funding-driven forced deleveraging rather than information-driven selling, and reverts. Entry: same-bar trigger (settlement clock AND elevated range AND down close, all three independent, LESSON 8 N/A by design -- no arm/trigger split). Stop: the settlement bar's own low (structure, LESSON 5). Target: the close price 4 bars (1h) before the settlement bar -- a real pre-squeeze traded level, not a stop multiple (HARD LESSON 41/47). R floor 0.8% by exclusion (LESSON 3). UTC hour/minute recovered via math.floor(time/...) arithmetic since hour()/minute() are unimplemented on this engine (established in Attack 50). Long only, bare, no filter stack.",
+    "metrics": {
+      "netProfitPct": -8.44282286,
+      "profitFactor": 0,
+      "maxDrawdownPct": 9.80203526,
+      "totalTrades": 7,
+      "winningTrades": 0,
+      "losingTrades": 7,
+      "winRatePct": 0,
+      "avgTradePct": -1.20611755,
+      "avgWinningTrade": 0,
+      "avgLosingTrade": -120.611755121428,
+      "ratioAvgWinLoss": 0,
+      "largestWin": 0,
+      "largestLoss": -212.484703549999,
+      "avgBarsInTrade": 19.57142857,
+      "avgBarsWinning": 0,
+      "avgBarsLosing": 19.57142857,
+      "sharpeRatio": -1.34015593,
+      "sortinoRatio": -0.04745918,
+      "commissionPaid": 67.16198585,
+      "grossProfit": 0,
+      "grossLoss": 844.282285849998,
+      "longTrades": 7,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1P9TNR25ARZVJ3BC51FKGFG",
+      "strategyId": "01M1P9TBFQPRW7SZ4K8HH8ZZ13",
+      "resultId": "01M1P9TNR2SQ5CBET3VZN6FJXD",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1P9TNR2SQ5CBET3VZN6FJXD",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T13:24:05Z"
+    },
+    "verdict": "DISCARDED BY THE KILL RULE, DOUBLY. Profit factor 0 (0 winners of 7 losers) is unambiguously below 1.0 on H1 -- H2 NOT run, second credit not spent. Independently, 7 trades is far below even the 30-trade sample floor, so this would not have been quotable as a result regardless of PF.",
+    "notes": "FREQUENCY FINDING (HARD LESSON 4): the pre-registered estimate was ~270 trades on H1 (from a 1-in-32 settlement-clock fact x ~50% down-bar fraction x an assumed ~20% chance of a >=1.5x-average-range bar). Actual: 7 trades across 85,559 bars -- roughly 38x rarer than estimated. The three-way conjunction (exact settlement timestamp AND elevated range AND down close) binds far harder in practice than the independence assumption predicted; whichever pairwise correlation was assumed independent was not. This is a frequency finding in its own right, reported before the PF is read, per the board's standing practice. cascadeRatio 1, maxCascadeDepth 1 (get_trades cascade summary from run_backtest response) -- not a margin artifact, a genuine small-sample outright loss. Avg loser -$120.61, largest loss -$212.48, all 7 losers, avgBarsLosing 19.57 against a 192-bar cap (not truncation-related; these are fast, clean stop-outs). H2 not run per the kill rule; do not tune this mechanism (widening rangeMult would only shrink the count further, tightening it would abandon the 'outsized move' claim entirely)."
   }
 ];
-const BUILT = "2026-09-04 12:35";
+const BUILT = "2026-09-04 13:32";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

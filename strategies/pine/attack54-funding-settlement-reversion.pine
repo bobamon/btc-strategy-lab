@@ -1,0 +1,175 @@
+//@version=6
+// BTC ATTACK 54 - FUNDING-SETTLEMENT SQUEEZE REVERSION. LONG LEG (fades an oversized DOWN bar at a
+// funding-settlement timestamp).
+//
+// THE STORED PROMPT still asks for Attack 37's filter stack (an EIGHTH time now), describing a board
+// state (Attack 37, 322/196 trades, "earned a filter stack, queued not built") that is 17 attacks
+// stale. THE DOCS OVERRIDE IT, again, per STRATEGY-LEDGER's own instruction to say so when they
+// disagree: Attack 41 closed Attack 37 as a development target after four single-term filter
+// rejections; Attack 43 closed the whole sweep-reversal FAMILY (37-43) on both timeframes; Attack 47 --
+// the one filter tried on the current champion, Attack 46 -- died on the ~77% sample wall (HARD LESSON
+// 45/49, confirmed on two unrelated mechanisms in two labs). The board's own queue after Attacks 47-53
+// says stop filtering Attack 46 on this data and propose a genuinely new mechanism instead, so this
+// cycle builds one, per the mandate's own fallback clause -- and per Attack 53's own queue item 4, this
+// is tested on BOTH halves in one pair, without a prior single-half detour, since the mechanism-space
+// search is narrowing (four straight new-mechanism proposals -- 50, 51, 52, 53 -- have now failed).
+//
+// ==================== WHAT HAS ALREADY BEEN TRIED, SO THIS DOES NOT REPEAT IT ====================
+// Price structure alone (x7 families: VWAP, channel breakout, weekly/daily calendar anchor,
+// volatility-coil, sweep-reversal 37-43, level-target tap-and-hold 44-47, round-number grid 48), a
+// single bar's own statistics (Attack 49, momentum continuation), a session RANGE used as a breakout
+// level (Attack 50, Asian range), a derived PRICE oscillator (Attack 51/52, RSI divergence), and a
+// volume-delta order-flow proxy (Attack 53) have all been tried as PRIMARY signals. **None has used a
+// CLOCK TIMESTAMP tied to a real BTC-perpetual structural mechanism as the trigger** -- Attack 50 used
+// a session's price RANGE (Asia low-volume hours) as a breakout level, which is a price-structure claim
+// wearing a time label; it says nothing about WHY that specific moment should behave differently. This
+// build's trigger is the funding-settlement CLOCK ITSELF, not a range it happens to produce.
+//
+// ==================== THE CLAIM ====================
+// Bybit BTCUSDT perpetuals settle funding three times a day, at 00:00 / 08:00 / 16:00 UTC. Funding is
+// paid by whichever side (longs or shorts) is crowded, to the other side, and settlement is a genuine
+// mechanical, calendar-fixed event independent of any price level. When the 15m bar that OPENS exactly
+// at a settlement timestamp also prints an outsized DOWN move (an elevated true range relative to its
+// own recent average, closing below its open), that move is more likely to be leveraged, forced
+// deleveraging flow synchronised to the settlement clock than information-driven selling -- and
+// mechanical flow reverts once the settlement pressure clears, unlike a genuinely information-driven
+// decline. This is a claim about WHEN a move happened relative to a real exchange mechanism, not about
+// its price level (distinct from Attack 37-47) and not about who was transacting via a derived
+// volume-delta proxy (distinct from Attack 53).
+//
+// ==================== MECHANICS, NO ARRAYS, NO UDFs, NO REQUEST.SECURITY ====================
+// `hour()` / `minute()` are UNIMPLEMENTED on this engine (established in Attack 50's own header) --
+// UTC hour and minute are recovered by pure integer arithmetic on the `time` builtin, exactly as Attack
+// 50 did: hourUTC = math.floor(time / 3600000) % 24; minuteUTC = math.floor(time / 60000) % 60.
+// isSettlement flags the bar whose OPEN lands exactly on a funding timestamp (hourUTC % 8 == 0 and
+// minuteUTC == 0) -- true on 3 of every 96 bars on 15m, a fixed 1-in-32 clock fact, independent of any
+// price condition. avgRange is the 20-bar SMA of ta.tr, read ONE BAR BACK ([1]) so the elevated-range
+// test never compares a bar's range against an average that already includes itself. rangeBig is this
+// bar's own ta.tr against rangeMult times that trailing average. isBigDown is close < open on the same
+// bar. All three conditions are independent (a clock fact, a volatility-relative-to-recent-history
+// fact, and a same-bar direction fact) and ALL must hold on ONE bar to fire -- this is a same-bar
+// trigger, not a two-stage latch (see LATCH note below).
+//
+// TARGET IS A LEVEL, NOT A MULTIPLE (HARD LESSON 41/47): tpPx = close[preBars], the close price traded
+// `preBars` bars (1 hour at preBars=4 on 15m) BEFORE the settlement bar -- a real, already-traded price
+// from immediately before the squeeze began, not a multiple of the stop. Because the squeeze is by
+// definition a departure from that pre-squeeze level, the target sits on the correct side of entry by
+// construction whenever the claim is right (checked explicitly via rrOk, not assumed). STOP is the
+// settlement bar's OWN LOW (structure, LESSON 5) -- the extreme the forced-flow move actually printed,
+// not an ATR offset and not the reclaim/target level.
+//
+// ==================== AUDIT, ONE LINE PER LEG (LONG ONLY -- LESSON 6) ====================
+//   R >= 0.8% (LESSON 3) -- enforced by EXCLUSION via rFloorOk, measured close-to-low on the settlement
+//        bar. A squeeze bar too shallow to clear the floor is SKIPPED, never widened to fit.
+//   Stop beyond STRUCTURE (LESSON 5) -- slPx = the settlement bar's own low, the actual extreme printed
+//        by the forced-flow move, never the entry level itself and never an ATR offset.
+//   Each leg separately (LESSON 6) -- LONG ONLY this cycle, fading an oversized DOWN settlement bar.
+//        The mirror (fading an oversized UP settlement bar, short) is NOT assumed identical -- HARD
+//        LESSON 42/43 established a 100%-equity short is a harness margin artifact, not a signal, and
+//        needs its own declared 25%-equity run that cannot sit beside this long's 100%-equity numbers
+//        in the same table. Unlike a price-structure filter (support/resistance is NOT symmetric per
+//        HARD LESSON 48), funding-settlement mechanics ARE directionally symmetric by construction --
+//        crowded longs and crowded shorts pay the same mechanism in mirrored form -- so the short is a
+//        deliberate, low-risk next step if this long clears the kill rule, built and measured on its
+//        own, not carried over from this run. Its absence here is a declared scope limit, not a design
+//        claim that it works.
+//   BINDING (E17) -- THREE independent conditions must all be true on the SAME bar (settlement clock,
+//        elevated range, down close); trade count is read before any ratio is quoted (LESSON 12).
+//   REDUNDANCY (E14) -- rFloorOk constrains the STOP distance (close-to-low, an absolute % floor);
+//        rrOk only checks tpPx sits above close (existence, not a size threshold). Non-overlapping,
+//        same pattern as Attack 44/50/51/52/53.
+//   LATCH IN SEQUENCE (LESSON 8) -- N/A BY DESIGN, STATED EXPLICITLY: all three trigger conditions
+//        (clock, range, direction) are evaluated and satisfied on ONE bar, with no separate arm stage
+//        to sequence -- the same accepted same-bar-trigger shape as Attack 48 (round-number cross) and
+//        Attack 49 (impulse-bar continuation), not a violation of the two-stage-latch requirement,
+//        which applies only when a design HAS an arm/trigger split.
+//   SL and TP FIXED AT ENTRY (slPx/tpPx captured once, at the entry bar, from the settlement bar's own
+//        low and the preBars-back close). No trailing, no averaging down, no martingale.
+//   CASCADE (HARD LESSON 35/50) -- long build at 100% equity with a fixed stop/target; expect
+//        cascadeRatio 1, verified via get_trades before applying RATCHET v2 clause 3 if this advances.
+//   WEEKENDS (structural note 4) -- funding settles identically on weekends; no special-casing, stated
+//        rather than silently assumed. The settlement clock does not distinguish weekday from weekend.
+//
+// ==================== FREQUENCY ESTIMATE, A HYPOTHESIS TO BE SCORED (HARD LESSON 4) ====================
+// ~163,700 15m bars over the backtest window; settlement bars are exactly 1-in-32 (~5,115 bars). Down
+// bars are ~50% of those. An elevated-range bar (>=1.5x the trailing 20-bar average true range) is
+// estimated at roughly 20% of bars given typical right-skewed TR distributions on this asset. Naive
+// conjunction: 5,115 * 0.50 * 0.20 ~ 510 candidate bars before the R-floor exclusion, split roughly by
+// bar-count share across the two halves (~85,655 H1 bars vs ~78,000 H2 bars per Attack 43's own count)
+// to somewhere near 270 / 240 before the floor trims further. Read the ACTUAL count from the result,
+// never trust this estimate (HARD LESSON 4) -- if it misses by more than 2x, say so explicitly.
+//
+// ==================== OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17) ====================
+//   * PRE-2024 HALF (H1, never-tuned, 2022-01-01 -> 2024-06-08) BELOW 1.0 -> KILL RULE. Discard, do NOT
+//     run H2, do NOT add filters to rescue it -- this is a bare mechanism test.
+//   * BOTH HALVES >= 1.0 -> a third genuinely-new, both-halves-positive family alongside Attack 37
+//     (closed on cost) and Attack 46 (the current champion) -- queues for its own cold re-run and cost
+//     screen (HARD LESSON 25/37) before any filter-stack treatment, per the mandate's own logic.
+//   * EITHER HALF UNDER ~30 TRADES -> that half's ratio is a DIRECTION, not a result (LESSON 12); the
+//     three-way conjunction is expected to bind hard (see BINDING above), so a thin count is a real,
+//     registered-in-advance risk, not a surprise to explain away afterward.
+//   * TRADE COUNT FAR ABOVE THE ~510 ESTIMATE (>2x) -> the elevated-range assumption was wrong, a
+//     frequency finding in its own right per HARD LESSON 4, reported before interpreting the PF.
+//   * A MAJORITY OF HOLDS AT maxBars 192 -> HARD LESSON 38 truncation, reported before any conclusion
+//     is drawn from the achieved win/loss ratio.
+//   REPORT gross, commission, achieved ratio, avg loser, win rate and max drawdown together, per the
+//   board's standing instruction since Attack 37 named the three drawdown categories (HARD LESSON
+//   36/39).
+
+strategy("BTC Attack54 funding settlement reversion", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rangeMult = input.float(1.5,  "Elevated-range multiple of trailing 20-bar avg true range")
+avgLook   = input.int(20,    "Lookback for the trailing average true range")
+preBars   = input.int(4,     "Bars before the settlement bar used as the target anchor (4 = 1h on 15m)")
+minRpct   = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars   = input.int(192,   "Max bars in trade")
+
+hourUTC   = math.floor(time / 3600000) % 24     // hour() is unimplemented on this engine (Attack 50)
+minuteUTC = math.floor(time / 60000) % 60
+
+isSettlement = (hourUTC % 8 == 0) and (minuteUTC == 0)
+
+avgRange = ta.sma(ta.tr, avgLook)[1]
+rangeBig = not na(avgRange) and ta.tr >= rangeMult * avgRange
+isBigDown = close < open
+
+signal = isSettlement and rangeBig and isBigDown
+
+flat = strategy.position_size == 0
+
+slCand = low
+tpCand = close[preBars]
+
+rLong    = close - slCand
+minR     = close * minRpct / 100
+rFloorOk = rLong >= minR
+rrOk     = not na(tpCand) and tpCand > close
+
+goLong = flat and signal and rFloorOk and rrOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := slCand
+    tpPx   := tpCand
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(slPx, title="StopPx")
+plot(tpPx, title="TargetPx")
