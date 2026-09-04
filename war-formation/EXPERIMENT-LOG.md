@@ -4129,3 +4129,58 @@ $8.84). By the screen in HARD LESSON 37, this build sits where a workable mechan
    source's own larger shield may be right and the earlier rejection was cost-blind.
 2. The entry binding sweep is complete (E70) — do not re-run it.
 3. No credits on short geometries until the sizing constraint changes (E68).
+
+
+---
+
+# ██ THE WIDER-SHIELD QUESTION IS ANSWERED, AND MY OWN HYPOTHESIS WAS WRONG (2026-09-04, no credits)
+
+Last cycle's queue item asked whether E57's rejection of the source's larger shields ($3,000/$4,000)
+was **cost-blind** — it swept shield width against NET profit factor, and a wider shield raises R,
+which raises gross edge per trade against a fixed fee. **Measured, the rejection was correct, and for
+a reason it never stated.**
+
+Comparing the two reproducible builds that differ only in shield width (and its linearly-scaled cap):
+
+| | **e50b** — $2,000 shield, cap 12960 | **e58a** — $1,000 shield, cap 6480 |
+|---|---|---|
+| Trades | 21 | 36 |
+| **Gross edge per trade** | **$41.56** | $31.17 |
+| Commission per trade | $9.99 | $10.40 |
+| **Commission as % of gross** | **24.0%** | 33.4% |
+| **Profit factor GROSS** | **1.29974085** | **1.38769869** |
+| Profit factor NET | 1.21869905 | 1.24015239 |
+| **Trades hitting the hold cap** | **3 of 21 (14%)** | **0 of 36** (max 5503 vs 6480) |
+
+*(e50b's decomposition reproduces its recorded net PF exactly — 1.21869905 — so the arithmetic is
+verified, not asserted.)*
+
+## THE HALF THAT WAS RIGHT
+**A wider shield does exactly what HARD LESSON 37 predicted on the cost axis.** Gross edge per trade
+rises 33% ($31.17 → $41.56) while commission per trade stays flat (~$10), so the cost share falls from
+**33.4% to 24.0%**. That part of the hypothesis holds.
+
+## THE HALF THAT WAS WRONG, AND IT DOMINATES
+**Gross profit factor FALLS: 1.38769869 → 1.29974085.** The wider shield buys a better *cost* ratio at
+the price of a worse *win/loss* ratio, and the second effect is larger.
+
+**The mechanism is visible in the trade log.** Three of e50b's 21 trades sit at `barsInTrade` **12961**
+— exactly the cap — and they exit as time-outs producing −$5.85, +$43.71 and +$68.94 of gross instead
+of clean ±R resolutions. **e58a's cap never binds at all** (longest trade 5,503 bars against a 6,480
+cap).
+
+**This is the same target/cap coupling the BTC lab named hours ago in Attack 41**, where widening rr
+2.0 → 3.0 pushed `avgBarsWinning` from 49 to 78 bars against a 192-bar cap and destroyed 43% of the
+per-trade edge. **Two labs, two different exit models, same mechanism.**
+
+## SO E57 STANDS, AND THE SOURCE'S LARGER SHIELDS ARE NOT VINDICATED
+E57 rejected $3,000 and $4,000 on net profit factor and on sample collapse. The gross lens does not
+overturn that — it explains it. Larger shields need proportionally longer holds; longer holds both
+**time out at the cap** and **block later entries**, so the sample shrinks *and* the win/loss ratio
+degrades. **$1,000 is not merely the best net result, it is the best GROSS result too.**
+
+## QUEUE
+1. **The shield axis is now closed on both net and gross grounds.** Do not re-sweep it.
+2. **Before any future change that lengthens holds, check what fraction of trades hit `maxBars`.**
+   Free, from `get_trades`. e58a's 0-of-36 is headroom; e50b's 3-of-21 is the cap already biting.
+3. The entry binding sweep is complete (E70). No credits on short geometries (E68).

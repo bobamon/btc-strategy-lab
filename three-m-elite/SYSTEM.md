@@ -3117,3 +3117,34 @@ $8.84). By HARD LESSON 37's screen, v37 sits comfortably where a workable mechan
 2. **Re-measure H2's gross profit factor** before repeating the "the edge is concentrated in H1"
    caveat. Free, via `get_trades` on the existing H2 split result.
 3. The bias-gate question (v54/v57) is answered and closed; the R-floor and freshness axes stay closed.
+
+
+---
+
+# ██ A CROSS-LAB WARNING FOR THE QUEUED rTarget SWEEP (2026-09-04, no credits)
+
+SYSTEM.md queued a **rTarget sweep (2.0 → 2.5 → 3.0)** last cycle, on HARD LESSON 37's logic that
+raising gross edge per trade lifts net directly because the fee is fixed. **Two experiments in the
+other labs have since falsified that reasoning in its first two applications** (HARD LESSON 38):
+
+- **BTC Attack 41** widened rr 2.0 → 3.0 on a capped-hold mechanism. Gross edge per trade **fell 43%**
+  ($10.58 → $6.00) because `avgBarsWinning` rose from 49 to 78 bars against a 192-bar cap and winners
+  timed out instead of resolving.
+- **War Formation e50b vs e58a** widened the shield. The cost axis behaved exactly as predicted —
+  gross edge per trade rose 33%, cost share fell 33.4% → 24.0% — **and gross profit factor still fell**
+  (1.388 → 1.300), because 3 of 21 trades hit the hold cap.
+
+**v37 has `maxBars = 96`, and a 3R target needs materially longer to reach than a 2R one.** So the
+sweep as queued is a real risk of repeating the same error a third time.
+
+## DO THIS FIRST, AND IT COSTS NOTHING
+**Measure what fraction of v37's 155 trades already sit at or near `maxBars = 96`, and what
+`avgBarsWinning` is.** One `get_trades` call on the existing champion result. If winners already run a
+large fraction of 96 bars, a wider target will time out rather than pay, and the sweep should either
+be dropped or run with `maxBars` widened in the same build — which is a two-variable change and would
+need to be declared as one.
+
+If winners resolve well inside the cap, the sweep is safe and the HARD LESSON 37 logic applies cleanly.
+
+**Either way this is a free check that decides whether to spend a credit at all** — and it is exactly
+the check that would have saved the two failed experiments above.

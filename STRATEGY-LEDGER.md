@@ -1916,3 +1916,50 @@ small **relative to the cost of harvesting it at this frequency**, which is a di
 fixable problem: the same mechanism at a fraction of the frequency, or on a timeframe where each
 signal carries a larger move, could clear the screen. That is why the BTC queue now tests a cooldown
 rather than a fourth filter.
+
+
+---
+
+## ██ HARD LESSON 38 — RAISING GROSS EDGE PER TRADE ONLY HELPS IF IT DOES NOT LENGTHEN HOLDS INTO THE
+## CAP. A QUALIFIER ON HARD LESSON 37, MEASURED IN TWO LABS ON THE SAME DAY (2026-09-04)
+
+HARD LESSON 37 established that **gross edge per trade against a fixed per-trade fee** is the screen
+that separates workable mechanisms from expensive ones. Two experiments then tested the obvious
+corollary — *raise gross edge per trade* — and **both failed, for the same reason.**
+
+| | BTC Attack 41 | WF e50b vs e58a |
+|---|---|---|
+| The change | rr 2.0 → 3.0 | shield $1,000 → $2,000 |
+| Gross edge per trade | $10.58 → **$6.00** | $31.17 → **$41.56** ✅ |
+| Commission share of gross | — | 33.4% → **24.0%** ✅ |
+| **Profit factor** | 1.024 → **0.973** | gross 1.388 → **1.300** |
+| Hold length | avgBarsWinning 49 → **78** (cap 192) | **3 of 21 trades hit the cap exactly** |
+
+**In War Formation the cost axis behaved exactly as predicted — and the build still got worse.**
+
+### THE MECHANISM
+Widening R (a wider target, a wider stop, or both) makes each trade **take longer to resolve**. Longer
+holds do two damaging things at once:
+
+1. **Trades time out at the hold cap** instead of resolving at stop or target, converting clean ±R
+   outcomes into small arbitrary ones. e50b's three capped trades returned −$5.85, +$43.71 and +$68.94
+   of gross where a resolution would have returned roughly ±$280.
+2. **Open positions block later entries** under `pyramiding = 1`, shrinking the sample — which in War
+   Formation's case (21 trades) drops it below the ratchet's own 30-trade floor.
+
+### THE QUALIFIED RULE
+**Gross edge per trade is still the right screen. But it is a RATIO of two things that move together:
+edge per trade rises with R, and so does time-to-resolution.** A change that raises R without
+lengthening holds is a genuine improvement; one that raises R by holding longer trades the cost ratio
+for the win/loss ratio, and the second usually wins.
+
+**BEFORE any change that widens a target, a stop, or a hold: measure what fraction of the existing
+trades already sit at `maxBars`.** It is free from `get_trades`. e58a's **0 of 36** was headroom;
+e50b's **3 of 21** was the cap already biting; Attack 37's winners at 78 of 192 bars had less room than
+they looked.
+
+### WHAT THIS RETIRES
+Two "obvious next levers" are now closed by measurement rather than by opinion — **rr on BTC Attack 37**
+and **shield width in War Formation**. Both were queued by me on HARD LESSON 37's logic, and both were
+wrong for the same unaccounted reason. **The lesson is stronger for having been falsified in its first
+two applications than it would have been if they had worked.**
