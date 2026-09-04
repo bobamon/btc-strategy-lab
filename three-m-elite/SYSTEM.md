@@ -3456,3 +3456,69 @@ one without losing three quarters of its sample.
 
 **CHAMPION UNCHANGED: v37, 1.25172059 / 155 trades**, with every existing caveat -- and, decisively, on
 a sample that can actually be split (96/59).
+
+
+---
+
+## v57 -- THE SOURCE'S OWN BIAS RULE ON THE SHORT. GROSS TURNS POSITIVE.
+
+**Both stored queue items were already closed** -- item 1 by the transcript check (bias is a 20/50/200
+SMA stack on 15m, not 12H/24H closes), item 2 by the free trade-level forensics (a margin-call unwind,
+not a latch failure). So this cycle took **the untested cell of the 2x2**:
+
+| | lab's 12H/24H proxy | **source's 20/50/200 stack** |
+|---|---|---|
+| **LONG** | v54 — reverted | v56 — 1.62137752, split unsatisfiable |
+| **SHORT** | v55 — 0.72183885 | **v57 — this run** |
+
+HARD LESSON 48 is why the gap mattered: **a filter's value is direction-specific.** In the sister lab
+the same term cost the long 0.0103 of profit factor and *gained* the short 0.194.
+
+### THE REGISTERED FIRST READ WAS GROSS, AND IT IS DECISIVE
+
+| | v53 (ungated mirror) | **v57 (source's rule)** |
+|---|---|---|
+| **gross, pre-commission** | **−$895.26** | **+$780.77** |
+| profit factor | 0.70512830 | **1.222673** |
+| max drawdown | 31.08% | **8.07312248%** |
+| unique entries | 174 | 39 |
+
+**A $1,676 swing from one term.** The pre-registered outcome said a positive gross would mean *"the
+bias gate was the short's real problem, the source's own rule fixes it, and the mirror is viable"* —
+and that is what happened. **The source was right and the lab's proxy was wrong**, now shown on the leg
+where it matters most.
+
+**This is the first profitable 3M short in the project's history**, and the first real answer to the
+bidirectional directive for this lab.
+
+### HARD LESSON 48 CONFIRMED A SECOND TIME, IN A SECOND LAB
+The identical term is worth opposite things by leg: on the **long** it lifted PF to 1.62 but cut 76% of
+the sample and could not promote; on the **short** it rescues a mechanism that was losing money *before
+costs*. Predicting either from the other would have been wrong.
+
+### READ THE WIN RATE BY ENTRY, NOT BY ROW
+`cascadeRatio` 1.5128205128205128 — 59 rows from **39 unique entries** (histogram 24/11/3/1, depth 4),
+the margin-call unwind established on v53.
+
+- win rate **by row 16.94915254%**, **by entry 10/39 = 25.64102564%**
+- `avgLosingTrade` −$34.79 is contaminated by sliver rows and is **not** the true loss per position
+- **`ratioAvgWinLoss` 5.9910977 is inflated by the same effect and must NOT be quoted** as the
+  geometry's ratio
+- **profit factor is the one aggregate shown to survive the artifact** (v53: 0.70512830 by row vs
+  0.70360999 by entry, a difference of 0.0015), so 1.222673 reads as printed
+
+### IT CANNOT PROMOTE — SAME STRUCTURAL REASON AS v56
+174 → 39 entries is a **78% cut**, so clause 4 requires a split test first. **39 entries cannot put 30
+on both sides of 2024-06-08**, so the split is unsatisfiable, exactly as v56's 27/10 was.
+
+**HARD LESSON 45 now has its second confirmation:** every bias gate this lab tries — its own invention
+*or* the source's own rule — cuts the sample below what the ratchet needs. **The binding constraint is
+the data.**
+
+**CHAMPION UNCHANGED: v37, 1.25172059 / 155 trades**, on a sample that can actually be split.
+
+### QUEUE
+1. **Confirm v57's profit factor by entry from the free trade log.** No credit needed.
+2. **Stop proposing bias gates.** Three of four cells now show the same sample collapse.
+3. **The short's real result is the gross sign flip, not the profit factor** — that finding is
+   sample-robust in a way the ratio is not, and it stands on its own.

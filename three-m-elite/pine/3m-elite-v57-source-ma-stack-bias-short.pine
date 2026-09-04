@@ -1,0 +1,145 @@
+//@version=6
+// 3M ELITE v57 - THE SOURCE'S OWN BIAS RULE ON THE SHORT LEG. THE UNTESTED CELL OF THE 2x2.
+//   v54 lab proxy LONG (reverted) | v55 lab proxy SHORT (0.72183885)
+//   v56 stack     LONG (1.62137752, split unsatisfiable) | v57 stack SHORT <- THIS RUN
+// HARD LESSON 48 is why the gap mattered: a filter's value is DIRECTION-SPECIFIC. In the sister lab
+// the same term COST the long 0.0103 of profit factor and GAINED the short 0.194.
+//
+// THE RULE, transcript 2026-08-09 09-49-18, inverted for the short exactly as stated:
+//   [04:31] bearish: "the 200 is going to be on the top, and then the 50 and then the 20"
+//   -> sma20 < sma50 < sma200.  SMA not EMA per [03:01] "the average price of the last 200 candles".
+//   Read on the 15m WORKING chart per [00:28]; [02:47] the 200 MA IS his higher-timeframe read.
+//
+// WHY IT WAS SHAPED TO FIX THIS LEG: v53 is GROSS-NEGATIVE at -$895.26 BEFORE a cent of commission --
+// not a cost problem. It shorted supply zones straight through the 2023-2025 bull advance, which the
+// source forbids ("the model is just going to be the same thing that the hard time frame is",
+// 04-18-22 [05:12]). A CORRECT BIAS GATE SHOULD EXCLUDE PRECISELY THOSE TRADES.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - by EXCLUSION via rBig, never clamped, so the stop stays structural.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = szTop, the supply zone's HIGH; the mirror of v37's
+//        demand-zone low, which is what the source prescribes rather than something invented here.
+//   Each leg separately (LESSON 6 as scoped by HARD LESSON 31) - SHORT alone, NOT bundled: v24 showed
+//        removing shorts ADDED 84 long entries, so a combined build is not the sum of two runs.
+//   BINDING (E17) - the stack gate necessarily binds. Count read first, as in v56.
+//   REDUNDANCY (E14) - NAMED. A supply-zone tap tends to occur in downtrends anyway, so the gate may
+//        overlap what the zone logic already selects. That is what made v56 cut 76% of its sample.
+//   LATCH IN SEQUENCE (LESSON 8) - SMAs read on the entry bar; the zone is built from a COMPLETED 4H
+//        candle and the tap is a later 15m bar, so setup and trigger cannot share a bar.
+//   CASCADE (HARD LESSONS 35/42) - a SHORT build, so expect cascadeRatio > 1 from margin slivers. This
+//        is MEASURED, not a mystery: on v53 it moved profit factor by 0.0015 (0.70512830 by row vs
+//        0.70360999 by entry) but understated the WIN RATE by ~6pp. PF reads as printed; THE WIN RATE
+//        AND avgLosingTrade MUST BE READ BY ENTRY.
+//   NO PARITY DEVIATION. Unlike War Formation, 3M's structural stop sits inside the margin boundary,
+//        so that lab's sizing fix is NOT needed here and is not applied. 3M keeps its own model.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// RESULT: GROSS -$895.26 -> +$780.77, PF 0.70512830 -> 1.222673, DD 31.08% -> 8.07312248%,
+// 59 rows from 39 unique entries, win rate 25.64102564% BY ENTRY. FIRST PROFITABLE 3M SHORT.
+// CANNOT PROMOTE: a 78% cut, and 39 entries cannot put 30 on both sides of 2024-06-08, so RATCHET v2
+// clause 4 is unsatisfiable exactly as it was for v56's 27/10.
+strategy("3M ELITE v57 source MA stack bias SHORT", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rTarget  = input.float(2.0, "Target, x R -- held at v37/v53")
+maxBars  = input.int(96,    "Max bars in trade -- held")
+maxAge   = input.int(6,     "Zone freshness cap, 4H candles -- held")
+minRpct  = input.float(0.80,"Min stop distance as % of price (LESSON 3)")
+maFast   = input.int(20,    "THE SOURCE'S STACK: fast MA")
+maMid    = input.int(50,    "THE SOURCE'S STACK: middle MA")
+maSlow   = input.int(200,   "THE SOURCE'S STACK: slow MA -- his higher-timeframe read")
+
+sma20  = ta.sma(close, maFast)
+sma50  = ta.sma(close, maMid)
+sma200 = ta.sma(close, maSlow)
+stackBear = not na(sma200) and sma20 < sma50 and sma50 < sma200
+
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+var float pO  = na
+var float pH  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pH  := h4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+bearEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC > ppO and pC < pO and pC < ppO
+
+var float szTop   = na
+var float szBot   = na
+var bool  szLive  = false
+var int   szTouch = 0
+var int   szAge   = 0
+var bool  szTraded = false
+
+if new4h
+    if szLive and not na(pC) and pC >= szBot
+        szTouch := szTouch + 1
+        if szTouch >= 2
+            szLive := false
+    if szLive
+        szAge := szAge + 1
+    if bearEngulf
+        szTop   := pH
+        szBot   := pO
+        szLive  := true
+        szTouch := 0
+        szAge   := 0
+        szTraded := false
+
+minR     = close * minRpct / 100
+rBig     = not na(szTop) and (szTop - close) >= minR
+
+shortCond = rBig and szLive and not szTraded and szAge >= 1 and szTouch < 2 and high >= szBot and close < szTop and szAge <= maxAge and stackBear
+
+flat = strategy.position_size == 0
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if flat and shortCond and not na(szTop) and close < szTop
+    r = szTop - close
+    if r > 0
+        strategy.entry("S", strategy.short)
+        szTraded := true
+        slPx   := szTop
+        tpPx   := close - r * rTarget
+        barsIn := 0
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(szLive ? 1 : 0,     title="SupplyZoneLive")
+plot(stackBear ? 1 : 0,  title="StackBear")
