@@ -2171,3 +2171,41 @@ War Formation lab would have needed re-running.** The control cost one credit an
    reason that is arithmetic and was predictable in advance.
 3. **Reproducing a result at a DIFFERENT setting, with an identical trade population, is stronger
    evidence than repeating it at the same setting** (LESSON 25). e58a now clears that higher bar.
+
+---
+
+## HARD LESSON 45 — WHEN EVERY VERSION OF A FILTER COSTS THREE QUARTERS OF THE SAMPLE, THE BINDING CONSTRAINT IS THE DATA, NOT THE FILTER.
+
+3M tried two bias gates on the same mechanism:
+
+| gate | source | count | profit factor |
+|---|---|---|---|
+| v54 — consecutive higher/lower closes, 12H **and** 24H | **the lab's own invention** | 155 → 48 (−69%) | 1.25172059 → 1.15861551 |
+| v56 — 20/50/200 SMA stack on 15m | **the source's own rule**, verified in the transcripts | 155 → 37 (**−76%**) | 1.25172059 → **1.62137752** |
+
+v56 improves profit factor by 0.37 **and** improves drawdown — it passes RATCHET v2 clauses 1–3
+outright. **Clause 4 kills it:** a >50% cut needs a split test, and splitting 37 trades at 2024-06-08
+gives **27 and 10**. Both under the sample floor, so the split can never clear **no matter how it
+lands**.
+
+**Two gates, opposite provenance, opposite PF directions — same fatal count collapse.** That points at
+the data, not at either gate. The mechanism fires ~155 times in 4.7 years; **any** condition that is
+true less than a quarter of the time takes it under the floor.
+
+**HOW TO USE THIS:**
+1. **Before building a filter, estimate what fraction of bars it will be true on, and multiply.** If
+   the projected count lands near the floor, the run cannot promote whatever it returns — so run it
+   only as a measurement, and say so up front.
+2. **Compute the split feasibility from the FREE trade log before spending credits on halves.** Two
+   credits were saved here by reading entry timestamps rather than running H1 and H2 that could not
+   have counted.
+3. **A result can be genuinely good and still unpromotable.** v56's halves land at roughly 1.60 and
+   1.67 — strikingly consistent — and that is *still* not evidence, because 10 trades cannot carry a
+   ratio. Consistency is not a substitute for sample size.
+
+**AND A CORRECTION TO MY OWN REASONING, which is the reason this lesson exists.** I registered the
+prediction that "a stack ordering is a COMMON state" and would therefore cut mildly. It cut *harder*
+than the gate I was criticising. A 200-SMA on 15m spans ~50 hours, and demand-zone taps happen during
+pullbacks — exactly when the fast averages are dipping toward the slow one. **The gate and the entry
+were competing for the same moments**, which is the redundancy the E14 audit line names but which I
+did not weigh heavily enough when predicting the count.

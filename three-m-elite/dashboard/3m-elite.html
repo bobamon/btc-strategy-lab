@@ -711,9 +711,55 @@ const DATA = [
     "pineSource": "three-m-elite/pine/3m-elite-v58-first-touch-only.pine",
     "verdict": "RATCHET v2 clauses 1-3 PASS decisively; clause 4 (mandatory split) not triggered but not yet checked -- new interior base, promotion to champion-of-record pending a split test",
     "notes": "THE PREDICTION'S FIRST BRANCH LANDED, DECISIVELY. Versus champion v37: profit factor 1.25172059 -> 1.48439273 (+0.2327, far past the 0.02 threshold), max drawdown 8.72815312% -> 8.70519440% (IMPROVED, not just held), trades 155 -> 117 (a 24.5% cut -- real but under RATCHET v2 clause 4's 50% split-test trigger). All three live ratchet clauses (PF up, DD not worse, count >=30) pass at once, which last happened for this lab at v32 and v37 themselves. WHY IT WORKED AS DESIGNED: avgBarsWinning is 47.02 (49% of the 96-bar cap), essentially identical to v37's own 47.0 (49%) -- the hold profile is unchanged, confirming the entry-only filter did not achieve its PF gain by lengthening winners into the cap, exactly the lever HARD LESSON 38 said was untried and safest. Achieved win/loss ratio (HARD LESSON 39) is 1.73179151 against the same nominal rTarget=2.0 -- 86.6% of nominal, weaker than v37's 97.1% but still healthy, and win rate rose from 42.58% to 46.15%. Net effect: a genuinely untouched zone (dzTouch==0) converts at a higher rate than a zone that already absorbed one completed close-inside, which is the opposite of 'a zone that survived a test is proven' and consistent with the source's own framing of a fresher setup as a cleaner one. Cascade ratio 1.0 (117 rows = 117 unique entries) -- clean, as expected for a long build (HARD LESSON 35's tranching signature is short-specific). NOT YET A CHAMPION: this is a >24% trade-count cut on a large PF move, and while RATCHET v2's clause 4 does not mandate a split test below 50%, this lab has never promoted a result of this magnitude to 'passed' without one (v32->v33, v37->v39) -- the credit budget this cycle (1 of 2 spent on this run) did not extend to a same-cycle split, so v58 is recorded as the new interior base (status: testing) and the split (2022-01-01/2024-06-08 halves, matching the established methodology) is the top queue item for the next cycle before any promotion."
+  },
+  {
+    "id": "3m-elite-v56-source-ma-stack-bias-long",
+    "name": "v56 LONG: the SOURCE's own bias rule (20/50/200 SMA stack on 15m)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/pine/3m-elite-v56-source-ma-stack-bias.pine",
+    "description": "v37 byte-identical plus ONE term: the source's own bias rule. v54's gate ('consecutive higher/lower closes on 12H AND 24H, both agreeing') was this lab's invention. The transcripts define bias as a 20/50/200 SMA STACK ORDERING read on the 15m WORKING CHART -- 09-49-18 [00:28] 'mainly on the 15 minute time frame', [01:30] 'the twenty, the fifty and the two hundred', [04:20] bullish is '200 on the bottom, then the 50, then the 20', [02:47] the 200 MA IS his higher-timeframe read rather than something pulled from a higher timeframe. SMA not EMA per [03:01] 'the average price of the last 200 candles'. So the gate here is sma20 > sma50 > sma200.",
+    "metrics": {
+      "netProfitPct": 14.70257913,
+      "profitFactor": 1.62137752,
+      "maxDrawdownPct": 6.18395066,
+      "totalTrades": 37,
+      "winRatePct": 48.64864865,
+      "avgTradePct": 0.397367,
+      "sharpeRatio": 0.55523409,
+      "sortinoRatio": 0.05011915,
+      "commissionPaid": 394.0866874,
+      "avgWinningTrade": 213.132476972222,
+      "avgLosingTrade": -124.53298278421,
+      "ratioAvgWinLoss": 1.71145404,
+      "largestWin": 345.371226400001,
+      "largestLoss": -285.335862100001,
+      "avgBarsInTrade": 38.7027027,
+      "avgBarsWinning": 45.44444444,
+      "avgBarsLosing": 32.31578947,
+      "longTrades": 37,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1NGHX3ZWPNTJ9TNJ7JS1YS8",
+      "strategyId": "01M1NGHXB367KCXKYQW5C39XMF",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NGHX3ZWPNTJ9TNJ7JS1YS8",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T06:09:00Z"
+    },
+    "verdict": "DOES NOT PROMOTE -- RATCHET v2 clause 4 is UNSATISFIABLE at this sample size. My registered falsifier fired.",
+    "notes": "MY REGISTERED FALSIFIER FIRED, AND IT IS REPORTED FIRST BECAUSE IT WAS THE POINT OF THE RUN. I predicted in the Pine header that 'a stack ordering is a COMMON state' so the count cut would be far milder than v54's 155->48, and that a collapse would mean the stack reading is ALSO too strict. THE COUNT WENT 155 -> 37, a 76% cut, WORSE than v54's 69%. MY REASONING WAS WRONG: a full 20>50>200 alignment on a 15m chart is NOT a common state, because 15m is noisy and a 200-SMA spans about 50 hours, so it rarely sits cleanly below both faster averages at the moment a demand zone is being tapped. THE HEADLINE LOOKS EXCELLENT AND IT DOES NOT MATTER: PF 1.62137752 against the v37 champion's 1.25172059, drawdown 6.18395066% against 8.72815312%, win rate 48.64864865%, Sharpe 0.55523409, cascadeRatio 1 on 37 clean entries. Under RATCHET v2 clauses 1-3 it would KEEP outright. IT IS CLAUSE 4 THAT STOPS IT: a >50% count cut must pass a SPLIT TEST BEFORE being kept, and THE SPLIT TEST CANNOT BE SATISFIED AT THIS SAMPLE SIZE. Determined FREE from the per-trade log rather than by spending two more credits on halves that could not have counted: splitting the 37 entries at 2024-06-08 (trade 27 enters 2024-03-12, trade 28 enters 2024-06-12) gives H1 = 27 TRADES and H2 = 10 TRADES. BOTH ARE BELOW THE 30-TRADE FLOOR, so neither half's ratio is quotable under LESSON 12 and the split can never clear clause 4 no matter how it lands. DERIVED FIGURES, COMPUTED BY ME FROM THE FREE TRADE LOG AND EXPLICITLY NOT ENGINE METRICS -- recorded because the consistency is interesting, and NOT quotable as results: H1 about 1.60 on 13W/14L, H2 about 1.67 on 5W/5L. The two halves being that close is the most encouraging thing here and it is still not evidence, because 10 trades cannot carry a ratio. WHAT THIS SETTLES: the bias axis is now closed for THIS mechanism on THIS data, and not because bias is the wrong idea. Every bias gate tried -- the lab's 12H/24H proxy and now the source's own MA stack -- cuts the sample below what the ratchet requires to believe the improvement. The constraint is the DATA, not the gate. NO CHAMPION CHANGE: v37 stands at 1.25172059 / 155 trades with all existing caveats, and it stands on a sample that can actually be split (96/59)."
   }
 ];
-const BUILT = "2026-09-04 00:04";
+const BUILT = "2026-09-04 00:10";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

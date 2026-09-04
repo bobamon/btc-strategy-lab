@@ -3401,3 +3401,58 @@ rarer state than a 15m stack ordering**, so it did not measure "bias", it measur
    ordering is a common state and a 12H/24H agreement is a rare one. **If the count still collapses,
    the stack reading is wrong too and the whole bias axis needs rethinking rather than re-parameterising.**
 3. **The short's problem is not the gate.** It is gross-negative before fees, so no bias gate rescues it.
+
+
+---
+
+## v56 -- THE SOURCE'S OWN BIAS RULE. BEST NUMBERS THIS LAB HAS PRODUCED, AND IT STILL CANNOT BE PROMOTED.
+
+v37 byte-identical plus one term: the bias rule the transcripts actually specify -- a **20/50/200 SMA
+stack on the 15m working chart** (`sma20 > sma50 > sma200`), replacing the lab's invented 12H/24H
+consecutive-closes proxy.
+
+### MY REGISTERED FALSIFIER FIRED, AND IT GOES FIRST
+I predicted in the Pine header that *"a stack ordering is a COMMON state"*, so the count cut would be
+far milder than v54's 155 -> 48, and that a collapse would mean the stack reading is also too strict.
+
+**The count went 155 -> 37. A 76% cut -- worse than v54's 69%.**
+
+**My reasoning was wrong.** A full 20>50>200 alignment on 15m is *not* common: the chart is noisy and a
+200-SMA spans about 50 hours, so it rarely sits cleanly below both faster averages at the exact moment
+a demand zone is being tapped.
+
+### THE HEADLINE LOOKS EXCELLENT, AND IT DOES NOT MATTER
+
+| | v37 champion | **v56** |
+|---|---|---|
+| profit factor | 1.25172059 | **1.62137752** |
+| max drawdown | 8.72815312% | **6.18395066%** |
+| win rate | - | 48.64864865% |
+| Sharpe | 0.90 -> 0.16 across halves | 0.55523409 |
+| **trades** | **155** | **37** |
+
+Under RATCHET v2 clauses 1-3 this KEEPS outright. **Clause 4 stops it:** a >50% count cut must pass a
+**split test before being kept**, and here the split test is **unsatisfiable**.
+
+Determined **free** from the per-trade log rather than by spending two credits on halves that could
+never have counted. Splitting the 37 entries at 2024-06-08 (trade 27 enters 2024-03-12, trade 28
+enters 2024-06-12):
+
+**H1 = 27 trades. H2 = 10 trades. Both below the 30-trade floor.**
+
+Neither half's ratio is quotable under LESSON 12, so the split can never clear clause 4 **no matter how
+it lands**.
+
+*Derived from the free trade log, explicitly NOT engine metrics and NOT quotable as results:* H1 about
+1.60 on 13W/14L, H2 about 1.67 on 5W/5L. The two halves being that close is the most encouraging thing
+here, **and it is still not evidence** -- 10 trades cannot carry a ratio.
+
+### WHAT THIS SETTLES
+**The bias axis is closed for this mechanism on this data -- and not because bias is the wrong idea.**
+Every gate tried, the lab's invented proxy and now the source's own rule, cuts the sample below what
+the ratchet needs in order to believe the improvement. **The binding constraint is the DATA, not the
+gate.** Stop proposing bias gates for v37 until there is either more data or a mechanism that survives
+one without losing three quarters of its sample.
+
+**CHAMPION UNCHANGED: v37, 1.25172059 / 155 trades**, with every existing caveat -- and, decisively, on
+a sample that can actually be split (96/59).
