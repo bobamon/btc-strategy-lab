@@ -534,3 +534,16 @@ reading of condition 2. **No genuinely better-supported reading exists in this l
 This closes v48/v49's item (a)/(b) choice with a negative finding on (b); the only remaining live path
 for the stage machine is (a), a user-confirmed bias/model definition, which per 0-V26 this lab does not
 invent on its own.
+
+### ✅ UPDATE, 2026-09-04 (v54/v55) — THE BIAS GATE WAS BUILT FROM AN ALREADY-DECODED DEFINITION, AND IT MOVED THE LONG LEG
+
+No new vocabulary term was decoded this cycle. The gate v53 identified as missing ("the model is just
+going to be the same thing that the hard time frame is" [05:12]) was implemented using the mechanical
+reading already on record above ("Model / structural bias" row: consecutive higher/lower closes on the
+reconstructed timeframe), applied to BOTH 12H and 24H per the shape table, both required to agree.
+Result (SYSTEM.md's v54/v55 entry has the full numbers): the long leg's PF fell from 1.25172059 to
+1.15861551 and its trade count collapsed from 155 to 48 — confirming part of the champion's headline
+was the bull market, not the zone mechanism alone. The short leg improved (drawdown 31.08% -> 14.66%)
+but stayed unprofitable (PF 0.722) and needs a split test before any keep decision. Type 1 (the 3M
+candle's anatomy) and the swing rule remain undefined and still do not block the working engulf-based
+entry.

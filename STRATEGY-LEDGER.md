@@ -1552,3 +1552,23 @@ the same signature at 1.419. **Both are short builds.** The one-entry-per-zone l
 the short side, which means the headline is computed over more rows than there were entries.
 **No short number from this lab should be believed until this is understood** — including v53's own
 0.705, which is recorded with that caveat attached rather than as a clean reading.
+
+**RESOLVED, 2026-09-04 (3M v54/v55).** Pulled the full per-trade list for v53's job via `get_trades`
+(255 rows) and had it examined for what separates the 174 "unique" entries from the extra 81 rows.
+**Every cascade group shares an identical `entryBar`/`entryTime`/`entryPrice` and differs only in
+`qty`, exit bar/price, and P&L.** Concrete example: one entry at bar 20139 (entryPrice 20915.5) is
+reported as four rows — qty 0.004 exiting at bar 20140, qty 0.004 at bar 20142, qty 0.008 at bar 20143,
+and the remaining qty 0.466 at bar 20148, each a distinct exit price and P&L. **This is the parity
+engine reporting each partial-exit fill of a single bracket order as its own trade-list row** — not a
+re-entry storm and not the `dzTraded`/`szTraded` one-entry-per-zone latch failing. The latch IS holding;
+174 (and 62 on v55, ratio 1.4516, the same signature a third time) is the real count of zone decisions,
+not 255 or 90.
+
+**What this changes and does not change.** `profitFactor` and `netProfitPct` are dollar sums over all
+rows and are invariant to how the engine splits one position's exits — every PF this lab has reported,
+short builds included, stands as measured and does not need re-reading. `totalTrades`, `winRatePct` and
+the `avgBars*` fields ARE computed at row level and can be inflated or distorted by this artefact, so on
+any build (this lab's or a sibling's) where `get_backtest_result`'s `cascade` block shows a ratio above
+1.0, those specific fields should be read alongside `uniqueEntries`, not instead of it. **Open and
+low-priority: why the artefact appears on short builds (v51, v53, v55) and not the long ones (v37, v52,
+v54, all ratio 1.0) is unexplained** — worth a look if it recurs on a fourth build, not before.

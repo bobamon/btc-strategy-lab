@@ -2671,3 +2671,91 @@ this lab should be believed until this is understood, v53's own 0.705 included.*
 **CHAMPION UNCHANGED: v37** (PF 1.25172059 / DD 8.72815312% / 155 trades; H1 1.33630490 / H2
 1.12058245), now carrying an additional honest caveat: **it has no regime gate, and the source says it
 should.**
+
+
+---
+
+# ██ v54/v55 — THE BIAS GATE IS BUILT AND RUN ON BOTH LEGS. THE LONG NUMBERS MOVED. THE CASCADE IS RESOLVED. (2026-09-04)
+
+**Queue item 1 from v53, at the top per this cycle's mandate.** Implemented the 12H & 24H model-
+direction gate the source specifies, using the mechanical definition this lab already established and
+used (v1's Pine, and SYSTEM.md's own "WHAT I COULD DEFINE MECHANICALLY" table): consecutive higher
+closes on the reconstructed timeframe = bull, lower = bear. Applied to BOTH 12H and 24H, both required
+to agree, per the shape table's own "BIAS 12H & 24H" row and the pattern the 15sec/30sec checklists use
+("1H & 2H", "2H & 4H"). Nothing new decoded — an existing definition extended to the two timeframes the
+source specifies for this variant. Full audit (LESSON 3/5/6/8, E14/E17) is in each Pine file's header.
+
+Credits: 628 (above 500 — budget allowed at most two backtests). Both spent on this queue item, one
+per leg, exactly as instructed.
+
+## THE LONG LEG — v54 (`pine/3m-elite-v54-bias-gate-long.pine`)
+
+| | v37 (champion) | **v54 (+ bias gate)** |
+|---|---|---|
+| Profit factor | 1.25172059 | **1.15861551** |
+| Max drawdown | 8.72815312% | **9.03845822%** |
+| Trades | 155 | **48** |
+| Win rate | 42.58% | 41.67% |
+
+**RATCHET v2 clause 1 fails outright — REVERTED.** PF fell, not rose. **This answers the queue's real
+question: v37's headline WAS partly the bull market.** The gate strips out exactly the trades that
+fired when the 4H demand-zone mechanism was ready but the 12H/24H model had not yet turned bullish —
+and on net those trades were carrying real edge (PF was higher without the gate, not lower). That is
+the opposite of what the source's own reasoning would predict if the gate were purely protective; it
+says the zone mechanism itself is sound on this instrument and the bias condition, mechanically defined
+this way, is stricter than what BTC 2022–2026 needed to profit. **v37 remains champion, unchanged**,
+now carrying a MEASURED caveat instead of a suspected one: its 1.25172059 blends gated-would-pass and
+gated-would-fail trades, and the gate does not improve on the blend.
+
+Cascade on this run: 48 rows, 48 unique entries, ratio 1.0 — clean. The cascade signature (see below)
+is specific to the short builds.
+
+## THE SHORT LEG — v55 (`pine/3m-elite-v55-bias-gate-short.pine`)
+
+| | v53 (mirror, no gate) | **v55 (+ bias gate)** |
+|---|---|---|
+| Profit factor | 0.70512830 | **0.72183885** |
+| Max drawdown | 31.07505566% | **14.65750079%** |
+| Trades (rows / unique) | 255 / 174 | **90 / 62** |
+| Win rate | 13.73% | 11.11% |
+
+**The gate helps, but does not fix the leg.** PF ticks up by only 0.017 (well under the 0.02 that would
+buy a drawdown allowance, though that clause is moot — drawdown IMPROVED by 16.4pp, it did not worsen).
+Trade count fell 64% on either the row or unique-entry basis — **more than 50%, which triggers RATCHET
+v2 clause 4: a split test is required BEFORE this can be kept, not after.** That split was not run this
+cycle (both credits went to v54/v55 themselves). So although clauses 1–3 read as a pass in isolation,
+clause 4 is unmet and this is recorded as **`status: testing`, not kept, not promoted.**
+
+**And even if it clears the split test, PF 0.72183885 is still below 1.0.** The bias gate removed the
+worst of the trading-into-the-bull-market losses but did not turn the mirror into a profitable
+strategy. The short leg remains, honestly, not working — improved, not fixed.
+
+## THE CASCADE SIGNATURE — RESOLVED
+
+Queue item 2. Used `get_trades` on v53's raw trade list (255 rows) and had it analysed for what
+distinguishes the 174 "unique" entries from the 81 extra rows. **Finding: every cascade group shares an
+identical `entryBar`/`entryTime`/`entryPrice` and differs only in `qty`, exit bar/price, and P&L** — for
+example, one entry at bar 20139 (entryPrice 20915.5) is reported as four rows: qty 0.004 exiting at bar
+20140, qty 0.004 at bar 20142, qty 0.008 at bar 20143, and the remaining qty 0.466 at bar 20148. This is
+**the parity engine reporting each partial-exit fill of a single bracket order as its own trade-list
+row** — not a re-entry storm and not a latch failure. The `dzTraded`/`szTraded` one-entry-per-zone latch
+IS holding; 174 (and now 62, on v55) is the real count of zone decisions.
+
+**v55 reproduces the same signature** (90 rows, 62 unique, ratio 1.4516, max depth 4) — a third short
+build showing it, alongside v51 (1.419) and v53 (1.4655). v54 (long) shows a clean ratio of 1.0.
+
+**What this does and does not change:** `profitFactor` and `netProfitPct` are dollar sums, invariant to
+how the engine splits one position's exits into rows — they are NOT affected by the cascade and every
+PF this lab has reported (long or short) stands as measured. `totalTrades`, `winRatePct`, and the
+`avgBars*` fields ARE row-level and can be inflated or distorted by it, so those specific numbers on
+short builds should be read alongside the cascade block's `uniqueEntries`, not instead of it, going
+forward. **Why the asymmetry between long and short remains open** — not blocking, since the mechanism
+itself is now understood and no longer a reason to distrust a short PF.
+
+## QUEUE
+1. **Split-test v55 before any keep decision** — RATCHET v2 clause 4 is outstanding on a 64% trade cut.
+2. **The long leg's bias-gate result is closed, not open** — v54 is a REVERTED, informative negative;
+   no further tuning of the gate on the long side is queued unless new source material changes the
+   mechanical definition of "model."
+3. **Why cascade rows appear on short builds and not long ones** is unexplained and low-priority — it
+   does not affect any PF already on record.

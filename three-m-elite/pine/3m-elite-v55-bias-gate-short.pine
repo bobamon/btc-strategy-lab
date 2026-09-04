@@ -1,0 +1,158 @@
+//@version=6
+// 3M ELITE v55 -- THE BIAS GATE, SHORT LEG. One change from v53 (the exact structural mirror of the
+// v37 champion): add the same 12H & 24H model-direction gate v54 adds to the long leg.
+//
+// WHY: v53 shorted supply zones straight through the 2023-2025 bull advance and returned PF 0.70512830
+// on 255 rows (174 unique entries), 13.73% win rate -- HARD LESSON 32's diagnosis is that the source's
+// bias gate ("the model is just going to be the same thing that the hard time frame is" [05:12]) was
+// simply never implemented, on EITHER leg, so the short mirror paid the full cost of trading against
+// the higher-timeframe context the source says must agree first. This build tests that diagnosis
+// directly: same mirror, same every other parameter, one gate added.
+//
+// MECHANICAL DEFINITION: identical to v54's -- "consecutive higher/lower closes = bull/bear" on the
+// reconstructed 12H and 24H timeframes (SYSTEM.md's mechanical table, v1's original bias layer), BOTH
+// timeframes required to agree BEARISH for a short. Nothing new decoded; same reused definition,
+// mirrored the same way the source itself describes the whole system as mirrored (04-18-22 [06:19]).
+//
+// AUDIT: SHORT ONLY (LESSON 6 as scoped by HARD LESSON 31 -- this is the source's own prescribed
+// mirror, not an invented geometry, and is judged on its own terms per the standing 3M-specific
+// warning that the legs are not independent, v24). Stop = szTop, structural, unchanged (LESSON 5). R
+// floor 0.8% by EXCLUSION, unchanged (LESSON 3). SL/TP fixed at entry. BINDING (E17): biasBearOk is
+// the only new term and nothing else in the conjunction encodes model direction. REDUNDANCY (E14): 12H
+// and 24H are independent reconstructions, not duplicates of each other or of the 4H supply-zone
+// timeframe already present. LATCH IN SEQUENCE (LESSON 8): bias state updates only on completed
+// 12H/24H bars, read but never written by the same-bar entry conjunction. 3M KEEPS ITS OWN MODEL -- no
+// War Formation ALCM shield ported here.
+//
+// KNOWN CAVEAT CARRIED FORWARD FROM v53/v51: cascadeRatio was 1.4655 (v53) and 1.419 (v51) -- MEASURED
+// AND RESOLVED THIS CYCLE (see STRATEGY-LEDGER.md): the szTraded latch IS holding one entry per zone;
+// the row count exceeds the unique-entry count because the parity engine reports each partial exit
+// fill of a single bracket as its own trade-list row, not because of a re-entry storm. totalTrades in
+// this run's raw output should therefore be read alongside a unique-entry count, not instead of it.
+//
+// OUTCOME STATED BEFORE THE RUN (LESSON 17): if PF clears meaningfully above v53's 0.70512830 with the
+// gate on, the source's bias-context rule is confirmed load-bearing on the short side and the mirror
+// hypothesis (HARD LESSON 31) survives with the missing gate as the explanation. If it does not move,
+// the short leg's failure is not (only) a missing bias gate and the mirror hypothesis needs a further
+// look. RATCHET v2 governs whether this is KEPT against v53 as the short-leg baseline.
+strategy("3M ELITE v55 bias-gated SHORT", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rTarget  = input.float(2.0, "Target, x R -- held at v37/v53")
+maxBars  = input.int(96,    "Max bars in trade -- held at v37/v53")
+maxAge   = input.int(6,     "Zone freshness cap, 4H candles since creation -- held at v37/v53")
+minRpct  = input.float(0.80,"Min stop distance as % of price (LESSON 3) -- held at v37/v53")
+
+MS4H  = 14400000
+MS12H = 43200000
+MS24H = 86400000
+b4h  = math.floor(time / MS4H)
+b12h = math.floor(time / MS12H)
+b24h = math.floor(time / MS24H)
+new4h  = b4h  != b4h[1]
+new12h = b12h != b12h[1]
+new24h = b24h != b24h[1]
+
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+var float pO  = na
+var float pH  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pH  := h4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+bearEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC > ppO and pC < pO and pC < ppO
+
+var float szTop   = na
+var float szBot   = na
+var bool  szLive  = false
+var int   szTouch = 0
+var int   szAge   = 0
+var bool  szTraded = false
+
+if new4h
+    if szLive and not na(pC) and pC >= szBot
+        szTouch := szTouch + 1
+        if szTouch >= 2
+            szLive := false
+    if szLive
+        szAge := szAge + 1
+    if bearEngulf
+        szBot   := pO
+        szTop   := pH
+        szLive  := true
+        szTouch := 0
+        szAge   := 0
+        szTraded := false
+
+// ---------- BIAS GATE (NEW, v55): 12H & 24H model direction, both must agree bearish ----------
+var float c12prev  = na
+var float c12prev2 = na
+if new12h
+    c12prev2 := c12prev
+    c12prev  := close[1]
+
+var float c24prev  = na
+var float c24prev2 = na
+if new24h
+    c24prev2 := c24prev
+    c24prev  := close[1]
+
+bias12Bear = not na(c12prev) and not na(c12prev2) and c12prev < c12prev2
+bias24Bear = not na(c24prev) and not na(c24prev2) and c24prev < c24prev2
+biasBearOk = bias12Bear and bias24Bear
+
+minR    = close * minRpct / 100
+rBig    = not na(szTop) and (szTop - close) >= minR
+
+shortCond = rBig and szLive and not szTraded and szAge >= 1 and szTouch < 2 and high >= szBot and close < szTop and szAge <= maxAge and biasBearOk
+
+flat = strategy.position_size == 0
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if flat and shortCond and not na(szTop) and close < szTop
+    r = szTop - close
+    if r > 0
+        strategy.entry("S", strategy.short)
+        szTraded := true
+        slPx   := szTop
+        tpPx   := close - r * rTarget
+        barsIn := 0
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(szLive ? 1 : 0,      title="SupplyZoneLive")
+plot(szAge,               title="SupplyZoneAge")
+plot(biasBearOk ? 1 : 0,  title="BiasBearOk12H24H")

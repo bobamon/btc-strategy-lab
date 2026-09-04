@@ -1,0 +1,162 @@
+//@version=6
+// 3M ELITE v54 -- THE BIAS GATE, LONG LEG. One change from v37 (the champion): add the 12H & 24H
+// model-direction gate the source specifies (SYSTEM.md shape table: "BIAS 12H & 24H" for 3M ELITE).
+//
+// WHY: HARD LESSON 32 / SYSTEM.md v53 -- the source says repeatedly that "the model is just going to
+// be the same thing that the hard time frame is" [05:12], and 04-18-22 [06:19] turns entirely on
+// whether a break is read in a bullish or bearish CONTEXT. v37 implements NO bias gate on either leg.
+// v53 (short) shorted supply zones straight through the 2023-2025 bull advance and returned PF 0.705
+// -- exactly what a missing bias gate looks like. This build asks whether the LONG leg's own
+// PF 1.25172059 / DD 8.72815312% / 155 trades was partly the bull market rather than the zone
+// mechanism, by adding the same gate and re-measuring.
+//
+// MECHANICAL DEFINITION REUSED, NOT INVENTED: SYSTEM.md's own "WHAT I COULD DEFINE MECHANICALLY"
+// table (row: "Model / structural bias") and v1's Pine (3m-elite-v1.pine, LAYER 1) both define bias
+// as "consecutive higher closes = bull, lower = bear" on the reconstructed timeframe. This build
+// applies that SAME definition to 12H and 24H, per the shape table's own bias row, and requires BOTH
+// to agree -- exactly how the 15sec/30sec checklists list two bias timeframes together ("1H & 2H",
+// "2H & 4H"). Nothing new is decoded; an existing, already-used definition is extended to the two
+// timeframes the source specifies for this variant.
+//
+// AUDIT: LONG ONLY (LESSON 6 -- legs are not independent in this lab, v24; judged on its own terms).
+// Stop = dzBot, structural, unchanged (LESSON 5). R floor 0.8% unchanged, by EXCLUSION not clamping
+// (LESSON 3). SL/TP fixed at entry. BINDING (E17): the new term is biasBullOk, which nothing else in
+// the conjunction encodes -- dzLive/dzAge/dzTouch are all zone-lifecycle state, not model direction.
+// REDUNDANCY (E14): 12H and 24H are two independent reconstructions off 1m-derived 15m bars; neither
+// is a duplicate of the other or of the 4H zone timeframe already in the conjunction. LATCH IN
+// SEQUENCE (LESSON 8): bias state updates only on completed 12H/24H bars, exactly like the existing
+// 4H zone state; the entry conjunction reads it, never writes it on the same bar it changes on.
+// 3M KEEPS ITS OWN MODEL -- the War Formation ALCM shield is not ported here.
+//
+// OUTCOME STATED BEFORE THE RUN (LESSON 17): if PF/DD move at all versus v37's 1.25172059/8.72815312%,
+// part of the champion's headline was the bull market, not the zone mechanism, and that must be known
+// before v37 is described as validated without caveat. RATCHET v2 governs whether this is KEPT.
+strategy("3M ELITE v54 bias-gated LONG", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rTarget  = input.float(2.0, "Target, x R -- held at v37")
+maxBars  = input.int(96,    "Max bars in trade -- held at v37")
+maxAge   = input.int(6,     "Zone freshness cap, 4H candles since creation -- held at v37")
+minRpct  = input.float(0.80,"Min stop distance as % of price (LESSON 3) -- held at v37")
+
+MS4H  = 14400000
+MS12H = 43200000
+MS24H = 86400000
+b4h  = math.floor(time / MS4H)
+b12h = math.floor(time / MS12H)
+b24h = math.floor(time / MS24H)
+new4h  = b4h  != b4h[1]
+new12h = b12h != b12h[1]
+new24h = b24h != b24h[1]
+
+// ---------- reconstruct the 4H candle from 15m bars: in-progress OHLC ----------
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+// ---------- snapshots of the two most recently COMPLETED 4H candles (open + close; +H/L for the most recent) ----------
+var float pO  = na
+var float pH  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pH  := h4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+// ---------- engulf on the just-completed candle vs the one before it (body containment, no gap) ----------
+bullEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC < ppO and pC > pO and pC > ppO
+
+// ---------- demand zone lifecycle: create on bull engulf, mitigate on a body close inside, age in 4H units ----------
+var float dzTop   = na
+var float dzBot   = na
+var bool  dzLive  = false
+var int   dzTouch = 0
+var int   dzAge   = 0
+var bool  dzTraded = false
+
+if new4h
+    if dzLive and not na(pC) and pC <= dzTop
+        dzTouch := dzTouch + 1
+        if dzTouch >= 2
+            dzLive := false
+    if dzLive
+        dzAge := dzAge + 1
+    if bullEngulf
+        dzTop   := pO
+        dzBot   := pL
+        dzLive  := true
+        dzTouch := 0
+        dzAge   := 0
+        dzTraded := false
+
+// ---------- BIAS GATE (NEW, v54): 12H & 24H model direction, both must agree bullish ----------
+// Same "consecutive higher closes" definition as v1's 12H bias layer and SYSTEM.md's mechanical table,
+// applied to the two bias timeframes this variant's shape table specifies.
+var float c12prev  = na
+var float c12prev2 = na
+if new12h
+    c12prev2 := c12prev
+    c12prev  := close[1]
+
+var float c24prev  = na
+var float c24prev2 = na
+if new24h
+    c24prev2 := c24prev
+    c24prev  := close[1]
+
+bias12Bull = not na(c12prev) and not na(c12prev2) and c12prev > c12prev2
+bias24Bull = not na(c24prev) and not na(c24prev2) and c24prev > c24prev2
+biasBullOk = bias12Bull and bias24Bull
+
+// ---------- entry: zone live, sequenced after creation, not yet double-mitigated, price back at the
+// zone, still fresh, AND the 12H/24H model agrees bullish ----------
+minR    = close * minRpct / 100
+rBig    = not na(dzBot) and (close - dzBot) >= minR
+
+longCond = rBig and dzLive and not dzTraded and dzAge >= 1 and dzTouch < 2 and low <= dzTop and close > dzBot and dzAge <= maxAge and biasBullOk
+
+flat = strategy.position_size == 0
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if flat and longCond and not na(dzBot) and close > dzBot
+    r = close - dzBot
+    if r > 0
+        strategy.entry("L", strategy.long)
+        dzTraded := true
+        slPx   := dzBot
+        tpPx   := close + r * rTarget
+        barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(dzLive ? 1 : 0,      title="DemandZoneLive")
+plot(dzAge,               title="DemandZoneAge")
+plot(biasBullOk ? 1 : 0,  title="BiasBullOk12H24H")

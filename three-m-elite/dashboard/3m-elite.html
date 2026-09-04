@@ -447,9 +447,97 @@ const DATA = [
     },
     "verdict": "REJECTED",
     "notes": "PF 0.7051283 on 255 trades, 13.73% win rate against an rr of 2.0 that needs 33% to break even. The pure mirror does not work on BTC. BUT THIS IS THE MOST INFORMATIVE SHORT FAILURE THE LAB HAS PRODUCED, for three reasons. (1) It is the first short built from the source's LITERAL statement rather than an invented geometry -- v34's 0.736 was a fade-into-the-zone construction nobody in the source described -- so it closes the mirror hypothesis SPECIFICALLY rather than vaguely. (2) IT POINTS DIRECTLY AT WHAT IS MISSING, AND IT IS MISSING FROM BOTH LEGS: the source says repeatedly that the model IS the higher timeframe ('the model is just going to be the same thing that the hard time frame is', [05:12]; a break down is distribution in a bearish context and redistribution in a bullish one, throughout 04-18-22). v37 IMPLEMENTS NO BIAS GATE AT ALL. So this build shorted supply zones straight through the 2023-2025 bull advance -- exactly what the source forbids -- and the 13.73% win rate is what that looks like. The champion has been getting away with the omission because a long-only strategy in a rising market does not need a bias gate to avoid the worst trades; the short leg cannot. (3) TECHNICAL FLAG, SECOND SIGHTING: cascadeRatio 1.4655 -- 255 rows from 174 unique entries, max depth 4. v51 showed the same signature at 1.419. The one-entry-per-zone latch is not holding on the short side, so the headline is computed over more rows than there were entries. This must be understood before ANY short number from this lab is believed, including this one."
+  },
+  {
+    "id": "3m-elite-v54-bias-gate-long",
+    "name": "3M Elite v54: bias gate (12H & 24H model direction) added to the v37 champion, LONG",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/pine/3m-elite-v54-bias-gate-long.pine",
+    "description": "Queue item 1 from v53/HARD LESSON 32: implement the 12H/24H model-direction bias gate the source specifies (\"the model is just going to be the same thing that the hard time frame is\", [05:12]) and re-run the LONG leg against it, one change from the v37 champion (PF 1.25172059 / DD 8.72815312% / 155 trades). Bias defined by the lab's own already-used mechanical rule (consecutive higher/lower closes on the reconstructed TF, from v1 and SYSTEM.md's mechanical table), applied to 12H and 24H per the shape table, both required to agree bullish.",
+    "metrics": {
+      "netProfitPct": 5.50029485,
+      "profitFactor": 1.15861551,
+      "maxDrawdownPct": 9.03845822,
+      "totalTrades": 48,
+      "winRatePct": 41.66666667,
+      "avgTradePct": 0.11458948,
+      "sharpeRatio": 0.25674664,
+      "avgWinningTrade": 200.8859950625,
+      "avgLosingTrade": -123.846086291071,
+      "avgBarsWinning": 35.85,
+      "avgBarsLosing": 21.75,
+      "longTrades": 48,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1N5MPARVSCFPVZ8NBB91ZZG",
+      "strategyId": "01M1N5MPFY4983M3XJ4FEGGTSD",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1N5MPAQ45MKBJJ9YX4XSZ99",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "uniqueEntries": 48,
+      "totalRows": 48,
+      "maxCascadeDepth": 1,
+      "verifiedAt": "2026-09-04T00:00:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v54-bias-gate-long.pine",
+    "verdict": "REVERTED (RATCHET v2)",
+    "notes": "THE LONG LEG'S NUMBERS MOVED, CONFIRMING HARD LESSON 32. Adding the 12H/24H bias gate (both timeframes must agree bullish, everything else held at v37) took PF 1.25172059 -> 1.15861551, drawdown 8.72815312% -> 9.03845822% (+0.31pp, worse), and trade count 155 -> 48 (a 69% cut). RATCHET v2 clause 1 (PF must improve) fails outright, so this change is REVERTED and v37 remains champion unchanged. But the result answers the queue's real question: part of v37's headline WAS the bull market. The gate removes exactly the trades that fired when the 4H demand-zone mechanism was right but the 12H/24H model was not yet aligned -- and those trades were, on net, carrying real edge (PF was higher WITHOUT the gate), which is consistent with the zone mechanism itself being sound and the source's bias condition being stricter than what this instrument's price action needed over this window. v37 is therefore promoted from champion to champion-with-a-now-MEASURED-caveat: its 1.25172059 is a blend of gated-would-pass and gated-would-fail trades, not a number the bias gate improves on. Cascade is clean here (48 rows = 48 unique entries, ratio 1.0) -- the cascade-signature issue (see v55 and the ledger) is specific to short builds."
+  },
+  {
+    "id": "3m-elite-v55-bias-gate-short",
+    "name": "3M Elite v55: bias gate (12H & 24H model direction) added to the v53 supply-zone mirror, SHORT",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "short",
+    "status": "testing",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/pine/3m-elite-v55-bias-gate-short.pine",
+    "description": "Queue item 1 from v53/HARD LESSON 32, short leg: same 12H/24H bias gate as v54, added to v53 (the exact structural mirror of the v37 champion), both bias timeframes required to agree bearish. Judged against v53's PF 0.70512830 / DD 31.07505566% / 255 rows (174 unique entries) under RATCHET v2.",
+    "metrics": {
+      "netProfitPct": -8.09120105,
+      "profitFactor": 0.72183885,
+      "maxDrawdownPct": 14.65750079,
+      "totalTrades": 90,
+      "winRatePct": 11.11111111,
+      "avgTradePct": -0.08990223,
+      "sharpeRatio": -0.4349903,
+      "avgWinningTrade": 209.96976781,
+      "avgLosingTrade": -36.360222285,
+      "avgBarsWinning": 48.6,
+      "avgBarsLosing": 8.7875,
+      "longTrades": 0,
+      "shortTrades": 90
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1N5NXYR598YAFGHVRMKKWE8",
+      "strategyId": "01M1N5NY3DMV9QRE4MEZVPYV6S",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1N5NXYR63XYV693W9TPRH5E",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1.4516129032258065,
+      "uniqueEntries": 62,
+      "totalRows": 90,
+      "maxCascadeDepth": 4,
+      "verifiedAt": "2026-09-04T00:00:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v55-bias-gate-short.pine",
+    "verdict": "NOT YET KEPT -- RATCHET v2 clause 4 (>50% trade cut) requires a split test before promotion",
+    "notes": "THE BIAS GATE HELPS THE SHORT LEG, BUT DOES NOT FIX IT. Versus v53: profit factor 0.70512830 -> 0.72183885 (improved, but by only 0.017 -- under the 0.02 threshold clause 2's drawdown band needs, though clause 2 is moot here since drawdown IMPROVED, not worsened). Drawdown fell sharply: 31.07505566% -> 14.65750079%, a 16.4pp improvement. Trade count fell from 174 unique entries (255 rows) to 62 unique entries (90 rows) -- a 64% cut on either basis, which is >50% and triggers RATCHET v2 clause 4: a split test is required BEFORE this can be kept, not after. That split has not been run this cycle (credit budget: two backtests, both spent on v54/v55 themselves). By clauses 1-3 alone the change looks like a pass (PF up, DD down, 90/62 trades clear the 30-trade floor), but clause 4 is binding and unmet, so status is 'testing', not 'passed', and this must NOT be described as a kept or validated change yet. MOST IMPORTANTLY: even if kept, PF 0.72183885 is still BELOW 1.0 -- the short leg remains net unprofitable. The bias gate improved the construction (removed the worst trading-into-the-bull-market losses) but did not turn the mirror into a working strategy. THE CASCADE SIGNATURE IS RESOLVED (see STRATEGY-LEDGER.md): 90 rows from 62 unique entries, ratio 1.4516, matches the same signature seen in v51 (1.419) and v53 (1.4655) -- all short builds. Investigation via get_trades on v53's raw trade list found the szTraded/dzTraded one-entry-per-zone latch IS holding; the extra rows are the parity engine reporting each PARTIAL EXIT FILL of a single bracket order as its own trade-list row (confirmed: cascade groups share identical entryBar/entryTime/entryPrice and differ only in qty/exit -- e.g. one entry at bar 20139 split into 4 exit rows of qty 0.004/0.004/0.008/0.466 closing at different bars/prices). This does not change profitFactor or netProfit (both are dollar sums, invariant to row-splitting) but DOES inflate totalTrades and can distort avgBarsWinning/avgBarsLosing and win-rate denominators -- read totalTrades/winRatePct on short builds alongside the cascade block's uniqueEntries, not instead of it. Why this shows up on shorts and not longs (v54's cascade ratio was a clean 1.0) remains an open sub-question, but the mechanism itself -- an engine partial-fill reporting artifact, not a re-entry-storm defect in this lab's Pine -- is now understood and no longer an open flag against believing PF/net-profit numbers."
   }
 ];
-const BUILT = "2026-09-03 06:40";
+const BUILT = "2026-09-04 03:00";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
