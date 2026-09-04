@@ -1061,5 +1061,51 @@
     },
     "verdict": "PREDICTION PARTLY CONFIRMED: timeGate binds in the predicted direction (PF falls, count rises) but more mildly than predicted -- weaker than both h1Bear and brokeAbove, not between them. NOT KEPT (RATCHET v2 clause 1: PF must improve, it fell 0.97315988 -> 0.92750018).",
     "notes": "timeGate binds on the short leg but is the WEAKEST of the three location/liveness terms, unlike its long-side rank (second most load-bearing there, E70b delta -0.231). Delta from E71: -0.04565970, count 33 -> 42 (+9, occupancy-consistent with the other admits), win rate 36.36363636% -> 35.71428571% (essentially flat), drawdown widened 2.66826642% -> 3.57912312%. Completes the short-leg binding sweep: h1Bear (-0.191) > brokeAbove (-0.087) > timeGate (-0.046) > inMiddle (+0.194, band is long-oriented and HURTS the short). The short-leg binding order is NOT a mirror of the long-leg order (h1Bull > timeGate > brokeBelow > inMiddle) -- timeGate drops from 2nd to 3rd of four. Term-specific, leg-specific; neither leg's order transfers wholesale to the other. cascadeRatio 1, 0 long trades / 42 short trades confirmed clean single-leg."
+  },
+  {
+    "id": "wf-e77-long-no-band-25pct-equity",
+    "name": "E77: the LONG without the whole-number band, at 25% equity -- the last cell in the 2x2",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/pine/e77-long-no-band-25pct-equity.pine",
+    "description": "Two already-validated changes combined for the first time into their one untested cell of a 2x2: {whole-number band on/off} x {100%/25% equity}. E69b measured band-off at 100% equity (PF 1.22985003, DD 9.28471029%, 43 trades). E72 measured band-on at 25% equity (PF 1.26239697, DD 2.50912733%, 36 trades, identical trade population to e58a's 100%-equity run). E74 measured the SHORT's band-off at 25% equity (PF 1.16714444, DD 3.61455016%, 41 trades). Nobody had run the LONG's band-off build at the SAME 25% equity E74 used, so E74 could not be set beside a genuinely comparable long number. This is that run: e72's pine byte-identical except the inMiddle (whole-number band) ban removed from goLong, exactly as e69b removed it from e58a.",
+    "metrics": {
+      "netProfitPct": 2.25917129,
+      "profitFactor": 1.24975173,
+      "maxDrawdownPct": 2.36726687,
+      "totalTrades": 43,
+      "winRatePct": 41.86046512,
+      "avgTradePct": 0.05253887,
+      "sharpeRatio": 1.19953806,
+      "sortinoRatio": 0.64340266,
+      "commissionPaid": 108.082871,
+      "avgWinningTrade": 62.804663055556,
+      "avgLosingTrade": -36.18267224,
+      "ratioAvgWinLoss": 1.7357663,
+      "largestWin": 73.473589,
+      "largestLoss": -40.5227744,
+      "avgBarsInTrade": 1285.11627907,
+      "avgBarsWinning": 1849.83333333,
+      "avgBarsLosing": 878.52,
+      "longTrades": 43,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1NWPH5PAKV51Q6C53BN5C36",
+      "strategyId": "01M1NWP2DYTZ4JC2DK8GF9BXB7",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NWPH5PAKV51Q6C53BN5C36",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T09:42:18Z"
+    },
+    "verdict": "REGISTERED PREDICTION CONFIRMED EXACTLY: this build reproduces E69b's 43-trade population and 18W/25L split precisely (41.86046512% win rate to 8 significant figures), and drawdown scaled down by 3.92x (9.28471029% -> 2.36726687%), matching E72's own 3.916x scaling factor to within noise. The equity-fraction insensitivity E72 established for e58a generalises to the band-removed build too. NOT A KEEP against E72 (RATCHET v2 clause 1: PF fell 1.26239697 -> 1.24975173, the same direction and similar magnitude as E69b's fall against e58a at 100% equity), but that was never the question -- this run exists to make E74 comparable, not to propose a change.",
+    "notes": "THE FIRST TRUE APPLES-TO-APPLES BAND-REMOVED COMPARISON BETWEEN THE TWO LEGS: LONG (E77) PF 1.24975173 / DD 2.36726687% / 43 trades / 41.86046512% win vs SHORT (E74) PF 1.16714444 / DD 3.61455016% / 41 trades / 41.46341463% win, both at 25% equity, both with the whole-number band removed, same window. The long remains meaningfully stronger than the short (PF +0.083) even on fully matched terms -- the long/short asymmetry documented since E71/E72 is not an equity-fraction artifact and is not explained by the band. This closes the queue item carried forward since E74 ('re-run the LONG without the whole-number band at 25% equity'). NO CHAMPION: 43 and 41 trades both clear the 30-trade floor (RATCHET v2 clause 3) but the 1m window remains 4.5 months of ONE regime and cannot support a split (HARD LESSON 22/LESSON 22), so nothing here can be promoted. Reference builds are unchanged: e58a (long, 100% equity, band present) and E71 (short, 25% equity, band present) remain this lab's two reference builds; E77 and E74 are the band-removed comparability pair, not replacements."
   }
 ]

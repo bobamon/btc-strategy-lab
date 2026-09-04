@@ -59,7 +59,7 @@ re-sweeps. **E62 (bottom of file, most recent) independently re-checked both clo
 backtest was run, and per HARD LESSON 26 this was flagged to the user rather than filed as a third
 quiet board entry.**
 
-**UPDATE, superseding the above through E76 (2026-09-04):** the halt stated at E62 was itself
+**UPDATE, superseding the above through E77 (2026-09-04):** the halt stated at E62 was itself
 overturned — E64a's trade-level forensics found the engine forces 100%-equity margin sizing on every
 short, which liquidates it at ~0.33% adverse before the shield can ever fire (HARD LESSON 42). E71
 fixed this with a **declared deviation** (25%-of-equity short) and produced this lab's first honestly
@@ -71,9 +71,15 @@ position size. E74 found the whole-number band hurts the short (PF 0.973→1.167
 from KEEP by RATCHET v2 clause 2 — an open rule question for the user). E75a/E75b/E76 completed the
 four-term entry binding sweep on the short leg (`h1Bear` Δ−0.191 > `brokeAbove` Δ−0.087 > `timeGate`
 Δ−0.046 > band, which helps) alongside the long's own completed sweep (E69/E70: `h1Bull` Δ−0.273 >
-`timeGate` Δ−0.231 > `brokeBelow` Δ−0.204 > `inMiddle`, mild hurt). **No champion, no candidate** —
+`timeGate` Δ−0.231 > `brokeBelow` Δ−0.204 > `inMiddle`, mild hurt). E77 then completed the last open
+comparability cell: the long's band-removed build re-run at 25% equity reproduced E69b's 43-trade,
+18W/25L population EXACTLY, confirming E72's equity-insensitivity finding generalises past e58a. The
+first true matched comparison — both legs, band removed, 25% equity — puts the long at PF 1.24975173
+(43 trades) against the short's PF 1.16714444 (E74, 41 trades): the long/short gap survives matched
+terms. **No champion, no candidate** —
 every entry term on both legs is now measured, the shield/rr axes are closed (E56-E62, E73, HARD
-LESSON 13), and the 1m window remains 4.5 months of one regime that cannot support a split (LESSON 22).
+LESSON 13), position sizing is closed (HARD LESSON 29/42/44), and the 1m window remains 4.5 months of
+one regime that cannot support a split (LESSON 22).
 
 *(The paragraph below describes v6, kept for history — it is DEMOTED, not current.)*
 **v6 — HA cascade, LONG ONLY, structural stop (pre-A.L.C.M., WRONG EXIT MODEL).** BTCUSDT 1m,
@@ -4669,3 +4675,88 @@ remains the short-leg reference build; e58a remains the long-leg reference build
    queue item 2) to complete the E69b comparison on equal footing between the two legs.
 3. **The two open rule questions for the user remain open**: the `inMiddle` ratchet asymmetry (E69b) and
    the E74 drawdown-allowance-should-be-proportional question. Neither is decided here.
+
+---
+
+# ██ E77 — THE LAST CELL IN THE 2x2 IS FILLED: THE LONG WITHOUT THE BAND, AT 25% EQUITY
+
+**Stored-prompt check first.** This cycle's stored prompt (queue item 1: attack the short's entry
+geometry; queue item 2: finish the four-term binding sweep) predates E71-E76 by a full day of work in
+this same file. **THE DOCS WIN, as the prompt itself instructs.** Item 1 is answered — E71's declared
+25%-equity deviation already fixed the margin problem the prompt worried about, and the short's
+mechanics (not its direction rule) were the actual defect, exactly as E74/E75a/E75b/E76 found. Item 2 is
+complete — the four-term sweep finished on both legs at E76. **The only open, credit-worthy item on the
+board is E76's own queue item 2**, carried forward from E74: re-run the long's band-removed build at
+25% equity so it is finally comparable to E74's short.
+
+**Construction:** `pine/e72-long-25pct-equity.pine` (e58a at 25% equity, the comparability control) with
+the ONE change `pine/e69b-no-whole-number-band.pine` already validated at 100% equity — the `inMiddle`
+ban removed from `goLong`. Nothing else touched. Numbered E77 (continuing after E76; no collision found
+in this file at start-of-cycle).
+
+**REGISTERED PREDICTION, BEFORE RUNNING (LESSON 17):** E72 established a LONG is insensitive to the
+100%→25% equity change with the band present — identical 36-trade population, identical win/loss split,
+drawdown scaling down mechanically (9.83%→2.51%, a 3.92x factor), PF moving +0.0222. If that
+insensitivity is a property of the sizing mechanism rather than of that one build, this run should
+reproduce E69b's exact 43-trade, 18W/25L population, with drawdown near 9.28%/3.92 ≈ 2.4% and PF close
+to 1.230. A different population would mean the insensitivity finding does not generalise past e58a.
+
+## RESULT: THE PREDICTION WAS CONFIRMED TO THE DIGIT
+
+| | E69b (band off, 100% equity) | E72 (band on, 25% equity) | **E77 (band off, 25% equity)** |
+|---|---|---|---|
+| Trades | 43 | 36 | **43 — identical to E69b** |
+| Win rate | 41.86046512% (18W/25L) | 41.66666667% | **41.86046512% (18W/25L) — identical to E69b** |
+| Profit factor | 1.22985003 | 1.26239697 | **1.24975173** |
+| Max drawdown | 9.28471029% | 2.50912733% | **2.36726687%** |
+| Sharpe | 1.22326152 | — | 1.19953806 |
+
+**The trade population and win/loss split are exact matches to E69b**, not approximations — the same 18
+winners and 25 losers, to eight significant figures on win rate. **Drawdown scaled by 3.92x** (9.28% →
+2.37%), matching E72's own 3.916x scaling factor within noise. **PF shifted by +0.0199** (1.230→1.250),
+almost identical to E72's own shift over e58a (+0.0222). Every number the prediction named landed within
+the margin the prediction itself set.
+
+## WHAT THIS ESTABLISHES
+**The equity-fraction insensitivity is a property of the sizing mechanism, not of one specific build.**
+E72 showed it once, on e58a. E77 shows the same insensitivity survives an unrelated entry-term change
+(the band), which rules out the alternative explanation that E72's clean result was a coincidence of
+that particular trade population.
+
+**This is the first apples-to-apples comparison between the two legs' band-removed builds:**
+
+| leg | PF | trades | win rate | drawdown |
+|---|---|---|---|---|
+| **LONG (E77)** | **1.24975173** | 43 | 41.86046512% | 2.36726687% |
+| **SHORT (E74)** | **1.16714444** | 41 | 41.46341463% | 3.61455016% |
+
+Same equity fraction (25%), same construction rule (band removed), same window. **The long remains
+meaningfully stronger than the short** (PF +0.083, DD 1.25pp better) even on fully matched terms — the
+long/short asymmetry documented since E71/E72 is not an artifact of equity fraction and is not explained
+by the whole-number band.
+
+## NOT A KEEP, AND THAT WAS NEVER THE QUESTION
+Against E72 (its true single-variable parent), RATCHET v2 clause 1 fails: PF fell 1.26239697 →
+1.24975173, the same direction and similar magnitude as E69b's fall against e58a at 100% equity
+(−0.0103 there, −0.0126 here). **Consistent, not new** — this run exists to make E74 comparable, not to
+propose a change. `status: "testing"` in `results/backtests.json`, matching E71/E72/E74's own
+comparability-control status rather than a binding-test rejection.
+
+## STATE, UNCHANGED
+No champion, no candidate. Reference builds remain **e58a** (long, 100% equity, band present, PF
+1.24015239/1.38769869 gross, 36 trades) and **E71** (short, 25% equity, band present, PF 0.97315988, 33
+trades) — E77 and E74 are the matched band-removed comparability pair, not replacements. The 1m window
+remains 4.5 months of ONE regime and cannot support a split (LESSON 22/HARD LESSON 22); 43 and 41 trades
+both clear the 30-trade floor but neither can be promoted without an out-of-sample window this
+instrument does not have.
+
+## QUEUE
+1. **The 2x2 {band on/off} x {100%/25% equity} grid is now complete on both legs where testable** (the
+   short cannot run at 100% equity at all — HARD LESSON 42). Do not re-run any cell.
+2. **No axis remains that this lab can spend a credit on right now** — entry terms (E69/E70 long,
+   E74-E76 short), shield/hold-cap net and gross (E56-E62, wider-shield analysis), reward:risk (HARD
+   LESSON 13 x4), position sizing (HARD LESSON 29/42/44) are all closed.
+3. **The two open rule questions for the user remain open, unchanged**: the `inMiddle` ratchet asymmetry
+   (E69b, ~0.01 PF vs better drawdown/sample/return) and the E74 drawdown-allowance-should-be-proportional
+   question (the 0.50pp band was calibrated on 8-45% drawdowns; at a 2-4% base it is a much larger
+   fraction of the total). Neither is decided here — both need the user, not another backtest.
