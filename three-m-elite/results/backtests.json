@@ -440,5 +440,50 @@
   },
   "verdict": "REJECTED -- the gate binds, is better implemented conditionally, and still costs edge",
   "notes": "THE SECOND OF FIVE PRE-REGISTERED OUTCOMES LANDED. THE GATE BINDS AND IS NOT INERT: 125 trades sits cleanly between v54's 48 (universal gate) and v37's 155 (no gate), exactly the range the header named in advance as the evidence that the conditional term does real work. AND THE FAITHFUL IMPLEMENTATION BEATS THE STRICT ONE: 1.17083258 against v54's 1.15861551, on 2.6x the sample (125 vs 48). Reading the transcripts before trusting a mechanisation was worth a credit. BUT NEITHER BEATS v37 WITH NO GATE AT ALL (1.25172059 / 8.72815312% / 155). REJECTED under RATCHET v2 clause 1: PF falls and drawdown worsens 8.73% -> 10.41%. THE CLAIM THAT MUST NOW BE WITHDRAWN: SYSTEM.md has been carrying 'part of v37s headline was the bull market, now measured rather than suspected', on the strength of v54. THAT IS WITHDRAWN. It rested on a gate that does not match the source, and the faithful version does not support it either. THE EVIDENCE ACTUALLY POINTS THE OTHER WAY, and the logic is worth stating: the gate KEEPS trades whose 12H/24H context is bullish and DROPS the rest. If v37s edge were merely the bull market, dropping the non-bull-confirmed trades should have RAISED profit factor. It LOWERED it, twice, under two different implementations -- which means the trades removed were profitable on average, and the strategy earns in non-bullish higher-timeframe contexts too. That is suggestive rather than conclusive, because the gate also shifts occupancy (LESSONS 24/28/29) and a different admitted population is not a controlled subset. But it is the opposite of what the withdrawn claim asserted. THIS IS THE THIRD SOURCE-INVERSION IN THE PROJECT: War Formation E64b found the source's literal 6h direction rule loses to the lab's proxy, E69a found the 1h term the source calls 'a bonus' is load-bearing, and now 3M finds the higher-timeframe bias the source insists on costs edge on this instrument. ENGINE NOTE (new constraint): the first version used ta.sum over a flip marker and the engine rejected it -- 'unimplemented function ta.sum'. Rejected at validation before execution, so no credit was spent; the run-length formulation that replaced it is array-free AND closer to the source's own wording. CASCADE: ratio 1, so 125 is a true position count (HARD LESSON 35) and clause 3 applies to it directly."
+ },
+ {
+  "id": "3m-elite-v58-first-touch-only",
+  "name": "3M Elite v58: entry restricted to dzTouch==0 (first touch of a never-touched zone), one change from champion v37",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "direction": "long",
+  "status": "testing",
+  "createdDate": "2026-09-04",
+  "lastTestedDate": "2026-09-04",
+  "backtestStart": "2022-01-01",
+  "backtestEnd": "2026-09-01",
+  "specPath": "three-m-elite/pine/3m-elite-v58-first-touch-only.pine",
+  "description": "This cycle's two named queue items (the 12H/24H bias gate, the cascade signature) are both already done as of v54/v55/v56/v57 and the concurrent liquidation-unwind closure -- per 'THE DOCS WIN over this prompt', this cycle continues the real open queue instead. The last SYSTEM.md entry (v37 cost decomposition + HARD LESSON 38 cross-lab warning) named the most promising untried lever as anything that raises gross edge per trade WITHOUT lengthening holds, and explicitly warned off a single-variable rTarget widen (13.5% of v37's trades already sit at maxBars=96). dzTouch < 2 (the One Candle Rule mitigation cap) has been a KILL condition since v13 but was never tested as an ENTRY-time selectivity filter distinct from that role: v37 currently allows entry on a zone that already absorbed one completed-4H body-close-inside (dzTouch==1, a 'used' zone under the One Candle Rule) as well as a genuinely untouched one (dzTouch==0). This restricts entry to dzTouch==0 only -- a pure entry-quality filter touching neither stop, target, nor maxBars, so it cannot lengthen holds by construction. PRE-RUN AUDIT (LESSON 17): R floor unchanged 0.8% (LESSON 3); stop unchanged dzBot, structural (LESSON 5); long-only, matches champion scope (LESSON 6 -- this is a champion-scope selectivity test, not a new short-side idea, so it does not violate v56's standing instruction against further short-mirror parameter tweaks); BINDING (E17): dzTouch==0 is a strict subset of dzTouch<2, so trade count must fall or stay flat -- if it did not fall the term would never have been binding at the dzTouch==1 margin; REDUNDANCY (E14): no other conjunction term measures completed-body-close count, so this is not implied by anything already present (unlike close>dzBot, shown redundant at v44). PREDICTION stated before running: trade count falls from 155 (some v37 entries currently fire on dzTouch==1 zones); if a genuinely untested zone converts at a materially higher rate than a once-touched one, PF should rise on the smaller sample; if a zone that already survived one completed close-inside is in fact the more reliable signal, PF could fall instead -- either way the exit mechanics are completely unchanged, so any PF move is attributable to entry quality alone, not to a longer or shorter hold.",
+  "metrics": {
+   "netProfitPct": 42.53848648,
+   "profitFactor": 1.48439273,
+   "maxDrawdownPct": 8.7051944,
+   "totalTrades": 117,
+   "winRatePct": 46.15384615,
+   "avgTradePct": 0.36357681,
+   "sharpeRatio": 0.9292181,
+   "avgWinningTrade": 241.401230038889,
+   "avgLosingTrade": -139.393932920635,
+   "avgBarsWinning": 47.01851852,
+   "avgBarsLosing": 33.31746032,
+   "longTrades": 117,
+   "shortTrades": 0,
+   "commissionPaid": 1397.232751900001
+  },
+  "provenance": {
+   "source": "trader.dev",
+   "jobId": "adhoc_01M1NFY916R3VTMHFDF3B09DAT",
+   "strategyId": "01M1NFY98ZT5D5CX3X3BPCA78Y",
+   "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NFY916Q9YJEM11SJ7XDSJA",
+   "engineVersion": "tv_jul26_mc7",
+   "cascadeRatio": 1,
+   "uniqueEntries": 117,
+   "totalRows": 117,
+   "maxCascadeDepth": 1,
+   "verifiedAt": "2026-09-04T06:00:00Z"
+  },
+  "pineSource": "three-m-elite/pine/3m-elite-v58-first-touch-only.pine",
+  "verdict": "RATCHET v2 clauses 1-3 PASS decisively; clause 4 (mandatory split) not triggered but not yet checked -- new interior base, promotion to champion-of-record pending a split test",
+  "notes": "THE PREDICTION'S FIRST BRANCH LANDED, DECISIVELY. Versus champion v37: profit factor 1.25172059 -> 1.48439273 (+0.2327, far past the 0.02 threshold), max drawdown 8.72815312% -> 8.70519440% (IMPROVED, not just held), trades 155 -> 117 (a 24.5% cut -- real but under RATCHET v2 clause 4's 50% split-test trigger). All three live ratchet clauses (PF up, DD not worse, count >=30) pass at once, which last happened for this lab at v32 and v37 themselves. WHY IT WORKED AS DESIGNED: avgBarsWinning is 47.02 (49% of the 96-bar cap), essentially identical to v37's own 47.0 (49%) -- the hold profile is unchanged, confirming the entry-only filter did not achieve its PF gain by lengthening winners into the cap, exactly the lever HARD LESSON 38 said was untried and safest. Achieved win/loss ratio (HARD LESSON 39) is 1.73179151 against the same nominal rTarget=2.0 -- 86.6% of nominal, weaker than v37's 97.1% but still healthy, and win rate rose from 42.58% to 46.15%. Net effect: a genuinely untouched zone (dzTouch==0) converts at a higher rate than a zone that already absorbed one completed close-inside, which is the opposite of 'a zone that survived a test is proven' and consistent with the source's own framing of a fresher setup as a cleaner one. Cascade ratio 1.0 (117 rows = 117 unique entries) -- clean, as expected for a long build (HARD LESSON 35's tranching signature is short-specific). NOT YET A CHAMPION: this is a >24% trade-count cut on a large PF move, and while RATCHET v2's clause 4 does not mandate a split test below 50%, this lab has never promoted a result of this magnitude to 'passed' without one (v32->v33, v37->v39) -- the credit budget this cycle (1 of 2 spent on this run) did not extend to a same-cycle split, so v58 is recorded as the new interior base (status: testing) and the split (2022-01-01/2024-06-08 halves, matching the established methodology) is the top queue item for the next cycle before any promotion."
  }
 ]

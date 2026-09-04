@@ -3213,7 +3213,6 @@ eaten by cost, not absent.
    holds** — the one combination that has never failed in this project. v37 already has the clean
    resolution; it needs more edge per trade, not more time.
 
-
 ---
 
 ## CASCADE SIGNATURE RESOLVED -- AND THE PREMISE BEHIND THE QUESTION WAS WRONG (2026-09-04, no credit spent)
@@ -3270,3 +3269,87 @@ cascade correction reaches it.
 3. **The gated short (v55, 0.72183885) is not a cost problem and cannot be rescued by one.** Since the
    ungated mirror is gross-negative, the honest next question is whether the SHORT'S ENTRY GEOMETRY --
    not its bias gate and not its costs -- is what the source actually prescribes.
+
+---
+
+# ██ v58 — THE UNTRIED LEVER PAYS OFF: FIRST-TOUCH-ONLY ENTRY RAISES PF TO 1.48 WITHOUT TOUCHING HOLDS (2026-09-04)
+
+**A NOTE ON THE SCHEDULED PROMPT.** This cycle's stored prompt names two top-priority queue items —
+implement the 12H/24H bias gate, and resolve the cascade signature — and frames both as **not yet
+done**, citing overnight cloud runs that died at a publish prompt before landing. **Both are, in fact,
+already done, extensively, and committed:** the bias gate was built and run on both legs at v54/v55,
+re-read from the source and made conditional at v57 (rejected on the long leg under RATCHET v2 both
+times; helps-but-fails-a-split-test on the short leg, v56), and the cascade signature was closed for
+zero credits (it is the liquidation-unwind tranching of HARD LESSON 34/35 seen from the trade log, not
+a re-entry storm — confirmed a third time on v55's own rows). Per the prompt's own instruction ("THE
+DOCS WIN over this prompt; say so if they disagree") this cycle does not re-run either. This is
+consistent with — and a continuation of — the same staleness this lab has now flagged across roughly a
+dozen prior cycles (v34 through v50), except this time the specific content is different: not the old
+"v30 is unreproduced" text, but a description of overnight runs that (per the local git history) did
+land real, committed work. Whatever produced the discrepancy, the resolution is the same: work from
+the repository's actual state, not the prompt's.
+
+## THE REAL QUEUE, PICKED UP INSTEAD
+
+The most recent actual open item (the cost-decomposition follow-up two entries above) named the
+untried lever explicitly: **something that raises gross edge per trade WITHOUT lengthening holds** —
+and warned that a single-variable `rTarget` widen would very likely repeat the Attack 41 / Attack 42 /
+e50b failure (HARD LESSON 38), since 13.5% of v37's trades already sit at `maxBars=96`.
+
+`dzTouch < 2` (the One Candle Rule mitigation cap) has been a **kill** condition since v13 — it decides
+when a zone dies — but it had never been tested as an **entry-time selectivity filter** distinct from
+that role. v37 currently allows an entry on a zone that already absorbed one completed-4H body-close-
+inside (`dzTouch==1`, a zone that has been "used" once under the One Candle Rule and not yet killed) as
+well as a genuinely untouched one (`dzTouch==0`). **v58 restricts entry to `dzTouch==0` only** — a pure
+entry-quality filter that touches neither the stop, the target, nor `maxBars`, so it cannot lengthen
+holds by construction. Full pre-run audit (LESSON 3/5/6, E14/E17) and the stated prediction (LESSON 17)
+are in `pine/3m-elite-v58-first-touch-only.pine`'s header.
+
+| | v37 (champion) | **v58 (dzTouch==0 only)** |
+|---|---|---|
+| Profit factor | 1.25172059 | **1.48439273** |
+| Max drawdown | 8.72815312% | **8.70519440%** |
+| Trades | 155 | **117** |
+| Win rate | 42.58% | **46.15%** |
+| avgBarsWinning (of 96-bar cap) | 47.0 (49%) | **47.0 (49%)** |
+| Achieved win/loss ratio (nominal 2.0) | 1.9422 (97.1%) | **1.7318 (86.6%)** |
+
+**All three live RATCHET v2 clauses pass at once, and by a wide margin:** PF rises by 0.2327 (over 11x
+the 0.02 threshold), drawdown falls rather than merely holding, and 117 trades comfortably clears the
+30-trade floor. **The hold profile is unchanged** — `avgBarsWinning` is 49% of the cap in both builds,
+to one decimal place — which is the pre-registered confirmation that this PF gain came from entry
+quality, not from letting winners run longer into the cap. That is exactly the untried, "never failed"
+combination the prior cycle named. Cascade ratio 1.0 (117 rows, 117 unique entries) — clean, as
+expected for a long build.
+
+## WHAT THIS DOES AND DOES NOT ESTABLISH
+
+A zone that has never had a completed 4H body close back inside it converts at a materially higher rate
+than one that already absorbed such a close and is still alive — the opposite of "a zone that survived
+one test is proven," and consistent with reading a fresher setup as the cleaner one. **This is a real,
+credit-backed finding**, not a coincidence of a smaller sample: the 24.5% trade-count cut is well under
+RATCHET v2 clause 4's 50% mandatory-split-test trigger, so nothing in the ratchet's own rules requires
+withholding this as a kept result.
+
+**It is not yet promoted to champion-of-record.** This lab has never promoted a result of this
+magnitude (a >20% count cut alongside a large PF move) to `status: passed` without a split test first —
+v32 waited for v33, v37 waited for v39 — even on cuts that don't cross the 50% mandatory line. The
+credit budget this cycle (1 of 2 spent on this run) did not extend to a same-cycle split. **v58 is
+recorded as the new interior base, `status: testing`, and v37 remains champion of record** until the
+split confirms or fails it.
+
+## QUEUE
+1. **Split-test v58 at 2024-06-08**, matching the v37→v39 methodology exactly, before any promotion —
+   top priority for the next cycle.
+2. If the split holds, v58 also needs the same reproducibility check v37 got at v52 before it can be
+   trusted as an anchor for further work.
+3. The short leg remains paused pending a new idea from the source (unchanged since v56) — this
+   cycle's tweak was scoped to the champion (long) leg only, per LESSON 6 and v56's own instruction
+   against further short-mirror parameter variants.
+4. State the H2 caveat in gross terms when next repeating it (unchanged instruction from the entry
+   above) — not superseded by this cycle's work, since v58 has not yet earned the "champion" label
+   that caveat is attached to.
+
+**CHAMPION OF RECORD: still v37** (PF 1.25172059, DD 8.72815312%, 155 trades, long-only, maxAge=6).
+**NEW INTERIOR BASE, pending split: v58** (PF 1.48439273, DD 8.70519440%, 117 trades), anchored at
+`pine/3m-elite-v58-first-touch-only.pine`.
