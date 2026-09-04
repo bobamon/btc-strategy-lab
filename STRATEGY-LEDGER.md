@@ -2397,3 +2397,83 @@ extra row is a small loss, which:
    like an exceptional geometry; it was an artifact of a shrunken denominator, and the real figure is
    3.55 — still good, but a different claim.
 4. **The check is free.** `get_trades`, group by `(entryBar, entryPrice)`, sum each group.
+
+**A NARROWER CLAIM THAN IT LOOKS — DO NOT READ THIS AS "v57's PF IS FINE."** The row-splitting artifact
+this lesson describes is dollar-neutral because cascaded rows of the SAME liquidation sum to the SAME
+total P&L whichever way they are counted. That is a different question from whether the margin call
+closed the position EARLIER than its real structural stop, which changes the actual dollars realized,
+not just how they are counted. HARD LESSON 52 measures that second, larger effect directly.
+
+---
+
+## ██ HARD LESSON 52 — v57's OWN CLAIM THAT 3M's SHORT DOES NOT NEED THE SIZING FIX WAS NEVER CHECKED
+## AGAINST v57's OWN TRADES, AND WAS WRONG. FIXED, THE SOURCE'S SHORT MIRROR IS GENUINELY POSITIVE (3M
+## ELITE v60, 2026-09-04)
+
+**QUEUE ITEM (3M ELITE, this cycle).** v57's header asserted: "3M's structural stop sits inside the
+margin boundary, so [War Formation's] sizing fix is NOT needed here." That line was never verified
+against v57's own trades — only against v53's, in HARD LESSON 34, which explicitly left v57 (built
+afterward) unaudited. It also never squared with v57's own recorded `avgLosingTradeByEntry` of
+**−$58.41 ≈ 0.58% of $10k, well under the 0.80% minRpct floor its own filter guarantees.** That number
+was sitting in the record the whole time.
+
+### THE CHECK, FREE, ON v57's ALREADY-RUN TRADES
+
+`get_trades` on v57 (jobId `01M1NHJV2GH1XCTD8NDYR839R7`), grouped by `entryBar` into its 39 unique
+entries: **29 are net losers, and 21 of those 29 (72%) never reach 0.80% adverse before the position is
+force-closed** — the same signature HARD LESSON 34 found in v53 (74%), not the exemption the header
+claimed. Two entries (bars 20139 and 27679) show three-to-four tranches skimmed off at progressively
+worse prices before the final piece closes — textbook margin-forced partial closes, not four separate
+signals. **v57's own comment was an assumption, never a measurement, and the measurement contradicts
+it.**
+
+### THE FIX, APPLIED TO 3M's SHORT LEG FOR THE FIRST TIME
+
+v60: v57 byte-identical except position size cut to **25% of equity via explicit qty** (HARD LESSON
+42's declared deviation, the same fix that took War Formation's E64a from 0.45 to 0.97). Nothing else
+changed — same 39-entry selection, same R floor, same stop/target geometry. One backtest, pre-registered
+outcomes stated before running (LESSON 17): either the cascade clears and PF holds (real edge, the
+truncation was optimistic-biased for this build) or the cascade clears and PF falls (v57's 1.22 was
+substantially the artifact).
+
+| | v57 (100% equity, distorted) | **v60 (25% equity, clean)** |
+|---|---|---|
+| cascadeRatio | 1.5128 | **1.0** |
+| maxCascadeDepth | 4 | **1** |
+| losing-entry adverse distance | 72% under 0.80% (margin-capped) | **100% at 0.94%–2.16% (real stops)** |
+| profit factor | 1.222673 (by entry) | **1.88616546** |
+| win rate | 25.64% (by entry) | **56.41%** |
+| max drawdown | 8.07% | 1.71% (not comparable — smaller position) |
+| Sharpe | 0.23 | **0.84** |
+
+**Outcome A, decisively.** Every losing entry now exits at a single, consistent price beyond the 0.80%
+floor — the structural stop, not a margin call. The cascade signature is completely gone (ratio 1.0,
+depth 1, matching War Formation's clean-short signature exactly). **The source's own bias-gated short
+mirror has real edge.** This also refines HARD LESSON 34's "the net bias is not cleanly signed" caution
+for v53 (the ungated mirror): correctly measured, v57/v60's PF moved UP, not down — HARD LESSON 34's
+concern was a live possibility, not a certainty, and here it did not materialize once the bias gate was
+already doing its job.
+
+### WHAT THIS DOES NOT SETTLE
+
+- **status=testing, not passed/champion.** The 25%-equity sizing is a DECLARED DEVIATION, not comparable
+  to v37/v58's 100%-equity long numbers on any shared scale — there is nothing to ratchet it against.
+- **No split test.** A free split was attempted from this run's own trade log and ABANDONED: a hand
+  re-transcription of the 39 rows did not reproduce the tool's reported gross totals ($1054.90/$487.23
+  by hand vs $1000.01/$530.18 reported) closely enough to trust, and an unverified hand-computed metric
+  must not enter the record (LESSON 21 / "never hand-write a metric"). The split needs either two
+  separate windowed backtests or a verified re-pull, neither spent this cycle.
+- **3M has never had a promoted short champion**, so this is the first trustworthy number for the leg,
+  not a displacement of one.
+- **Whether a declared-deviation-sized short can ever be "promoted" under this project's parity rules at
+  all is an open policy question**, not just a data question — it sits beside the unresolved RATCHET v2
+  clause-2 question already logged at line 2314.
+
+### THE STANDING RULE THIS ADDS
+
+**A comment asserting a lesson doesn't apply is not a check.** v57's exemption claim stood unverified
+across two cycles because it read as confident prose rather than a number. HARD LESSON 34's own closing
+line — "before trusting any SHORT result... check the average losing trade" — already said how to catch
+this, and the data to catch it (`avgLosingTradeByEntry` −$58.41 against a 0.80% floor) was sitting in
+v57's own backtests.json entry the whole time. **Read the recorded numbers against the standing rule
+before trusting a header's reasoning, especially your own.**

@@ -3769,3 +3769,102 @@ already present in the champion and stays there unchanged. v58 remains champion 
 **CHAMPION OF RECORD: v58** (PF 1.48439273, DD 8.70519440%, 117 trades, long-only, `dzTouch==0`,
 anchored at `pine/3m-elite-v58-first-touch-only.pine`). Unchanged by this cycle — v59 was a binding
 test, not a ratchet candidate.
+
+---
+
+# ██ v60 — THE SHORT LEG'S FIRST CLEAN MEASUREMENT: v57's OWN "SIZING FIX NOT NEEDED" CLAIM WAS NEVER
+# CHECKED AGAINST v57's OWN TRADES, AND WAS WRONG (2026-09-04)
+
+**THE SCHEDULED PROMPT AGAIN NAMES THE BIAS GATE (queue item 1) AND THE CASCADE SIGNATURE (queue item
+2) AS OPEN.** Both are done — the bias gate since v54-v57 (closed under RATCHET v2 on both legs, HARD
+LESSON 45), the cascade signature since v55/v57 (HARD LESSON 35/50: it is the liquidation unwind, dollar
+sums are safe, win rate/avgLosingTrade/ratio are not). The champion has also moved twice since the
+prompt's v37 snapshot (v37 → v58 → confirmed unchanged at v59). Per "THE DOCS WIN over this prompt" and
+HARD LESSON 26, this cycle does not repeat that work and does not send a fresh push about the staleness.
+It takes the queue's own standing item instead: "the short leg remains paused pending a new idea from
+the source" (v58/v59) combined with the one HARD-LESSON-flagged gap that was never actually closed —
+HARD LESSON 42/43's margin-ceiling fix had been applied to War Formation's short but never to 3M's.
+
+## WHAT WAS ACTUALLY OPEN: v57's OWN EXEMPTION CLAIM, UNVERIFIED
+
+v57's header (the source's own 20/50/200 SMA-stack bias gate, mirrored onto the short) asserted: "3M's
+structural stop sits inside the margin boundary, so [War Formation's] sizing fix is NOT needed here."
+That line was checked against v53 in HARD LESSON 34 (74% of v53's losers never reached the 0.80% floor)
+— but v53 predates the bias gate, and v57 postdates HARD LESSON 34, so v57's own trades were never
+audited. The number was already in the record to catch it: v57's `avgLosingTradeByEntry` is **−$58.41,
+≈0.58% of $10k — under the 0.80% minRpct floor its own filter guarantees.** No one read it against the
+standing rule.
+
+**Free check, `get_trades` on v57 (jobId `01M1NHJV2GH1XCTD8NDYR839R7`), grouped by entryBar into 39
+unique entries:** 29 net losers, and **21 of those 29 (72%) never reach 0.80% adverse** before a
+margin-forced partial close — matching v53's 74%, not the exemption the header claimed. Two entries
+show three-to-four skimmed tranches before the real close. v57's comment was an assumption; the
+measurement contradicts it. Full derivation and the standing rule this adds: STRATEGY-LEDGER.md HARD
+LESSON 52.
+
+## THE FIX, APPLIED TO 3M's SHORT LEG FOR THE FIRST TIME
+
+`pine/3m-elite-v60-short-declared-deviation.pine`: v57 byte-identical except position size cut to 25%
+of equity via explicit `qty` (HARD LESSON 42's declared deviation — the same fix that took War
+Formation's E64a from PF 0.45 to 0.97). Nothing else changed: same 39-entry selection, same R floor,
+same stop/target geometry — isolating sizing as the only variable.
+
+PRE-RUN AUDIT: R >= 0.8% (LESSON 3) unchanged. Stop beyond structure (LESSON 5) unchanged, `slPx =
+szTop`. Short leg alone (LESSON 6 as scoped by HARD LESSON 31 — a source mirror, not an invented
+geometry). BINDING (E17): N/A, no selection term touched, so the entry set cannot change. REDUNDANCY
+(E14): N/A. Latch in sequence (LESSON 8): unchanged. CASCADE (HARD LESSONS 35/42): this is the thing
+being tested.
+
+PRE-REGISTERED OUTCOMES (LESSON 17), stated before running: (A) cascade clears and PF holds above 1.0 →
+the source's bias-gated short mirror has real edge, the first trustworthy 3M short; (B) cascade clears
+and PF falls below 1.0 → v57's 1.222673 was substantially the margin-truncation artifact HARD LESSON 34
+warned of.
+
+| | v57 (100% equity, distorted) | **v60 (25% equity, clean)** |
+|---|---|---|
+| cascadeRatio | 1.5128 | **1.0** |
+| maxCascadeDepth | 4 | **1** |
+| losing-entry adverse distance | 72% under 0.80% floor | **100% at 0.94%-2.16%, genuine stops** |
+| Profit factor | 1.222673 (by entry) | **1.88616546** |
+| Win rate | 25.64102564% (by entry) | **56.41025641%** |
+| Trades | 39 | **39** (identical selection, as predicted) |
+| Sharpe | 0.23434069 | **0.83750737** |
+| Max drawdown | 8.07312248% | 1.71159657% (not comparable — 25%-size position) |
+
+## THE VERDICT
+
+**Outcome A, decisively.** The cascade is completely gone (ratio 1.0, depth 1 — matching War Formation's
+clean-short signature exactly), every losing entry now exits at a single price beyond the 0.80% floor,
+and profit factor moved UP under correct measurement (1.22 -> 1.89), not down. **The source's own
+bias-gated short mirror has real, structurally-stopped edge.** This also refines HARD LESSON 34's
+caution for the ungated v53 mirror ("a correctly-stopped short would very likely score worse, not
+better") — that was a live possibility, not a certainty, and here, with the bias gate already doing its
+selection work, it did not happen.
+
+**Recorded as `status: testing`, not `passed`/champion — three reasons, not one:**
+1. The 25%-equity sizing is a DECLARED DEVIATION, not comparable on any shared scale to v37/v58's
+   100%-equity long numbers — there is nothing to ratchet it against.
+2. **No split test.** A free split was attempted directly from this run's own trade log and abandoned:
+   hand-retyping the 39 rows did not reproduce the tool's reported gross totals closely enough to trust
+   ($1054.90/$487.23 by hand vs $1000.01/$530.18 reported), and an unverified hand-computed metric must
+   not enter the record. The split needs two separate windowed backtests or a verified re-pull — not
+   spent this cycle (budget: 1 of 2 available credits used).
+3. **3M has never had a promoted short champion** — this establishes the first trustworthy number for
+   the leg, it does not displace one.
+
+## QUEUE
+
+1. Run the H1/H2 split on v60 as two separate backtests (2 credits) before any promotion decision.
+2. **Open policy question, not just a data one:** can a declared-deviation-sized leg ever be promoted
+   under this project's parity rules, or does it only ever stand as a labelled, non-comparable finding
+   beside the 100%-equity long champion? This sits beside the unresolved RATCHET v2 clause-2 question
+   already logged in STRATEGY-LEDGER.md (line ~2314).
+3. The mechanical flip rule (combining both legs, per v24's finding that they are not independent) is
+   still untouched and still the other structural gap named at v58/v59.
+
+**CHAMPION OF RECORD (LONG): v58** (PF 1.48439273, DD 8.70519440%, 117 trades, `dzTouch==0`, anchored at
+`pine/3m-elite-v58-first-touch-only.pine`). Unchanged by this cycle.
+
+**FIRST CLEAN SHORT MEASUREMENT (NOT A CHAMPION): v60** (PF 1.88616546, DD 1.71159657%, 39 trades,
+25%-equity declared deviation, anchored at `pine/3m-elite-v60-short-declared-deviation.pine`). Real
+edge, not yet split-tested, not comparable to the long champion's sizing profile.

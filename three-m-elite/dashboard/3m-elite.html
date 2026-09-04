@@ -964,9 +964,61 @@ const DATA = [
     },
     "pineSource": "three-m-elite/pine/3m-elite-v59-dzage-binding-v58.pine",
     "notes": "REJECTED as a candidate change (this was a binding test, not a ratchet proposal -- v58's own dzAge >= 1 stays in, unchanged). Against v58 (PF 1.48439273, DD 8.7051944%, 117 trades): removing dzAge >= 1 gives PF 1.02675881 (-30.8% relative), DD 13.50029781% (+4.79pp), trades 177 (+60, +51.3%), win rate 38.98% (down from 46.15%). Confirms dzAge >= 1 is load-bearing against the current champion, same direction as v43's finding against the retired v37 base (PF 1.25172059 -> 0.96009862, trades 155 -> 199, +44/+28.4%) but a LARGER relative effect here: both the PF drop and the trade-count increase are proportionally bigger under v58's dzTouch==0 than they were under v37's dzTouch<2. Reading: same-4H-candle (dzAge==0) entries are disproportionately concentrated among never-touched (dzTouch==0) zones -- a zone that has just been created and not yet touched is, almost by construction, more likely to also be on its creation bar than an older zone would be -- so the two selectivity terms interact rather than acting independently. This closes v58-cold-reproduction's queue item 3 for dzAge; close > dzBot is closed without a new backtest per the algebraic argument in the Pine header (re-running it would spend a credit to re-confirm arithmetic, not learn anything new)."
+  },
+  {
+    "id": "3m-elite-v60-short-declared-deviation",
+    "name": "3M Elite v60 short leg, first clean measurement (25% equity declared deviation)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "short",
+    "status": "testing",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/pine/3m-elite-v60-short-declared-deviation.pine",
+    "description": "v57 (the source's own 20/50/200 SMA-stack bias gate mirrored onto the short leg) byte-identical except position size cut to 25% of equity via explicit qty (HARD LESSON 42's declared deviation). Nothing else changed: same 39-entry selection, same R floor, same structural stop/target. Isolates sizing as the only variable, mirroring War Formation's E71 fix against E64a.",
+    "metrics": {
+      "netProfitPct": 4.69826377,
+      "profitFactor": 1.88616546,
+      "maxDrawdownPct": 1.71159657,
+      "totalTrades": 39,
+      "winRatePct": 56.41025641,
+      "avgTradePct": 0.1204683,
+      "sharpeRatio": 0.83750737,
+      "sortinoRatio": 0.09130387,
+      "commissionPaid": 97.8430226,
+      "grossProfitPreCommission": 1000.005447249998,
+      "avgWinningTrade": 45.454793056818,
+      "avgLosingTrade": -31.187004108824,
+      "ratioAvgWinLoss": 1.45749149,
+      "largestWin": 98.855465,
+      "largestLoss": -54.1618326,
+      "avgBarsInTrade": 41.76923077,
+      "avgBarsWinning": 56.63636364,
+      "avgBarsLosing": 22.52941176,
+      "longTrades": 0,
+      "shortTrades": 39
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1NXR2YRQM6A2VV5MD748BNC",
+      "resultId": "01M1NXR2YRB23N335M7DEH5NW1",
+      "strategyId": "01M1NXR34DJZYWWGW0DHYCFNF9",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NXR2YRB23N335M7DEH5NW1",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "uniqueEntries": 39,
+      "totalRows": 39,
+      "maxCascadeDepth": 1,
+      "verifiedAt": "2026-09-04T12:00:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v60-short-declared-deviation.pine",
+    "verdict": "THE FIRST CLEAN 3M SHORT MEASUREMENT. The margin ceiling (HARD LESSON 42/43) was disproven as inert on v57 by get_trades: 72% of v57's losing entries (21/29) never reached the 0.80% structural stop before a margin-forced partial close, matching v53's 74% -- v57's own header claim that the sizing fix was unneeded was wrong, never checked against v57's own trades. At 25% equity the cascade fully clears: cascadeRatio 1.0 (was 1.5128), maxCascadeDepth 1 (was 4), and every losing entry now exits at a single, consistent adverse distance of 0.94%-2.16% -- all at or beyond the 0.80% R floor, none of the sub-0.8% liquidation signature. PF improves from v57's distorted 1.222673 to a clean 1.88616546. Outcome A of the two pre-registered outcomes: the source's bias-gated short mirror has REAL edge, not a margin artifact.",
+    "notes": "DECLARED DEVIATION: 25% of equity, NOT COMPARABLE to v37/v58 (100%-equity long champion) or to any other 100%-equity 3M build -- drawdown in particular (1.71%) is an artifact of the smaller position, not a claim the short leg is safer. status=testing rather than passed/champion for three reasons: (1) the sizing deviation means this cannot be measured on the same profile as the long champion, so there is nothing for it to be ratcheted against; (2) NO SPLIT TEST HAS BEEN RUN -- an attempted free split from this run's own trade log was abandoned mid-calculation after a hand-transcription check failed to reproduce the tool-reported gross totals exactly (1054.90/487.23 by hand vs 1000.01/530.18 reported), and LESSON 21/the standing rule against hand-writing metrics means an unverified manual split must not enter the record; a real split needs either two separate windowed backtests or a verified re-pull of the trade log, neither done this cycle; (3) 3M has never had a promoted short champion, so this is establishing the first trustworthy number for the leg, not displacing one. NEXT STEP: run the H1/H2 split as two separate backtests (2 credits) before any promotion decision, and decide whether a short leg at a declared-deviation sizing profile can be promoted at all under this project's parity rules, or whether it can only ever stand as a labelled, non-comparable finding."
   }
 ];
-const BUILT = "2026-09-04 08:56";
+const BUILT = "2026-09-04 10:03";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

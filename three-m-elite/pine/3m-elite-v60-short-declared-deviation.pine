@@ -1,0 +1,155 @@
+//@version=6
+// 3M ELITE v60 - THE SHORT LEG'S FIRST CLEAN MEASUREMENT. v57 BYTE-IDENTICAL except the DECLARED
+// DEVIATION below (position sizing only -- entry/exit logic, filters and stop/target untouched).
+//
+// WHY THIS RUN EXISTS: v57's own header claimed "3M's structural stop sits inside the margin
+// boundary, so [War Formation's] sizing fix is NOT needed here." That claim was never checked against
+// v57's own trades -- only against v53's. get_trades on v57 (jobId 01M1NHJV2GH1XCTD8NDYR839R7, free,
+// zero credits) DISPROVES it: grouping v57's 59 rows by entryBar into its 39 unique entries, 29 are net
+// losers and 21 of those 29 (72%) never reach the 0.80% minimum stop distance (minRpct) before the
+// position is force-closed -- the same cascade/margin-ceiling signature HARD LESSON 34 found in v53
+// (74%), not the exemption v57's comment claimed. Two losing entries even show FOUR tranches at
+// 0.194%/0.643%/1.081%/1.308% adverse (entryBar 20139) -- textbook margin-forced partial closes ahead
+// of the real stop, not four separate signals.
+//
+// THE FIX, per HARD LESSON 42/43 (proven in War Formation E71: PF 0.45->0.97, win rate 6.98%->36.36%,
+// from position sizing ALONE): reduce size so the required margin never crosses equity before the
+// structural stop can fire. NOTHING ELSE CHANGES -- same 39-entry selection, same filters, same R
+// floor, same stop/target geometry as v57. This isolates sizing as the only variable, exactly as E71
+// did against E64a.
+//
+// DECLARED DEVIATION: position size 25% of equity via explicit Pine qty (eqFrac below), because the
+// parity profile's default_qty_type=percent_of_equity/100 is what causes the margin call. NOT
+// COMPARABLE to v37 (100%-equity long) or to any other 100%-equity 3M build. Label carried on every
+// row this produces.
+//
+// PRE-REGISTERED OUTCOMES (LESSON 17), stated before running:
+//   A) Cascade clears (losers now consistently >=0.80% adverse, cascadeRatio ~1) AND PF holds above
+//      1.0 -> the source's bias-gated short mirror has REAL edge; the first honest positive 3M short.
+//      Still cannot be "promoted" over v37 (different direction, not a competing champion), but
+//      becomes the first trustworthy 3M short number on record.
+//   B) Cascade clears AND PF falls below 1.0 (or reverses sign) -> v57's 1.222673 was substantially
+//      the margin-truncation artifact HARD LESSON 34 warned of ("a correctly-stopped short would very
+//      likely score worse, not better"). The short leg stays paused; the source's own bias rule alone
+//      does not rescue it once measured cleanly.
+//   Either outcome answers, with real evidence rather than a header assertion, whether 3M's only
+//   profitable short is real.
+//
+// AUDIT, one line per leg (short only, per LESSON 6 as scoped by HARD LESSON 31 -- this is a source
+// mirror, not an invented geometry):
+//   R >= 0.8% (LESSON 3) - unchanged from v57, by EXCLUSION via rBig, never clamped.
+//   Stop beyond STRUCTURE (LESSON 5) - unchanged, slPx = szTop (supply zone high).
+//   BINDING (E17) - N/A this run: no selection term added or removed, so the entry set cannot change.
+//   REDUNDANCY (E14) - N/A, no new term.
+//   LATCH IN SEQUENCE (LESSON 8) - unchanged from v57.
+//   CASCADE (HARD LESSONS 35/42) - THIS IS THE THING BEING TESTED. VERIFY WITH get_trades AFTER
+//      RUNNING: confirm losers now exit at >=0.80% adverse and cascadeRatio drops toward 1.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+strategy("3M ELITE v60 short declared deviation 25pct", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rTarget  = input.float(2.0, "Target, x R -- held at v37/v53/v57")
+maxBars  = input.int(96,    "Max bars in trade -- held")
+maxAge   = input.int(6,     "Zone freshness cap, 4H candles -- held")
+minRpct  = input.float(0.80,"Min stop distance as % of price (LESSON 3)")
+maFast   = input.int(20,    "THE SOURCE'S STACK: fast MA")
+maMid    = input.int(50,    "THE SOURCE'S STACK: middle MA")
+maSlow   = input.int(200,   "THE SOURCE'S STACK: slow MA -- his higher-timeframe read")
+eqFrac   = input.float(0.25,"DECLARED DEVIATION: fraction of equity per position -- HARD LESSON 42")
+
+sma20  = ta.sma(close, maFast)
+sma50  = ta.sma(close, maMid)
+sma200 = ta.sma(close, maSlow)
+stackBear = not na(sma200) and sma20 < sma50 and sma50 < sma200
+
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+var float pO  = na
+var float pH  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pH  := h4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+bearEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC > ppO and pC < pO and pC < ppO
+
+var float szTop   = na
+var float szBot   = na
+var bool  szLive  = false
+var int   szTouch = 0
+var int   szAge   = 0
+var bool  szTraded = false
+
+if new4h
+    if szLive and not na(pC) and pC >= szBot
+        szTouch := szTouch + 1
+        if szTouch >= 2
+            szLive := false
+    if szLive
+        szAge := szAge + 1
+    if bearEngulf
+        szTop   := pH
+        szBot   := pO
+        szLive  := true
+        szTouch := 0
+        szAge   := 0
+        szTraded := false
+
+minR     = close * minRpct / 100
+rBig     = not na(szTop) and (szTop - close) >= minR
+
+shortCond = rBig and szLive and not szTraded and szAge >= 1 and szTouch < 2 and high >= szBot and close < szTop and szAge <= maxAge and stackBear
+
+flat = strategy.position_size == 0
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+qtyUse = strategy.equity * eqFrac / close
+
+if flat and shortCond and not na(szTop) and close < szTop
+    r = szTop - close
+    if r > 0
+        strategy.entry("S", strategy.short, qty = qtyUse)
+        szTraded := true
+        slPx   := szTop
+        tpPx   := close - r * rTarget
+        barsIn := 0
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(szLive ? 1 : 0,     title="SupplyZoneLive")
+plot(stackBear ? 1 : 0,  title="StackBear")
