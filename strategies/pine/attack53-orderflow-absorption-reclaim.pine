@@ -1,0 +1,171 @@
+//@version=6
+// BTC ATTACK 53 - ORDER-FLOW ABSORPTION, RECLAIMED ON A LATER BAR. A GENUINE MULTI-BAR LATCH, NOT A
+// SAME-BAR TAP-AND-HOLD.
+//
+// THE STORED PROMPT still asks for Attack 37's filter stack (a SEVENTH time), describing a board state
+// (Attack 37, 322/196 trades, "both halves clear 1.0... earned a filter stack") that is now 16 attacks
+// stale. THE DOCS OVERRIDE IT, again: Attack 41 closed Attack 37 as a development target after four
+// single-term filter rejections, Attack 43 closed the whole sweep-reversal FAMILY (37-43) on both
+// timeframes, and Attack 47 -- the one filter tried on the CURRENT champion, Attack 46 -- died on a
+// ~77% sample wall (HARD LESSON 45/49, confirmed across two labs). The board's own queue after Attacks
+// 47-52 says stop adding filters to Attack 46 on this data and propose a genuinely new mechanism, so
+// this cycle builds one, per the mandate's own fallback clause.
+//
+// ==================== WHAT HAS ALREADY FAILED, SO THIS DOES NOT REPEAT IT ====================
+// Single-bar / single-moment triggers are 0-for-2 (Attack 48 round-number cross, Attack 49 impulse bar)
+// and both failed on the SAME shape: negative edge at high frequency (518 and 427 trades in H1 alone,
+// both above the lab's 60-350 workable band). Multi-bar confirmation has been tried twice more and is
+// 0-for-2 in its own right: Attack 50 (two-bar close confirmation off an Asian-session range) failed
+// because its target was fixed BEFORE the confirmation delay, letting reward leak out; Attack 51/52
+// (RSI/price divergence at a confirmed pivot low) failed twice -- bare, and with the target lookback
+// doubled -- both landing in "category 2, bleed on a negative edge." Every mechanism on this board so
+// far is built from raw price, a calendar anchor, a volatility state, or a derived PRICE oscillator
+// (RSI). **None has used volume as anything other than a filter threshold** (VWM's Attack 5's abandoned
+// volume-confirmation gate). The STRATEGY-LEDGER's own "families still open" list names
+// "order-flow imbalance proxies" as untried, and this is the first build in this lab to use one as the
+// PRIMARY signal.
+//
+// ==================== THE CLAIM ====================
+// When price sets a fresh N-bar low, but the bar-by-bar net directional pressure over that same window
+// (a proxy for order flow, since the engine exposes no true bid/ask tape: volume * (close-open) /
+// (high-low), summed across the window) stays net POSITIVE despite the price decline, sellers are being
+// absorbed by resting buy-side interest rather than genuinely overwhelming it. That is a claim about
+// PARTICIPATION, not about price structure alone -- distinct in kind from Attack 44-47's tap-and-hold
+// (which says nothing about who was transacting) and from Attack 37-43's failed-break reversal (which
+// requires the low to be BROKEN and reclaimed same-bar, not merely tagged with resting support beneath
+// it).
+//
+// THE ENTRY IS A GENUINE TWO-STAGE LATCH (LESSON 8), NOT A SAME-BAR TEST:
+//   ARM  -- the absorption bar itself: a fresh N-bar low with net-positive summed delta over that same
+//           window. Latches armLow/armHigh/armTarget into `var` state (LESSON 8: setup and trigger must
+//           never share a bar). A later, lower absorption bar RE-ARMS to the newer low -- the arming
+//           event's natural expiry path, not a separate invalidation clause (HARD LESSON 8, generalised:
+//           ask what else the arming event triggers -- here, a fresh lower low simply supersedes the
+//           stale arm, since a support candidate that has since been broken again is not still support).
+//   TRIGGER -- ANY LATER bar (bar_index > armBar) whose CLOSE reclaims the arm bar's own HIGH -- a
+//           stronger structural reclaim than Attack 44-47's "close back above the tapped low," and
+//           deliberately delayed rather than same-bar, which is what makes this a real latch and not a
+//           same-bar tap-and-hold with a volume label stuck on it.
+//   EXPIRY -- if no trigger fires within `maxArmBars`, the arm goes stale and cannot fire late into an
+//           unrelated regime.
+//
+// TARGET IS A LEVEL, NOT A MULTIPLE (HARD LESSON 41/47): armTarget is the highest high in the lookback
+// window immediately BEFORE the absorption low, fixed at ARM time -- resistance price already traded at
+// shortly before the sweep, reachable by construction. STOP is armLow, the absorption bar's own low
+// (structure, LESSON 5) -- not the reclaim bar's low, not an ATR offset.
+//
+// ==================== MECHANICS, NO ARRAYS, NO UDFs ====================
+// rng = high - low; delta = rng > 0 ? volume * (close - open) / rng : 0.0 -- a per-bar proxy for net
+// buy/sell pressure using only builtins (open/high/low/close/volume). cumDelta = math.sum(delta,
+// lookback), an allowed builtin rolling sum, NOT ta.cum (which is cumulative from bar zero) and not an
+// array. isFreshLow = low <= ta.lowest(low, lookback), the same non-repainting "fresh N-bar low" idiom
+// already proven safe in Attack 37 and Attack 44 (ta.lowest at bar t only sees bars up to and including
+// t, so nothing here looks ahead). All state (armLow, armHigh, armTarget, armBar, armed) is `var float`/
+// `var int`/`var bool`, never an array.
+//
+// AUDIT, one line per leg (LONG ONLY -- LESSON 6, the short remains a separately-built, outstanding leg,
+// not assumed here):
+//   R >= 0.8% (LESSON 3) - enforced by EXCLUSION via rBig; an absorption low too shallow to clear the
+//        floor is SKIPPED, never widened.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = armLow, the absorption bar's own low. Never the reclaim
+//        bar's low, never an ATR offset from either.
+//   Each leg separately (LESSON 6) - LONG ONLY.
+//   BINDING (E17) - TWO independent conditions must both be true on the SAME bar to arm (fresh low AND
+//        net-positive summed delta), and a THIRD, later bar must independently reclaim the arm high to
+//        trigger. Read the trade count before quoting any ratio (LESSON 12) -- this is expected to bind
+//        much harder than a single-condition entry.
+//   REDUNDANCY (E14) - rBig constrains STOP distance (an absolute % floor on armLow-to-close); rrOk only
+//        checks armTarget sits above close (existence, not a size threshold). Non-overlapping, same
+//        pattern as Attack 44/51/52.
+//   LATCH IN SEQUENCE (LESSON 8) - arm and trigger are architecturally different bars (bar_index >
+//        armBar is enforced in the trigger condition itself); a fresh, lower absorption bar re-arms
+//        rather than requiring a separate invalidation flag, since the newer low is a strictly better
+//        description of "where support currently is."
+//   SL and TP FIXED AT ENTRY (slPx/tpPx captured once, at the entry bar, from the arm state). No
+//        trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17):
+//   * PRE-2024 HALF (H1, never-tuned) BELOW 1.0 -> KILL RULE. Discard, do not run H2, do not filter or
+//        tune further -- this is a bare mechanism test, not a rescue attempt.
+//   * H1 CLEARS 1.0 BUT UNDER ~30 TRADES -> a DIRECTION, not a result (LESSON 12); the two-stage latch
+//        is expected to bind hard (per the BINDING note above), so a thin count here is a real risk
+//        registered in advance, not a surprise to explain away afterward.
+//   * BOTH HALVES CLEAR 1.0 WITH A DEFENSIBLE COUNT (>=30 EACH) -> a second genuinely-new,
+//        both-halves-positive family alongside Attack 37 (closed on cost) and Attack 46 (the current
+//        champion) -- queues for its own cold re-run and cost screen (HARD LESSON 25/37) before any
+//        filter-stack treatment.
+//   * TRADE COUNT COLLAPSES NEAR OR BELOW THE ~30 FLOOR ON H1 ALONE -> the conjunction (fresh low AND
+//        positive delta AND a later reclaim) is too rare on 15m to be provable here, a frequency
+//        finding in its own right, distinct from an edge finding.
+//   * A MAJORITY OF TRADES HOLD TO maxBars -> HARD LESSON 38 truncation; report before drawing any
+//        conclusion from the payoff ratio.
+//   REPORT avg loser, win rate and max drawdown together (the board's standing instruction since Attack
+//   37 named the three drawdown categories), plus gross/commission/achieved ratio (LESSONS 36/39).
+strategy("BTC Attack53 orderflow absorption reclaim", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+lookback   = input.int(20,   "Window, bars -- sets the fresh-low check, the delta sum, and the pre-low resistance level")
+maxArmBars = input.int(40,   "Max bars an arm stays live before it expires unfired")
+minRpct    = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars    = input.int(192,  "Max bars in trade")
+
+rng      = high - low
+delta    = rng > 0 ? volume * (close - open) / rng : 0.0
+cumDelta = math.sum(delta, lookback)
+
+isFreshLow = low <= ta.lowest(low, lookback)
+absorb     = isFreshLow and cumDelta > 0
+
+var float armLow    = na
+var float armHigh   = na
+var float armTarget = na
+var int   armBar     = na
+var bool  armed      = false
+
+flat = strategy.position_size == 0
+
+if flat and absorb
+    armLow    := low
+    armHigh   := high
+    armTarget := ta.highest(high, lookback)[1]
+    armBar    := bar_index
+    armed     := true
+
+if armed and (bar_index - armBar) > maxArmBars
+    armed := false
+
+triggerNow = armed and bar_index > armBar and close > armHigh
+
+rLong = close - armLow
+minR  = close * minRpct / 100
+rBig  = armed and not na(armLow) and rLong >= minR
+rrOk  = armed and not na(armTarget) and armTarget > close
+
+goLong = flat and triggerNow and rBig and rrOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := armLow
+    tpPx   := armTarget
+    barsIn := 0
+    armed  := false
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(armLow, title="ArmLow")
+plot(armTarget, title="ArmTarget")

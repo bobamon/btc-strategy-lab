@@ -3837,3 +3837,94 @@ now been shown to trade one failure mode for another rather than closing the gap
 3. **The out-of-sample test for Attack 46 still ranks first and still cannot be run** under
    BTCUSDT-only -- unchanged from Attack 47/48/49/50/51's queue, restated because this cycle did not
    touch it.
+
+---
+
+# ATTACK 53 - ORDER-FLOW ABSORPTION, DELAYED RECLAIM. H1 CLEARS, H2 DOES NOT -- DISCARDED.
+
+The stored prompt asked for Attack 37's filter stack a SEVENTH time, describing a board state (Attack
+37, 322/196 trades, "earned a filter stack") that is 16 attacks stale. **The docs override it again.**
+Attack 41 closed Attack 37, Attack 43 closed the sweep-reversal family, and Attack 47 -- the one filter
+tried on the current champion, Attack 46 -- died on the ~77% sample wall (HARD LESSON 45/49). The
+board's own queue after Attacks 47-52 says stop filtering Attack 46 on this data and propose a
+genuinely new mechanism, so this cycle built one.
+
+**CLAIM:** every mechanism on this board is built from raw price, a calendar anchor, a volatility state,
+or a derived PRICE oscillator (RSI, Attacks 51-52). **None has used volume as anything but a filter
+threshold** -- the STRATEGY-LEDGER's "families still open" list names "order-flow imbalance proxies" as
+untried, and this is the first build to use one as the PRIMARY signal. A per-bar proxy delta =
+`volume*(close-open)/(high-low)` (no true bid/ask tape on this engine), summed over a 20-bar window via
+`math.sum` (an allowed builtin rolling sum, not `ta.cum`, not an array). A fresh 20-bar low whose summed
+delta over that same window stays net POSITIVE marks sellers being absorbed by resting buy-side
+interest rather than genuinely overwhelming it.
+
+**Genuine two-stage latch (LESSON 8), not a same-bar test:** ARM on the absorption bar (fresh low AND
+net-positive summed delta); TRIGGER on any LATER bar whose close reclaims the arm bar's own HIGH
+(stronger than Attack 44-47's same-bar "close back above the tapped low"); EXPIRE unfired after 40 bars;
+a later, lower absorption bar re-arms to the newer low (the arming event's own natural expiry, per HARD
+LESSON 8's generalisation). Target: the highest high in the 20-bar window immediately before the
+absorption low, fixed at arm time (a level, not a multiple -- HARD LESSON 41/47). Stop: the absorption
+bar's own low (structure, LESSON 5). R floor 0.8% by exclusion. Long only, bare, no filter stack. Pine:
+`strategies/pine/attack53-orderflow-absorption-reclaim.pine`.
+
+| | **53a** never-tuned (H1) | **53b** recent (H2) |
+|---|---|---|
+| Profit factor | **1.24912977** | **0.84998262** |
+| Max drawdown | 20.76032332% | 34.42069125% |
+| Trades | 174 | 174 |
+| Win rate | 31.60919540% | 31.03448276% |
+| Achieved win/loss ratio | 2.7026626 | 1.88885026 |
+| Avg winner | $378.91 | $212.75 |
+| Avg loser | -$140.20 | -$112.63 |
+| Net return | +41.56% | -20.28% |
+| Sharpe | 0.756 | -0.450 |
+
+## KILL RULE DID NOT APPLY -- H1 CLEARED CLEANLY, H2 RAN AS REGISTERED, AND FAILED
+
+174 trades on H1 is comfortably inside the lab's 60-350 workable band and well above the 30-trade floor
+-- this is not a thin sample either half, so the split is not confounded by HARD LESSON 12/19-style
+degeneracy. **The combined verdict is DISCARDED**: this is the "helps H1, breaks H2" shape the board has
+rejected every time it has appeared (Attack 38's EMA200 trend gate, the pre-filter-sweep verdicts on
+`trendOk`/`highVol`, the original VWAP base's 1.36-early/0.66-late decomposition) -- the mirror image of
+Attack 46, whose H2 is the STRONGER half. **A two-stage latch does not by itself protect a mechanism
+from regime-dependence**; Attack 46's entry is same-bar and survives the split, this one is multi-bar
+and does not.
+
+## TRUNCATION FLAGGED BEFORE THE SPLIT DECIDED IT
+
+`avgBarsWinning` sits at 154.6 (H1) and 163.0 (H2) against the 192-bar cap -- 80-85% of the ceiling on
+both halves. A meaningful share of winners may be closing on the time-stop rather than the structural
+target, which would inflate the apparent hit rate of the reachable-target claim. This was registered as
+a risk before the H2 run per LESSON 17, not raised after the fact to explain the H2 loss.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+H2's avg loser (-$112.63) is not an outlier in isolation -- not category 1. The H2 edge itself is
+negative (PF 0.850), so this is **category 2, bleed on a negative edge**, the same shape as Attacks
+36/48/49/50 -- not worth filtering, since a filter stack earns its place only on a thin-but-POSITIVE
+edge (category 3, Attack 37's case), per the mandate's own logic.
+
+## WHAT THIS SETTLES
+
+Order-flow (volume-delta) as a primary signal is 0-for-1 on the same H1/H2-split axis that has now
+qualified or killed the majority of this board's candidates. If order flow is revisited, the **H1-only**
+result (PF 1.249, 174 trades, achieved ratio 2.70) is a real, well-powered directional finding about the
+2022-2024 regime specifically -- worth remembering as a fact, not as grounds for a new BTCUSDT-only,
+all-history mechanism built the same way.
+
+## QUEUE
+
+1. **Do not tune this mechanism.** Do not widen `maxArmBars`, do not change the delta formula, do not
+   add a trend filter -- Attack 38 already showed a trend gate on a similarly-shaped H1/H2 split helps
+   one half and breaks the other.
+2. **Attack 46 remains the sole both-halves-positive candidate on the board**, both halves clear,
+   cold-reproduced, filters exhausted per HARD LESSON 49.
+3. **The out-of-sample test for Attack 46 still ranks first and still cannot be run** under
+   BTCUSDT-only -- unchanged, restated because this cycle did not touch it.
+4. **Next new-mechanism attempt should test on BOTH halves before declaring intent to build further** --
+   this cycle is now the fourth in a row (50, 51, 52, 53) where a fresh mechanism looked genuinely
+   distinct at proposal time and failed on real data. The lab's mechanism-space search is narrowing:
+   price structure (x7 families), a fixed grid, single-bar statistics, session range, a momentum
+   oscillator, and now order flow have all been tried as PRIMARY signals and only two families
+   (Attack 37's sweep-reversal, closed on cost; Attack 46's level-target tap-and-hold, the champion)
+   have ever cleared 1.0 on both halves.
