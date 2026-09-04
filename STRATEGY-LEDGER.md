@@ -1682,3 +1682,65 @@ prices against the levels the code actually set.
 Check exits against the levels you set, and check whether a loss equals the trade's own maximum
 adverse excursion — if it does, the position was closed *for* you, and you are not measuring what you
 think you are measuring.
+
+
+---
+
+## ██ HARD LESSON 34 — CROSS-LAB CONFIRMATION (3M ELITE + BTC, 2026-09-04). THE ~0.35% SHORT CEILING
+## IS UNIVERSAL, AND IT IS PARTIAL IN 3M RATHER THAN TOTAL
+
+E68 established in War Formation that the A.L.C.M. dollar shield never fires on a short position. Its
+queue item 1 was to check the other two labs, **free, via `get_trades`**, because 3M and BTC use
+*structural* stops rather than a dollar shield and the arithmetic might not carry over. It does — but
+not identically, and the difference matters.
+
+### THE SAME-STRATEGY, SAME-WINDOW, MIRRORED-CODE COMPARISON
+
+| Lab | build | LONG avg loss | build | SHORT avg loss |
+|---|---|---|---|---|
+| 3M Elite | v54 (gated long) | **−$123.85 ≈ 1.24%** | v55 (gated short) | **−$36.36 ≈ 0.36%** |
+| War Formation | E64b | −$143.20 ≈ 1.43% | E64a | −$35.80 ≈ 0.36% |
+| War Formation | e58a | −$1,000 exactly | E68 ($5,000 shield) | −$33.43 ≈ 0.33% |
+
+**Shorts cap out at roughly 0.35% of equity in both labs, on two completely different stop models.**
+Longs lose three to four times more and clear HARD LESSON 3's 0.8% floor properly. The ceiling is a
+property of the engine's short-side margin handling, not of any strategy.
+
+### BUT IN 3M IT IS PARTIAL, NOT TOTAL — AND THAT DISTINCTION IS THE HONEST READING
+`get_trades` on v53 (255 trades, 220 losers) measured directly:
+
+- **162 of 220 losing shorts (74%) exit at LESS than 0.8% adverse** — they cannot have reached their
+  structural stop, which the R floor guarantees is at least 0.8% away.
+- **58 of 220 (26%) DO exceed 0.8%** — those are genuine stop-outs.
+- Median loser adverse move **0.454%**, max **2.096%**.
+- Only **27.3%** exit at exactly their max adverse excursion, against **100%** in War Formation's
+  E64a. The most likely reason is bar granularity: on 1m bars a close sits essentially at the bar
+  extreme, so exit and max-excursion coincide; on 15m bars wicks are wide enough that a close-based
+  forced exit often lands short of the wick low. **That is an inference, not a measurement.**
+
+**So 3M's short exit model is partially active. War Formation's was entirely inactive.**
+
+### WHICH WAY THE DISTORTION RUNS — STATED, BECAUSE IT IS NOT THE OBVIOUS DIRECTION
+Truncated losses make gross loss **smaller**, which pushes profit factor **UP**. So **v53's 0.705 and
+v55's 0.722 are OPTIMISTIC readings, not pessimistic ones** — a correctly-stopped short would very
+likely score worse, not better. Truncation also closes positions before they can recover, which
+suppresses the winner count, and a 13.73% win rate against a 2R target needing 33% is consistent with
+that. The two effects push profit factor in opposite directions, so **the net bias is not cleanly
+signed and no corrected figure should be quoted.** What can be said is that neither number measures
+the strategy as specified.
+
+### WHAT THIS DOES AND DOES NOT TOUCH
+- **3M's short results (v53 0.70512830, v55 0.72183885, and v55's split H1 0.630 / H2 1.437) are
+  DISTORTED and provisional.** Not withdrawn outright as War Formation's were, because a quarter of
+  their stops genuinely fired — but not trustworthy as measurements of the specified system.
+- **3M's LONG champion v37 is UNAFFECTED.** Its losses run 1.24% and clear the floor, so its stops
+  fire as designed. v37 stands, with its existing caveats unchanged.
+- **THE BTC LAB IS UNAFFECTED.** Attacks 34, 36 and 37 are all `shortTrades: 0` — every recent
+  discovery mechanism is long-only, so nothing there passes through the short-side margin path. No
+  BTC result needs revisiting on this account.
+
+### THE STANDING RULE THIS CREATES
+**Before trusting any SHORT result from any lab on this engine, check the average losing trade against
+~0.35% of equity.** If it sits at or below that, the stop did not fire and the number is not measuring
+the strategy. This check is free, takes one `get_trades` call, and would have saved sixteen
+constructions across two labs.

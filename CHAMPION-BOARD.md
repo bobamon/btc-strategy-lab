@@ -2626,3 +2626,32 @@ H2 in isolation.
    a parameter tweak on the same gate will not fix.
 3. Attack 37 remains the base for the filter stack, unchanged, at PF 1.02423271/1.01155847 on
    322/196 trades. Still not tradeable, still the best provable-sample candidate on the board.
+
+
+---
+
+# ██ THE BTC LAB IS UNAFFECTED BY THE SHORT-SIDE LIQUIDATION DEFECT (2026-09-04)
+
+War Formation's E68 found that a short position sized at 100% of equity with `margin_short = 100` is
+force-closed at roughly **0.35% adverse** — below HARD LESSON 3's 0.8% minimum stop distance — so no
+valid short stop can ever fire. 3M Elite was then found partially affected (74% of its losing shorts
+exit before reaching their stop).
+
+**This lab is clean, and the reason is simple: every recent discovery mechanism is long-only.**
+
+| | short trades | avg losing trade |
+|---|---|---|
+| Attack 34 weekly break | 0 | −$772 |
+| Attack 36 narrow-day expansion | 0 | −$208.33 |
+| Attack 37 liquidity sweep reversal | 0 | −$116.19 / −$127.81 |
+
+All three sit far above the ~0.35% ceiling (Attack 37's −$116 is ~1.16% of equity), and none routes
+through the short-side margin path at all. **No BTC result needs revisiting on this account**, and
+Attack 37 remains the lab's strongest candidate with both halves above 1.0.
+
+**THE CONSTRAINT THIS PLACES ON FUTURE WORK.** The standing requirement is both directions, all
+regimes. This lab has not met it, and it now knows that **any short mechanism it builds will be
+untestable on this engine at this sizing** unless its stop sits below ~0.35% — which HARD LESSON 3
+forbids, because commission alone needs 0.8%. So a short leg here is blocked by the same wall, and
+that should be stated when the requirement is next reviewed rather than discovered by spending credits
+on a short that cannot be measured.

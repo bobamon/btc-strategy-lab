@@ -2810,3 +2810,55 @@ variant tried on faith.
 2. **The long leg's bias-gate result stays closed** — v54 is a settled, informative negative.
 3. **Cascade-row asymmetry (short vs. long)** — still open, still low-priority, does not affect any PF
    on record.
+
+
+---
+
+# ██ THE SHORT LEG'S NUMBERS ARE DISTORTED — CROSS-LAB CHECK FROM WAR FORMATION'S E68 (2026-09-04)
+
+War Formation's E68 proved its dollar shield never fires on a short. Its queue item 1 was to check
+this lab, **free**, because 3M uses a *structural* stop (the supply-zone high) rather than a dollar
+shield. **The defect carries over, but only partially — and that distinction is the finding.**
+
+## MEASURED DIRECTLY ON v53's 255 TRADES, NO CREDITS SPENT
+- **162 of 220 losing shorts (74%) exit at less than 0.8% adverse.** The R floor (`minRpct 0.80`,
+  enforced by exclusion) guarantees every stop is at least 0.8% away, so **those trades cannot have
+  reached their stop.**
+- **58 of 220 (26%) exceed 0.8%** — genuine stop-outs. The exit model is *partly* working here.
+- Median loser adverse move **0.454%**; max **2.096%**.
+
+## THE CROSS-LEG COMPARISON IS THE CLEANEST EVIDENCE
+Same window, same code mirrored, same parameters:
+
+| | v54 gated LONG | v55 gated SHORT |
+|---|---|---|
+| Average losing trade | **−$123.85 ≈ 1.24%** | **−$36.36 ≈ 0.36%** |
+
+War Formation's legs show the identical split (−$143.20 long vs −$35.80 short). **Shorts cap at ~0.35%
+of equity in both labs on two different stop models** — that is the engine's short-side margin
+behaviour, not a fact about either strategy.
+
+## WHICH WAY THE BIAS RUNS — NOT THE OBVIOUS DIRECTION
+Truncated losses shrink gross loss, which pushes profit factor **UP**, so **0.70512830 and 0.72183885
+are OPTIMISTIC**. But truncation also closes trades before they can recover, suppressing winners — and
+13.73% against a 2R target needing 33% is consistent with that. The two effects oppose each other, so
+**the net bias is not cleanly signed and no corrected number is quoted here.** What is certain is that
+neither figure measures the system the source describes.
+
+## STATUS CHANGES
+- **v53 (0.705), v55 (0.722), and v55's split (H1 0.630 / H2 1.437) are DISTORTED and PROVISIONAL.**
+  Not withdrawn — a quarter of their stops did fire — but not usable as measurements of the strategy.
+- **v37 remains champion and is UNAFFECTED.** Long losses run 1.24%, above the floor, so its stops
+  fire as designed. Its existing caveats (weak H2, edge concentrated in H1, bull-market component
+  measured by v54) are unchanged by this.
+- **The bias-gate question from v54/v55 is now harder to answer**, because v55's improvement
+  (0.705 → 0.722) was measured on distorted losses. That comparison must be re-read, not relied on.
+
+## QUEUE
+1. **Before trusting ANY future short number here, check `avgLosingTrade` against ~0.35% of equity.**
+   One free `get_trades` call. If it sits at or below that line, the stop did not fire.
+2. The bias gate's effect on the **LONG** leg (v54: 1.25172059 → 1.15861551, 155 → 48 trades) is
+   **NOT** affected by this defect and remains the real open question — is the gate correct and v37
+   inflated, or is the lab's 12H/24H proxy too strict for what the source means?
+3. The cascade signature (v53 ratio 1.4655, v55 90 rows from 62 entries) is still unexplained and is
+   a SECOND reason short numbers here are unreliable.
