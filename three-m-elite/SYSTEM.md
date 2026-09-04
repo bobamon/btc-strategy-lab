@@ -4177,3 +4177,41 @@ condition") governs a repeated notification exactly as it governs a repeated sta
 
 **CHAMPION OF RECORD (LONG): v58.** Unchanged. **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61.**
 Unchanged.
+
+---
+
+## ██ CYCLE CHECK #3 — STILL NOTHING NEW; NOT RE-NOTIFYING (2026-09-04)
+
+**Scheduled prompt fired again, still carrying the same stale v37/v53 snapshot** (12H/24H bias gate,
+cascade signature) — both closed since v54–v61 (bias gate: HARD LESSON 45/v57/v60; cascade: HARD LESSON
+50/52). Per "THE DOCS WIN over this prompt" and HARD LESSON 26 (escalate a stale prompt once, already
+done at v39; escalate a real blocker once, already done at cycle check #1), not re-flagging either
+unchanged condition this cycle.
+
+**Independently verified rather than taken on faith from the prior two checks:** `git log` shows the
+only non-Claude ("ecarr") commits on this repo predate cycle check #1 by several commits — no user
+response to the declared-deviation promotion policy question has landed. `three-m-elite/transcripts/`
+has no commits since long before v37 — no new source material to mine. `results/backtests.json` was
+re-read directly (not paraphrased from SYSTEM.md) and confirms the state both prior checks reported:
+v58 `passed`/long/PF 1.48439273/117 trades as champion; v60/v61 `passed`/short, split-clean both halves
+(H1 1.47025018/26, H2 3.00186566/13); v62/v63 `testing`/short regime-split diagnostics; v64
+`testing`/both/combined-flip diagnostic. Nothing has moved.
+
+**No backtest run. 0 of 559 available credits spent.** The real queue has exactly one open item and it
+is a policy question for the user (can a 25%-equity declared-deviation short ever be promoted beside
+the 100%-equity long champion v58), not a backtest — manufacturing an experiment to spend the budget
+would violate this lab's own no-invented-mechanism rule, and re-running the same source-material sweep
+a third time on unchanged material would not produce a different answer than check #1's already-
+documented pass.
+
+**No new notification sent.** Check #1 pushed this exact question once, as new information; it has not
+changed since. HARD LESSON 26 governs a repeated notification the same way it governs a repeated
+stale-prompt flag: say nothing new, notify nothing new.
+
+**QUEUE (unchanged, restated for the next cycle):**
+1. **The declared-deviation promotion policy question** — still open, still for the user, still the
+   only thing standing between v60/v61 (validated short) and v64 (validated combined build) and a
+   promotion decision. Nothing to re-run until the user answers.
+
+**CHAMPION OF RECORD (LONG): v58.** Unchanged. **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61.**
+Unchanged.
