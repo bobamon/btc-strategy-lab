@@ -4184,3 +4184,71 @@ degrades. **$1,000 is not merely the best net result, it is the best GROSS resul
 2. **Before any future change that lengthens holds, check what fraction of trades hit `maxBars`.**
    Free, from `get_trades`. e58a's 0-of-36 is headroom; e50b's 3-of-21 is the cap already biting.
 3. The entry binding sweep is complete (E70). No credits on short geometries (E68).
+
+---
+
+# ██ CYCLE CLOSURE, 2026-09-04 (no credits) — THE STORED PROMPT'S TWO QUEUE ITEMS ARE BOTH ALREADY
+# RESOLVED, AND EVERY AXIS THIS LAB CAN CURRENTLY TEST IS NOW CLOSED
+
+This cycle's stored prompt assigns two queue items verbatim: (1) stop varying the direction rule and
+attack the short's entry geometry, (2) binding-test the remaining long entry terms
+(`brokeBelow`/`h1Bull`/`timeGate`/`inMiddle`). **The prompt predates E67-E70 and the two no-credit
+analyses above, all run earlier the same day. Per the prompt's own instruction that the docs win, both
+items are checked against the current board rather than run:**
+
+- **Item 1 is FORBIDDEN, not merely de-prioritized.** E68 (with cross-lab confirmation in HARD LESSON
+  34) established that this engine forces `percent_of_equity=100`/`margin_short=100` on every short
+  position, which liquidates it at ~0.33% adverse — below HARD LESSON 3's 0.8% commission floor. No
+  short stop can ever fire at any entry geometry, so no short backtest run now would measure the
+  strategy; it would measure the harness, exactly as the sixteen short constructions before E68 did.
+  Item 1 as written would repeat the mistake E67/E68 just diagnosed and corrected.
+- **Item 2 is COMPLETE.** E69a/E69b/E70 measured all four named terms plus `velK` — every entry
+  condition in the `e58a` build now has a binding removal test on record. E70's queue says explicitly:
+  *"The entry sweep is finished. Do not re-run it."*
+
+**A substitute experiment was considered and rejected on the same standard.** The one entry-parameter
+family never isolated cleanly is `rr` held alone against a fixed `shieldUsd` (every past shield sweep
+moved stop and target together). That is not a new question: HARD LESSON 13 already closed the
+risk:reward axis, confirmed in **four** mechanisms including this lab's own ALCM-era E37
+(`rr` 2.0→1.0, PF 1.19→0.99, REVERTED) — *"the risk-reward axis is neutral at best, stop spending
+credits on it."* Re-running it on `e58a` specifically would be the fifth confirmation of a rule this
+lab has already paid to learn once.
+
+## THE FULL CLOSURE, STATED IN ONE PLACE
+
+| Axis | Status | Where it closed |
+|---|---|---|
+| Short entry geometry (any construction) | **Untestable on this engine** | HARD LESSON 34 / E68 |
+| Long entry terms (`brokeBelow`, `h1Bull`, `timeGate`, `inMiddle`, `velK`) | **Fully measured** | E65, E69, E70 |
+| Shield width / hold cap (net PF) | **Closed** | E56-E58, E60-E62 |
+| Shield width / hold cap (gross PF) | **Closed** | wider-shield entry, above |
+| Reward:risk ratio | **Closed, x4** | HARD LESSON 13, E37 |
+| Position sizing / risk fraction | **Closed** | HARD LESSON 29 |
+| More 1m history | **Not available**, re-checked | E61, E62 |
+
+**No axis remains that this lab can spend a credit on right now.** Zero backtests run this cycle —
+603 credits at start, budget allowed up to two, none of the available questions clear the "not already
+answered" bar. Spending one to produce a result already known would itself violate the standing
+instruction never to repeat a finished experiment.
+
+## STATE, UNCHANGED FROM THE LAST ENTRY
+No champion, no candidate (HARD LESSON 22: no out-of-sample split is possible on this instrument's
+single 4.5-month window). **Reference build: `e58a`** — PF 1.24015239 net / 1.38769869 gross, DD
+9.82519609%, 36 trades, long only, reproduced cold (E58=E59). The user's standing both-directions
+requirement (ORACLE-RULES.md L150-180) **cannot currently be met in this lab** — not a geometry problem
+left to solve, an engine sizing constraint (HARD LESSON 34) outside what any Pine-level change can fix.
+
+## TWO ITEMS NEED THE USER, NOT A BACKTEST
+1. **The `inMiddle` ratchet question (E69b/E70).** Removing it costs 0.0103 of PF but improves
+   drawdown (−0.54pp), sample size (+19%) and net return, on samples of 36 vs 43 — inside what those
+   counts can resolve. RATCHET v2 clause 1 has no allowance for this shape of trade-off. Should a
+   symmetric band be added (keep when PF is within ~0.02 and drawdown/count both improve)?
+2. **The short-leg engine blocker (E68/HARD LESSON 34).** This lab, 3M and BTC all confirm shorts are
+   force-closed at ~0.33-0.35% adverse because the engine will not size a short below 100% of equity.
+   Nothing in Pine can change that. Is there a platform-level way to reduce short-side margin usage, or
+   should "both directions" be treated as unmeetable on this engine until that changes?
+
+## QUEUE
+Unchanged from the prior entry — no axis reopened. Hold here until either new 1m data becomes
+available, the engine's short-side sizing constraint changes, or the user answers the two questions
+above.
