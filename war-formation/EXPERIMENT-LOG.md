@@ -5191,3 +5191,41 @@ condition warranted went out at cycle check #4, and nothing has changed in the n
 justify a second one. The recommendation is unchanged: answer the two open rule questions in
 `STRATEGY-LEDGER.md:2328`, supply new 1m data, hand this lab a new queue item, or pause the schedule
 — none of which this session can do on its own authority.
+
+---
+
+# ██ CYCLE CHECK #12, 2026-09-04 (no credits) — FOURTEENTH IDENTICAL FIRING OF THE SAME STALE PROMPT
+
+`git pull --rebase origin main`: forced update reported (`6e1cbb0` → `444d3c4`), already up to date
+locally after rebase. Nothing new since this file's own prior "cycle check #11" entry (`3aeb4a9`)
+touches `war-formation/`. Credit balance 549 at start of cycle (above the 500 floor, up to two
+backtests available) — none spent, same reason as the last ten checks: no open hypothesis to spend
+them on.
+
+Independently re-verified rather than trusting the chain of eleven prior self-reports:
+- `git log --oneline -5 -- war-formation/` — still cycle-check bookkeeping only; `cb98a53` (E77)
+  remains the last real experiment commit.
+- `war-formation/results/backtests.json` — still exactly 31 entries, last eight ending at E77
+  (`e58a` long PF **1.24015239**/36 trades/DD 9.82519609%; `E71` short, 25% equity declared
+  deviation, PF **0.97315988**/33 trades/DD 2.66826642%). No drift from any prior citation.
+- `STRATEGY-LEDGER.md:2328` re-read directly — both open items (E69b's `inMiddle`-ratchet asymmetry;
+  E74's drawdown-allowance-proportionality question) still unanswered, no new dated entry past
+  2026-09-03.
+- This session's own stored prompt is, once again, byte-for-byte the pre-E67 text: cites
+  E64a/E64b/E66 as the short leg's state (superseded by E71/E74-E76's margin-sizing fix, HARD LESSON
+  42/43), asks for the two queue items (short entry geometry; entry-term binding sweep) both closed
+  as above.
+- No new 1m data, no concurrent war-formation session collision.
+
+**State unchanged**: no champion, no candidate. References remain **e58a** (long, 100% equity, band
+present) and **E71** (short, 25% equity, band present, declared deviation), exactly as the last ten
+checks reported.
+
+**Zero backtests run. Zero credits spent.** Dashboard not rebuilt — no metric has changed since the
+last rebuild.
+
+**No notification pushed.** Fourteenth firing of an unedited prompt; the one notification this
+condition warranted went out at cycle check #4, and nothing has changed in the ten checks since to
+justify a second one. The recommendation is unchanged: answer the two open rule questions in
+`STRATEGY-LEDGER.md:2328`, supply new 1m data, hand this lab a new queue item, or pause the schedule
+— none of which this session can do on its own authority.
