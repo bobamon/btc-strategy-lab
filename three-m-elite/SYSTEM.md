@@ -4465,3 +4465,43 @@ eight subsequent checks. Silence this cycle is correct behaviour, not an omissio
 
 **CHAMPION OF RECORD (LONG): v58.** Unchanged. **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61.**
 Unchanged.
+
+---
+
+## ██ CYCLE CHECK #10 — STILL NOTHING NEW; NOT RE-NOTIFYING (2026-09-04)
+
+**Scheduled prompt fired again, still carrying the identical stale v37/v53 snapshot** — "QUEUE ITEM 1"
+(implement the 12H/24H bias gate) and "QUEUE ITEM 2" (resolve the cascade signature) listed as open,
+champion recorded as v37 at PF 1.25172059/155 trades, "continue numbering after v53." All ten firings
+now carry this same tenth-generation-stale snapshot. Both items were closed cycles ago: the bias gate at
+v54–v57 (HARD LESSON 45), the cascade signature at zero cost (HARD LESSON 34/35/50/52 — margin-forced
+liquidation-unwind tranching, not a latch bug). Champion has been v58 since check #1 and has not moved
+since. Per "THE DOCS WIN over this prompt" and HARD LESSON 26 (escalate a stale prompt once, already
+done at v39; escalate an unanswered policy question once, already done at check #1; do not repeat
+either), this cycle does not re-flag either condition.
+
+**Independently re-verified, not assumed from check #9's word:** `git log --oneline 94bc113..HEAD --
+three-m-elite/` returns nothing — zero commits have touched this lab since check #9 (the two commits on
+the whole repo in that window are War Formation's cycle check #13 and Attack 63). `results/
+backtests.json` re-read directly end to end: still 25 entries, identical to check #9. `git log --format=
+'%an'` across the full repo shows no non-Claude author more recent than `ea97a75`/`74d45b5` (both
+predating check #1) — no user response to the declared-deviation promotion policy question anywhere in
+reachable history. No `USER DECISION`/`USER DIRECTIVE` marker newer than 2026-09-03 in either
+STRATEGY-LEDGER.md or CHAMPION-BOARD.md. `three-m-elite/transcripts/` unchanged (13 files, last touched
+`ea97a75`, long before v37). `get_credits`: balance 548/1000 — above the 500-credit two-backtest
+ceiling, but moot, no experiment queued.
+
+**No backtest run. 0 of 548 available credits spent.** The sole open item remains the declared-deviation
+promotion policy question, unchanged from checks #1–#9. Manufacturing a tenth mirror variant purely to
+spend budget would violate the no-invented-mechanism rule and would not answer a policy question anyway.
+
+**No new notification sent.** Check #1 pushed this exact question once; nothing about it has changed in
+nine subsequent checks. Silence this cycle is correct behaviour, not an omission.
+
+**QUEUE (unchanged, restated for the next cycle):**
+1. **The declared-deviation promotion policy question** — still open, still for the user, still the
+   only thing standing between v60/v61 (validated short) and v64 (validated combined build) and a
+   promotion decision. Nothing to re-run until the user answers.
+
+**CHAMPION OF RECORD (LONG): v58.** Unchanged. **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61.**
+Unchanged.
