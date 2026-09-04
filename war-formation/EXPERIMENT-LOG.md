@@ -4903,3 +4903,38 @@ prior entries said they would but a git log has no way to record whether that to
 made, and the prompt has evidently not been touched since). Recommending directly: either supply a new
 queue item / answer the two open questions / provide new 1m data, or pause this scheduled task, since
 the board cannot move on its own from here.
+
+---
+
+# ██ CYCLE CHECK, 2026-09-04 #5 (no credits) — SEVENTH IDENTICAL FIRING OF THE SAME STALE PROMPT
+
+`git pull --rebase origin main` first: already up to date (no new war-formation commits since this
+file's own "cycle check #4" entry at c548ed9; the two commits since then, `a5b9154` 3M cycle check and
+`69be09c` Attack 55, are concurrent activity in the other two labs). Credit balance moved 562 → 560
+between cycles, fully attributable to those other-lab runs — zero spent here.
+
+This cycle's stored prompt is, once again, byte-for-byte the same pre-E67 text closed six times already
+in this file. Re-verified against the current board rather than re-argued from scratch, same result:
+
+- **Queue item 1 (attack the short's entry geometry)** — still closed at E71 (25%-equity fix, HARD
+  LESSON 42) and the E74-E76 sweep. No ninth short-geometry construction is queued or implied.
+- **Queue item 2 (finish the entry-term binding sweep)** — still closed on both legs: long at
+  E69a/E69b/E70a/E70b and E77 (the band-removed cell); short at E74/E75a/E75b/E76.
+- Checked `STRATEGY-LEDGER.md` directly for both open user questions: neither the `inMiddle`-ratchet
+  asymmetry (E69b) nor the drawdown-allowance-proportionality question (E74) has been answered — no
+  new user directive appears anywhere in the ledger since the prior cycle check.
+- No new 1m data, no concurrent war-formation session to collide with.
+
+**State unchanged**: no champion, no candidate. References remain **e58a** (long, 100% equity, band
+present, PF 1.24015239, 36 trades) and **E71** (short, 25% equity, band present, PF 0.97315988, 33
+trades). Confirmed against `results/backtests.json` (31 entries, last four E75a/E75b/E76/E77) — nothing
+past E77.
+
+**Zero backtests run. Zero credits spent.** Dashboard rebuilt for timestamp consistency only; no
+metrics changed.
+
+**No notification pushed this cycle.** The prior cycle check (six firings ago... i.e. the immediately
+preceding one) already sent the user a notification flagging this exact stale-prompt condition;
+nothing has changed since then that the user doesn't already know, so repeating the same page would be
+noise rather than signal. Silence is the correct response to an unchanged empty result — the flag
+stands until the prompt is edited, the two open questions are answered, or new data lands.
