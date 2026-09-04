@@ -1,0 +1,128 @@
+//@version=6
+// BTC ATTACK 60 - THE CHAMPION'S SHORT MIRROR, MEASURED HONESTLY FOR THE FIRST TIME IN THIS LAB.
+//
+// THE STORED PROMPT describes a board state (Attack 37, "earned a filter stack") that is now more
+// than twenty attacks stale -- Attack 41 closed Attack 37, Attack 43 closed the sweep-reversal family,
+// Attack 46 is the champion (level-target tap-and-hold, RR floor 3.5, both halves clear, cold-
+// reproduced), and Attack 47 exhausted its filter stack on the ~77% sample wall (HARD LESSON 49).
+// Attacks 48-59 (twelve straight new-mechanism-or-refinement proposals) all failed on H1, three of them
+// (50, 51, 59) on the SAME inverted-payoff shape: majority win rate, average loser bigger than average
+// winner. THE DOCS OVERRIDE THE PROMPT, per the prompt's own instruction.
+//
+// ==================== WHAT THIS CYCLE ACTUALLY DOES, AND WHY IT IS NOT A THIRTEENTH GUESS ====================
+// Every discovery attempt in this lab has been LONG ONLY. The STANDING REQUIREMENT (user directive,
+// 2026-09-02) demands both directions, built separately, with the short's own geometry -- never a
+// sign-flipped mirror -- but the CORRECTED no-mirror rule (2026-09-02) says: BUILD THE MIRROR FIRST,
+// THEN FIX LOCATION. A symmetric construction is a legitimate starting point, not a banned shortcut.
+// This lab has never run that first step, because HARD LESSON 42/43 (War Formation E64a/E71, 3M v57/v60,
+// 2026-09-04) established something this lab's own CHAMPION-BOARD already recorded as a wall
+// (line ~2652, pre-E71): at 100%-of-equity sizing, a SHORT position's required margin RISES as the
+// trade moves against it while equity FALLS, so the two cross almost immediately and the engine
+// force-closes the position at ~0.01%-0.6% adverse -- long before any real stop can fire. A LONG's
+// margin requirement shrinks with an adverse move, so longs never hit this wall; every long result in
+// this lab (Attacks 1-59) is genuine. Every SHORT this lab has never even tried would have hit it.
+// THE FIX, proven twice already (War Formation E71: PF 0.454->0.973; 3M v57->v60: PF 1.223->1.886,
+// win rate 25.6%->56.4%): cut position size to 25% of equity via an EXPLICIT Pine `qty=` on
+// strategy.entry, because the parity profile force-overrides `default_qty_value` back to 100 -- the
+// qty argument is the only channel that survives. This is a DECLARED DEVIATION, labelled here and in
+// every record of this run, and NOT comparable to Attack 46's 100%-equity long numbers on return or
+// drawdown (both scale with position fraction). Profit factor, win rate, achieved ratio and trade count
+// ARE comparable -- they are ratios of a uniform per-trade scalar, the same leverage-invariance argument
+// the LEVERAGE section of this ledger already applies to leverage itself.
+//
+// THE MIRROR ITSELF is Attack 46 byte-for-byte, flipped: resistance tapped and held (a level-target
+// SHORT, not a sign-flip of the long's economics) instead of support tapped and held, target the
+// LOWER level instead of the higher one, stop beyond the tap bar's own high instead of its own low.
+// Same lookback (20), same tap tolerance (0.10%), same RR floor (3.5), same R floor (0.8% by
+// exclusion), same max hold (192 bars). Nothing about the SIGNAL logic changed -- only direction and
+// the declared sizing deviation this direction requires to be measurable at all.
+//
+// AUDIT, one line per leg (SHORT ONLY -- this is the leg the standing requirement has never gotten):
+//   R >= 0.8% (LESSON 3) - enforced by EXCLUSION via rBig on rShort = high - close, never clamped.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = the tap bar's own high, the actual extreme of the test
+//        of resistance. Not an ATR, not a percentage, not the signal price.
+//   Each leg separately (LESSON 6, scoped by HARD LESSON 31) - SHORT ONLY. Not blended with Attack 46's
+//        long. The mirror is the DECLARED starting point per the corrected no-mirror rule, not a claim
+//        that location is already right -- if this fails, the next move is fixing location, not another
+//        sizing tweak.
+//   BINDING (E17) - the RR floor NECESSARILY binds, since it rejects setups outright; trade count is
+//        read before anything else, same as Attack 44-46.
+//   REDUNDANCY (E14) - minRpct (absolute stop distance) and minRRv (reward geometry) are independent;
+//        a wide stop can pass one and fail the other.
+//   LATCH IN SEQUENCE (LESSON 8) - sup/res are both [1]-shifted, strictly prior bars; the tap and the
+//        hold are read on the current bar and entry fires at its close -- identical construction to
+//        Attack 44-46's proven-safe same-bar candle read, not a coil+thrust same-bar contradiction.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, an open position blocks later entries; named in
+//        advance because a level target produces variable hold times by construction.
+//   CASCADE / MARGIN ARTIFACT (HARD LESSON 42/43) - the reason this build exists. VERIFY with
+//        get_trades before trusting the result: losers must exit at CONSISTENT distances near the tap
+//        bar's own high, not at scattered tiny adverse distances. A scattered pattern means 25% was
+//        still not enough and the result is not yet trustworthy.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17):
+//   * H1 PF >= 1.0 AND loss distances consistent (margin artifact absent) -> the first honestly
+//     measured short edge in this lab's history; run H2, per the mandate's kill-rule structure.
+//   * H1 PF < 1.0 -> DISCARDED by the kill rule. No filters, no rescue, no H2, regardless of credit
+//     balance -- the mandate's explicit instruction. The declared-deviation fix will still be recorded
+//     as validated (or not) via the loss-distance check, separate from the mechanism's own verdict.
+//   * MAJORITY WIN RATE but achieved ratio well below the 3.5 floor's promise -> the inverted-payoff
+//     shape (Attacks 50, 51, 59) recurring a fourth time, now on the short side -- report win rate
+//     alongside achieved ratio explicitly, per the board's own standing risk note.
+//   * FEWER THAN ~30 TRADES -> a DIRECTION, not a result (LESSON 12).
+//   * LOSS DISTANCES SCATTERED AND SUB-0.8% -> 25% equity was insufficient; the margin ceiling is not
+//     fully cleared and the result is NOT a measurement of the mechanism, per HARD LESSON 42/43's own
+//     warning about trusting a win rate before checking this.
+strategy("BTC Attack60 level target SHORT mirror 25pct equity", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+lookback = input.int(20,     "Level lookback, bars -- sets BOTH the resistance tapped and the low targeted")
+tapTol   = input.float(0.10, "Tap tolerance, % -- how close to resistance counts as a tap")
+minRRv   = input.float(3.5,  "Minimum reward:risk the GEOMETRY must offer, else skip -- mirrors Attack 46")
+minRpct  = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars  = input.int(192,    "Max bars in trade")
+eqFrac   = input.float(0.25, "DECLARED DEVIATION: fraction of equity per position -- HARD LESSON 42/43")
+
+sup = ta.lowest(low,   lookback)[1]
+res = ta.highest(high, lookback)[1]
+
+tapped  = not na(res) and high  >= res * (1 - tapTol / 100)
+held    = not na(res) and close < res
+setupOn = tapped and held
+
+rShort = high - close
+reward = na(sup) ? na : close - sup
+minR   = close * minRpct / 100
+rBig   = rShort >= minR
+rrOk   = not na(reward) and rShort > 0 and reward / rShort >= minRRv
+
+goShort = setupOn and rBig and rrOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat   = strategy.position_size == 0
+qtyUse = strategy.equity * eqFrac / close
+
+if flat and goShort and qtyUse > 0
+    strategy.entry("S", strategy.short, qty = qtyUse)
+    slPx   := high
+    tpPx   := sup
+    barsIn := 0
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goShort ? 1 : 0, title="ShortSignal")
+plot(res, title="Resistance")
+plot(sup, title="TargetLevel")

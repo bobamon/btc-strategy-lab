@@ -4463,3 +4463,92 @@ independent problems; solving one does not solve the other.
    structurally unrelated mechanisms (50, 51, 59) -- worth treating as a standing risk to check for
    explicitly (report win rate alongside achieved ratio, not just PF) on every future proposal, not yet
    a numbered HARD LESSON since all three instances are single-half kills.
+
+---
+
+# ATTACK 60 - THE CHAMPION'S SHORT MIRROR, THE FIRST HONEST SHORT-LEG MEASUREMENT IN THIS LAB'S HISTORY. DISCARDED ON H1, AND THE SIZING FIX IS VALIDATED.
+
+The stored prompt describes a board state (Attack 37, "earned a filter stack") now more than twenty
+attacks stale -- Attack 41 closed Attack 37, Attack 43 closed the sweep-reversal family, Attack 46 is
+the champion (filter stack exhausted per HARD LESSON 49), and Attacks 48-59 (twelve straight
+new-mechanism-or-refinement proposals) all failed on H1. **The docs override the prompt, again**, per
+the prompt's own instruction, and this cycle does not add a thirteenth guess at a long-only mechanism.
+
+**Instead it takes up the STANDING REQUIREMENT (user directive, 2026-09-02) that has sat outstanding
+through all 59 prior attacks: both directions, built separately.** Every attack in this lab is
+long-only. This board's own pre-Attack-39 note explains why: a 100%-equity short here is untestable,
+because the required stop distance (>=0.8%, LESSON 3) exceeds the ~0.35% adverse move at which the
+engine force-closes a 100%-equity short (HARD LESSON 42, discovered independently in War Formation and
+3M Elite on 2026-09-04, the same day). **That fix -- cut position size to 25% of equity via an explicit
+Pine `qty=` on strategy.entry, since the parity profile force-overrides `default_qty_value` -- has now
+worked twice** (War Formation E71: PF 0.454->0.973; 3M v57->v60: PF 1.223->1.886) but had never been
+applied here. Per the CORRECTED no-mirror rule (2026-09-02: build the mirror first, then fix location),
+this build is Attack 46 byte-for-byte, mirrored: resistance (prior 20-bar high) tapped and held instead
+of support tapped and held, target the prior 20-bar low, stop the tap bar's own high, same RR floor
+(3.5), same R floor (0.8% by exclusion), same 192-bar cap. Only direction and the sizing deviation
+changed. Pine: `strategies/pine/attack60-level-target-short-mirror-25pct.pine`.
+
+| | **Attack 60a** never-tuned (H1) |
+|---|---|
+| Profit factor | **0.59338308** |
+| Max drawdown | 8.70594905% (25%-equity number, not comparable to Attack 46's 100%-equity DD) |
+| Trades | **67** (all short) |
+| Win rate | **14.92537313%** |
+| Achieved win/loss ratio | 3.38228354 |
+| Avg winner | $94.39 |
+| Avg loser | -$27.91 |
+| Commission paid | $160.91 |
+| Cascade ratio / max depth | 1 / 1 |
+
+## KILL RULE APPLIED. H2 NOT RUN, SECOND CREDIT NOT SPENT.
+
+**Profit factor 0.59338308, well below 1.0.** The 555-credit balance would otherwise permit the full
+pair; the kill rule overrides that when H1 fails outright. No filters, no rescue.
+
+## THE SIZING FIX IS VALIDATED, EVEN THOUGH THE MIRROR IS NOT
+
+`get_trades` on all 67 entries: cascade ratio 1, max depth 1 (no slivering), and **every single losing
+trade's `profitPct` falls in a tight 0.91%-2.41% band** clustered around the R floor plus the tap-to-
+stop gap -- consistent, structural-stop-distance exits, not the scattered 0.01%-0.6% tiny-adverse-
+distance signature HARD LESSON 42/43 diagnosed in the other two labs' pre-fix shorts. **The 25%-equity
+declared deviation did its job: this is a genuine read of the mechanism, not a harness artifact.**
+
+## THE MECHANISM ITSELF FAILS CLEANLY, AND IT IS A NEW FAILURE SHAPE
+
+Win rate 14.93% (10W/57L) sits far below the ~22.8% breakeven its own 3.38 payoff ratio requires -- not
+a close call. This is the **opposite** shape from Attacks 50/51/59 (majority win rate undone by a poor
+payoff): here the payoff ratio is good and the win rate is the killer. Resistance taps that reverse into
+a full measured-move-scale continuation are evidently much rarer than support taps that do the same,
+which is plausible on an asset with BTC's long-run upward drift across 2022-2024 (a period containing
+both the 2022 bear leg and the 2023-2024 recovery) -- "tap and hold" does not transfer symmetrically
+from support to resistance just because the Pine is a mirror.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Category **2, bleed on a negative edge** -- PF outright below 1.0, avg loser -$27.91 is small and not an
+outlier (not category 1), and the edge is negative outright so not category 3.
+
+## WHAT THIS SETTLES
+
+1. **The BTC lab's short-side margin wall is real and is now fixed**, the same way the sister labs fixed
+   it. Any future BTC short attempt should default to the 25%-equity `qty=` pattern from the start
+   rather than rediscover the artifact through a failed run.
+2. **The champion's exact geometry, naively mirrored, is not the short leg's answer.** Per the corrected
+   no-mirror rule, the next short attempt should fix LOCATION (a resistance definition requiring
+   multiple prior tests rather than the single most-recent 20-bar high, or an explicit trend/regime gate
+   given BTC's upward drift) rather than re-tune this same geometry's RR floor or lookback.
+3. **The both-directions requirement is still unmet**, but it is now unmet for a documented, specific
+   reason (location, not measurability) instead of an unexamined one.
+
+## QUEUE
+
+1. **If the short leg is revisited, fix location before re-tuning this geometry's parameters** -- e.g. a
+   multi-touch resistance requirement or a trend/regime gate on the short only. Untested here.
+2. **Attack 46 (long) remains the sole both-halves-positive candidate on the board**, both halves clear,
+   cold-reproduced, filters exhausted per HARD LESSON 49; this cycle does not touch that verdict.
+3. **The out-of-sample test for Attack 46 still ranks first and still cannot be run** under
+   BTCUSDT-only -- unchanged, restated because this cycle did not touch it.
+4. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+5. **The inverted-payoff-shape watch (Attacks 50/51/59) stays open on the LONG side** -- this short
+   failure is a different shape (low win rate, good payoff) and neither confirms nor denies it.
