@@ -2772,3 +2772,79 @@ warranted.
    had three tries and none has passed clause 1 on both halves. The next cycle should propose one,
    distinct from the VWAP family and from every rejected/discarded construction (33 channel breakout,
    34/35 weekly break, 36 narrow-range day, and Attack 37's own three failed filter terms).
+
+
+---
+
+# ██ THE ATTACK 37 DIAGNOSIS — THREE FILTERS HAVE FAILED, AND THE TRADE LOG SAYS WHY. NO CREDITS SPENT.
+
+Three filter terms have now been tried on Attack 37 and all three are rejected:
+
+| | term | H1 | H2 | disposition |
+|---|---|---|---|---|
+| Attack 38 | EMA200 trend gate | 1.19654848 (65) | 0.90073247 (40) | helps H1, breaks H2 |
+| Attack 39 | sweep-depth FLOOR 0.15% | 0.98206513 (280) | not run | breaks H1 outright |
+| Attack 40 | sweep-depth CAP 0.50% | 1.21100000 (182) | 0.96200000 (137) | helps H1, breaks H2 |
+
+**Two of three help H1 and break H2.** That is the signature the VWAP family died of (Attacks 31/32):
+**filters fitting the first half.** A fourth term chosen the same way would be the same mistake.
+
+## SO THIS CYCLE READ THE TRADE LOG INSTEAD OF SPENDING A CREDIT, AND THE ANSWER IS UNAMBIGUOUS
+
+**Attack 37a, 322 trades, decomposed:**
+
+| | |
+|---|---|
+| Gross P&L | **$3,405.88** |
+| Commission | **$2,845.60** |
+| Net P&L | $560.28 |
+| **Commission as a share of the gross edge** | **83.5%** |
+| **Profit factor BEFORE commission** | **1.15945508** |
+| Profit factor AFTER commission | 1.02423271 |
+
+**ATTACK 37 IS NOT A WEAK MECHANISM. IT IS A DECENT MECHANISM TRADED TOO OFTEN.** Its raw edge of
+**1.159** sits in the same band as 3M's verified champion (1.252) and War Formation's reference build
+(1.240). Cost consumes five-sixths of it.
+
+## THIS CORRECTS A CLAIM THIS BOARD HAS BEEN CARRYING
+The board recorded that "the frequency window is settled and roughly 60-350 trades per half", on the
+grounds that Attack 33 died at 757 trades while Attack 37 ran 322 profitably. **That reading was too
+generous.** Attack 37 runs 322 trades and gives up 83.5% of its edge to do so. The window's upper end
+is not safe — it is merely survivable, and only because the gross edge happened to be large enough to
+leave a sliver behind.
+
+## AND SIZING CANNOT RESCUE IT EITHER — MEASURED, NOT ASSUMED
+Recomputing 37a's equity curve from the per-trade returns at different position sizes:
+
+| size | return | max drawdown | return / drawdown |
+|---|---|---|---|
+| 100% of equity | +5.59% | 31.37% | **0.178** |
+| 50% | +4.18% | 16.99% | 0.246 |
+| 25% | +2.43% | 8.85% | 0.274 |
+| 10% | +1.05% | 3.63% | **0.289** |
+
+Sizing down does improve the ratio — compounding at 100% amplifies drawdowns superlinearly — but it
+**asymptotes near 0.29**, and the return collapses with it. **The best achievable ratio is roughly
+0.29: to earn 1% you must accept losing about 3.4%.** That is not tradeable at any size.
+
+**The drawdown's source is precisely identified:** the **longest losing streak is 14 trades**, and the
+**worst consecutive losing run costs 21.42% of equity** at an average loser of only **1.312%**. So it
+is not oversized bets — it is a long streak of small ones. Sizing scales both sides and cannot change
+the shape.
+
+## WHAT THIS CHANGES ABOUT THE NEXT MOVE
+**Stop selecting filters on H1 profit factor.** That is a NET number dominated by cost, which is why
+three price-action terms chosen that way all failed. **The correct target is COST — specifically
+gross edge per trade.** A term that halves the trade count while keeping half the gross edge would
+roughly double the net profit factor, and it would do so without touching the mechanism's logic.
+
+## QUEUE — REWRITTEN
+1. **Test a COOLDOWN between entries.** It is the cleanest lever on trade count that leaves the
+   mechanism's logic untouched, and cost is now the identified binding constraint. Register the
+   prediction first: if the gross edge per trade is roughly uniform, a cooldown halving the count
+   should leave gross P&L per trade unchanged and lift net PF materially. If gross-edge-per-trade is
+   NOT uniform, the cooldown will remove good and bad trades alike and net PF will barely move — and
+   that would itself be worth knowing.
+2. **Do NOT add a fourth price-action filter selected on H1 PF.** Three have failed the same way.
+3. **Record gross P&L and commission alongside net on every future run in this lab.** Attack 37's
+   real character was invisible for four cycles because only net numbers were being read.

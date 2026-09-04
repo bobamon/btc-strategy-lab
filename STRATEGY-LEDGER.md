@@ -1815,3 +1815,47 @@ The blanket instruction *"no short number from this lab should be believed"* is 
 narrowed**: profit factors survive, win rates and counts do not. What still stands against those
 shorts is HARD LESSON 34 — 74% of their losses were truncated before the stop — and that remains the
 reason v53 and v55 are not measurements of the specified system.
+
+
+---
+
+## ██ HARD LESSON 36 — A NET PROFIT FACTOR NEAR 1.0 ON A HIGH-FREQUENCY MECHANISM HIDES WHETHER THE
+## EDGE IS WEAK OR MERELY EXPENSIVE, AND THOSE NEED OPPOSITE FIXES (BTC, 2026-09-04)
+
+Attack 37 sat at PF 1.02423271 / 1.01155847 across 322 and 196 trades and was read, for four cycles,
+as a **thin edge** that a filter might sharpen. Three filter terms were built and all three failed —
+two of them by helping H1 and breaking H2, the same signature that killed the VWAP family.
+
+**The trade log, read for free, says the edge was never thin.**
+
+| Attack 37a | |
+|---|---|
+| Gross P&L | $3,405.88 |
+| Commission | $2,845.60 — **83.5% of the gross edge** |
+| **PF before commission** | **1.15945508** |
+| PF after commission | 1.02423271 |
+
+**A raw 1.159 is a healthy mechanism** — the same band as 3M's verified champion and War Formation's
+reference build. It was not weak. It was **expensive**.
+
+### WHY THIS MATTERS BEYOND ONE ATTACK
+**A weak edge and an expensive edge look identical in the net number and need opposite treatments.**
+- A weak edge needs a **conditioning filter** — find when the mechanism is right.
+- An expensive edge needs **fewer trades** — keep the same logic, pay for it less often.
+
+Selecting filters on net profit factor when cost dominates optimises the wrong quantity, which is
+exactly what Attacks 38, 39 and 40 did. Each was a sensible price-action idea judged against a number
+that was mostly a commission artifact.
+
+### THE RULE
+**On any mechanism above ~100 trades, decompose gross P&L and commission BEFORE designing a filter.**
+`get_trades` gives both and costs nothing. If commission is a large share of gross, the design target
+is trade count, not signal quality — and no amount of filtering on the net number will find that out.
+
+### THE COROLLARY ON SIZING, ALSO MEASURED
+Recomputing the same trade sequence at 100 / 50 / 25 / 10 percent of equity gives return-to-drawdown
+ratios of 0.178 / 0.246 / 0.274 / **0.289**. Sizing down helps, because 100%-equity compounding
+amplifies drawdowns superlinearly — but it **asymptotes**, and returns fall with it. **A bad
+return-to-drawdown ratio is scale-invariant in the way that matters: you cannot size your way out of
+it.** The drawdown here came from a **14-trade losing streak costing 21.42% of equity** at an average
+loss of 1.312% — a streak problem, not a bet-size problem.
