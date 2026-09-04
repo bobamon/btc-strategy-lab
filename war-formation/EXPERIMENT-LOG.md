@@ -4760,3 +4760,48 @@ instrument does not have.
    (E69b, ~0.01 PF vs better drawdown/sample/return) and the E74 drawdown-allowance-should-be-proportional
    question (the 0.50pp band was calibrated on 8-45% drawdowns; at a 2-4% base it is a much larger
    fraction of the total). Neither is decided here — both need the user, not another backtest.
+
+---
+
+# ██ CYCLE CHECK, 2026-09-04 (no credits) — STORED PROMPT IS THE SAME STALE VERSION E77 ALREADY ANSWERED
+
+This cycle's stored prompt is, verbatim, the pre-E67 prompt already checked and superseded twice in this
+file: once at the "CYCLE CLOSURE, 2026-09-04 (no credits)" entry above E75a/E75b, and again in E77's own
+opening line ("this cycle's stored prompt predates E71-E76 by a full day of work in this same file").
+**It fires with the same text regardless of what this log has done since**, so this is the third time the
+identical two queue items have had to be checked against the board rather than run. Per the prompt's own
+instruction, the docs win, and re-confirming that here rather than re-running anything:
+
+- **"Attack the short's entry geometry"** — closed. E64a's re-opening (trade-level forensics, no credit)
+  found the short's 4-7% win rates were never a geometry problem; they were the engine's short-side
+  margin ceiling (HARD LESSON 42) force-closing positions at ~0.013%-0.585% adverse before the shield
+  could ever bind. E71's declared 25%-equity deviation fixed it outright (PF 0.454 → 0.973, win rate
+  6.98% → 36.36%). E74/E75a/E75b/E76 then swept every entry term this construction has (band, `h1Bear`,
+  `brokeAbove`, `timeGate`) on the corrected short leg. There is no ninth short-geometry construction
+  queued or implied by anything on the board.
+- **"Binding-test the remaining entry terms"** — closed on both legs. Long: E69a/E69b/E70a/E70b. Short:
+  E74/E75a/E75b/E76. All four terms (`brokeBelow`/`band`, `h1Bull`/`h1Bear`, `timeGate`, `inMiddle`) are
+  measured on both legs; E76's own queue says so explicitly ("do not re-run any of the eight cells").
+
+**A fresh scan for anything NOT already covered by that closure, done before writing this entry:**
+narrower-than-$1,000 shields on the short leg were considered — only the upward direction ($1,000→$2,000,
+E73) has been run on this leg. But HARD LESSON 29 (established on the long leg, E58, and re-confirmed by
+E73's own occupancy note) is a general claim about this construction's `pyramiding=1` single-book
+design, not a leg-specific one: any parameter that changes a trade's resolution time changes which bars
+the book is flat on, so a shield sweep cannot isolate "risk fraction" from "which trades got admitted" —
+in either direction, on either leg. Running a narrower short shield would be a third confirmation of an
+already-generalized mechanism, not a new question, and 571 credits is not a reason to spend one restating
+HARD LESSON 29. Also checked: 3M Elite's HARD LESSON 52 (2026-09-04, same day) applies the identical
+25%-equity sizing fix to 3M's short for the first time — it is War Formation's own E71 technique arriving
+in the other lab, not new information flowing back here.
+
+**Zero backtests run. Zero credits spent.** State, reference builds and the two open user questions are
+unchanged from E77. Dashboard rebuilt (`python build_dashboard.py --lab war`) to pick up no data change —
+timestamp only.
+
+## QUEUE
+Unchanged from E77. Hold here until the user answers the `inMiddle`-ratchet or drawdown-proportionality
+questions, or new 1m data becomes available. **Worth flagging to the user directly: this stored prompt
+has now been answered as stale three times in a row (this entry, E77, and the entry above E75a/E75b)
+without being updated** — a future firing of the same text will find the same answer for as long as the
+board sits here.
