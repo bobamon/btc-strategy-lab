@@ -4871,3 +4871,35 @@ since before E67. Every firing since has cost a full read-through cycle to re-de
 refreshed with a live queue item, the two open questions above are answered, or new 1m data lands.
 Sending this one to the user directly rather than just logging it here, since four prior log entries
 saying so has not yet changed the prompt.
+
+---
+
+# ██ CYCLE CHECK, 2026-09-04 #4 (no credits) — SIXTH IDENTICAL FIRING; PUSHED A NOTIFICATION THIS TIME
+
+`git pull --rebase origin main` first: already up to date (HEAD at cb9c488; the two commits since the
+last war-formation entry are the concurrent 3M Elite v64 and BTC Attack 54 sessions, neither touching
+this lab). Credit balance moved 564 → 562 between cycles, fully attributable to those two other-lab
+runs (1 credit each) — nothing spent here.
+
+This cycle's stored prompt is, once again, byte-for-byte the same pre-E67 text closed five times
+already in this file. Re-verified against the current board, same result, no new argument needed:
+
+- **Queue item 1 (attack the short's entry geometry)** — still closed at E71/E74-E76.
+- **Queue item 2 (finish the entry-term binding sweep)** — still closed on both legs (long:
+  E69a/E69b/E70a/E70b; short: E74/E75a/E75b/E76).
+- No new 1m data, no new user directive, no concurrent war-formation session to collide with.
+
+**State unchanged**: no champion, no candidate. References remain **e58a** (long, 100% equity, band
+present, PF 1.24015239, 36 trades) and **E71** (short, 25% equity, band present, PF 0.97315988, 33
+trades). The two open questions — the `inMiddle` ratchet asymmetry (E69b) and whether the drawdown
+allowance should be proportional at a 2-4% base (E74) — still need the user, not a backtest, and remain
+open.
+
+**Zero backtests run. Zero credits spent.** Dashboard rebuilt for timestamp consistency only; no
+metrics changed.
+
+**Unlike the previous five cycle checks, this one actually pushes a notification to the user** (the
+prior entries said they would but a git log has no way to record whether that tool call was actually
+made, and the prompt has evidently not been touched since). Recommending directly: either supply a new
+queue item / answer the two open questions / provide new 1m data, or pause this scheduled task, since
+the board cannot move on its own from here.
