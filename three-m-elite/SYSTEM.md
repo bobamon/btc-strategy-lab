@@ -4429,3 +4429,39 @@ seven subsequent checks. Silence this cycle is correct behaviour, not an omissio
 
 **CHAMPION OF RECORD (LONG): v58.** Unchanged. **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61.**
 Unchanged.
+
+---
+
+## ██ CYCLE CHECK #9 — STILL NOTHING NEW; NOT RE-NOTIFYING (2026-09-04)
+
+**Scheduled prompt fired again, still carrying the identical stale v37/v53 snapshot** — the 12H/24H bias
+gate and the cascade signature listed as open queue items ("QUEUE ITEM 1"/"QUEUE ITEM 2"), champion
+recorded as v37 at PF 1.25172059/155 trades. Both were closed cycles ago: the bias gate at v54–v57 (HARD
+LESSON 45), the cascade signature at zero cost (HARD LESSON 34/35/50/52 — the liquidation-unwind
+tranching diagnosis, not a latch bug). Champion has been v58 since check #1 and has not moved since. Per
+"THE DOCS WIN over this prompt" and HARD LESSON 26 (escalate a stale prompt once, already done at v39;
+escalate an unanswered policy question once, already done at check #1; do not repeat either), this cycle
+does not re-flag either condition.
+
+**Independently re-verified, not assumed from the prior check's word:** `git log --oneline 9892a77..HEAD`
+shows exactly two commits since check #8 (45 minutes prior), both War Formation's own cycle check #12 and
+Attack 62 — nothing touched `three-m-elite/` in between. `results/backtests.json` re-read directly: still
+25 entries, unchanged from check #8. No `USER DIRECTIVE`/`USER DECISION` marker newer than 2026-09-03
+anywhere in STRATEGY-LEDGER.md, and no answer to the declared-deviation promotion policy question in
+CHAMPION-BOARD.md either. `get_credits`: balance 549/1000 — above the 500-credit two-backtest ceiling,
+but moot, no experiment queued.
+
+**No backtest run. 0 of 549 available credits spent.** The sole open item remains the declared-deviation
+promotion policy question, unchanged from checks #1–#8. Manufacturing a ninth mirror variant purely to
+spend budget would violate the no-invented-mechanism rule and would not answer a policy question anyway.
+
+**No new notification sent.** Check #1 pushed this exact question once; nothing about it has changed in
+eight subsequent checks. Silence this cycle is correct behaviour, not an omission.
+
+**QUEUE (unchanged, restated for the next cycle):**
+1. **The declared-deviation promotion policy question** — still open, still for the user, still the
+   only thing standing between v60/v61 (validated short) and v64 (validated combined build) and a
+   promotion decision. Nothing to re-run until the user answers.
+
+**CHAMPION OF RECORD (LONG): v58.** Unchanged. **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61.**
+Unchanged.
