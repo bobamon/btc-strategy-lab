@@ -4352,3 +4352,46 @@ omission.
 
 **CHAMPION OF RECORD (LONG): v58.** Unchanged. **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61.**
 Unchanged.
+
+---
+
+## ██ CYCLE CHECK #7 — STILL NOTHING NEW; NOT RE-NOTIFYING (2026-09-04)
+
+**Scheduled prompt fired again, still carrying the identical stale v37/v53 snapshot** — "queue item 1"
+(implement the 12H/24H bias gate), "queue item 2" (resolve the cascade signature), "continue numbering
+after v53", champion recorded as v37 at PF 1.25172059/155 trades. Both named items were closed cycles
+ago: the bias gate at v54–v57 (HARD LESSON 45), the cascade signature for zero credits as the
+margin-forced liquidation-unwind tranching (HARD LESSON 34/35/50/52). The champion has moved twice since
+that snapshot (v37 → v58) and has been unchanged through v59–v64 and every cycle check since. Per "THE
+DOCS WIN over this prompt" and HARD LESSON 26 (escalate a stale prompt once, done at v39; escalate a
+real blocker once, done at cycle check #1), not re-flagging either unchanged condition this cycle.
+
+**Independently re-verified, not taken on faith from checks #1–#6:** `git log --oneline
+0eb1dc7..HEAD -- three-m-elite/` returns empty — no commit has touched this lab since cycle check #6.
+The full-history author scan repeats the same result as check #6: the only non-Claude author is `ecarr`,
+and every `ecarr`-authored commit in reachable history is dated 2026-09-04 lab research output, not a
+policy answer to the declared-deviation question — no commit anywhere addresses it. `results/backtests.json`
+was read directly and still holds exactly 25 entries, unchanged. `three-m-elite/transcripts/` is
+unchanged (10 files). `get_credits` returned cleanly this cycle: balance 554/1000 weekly grant, well
+above the 500-credit two-backtest ceiling — but moot, since no experiment is queued regardless.
+
+**No backtest run. 0 of 554 available credits spent.** The real queue still has exactly one open item
+and it is a policy question for the user, not a backtest: can a 25%-equity declared-deviation short leg
+(split-tested clean on both halves at v60/v61, confirmed to sort regime correctly at v62/v63) ever be
+promoted to sit beside the 100%-equity long champion v58, or does it only ever stand as a labelled,
+non-comparable finding. Manufacturing an experiment to spend the credit budget would violate this lab's
+own no-invented-mechanism rule; re-running an unchanged source-material sweep a seventh time would not
+produce a different answer than check #1's already-documented pass.
+
+**No new notification sent.** Check #1 pushed this exact question once, as new information; nothing
+about it has changed in six subsequent checks. HARD LESSON 26 governs a repeated notification the same
+way it governs a repeated stale-prompt flag: say nothing new, notify nothing new. Silence this cycle is
+the correct behaviour, not an omission.
+
+**QUEUE (unchanged, restated for the next cycle):**
+1. **The declared-deviation promotion policy question** — still open, still for the user, still the
+   only thing standing between v60/v61 (validated short) and v64 (validated combined build) and a
+   promotion decision. Nothing to re-run until the user answers.
+
+**CHAMPION OF RECORD (LONG): v58.** Unchanged. **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61.**
+Unchanged.
