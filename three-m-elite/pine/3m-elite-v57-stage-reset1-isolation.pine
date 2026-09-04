@@ -1,0 +1,225 @@
+//@version=6
+// 3M ELITE v57 - RESET CONDITION 1 ADDED TO THE STAGE MACHINE, LATE-STAGE-2 OCCUPANCY RE-MEASURED
+//   (DIAGNOSTIC, NOT A STRATEGY).
+//
+// WHY NOW: v48/v49 (SYSTEM.md, 2026-09-03) built VOCABULARY.md's 5-state stage/cluster machine and
+// found it locks into LATE STAGE 2 early and stays there for most of the 4.7-year window, because
+// RESET condition 1 ("the model turns bearish, then bullish again") was NOT implemented -- this lab
+// had no confirmed bias/model definition at the time (0-V26's standing policy: never invent one).
+// v48's header named this the #1 documented gap; v48/v49's queue named "(a) a user-confirmed
+// bias/model definition" as one of exactly two live paths forward, the other (a looser reading of
+// RESET condition 2) was checked and came back empty at v50.
+//
+// THAT BLOCKER IS NOW CLEARED. v54/v55 (2026-09-04) built and ran the source's own bias gate --
+// 12H & 24H model direction, consecutive higher/lower closes on each reconstructed timeframe, both
+// required to agree -- against the champion. Per this lab's own standing instruction ("a decoded
+// definition not yet implemented outranks other queue items"), this cycle uses that SAME definition
+// (not a new invention) to finally implement RESET condition 1 and re-measure whether the lock-up
+// v48/v49 found is actually resolved by it, exactly as v48/v49's own queue proposed.
+//
+// ONE CHANGE FROM v49: RESET condition 1 is added. modelBull = bias12Bull AND bias24Bull; modelBear =
+// bias12Bear AND bias24Bear (mirror-image definition, consecutive LOWER closes). While the machine sits
+// in LATE STAGE 2, a latch `sawBearSinceLate` arms the first time modelBear is observed; if modelBull is
+// then observed while that latch is armed, this is "the model turns bearish, then bullish again" and
+// the machine resets to NO STAGE, exactly like RESET condition 2's existing reset action. The latch
+// clears whenever LATE STAGE 2 is (re-)entered. RESET condition 2 (a full cluster-free break-up cycle)
+// is UNCHANGED and still implemented alongside this -- the two reset paths are independent ORs, as the
+// source describes ("there are exactly two forms of reset").
+//
+// STILL A DOCUMENTED GAP: the "instant break-down in stage 2" whipsaw remains mechanised literally, as
+// in v48/v49 -- unchanged, not touched this cycle (LESSON 17).
+//
+// METHOD: unchanged from v49 -- isolate LATE STAGE 2 occupancy specifically (flat AND stage==LATE_2,
+// one-bar exit), the direct measurement of the state RESET 1 is meant to unstick. P&L is not meaningful
+// (same exemption as v12/v19/v20/v22/v45/v46/v47/v48/v49).
+//
+// PREDICTION, STATED BEFORE RUNNING (LESSON 17): if RESET 1 is doing real work, LATE STAGE 2 occupancy
+// should no longer run to the end of the 4.7-year window the way v49's did (last trade 2026-08-30, i.e.
+// nearly the full sample) -- it should show gaps corresponding to bear-to-bull model flips, and the
+// machine's last LATE STAGE 2 occupancy bar should end well before the window's close if resets are
+// firing at a realistic cadence. If the last trade is still at or near the end of the window, RESET 1 as
+// mechanised here is not materially looser than RESET 2 alone, and the lock-up is not primarily a
+// missing-bias-definition problem.
+strategy("3M ELITE v57 stage-reset1 isolation (late-stage-2 occupancy)", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+pivLeft  = input.int(5, "Pivot left bars (swing confirmation)")
+pivRight = input.int(5, "Pivot right bars (swing confirmation)")
+
+ph = ta.pivothigh(pivLeft, pivRight)
+pl = ta.pivotlow(pivLeft, pivRight)
+
+var float lastSwingHigh = na
+var float lastSwingLow  = na
+if not na(ph)
+    lastSwingHigh := ph
+if not na(pl)
+    lastSwingLow := pl
+
+breakUp   = not na(lastSwingHigh) and close > lastSwingHigh and close[1] <= lastSwingHigh
+breakDown = not na(lastSwingLow)  and close < lastSwingLow  and close[1] >= lastSwingLow
+
+// ---------- 4H reconstruction (byte-identical to v37/v45-v49) ----------
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+var float pO  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+bullEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC < ppO and pC > pO and pC > ppO
+
+var float dzTop    = na
+var float dzBot    = na
+var bool  dzLive   = false
+var int   dzTouch  = 0
+var bool  dzTapped = false
+
+if new4h
+    if dzLive and not na(pC) and pC <= dzTop
+        dzTouch := dzTouch + 1
+        if dzTouch >= 2
+            dzLive := false
+    if bullEngulf
+        dzTop    := pO
+        dzBot    := pL
+        dzLive   := true
+        dzTouch  := 0
+        dzTapped := false
+
+if dzLive and low <= dzTop
+    dzTapped := true
+
+tapped = dzLive and dzTapped
+clusterCandidate = tapped and breakUp
+
+// ---------- 12H & 24H MODEL/BIAS (NEW, reused byte-identical definition from v54/v55) ----------
+MS12H = 43200000
+MS24H = 86400000
+b12h = math.floor(time / MS12H)
+b24h = math.floor(time / MS24H)
+new12h = b12h != b12h[1]
+new24h = b24h != b24h[1]
+
+var float c12prev  = na
+var float c12prev2 = na
+if new12h
+    c12prev2 := c12prev
+    c12prev  := close[1]
+
+var float c24prev  = na
+var float c24prev2 = na
+if new24h
+    c24prev2 := c24prev
+    c24prev  := close[1]
+
+bias12Bull = not na(c12prev) and not na(c12prev2) and c12prev > c12prev2
+bias12Bear = not na(c12prev) and not na(c12prev2) and c12prev < c12prev2
+bias24Bull = not na(c24prev) and not na(c24prev2) and c24prev > c24prev2
+bias24Bear = not na(c24prev) and not na(c24prev2) and c24prev < c24prev2
+
+modelBull = bias12Bull and bias24Bull
+modelBear = bias12Bear and bias24Bear
+
+// ---------- THE STATE MACHINE (byte-identical to v48/v49 except RESET condition 1, marked NEW) ----------
+STAGE_NONE       = 0
+STAGE_1          = 1
+STAGE_1_REACC    = 2
+STAGE_2          = 3
+STAGE_2_REACC    = 4
+STAGE_2_LATE     = 5
+
+var int  stage                    = STAGE_NONE
+var bool stage2HadCluster         = false
+var bool lateHadClusterSinceEntry = false
+var int  upsSinceStage2           = 0
+var bool sawBearSinceLate         = false   // NEW: RESET condition 1's latch
+
+if breakDown
+    if stage == STAGE_1
+        stage := STAGE_1_REACC
+    else if stage == STAGE_2
+        if upsSinceStage2 == 0
+            stage := STAGE_NONE
+            stage2HadCluster := false
+        else
+            stage := STAGE_2_REACC
+    else if stage == STAGE_2_LATE
+        if not lateHadClusterSinceEntry
+            stage := STAGE_NONE
+            stage2HadCluster := false
+        else
+            lateHadClusterSinceEntry := false
+
+if breakUp
+    if stage == STAGE_NONE
+        if clusterCandidate
+            stage := STAGE_1
+            stage2HadCluster := false
+    else if stage == STAGE_1_REACC
+        stage := STAGE_2
+        upsSinceStage2 := 0
+    else if stage == STAGE_2
+        upsSinceStage2 := upsSinceStage2 + 1
+        if clusterCandidate
+            stage2HadCluster := true
+    else if stage == STAGE_2_REACC
+        if stage2HadCluster
+            stage := STAGE_2_LATE
+            lateHadClusterSinceEntry := false
+            sawBearSinceLate := false        // NEW: arm the latch fresh on entry to LATE STAGE 2
+        else
+            stage := STAGE_1
+            stage2HadCluster := false
+    else if stage == STAGE_2_LATE
+        if clusterCandidate
+            lateHadClusterSinceEntry := true
+
+// ---------- RESET condition 1 (NEW): model turns bearish, then bullish again, while in LATE STAGE 2 ----------
+// Checked every bar (bias is a level, not an edge, so it does not need to be tied to breakUp/breakDown).
+if stage == STAGE_2_LATE
+    if modelBear
+        sawBearSinceLate := true
+    else if modelBull and sawBearSinceLate
+        stage := STAGE_NONE
+        stage2HadCluster := false
+        sawBearSinceLate := false
+
+lateStage2 = stage == STAGE_2_LATE
+
+// ---------- THE ISOLATION: count LATE STAGE 2 occupancy alone, same one-bar-exit convention as v49 ----------
+if strategy.position_size == 0 and lateStage2
+    strategy.entry("LATE2", strategy.long)
+
+if strategy.position_size != 0
+    strategy.close_all()
+
+plot(stage, title="Stage")
+plot(lateStage2 ? 1 : 0, title="LateStage2")
+plot(modelBull ? 1 : modelBear ? -1 : 0, title="Model")

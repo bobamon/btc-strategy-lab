@@ -2910,3 +2910,102 @@ adverse side predicts, and independent confirmation of the liquidation finding. 
    155 → 48 trades) — is **untouched by this** and remains the lab's real open question. v54 is long
    and long builds do not cascade, so its 48 is a true count.
 3. **CHAMPION UNCHANGED: v37.** Long, uncascaded, unaffected by both defects.
+
+
+---
+
+# ██ v57 — RESET CONDITION 1 IS BUILT, AND IT DOES NOT UNSTICK THE STAGE MACHINE (2026-09-04)
+
+**A NOTE ON THE SCHEDULED PROMPT.** This cycle's stored prompt asks for two things framed as top
+priority — the bias gate, and resolving the cascade signature — both of which are **already done**,
+the first as of v54/v55 (built, run on both legs, ratcheted: reverted on the long leg, improved-but-
+still-rejected on the short), the second as of v54/v55's cascade section and the subsequent cross-lab
+check (partial-exit fills of a single bracket order, not a re-entry storm; the short/long asymmetry is
+open but explicitly low-priority and non-blocking). Per the prompt's own instruction ("THE DOCS WIN
+over this prompt") and this project's now well-established pattern (v34, v36, v37/v38, v39, v40/v41,
+v42/v43, v44, v45, v46/v47, v48/v49, v50 all flagged the same class of staleness), this cycle instead
+picks up the actual open item highest on the real queue: **VOCABULARY.md's stage/cluster machine has a
+decoded RESET condition that was never implementable for lack of a bias/model definition — and that
+definition now exists (v54/v55).** Implementing a decoded-but-blocked rule outranks a parameter sweep
+per this lab's own standing instruction, so this is the cycle's one experiment.
+
+## THE BLOCKER v48/v49 NAMED IS NOW CLEARABLE
+
+v48/v49 (2026-09-03) built VOCABULARY.md's 5-state stage/cluster machine and found it falls into LATE
+STAGE 2 (the one no-entry state with no automatic expiry) early and stays there for most of a 4.7-year
+window — promoted to HARD LESSON 30. Two live paths were named: (a) implement RESET condition 1 ("the
+model turns bearish, then bullish again"), blocked on a bias/model definition this lab had never
+confirmed; or (b) re-read the source for a looser RESET condition 2. v50 checked (b) and found nothing
+looser. **(a) is what v54/v55 unblocks** — not a new decode, the SAME mechanical definition already
+built and run against the champion (12H & 24H, consecutive higher/lower closes on each reconstructed
+timeframe, both required to agree in one direction to call a "model").
+
+## THE BUILD: `pine/3m-elite-v57-stage-reset1-isolation.pine`
+
+Byte-identical to v49 (the late-stage-2 occupancy isolation) with exactly one addition: `modelBull` =
+`bias12Bull AND bias24Bull`, `modelBear` = `bias12Bear AND bias24Bear` (mirror-image of the bull
+definition — consecutive LOWER closes), reusing v54's code verbatim. A latch `sawBearSinceLate` arms
+the first time `modelBear` is observed while `stage == STAGE_2_LATE`; if `modelBull` is then observed
+while armed, the machine resets to `STAGE_NONE` — "the model turns bearish, then bullish again,"
+exactly as VOCABULARY.md's quote states it. The latch re-arms fresh on every entry to LATE STAGE 2.
+RESET condition 2 (a full cluster-free break-up cycle) is unchanged and still active alongside it, as
+the source's own "there are exactly two forms of reset" describes. Same one-bar-exit occupancy counter
+as v49 (P&L not meaningful, same exemption as v12/v19/v20/v22/v45/v46/v47/v48/v49), so this is directly
+comparable to v49's own numbers.
+
+**PREDICTION, STATED BEFORE RUNNING (LESSON 17):** if RESET 1 does real work, LATE STAGE 2 occupancy
+should shrink materially and its last occupancy bar should land well before the window's close. If the
+last trade stays near the window's end and the count barely moves, RESET 1 as mechanised here is not
+materially looser than RESET 2 alone.
+
+| | v49 (RESET 2 only) | **v57 (+ RESET condition 1)** |
+|---|---|---|
+| Late-stage-2 occupancy (one-bar-exit count) | 3,737 | **3,546** |
+| Last occupancy bar | 2026-08-30 | **2026-07-31** |
+| Change | — | **−191 bars (−5.1%), last-seen date one month earlier** |
+
+## THE VERDICT: THE SECOND PREDICTED OUTCOME. RESET 1 IS NOT THE FIX.
+
+**A 5.1% reduction in occupancy and a one-month shift in the last-seen date, against a 4.7-year window,
+is not RESET 1 doing real work — it is close to noise.** Both of this lab's own decoded reset paths are
+now mechanised and running simultaneously, and the machine is still in the blocked state for nearly the
+entire sample. `modelBear`/`modelBull` (both 12H and 24H agreeing) are not rare events in isolation —
+BTC 2022–2026 crosses both conditions repeatedly over 4.7 years — so the near-absence of effect says the
+bear-then-bull sequence specifically is essentially never *observed while the machine is sitting in LATE
+STAGE 2*, not that the model rarely flips at all. That is consistent with HARD LESSON 30's actual
+mechanism: the machine re-enters LATE STAGE 2 so readily (via RESET 2's own narrow exit and the
+persistent `dzTapped` latch feeding `clusterCandidate`) that any given visit is usually too short, or
+too immediately followed by a fresh cluster, for a full bear→bull cycle to land inside it.
+
+**This closes out BOTH of v48/v49's named live paths with real, credit-backed negative answers**, not
+"not yet attempted" placeholders: (a) a confirmed bias/model definition, tried here, barely moves the
+lock; (b) a looser RESET condition 2, checked at v50, does not exist in the captured transcripts. The
+stage/cluster machine, exactly as VOCABULARY.md decodes it from the available source material, cannot
+currently be turned into a usable gating filter on this instrument and window — not because any single
+rule was mis-read (every quote-level rule still checks out individually, per HARD LESSON 30's own
+closing note), but because the composition of its two reset conditions is stricter than either reads on
+its own, and the source material this lab has does not offer a third way out.
+
+**Not gated onto the champion this cycle, on purpose.** Per the same diagnostic-first discipline v48/v49
+established: gating a machine still locked ~95% as hard as before would spend the second credit
+re-measuring the lock, not learning anything past what this run already shows. The budget allowed a
+second backtest; it was not spent, because the honest read of this result is that there is nothing left
+to test on the stage machine without new source material.
+
+Saved to `pine/` in the same action that recorded these numbers (HARD LESSON 21). Credits spent: 1 of
+the 2 allowed this cycle (balance was 617, above the 500 threshold).
+
+## QUEUE
+1. **The stage/cluster machine is closed as a gating filter, pending new source material** — both
+   decoded reset paths have now been tried and neither escapes the LATE STAGE 2 lock. Re-opening it
+   needs either the missing "last week's cluster lesson" transcript (never captured, per v50) or a
+   different reading this lab has not yet found, not another parameter variant on the same two rules.
+2. **Cascade signature — CLOSED**, by the concurrent entry directly above this one (same day): it is the
+   liquidation-unwind tranching from HARD LESSON 34, not a re-entry storm or a latch failure. Short-only
+   because HARD LESSON 34's truncation is itself short-specific (the ~0.35%-of-equity margin ceiling
+   only binds shorts in this engine) — the asymmetry this lab had flagged as unexplained since v54/v55
+   is now accounted for by the same mechanism, not a separate defect.
+3. **A purpose-built bear-market or regime-flip split beyond v50's single window** — v50 (Sep 2022–Mar
+   2023) remains the only dedicated flip-window test; further windows are optional, not blocking.
+4. **CHAMPION UNCHANGED: v37** (PF 1.25172059 / DD 8.72815312%, 155 trades, long-only). Nothing in this
+   cycle's finding, nor the concurrent cascade-closure entry above, touches its numbers.

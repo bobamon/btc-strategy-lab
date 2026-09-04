@@ -1291,6 +1291,18 @@ practically different from impossible when the base rate is measured in years.
   rules compose, not a mistranslation of any one of them. Composition needs its own check even when
   every component checks out alone.
 
+**UPDATE (v57, 2026-09-04) — THE PREDICTED FIX WAS TESTED AND DID NOT WORK EITHER.** RESET condition 1
+("the model turns bearish, then bullish again") was named here as one of two live paths out of the
+lock, blocked at the time on a missing bias/model definition. That definition was later built (v54/v55)
+for an unrelated reason (the source's own bias gate) and then used here to finally implement RESET 1.
+Result: late-stage-2 occupancy fell only 5.1% (3,737 → 3,546 one-bar-exit counts) and the last occupancy
+bar moved from 2026-08-30 to 2026-07-31 — one month, on a 4.7-year window. **Both of this lesson's named
+live paths are now closed with real answers**: a looser RESET condition 2 (checked at v50) does not
+exist in the captured source; a working RESET condition 1 (built at v57) barely moves the lock. The
+lesson's core claim stands strengthened, not weakened — this is a second, independent confirmation that
+a reset gated by a persistent latch can be "eventually true" in principle and still not fire inside any
+window a project actually tests.
+
 
 ---
 
