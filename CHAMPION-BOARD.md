@@ -3341,3 +3341,61 @@ feels like. Drawdown category **three** (bleed on a positive edge), but a far lo
 2. **If a filter stack is built, target the 2025 stretch specifically** - that is where the edge went
    missing, and it is now identified rather than guessed at.
 3. **Quote the ten-month stretch alongside the profit factor** whenever this build is described.
+
+
+---
+
+# ATTACK 47 - REJECTED ON SAMPLE, NOT ON MERIT. AND A RETRACTION.
+
+## THE RETRACTION FIRST
+Last cycle's queue said *"if a filter stack is built, target the 2025 stretch specifically."*
+**That was a trap and it is withdrawn.** The 2025 stretch lives inside **46b, the only window that
+never informed a parameter choice.** A filter designed by looking at *when* the strategy lost is fitted
+to that window and destroys exactly what made 46b worth leading with - the same selection effect
+already declared on 46a, aimed at the one number that did not carry it.
+
+So this term was motivated by the **mechanism**: Attack 46 assumes the 20-bar low is *support*, a level
+buyers defended. In a sustained downtrend it is just the newest low, defended by nobody, while the
+target above it is falling too. **Require `sup > ta.lowest(low,60)[1]`** - if the 20-bar low is also the
+60-bar low, the "support" is fictional, so skip it.
+
+## THE COUNT DECIDES IT
+**105 trades → 24.** A 77% cut, and **24 is below the 30-trade floor.**
+
+Under LESSON 12 the profit factor is a **direction, not a result**, and is not quoted as one.
+**RATCHET v2 clause 3 fails outright**; clause 4's split is doubly unsatisfiable. **REJECTED.**
+
+## WHAT THE DIRECTION SUGGESTS - labelled as a direction
+| | Attack 46a | Attack 47a *(direction only)* |
+|---|---|---|
+| profit factor | 1.17245633 | 1.55751448 |
+| max drawdown | 23.45223579% | 8.34822885% |
+| trades | 105 | **24** |
+| avg loser | -$124.08 | **-$126.28** |
+
+Clauses 1 and 2 would both have passed comfortably. And the **avg loser is essentially unchanged**,
+which says the term removes **losing trades** rather than altering the risk geometry - the shape a
+genuinely useful filter has. **Still rejected: a shape is not evidence at 24 trades.**
+
+## THE E14 REDUNDANCY QUESTION IS ANSWERED, AND THE ANSWER IS NO
+The header named the risk that this gate would overlap the 3.5 RR floor. **A 77% cut with a rising
+profit factor says the two are largely independent** - the RR floor was not already excluding these
+setups. That is also why the cut is so severe.
+
+## THIRD LAB-INDEPENDENT CONFIRMATION OF HARD LESSON 45
+| filter | lab | cut | outcome |
+|---|---|---|---|
+| v56 stack, long | 3M | 76% | split 27/10, unsatisfiable |
+| v57 stack, short | 3M | 78% | 39 entries, unsatisfiable |
+| **Attack 47** | **BTC** | **77%** | **under the floor entirely** |
+
+Three filters, two labs, two different mechanisms, **one wall**: any condition true less than about a
+quarter of the time takes these mechanisms under the sample floor. **The binding constraint is the
+data**, and that is now established well enough to stop rediscovering it.
+
+## QUEUE
+1. **Stop adding filters to Attack 46 on this data.** Three consecutive runs across two labs say the
+   sample cannot support one, whatever the term's merit.
+2. **The out-of-sample test still ranks first and still cannot be run** under BTCUSDT-only.
+3. **Attack 46 stands as-is**: both halves clear, cold-reproduced, with the declared selection caveat
+   on 46a and the ten-month losing stretch inside 46b.

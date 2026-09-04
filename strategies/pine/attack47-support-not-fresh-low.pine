@@ -1,0 +1,74 @@
+//@version=6
+// BTC ATTACK 47 - THE TAPPED SUPPORT MUST NOT BE A FRESH 60-BAR LOW. ONE TERM ON ATTACK 46.
+// A RETRACTION FIRST: the board queue item "target the 2025 stretch specifically" IS WITHDRAWN. That
+// stretch lives inside 46b, the ONLY window that never informed a parameter choice; fitting a filter
+// to it would burn the one number in this lab carrying no selection effect.
+// SO THE TERM IS MOTIVATED BY THE MECHANISM: Attack 46 assumes the 20-bar low is SUPPORT, a level
+// buyers defended. In a sustained downtrend it is just the newest low, defended by nobody, while the
+// 20-bar high above it falls too -- so the setup fires constantly and fails. Require sup > 60-bar low.
+// AUDIT: R>=0.8%% by EXCLUSION, unchanged (LESSON 3); stop at the tap bar low, UNCHANGED (LESSON 5);
+// LONG only, shorts untestable at 100%% equity (LESSONS 6/34/42); the gate necessarily binds so the
+// COUNT IS READ FIRST (E17); REDUNDANCY NAMED - it may overlap the 3.5 RR floor, which already
+// declines setups whose target sits close above entry (E14); both lookbacks [1]-shifted (LESSON 8);
+// pyramiding=1 so blocking an entry can free a LATER one, not a clean subset (LESSONS 24/28/29);
+// expect cascadeRatio 1 (LESSON 35). SL and TP FIXED AT ENTRY. No trailing/averaging/martingale.
+// RESULT: 105 -> 24 trades, a 77%% cut, BELOW THE 30-TRADE FLOOR. PF 1.55751448 and DD 8.34822885%%
+// are a DIRECTION, NOT A RESULT (LESSON 12), and clause 3 fails outright. REJECTED ON SAMPLE.
+// The E14 question is answered NO: a 77%% cut with a RISING profit factor means this gate and the RR
+// floor are largely INDEPENDENT. Third confirmation of HARD LESSON 45 across two labs.
+strategy("BTC Attack47 support not fresh low", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+deepBack = input.int(60,     "THE ONE NEW TERM: the 20-bar low must sit ABOVE this lookback low")
+lookback = input.int(20,     "Level lookback, bars -- sets BOTH the support tapped and the high targeted")
+tapTol   = input.float(0.10, "Tap tolerance, % -- how close to support counts as a tap")
+minRRv   = input.float(3.5,  "Minimum reward:risk -- 2.5 -> 3.5")
+minRpct  = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars  = input.int(192,    "Max bars in trade")
+
+sup  = ta.lowest(low,   lookback)[1]
+deep = ta.lowest(low,   deepBack)[1]
+// THE ONE NEW TERM: if the 20-bar low IS the 60-bar low, price is making fresh lows and the
+// support is fictional. Require the tapped level to sit above the deeper low.
+supReal = not na(deep) and not na(sup) and sup > deep
+res = ta.highest(high, lookback)[1]
+
+tapped = not na(sup) and low  <= sup * (1 + tapTol / 100)
+held   = not na(sup) and close > sup
+setupOn = tapped and held
+
+rLong  = close - low
+reward = na(res) ? na : res - close
+minR   = close * minRpct / 100
+rBig   = rLong >= minR
+rrOk   = not na(reward) and rLong > 0 and reward / rLong >= minRRv
+
+goLong = setupOn and rBig and rrOk and supReal
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := low
+    tpPx   := res
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(sup, title="Support")
+plot(res, title="TargetLevel")

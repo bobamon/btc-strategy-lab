@@ -2325,3 +2325,43 @@ of the entire drawdown.** A proportional allowance (say, "drawdown may not worse
 its own value") would behave the same on the old builds and differently here.
 
 **Not changed on my own authority. The rule as written was applied and E74 does not keep.**
+
+---
+
+## HARD LESSON 49 — A FILTER DESIGNED BY LOOKING AT *WHEN* A STRATEGY LOST IS FITTED TO THAT WINDOW. IF THAT WINDOW IS YOUR CLEAN ONE, YOU HAVE JUST BURNED IT.
+
+Attack 46b's trade distribution exposed a **ten-month stretch with a 1-in-15 win rate** (Jan–Nov 2025).
+The obvious next move — and the one this board wrote into its own queue — was *"target the 2025 stretch
+specifically."*
+
+**That queue item was a trap, and it is retracted.**
+
+The 2025 stretch lives inside **46b — the only window in this lab that never informed a parameter
+choice.** 46a already carries a declared selection effect, because the 3.5 RR floor was chosen by
+watching it. Fitting a filter to 46b's losing stretch would have applied the identical error to the one
+number that was still clean, and the resulting build would have looked excellent on both halves while
+being fitted on both.
+
+**HOW TO USE THIS:**
+1. **Diagnostics and design must draw on different windows.** It is legitimate to *measure* where an
+   edge failed. It is not legitimate to then design against that measurement and still call the window
+   out-of-sample.
+2. **Track which windows have been "spent" per parameter, not per strategy.** Attack 46's 3.5 floor
+   spent 46a. A 2025-targeted filter would have spent 46b. Once every window is spent, there is no
+   validation left, only fitting.
+3. **Prefer a term you can argue for from the mechanism alone.** Attack 47's gate — the tapped 20-bar
+   low must not also be the 60-bar low, because in a downtrend that "support" is defended by nobody —
+   is arguable without ever looking at a date. It was rejected on sample, but it was **rejected
+   honestly**, and its framing survives the rejection.
+
+**AND THE THIRD CONFIRMATION OF HARD LESSON 45 ARRIVED WITH IT.**
+
+| filter | lab | count cut | outcome |
+|---|---|---|---|
+| v56 stack, long | 3M | 76% | split 27/10, unsatisfiable |
+| v57 stack, short | 3M | 78% | 39 entries, unsatisfiable |
+| Attack 47 | BTC | 77% | 24 trades, under the floor entirely |
+
+Three filters, two labs, two unrelated mechanisms, **the same wall at ~77%**. Any condition true less
+than roughly a quarter of the time takes these mechanisms below the sample floor. **Stop adding
+filters on this data.** The constraint is not the terms; it is the amount of data.
