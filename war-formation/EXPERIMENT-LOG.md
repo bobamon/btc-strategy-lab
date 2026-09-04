@@ -3609,3 +3609,182 @@ items are live, neither supersedes the other; they answer different standing ins
 4. **If more 1m history ever becomes available**, the $3,000/$4,000 shield question is still the first
    exit-side item to re-run on a longer window. Not re-checked this cycle (both credits spent on the
    entry-side item above); last confirmed clamped to 2025-12-16 -> 2026-05-03 at E62.
+
+---
+
+# E66 — THE SHORT LEG ON THE PROXY DIRECTION RULE (QUEUE ITEM 1, RENUMBERED FROM THE PRIOR CYCLE'S "E65")
+
+**Credits: 624 at the start of this cycle (free tier, shared pool). Budget rule: above 500 -> at most
+TWO backtests. One used.** `get_trades` was also called once on this run's own result (free, no credit
+spent) to check the occupancy point named in advance below.
+
+## THE QUESTION
+
+E64 ran the bidirectional cascade ORACLE-RULES L179-180 prescribes, off the reproducible parent e58a
+(PF 1.24015239 / DD 9.82519609% / 36 trades, long, confirmed reproducible E58=E59):
+- E64a SHORT, direction = 2+ consecutive RED 6h candles (the source's own literal rule): PF
+  0.45442725 / DD 10.97440232% / 43 trades / 6.98% win.
+- E64b LONG, direction = 2+ consecutive GREEN 6h candles (the control, source's own rule): PF
+  0.95884068 / DD 10.63382724% / 28 trades / 35.71% win. NEITHER WAS KEPT (RATCHET v2 clause 1).
+
+The decomposition from that cycle is the finding this run acts on: going from e58a's own proxy
+direction rule (4+ green 1h candles inside the PRIOR completed 6h block, a PERSISTENCE condition) to
+the source's raw 6h-candle count costs PF twice over — once for the direction rule itself (1.240 ->
+0.959 on the long control) and again for the leg (0.959 -> 0.454 on the short). ORACLE-RULES L215-216
+calls the straight 6h count "simpler and better specified" than the proxy; measured, it is simpler and
+WORSE, because "2 consecutive 6h candles green/red" is satisfied by two barely-colored blocks with no
+requirement the move persisted inside them, while the proxy demands persistence across ~5-6 1h candles.
+
+**So E66 builds the short leg on e58a's OWN proxy direction rule** — `bearRegime = cntPrev>=5 and
+redPrev>=4` (4+ RED 1h candles in the prior completed 6h block), the exact structural mirror of e58a's
+`bullRegime`/`greenBull` — rather than E64a's raw 6h-colour count, isolating the leg against a
+direction rule already shown to work (e58a's long) instead of one just shown to underperform (E64's
+raw count). **The source rule is NOT adopted and NOT discarded on this one 4.5-month window** — e58a's
+proxy long remains the reference build either way, this only tests whether the proxy generalizes to
+the mirrored leg.
+
+## MECHANICS AND PARENT
+
+Mechanics are otherwise the structural mirror of E64a's short: `brokeAbove` (a 15m sweep to a higher
+high) THEN a rejection `crossunder` back below it — the same "let the enemy finish" location solve the
+long gets implicitly and the short must be given explicitly (ORACLE-RULES L175-177), which is why
+LESSON 6 ("never mirror the short off the long") is scoped by HARD LESSON 31 to govern geometries this
+project *invents*, not a mirror the source itself prescribes and whose location the long side already
+earns. `shieldUsd`/`maxBars`/`rr` held EXACTLY at e58a's values ($1,000 / 6480 / 2.0) — HARD LESSON
+28/29 established shield and hold cap are coupled and both shift occupancy, so changing either
+alongside the direction rule would confound this run. Only the DIRECTION SOURCE and the LEG (long ->
+short) change versus e58a. Parent named per the mandate's own instruction: e58a is the best-PF,
+largest-sample, lowest-DD of the three confirmed-reproducible ALCM families
+(`alcm-reference.pine` 0.35, `e50a`/`e50b` 0.457/1.219, `e58a` 1.240) and the one whose direction rule
+this leg now mirrors. Saved to `pine/e66-proxy-direction-short.pine` before running (LESSON 21).
+
+## PRE-RUN AUDIT
+
+- **R >= 0.8% (LESSON 3)** — R is the shield, $1,000, ~1.0% of BTC price over most of this window;
+  PASSES the floor. LIVE TENSION, unchanged from e58a/E64a: falls below 0.8% above ~$125k BTC — real
+  over parts of this window's range (BTC traded up to ~$96k here), not a formality.
+- **Stop placement (LESSON 5)** — risk-defined by the shield (fixed $ gap to liquidation), the spec's
+  own exit model, a declared deviation from a structural stop. SL/TP fixed at entry, no trailing.
+- **Each leg separately (LESSON 6, scoped by HARD LESSON 31)** — SHORT ONLY. e58a's long is not
+  re-run or blended here. Location solved structurally (brokeAbove + rejection), not assumed.
+- **BINDING (E17)** — `bearRegime` must actually fire or the direction rule is inert; trade count
+  against e58a's 36 and E64a's 43 is the evidence, read below.
+- **REDUNDANCY (E14)** — `bearRegime` (1h persistence) and `h1Bear` (current 1h close < open) could
+  proxy each other. Kept because e58a's own long keeps both terms and this run's only stated change is
+  the direction SOURCE, not the term list. Registered in advance: if trades collapsed toward zero,
+  `h1Bear` would be the first term to drop. **Did not happen** — see below.
+- **LATCH IN SEQUENCE (LESSON 8)** — 1h red counts latch only on a completed 1h close, rolling into
+  `redPrev`/`cntPrev` only at the new-6h boundary, mirroring e58a exactly; `brokeAbove` sets on a
+  completed 15m block; `shortTrig` crossunder fires on a later 1m bar. No shared-bar leakage.
+- **OCCUPANCY (LESSONS 24/28/29)** — a different direction rule AND a different leg both admit a
+  genuinely different trade population than e58a's 36 longs or E64a's 43 shorts. NOT a controlled
+  comparison against either. Named in advance, checked with `get_trades` below.
+- **SL and TP fixed at entry.** No trailing, no martingale. Position ends at target or the shield.
+
+## PRE-REGISTERED OUTCOMES (LESSON 17), READ AGAINST BOTH e58a's LONG (PF 1.240, 36) AND E64a's RAW-6h
+## SHORT (PF 0.454, 43) — NEITHER ALONE IS DECISIVE (LESSON 16)
+
+- PF >= 1.0 with a usable count -> the short leg EXISTS under a direction rule that already works on
+  the long side; the proxy, not the leg, was E64a's problem.
+- PF improves over E64a's 0.454 but stays below 1.0 -> the persistence proxy helps the direction term
+  (as on the long, 0.959->1.240) but the short still doesn't clear parity; mechanics are the remaining
+  open question.
+- **PF at or below E64a's 0.454 -> the proxy fix that helped the long does nothing for the short; the
+  location solve itself needs revisiting, not the direction source feeding it.**
+- Trades collapse toward single digits -> `redPrev>=4`/`h1Bear` redundancy is the suspect, not an edge
+  result.
+- Fewer than ~20 trades but not degenerate -> reported as a count and a direction, not a validated
+  result, per the mandate's own restatement of the 4.5-month single-regime limit.
+
+## THE RESULT
+
+| Build | PF | Trades | Max DD | Win rate | Direction |
+|---|---|---|---|---|---|
+| e58a (long, proxy direction, parent) | **1.24015239** | 36 | 9.82519609% | 41.67% | long |
+| E64a (short, RAW 6h colour) | 0.45442725 | 43 | 10.97440232% | 6.98% | short |
+| **E66 (short, PROXY direction, this run)** | **0.29987043** | **66** | **14.5611245%** | **4.55%** | short |
+
+[E66 report](https://mcp-api.trader.dev/backtest/01M1N81TJV383JMJ2TQJBS3M1Y) —
+3 winners / 63 losers, avgBarsWinning 1251.7 bars vs avgBarsLosing 118.7 bars.
+
+**The third pre-registered branch landed, decisively.** PF 0.29987043 is at — well below — E64a's
+0.454, and this is now the WORST short construction on record in this lab, below every one of the
+fourteen-plus prior mirrored or source-faithful attempts. Not a degenerate-count case (66 trades, well
+clear of the ~20/30 floors either way) — the result is a real, read-able measurement, and it reads
+badly.
+
+## WHAT get_trades ADDS: THE PERSISTENCE PROXY INVERTS ON THE SHORT SIDE
+
+Pulled this run's own trade list (`jobId 01M1N81TJV383JMJ2TQJBS3M1Y`, free, no credit spent) per HARD
+LESSON 11 (measure a mechanism, don't declare it).
+
+- **Trade count nearly DOUBLED versus E64a's raw-6h short (66 vs 43)**, the opposite of what the long
+  side showed. On the long leg, tightening from the source's raw 2-consecutive-6h-candle rule to the
+  proxy's persistence requirement CUT trades (E64b's 28 -> e58a's 36 is actually a rise, but e58a is
+  the more selective build by construction — see note below) and lifted PF. On the short leg, the same
+  swap (raw 6h count -> persistence proxy) nearly doubled the trade count and roughly HALVED the PF.
+  **`redPrev>=4` out of a `cntPrev>=5` window is evidently a LOOSER bar on red persistence than "2
+  fully consecutive red 6h candles"** — a 6h block can rack up 4 red 1h candles inside it without ever
+  producing two whole clean red-to-red 6h blocks in a row, so the proxy admits materially more marginal
+  bear regimes on the short side than the raw rule did.
+- **Win rate nearly halved too (4.55% vs E64a's 6.98%, 3W/63L)** — confirms this is not merely "more of
+  the same trades," it is a worse-quality admitted set, consistent with the looser-gate reading above.
+- **`effectiveTradeRange.firstTradeEntryTs` is `1765955400000`** — matching neither e58a's own first
+  long entry (`1766151300000`, from E65's `get_trades` pull) nor a degenerate/collapsed count. This is
+  a genuinely distinct trade population from the first entry onward, exactly as OCCUPANCY (LESSONS
+  24/28/29) predicted in advance.
+- **avgBarsLosing 118.7 vs avgBarsWinning 1251.7** — losses hit the $1,000 shield fast and reliably (63
+  of 66 trades); the 3 winners are large multi-day reversal trades the geometry stumbles into (e.g.
+  trade 46: entry $71,187 -> exit $69,187, +$239, 358 bars) rather than trades the direction/location
+  gates select for. That asymmetry is a symptom of a geometry that is not discriminating real bear
+  continuation from noise, not a sizing or occupancy artifact.
+
+**The redundancy branch did NOT fire** — trades did not collapse toward zero, so `h1Bear` is not
+implicated as a redundant term by this run; the registered-in-advance fallback was not needed.
+
+## WHAT THIS ESTABLISHES
+
+- **The proxy-vs-raw-6h direction choice does NOT generalize symmetrically across legs.** It helped
+  the long (E64b's 0.959 -> e58a's 1.240) and made the short WORSE than the raw rule already had
+  (E64a's 0.454 -> E66's 0.300). A fix that improves one leg of a mirrored construction is not evidence
+  it will improve, or even hold steady on, the other leg — read every future proxy/rule swap on BOTH
+  legs before trusting it on one (this generalizes HARD LESSON 16's "read both sides" instruction from
+  parameter sweeps to rule-family swaps).
+- **The short leg's defect is now more clearly located in the MECHANICS, not the direction-rule
+  flavor feeding it.** Both the raw 6h count (E64a, 0.454) and the persistence proxy (E66, 0.300) fail
+  under the identical `brokeAbove` + rejection-crossunder geometry. Two different direction sources,
+  same geometry, same failure mode (near-zero win rate, most losses hitting the shield in well under
+  200 bars) — the geometry itself, or the `redPrev` persistence count specifically measured on RED
+  bars (as opposed to green), is the next thing to question, not another direction-rule variant.
+- **Fourteenth-plus mirrored/source-faithful short construction to fail in this project.** Per HARD
+  LESSON 31 this is evidence about constructions tried, not evidence the short side cannot exist. e58a's
+  proxy long (PF 1.240, unchanged, still the lab's best confirmed-reproducible number) remains the
+  reference build regardless of this leg's outcome.
+
+## WHAT THIS DOES NOT DO
+
+- **REJECTED under RATCHET v2 clause 1** (PF must improve to be kept, against either e58a or E64a):
+  0.29987043 clears neither bar. Not promoted to champion or candidate.
+- **Does not touch `brokeBelow`, `timeGate`, or `inMiddle`** on the long side, or re-open the
+  shieldUsd/maxBars axis (closed per HARD LESSON 29/E61/E62).
+- **Does not conclude the proxy is wrong in general** — it is unchanged and unchallenged on the long
+  leg (e58a, PF 1.240 stands). This result is specific to the short leg's mechanics.
+- **Only one backtest spent this cycle** (624 credits at start, budget allowed up to two). A second
+  credit was not spent on a reproduction check or a redundancy-drop variant: the result is decisively
+  below both comparison points and not near a threshold where a cold re-run would change the reading,
+  and the registered redundancy branch (drop `h1Bear`) did not trigger per `get_trades` above.
+
+## QUEUE
+
+1. **The short leg's geometry, not its direction source, is now the open question.** A future cycle
+   should question `brokeAbove` + rejection-crossunder itself on the short side — e.g. whether the 15m
+   high sweep is finding real exhaustion tops or just noise in a chopping/declining market, mirroring
+   E29's finding that level-based shorts were the better half of this project's short record. Not
+   attempted this cycle (would be a genuinely new construction, not a rerun, and budget was reserved
+   per the mandate's caution against over-spending on a single decisive pair).
+2. **Binding-test the remaining LONG-side entry terms one at a time on e58a**, per the mandate's
+   standing list: `brokeBelow`, `h1Bull`, `timeGate`, `inMiddle`. velK is closed (E65a/b). Not
+   attempted this cycle — this cycle's budget went to the short-leg queue item instead.
+3. **Position sizing / risk fraction** — still closed per HARD LESSON 29, unchanged.
+4. **If more 1m history ever becomes available**, the $3,000/$4,000 shield question is still the first
+   exit-side item to re-run on a longer window. Last confirmed clamped to 2025-12-16 -> 2026-05-03.

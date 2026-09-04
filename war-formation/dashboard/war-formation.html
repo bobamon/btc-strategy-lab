@@ -708,9 +708,38 @@ const DATA = [
       "verifiedAt": "2026-09-03T00:00:00Z"
     },
     "notes": "REJECTED under RATCHET v2 clause 1: PF 1.0762016 < parent e58a's 1.24015239, though better than E65a. DD 11.63% vs e58a's 9.83% (worse); trades 36->31 (not degenerate, clears RATCHET v2's own 30-trade floor). effectiveTradeRange.firstTradeEntryTs 1766151300000 matches e58a's own trade 1 (jobId 01M1K3J6GDK0Z51MFX60ECM75F) exactly -- the stricter gate did not exclude e58a's first entry, only later ones. Together with E65a, velK=0.8 (e58a) is now confirmed the peak of three non-degenerate points (48/36/31 trades, PF 0.873/1.240/1.076) -- a real local optimum on the ENTRY side, the mirror of maxBars=12960 on the exit side (E56/E60). Neither side is a curve-fit spike (HARD LESSON 16): both are meaningfully worse but not a cliff collapse."
+  },
+  {
+    "id": "wf-e66-proxy-direction-short",
+    "name": "WF E66: short leg on e58a's PROXY direction rule (4+ red 1h in prior 6h), not raw 6h colour",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "short",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/ORACLE-RULES.md",
+    "description": "Queue item 1 (STRATEGY-LEDGER.md HARD LESSON 32 item 2; EXPERIMENT-LOG.md's renumbered E66). E64 showed the source's own literal '2+ consecutive red/green 6h candle' direction rule (E64b long control PF 0.95884068) underperforms e58a's own 4-green-1h-in-prior-6h-block PERSISTENCE proxy (PF 1.24015239), and that E64a's mirrored short on the raw-6h rule scored only PF 0.45442725 (43 trades). This build isolates the short leg against the direction rule that demonstrably works instead of the one just shown to underperform: bearRegime = 4+ RED 1h candles inside the PRIOR completed 6h block (redPrev>=4, cntPrev>=5), the exact structural mirror of e58a's bullRegime/greenBull. Mechanics otherwise identical to E64a's short (brokeAbove: 15m sweep to a higher high, then a rejection crossunder back below it -- the same 'let the enemy finish' location solve the long gets for free, per ORACLE-RULES L175-177 / HARD LESSON 31 scoping of LESSON 6). shieldUsd=$1000, maxBars=6480, rr=2.0 held exactly at e58a's values (HARD LESSON 28/29: shield and hold cap are coupled, named in advance). Saved to pine/e66-proxy-direction-short.pine before running.",
+    "metrics": {
+      "netProfitPct": -14.54482546,
+      "profitFactor": 0.29987043,
+      "maxDrawdownPct": 14.5611245,
+      "totalTrades": 66,
+      "winRatePct": 4.54545455,
+      "avgTradePct": -0.22037614
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1N81TJVA4YN2ZAG8ZHXNKDP",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1N81TJV383JMJ2TQJBS3M1Y",
+      "verifiedAt": "2026-09-04T00:00:00Z"
+    },
+    "notes": "REJECTED under RATCHET v2 clause 1, and decisively -- this is the WORST short construction result on record in this lab, below E64a's raw-6h-colour short (0.454) and below every prior mirrored short (E9/E9b/E13/E25-29). The pre-registered branch that landed: 'PF at or below E64a's 0.454 -> the proxy fix that helped the long does nothing for the short; the location solve itself needs revisiting, not the direction source feeding it.' Trade count nearly doubled versus E64a (66 vs 43) and win rate nearly halved (4.55% vs 6.98%, 3W/63L) -- the PERSISTENCE proxy that tightened the long's regime (cutting E64b's 28 down toward e58a's disciplined 36 via a stricter bar-by-bar count) does the OPPOSITE on the short side: redPrev>=4 out of a >=5-block window is evidently a much LOOSER bar than '2 consecutive fully-red 6h candles', admitting far more marginal bear regimes rather than fewer. get_trades (jobId 01M1N81TJV383JMJ2TQJBS3M1Y) confirms a genuinely different trade population from every sibling: first entry 1765955400000, matching neither e58a's long (1766151300000) nor a degenerate count -- the occupancy point named in advance (LESSON 24/28) held. avgBarsLosing 118.7 vs avgBarsWinning 1251.7: losses hit the shield fast and consistently (63 of 66), the 3 wins are large reversals the geometry stumbles into rather than selects for. THE FINDING: on this construction and window, the proxy-vs-raw-6h direction choice does NOT generalize symmetrically across legs -- it helped the long (0.959->1.240) and hurt the short even more than the raw rule already had (0.454->0.300). The short leg's defect is the MECHANICS (brokeAbove+rejection sweep, or the redPrev persistence count itself measured on RED bars specifically), not which direction-rule flavor feeds it. Fourteenth-plus mirrored/source-faithful short construction to fail in this project; per HARD LESSON 31 this remains evidence about constructions tried, not evidence the short side cannot exist -- e58a's proxy long (PF 1.240, unchanged) remains the reference build either way."
   }
 ];
-const BUILT = "2026-09-03 12:47";
+const BUILT = "2026-09-04 03:42";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
