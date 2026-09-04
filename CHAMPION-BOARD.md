@@ -3399,3 +3399,79 @@ data**, and that is now established well enough to stop rediscovering it.
 2. **The out-of-sample test still ranks first and still cannot be run** under BTCUSDT-only.
 3. **Attack 46 stands as-is**: both halves clear, cold-reproduced, with the declared selection caveat
    on 46a and the ten-month losing stretch inside 46b.
+
+
+---
+
+# ATTACK 48 - ROUND-NUMBER MAGNET. FALSIFIED CLEANLY ON THE NEVER-TUNED HALF.
+
+The stored prompt asked for Attack 37's filter stack again. **The docs override it a second time**:
+Attack 41 closed Attack 37, Attack 43 closed the whole sweep-reversal family, and Attack 47 -- the
+first filter tried on the current champion, Attack 46 -- died on the identical ~77% sample wall HARD
+LESSON 49 already named across two labs. The board's own queue says **stop adding filters on this
+data**, so this cycle used the mandate's own fallback: propose one genuinely new mechanism.
+
+**CLAIM:** a decisive close through a major psychological round-number price level tends to
+*continue* toward the next round number rather than reverting, because resting stop and limit orders
+cluster at round numbers and clearing that cluster removes nearby resistance to further movement.
+Entry fires when the close moves into a higher round-number band than the previous bar's close, where
+the band width **rescales with BTC's price** (`10^(floor(log10(close))-1)` -- roughly $1,000 bands in
+the $10k-$99k range this window starts in, $10,000 bands once price clears $100k), so the same relative
+claim is tested at both ends of a market that ran from ~$16k to ~$125k+ across the two halves. Stop is
+the crossing bar's own low; target is the next round number up -- a fixed level, not an `rr` multiple,
+applying the reachable-target principle HARD LESSON 41/47 already validated to a genuinely new level
+source. Long only, bare, no filter stack.
+
+**Genuinely distinct** from every family on this board: not the VWAP mean (retired), not a rolling
+N-bar extreme (Attack 33), not a calendar anchor (Attack 34/35), not a volatility-coil state (Attack
+36), not a failed-break reversal off a swing low (Attack 37-43), and not a bounce off a structural swing
+level (Attack 44-47) -- the level here is a fixed psychological grid, independent of any recent swing,
+and the entry trades *with* a level break rather than off a reversal or a support tap.
+
+| | **Attack 48a** (never-tuned half) |
+|---|---|
+| Profit factor | **0.72388089** |
+| Max drawdown | **71.05295376%** |
+| Trades | **518** |
+| Win rate | 37.25868726% |
+| Achieved win/loss ratio | 1.21897041 |
+| Avg loser | -$76.38 |
+| Avg winner | $93.10 |
+| Commission paid | $2,700.12 |
+| avgBarsWinning (cap 192) | 29.40 |
+
+## KILL RULE APPLIED. H2 NOT RUN, SECOND CREDIT NOT SPENT.
+
+**Not a close call.** PF 0.72 is well under 1.0. Break-even for a 1.219 win/loss ratio is 45.1%; the
+mechanism ran 37.26%, **7.8 percentage points short**. `avgBarsWinning` 29.4 against the 192-bar cap
+rules out truncation (HARD LESSON 38 does not apply here) -- winners that happen resolve quickly, the
+target just isn't reached often enough relative to how often the stop is hit first. **The claim is
+falsified on this data**, not merely underpowered.
+
+## A SECOND, INDEPENDENT DISQUALIFIER: FREQUENCY
+
+**518 trades in the never-tuned half alone** is above the lab's settled 60-350 workable band -- more
+frequent than Attack 33's 757-trade *full-sample* pace, scaled to one half. The adaptive round-number
+grid fires on ordinary chop about as readily as on genuine momentum, which is consistent with the low
+win rate: this is not a rare, selective signal, it is a common one, and $2,700.12 of commission against
+a $6,854.01 net loss shows the same cost exposure that killed Attack 33.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Avg loser (-$76.38) is not large in isolation -- this is not category 1 (concentrated, sizing). But 325
+losers at a 37.26% win rate compound into a 71% drawdown: this is **category 2, bleed on a negative
+edge**, the same shape as Attack 36, not fixable by risk changes. Recorded per the board's standing
+instruction to report avg loser, win rate and max drawdown together on every run.
+
+## QUEUE
+1. **The round-number magnet mechanism is DISCARDED.** Do not tune it, do not add a direction filter,
+   do not narrow the band -- the failure is a negative edge at high frequency, not a thin-but-positive
+   edge (Attack 37's category 3), so a filter stack is not warranted by the mandate's own logic.
+2. **Attack 46 remains the sole advancing candidate on the board**, both halves clear, cold-reproduced,
+   filters exhausted per HARD LESSON 49.
+3. **The out-of-sample test still ranks first and still cannot be run** under BTCUSDT-only -- unchanged
+   from Attack 47's queue, restated because this cycle did not touch it.
+4. **Next new-mechanism attempt should design the entry from a genuine directional filter**, not a bare
+   level-crossing: round numbers may still have value as *targets* (per HARD LESSON 41/47's validated
+   principle) even though they failed as a stand-alone *entry* trigger here. That is a narrower, testable
+   idea for a future cycle, not a rescue of this one.

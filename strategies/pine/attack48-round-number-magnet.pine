@@ -1,0 +1,128 @@
+//@version=6
+// BTC ATTACK 48 — ROUND-NUMBER MAGNET (MOMENTUM CONTINUATION THROUGH A PSYCHOLOGICAL LEVEL, BARE).
+// Continues numbering after Attack 47 (rejected on sample -- 24 trades, direction only). Queue item 1
+// (Attack 37's filter stack) is EXHAUSTED per the docs: Attack 41 closed Attack 37, Attack 43 closed
+// the whole sweep-reversal family, and Attack 47 -- the first filter attempted on the CURRENT champion,
+// Attack 46 -- died on the identical ~77% sample wall HARD LESSON 49 already named across two labs.
+// The board's own queue says "stop adding filters on this data" and ranks an out-of-sample test above
+// everything else, but that test needs another symbol or another data source and this lab is
+// BTCUSDT-only -- a constraint to report, not engineer around. So this cycle proposes ONE genuinely
+// new mechanism, per the mandate's own fallback.
+//
+// CLAIM: a decisive close through a major psychological round-number price level ($1,000-scale bands,
+// rescaled by an order of magnitude as BTC's price rises) tends to CONTINUE toward the next round
+// number rather than reverting immediately, because resting stop and limit orders cluster at round
+// numbers (a documented microstructure effect in FX and crypto), and clearing that cluster removes
+// nearby resistance to further movement in the same direction.
+//
+// GENUINELY DISTINCT from every mechanism already tried:
+//   - VWAP pullback-continuation family (RETIRED) -- an intraday MEAN, not a round-number grid.
+//   - Attack 33 channel breakout -- a rolling N-bar extreme, not a fixed psychological price grid.
+//   - Attack 34/35 weekly break-and-hold -- a CALENDAR anchor (Monday's range), not price-derived at all.
+//   - Attack 36 narrow-range day expansion -- a VOLATILITY-STATE gate (a coil), no level of any kind.
+//   - Attack 37/38/39/40/41/43 liquidity sweep reversal -- a FAILED break of a swing low that reverses;
+//     this trades WITH a level break that continues. Opposite claim, opposite direction of trade logic.
+//   - Attack 44/45/46/47 level-target break-and-hold -- targets a STRUCTURAL swing level (the prior
+//     20-bar high/low, a place price recently traded) reached from a support TAP. Attack 48's levels are
+//     a fixed PSYCHOLOGICAL grid independent of any recent swing, and the entry is a BREAKOUT through
+//     the level, not a bounce off it. The reachability logic is validated (HARD LESSON 41/47: target a
+//     level, not an rr multiple) but the level itself and the entry trigger are both new.
+//   - The round-number idea has never appeared in this lab in any form.
+//
+// WHY THE STEP SIZE IS ADAPTIVE, NOT A FIXED $1,000: the backtest window spans BTC ~$16k (2022) to
+// ~$125k+ (2025-26). A fixed $1,000 grid is a ~6% band at $16k and a ~0.8% band at $125k -- not the
+// same claim at both ends, and it would silently favour whichever regime the fixed step happened to
+// suit. step = 10^(floor(log10(close)) - 1) rescales the grid with the leading digit of the price, so
+// the band is consistently 1/10th of an order of magnitude (~$1,000 bands in the $10k-$99k range,
+// ~$10,000 bands above $100k) -- the same relative granularity of "round number" a trader would actually
+// watch at either price scale. This is a design decision made BEFORE the run, not tuned after seeing it.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3)   -- enforced by EXCLUSION via rBig, never clamped. The stop stays the crossing
+//                            bar's real low regardless of whether it clears the floor; if it doesn't,
+//                            the trade is skipped, not resized.
+//   Stop beyond STRUCTURE (LESSON 5) -- slPx = the crossing bar's own low, the actual traded extreme of
+//                            the bar that broke the level. Not an ATR, not a percentage, not the level
+//                            itself.
+//   Each leg separately (LESSON 6) -- LONG ONLY. Shorts at 100% equity are untestable in this lab
+//                            (HARD LESSON 34/35/50: the engine sheds margin slivers that corrupt
+//                            trade-level stats on the loss side). A short mirror (crossing DOWN through
+//                            a round number, continuation lower) is a separate, un-coded construction.
+//   BINDING (E17)          -- crossedUp requires the bar's close to land in a HIGHER round-number band
+//                            than the previous bar's close. Ordinary bars do not change bands; the
+//                            binding evidence is the trade count, reported before any ratio is read.
+//   REDUNDANCY (E14)       -- two independent terms: crossedUp is a DIRECTIONAL/structural condition
+//                            (which band the close falls in, relative to the prior bar), rBig is a
+//                            MAGNITUDE condition (is the resulting stop distance big enough). Neither
+//                            implies the other -- a level crossing can happen on a tiny-range bar (fails
+//                            rBig) or a huge-range bar (passes it easily).
+//   LATCH IN SEQUENCE (LESSON 8) -- levelPrev is derived from close[1], levelCur from the current bar's
+//                            close; the comparison spans two bars exactly like Attack 37's swingLow[1]
+//                            and Attack 44's sup[1]/res[1], a pattern already proven not to zero out in
+//                            this engine. Setup (below the band) and trigger (closed into it) cannot
+//                            share the bar that established the reference level.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17):
+//   * PRE-2024 HALF BELOW 1.0 -> DISCARD outright, per the kill rule. No filters, no rescue, H2 not run.
+//   * BOTH HALVES >= 1.0 AND ratioAvgWinLoss well above 1 with avgBarsWinning a small fraction of
+//     maxBars -> the round-number magnet is real and resolves quickly, matching the reachable-target
+//     principle that already worked for Attack 44-46 (HARD LESSON 41/47), applied to a genuinely new
+//     level source. This ADVANCES as the lab's newest discovery-track candidate.
+//   * BOTH HALVES >= 1.0 BUT avgBarsWinning near the 192-bar cap -> the target is being reached only by
+//     truncation (HARD LESSON 38/39), not because the magnet claim is true; report it as such.
+//   * PROFIT FACTOR CLEARS 1.0 BUT AVG LOSER IS LARGE RELATIVE TO EQUITY -> drawdown category 1
+//     (concentrated, a sizing problem); AVG LOSER SMALL BUT WIN RATE LOW AND DRAWDOWN STILL DEEP ->
+//     category 2 or 3 per the board's own taxonomy -- report avg loser, win rate and max drawdown
+//     together regardless of which category applies.
+//   * FEWER THAN ~30 TRADES ON EITHER HALF -> the ratio is a DIRECTION, not a result (LESSON 12).
+//   * TRADE COUNT FAR OUTSIDE THE ~60-350 WORKABLE BAND (Attack 33/34/37) -> report against that band
+//     for context; a step this coarse (adaptive $1,000-$10,000 bands) may fire far less often than the
+//     swing-based families, and that is a finding, not a failure by itself.
+//   * REPORT GROSS, COMMISSION AND ACHIEVED WIN/LOSS RATIO ALONGSIDE NET -- required since LESSONS 36/39.
+strategy("BTC Attack48 round-number magnet", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+minRpct = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars = input.int(192,    "Max bars in trade -- 2 days on 15m")
+
+step      = math.pow(10, math.floor(math.log(close) / math.log(10)) - 1)
+levelPrev = math.floor(close[1] / step) * step
+levelCur  = math.floor(close    / step) * step
+crossedUp = levelCur > levelPrev
+
+target = levelCur + step
+slPx0  = low
+rLong  = close - slPx0
+minR   = close * minRpct / 100
+rBig   = rLong >= minR
+
+goLong = crossedUp and rBig and rLong > 0 and target > close
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := slPx0
+    tpPx   := target
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(levelCur, title="RoundLevel")
+plot(target,   title="TargetLevel")
