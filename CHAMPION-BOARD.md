@@ -4026,3 +4026,73 @@ sixth clock-based variant from scratch.
    edge at an adequate sample (50, 51/52 as one family, 53) and one outright on sample size (54). The
    search should weight frequency estimation at least as heavily as the mechanism claim itself before
    the next build, given how large this cycle's miss was.
+
+---
+
+# ATTACK 55 - FUNDING-SETTLEMENT REVERSION, RANGE FILTER DROPPED. ATTACK 54's OWN QUEUE ITEM 1, EXECUTED. STILL COLLAPSES ON SAMPLE, AND THE DIAGNOSIS WAS WRONG.
+
+The stored prompt asked for Attack 37's filter stack a NINTH time, describing a board state (Attack 37,
+322/196 trades, "earned a filter stack, queued not built") now 18 attacks stale. **The docs override it
+again.** Attack 41 closed Attack 37, Attack 43 closed the sweep-reversal family, Attack 47 died on the
+~77% sample wall against the champion (Attack 46), and the board's own queue after Attacks 47-53 says
+stop filtering Attack 46 and propose a genuinely new mechanism. This cycle instead executed **Attack
+54's own queue item 1**, which explicitly outranks a sixth clock variant or a fresh mechanism: "if the
+funding-clock family is revisited, drop the elevated-range requirement first and measure frequency
+alone."
+
+**THE ONE CHANGE FROM ATTACK 54:** `rangeBig` (true range >= 1.5x its trailing 20-bar average) removed
+entirely. `isSettlement` and `isBigDown` unchanged, bit-for-bit. Stop, target (close 4 bars/1h before
+the settlement bar), R floor 0.8%, maxBars 192, sizing and commission all identical. Pine:
+`strategies/pine/attack55-funding-settlement-no-range.pine`.
+
+| | **Attack 54** (3 conditions) | **Attack 55a** (2 conditions, never-tuned half) |
+|---|---|---|
+| Profit factor | 0 | **0.08756984** |
+| Max drawdown | 9.80203526% | 9.80391639% |
+| Trades | 7 | **8** |
+| Win rate | 0% | 12.5% |
+| Avg loser | -$120.61 | -$121.57 |
+
+## KILL RULE APPLIED. H2 NOT RUN, SECOND CREDIT NOT SPENT.
+
+PF 0.088 is unambiguously below 1.0, and 8 trades sits nowhere near the 30-trade RATCHET v2 floor --
+two independent reasons to stop, same as Attack 54.
+
+## THE REAL FINDING: THE DIAGNOSIS THAT MOTIVATED THIS RUN WAS WRONG
+
+Attack 54 blamed its own 38x frequency miss on the elevated-range term, reasoning that requiring 1.5x
+on top of the exact-minute clock condition "stacks two nearly-orthogonal rare events." **Removing that
+term changed the trade count from 7 to 8.** One extra trade. If the range filter had been the binding
+constraint, dropping it should have released most of the ~1,300 candidate bars the naive
+clock-frequency x down-bar-fraction estimate implied. It did not. **The range term was never the
+problem -- something in the settlement-clock condition itself, or in the down-close split specifically
+at those timestamps, is far rarer in the real data than either estimate assumed.** This is now the
+largest frequency miss on this board by a wide margin: ~1,300 estimated against 8 actual, roughly 165x,
+dwarfing Attack 54's own 38x and Attack 003's original 4-10x (HARD LESSON 4).
+
+## WHAT THIS SETTLES
+
+**The funding-clock family is now 0-for-2**, both variants landing at single-digit trade counts on a
+never-tuned half with 85,655 bars available -- not a sample the lab's workable-band language (60-350)
+comes anywhere near. Removing a filter term did not fix it, which rules out the specific diagnosis
+Attack 54 offered. **Not tuning further per the mandate's kill rule** -- a third clock variant would
+need to first isolate whether `isSettlement` or `isBigDown` is the actual binding term (a counter
+build, HARD LESSON 8/10, gate-as-entry with a one-bar exit), which was not done this cycle: H1 already
+answered the pre-registered kill-rule outcome cleanly, and the credit rule caps this cycle at the two
+runs already available (one spent, kill rule stops the second).
+
+## QUEUE
+
+1. **The funding-clock family is closed as currently understood.** Do not try a third clock variant
+   without first running a counter build to isolate `isSettlement` alone (expected ~1-in-32 of bars,
+   ~2,677 on H1) from `isBigDown` alone at those specific bars -- the 165x miss says one of those two
+   assumptions, not their conjunction, is the real error.
+2. **Attack 46 remains the sole both-halves-positive candidate on the board**, both halves clear,
+   cold-reproduced, filters exhausted per HARD LESSON 49.
+3. **The out-of-sample test for Attack 46 still ranks first and still cannot be run** under
+   BTCUSDT-only -- unchanged, restated because this cycle did not touch it.
+4. **Six straight new-mechanism-or-refinement proposals (50-55) have now failed.** The next cycle
+   should either run the counter-build diagnostic above before another funding-clock attempt, or open a
+   genuinely fresh mechanism family per the mandate's fallback clause -- weighting frequency measurement
+   at least as heavily as the mechanism claim, as Attack 54's queue already said and this cycle
+   confirms was necessary.

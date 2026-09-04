@@ -1,0 +1,134 @@
+//@version=6
+// BTC ATTACK 55 - FUNDING-SETTLEMENT SQUEEZE REVERSION, RANGE REQUIREMENT DROPPED. LONG LEG.
+//
+// THE STORED PROMPT still asks for Attack 37's filter stack (a NINTH time now), describing a board
+// state (Attack 37, 322/196 trades, "earned a filter stack, queued not built") that is 18 attacks
+// stale. THE DOCS OVERRIDE IT, again: Attack 41 closed Attack 37 as a development target, Attack 43
+// closed the whole sweep-reversal FAMILY (37-43), Attack 47 -- the one filter tried on the current
+// champion, Attack 46 -- died on the ~77% sample wall (HARD LESSON 45/49). This cycle instead executes
+// Attack 54's own queue item 1, which explicitly outranks inventing a sixth clock-based variant or a
+// wholly new mechanism: "if the funding-clock family is revisited, drop the elevated-range requirement
+// first and measure frequency alone before adding any second condition back."
+//
+// ==================== WHAT CHANGED FROM ATTACK 54, AND ONLY THIS ====================
+// Attack 54 required THREE independent same-bar conditions: settlement clock, elevated range
+// (ta.tr >= 1.5x its trailing 20-bar average), and a down close. It got 7 trades on H1 -- ~38x rarer
+// than its own pre-registered ~270 estimate, the largest frequency miss yet recorded on this board.
+// Attack 54's own diagnosis: "whichever pairwise correlation was assumed independent was not,
+// most plausibly because settlement-timestamp bars do not carry meaningfully different range statistics
+// than any other bar once the trailing-average normalisation is applied, so requiring 1.5x on top of
+// the exact-minute clock condition stacks two nearly-orthogonal rare events." This cycle tests that
+// diagnosis directly: `rangeBig` is REMOVED. `isSettlement` and `isBigDown` are UNCHANGED, bit-for-bit
+// identical to Attack 54 (`hourUTC`/`minuteUTC` arithmetic, `isBigDown = close < open`). Stop, target,
+// R floor, maxBars, sizing, commission -- all identical to Attack 54. This is a single-term removal on
+// the existing base, not a new mechanism.
+//
+// ==================== THE CLAIM, NARROWED ====================
+// Every 15m bar whose OPEN lands exactly on a funding-settlement timestamp (00:00/08:00/16:00 UTC) and
+// which closes below its own open is candidate forced-flow selling synchronised to the settlement
+// clock, independent of how large that bar's range is relative to its own recent history. If Attack
+// 54's diagnosis is right, this measures the settlement-clock effect at its full, un-compounded
+// frequency; if the clock itself carries no directional edge once the range filter is removed, PF
+// should sit near the funding-agnostic baseline (no better than an unconditional down-bar fade), which
+// this run will show directly rather than assume.
+//
+// ==================== AUDIT, ONE LINE PER LEG (LONG ONLY -- LESSON 6) ====================
+//   R >= 0.8% (LESSON 3) -- rFloorOk, close-to-low on the settlement bar, unchanged from Attack 54,
+//        enforced by EXCLUSION (a shallow bar is skipped, never widened).
+//   Stop beyond STRUCTURE (LESSON 5) -- slPx = the settlement bar's own low, unchanged from Attack 54.
+//   Each leg separately (LESSON 6) -- LONG ONLY this cycle, identical scope declaration as Attack 54:
+//        the short mirror (fading an oversized UP settlement bar) is a deliberate next step, not run
+//        here, and funding mechanics remain directionally symmetric by construction (HARD LESSON 48
+//        exempts this family, unlike price-structure support/resistance).
+//   BINDING (E17) -- now TWO independent conditions on one bar (clock, down close) instead of three;
+//        trade count is read before any ratio is quoted (LESSON 12), and this run's own point is to
+//        measure how much removing the third term changes that count.
+//   REDUNDANCY (E14) -- rFloorOk constrains STOP distance; rrOk only checks tpPx sits above close
+//        (existence, not a size threshold). Non-overlapping, unchanged from Attack 54.
+//   LATCH IN SEQUENCE (LESSON 8) -- N/A BY DESIGN, stated explicitly: both trigger conditions (clock,
+//        direction) evaluate on ONE bar, no arm/trigger split to sequence.
+//   SL and TP FIXED AT ENTRY -- slPx/tpPx captured once at entry, from the settlement bar's own low and
+//        the preBars-back close (preBars=4, unchanged). No trailing, no averaging down, no martingale.
+//   CASCADE (HARD LESSON 35/50) -- 100% equity, fixed stop/target; expect cascadeRatio 1 if this
+//        advances far enough to need get_trades verification before RATCHET v2 clause 3.
+//   WEEKENDS (structural note 4) -- funding settles identically on weekends; no special-casing.
+//
+// ==================== FREQUENCY ESTIMATE, A HYPOTHESIS TO BE SCORED (HARD LESSON 4) ====================
+// Settlement bars are 1-in-32 (~5,115 of ~163,700 15m bars over the full window). Naive independence
+// with a ~50% down-bar fraction gives ~2,560 candidate bars full-sample, split roughly by each half's
+// bar count (~85,655 H1 / ~78,000 H2, Attack 43's own count) to something near 1,340 H1 / 1,220 H2
+// before the R-floor trims further. THIS ESTIMATE IS FLAGGED IN ADVANCE AS LIKELY ABOVE THE LAB'S OWN
+// SETTLED 60-350-PER-HALF WORKABLE BAND (Attack 33 died at 757 trades on cost) -- if the actual count
+// lands far above 350, that is itself the finding this run exists to produce (HARD LESSON 4), and a
+// PF that clears 1.0 gross but fails on commission drag would need the same cost-screen treatment
+// Attack 33 got, not a filter-stack rescue.
+//
+// ==================== OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17) ====================
+//   * PRE-2024 HALF (H1, never-tuned, 2022-01-01 -> 2024-06-08) BELOW 1.0 -> KILL RULE. Discard, do NOT
+//     run H2. Removing the range filter did not rescue the clock claim; the funding-clock family is
+//     0-for-2 (Attack 54 too thin to classify, Attack 55 measured and negative).
+//   * H1 >= 1.0 AND TRADE COUNT INSIDE OR NEAR THE 60-350 BAND -> run H2 as the second credit; a real
+//     third both-halves-positive family candidate if H2 also clears 1.0.
+//   * H1 >= 1.0 BUT TRADE COUNT FAR ABOVE 350 -> a cost problem in Attack 33's shape is likely; run H2
+//     anyway (credits allow the full pair) but flag the cost screen as owed before any further work,
+//     do not call it a candidate on PF alone.
+//   * TRADE COUNT NEAR THE ~1,300 ESTIMATE -> confirms Attack 54's diagnosis that the range filter, not
+//     the clock condition, was the source of the 38x miss. TRADE COUNT STILL FAR BELOW IT -> the clock
+//     condition itself binds harder than assumed, a distinct and equally reportable finding.
+//   * A MAJORITY OF HOLDS AT maxBars 192 -> HARD LESSON 38 truncation, reported before any conclusion
+//     is drawn from the achieved win/loss ratio.
+//   REPORT gross, commission, achieved ratio, avg loser, win rate and max drawdown together, per the
+//   board's standing instruction since Attack 37 named the three drawdown categories.
+
+strategy("BTC Attack55 funding settlement no-range", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+preBars   = input.int(4,     "Bars before the settlement bar used as the target anchor (4 = 1h on 15m)")
+minRpct   = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars   = input.int(192,   "Max bars in trade")
+
+hourUTC   = math.floor(time / 3600000) % 24     // hour() is unimplemented on this engine (Attack 50)
+minuteUTC = math.floor(time / 60000) % 60
+
+isSettlement = (hourUTC % 8 == 0) and (minuteUTC == 0)
+isBigDown = close < open
+
+signal = isSettlement and isBigDown
+
+flat = strategy.position_size == 0
+
+slCand = low
+tpCand = close[preBars]
+
+rLong    = close - slCand
+minR     = close * minRpct / 100
+rFloorOk = rLong >= minR
+rrOk     = not na(tpCand) and tpCand > close
+
+goLong = flat and signal and rFloorOk and rrOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := slCand
+    tpPx   := tpCand
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(slPx, title="StopPx")
+plot(tpPx, title="TargetPx")

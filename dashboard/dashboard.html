@@ -1449,9 +1449,60 @@ const DATA = [
     },
     "verdict": "DISCARDED BY THE KILL RULE, DOUBLY. Profit factor 0 (0 winners of 7 losers) is unambiguously below 1.0 on H1 -- H2 NOT run, second credit not spent. Independently, 7 trades is far below even the 30-trade sample floor, so this would not have been quotable as a result regardless of PF.",
     "notes": "FREQUENCY FINDING (HARD LESSON 4): the pre-registered estimate was ~270 trades on H1 (from a 1-in-32 settlement-clock fact x ~50% down-bar fraction x an assumed ~20% chance of a >=1.5x-average-range bar). Actual: 7 trades across 85,559 bars -- roughly 38x rarer than estimated. The three-way conjunction (exact settlement timestamp AND elevated range AND down close) binds far harder in practice than the independence assumption predicted; whichever pairwise correlation was assumed independent was not. This is a frequency finding in its own right, reported before the PF is read, per the board's standing practice. cascadeRatio 1, maxCascadeDepth 1 (get_trades cascade summary from run_backtest response) -- not a margin artifact, a genuine small-sample outright loss. Avg loser -$120.61, largest loss -$212.48, all 7 losers, avgBarsLosing 19.57 against a 192-bar cap (not truncation-related; these are fast, clean stop-outs). H2 not run per the kill rule; do not tune this mechanism (widening rangeMult would only shrink the count further, tightening it would abandon the 'outsized move' claim entirely)."
+  },
+  {
+    "id": "attack55a-funding-settlement-no-range-h1",
+    "name": "Attack 55a: funding-settlement reversion, range filter dropped -- never-tuned half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack55-funding-settlement-no-range.pine",
+    "description": "Executes Attack 54's own queue item 1 (which the board ranked ahead of inventing a new mechanism): drop the elevated-range requirement from the funding-settlement-clock reversion and measure frequency alone. The stored prompt asked a NINTH time for Attack 37's filter stack, describing a board state 18 attacks stale; the docs override it again. Signal narrowed from three conditions to two -- settlement clock (bar opens exactly at 00:00/08:00/16:00 UTC, via math.floor(time/...) arithmetic since hour()/minute() are unimplemented) AND a down close (close < open) -- with the >=1.5x-trailing-average-range requirement removed entirely. Stop, target (close 4 bars/1h before the settlement bar), R floor 0.8% by exclusion, maxBars 192, sizing and commission all identical to Attack 54; this is a single-term removal on the existing base, not a new mechanism.",
+    "metrics": {
+      "netProfitPct": -7.76443241,
+      "profitFactor": 0.08756984,
+      "maxDrawdownPct": 9.80391639,
+      "totalTrades": 8,
+      "winningTrades": 1,
+      "losingTrades": 7,
+      "winRatePct": 12.5,
+      "avgTradePct": -0.97055405,
+      "avgWinningTrade": 74.518587500002,
+      "avgLosingTrade": -121.565975542857,
+      "ratioAvgWinLoss": 0.61298885,
+      "largestWin": 74.518587500002,
+      "largestLoss": -213.630173649999,
+      "avgBarsInTrade": 17.5,
+      "avgBarsWinning": 3,
+      "avgBarsLosing": 19.57142857,
+      "sharpeRatio": -1.20970942,
+      "sortinoRatio": -0.04359483,
+      "commissionPaid": 77.6968413,
+      "grossProfit": 74.518587500002,
+      "grossLoss": 850.961828799998,
+      "longTrades": 8,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1PCMEX250FDA8DQNQ895Y9A",
+      "strategyId": "01M1PCMFYFSX34BYGR17VW4PEJ",
+      "resultId": "01M1PCMEX2QWY00A70WYHRVXAZ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1PCMEX2QWY00A70WYHRVXAZ",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T00:00:00Z"
+    },
+    "verdict": "DISCARDED BY THE KILL RULE. Profit factor 0.088 on H1 is far below 1.0 -- H2 not run, second credit not spent. Trades stayed at 8, statistically identical to Attack 54's 7 despite removing an entire independent filter term.",
+    "notes": "THE FINDING THIS RUN EXISTS TO PRODUCE (HARD LESSON 4): dropping the range filter changed the trade count from 7 to 8 -- essentially nothing -- which falsifies Attack 54's own diagnosis that the 1.5x-range requirement was the source of its 38x frequency miss. The binding constraint is somewhere in the settlement-clock condition or the down-close split at those specific bars, not in the range term that was removed here. The naive independence estimate for clock+down-close alone was ~1,300 trades; actual is 8, roughly 165x rarer -- the largest frequency miss yet recorded on this board, larger than Attack 54's own 38x miss. This closes the funding-clock family as currently understood: two variants tried (3-condition and 2-condition), both land at single-digit trade counts nowhere near the 30-trade floor, and removing a filter term did not change that. A future attempt would need to diagnose the isSettlement/isBigDown interaction directly (a counter build, HARD LESSON 8/10) before trying a third variant -- not done here, per the 'never more than two runs' credit rule and because H1 already answered the pre-registered kill-rule outcome cleanly. cascadeRatio 1, maxCascadeDepth 1 -- not a margin artifact. Avg loser -$121.57, largest loss -$213.63; sample (8) too thin to categorise by the board's drawdown taxonomy, same as Attack 54."
   }
 ];
-const BUILT = "2026-09-04 13:32";
+const BUILT = "2026-09-04 14:21";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
