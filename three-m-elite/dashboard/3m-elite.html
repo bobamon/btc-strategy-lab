@@ -920,9 +920,53 @@ const DATA = [
     "pineSource": "three-m-elite/pine/3m-elite-v58-first-touch-only.pine",
     "verdict": "COLD REPRODUCTION CONFIRMED, digit-for-digit: PF 1.48439273, DD 8.7051944%, 117 trades (54W/63L, long 117/short 0) -- exact match to the originally recorded v58 run. v58 clears HARD LESSON 25 and is now, like v37 at v52, a champion verified on BOTH gates (split test + cold reproduction).",
     "notes": "Matches the v37-at-v52 methodology exactly: fresh quick_backtest submission (new strategyId 01M1NPK9330DEE97KX7KCCW8MJ, not the original 01M1NFY98ZT5D5CX3X3BPCA78Y) of the byte-identical file on disk, same BTCUSDT/15m/2022-01-01-2026-09-01 window and parity profile (10000 capital, 0.05% commission, 100% equity sizing, margin 100/100, pyramiding 1). Every field checked -- netProfitPct, profitFactor, maxDrawdownPct, totalTrades, winRatePct, avgWinningTrade, avgLosingTrade, avgBarsWinning/Losing, commissionPaid -- reproduced to the identical digit against the recorded 3m-elite-v58-first-touch-only entry. Cascade ratio 1.0 (117 rows = 117 unique entries) also reproduced unchanged. This closes queue item 1 from the v58 entry; v58 stands confirmed as champion-of-record for 3M ELITE."
+  },
+  {
+    "id": "3m-elite-v59-dzage-binding-v58",
+    "name": "3M Elite v59 dzAge>=1 binding test against champion v58",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "description": "v58-cold-reproduction's own queue item 3: the remaining signal terms close > dzBot and dzAge >= 1 had only ever been binding-tested against the retired v37 base (dzTouch<2, at v43/v44), never against the current champion v58 (dzTouch==0). close > dzBot is not re-tested here -- v44 proved it algebraically redundant (rBig = (close-dzBot) >= minR with minRpct fixed at 0.80% already entails close > dzBot as a mathematical consequence, unchanged in v58's identical rBig formula), so a re-run would only re-confirm arithmetic. dzAge >= 1 was an EMPIRICAL finding (v43: load-bearing, PF 1.25172059 -> 0.96009862 when removed from v37), and v58's dzTouch==0 is a materially different, stricter selectivity filter whose interaction with dzAge had not been measured -- this is that one backtest. One change from pine/3m-elite-v58-first-touch-only.pine: dzAge >= 1 removed from longCond (single occurrence, unlike close > dzBot's two).",
+    "metrics": {
+      "netProfitPct": 3.30125764,
+      "profitFactor": 1.02675881,
+      "maxDrawdownPct": 13.50029781,
+      "totalTrades": 177,
+      "winRatePct": 38.98305085,
+      "sharpeRatio": 0.11905966,
+      "avgTradePct": 0.01865117,
+      "avgWinningTrade": 183.582774939131,
+      "avgLosingTrade": -114.232275066667,
+      "avgBarsWinning": 49.5942029,
+      "avgBarsLosing": 31.9537037,
+      "longTrades": 177,
+      "shortTrades": 0,
+      "commissionPaid": 1726.9328364
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1NT2H8Q47ZG0VB2FWBD7WC4",
+      "strategyId": "01M1NT2HGW1VJQ9T1X7B665AEK",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NT2H8QHYFGJPE49MH111A9",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "uniqueEntries": 177,
+      "totalRows": 177,
+      "maxCascadeDepth": 1,
+      "verifiedAt": "2026-09-04T00:00:00Z"
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v59-dzage-binding-v58.pine",
+    "notes": "REJECTED as a candidate change (this was a binding test, not a ratchet proposal -- v58's own dzAge >= 1 stays in, unchanged). Against v58 (PF 1.48439273, DD 8.7051944%, 117 trades): removing dzAge >= 1 gives PF 1.02675881 (-30.8% relative), DD 13.50029781% (+4.79pp), trades 177 (+60, +51.3%), win rate 38.98% (down from 46.15%). Confirms dzAge >= 1 is load-bearing against the current champion, same direction as v43's finding against the retired v37 base (PF 1.25172059 -> 0.96009862, trades 155 -> 199, +44/+28.4%) but a LARGER relative effect here: both the PF drop and the trade-count increase are proportionally bigger under v58's dzTouch==0 than they were under v37's dzTouch<2. Reading: same-4H-candle (dzAge==0) entries are disproportionately concentrated among never-touched (dzTouch==0) zones -- a zone that has just been created and not yet touched is, almost by construction, more likely to also be on its creation bar than an older zone would be -- so the two selectivity terms interact rather than acting independently. This closes v58-cold-reproduction's queue item 3 for dzAge; close > dzBot is closed without a new backtest per the algebraic argument in the Pine header (re-running it would spend a credit to re-confirm arithmetic, not learn anything new)."
   }
 ];
-const BUILT = "2026-09-04 07:55";
+const BUILT = "2026-09-04 08:56";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

@@ -1,0 +1,147 @@
+//@version=6
+// 3M ELITE v59 - BINDING TEST: dzAge >= 1 removed, against the CURRENT champion v58 (dzTouch==0),
+//   not the retired v37 (dzTouch<2) base the original v43 binding test used.
+//   PF/DD/trades recorded in three-m-elite/results/backtests.json (id 3m-elite-v59-dzage-binding-v58)
+//   15m, 2022-01-01 -> 2026-09-01 (4.7 years), BTCUSDT, long-only
+//
+// WHY THIS CYCLE: the scheduled prompt's two named queue items (12H/24H bias gate, cascade signature)
+// are BOTH ALREADY DONE -- bias gate built and run on both legs at v54-v57, closed under RATCHET v2 on
+// both legs (HARD LESSON 45: any conjunction term true on <25% of bars collapses the sample below the
+// split floor, confirmed twice with opposite-provenance gates). Cascade signature resolved for zero
+// credits: the liquidation-unwind tranching of HARD LESSON 34/35, not a re-entry storm. Per "THE DOCS
+// WIN over this prompt" and HARD LESSON 26 (escalate staleness once, then continue the real queue), this
+// cycle takes v58-cold-repro's own queue item 3 instead: "the remaining signal terms close > dzBot and
+// dzAge >= 1 ... carried forward unchanged, now against v58."
+//
+// SPLIT FROM THAT ITEM, STATED BEFORE RUNNING: `close > dzBot` is NOT re-tested this cycle. Its v44
+// finding was an ALGEBRAIC proof, not an empirical one -- rBig = (close - dzBot) >= minR with
+// minR = close * minRpct/100 and minRpct fixed at 0.80 (> 0 for any positive price) means rBig already
+// entails close > dzBot as a strict mathematical consequence of the unchanged rBig formula, independent
+// of dzTouch's threshold. v58 did not touch rBig or minRpct, so the v44 proof carries over unchanged;
+// spending a credit to re-confirm arithmetic would be waste. `dzAge >= 1` is different: v43's finding
+// was EMPIRICAL (PF 1.25172059 -> 0.96009862, trades 155 -> 199, when removed from v37/dzTouch<2), and
+// dzTouch==0 (v58) is a materially different selectivity filter (stricter subset, 155 -> 117 trades on
+// its own) whose interaction with same-bar entries has not been measured. That empirical question is
+// this cycle's one backtest.
+//
+// PRE-RUN AUDIT (LESSON 17, stated before running):
+//   R floor: unchanged, 0.8% of price (LESSON 3).
+//   Stop: unchanged, dzBot, structural (LESSON 5).
+//   Legs: LONG ONLY, matches champion v58 scope (LESSON 6 -- single-leg term test, no mirroring).
+//   BINDING (E17): this run IS the binding test, single change from v58 -- dzAge >= 1 removed from
+//     longCond (one occurrence only, unlike close > dzBot's two).
+//   REDUNDANCY (E14): no other conjunction term measures 4H-candle age since zone creation, so this is
+//     not implied by anything else present.
+//   Latch in sequence (LESSON 8): dzTouch == 0 (the term under test at v58) is untouched here.
+// PREDICTION, stated before running: v43 found dzAge >= 1 load-bearing against v37/dzTouch<2 (PF fell to
+//   0.96, DD rose to 12.51%, trades rose 155 -> 199 -- same-4H-candle entries were uniformly worse).
+//   Against v58's dzTouch==0 base (117 trades), the same mechanism predicts trade count rises above 117
+//   and PF falls -- but the MAGNITUDE is the open question: dzTouch==0 already restricts entry to
+//   never-touched zones, which may or may not overlap with the same-bar-as-creation cases dzAge >= 1
+//   excludes. If PF falls by a similar proportion to v43's finding, the term generalises across
+//   selectivity filters. If the fall is much smaller (or absent), dzTouch==0 was already doing most of
+//   dzAge >= 1's work and the terms are partially redundant with each other -- itself a finding.
+strategy("3M ELITE v59 dzAge binding test vs v58", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rTarget  = input.float(2.0, "Target, x R")
+maxBars  = input.int(96,    "Max bars in trade (entry timeframe)")
+maxAge   = input.int(6,     "Zone freshness cap, 4H candles since creation")
+minRpct  = input.float(0.80,"Min stop distance as % of price (LESSON 3)")
+
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+// ---------- reconstruct the 4H candle from 15m bars: in-progress OHLC ----------
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+// ---------- snapshots of the two most recently COMPLETED 4H candles (open + close; +H/L for the most recent) ----------
+var float pO  = na
+var float pH  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pH  := h4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+// ---------- engulf on the just-completed candle vs the one before it (body containment, no gap) ----------
+bullEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC < ppO and pC > pO and pC > ppO
+bearEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC > ppO and pC < pO and pC < ppO
+
+// ---------- demand zone lifecycle: create on bull engulf, mitigate on a body close inside, age in 4H units ----------
+var float dzTop   = na
+var float dzBot   = na
+var bool  dzLive  = false
+var int   dzTouch = 0
+var int   dzAge   = 0
+var bool  dzTraded = false
+
+if new4h
+    if dzLive and not na(pC) and pC <= dzTop
+        dzTouch := dzTouch + 1
+        if dzTouch >= 2
+            dzLive := false
+    if dzLive
+        dzAge := dzAge + 1
+    if bullEngulf
+        dzTop   := pO
+        dzBot   := pL
+        dzLive  := true
+        dzTouch := 0
+        dzAge   := 0
+        dzTraded := false
+
+// ---------- entry: zone live, NEVER YET TOUCHED (v58's own change), price back at zone, still fresh.
+//            dzAge >= 1 REMOVED from this conjunction -- the term under test. ----------
+minR    = close * minRpct / 100
+rBig    = not na(dzBot) and (close - dzBot) >= minR
+
+longCond = rBig and dzLive and not dzTraded and dzTouch == 0 and low <= dzTop and close > dzBot and dzAge <= maxAge
+
+flat = strategy.position_size == 0
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if flat and longCond and not na(dzBot) and close > dzBot
+    r = close - dzBot
+    if r > 0
+        strategy.entry("L", strategy.long)
+        dzTraded := true
+        slPx   := dzBot
+        tpPx   := close + r * rTarget
+        barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(dzLive ? 1 : 0, title="DemandZoneLive")
+plot(dzAge,          title="DemandZoneAge")

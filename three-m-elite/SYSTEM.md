@@ -3690,3 +3690,82 @@ hand, one backtest spent).
 **CHAMPION OF RECORD: v58** (PF 1.48439273, DD 8.70519440%, 117 trades, long-only, `dzTouch==0`,
 anchored at `pine/3m-elite-v58-first-touch-only.pine`). Split-tested AND cold-reproduced — both gates
 cleared, matching v37's standard at v52.
+
+---
+
+# ██ v59 — `dzAge >= 1` RE-TESTED AGAINST v58: STILL LOAD-BEARING, AND MORE SO THAN AGAINST v37 (2026-09-04)
+
+**THE SCHEDULED PROMPT AGAIN NAMES THE 12H/24H BIAS GATE AS "NOT YET DONE."** It is done, and has
+been since v54–v57: both legs were built and run, closed under RATCHET v2 on both (HARD LESSON 45 —
+two gates of opposite provenance both collapsed the sample below the split-test floor). It is also
+done that the cascade signature (queue item 2) was resolved for zero credits — the liquidation-unwind
+tranching of HARD LESSON 34/35, not a re-entry storm. The champion has also moved twice since this
+prompt's snapshot: v37 → v58. Per "THE DOCS WIN over this prompt" and HARD LESSON 26 (escalate a
+stale prompt once, then continue the real queue without re-flagging an unchanged condition — already
+escalated at v39), this cycle does not repeat the bias-gate or cascade work and does not send a new
+push about the staleness. It takes v58-cold-reproduction's own queue item 3 instead.
+
+## THE ACTUAL TOP QUEUE ITEM, TAKEN
+
+v58-cold-reproduction's queue item 3: "the remaining signal terms `close > dzBot` and `dzAge >= 1` —
+the binding test never yet applied to either — carried forward unchanged, now against v58." Both terms
+*were* binding-tested once already (v43, v44) — but against the retired v37 base (`dzTouch < 2`), never
+against the current champion v58 (`dzTouch == 0`, a materially stricter, different selectivity filter).
+
+**`close > dzBot` is not re-tested this cycle.** v44's finding was an algebraic proof, not an empirical
+one: `rBig = (close - dzBot) >= minR` with `minR = close * minRpct/100` and `minRpct` fixed at 0.80%
+already entails `close > dzBot` as a strict mathematical consequence for any positive price — not an
+empirical fact about this data. v58 did not change `rBig` or `minRpct`, so the proof carries over
+unchanged and re-running it would spend a credit to re-confirm arithmetic.
+
+**`dzAge >= 1` is different.** v43's finding was empirical (PF 1.25172059 → 0.96009862, trades 155 →
+199, when removed from v37). That is a claim about this data, and v58's `dzTouch==0` restricts entry
+to a different, stricter population than v37's `dzTouch<2` did — whether the same term binds the same
+way on a different base is a real, unanswered question. One backtest: `pine/3m-elite-v59-dzage-binding-v58.pine`,
+byte-identical to v58 with `dzAge >= 1` removed from `longCond` (its only occurrence).
+
+PRE-RUN AUDIT: R floor unchanged (0.8%, LESSON 3). Stop unchanged (`dzBot`, structural, LESSON 5).
+Long-only, matches champion scope (LESSON 6). BINDING (E17): this run IS the binding test. REDUNDANCY
+(E14): no other term measures 4H-candle age since creation. Latch in sequence (LESSON 8): `dzTouch==0`
+untouched.
+
+| | v58 (champion, `dzAge >= 1` present) | **v59 (`dzAge >= 1` removed)** |
+|---|---|---|
+| Profit factor | 1.48439273 | **1.02675881** |
+| Max drawdown | 8.70519440% | **13.50029781%** |
+| Trades | 117 | **177** |
+| Win rate | 46.15384615% | **38.98305085%** |
+| Net return | +42.53848648% | **+3.30125764%** |
+
+## THE VERDICT, AND A GENUINELY NEW FINDING
+
+**`dzAge >= 1` is confirmed load-bearing against v58 too** — removing it adds 60 trades (+51.3%) that
+drag PF down to barely above breakeven and drawdown up nearly 5 points. That alone would just repeat
+v43's conclusion on a new base.
+
+**But the magnitude differs, and the direction of the difference is informative.** Against v37, removing
+the term added 44 trades (+28.4% relative) and cut PF 23.2% (1.25 → 0.96). Against v58, removing it adds
+60 trades (+51.3% relative) and cuts PF 30.8% (1.48 → 1.03) — both the relative trade-count increase and
+the relative PF drop are LARGER under v58's stricter filter, not smaller. **The two selectivity terms are
+not independent: same-4H-candle (`dzAge==0`) entries are disproportionately concentrated among
+never-touched (`dzTouch==0`) zones** — a zone on the exact bar of its own creation has, near tautologically,
+never yet had a chance to be touched, so restricting to `dzTouch==0` concentrates rather than dilutes the
+population `dzAge >= 1` exists to exclude. This is new information about how the two terms interact, not
+just a repeat confirmation.
+
+**No ratchet action follows.** This was a binding test, not a ratchet proposal — `dzAge >= 1` was
+already present in the champion and stays there unchanged. v58 remains champion of record.
+
+## QUEUE
+
+1. **`close > dzBot` remains closed on the algebraic argument above** — no further credit warranted
+   unless `minRpct` or the `rBig` formula itself is ever changed, which would invalidate the proof.
+2. The short leg remains paused pending a new idea from the source (unchanged since v56/v58).
+3. **Signal-term audit is now complete against the current champion**: both remaining conjunction terms
+   have been checked against v58 specifically (dzAge empirically here; dzBot algebraically, carried
+   over). The highest-value remaining gaps are structural, not parametric — the short leg and a
+   mechanical flip rule — same as v58's own closing note.
+
+**CHAMPION OF RECORD: v58** (PF 1.48439273, DD 8.70519440%, 117 trades, long-only, `dzTouch==0`,
+anchored at `pine/3m-elite-v58-first-touch-only.pine`). Unchanged by this cycle — v59 was a binding
+test, not a ratchet candidate.
