@@ -2284,3 +2284,44 @@ went **67.94 → 76.58 → 83.44** against a 192-bar cap: **holds rose 23% while
 1.17245633 carries a selection effect. **The recent half never informed the choice, and it came in
 stronger at 1.58559241.** When a parameter has been selected on one window, say so, and lead with the
 window that had no part in the choice.
+
+---
+
+## HARD LESSON 48 — A FILTER'S VALUE IS DIRECTION-SPECIFIC. DO NOT ASSUME A TERM THAT BINDS ON ONE LEG BINDS ON THE OTHER.
+
+War Formation's whole-number band bans entries in the x400–x600 middle of a thousand. It has always
+been applied to **both** legs, on the unexamined assumption that a price-location rule is symmetric.
+
+| leg | removing the band | verdict |
+|---|---|---|
+| **long** (E69b) | PF fell 0.0103 — the closest call in the log | the band is (barely) load-bearing |
+| **short** (E74) | **PF 0.97315988 → 1.16714444**, win rate +5.1pp, sample 33 → 41 | **the band was costing money** |
+
+**Same term, opposite sign.** The band is oriented for longs, exactly as the lab's own queue
+hypothesised but had never been able to test — because until the sizing fix (HARD LESSON 42) the short
+leg produced no measurement worth interpreting.
+
+**HOW TO USE THIS:**
+1. **Sweep binding separately per leg.** A four-term sweep on the long establishes the long's binding
+   order and **nothing about the short's**. This project ran E69/E70 and then carried those
+   conclusions across for weeks.
+2. **Price-location rules are the most suspect.** Support and resistance are not mirror images in a
+   market with a long-run upward drift; a band that keeps a long out of chop can be the very region a
+   short needs.
+3. **A leg you cannot measure is a leg whose filters you have never tested.** All the short-side
+   conclusions before E71 were untested assumptions wearing the clothes of settled results.
+
+## RULE QUESTION FOR THE USER — RATCHET v2 CLAUSE 2 HAS NOW BLOCKED TWO STRONG RESULTS IN THE SAME LAB
+
+| | what improved | what blocked it |
+|---|---|---|
+| **E69b** | drawdown, sample, return, simplicity | profit factor short by **0.0103** |
+| **E74** | PF **+0.194**, win rate **+5.1pp**, sample **+8**, Sharpe **−0.11 → +0.78**, a losing leg turned **profitable** | drawdown over the allowance by **0.45pp** |
+
+**The concern is specific, not a plea to relax the rule.** E74's drawdowns are 2.67% and 3.61% —
+tiny, because the position is **25% of equity**. The 0.50pp allowance was calibrated on builds
+carrying **8–45%** drawdowns, where half a point is a rounding error. **At a 3% base it is a quarter
+of the entire drawdown.** A proportional allowance (say, "drawdown may not worsen by more than 20% of
+its own value") would behave the same on the old builds and differently here.
+
+**Not changed on my own authority. The rule as written was applied and E74 does not keep.**

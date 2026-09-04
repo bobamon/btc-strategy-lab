@@ -4462,3 +4462,62 @@ makes E71's configuration the good one rather than a starting point.
 is **fee-bound in a way that cannot be fixed by widening**. The remaining honest levers are lower-cost
 execution or a higher-frequency variant of the same edge -- **neither of which this harness can express**
 at the forced 0.05%/side parity profile. That is a limit to state, not to engineer around.
+
+
+---
+
+## E74 -- THE FIRST PROFITABLE SHORT IN THE PROJECT'S HISTORY, AND THE RATCHET STILL BLOCKS IT
+
+E71 byte-identical with **one term removed**: the whole-number band. **The first binding test ever run
+on the short leg** -- all four entry terms were swept on the long (E69a/b, E70a/b), but the short was
+unmeasurable until E71's declared 25%-equity deviation fixed the margin problem.
+
+The queue's own hypothesis list named the term to start with: *"the whole-number band is oriented for
+longs."* **Confirmed.**
+
+| | E71 (band on) | **E74 (band removed)** |
+|---|---|---|
+| profit factor | 0.97315988 | **1.16714444** |
+| win rate | 36.36363636% | **41.46341463%** |
+| trades | 33 (at the floor) | **41** |
+| Sharpe | -0.11260373 | **0.77715586** |
+| net | -0.20431733% | **+1.48927615%** |
+| gross | +$61.00 | **+$252.00** |
+| max drawdown | 2.66826642% | 3.61455016% |
+
+**This is the first profitable short in the project's history**, across every construction in both
+labs. The count rose exactly as the occupancy note predicted, lifting the sample clear of the
+30-trade floor rather than sitting on it.
+
+### AND IT DOES NOT KEEP. THE RULE IS APPLIED AS WRITTEN.
+- **Clause 1** — PF improves by 0.194, ten times the 0.02 threshold. **PASSES.**
+- **Clause 3** — 41 trades ≥ 30. **PASSES.**
+- **Clause 2** — drawdown must not worsen, except up to 0.50pp when PF improves by >0.02. It rose
+  **0.94628374pp**, exceeding the allowance by **0.45pp**. **FAILS.**
+
+**E74 does not replace E71 as the reference build.** The *finding* stands regardless: the band is
+long-oriented, and the short leg's binding order has begun to be established.
+
+### A RULE TENSION FOR THE USER -- AND THIS IS THE SECOND TIME
+| | improved | blocked by |
+|---|---|---|
+| **E69b** | drawdown, sample, return, simplicity | PF short by **0.0103** |
+| **E74** | PF +0.194, win rate +5.1pp, sample +8, Sharpe -0.11 → +0.78, losing leg → profitable | drawdown over by **0.45pp** |
+
+**The specific concern:** both drawdowns here are tiny in absolute terms (2.67% and 3.61%) **because
+the position is only 25% of equity**. The 0.50pp allowance was calibrated on builds carrying 8-45%
+drawdowns, where half a point is a rounding error; **at a 3% base it is a quarter of the entire
+drawdown**. The allowance may need to be **proportional rather than absolute**.
+
+**I am not changing the rule on my own authority.** Recorded as an open question, exactly as E69b's was.
+
+### NO CHAMPION
+41 trades clears the floor, but the 1m window is **4.5 months of one regime and cannot support a
+split**, so nothing in this lab can be promoted on it. And this is a 25%-equity run -- not comparable
+to any 100%-equity long.
+
+### QUEUE
+1. **Test the remaining three terms on the short** (`h1Bear`, `brokeAbove`, `timeGate`), one at a time.
+   The binding order on this leg is now worth establishing, and the band result shows the two legs do
+   **not** share it.
+2. **Re-run the LONG without the band at 25%** to complete the E69b comparison on equal footing.
