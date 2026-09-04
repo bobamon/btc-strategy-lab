@@ -3227,3 +3227,48 @@ Attack 37, it also clears the cost screen.
 2. **Do not run a 4.5 floor.** The curve is already three points chosen on one half; a fourth would
    deepen the selection effect for a number that is already positive.
 3. **The honest next test is a THIRD window or another symbol**, not another parameter.
+
+
+---
+
+# ATTACK 46 - COLD REPRODUCTION PASSED ON BOTH HALVES
+
+The board's own queue put this **before** anything else, and the stored prompt's "build Attack 37's
+filter stack" loses twice over: Attack 41 closed Attack 37 and Attack 43 closed its whole family.
+
+Re-run from the **saved spec file**, as a **fresh strategy with no strategyId chaining** - so what was
+verified is the artifact the repo actually stores, not a server-side lineage.
+
+| | recorded | **cold re-run** |
+|---|---|---|
+| 46a profit factor | 1.17245633 | **1.17245633** |
+| 46a drawdown | 23.45223579% | **23.45223579%** |
+| 46a trades / win | 105 / 23.80952381% | **105 / 23.80952381%** |
+| 46a commission | 1083.400482050001 | **1083.400482050001** |
+| 46b profit factor | 1.58559241 | **1.58559241** |
+| 46b drawdown | 13.6122535% | **13.6122535%** |
+| 46b trades / win | 38 / 26.31578947% | **38 / 26.31578947%** |
+| 46b commission | 434.78103475 | **434.78103475** |
+
+**Every field, to the last digit.** Cascade ratio 1 on both.
+
+**This is the check E38 and E47 both failed** in the sister lab - which is why it is mandatory before
+any champion claim, and why it came before any filter stack.
+
+## WHAT THIS DOES AND DOES NOT ESTABLISH
+**Does:** Attack 46 is a **defensible** result rather than merely a recorded one. The saved Pine is
+genuinely the thing that produced the numbers, so anyone can re-run it.
+
+**Does not:** it is **still not a champion.**
+1. The **selection caveat on 46a stands** - the 3.5 floor was chosen by watching that half.
+2. **46b's 38 trades is thin**, barely above the floor.
+3. **Reproducibility says nothing about whether the edge persists out of sample.** A number can
+   reproduce perfectly and still be a fit to 4.7 years of one asset.
+
+## QUEUE - UNCHANGED, AND NOW UNBLOCKED
+1. **A third window or another symbol**, not another parameter. This is the only test that addresses
+   weakness 3, and it is now the single most valuable run available to this lab.
+2. **Still no 4.5 floor.** Three points already chosen on one window.
+3. **A filter stack is now permitted** by the mandate's own logic - both halves clear on a defensible,
+   reproduced base - but it ranks BELOW the out-of-sample test, because a filter on an unvalidated
+   edge is decoration.
