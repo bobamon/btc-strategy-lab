@@ -4837,3 +4837,37 @@ since before E67, so every firing re-derives the same "already closed" conclusio
 read-through cycle. The board will not move until the prompt is refreshed with a live queue item, the
 `inMiddle`/drawdown-proportionality questions are answered, or new 1m data lands. Recommend pausing or
 editing this scheduled task rather than continuing to fire it as-is.
+
+---
+
+# ██ CYCLE CHECK, 2026-09-04 #3 (no credits) — FIFTH IDENTICAL FIRING OF THE SAME STALE PROMPT
+
+`git pull --rebase origin main` first: already up to date with origin/main (HEAD at f1cbdfb). No new
+war-formation commits since this file's own prior cycle-check entry. Credit balance moved 568 → 564
+between cycles, but the delta is accounted for entirely by concurrent activity in the other two labs
+(3M Elite v62/v63, BTC Attack 53) visible in `git log` — zero of it is this lab's.
+
+This cycle's stored prompt is, once again verbatim, the same pre-E67 text closed four times already in
+this file. Re-verified against the current board rather than re-argued from scratch, same result:
+
+- **Queue item 1 (attack the short's entry geometry)** — still closed at E71/E74-E76. No ninth
+  short-geometry construction is queued or implied.
+- **Queue item 2 (finish the entry-term binding sweep)** — still closed on both legs (long:
+  E69a/E69b/E70a/E70b; short: E74/E75a/E75b/E76).
+- No new 1m data, no new user directive, no collision with a concurrent war-formation session.
+
+**State unchanged**: no champion, no candidate. References remain **e58a** (long, 100% equity, band
+present, PF 1.24015239, 36 trades) and **E71** (short, 25% equity, band present, PF 0.97315988, 33
+trades). The two open questions — the `inMiddle` ratchet asymmetry (E69b) and whether the drawdown
+allowance should be proportional at a 2-4% base (E74) — still need the user, not a backtest, and remain
+open.
+
+**Zero backtests run. Zero credits spent** (564 available at start of cycle, all attributable to other
+labs). Dashboard rebuilt for timestamp consistency only; no metrics changed.
+
+**Flag to the user, now for the fifth time**: this scheduled task's stored prompt has not been updated
+since before E67. Every firing since has cost a full read-through cycle to re-derive the identical
+"already closed" conclusion, with nothing left on this board a backtest can move until the prompt is
+refreshed with a live queue item, the two open questions above are answered, or new 1m data lands.
+Sending this one to the user directly rather than just logging it here, since four prior log entries
+saying so has not yet changed the prompt.
