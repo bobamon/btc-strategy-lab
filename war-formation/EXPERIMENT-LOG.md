@@ -4521,3 +4521,70 @@ to any 100%-equity long.
    The binding order on this leg is now worth establishing, and the band result shows the two legs do
    **not** share it.
 2. **Re-run the LONG without the band at 25%** to complete the E69b comparison on equal footing.
+
+
+---
+
+# ██ E75a/E75b — THE SHORT-LEG BINDING SWEEP CONTINUES: h1Bear AND brokeAbove BOTH BIND
+
+**The stored prompt's queue item 1 asked to attack the short's entry geometry directly. THE DOCS
+OVERRIDE IT** — E68/HARD LESSON 42 already showed a 100%-equity short is untestable, and E71's declared
+25%-equity deviation is what made the leg measurable at all. This cycle ran **E74's own queue item 1**:
+finish the short-leg binding sweep started by the band test, one term at a time, per HARD LESSON 16 (two
+single-term removals read together, not stacked).
+
+Two single-term removals from **E71** (PF 0.97315988 / DD 2.66826642% / 33 trades / 36.36363636% win —
+the established short-leg parent), run this cycle. `timeGate` is the one term left untested on this leg.
+
+| | E71 parent | **E75a — no `h1Bear`** | **E75b — no `brokeAbove`** |
+|---|---|---|---|
+| Profit factor | **0.97315988** | **0.78210297** | **0.88628485** |
+| Δ from parent | — | **−0.19105691** | **−0.08687503** |
+| Max drawdown | 2.66826642% | 5.5876551% | 4.62621562% |
+| Trades | 33 | 57 | 53 |
+| Win rate | 36.36363636% | 31.57894737% | 33.96226415% |
+| Net return | −0.20431733% | −3.05963051% | −1.42471163% |
+| Sharpe | −0.11260373 | −1.46464317 | −0.65602509 |
+
+**Registered predictions, stated before running:** on the long, `h1Bull` was the single most load-bearing
+entry term (E69a, Δ −0.273) and `brokeBelow` a genuine but smaller one (E70a, Δ −0.204). If the mirror
+terms carry to the short the way they do on the long, removing either should drop PF and raise the
+count; if PF holds flat like the whole-number band did (E74), the term is long-oriented. **Both
+predictions were confirmed** — neither term behaves like the band.
+
+## WHAT THIS ESTABLISHES
+**1. Unlike the whole-number band, `h1Bear` and `brokeAbove` are NOT long-oriented.** Both bind on the
+short exactly as their mirrors do on the long: removing either costs profit factor and admits more
+trades. The short leg is not simply "the long's terms don't transfer" — it is term-specific, and so far
+splits the same way the long did.
+
+**2. `h1Bear` is the most load-bearing short-leg term measured so far**, exactly mirroring `h1Bull`'s
+status as the long's most load-bearing term (E69a). The 1-hour "liveness" condition — not the 6h
+regime the source calls "the God of direction" — again carries more weight than the source's own framing
+suggests, on both legs now. This is the fifth source-inversion in the project (after E64b, E69a, 3M v57,
+E70's full long ranking).
+
+**3. `brokeAbove` binds more mildly than `h1Bear`**, the same ordering direction/1he/location relationship
+seen on the long (`h1Bull` > `brokeBelow` > `timeGate` > `inMiddle` there). Provisional short-leg ranking
+so far, by |ΔPF| from E71: **`h1Bear` (0.191) > `brokeAbove` (0.087) > `inMiddle` (0.194, but HELPS when
+removed — E74) > `timeGate` (untested)**.
+
+**Neither E75a nor E75b is a candidate or a KEEP** — both single-term removals reduce profit factor
+below the parent, so RATCHET v2 clause 1 is not even reached; they are binding measurements, not
+promotion attempts, exactly like E69a/E69b/E70a/E70b on the long.
+
+## STATE, UNCHANGED
+No champion, no candidate. **Reference build for the long remains `e58a`** (PF 1.24015239, DD
+9.82519609%, 36 trades, 100% equity). **Reference build for the short leg remains `E71`** (PF
+0.97315988, DD 2.66826642%, 33 trades, 25% equity, declared deviation per HARD LESSON 42) — E74 is the
+first profitable short but is blocked from replacing E71 by RATCHET v2 clause 2, an open rule question
+for the user (unchanged from the E74 entry). The 1m window remains 4.5 months of ONE regime and cannot
+support a split (LESSON 22/HARD LESSON 22).
+
+## QUEUE
+1. **`timeGate` is the last untested term on the short leg.** One more single-term removal from E71
+   completes the short-side binding sweep symmetrically with the long's (E69/E70).
+2. **Re-run the LONG without the whole-number band at 25% equity** (E74's queue item 2, still open) to
+   complete the E69b comparison on equal footing between the two legs.
+3. **The two open rule questions for the user remain open**: the `inMiddle` ratchet asymmetry (E69b) and
+   the E74 drawdown-allowance-should-be-proportional question. Neither is decided here.

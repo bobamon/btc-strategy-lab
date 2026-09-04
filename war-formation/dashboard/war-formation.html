@@ -1149,9 +1149,101 @@ const DATA = [
     },
     "verdict": "THE FIRST PROFITABLE WAR FORMATION SHORT -- but it does NOT KEEP under RATCHET v2 as written. Clause 2 fails.",
     "notes": "THE QUEUE'S OWN HYPOTHESIS IS CONFIRMED: THE WHOLE-NUMBER BAND IS ORIENTED FOR LONGS. Against E71 (PF 0.97315988 / DD 2.66826642% / 33 trades / 36.36363636% win / Sharpe -0.11260373 / net -0.20431733%): removing the band gives PF 1.16714444 / DD 3.61455016% / 41 trades / 41.46341463% win / Sharpe 0.77715586 / net +1.48927615%. THIS IS THE FIRST PROFITABLE SHORT IN THE PROJECT'S HISTORY, across every construction in both labs. Gross = net + commission = $148.93 + $103.07 = +$252.00, against E71's +$61.00 -- roughly four times the gross edge. Cascade ratio 1 on 41 clean entries. The count ROSE 33 -> 41 exactly as the occupancy note predicted, which also lifts the sample clear of the 30-trade floor rather than sitting on it. AND YET IT DOES NOT KEEP, AND I AM APPLYING THE RULE AS WRITTEN RATHER THAN RELAXING IT BECAUSE I LIKE THE RESULT. RATCHET v2 clause by clause: (1) PF improves by 0.194 -- PASSES, and by ten times the 0.02 threshold. (3) count 41 >= 30 -- PASSES. (2) DRAWDOWN MUST NOT WORSEN, except up to 0.50pp when PF improves by more than 0.02. Drawdown went 2.66826642% -> 3.61455016%, a rise of 0.94628374pp, which EXCEEDS THE 0.50pp ALLOWANCE BY 0.45pp. CLAUSE 2 FAILS, SO E74 DOES NOT REPLACE E71 AS THE REFERENCE BUILD. THE FINDING STANDS REGARDLESS OF THE VERDICT: the band is long-oriented, it is the first term ever removed from the short on evidence, and the short leg's binding order has begun to be established. A RULE TENSION WORTH THE USER'S ATTENTION, AND THIS IS THE SECOND TIME IN THIS LAB. E69b failed the ratchet by 0.0103 of profit factor while improving drawdown, sample, return and simplicity. E74 now fails by 0.45pp of drawdown while improving profit factor by 0.194, win rate by 5.1pp, sample by 8 trades, Sharpe from -0.11 to +0.78, and turning a losing leg profitable. THE SPECIFIC CONCERN: both drawdowns here are TINY in absolute terms (2.67% and 3.61%) BECAUSE the position is only 25% of equity. The 0.50pp allowance was calibrated on builds carrying 8-45% drawdowns, where half a point is a rounding error; at a 3% base it is a quarter of the whole drawdown. The allowance may need to be proportional rather than absolute. I AM NOT CHANGING THE RULE ON MY OWN AUTHORITY -- it is recorded as an open question for the user, exactly as E69b's was. NO CHAMPION IS DECLARED. 41 trades is above the floor but the 1m window is 4.5 months of ONE regime and CANNOT support a split, so no build in this lab can be promoted on it. Stated, not engineered around. And this is a 25%-equity run: NOT comparable to any 100%-equity long."
+  },
+  {
+    "id": "wf-e75a-short-no-h1bear",
+    "name": "E75a: the SHORT without h1Bear -- second binding test on this leg",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "short",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/pine/e75a-short-no-h1bear.pine",
+    "description": "E71 byte-identical with ONE term removed: h1Bear (close below the current 1h candle's open, the 'liveness' condition mirroring the long's h1Bull). On the LONG, h1Bull was the single most load-bearing of the four entry terms (E69a: PF 1.24015239 -> 0.96688238 when removed, +31 trades). REGISTERED PREDICTION: if the 1h liveness term carries to the short the way it does on the long, PF should fall sharply and the count should rise substantially; if PF holds steady, the term is long-oriented like the whole-number band (E74). Single-term removal from E71 (PF 0.97315988 / DD 2.66826642% / 33 trades / 36.36363636% win), the established parent for short-leg binding tests.",
+    "metrics": {
+      "netProfitPct": -3.05963051,
+      "profitFactor": 0.78210297,
+      "maxDrawdownPct": 5.5876551,
+      "totalTrades": 57,
+      "winRatePct": 31.57894737,
+      "avgTradePct": -0.05367773,
+      "sharpeRatio": -1.46464317,
+      "sortinoRatio": -0.8032975,
+      "commissionPaid": 140.9630505,
+      "avgWinningTrade": 61.011133338889,
+      "avgLosingTrade": -36.004191041026,
+      "ratioAvgWinLoss": 1.69455643,
+      "largestWin": 71.535581699999,
+      "largestLoss": -42.546952,
+      "avgBarsInTrade": 1076.26315789,
+      "avgBarsWinning": 1104.94444444,
+      "avgBarsLosing": 1063.02564103,
+      "longTrades": 0,
+      "shortTrades": 57
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1NJB9J632B18K1MF78WYKAV",
+      "strategyId": "01M1NJB9RVW57ZRRDTZNH84JAC",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NJB9J632B18K1MF78WYKAV",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T06:41:34Z"
+    },
+    "verdict": "PREDICTION CONFIRMED. h1Bear binds hard on the short too -- PF 0.97315988 -> 0.78210297, count 33 -> 57. NOT KEPT (RATCHET v2 clause 1: PF must improve, it fell).",
+    "notes": "h1Bear is load-bearing on the short leg, mirroring h1Bull's status as the most load-bearing term on the long (E69a). Removing it cost 0.19105691 of profit factor and admitted 24 more trades (33 -> 57), win rate falling 36.36363636% -> 31.57894737% and net swinging +... wait see prior entry for exact net -- net -0.20431733% (E71) -> -3.05963051% (E75a). Drawdown widened 2.66826642% -> 5.5876551%. Ranking of short-leg terms measured so far by |delta PF| from E71: h1Bear -0.19105691 (E75a) > brokeAbove -0.08687503 (E75b) > inMiddle +0.19398456, i.e. HELPS when removed (E74). timeGate remains untested on the short leg -- the fourth and last term."
+  },
+  {
+    "id": "wf-e75b-short-no-brokeabove",
+    "name": "E75b: the SHORT without brokeAbove -- third binding test on this leg",
+    "symbol": "BTCUSDT",
+    "timeframe": "1m",
+    "direction": "short",
+    "status": "rejected",
+    "createdDate": "2026-09-04",
+    "lastTestedDate": "2026-09-04",
+    "backtestStart": "2025-12-16",
+    "backtestEnd": "2026-05-03",
+    "specPath": "war-formation/pine/e75b-short-no-brokeabove.pine",
+    "description": "E71 byte-identical with ONE term removed: brokeAbove (the current 15m high must exceed the prior completed 15m high -- the location filter mirroring the long's brokeBelow, the source's own central 'let the Red Army finish' teaching). On the LONG, brokeBelow bound clearly (E70a: PF 1.24015239 -> 1.03608397 when removed, +23 trades). REGISTERED PREDICTION: if the location thesis carries to the short leg, PF should fall and the count should rise; if PF holds steady, the term is long-oriented. Single-term removal from E71 (PF 0.97315988 / DD 2.66826642% / 33 trades / 36.36363636% win), the established parent for short-leg binding tests.",
+    "metrics": {
+      "netProfitPct": -1.42471163,
+      "profitFactor": 0.88628485,
+      "maxDrawdownPct": 4.62621562,
+      "totalTrades": 53,
+      "winRatePct": 33.96226415,
+      "avgTradePct": -0.02688135,
+      "sharpeRatio": -0.65602509,
+      "sortinoRatio": -0.33528279,
+      "commissionPaid": 130.4711629,
+      "avgWinningTrade": 61.689243261111,
+      "avgLosingTrade": -35.796501188572,
+      "ratioAvgWinLoss": 1.72333164,
+      "largestWin": 73.522552,
+      "largestLoss": -41.5588173,
+      "avgBarsInTrade": 998.18867925,
+      "avgBarsWinning": 981.55555556,
+      "avgBarsLosing": 1006.74285714,
+      "longTrades": 0,
+      "shortTrades": 53
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1NJC6SFESTTQMAZPXEWKTC1",
+      "strategyId": "01M1NJC6YXGX9Y24F8X5ZKK91E",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1NJC6SFESTTQMAZPXEWKTC1",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-04T06:41:34Z"
+    },
+    "verdict": "PREDICTION CONFIRMED, more mildly than h1Bear. The location term binds on the short too -- PF 0.97315988 -> 0.88628485, count 33 -> 53. NOT KEPT (RATCHET v2 clause 1: PF must improve, it fell).",
+    "notes": "brokeAbove binds on the short leg, mirroring brokeBelow's role as a genuine (if not the strongest) term on the long (E70a). Removing it cost 0.08687503 of profit factor and admitted 20 more trades (33 -> 53), win rate falling 36.36363636% -> 33.96226415% and net -0.20431733% -> -1.42471163%. Drawdown widened 2.66826642% -> 4.62621562%. The two location/liveness terms tested this cycle both bind on the short, unlike the whole-number band (E74), which is long-oriented. timeGate remains the last untested term on the short leg."
   }
 ];
-const BUILT = "2026-09-04 00:38";
+const BUILT = "2026-09-04 06:42";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
