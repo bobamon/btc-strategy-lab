@@ -3294,3 +3294,50 @@ variable, which is precisely the caveat the first cold-repro commit raised about
 **Numbering note, per the stored prompt's own instruction:** this was not a new attack and needed no
 new number — it is the same verification the concurrent session already completed, recorded as
 corroborating provenance rather than a duplicate entry.
+
+
+---
+
+# ATTACK 46b - TRADE DISTRIBUTION. THE HEADLINE HIDES A TEN-MONTH LOSING STRETCH.
+
+The queue asked for an out-of-sample test. **Neither form is available:** the mandate restricts this
+lab to BTCUSDT, the 2022-2026 15m data is fully consumed by the two halves, and a timeframe change
+would be a **new mechanism** under HARD LESSON 40, not an out-of-sample test. So the next-best question
+was asked on the clean half, for free: **is 1.58559241 concentrated in a lucky patch?**
+
+**Partly yes, and it qualifies the verdict.**
+
+### REASSURING: the winners are genuinely spread
+Ten winners across the full 2.2 years - 2024-07, three in 2024-08, 2024-10, 2025-01, 2025-03, 2025-12,
+and two in 2026-02. **Not a single regime pocket**, which was the first thing worth ruling out.
+
+### NOT REASSURING: two adjacent trades carry 27.6% of all gross profit
+| trade | entered | profit |
+|---|---|---|
+| 34 | **2026-02-06** | **+$908.61** |
+| 35 | **2026-02-07** | **+$615.48** |
+
+**$1,524.09 of $5,521.73 gross, from one week.** The top three make 39.5%.
+
+### THE WORSE FINDING, WHICH THE HEADLINE COMPLETELY HIDES
+**From trade 14 (2025-01-20) to trade 28 (2025-11-04) it took 15 trades and won ONE.**
+
+Cumulative profit fell from a peak of **$2,243.20** to **$866.12** - giving back **61% of everything it
+had made, over ten months**. That is the 13.6122535% max drawdown, now **located in time** rather than
+merely measured.
+
+### WHAT THIS MEANS
+Attack 46 **still ADVANCES** - both halves clear, it reproduces cold, and the winners are distributed.
+But it is a **low-frequency, lumpy edge with a ten-month losing stretch inside it**, and anyone reading
+"1.59 profit factor, 26% win rate" without this decomposition would badly misjudge what holding it
+feels like. Drawdown category **three** (bleed on a positive edge), but a far longer bleed than Attack
+37's.
+
+**Recorded as a caveat on the result, not as a rejection.**
+
+## QUEUE
+1. **The out-of-sample test still ranks first and still cannot be run here.** It needs either another
+   symbol or data this lab does not have. **That is a constraint to report, not to engineer around.**
+2. **If a filter stack is built, target the 2025 stretch specifically** - that is where the edge went
+   missing, and it is now identified rather than guessed at.
+3. **Quote the ten-month stretch alongside the profit factor** whenever this build is described.
