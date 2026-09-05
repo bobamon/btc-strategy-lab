@@ -6318,3 +6318,121 @@ mirror) remains untested.
    from every rejected strategy on the board (Attacks 33–65, 67/69/70/71, 72, 73, 74, 75, and now 76).
 
 ---
+
+# ATTACK 77 — BOLLINGER BAND WIDTH SQUEEZE BREAKOUT. A GENUINELY NEW MECHANISM, DISCARDED ON THE KILL RULE.
+
+The stored scheduled prompt again described a board state ("Attack 37, build its filter stack") more
+than seventy-six attacks stale — Attack 41 closed Attack 37 on cost, Attack 43 closed the whole
+sweep-reversal family, and Attack 68 (Attack 66 + OBV divergence-magnitude floor) is the board's
+strongest both-halves candidate. **The docs override it, again**, per the prompt's own standing
+instruction: Attack 76's own queue item 8 asked for one further genuinely new mechanism. This build is
+that instruction, continuing numbering after Attack 76, not Attack 37.
+
+## THE CLAIM
+
+Bollinger Band width — a rolling standard-deviation-based measure of how far price is dispersing around
+its own moving average — contracting to a fresh multi-bar low reflects unresolved directional pressure
+accumulating; a close back above the upper band shortly after that contraction is the release of that
+pressure, and the resulting move tends to continue rather than immediately mean-revert. Genuinely
+distinct from every volatility-flavoured mechanism already on the board: Attack 6 (old-mandate era)
+measured an ATR(5)/ATR(50) **term-structure ratio**; Attack 36 measured a **daily bar's own high-low
+range** against its own history (calendar-anchored, discarded on the kill rule); Attack 65 **fades** a
+volatility shock (the opposite trade direction from what it measures). This build uses `ta.bb`/`ta.bbw`
+— standard-deviation bands computed intrabar on the same 15m series the strategy trades — and trades
+**with** the expansion that follows contraction. No prior BTC attack has used `ta.bb`, `ta.bbw`, `ta.kc`
+or `ta.kcw`. Pine: `strategies/pine/attack77-bollinger-squeeze-breakout.pine`.
+
+## AUDIT (one line per leg)
+
+R >= 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rLong = close - swingLow`, never clamped. Stop beyond
+STRUCTURE (LESSON 5) — `slPx = ta.lowest(low, 20)[1]`, a genuine prior swing low computed strictly before
+the signal bar, same convention as Attack 37/59/63/66/76. Each leg separately (LESSON 6) — LONG ONLY,
+following this lab's convention for a first pass (Attacks 50/59/63/65/66/72/73/74/75/76 all opened
+one-sided); the short leg (a squeeze resolving down through the lower band) is deferred and reported as
+OUTSTANDING. BINDING (E17) — the compound squeeze+breakout term (`squeezeRecent` AND `breakoutTrigger`,
+the two halves of one classic pattern) AND `rBig` AND `haveSwing`; two credits were budgeted for the
+H1/H2 pair, so no per-term counter build was affordable (moot — see verdict, H2 never spent). REDUNDANCY
+(E14) — `bbw` and `upper` share the same rolling stdev but read different quantities (a normalized width
+vs. a directional price-level cross); `swingLow` reads a price level from an entirely separate rolling
+window. LATCH IN SEQUENCE (LESSON 8, fourth-confirmation check) — `isSqueeze` is read via
+`ta.barssince` (a monotonic bar-count, not a latched boolean) and `breakoutTrigger` is a fresh
+`ta.crossover` every bar, so there is exactly one true trigger event gated by a bar-count condition, not
+two competing latches on the same bar. WEEKENDS — no calendar dependency at all; Bollinger Bands compute
+off ordinary closes. CASCADE (HARD LESSON 42/43) — LONG at 100% equity, single entry id "L";
+`cascadeRatio` 1 / `maxCascadeDepth` 1, confirmed (207 total rows, 207 unique entries).
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4)
+
+No prior attack has plotted Bollinger Band width on this engine. Anchored against Attack 37's swing-sweep
+construction (322/196 trades, a comparable two-stage price/structure test) rather than the raw EMA cross
+that overfired in Attack 57 or the NVI regime cross that overfired in Attack 76. Pre-registered
+**100-450 trades per half**, moderate confidence.
+
+## H1 (NEVER-TUNED HALF, 2022-01-01 → 2024-06-08)
+
+| | **Attack 77a (H1)** |
+|---|---|
+| Profit factor | **0.91078661** |
+| Trades | 207 |
+| Win rate | 27.53623188% |
+| Avg winner | $141.66 |
+| Avg loser | -$59.10 |
+| Achieved win/loss ratio | 2.39680686 |
+| Max drawdown | 19.90182244% |
+| Net return | -7.90899189% |
+| Commission paid | $1,889.57 |
+| Largest loss | -$272.46 |
+
+**Frequency estimate scored: pre-registered 100-450, actual 207** — inside the pre-registered band and
+inside the lab's settled 60-350 workable window. This is the rare case where the frequency model landed
+close to right; the mechanism still failed on edge, not on cost or sample.
+
+## KILL RULE APPLIED. ONE CREDIT SPENT THIS CYCLE (526 BALANCE → 525). H2 NOT RUN.
+
+**Not a close call.** PF 0.91078661 is below 1.0 on the never-tuned half. Per Attack 37/48/75/76's own
+kill-rule precedent, this is discarded outright: no filter stack, no rescue, H2 not run, second credit
+not spent.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+PF < 1.0, so this is **category 2, bleed on a negative edge**, the same shape as Attacks
+36/48/49/50/53b/72b/73/74/75/76 — not worth filtering. Worth noting: the largest loss (-$272.46) is
+~4.6x the average loser (-$59.10), somewhat wider than most category-2 builds on this board, but moot
+for the verdict since PF is already below 1.0 before any concentration is considered.
+
+## THE VERDICT — DISCARDED ON THE KILL RULE
+
+A majority of the win/loss shape here looks healthy in isolation (achieved payoff 2.40, avg winner more
+than double avg loser) but the win rate (27.5%) is too low to clear breakeven against that payoff —
+the mirror-image failure shape to HARD LESSON 53's "majority win rate that still loses": here it is a
+**minority win rate whose payoff still isn't enough**, a plain negative-edge entry rather than an
+exit-design problem. The squeeze-then-breakout construction is a clean falsification of THIS specific
+definition (20/100/10-bar parameters, 2R fixed target), not evidence the volatility-contraction family
+as a whole is dead — a tighter squeeze definition (a stricter percentile on `bbw`, or a longer width
+lookback) or Keltner-based variant (`ta.kc`/`ta.kcw`) remains untested, but per HARD LESSON 4/45 that is
+a re-derivation of the frequency/threshold model, not a rescue filter on this exact build.
+
+## QUEUE
+
+1. **Do not re-run this exact construction with a different `bbLen`/`widthLen` alone.** If the
+   volatility-contraction family is revisited, re-derive the squeeze definition from first principles
+   (e.g. a percentile-rank threshold on `bbw` rather than a rolling-low test) rather than sweeping this
+   build's parameters past a diagnosed negative edge.
+2. **Attack 68 (Attack 66 + OBV divergence-magnitude floor) remains the board's strongest both-halves
+   candidate** — PF 1.56474476/1.13127036 on 89/80 trades — unaffected by this cycle.
+3. **Attack 46 (long) remains a candidate alongside Attack 68**, unaffected by this cycle.
+4. **The out-of-sample test for Attack 46 still ranks first among long-side work not yet startable**
+   under BTCUSDT-only — unchanged.
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+7. **This is now the sixth bare-mechanism first pass to fail outright in a row (72, 73, 74, 75, 76, 77),
+   all on different mechanisms.** The frequency model landed close to correct this time (207 actual vs.
+   100-450 pre-registered), which rules out "we can't estimate frequency" as the recurring problem —
+   the recurring problem is finding edge on a bare first pass at all. The next cycle should keep
+   proposing genuinely new mechanisms per the standing mandate.
+8. **The next cycle proposes ONE further genuinely new mechanism**, distinct from the VWAP family and
+   from every rejected strategy on the board (Attacks 33–65, 67/69/70/71, 72, 73, 74, 75, 76, and now
+   77).
+
+---

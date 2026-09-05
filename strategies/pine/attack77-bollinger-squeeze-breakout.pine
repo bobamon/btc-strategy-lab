@@ -1,0 +1,168 @@
+//@version=6
+// BTC ATTACK 77 - BOLLINGER BAND WIDTH SQUEEZE BREAKOUT. A GENUINELY NEW MECHANISM, BARE.
+//
+// The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") more
+// than seventy-five attacks stale -- Attack 41 closed Attack 37 on cost, Attack 43 closed the whole
+// sweep-reversal family, and Attack 68 (Attack 66 + OBV divergence-magnitude floor) is the board's
+// strongest both-halves candidate (PF 1.56474476/1.13127036, 89/80 trades). THE DOCS OVERRIDE IT, AGAIN,
+// per the prompt's own standing instruction: Attack 76's own queue item 8 asked for one further
+// genuinely new mechanism, distinct from every family already on the board. This build is that
+// instruction, continuing numbering after Attack 76, not Attack 37.
+//
+// ==================== WHAT THIS CLAIMS, IN ONE SENTENCE ====================
+// Bollinger Band width (a rolling measure of how far price is dispersing around its own moving average)
+// contracting to a multi-bar low reflects an accumulation of unresolved directional pressure; a close
+// back above the upper band shortly after that contraction is the release of that pressure, and the
+// resulting directional move tends to continue rather than immediately mean-revert.
+//
+// ==================== WHY THIS IS A NEW INPUT CLASS FOR THIS LAB ====================
+// Genuinely distinct from every volatility-flavoured mechanism already on the board: Attack 6 (old-
+// mandate era) measured a TERM-STRUCTURE RATIO of two ATR lengths as a regime switch; Attack 36 measured
+// a DAILY bar's own high-low RANGE against its own history (a calendar-anchored day-range compression,
+// discarded on the kill rule); Attack 65 FADES a volatility shock (exhaustion reversal -- the opposite
+// trade direction from what it measures). This build uses ta.bb/ta.bbw -- standard-deviation bands
+// around a moving average, computed intrabar on the SAME 15m series the strategy trades -- and trades
+// WITH the expansion that follows contraction, not against it and not on a higher timeframe. No prior
+// BTC attack has used ta.bb, ta.bbw, ta.kc or ta.kcw. Also distinct from the price-level/pivot families
+// (37-47, 59, 63, 66-71, 75), the calendar families (34/35/50/54/55/74), the fixed-grid or single-bar
+// impulse families (48/49), the divergence families (51/52/66-71), order-flow absorption (53), streak/
+// crossover (56-58), autocorrelation (72), Ichimoku (73), and the volume-participation family (76).
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS ====================
+// [basis, upper, lower] = ta.bb(close, bbLen, bbMult); bbw = ta.bbw(close, bbLen, bbMult) (both
+// allowlisted, engine-native). isSqueeze = bbw <= ta.lowest(bbw, widthLen) -- the bar where band width
+// prints a fresh widthLen-bar low. squeezeRecent = ta.barssince(isSqueeze) <= squeezeWindow -- the
+// squeeze happened within the last squeezeWindow bars, giving the breakout a short window to arrive
+// after the tightest point rather than requiring both events on the identical bar (the classic
+// squeeze-then-release pattern is two events in sequence, not one). breakoutTrigger =
+// ta.crossover(close, upper) -- price closing back above the upper band is the release. These two
+// conditions are the two halves of ONE classic pattern (compression, then expansion), not two
+// independently-motivated filters stacked together -- reported as a single compound entry term for the
+// binding audit below.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - EXCLUSION via rBig on rLong = close - swingLow, never clamped.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = ta.lowest(low, swingLen)[1], a genuine prior swing low
+//        computed from bars STRICTLY BEFORE the signal bar (the [1] shift, same convention as Attack
+//        37/59/63/66/71/76), never the Bollinger trigger level itself and never the entry bar's own low.
+//   Each leg separately (LESSON 6) - LONG ONLY this cycle, following this lab's established convention
+//        for a first pass on a new mechanism (Attacks 50/59/63/65/66/72/73/74/75/76 all opened one-
+//        sided). The short leg (a squeeze resolving DOWN through the lower band, its own geometry) is
+//        deferred and reported as OUTSTANDING -- this is an INTERIM result, not a finished one.
+//   BINDING (E17) - the compound squeeze+breakout term (squeezeRecent AND breakoutTrigger, the single
+//        classic pattern) AND rBig AND haveSwing must all independently bind; this is the first run of
+//        this mechanism and two credits are budgeted this cycle for the H1/H2 pair (H2 spent only if H1
+//        clears the kill rule), so no per-term counter build was affordable -- the realized trade count
+//        against the pre-run frequency estimate below is the binding evidence this cycle can afford.
+//   REDUNDANCY (E14) - bbw and upper both derive from the same rolling stdev, but they read DIFFERENT
+//        quantities off it: bbw is a NORMALIZED WIDTH (volatility state, no direction), upper is a PRICE
+//        LEVEL crossed in a specific direction (momentum through a level) -- a width contraction alone
+//        never fires goLong, and a breakout alone never fires goLong without a recent width contraction,
+//        so the two terms do distinct work despite the shared input. swingLow (for rLong/slPx) reads a
+//        PRICE LEVEL from an entirely separate rolling window (20-bar low of lows, unrelated to the
+//        20-bar Bollinger basis/stdev computed off closes) -- a third independent quantity.
+//   LATCH IN SEQUENCE (LESSON 8, fourth-confirmation check) - isSqueeze arms on its own bar and is read
+//        via ta.barssince (a monotonic bar-count, not a boolean latched across an if-block);
+//        breakoutTrigger is evaluated fresh every bar via ta.crossover, so there is exactly one true
+//        trigger event (the crossover bar) gated by a bar-count condition, not two competing latches
+//        racing on the same bar -- the generalized same-bar-conjunction failure mode (Attack 57) does
+//        not apply.
+//   WEEKENDS (structural note 4) - Bollinger Bands compute off ordinary bar closes with no calendar
+//        dependency; weekend bars are treated identically to weekday bars, handled by construction.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity, single entry id "L", pyramiding=1; expect
+//        cascadeRatio 1 / maxCascadeDepth 1 on both halves, confirmed below.
+//   SL and TP FIXED AT ENTRY (2R, lab convention; HARD LESSON 13 found the R:R axis neutral, so no
+//        tuning credit spent hunting "the best" multiple on a first pass). The regime-flip flatten
+//        (close crossing back under the BASIS, the middle band -- the squeeze thesis failed) is a
+//        strategy.close signal exit, not a modification of the fixed SL/TP prices themselves -- same
+//        pattern as the retired VWAP base's "flip signal: close crossing VWAP" rule and Attack 76's NVI
+//        regime flatten.
+//
+// ==================== FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4) ====================
+// No prior BTC attack has plotted Bollinger Band width on this engine. A 20-bar/100-bar-lookback squeeze
+// definition is a moderately loose contraction test (not a strict "tightest in a year" filter), so
+// squeeze bars should recur often across a ~2.4-year half; the 10-bar breakout window then narrows to
+// only the fraction of squeezes that resolve UP promptly. Anchored against Attack 37's swing-sweep
+// construction (322/196 trades, a comparable two-stage price/structure test) rather than the raw EMA
+// cross that overfired in Attack 57 or the NVI regime cross that overfired in Attack 76 (both single-
+// series threshold crosses with no second confirming stage). Pre-registering **100-450 trades per
+// half**, moderate confidence given the total absence of a prior Bollinger measurement on this engine.
+//
+// ==================== OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17), PER THE PROMPT'S OWN KILL RULE ====
+//   * H1 (never-tuned, 2022-01-01 to 2024-06-08) PROFIT FACTOR BELOW 1.0 -> DISCARD immediately. Do not
+//     run H2. Do not add filters to rescue H1.
+//   * H1 clears 1.0 -> run H2 (2024-06-08 to 2026-09-01) as the second and last credit this cycle.
+//   * BOTH halves clear 1.0, trades roughly 60-350 per half -> a genuine both-halves candidate, joining
+//     Attack 37/46/66-68 on the board; report avg loser, win rate and max DD alongside PF (the board's
+//     three-drawdown-category taxonomy), and queue it for a filter stack exactly as Attack 37/66 earned
+//     theirs.
+//   * H1 clears but H2 does not -> report both, DISCARD as a candidate (per Attack 53/72/74's
+//     precedent: helps H1, breaks H2), not as evidence the volatility-contraction family as a whole is
+//     dead.
+//   * FEWER THAN ~30 TRADES in a half -> that half's ratio is a DIRECTION per LESSON 12, not a result.
+//   * A LARGE SHARE OF HOLDS AT maxBars 480 -> the cap is truncating (HARD LESSON 38); report before
+//     drawing any conclusion.
+//   REPORT GROSS, COMMISSION, ACHIEVED WIN/LOSS RATIO, AVG LOSER AND WIN RATE alongside net (LESSONS
+//     36/39 and the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack77 Bollinger Squeeze Breakout", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+bbLen         = input.int(20, "Bollinger length")
+bbMult        = input.float(2.0, "Bollinger multiplier")
+widthLen      = input.int(100, "Width rolling-low lookback (bars)")
+squeezeWindow = input.int(10, "Bars allowed between squeeze and breakout")
+swingLen      = input.int(20, "Structural swing-low lookback (bars)")
+minRpct       = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+targetR       = input.float(2.0,  "Target, multiple of R (lab convention)")
+maxBars       = input.int(480,    "Max bars in trade -- 5 days on 15m")
+
+[basis, upper, lower] = ta.bb(close, bbLen, bbMult)
+bbw = ta.bbw(close, bbLen, bbMult)
+
+isSqueeze       = bbw <= ta.lowest(bbw, widthLen)
+squeezeRecent   = ta.barssince(isSqueeze) <= squeezeWindow
+breakoutTrigger = ta.crossover(close, upper)
+
+swingLow  = ta.lowest(low, swingLen)[1]
+haveSwing = not na(swingLow)
+
+rLong = haveSwing ? close - swingLow : na
+minR  = close * minRpct / 100
+rBig  = not na(rLong) and rLong >= minR
+
+flat   = strategy.position_size == 0
+goLong = flat and squeezeRecent and breakoutTrigger and haveSwing and rBig
+
+regimeFail = ta.crossunder(close, basis)
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if goLong
+    strategy.entry("L", strategy.long)
+    slPx   := swingLow
+    tpPx   := close + targetR * rLong
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if strategy.position_size > 0 and regimeFail
+    strategy.close("L")
+    barsIn := 0
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(bbw,   title="BBWidth")
+plot(upper, title="BB_Upper")
+plot(basis, title="BB_Basis")
