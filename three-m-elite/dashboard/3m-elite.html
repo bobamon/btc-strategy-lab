@@ -1250,9 +1250,140 @@ const DATA = [
       "maxCascadeDepth": 1,
       "verifiedAt": "2026-09-04T13:05:00Z"
     }
+  },
+  {
+    "id": "3m-elite-v37-baseline-full-coverage",
+    "name": "3M Elite v37 champion, re-baselined on FULL data coverage (2020-08-19 onward)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-05",
+    "lastTestedDate": "2026-09-05",
+    "backtestStart": "2020-08-19",
+    "backtestEnd": "2026-09-01",
+    "description": "Byte-identical v37 code (pine/3m-elite-v37-freshness-tight.pine), window widened from the project's standard 2022-01-01 start to the full available 15m coverage (2020-08-19, confirmed via plan_backtest_window: 211,711 bars from firstOpenMs). Every 3M result on file before this cycle used the 2022-01-01 start despite 17 months of earlier data being available the whole time. Run by a concurrent local session this cycle (2026-09-05) as part of the FVG-graded-zone investigation; recorded here because it was never written to this file (a gap against the 'record real results with provenance' rule) though it was reported in SYSTEM.md's v61/v62-fvg entry with resultId 01M1SES9QF5Y18V67JH78FC1DY.",
+    "notes": "The champion is barely above breakeven with roughly triple the drawdown on the fuller record: PF 1.25172059 (2022- window) -> 1.0534251, DD 8.72815312% -> 26.97850442%, net +29.75955671% -> +8.87299247%, trades 155 -> 241. This is an out-of-sample test that was always available and never run. STATUS testing (diagnostic re-baseline, not a strategy variant) rather than rejected/passed - it does not change what v37/v58 ARE, it changes what window they were ever measured against. OPEN GAP left by this cycle: the ACTUAL current champion of record is v58 (v37 + dzTouch==0), not v37, and v58 has never been re-baselined on full coverage - only v37 was. That comparison is queued, not run this cycle (credit budget).",
+    "metrics": {
+      "profitFactor": 1.0534251,
+      "maxDrawdownPct": 26.97850442,
+      "netProfitPct": 8.87299247,
+      "totalTrades": 241,
+      "winRatePct": 39.41908713692946,
+      "avgTradePct": 0.051184875385970906
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v37-freshness-tight.pine",
+    "specPath": "three-m-elite/SYSTEM.md",
+    "provenance": {
+      "source": "trader.dev",
+      "resultId": "01M1SES9QF5Y18V67JH78FC1DY",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1SES9QF5Y18V67JH78FC1DY",
+      "verifiedAt": "2026-09-05T00:00:00Z"
+    }
+  },
+  {
+    "id": "3m-elite-v62-fvg-graded-full-coverage",
+    "name": "3M Elite v62-fvg: FVG-graded zone, corrected anchoring, full data coverage",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-05",
+    "lastTestedDate": "2026-09-05",
+    "backtestStart": "2020-08-19",
+    "backtestEnd": "2026-09-01",
+    "description": "v37's zone-creation gate given exactly one grading term: a demand zone is only created if the engulfing candle also left a standard three-candle bullish Fair Value Gap, anchored correctly this time with the engulf as the DISPLACEMENT (middle) candle B: gap = C.low > A.high, confirmed on the 4H candle after the engulf (zone creation deferred one candle via a pendActive latch). Everything else byte-identical to v37. Run on full 15m coverage (2020-08-19 onward, not the project's usual 2022-01-01 start) after that window gap was discovered this cycle. NUMBERING COLLIDES with the pre-existing v61 (2026-09-04, v60's split test) and v62 (2026-09-04, short-leg bear-regime split) already on record from a different lineage - referred to as v62-fvg throughout to disambiguate. Source retrieved verbatim via get_strategy(strategyId=01M1SETEJSRCMK2Y62GV2MHR4A) since the concurrent session that ran it never committed the file (HARD LESSON 21 gap, closed this cycle) and saved to pine/3m-elite-v62-fvg-graded-full-coverage.pine.",
+    "notes": "Against v37 re-baselined on the SAME full-coverage window (see 3m-elite-v37-baseline-full-coverage): PF 1.0534251 -> 2.04354108, DD 26.97850442% -> 4.50890824%, trades 241 -> 40, net +8.87299247% -> +25.61599544%. Clears RATCHET v2 clauses 1-3 decisively. Clause 4 (mandatory split test on a >50% count cut, 241->40 is 83%) run THIS cycle (see the two split entries below): both halves clear PF 1.0 with no collapse or reversal, so clause 4 is now satisfied by the same standard this lab applied at v60/v61(short) (full-sample count clears clause 3; the split confirms direction even with both halves individually under the ~30-trade quoting floor). STATUS held at testing, not passed, for one remaining reason stated explicitly: this has only ever been compared against v37, and the ACTUAL reigning champion is v58 (v37 + dzTouch==0), which has never been run on full coverage. v62-fvg cannot be promoted over v58 until that comparison exists - top queue item for the next cycle, not run here (credit budget: 4 backtests already spent this cycle, 2 on this split and 2 on an unrelated diagnostic that hit an engine bug). avgTradePct/winRatePct derived free-of-charge from get_trades on this resultId (40-row list, matches the recorded trade count exactly) since the concurrent session's prose table did not carry per-trade averages.",
+    "metrics": {
+      "profitFactor": 2.04354108,
+      "maxDrawdownPct": 4.50890824,
+      "netProfitPct": 25.61599544,
+      "totalTrades": 40,
+      "winRatePct": 52.5,
+      "avgTradePct": 0.5893801892026946
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v62-fvg-graded-full-coverage.pine",
+    "specPath": "three-m-elite/pine/3m-elite-v62-fvg-graded-full-coverage.pine",
+    "provenance": {
+      "source": "trader.dev",
+      "resultId": "01M1SETEAG1ADNXCW7JD5SXSGJ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1SETEAG1ADNXCW7JD5SXSGJ",
+      "strategyId": "01M1SETEJSRCMK2Y62GV2MHR4A",
+      "verifiedAt": "2026-09-05T00:00:00Z"
+    }
+  },
+  {
+    "id": "3m-elite-v62-fvg-split-h1",
+    "name": "3M Elite v62-fvg split-test, H1 (2020-08-19 to 2024-06-08)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-05",
+    "lastTestedDate": "2026-09-05",
+    "backtestStart": "2020-08-19",
+    "backtestEnd": "2024-06-08",
+    "description": "RATCHET v2 clause 4 mandatory split test for v62-fvg (>50% trade-count cut vs v37 full-coverage baseline). Byte-identical Pine to pine/3m-elite-v62-fvg-graded-full-coverage.pine (strategyId 01M1SETEJSRCMK2Y62GV2MHR4A reused, no source changes), window split at the project's standard 2024-06-08 boundary.",
+    "notes": "24 trades, PF 2.10461082, DD 4.50890824%, win rate 54.16666667%, net +15.95491041%. Stronger than the full-sample PF (2.04). Combined with H2 (16 trades) reconciles exactly to the full sample's 40 - clean partition. Below the ~30-trade individual quoting floor (HARD LESSON 19); read for direction only, per the v60/v61(short) precedent.",
+    "metrics": {
+      "profitFactor": 2.10461082,
+      "maxDrawdownPct": 4.50890824,
+      "netProfitPct": 15.95491041,
+      "totalTrades": 24,
+      "winRatePct": 54.16666667,
+      "sharpeRatio": 0.85209663,
+      "avgTradePct": 0.66478793
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v62-fvg-graded-full-coverage.pine",
+    "specPath": "three-m-elite/pine/3m-elite-v62-fvg-graded-full-coverage.pine",
+    "provenance": {
+      "source": "trader.dev",
+      "resultId": "01M1SF819JPM7TJCVKQ4BETGJN",
+      "jobId": "adhoc_01M1SF819J0F4V6H6GFYWG8NWS",
+      "strategyId": "01M1SF81HZZ492R70HHGR04ANR",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1SF819JPM7TJCVKQ4BETGJN",
+      "cascadeRatio": 1,
+      "engineVersion": "tv_jul26_mc7",
+      "verifiedAt": "2026-09-05T00:00:00Z"
+    }
+  },
+  {
+    "id": "3m-elite-v62-fvg-split-h2",
+    "name": "3M Elite v62-fvg split-test, H2 (2024-06-08 to 2026-09-01)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-05",
+    "lastTestedDate": "2026-09-05",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "description": "RATCHET v2 clause 4 mandatory split test for v62-fvg, second half. Byte-identical Pine to pine/3m-elite-v62-fvg-graded-full-coverage.pine (strategyId 01M1SETEJSRCMK2Y62GV2MHR4A reused, no source changes), window split at the project's standard 2024-06-08 boundary.",
+    "notes": "16 trades, PF 1.95534435, DD 2.98802262%, win rate 50%, net +8.32064583%. Consistent in direction and magnitude with H1 (PF 2.10) and the full sample (PF 2.04) - no collapse, no reversal. 24 + 16 = 40, exact partition of the full sample. Below the ~30-trade individual quoting floor; read for direction only.",
+    "metrics": {
+      "profitFactor": 1.95534435,
+      "maxDrawdownPct": 2.98802262,
+      "netProfitPct": 8.32064583,
+      "totalTrades": 16,
+      "winRatePct": 50,
+      "sharpeRatio": 0.7461092,
+      "avgTradePct": 0.52004036
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v62-fvg-graded-full-coverage.pine",
+    "specPath": "three-m-elite/pine/3m-elite-v62-fvg-graded-full-coverage.pine",
+    "provenance": {
+      "source": "trader.dev",
+      "resultId": "01M1SF894RY24KFXF2MVRGRQKE",
+      "jobId": "adhoc_01M1SF894RPGXY74GC3X90CRWG",
+      "strategyId": "01M1SF89BSVPJTXNZF4SAF18SJ",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1SF894RY24KFXF2MVRGRQKE",
+      "cascadeRatio": 1,
+      "engineVersion": "tv_jul26_mc7",
+      "verifiedAt": "2026-09-05T00:00:00Z"
+    }
   }
 ];
-const BUILT = "2026-09-05 13:53";
+const BUILT = "2026-09-05 19:08";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
