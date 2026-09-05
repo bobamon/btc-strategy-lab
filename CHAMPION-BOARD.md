@@ -8541,3 +8541,119 @@ change motivated by looking at where this run struggled would be fitted to this 
 6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
 7. **This session cannot continue the new-engine cross-sectional track (Attacks 84-86)** — no
    `backtest-lab`/`sweep_backtest` tool is available here, unaffected by this cycle.
+
+---
+
+# ATTACK 90 — QUEUE ITEM 1 ON ATTACK 89: SLOW-CADENCE SUPERTREND RETUNE. DISCARDED — KILL RULE FAILS, AND THE RETUNE DIRECTION DID NOT HOLD.
+
+The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") more than
+85 attacks stale, instructing "continue numbering after 37." **The docs override it, again**, per the
+prompt's own instruction: Attack 37 closed on cost at Attack 41; the OBV-divergence filter stack on Attack
+68/82/83 is CLOSED at three terms (Attack 83 remains the board's strongest both-halves candidate, PF
+1.61044869/1.15365198 on 88/79 trades, unaffected by this cycle); Attack 89's SuperTrend-flip mechanism was
+discarded on frequency (526 H1 trades, well outside the ~60-350 workable band) despite a nominal PF of
+1.01365036, and its own queue item 1 named the fix directly: retune the ATR length/factor toward a slower
+flip cadence and re-run bare, before any filter work. This cycle is that retune. Numbering continues after
+Attack 89, the last entry on the board.
+
+## THE CHANGE
+
+**SuperTrend ATR multiplier 3.0 → 4.0, ATR length 10 → 21.** A wider multiplier requires a larger adverse
+excursion before the band flips side; a longer ATR length smooths the volatility estimate so the band
+reacts to sustained regime change rather than single-bar noise. Both push flip frequency down in the same
+direction — the exact retune Attack 89's queue asked for. Every other term (`rBig` ≥0.8% stop-distance
+exclusion by LESSON 3, confirmed-swing-low stop by LESSON 5, confirmed-swing-amplitude measured-move target
+by LESSON 41) is byte-identical to Attack 89. Coded bare, no filter stack. Pine:
+`strategies/pine/attack90-supertrend-flip-slow-cadence-long.pine`.
+
+This is a mechanism retune, not a ratchet-tracked filter addition: Attack 89 was discarded outright (not
+kept as a base), so Attack 90 stands or falls on the kill rule alone, exactly as Attack 89 did.
+
+## AUDIT (one line per leg)
+
+R ≥ 0.8% (LESSON 3) — unchanged, `rBig` gates by exclusion on `rLong = close - lastPivLow`. Stop beyond
+STRUCTURE (LESSON 5) — unchanged, `slPx = lastPivLow`, the confirmed swing low, never the SuperTrend line.
+Each leg separately (LESSON 6) — LONG ONLY; short remains the standing asymmetry (Attack 64). BINDING (E17)
+— `flipLong` AND `rBig` AND `swingOk` all necessarily bind: the (now slower) raw flip fires regardless of
+stop distance or swing validity, so each term independently removes flips the trigger alone would take.
+REDUNDANCY (E14) — an ATR-envelope trend-state (factor 4.0/length 21), price distance to the confirmed
+swing low, and confirmed swing amplitude — three independent quantities across three domains, unchanged
+from Attack 89. LATCH IN SEQUENCE (LESSON 8) — `lastPivLow`/`lastPivHigh` are `var float` scalars updated
+only on their own confirmed pivot bars; `flipLong` reads a later, separate bar via crossover, never the
+same bar a pivot confirms by construction. CASCADE (HARD LESSON 42/43) — LONG at 100% equity;
+`cascadeRatio` 1, `maxCascadeDepth` 1, 434 total rows, 434 unique entries, confirmed. SL/TP FIXED AT ENTRY,
+no trailing, no martingale.
+
+## OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17)
+
+Bare mechanism, one half only (credits band 250-500, 492 balance → pre-2024 half):
+- H1 above 1.0 AND trades inside ~60-350 → the retune worked, queue an H2 run before any filter work.
+- H1 above 1.0 but trades still outside ~60-350 → frequency diagnosis needs a second retune pass, report
+  direction and magnitude of the miss.
+- H1 below 1.0 → DISCARDED immediately by the kill rule. No H2 run, no filter rescue.
+- Majority win rate with `ratioAvgWinLoss` well below 1.0 → HARD LESSON 53's inverted-payoff shape.
+
+## RESULT — H1 ONLY (2022-01-01 → 2024-06-08, never tuned)
+
+| Metric | Attack 89a (H1, factor 3.0/len 10) | **Attack 90a (H1, factor 4.0/len 21)** |
+|---|---|---|
+| Profit factor | 1.01365036 | **0.95566996** |
+| Trades | 526 | **434** |
+| Win rate | 57.60456274% | 59.67741935% |
+| Avg winner | $132.91 | $114.20 |
+| Avg loser | -$178.16 | **-$176.86** |
+| Achieved win/loss ratio | 0.7460199 | **0.64572294** |
+| Max drawdown | 22.63547866% | **30.15538469%** |
+| Net return | +5.42324888% | **-13.71999556%** |
+| Commission paid | $5,327.26 | $4,142.96 |
+| Largest loss | -$600.12 | -$731.17 |
+
+## THE VERDICT — DISCARDED. THE RETUNE MOVED FREQUENCY IN THE RIGHT DIRECTION BUT PF THE WRONG WAY.
+
+Trade count fell as diagnosed (526 → 434, -17.5%), but **434 still sits outside the ~60-350 workable
+band**, and commission fell only modestly ($5,327.26 → $4,142.96) because avg trade size did not shrink.
+**PF moved the WRONG direction** — 1.01365036 → 0.95566996 — failing the kill rule outright. The retune's
+premise was that a slower, higher-conviction flip would select for *better* trades; instead win rate rose
+(57.6% → 59.7%) while `ratioAvgWinLoss` fell further (0.746 → 0.646), a WORSE inverted-payoff shape (avg
+loser -$176.86 now closer to avg winner $114.20's inverse, largest loss ballooning to -$731.17 from
+-$600.12). Max drawdown worsened materially, 22.64% → 30.16% (+7.52pp) — the opposite of what a "remove
+low-conviction flips" story predicts. **None of the three drawdown categories fit as an improvement**: this
+is not concentrated (largest loss -$731.17 is ~4.1x avg loser -$176.86, higher than Attack 89's ~3.4x, edging
+toward category 1) while PF sits below 1.0 (category 2's territory, bleed on a negative edge). The
+slower cadence did not select for quality; it changed which flips the strategy takes without improving
+the mixture, and the specific parameter pair tried lands closer to a concentrated-loss / negative-edge
+mix than Attack 89's did.
+
+## WHY NO H2 RUN
+
+The kill rule discards on H1 alone — H1 is below 1.0, so per LESSON 17's pre-registered outcomes this is
+an immediate discard with no H2 run and no filter rescue. Independent of that: the credits band (492
+credits, the 250-500 tier) authorized only the pre-2024 half this cycle regardless of outcome.
+
+## WHAT THIS SETTLES
+
+**The SuperTrend flip-continuation family is now discarded on two distinct parameterizations** — Attack 89
+(factor 3.0/length 10: over-frequent, nominally PF-positive) and Attack 90 (factor 4.0/length 21: closer to
+but still outside the workable band, net-negative). The direction that motivated this retune — "slower
+cadence selects higher-conviction flips, which should raise PF" — **did not hold**; PF fell as frequency
+fell, the opposite of the pattern this board saw with the OBV-divergence magnitude floor (Attack 68, where
+a stricter setup condition raised PF on both halves). A further slowdown is not pre-registered as promising
+without a reason to expect the direction to reverse a second time, so this family is set aside rather than
+retried a third time on the same axis.
+
+## QUEUE
+
+1. **Do not retry a third SuperTrend factor/length pair on this same axis without a new argument.** Two
+   parameterizations moved frequency in the intended direction while PF moved in opposite directions
+   between them (up then down) — there is no evidence a third point on this curve behaves predictably.
+2. **Attack 83 remains the strongest both-halves candidate on this board** (PF 1.61044869/1.15365198 on
+   88/79 trades), unaffected by this cycle.
+3. **Attack 46 (long) remains a candidate alongside Attack 83**, unaffected by this cycle.
+4. **Untried indicator families remain**: `ta.sar`, `ta.cci`, `ta.stoch`, `ta.macd`, `ta.cog`, `ta.tsi`,
+   `ta.wpr`, `ta.iii`, `ta.wad`, `ta.wvad`, `ta.linreg`, `ta.percentrank` — the next genuinely-new-mechanism
+   cycle should pick one of these instead of a further SuperTrend retune.
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if that
+   family is revisited before another fresh mechanism.
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+7. **This session cannot continue the new-engine cross-sectional track (Attacks 84-86)** — no
+   `backtest-lab`/`sweep_backtest` tool is available here, unaffected by this cycle.
