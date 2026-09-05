@@ -1,0 +1,167 @@
+//@version=6
+// BTC ATTACK 87 - QUEUE ITEM 2 ON ATTACK 83 (FILTER-STACK TERM 4): A REGIME-CONDITIONED VERSION OF
+// ATTACK 67'S BREAKOUT-MARGIN FLOOR.
+//
+// The scheduled prompt again asks for "Attack 37's filter stack," describing a board state more than
+// eighty attacks stale (Attack 37 was closed on cost by Attack 41; Attack 34/35/36 are also long closed).
+// The docs override it, per the prompt's own standing instruction: the live base is Attack 83 (Attack 66
+// bare + Attack 68 OBV-magnitude floor + Attack 83's regime-conditioned climax exclusion), and Attack 83's
+// own queue named this cycle's exact candidate: "a similar regime-conditioning treatment applied to
+// Attack 67's ... own rejected term."
+//
+// ATTACK 67 (breakout-margin floor, unconditional) was REJECTED: H2 cleared RATCHET v2 outright
+// (PF 1.00868976 -> 1.16582077, DD -2.43pp) but H1 failed (PF 1.36461764 -> 1.36493974, functionally flat,
+// DD +0.71pp). Attack 67's own diagnosis: H2's edge was thin and diluted by low-conviction breakouts, so
+// removing them helped a lot; H1's edge was already strong and the removed trades were a wash on profit
+// while still worsening the drawdown shape by bunching the remaining trades.
+//
+// THE TERM, ARGUED FROM THE MECHANISM (LESSON 49, not from either half's dates). This build tests a
+// DIFFERENT, per-trade hypothesis than Attack 67's own half-level "already diluted or not" diagnosis: a
+// thin breakout margin (closing only a fraction of a percent above the pivot high) is more likely to be a
+// fakeout poke in a CALM, range-bound tape, where price can drift a tick past a level with no real
+// momentum behind it; in an ALREADY-ELEVATED volatility regime, directional momentum is already
+// established, so even a thin clearance is more likely genuine follow-through, and demanding extra margin
+// there mostly discards trades the setup would have won anyway. This is a genuinely different construction
+// from Attack 67 (which applied the margin floor unconditionally to every breakout), not a threshold
+// retune of it (HARD LESSON 4/45): the floor is now EXEMPTED, not just resized, in the elevated-vol case.
+//
+// This reuses Attack 83's own regime descriptor VERBATIM (ATR14/close vs. its own 200-bar average) and
+// Attack 67's own margin threshold VERBATIM (0.10% of the pivot high) -- neither is invented or retuned
+// for this test. It does not touch bullDiv (divMagOk, validClimax from Attacks 68/83), rBig, or swingAmp.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - unchanged, rBig still gates by exclusion on rLong = close - lastPivLow.
+//   Stop beyond STRUCTURE (LESSON 5) - unchanged, slPx = lastPivLow, the confirmed divergence low.
+//   Each leg separately (LESSON 6) - LONG ONLY, unchanged; short leg remains a reported standing
+//        asymmetry (Attack 64).
+//   BINDING (E17) - bullDiv (divMagOk AND validClimax, unchanged from Attack 83) AND breakoutTrigger AND
+//        breakoutMarginOk AND rBig AND swingOk all necessarily bind; breakoutMarginOk is a strict
+//        WIDENING relative to Attack 67's unconditional floor (elevated-regime bars are exempted) and a
+//        strict NARROWING relative to Attack 83/no-margin-term (calm-regime bars now need the floor) --
+//        it can only remove a SUBSET of what Attack 67 removed, never more, and only removes trades Attack
+//        83 currently keeps.
+//   REDUNDANCY (E14) - breakoutMarginPct reads clearance distance above lastPivHigh at the breakout bar;
+//        elevatedVol reads ATR14/close vs. its OWN 200-bar average (already used by validClimax, reused
+//        verbatim, not a new quantity introduced twice); rBig reads distance to lastPivLow; swingAmp reads
+//        the pivot spread; divMagOk reads normalized OBV magnitude -- five independent quantities across
+//        four domains (entry-clearance distance, ATR-normalized volatility regime, price-to-stop distance,
+//        price swing, OBV), with elevatedVol's reuse being an explicit shared regime gate, not a
+//        redundant restatement of a different signal.
+//   LATCH IN SEQUENCE (LESSON 8) - breakoutMarginOk is computed and read on the SAME bar breakoutTrigger
+//        already fires on (the crossover bar), exactly as Attack 67's original margin check did -- this
+//        only widens/narrows an existing single-bar trigger's threshold conditionally, not a new
+//        same-bar setup/trigger conjunction. elevatedVol is a running series available on every bar, so
+//        no additional latch is introduced by reading it on the trigger bar.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, flat check gates every entry, unchanged.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity; expect cascadeRatio 1 on both halves, confirmed
+//        below.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4): because breakoutMarginOk can only remove
+// a SUBSET of what Attack 67's unconditional floor removed (Attack 67 cut H1 89->100 trades... actually
+// Attack 66->67: 137->100, -27%; 142->105, -26%), and this term only applies that same floor within the
+// CALM-regime subset of bars, the expected cut on Attack 83's own 88/79-trade base is smaller than Attack
+// 67's ~26-27%. Registered with MODERATE confidence: a 0-25% cut on each half, i.e. roughly 66-88 (H1) and
+// 59-79 (H2) trades surviving.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17), READ AGAINST ATTACK 83 (THE BASE) ON BOTH HALVES:
+//   * PF IMPROVES ON BOTH HALVES (RATCHET v2 clause 1), DD DOES NOT WORSEN (clause 2 allowance if PF
+//     gain > 0.02) ON BOTH -> KEPT as filter-stack term 4.
+//   * IMPROVES ONE HALF, HURTS THE OTHER -> REJECTED, exactly Attack 67/69/70/71/82's fate, not averaged.
+//   * COUNT CUT > 50% ON EITHER HALF -> a split-feasibility problem under clause 4.
+//   * TRADES BELOW ~30 ON EITHER HALF -> a direction, not a result (LESSON 12).
+//   IF THE CUT IS NEAR ZERO ON BOTH HALVES (i.e. almost no Attack-67-style weak-margin breakouts occur in
+//     the calm regime on this instrument), that itself falsifies the calm-regime-fakeout hypothesis as
+//     stated, independent of whatever PF does, and will be reported as such rather than read as a pass.
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside net (LESSONS 36/39 and the
+//     board's three-drawdown-category taxonomy).
+
+strategy("BTC Attack87 OBV divergence regime-conditioned breakout margin", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+pivotLeft   = input.int(5, "Pivot confirmation bars, left")
+pivotRight  = input.int(5, "Pivot confirmation bars, right")
+minRpct     = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars     = input.int(192, "Max bars in trade")
+obvRangeLen = input.int(200, "OBV normalizing range lookback")
+divMagPct   = input.float(3.0, "Min OBV divergence magnitude, % of OBV's own range")
+volAvgLen   = input.int(20, "Volume trailing average length (climax definition)")
+climaxMult  = input.float(2.5, "Volume climax multiple of its own trailing average")
+atrLen      = input.int(14, "ATR length (regime descriptor)")
+regimeLen   = input.int(200, "Regime lookback for ATR/close's own average")
+breakoutMinPct = input.float(0.10, "Min breakout clearance above pivot high, % (Attack 67's own value)")
+
+pl  = ta.pivotlow(low, pivotLeft, pivotRight)
+ph  = ta.pivothigh(high, pivotLeft, pivotRight)
+obv = ta.obv
+
+obvRange = ta.highest(obv, obvRangeLen) - ta.lowest(obv, obvRangeLen)
+
+volAvg  = ta.sma(volume, volAvgLen)
+isClimax = volume >= volAvg * climaxMult
+
+atrPct       = ta.atr(atrLen) / close
+atrPctAvg    = ta.sma(atrPct, regimeLen)
+elevatedVol  = atrPct > atrPctAvg
+
+var float lastPivLow    = na
+var float prevPivLow    = na
+var float lastPivLowOBV = na
+var float prevPivLowOBV = na
+var float lastPivHigh   = na
+var bool  bullDiv       = false
+
+if not na(pl)
+    prevPivLow    := lastPivLow
+    prevPivLowOBV := lastPivLowOBV
+    lastPivLow    := pl
+    lastPivLowOBV := obv[pivotRight]
+    if not na(prevPivLow)
+        obvDivMag   = lastPivLowOBV - prevPivLowOBV
+        divMagFloor = obvRange * divMagPct / 100
+        divMagOk    = not na(obvRange) and obvDivMag > divMagFloor
+        validClimax = not (isClimax and not elevatedVol)
+        bullDiv := lastPivLow < prevPivLow and obvDivMag > 0 and divMagOk and validClimax
+
+if not na(ph)
+    lastPivHigh := ph
+
+rLong = not na(lastPivLow) ? close - lastPivLow : na
+minR  = close * minRpct / 100
+rBig  = not na(rLong) and rLong >= minR
+
+breakoutTrigger = not na(lastPivHigh) and ta.crossover(close, lastPivHigh)
+breakoutMarginOk = not na(lastPivHigh) and (elevatedVol or (close - lastPivHigh >= lastPivHigh * breakoutMinPct / 100))
+
+swingAmp = not na(lastPivHigh) and not na(lastPivLow) ? lastPivHigh - lastPivLow : na
+swingOk  = not na(swingAmp) and swingAmp > 0
+
+goLong = bullDiv and breakoutTrigger and breakoutMarginOk and rBig and swingOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := lastPivLow
+    tpPx   := close + swingAmp
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(lastPivLow, title="LastPivotLow")
+plot(lastPivHigh, title="LastPivotHigh")

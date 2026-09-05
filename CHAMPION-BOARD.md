@@ -8135,3 +8135,159 @@ anything else on this board and less than a promotion.
 - StratBase, *Survivorship Bias: Dead Coins Your Backtest Ignores* — https://stratbase.ai/en/blog/survivorship-bias-crypto
 - CoinAPI, *How to Eliminate Survivorship Bias in Crypto Backtesting* — https://www.coinapi.io/blog/how-to-eliminate-survivorship-bias-in-crypto-backtesting
 - Gainium, *Common Backtesting Mistakes* — https://gainium.io/blog/common-backtesting-problems
+
+---
+
+# ATTACK 87 — QUEUE ITEM 2 ON ATTACK 83 (FILTER-STACK TERM 4): A REGIME-CONDITIONED VERSION OF ATTACK 67's BREAKOUT-MARGIN FLOOR. REJECTED — H1 REVERSES OUTRIGHT, THE SAME HALF ATTACK 67 ITSELF FAILED ON.
+
+The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") more than
+eighty attacks stale, instructing "continue numbering after 37." **The docs override it, again.** Attack
+37 closed on cost at Attack 41; the filter stack in progress is on Attack 66/68/83, and this cycle is BTC
+Attack 87 (next free number after Attack 86, the last entry on the merged board).
+
+**Engine note, stated up front.** Attacks 84-86 (renumbered from a parallel local session) ran on a
+different engine (`backtest-lab`/`sweep_backtest`, cross-sectional, multi-pair) that this session does not
+have tool access to. This session has only the original `trader-dev` Pine v6 engine (`quick_backtest`),
+the same one every attack through Attack 83 used. Attack 83 is therefore the correct base for this cycle,
+and its own queue (item 2) is what this cycle executes — a genuinely new mechanism is NOT owed this cycle
+because that queue item still stands.
+
+## THE TERM
+
+**Regime-conditioned breakout-margin floor**, executing Attack 83's own queue item 2: "a similar
+regime-conditioning treatment applied to Attack 67's ... own rejected term." Attack 67 required every
+breakout to clear the pivot high by >= 0.10% of price before entry, and was REJECTED because H2 cleared
+RATCHET v2 outright (PF 1.00868976 → 1.16582077) while H1 came back functionally flat (PF 1.36461764 →
+1.36493974, +0.00032) with drawdown worse by 0.71pp — Attack 67's own diagnosis was that H1's edge was
+already strong and undiluted, so removing any margin-thin breakouts there was a pure cost, while H2's edge
+was thin and diluted by exactly the population the floor removed.
+
+This build tests a DIFFERENT, per-trade hypothesis than Attack 67's own half-level diagnosis: that a thin
+breakout margin is a fakeout signature specifically in a CALM, range-bound tape (price drifting a tick past
+a level with no momentum behind it), and is NOT a fakeout signature when the market is already in an
+ELEVATED-volatility regime (directional momentum already established, so a thin clearance is more likely
+genuine follow-through). The floor is therefore EXEMPTED, not resized, when `elevatedVol` (Attack 83's own
+ATR14/close-vs-its-200-bar-average regime descriptor, reused verbatim) is true. Both the 0.10% threshold
+(Attack 67's own value) and the regime descriptor (Attack 83's own value) are reused unchanged — nothing is
+invented or retuned for this test (LESSON 49). Pine:
+`strategies/pine/attack87-obv-divergence-regime-conditioned-breakout-margin.pine`.
+
+## AUDIT (one line per leg)
+
+R >= 0.8% (LESSON 3) — unchanged, `rBig` gates by exclusion on `rLong = close - lastPivLow`. Stop beyond
+STRUCTURE (LESSON 5) — unchanged, `slPx = lastPivLow`. Each leg separately (LESSON 6) — LONG ONLY; short
+remains a reported standing asymmetry (Attack 64). BINDING (E17) — `bullDiv` (unchanged: `divMagOk AND
+validClimax`) AND `breakoutTrigger` AND `breakoutMarginOk` AND `rBig` AND `swingOk`; `breakoutMarginOk` is
+a strict WIDENING relative to Attack 67's unconditional floor (elevated-regime bars are exempted) and a
+strict NARROWING relative to Attack 83/no-margin-term (calm-regime bars now need the floor) — it can only
+remove a subset of what Attack 83 currently keeps, and only a subset of what Attack 67 removed. REDUNDANCY
+(E14) — breakout-clearance distance, ATR-regime (reused from `validClimax`, an explicit shared gate not a
+duplicate signal), price-to-stop distance, price swing, and normalized OBV magnitude — five independent
+quantities across four domains. LATCH IN SEQUENCE (LESSON 8) — `breakoutMarginOk` is read on the SAME bar
+`breakoutTrigger` already fires on, exactly as Attack 67's original check did; no new same-bar
+setup/trigger conjunction. CASCADE (HARD LESSON 42/43) — LONG at 100% equity; `cascadeRatio` 1 /
+`maxCascadeDepth` 1 confirmed on both halves (75 and 70 total rows, unique entries each).
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4)
+
+Because `breakoutMarginOk` can only remove a subset of Attack 83's own 88/79 trades (the calm-regime,
+thin-margin subset), and Attack 67's own unconditional floor cut 26-27% of Attack 66's bare base, the
+registered estimate was a **0-25% cut on each half**, i.e. roughly 66-88 (H1) and 59-79 (H2) trades
+surviving.
+
+## H1 AND H2, ATTACK 83 (BASE) VS ATTACK 87 (+ TERM), SIDE BY SIDE
+
+| | Attack 83a (H1) | **Attack 87a (H1)** | Attack 83b (H2) | **Attack 87b (H2)** |
+|---|---|---|---|---|
+| Profit factor | 1.61044869 | **1.57841989** | 1.15365198 | **1.17564253** |
+| Trades | 88 | **75** | 79 | **70** |
+| Win rate | 65.90909091% | **65.33333333%** | 59.49367089% | **61.42857143%** |
+| Avg winner | $171.25 | $181.48 | $124.79 | $122.62 |
+| Avg loser | -$205.59 | **-$216.69** | -$158.87 | **-$166.10** |
+| Achieved win/loss ratio | 0.8329907 | 0.83752892 | 0.78546517 | 0.73819415 |
+| Max drawdown | 11.08160523% | **11.85336747%** | 10.75664561% | **7.727746%** |
+| Net return | +37.65049449% | **+32.58779198%** | +7.81141638% | **+7.87723429%** |
+| Commission paid | $970.53 | $815.05 | $833.30 | $736.01 |
+| Largest loss | -$565.29 | -$563.54 | -$322.56 | -$322.56 |
+
+**Frequency estimate scored: pre-registered 0-25% cut, actual H1 14.77% cut (88→75) and H2 11.39% cut
+(79→70)** — both inside the registered band.
+
+## THE VERDICT — REJECTED. H1 REVERSES OUTRIGHT (PF FALLS, DRAWDOWN WORSENS); H2 CLEARS CLEANLY.
+
+**H2, taken alone, clears RATCHET v2 without qualification.** PF rises 1.15365198 → 1.17564253
+(+0.02199055, just past the 0.02 material-gain bar) and drawdown improves outright, 10.75664561% →
+7.727746% (-3.02890761pp) — no allowance needed.
+
+**H1 does not merely fail to improve — it reverses.** PF FALLS, 1.61044869 → 1.57841989 (-0.0320288), and
+drawdown WORSENS, 11.08160523% → 11.85336747% (+0.77176224pp). RATCHET v2's clause-2 allowance (up to
+0.50pp of drawdown worsening) only applies when the PF gain exceeds 0.02 — here there is no PF gain at
+all, so no allowance can apply and clause 1 fails outright on its own. Per the queue's own standing
+instruction — *"anything that improves one half and hurts the other is rejected, not averaged"* — the term
+is **REJECTED**. Attack 83 remains the base for term 4.
+
+## WHY THIS FALSIFIES THE STATED HYPOTHESIS, NOT JUST THE THRESHOLD
+
+The regime-conditioning **did narrow the cut** relative to Attack 67's unconditional floor (14.8%/11.4%
+here vs. 27%/26% there) — the mechanism of `breakoutMarginOk` behaved exactly as designed, removing only
+the calm-regime, thin-margin subset. **But the DIRECTION of the per-half asymmetry did not change**: H2
+improves and H1 gets worse, the identical shape Attack 67 produced with the unconditional floor, just at a
+smaller magnitude. If the stated hypothesis (thin margin = fakeout specifically in calm regime) were
+correct, conditioning on regime should have at minimum stopped hurting H1, since it now only removes
+calm-regime trades and exempts the elevated-regime ones. It did not: the calm-regime thin-margin breakouts
+still being removed from H1 were themselves apparently good trades, not fakeouts, on this half.
+
+**This supports Attack 67's OWN diagnosis over this cycle's alternative one.** Attack 67 attributed the
+asymmetry to a half-level property (H1's edge was already strong and undiluted; H2's was thin and
+diluted), not to a per-trade property like the prevailing volatility regime. A per-trade regime gate can
+only narrow which trades a filter touches — it cannot fix an asymmetry whose actual cause is which HALF a
+trade falls in, and this result is consistent with that being the real cause. **This is a different outcome
+from Attack 83's own regime-conditioning success** (the volume-climax exclusion): there, the asymmetry's
+cause (LUNA/FTX capitulation bars) was ITSELF a volatility-regime event, so conditioning on regime directly
+targeted the cause. Here, the asymmetry's cause (per Attack 67's own diagnosis) is not a volatility-regime
+event, so conditioning on regime only ever had a narrowing effect, never a fixing one. **Regime-conditioning
+is not a universal rescue for a "helps one half, hurts the other" filter — it only rescues cases where the
+half-level asymmetry is itself caused by the same regime variable being conditioned on.**
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Both halves remain category **3** (bleed on a positive edge): PF stays above 1.0 on both variants tested
+here, and neither half's avg loser is an outlier against its largest loss (H1: -$563.54 largest vs
+-$216.69 avg, ~2.6x; H2: -$322.56 largest vs -$166.10 avg, ~1.9x — no concentration signature). This
+rejection is about the RATCHET v2 keep/revert decision on H1, not a drawdown-category reclassification.
+
+## WHAT THIS SETTLES
+
+**Two of Attack 83's five explored filter axes now carry a clear pattern.** The volume-climax axis
+(Attacks 82→83) shows regime-conditioning CAN rescue a filter when the filter's own failure is itself a
+regime-linked historical event. The breakout-margin axis (Attacks 67→87) shows regime-conditioning CANNOT
+rescue a filter whose failure is a half-level edge-strength asymmetry unrelated to per-trade volatility.
+**The distinguishing question for any future regime-conditioning attempt is: does the ORIGINAL filter's
+failure trace to a specific regime-linked event, or to a half-level property like edge strength or sample
+composition?** Only the first case is a candidate for this fix.
+
+## QUEUE
+
+1. **Attack 83 remains the base.** Filter-stack term 4 has now failed twice (Attack 71's pivot-spacing
+   floor, decisively; this build, on the H1/H2-asymmetry axis specifically). Per Attack 71's own
+   precedent, a third failed axis argued cleanly from the mechanism (this one was) is not itself a reason
+   to keep searching this exact base for a fourth candidate before considering the stack complete at three
+   terms.
+2. **If a term-4 candidate is attempted again, the untouched-axis list narrows further**: timing margin
+   (67, rejected unconditionally; 87, rejected even regime-conditioned), swing amplitude (69/70, rejected,
+   axis abandoned), pivot spacing (71, rejected decisively), volume-climax magnitude (82/83, folded in
+   regime-conditioned). The divergence's own TIME SEPARATION normalized by regime (distinct from Attack
+   71's raw bar-count spacing) remains the one named-but-untried candidate from Attack 83's queue.
+3. **Per the mandate's own fallback, if queue item 2 is not retried, the next cycle proposes ONE genuinely
+   new mechanism**, distinct from the VWAP family and from every rejected strategy on the board (Attacks
+   33-65, 67/69/70/71/72-82, 84-86, and now 87).
+4. **Attack 46 (long) remains a candidate alongside Attack 83**, unaffected by this cycle — its H2 PF
+   (1.586) is still the best of any both-halves-positive build on this board (three-term stack included),
+   though its H2 sample (38) sits closer to the 30-trade floor than Attack 83's (79).
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+7. **This session cannot continue the new-engine cross-sectional track (Attacks 84-86)** — no
+   `backtest-lab`/`sweep_backtest` tool is available here. That track's own queue (re-run per-cell on a
+   longer window, split-test BTC/ETH, a Donchian-breakout control arm) is left for whichever session next
+   has that tool.
