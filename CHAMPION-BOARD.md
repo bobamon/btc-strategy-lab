@@ -5161,3 +5161,102 @@ kill rule, does not yet earn a champion claim," not as a decisive win.
    long-only build).
 
 ---
+
+# ATTACK 67 — QUEUE ITEM 1, FILTER-STACK TERM 1 ON ATTACK 66: BREAKOUT-MARGIN FLOOR. REJECTED, RATCHET v2 CLAUSE 1.
+
+The stored scheduled prompt asks (again) for "Attack 37's filter stack," describing a board state more
+than sixty attacks stale. **The docs override it**, per the prompt's own standing instruction: Attack 41
+closed Attack 37 on cost, Attack 43 closed the whole sweep-reversal family, Attack 46 is the long
+champion, and the live queue item 1 as of Attack 66 is exactly the instruction the stored prompt gives —
+build a filter stack, one term at a time, re-split on every addition — aimed at the mechanism that
+currently holds that queue slot (Attack 66, OBV/price bullish divergence breakout, PF 1.36461764/
+1.00868976 on 137/142 trades), not at Attack 37.
+
+## THE TERM
+
+**Breakout-margin floor.** Attack 66's `breakoutTrigger` fires on any `ta.crossover(close, lastPivotHigh)`,
+including a close that clears the pivot high by a single tick. This term requires the breakout bar to
+clear the pivot high by at least 0.10% of price (`breakoutMinPct`) before the entry is granted — a bare
+crossover cannot distinguish a decisive break from a whipsaw poke, and H2's razor-thin margin (PF
+1.00868976, win rate 56.3% against a ~56.1% breakeven) is the shape a population diluted by low-conviction
+breakouts would produce. **This does not move the target** (`close + swingAmp`, fixed geometry from the
+pivot spread, independent of the entry's clearance distance) — it is the Attack-46 pattern (raise a floor
+on the setup's own already-offered geometry) rather than the Attack-41/42/WF-E73 pattern that raises the
+target itself and pays for it in win rate. Byte-identical to Attack 66 otherwise. Pine:
+`strategies/pine/attack67-obv-divergence-breakout-margin.pine`.
+
+## AUDIT (one line per leg)
+
+R >= 0.8% (LESSON 3) — unchanged, `rBig` still gates by exclusion. Stop beyond STRUCTURE (LESSON 5) —
+unchanged, `slPx = lastPivLow`. Each leg separately (LESSON 6) — LONG ONLY, unchanged; short leg remains a
+reported standing asymmetry (Attack 64). BINDING (E17) — `bullDiv AND breakoutTrigger AND breakoutMarginOk
+AND rBig AND swingOk`; the new term is a strict narrowing of `breakoutTrigger`'s own bar, so it can only
+remove trades. REDUNDANCY (E14) — `breakoutMarginOk` reads clearance distance above `lastPivHigh`; `rBig`
+reads distance to `lastPivLow`; `swingAmp` reads the pivot spread — three independent quantities, not the
+HARD LESSON 18 redundant-pair failure. LATCH IN SEQUENCE (LESSON 8) — unaffected: the margin check reads
+the SAME bar as `breakoutTrigger`, tightening an existing single-bar trigger's threshold exactly as
+`minRpct` already does for `rBig`, not a new same-bar setup/trigger conjunction. CASCADE (HARD LESSON
+42/43) — LONG at 100% equity; `cascadeRatio` 1 confirmed on both halves below.
+
+## H1 (never-tuned) AND H2 (out-of-period), ATTACK 66 (BASE) VS ATTACK 67 (+ TERM)
+
+| | Attack 66a (H1) | **Attack 67a (H1)** | Attack 66b (H2) | **Attack 67b (H2)** |
+|---|---|---|---|---|
+| Profit factor | 1.36461764 | **1.36493974** | 1.00868976 | **1.16582077** |
+| Trades | 137 | **100** | 142 | **105** |
+| Win rate | 60.58394161% | **62%** | 56.33802817% | **61.9047619%** |
+| Avg winner | $160.24 | $160.74 | $119.66 | $124.05 |
+| Avg loser | -$180.48 | **-$192.14** | -$153.07 | **-$172.91** |
+| Max drawdown | 15.24998146% | **15.96180851%** | 13.83983527% | **11.4121128%** |
+| Net return | +35.54% | +26.65% | +0.82% | **+11.47%** |
+| Commission paid | $1,494.46 | $1,064.65 | $1,525.67 | $1,174.12 |
+
+Both halves cut trade count by roughly a quarter (137→100, -27%; 142→105, -26%), well under the 50%
+RATCHET v2 clause-4 threshold, so no split-feasibility problem on either half.
+
+## THE VERDICT — REJECTED, RATCHET v2 CLAUSE 1 (H1 FAILS EVEN AS H2 CLEARS)
+
+**H2 clears RATCHET v2 outright and by a wide margin.** PF rises 1.00868976 → 1.16582077 (+0.15713), max
+drawdown falls 13.84% → 11.41% (-2.43pp, an improvement not a cost), win rate rises 5.6pp, and net return
+over the period rises from a razor-thin +0.82% to +11.47%. Exactly the population this term predicted it
+would remove — low-conviction breakouts diluting H2's thin margin.
+
+**H1 does not clear it.** Profit factor is functionally FLAT — 1.36461764 → 1.36493974, a move of
++0.00032, nowhere near the >0.02 improvement RATCHET v2 requires before it will forgive any drawdown
+increase. Drawdown WORSENS by 0.71pp (15.24998% → 15.96180851%), which is not covered by the (unearned)
+0.50pp allowance. **RATCHET v2 clause 1 fails outright on H1 taken alone**, and per this queue's own
+standing instruction — *"anything that improves one half and hurts the other is rejected, not
+averaged"* — the term is **REJECTED**, despite H2's strong result. Attack 66 (bare) remains the base.
+
+## WHY THIS ONE HALF DIVERGED (NOT SPECULATION, A READ OF THE NUMBERS)
+
+Both halves show the same qualitative shape — win rate rises, avg loser gets worse (H1: -$180.48 →
+-$192.14; H2: -$153.07 → -$172.91), the term is removing a genuine chunk of low-conviction breakouts on
+both. The difference is in what the removed population was DOING to profit factor: on H2 those weak
+breakouts were dragging a thin edge down toward 1.0, so removing them helped a lot; on H1 the underlying
+edge was already strong (PF 1.36) and the removed trades were apparently a wash on net contribution while
+still counting toward the drawdown's peak-to-trough path (fewer trades bunches the remaining ones,
+worsening the drawdown shape slightly) — an unfavorable trade for a half that did not need the filter.
+This is the mirror image of HARD LESSON 45/49's "same term, different provenance, same wall" pattern:
+here it is the same term, same mechanism, opposite verdict per half, because the two halves' problems were
+different sizes to begin with.
+
+## QUEUE
+
+1. **Do not retry this exact filter at a different `breakoutMinPct` threshold.** The failure mode is not
+   "wrong strength" — H1's problem is that the filter removes trades from a half that was not diluted to
+   begin with, and no single global threshold can be strict on H2 and lenient on H1 simultaneously without
+   becoming a date-conditioned rule (HARD LESSON 49's exact trap).
+2. **Attack 66 (bare) remains the base for filter-stack term 2.** The next term should target a property
+   that is plausibly weaker in the SAME direction on both halves (a divergence-magnitude or OBV-quality
+   measure central to the mechanism's own claim, rather than an entry-timing margin), so the same
+   diagnosis-before-running discipline applies: argue it from the mechanism, not from either half's losses.
+3. **Attack 46 (long) remains a candidate alongside Attack 66**, unaffected by this cycle.
+4. **The out-of-sample test for Attack 46 still ranks first among long-side work not yet startable** and
+   still cannot be run under BTCUSDT-only — unchanged, restated because this cycle did not touch it.
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle (a
+   long-only build).
+
+---
