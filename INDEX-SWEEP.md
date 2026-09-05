@@ -129,3 +129,145 @@ report one, and no record in `CHAMPION-BOARD.md` contains one. It earned its kee
 4. Consider whether the mandate's original YM/NQ are worth adding. They are the futures contracts for
    US30/NAS100 rather than separate instruments, so they likely add correlation, not coverage — check
    before spending a cell on them.
+
+---
+
+# SWEEP 2 — `bollinger_reversion`, untuned defaults (20 / 2.0). THE BUY & HOLD CONTROL, AND IT PASSES.
+
+Executes this file's queue item 1. HARD LESSON 54 said the informative test is a strategy whose bias
+is **not** long-only-trend, so that its instrument ranking has a chance to disagree with buy & hold.
+A mean-reverter is that strategy. Same symbols, same windows, same fee, untuned defaults, both
+directions enabled — only the mechanism changed.
+
+### 1h — 2025-09-05 → 2026-09-01, 1,730 bars each, all `pinned: true`
+
+| Symbol | PF | Trades | Win rate | Net | Buy & hold | Max DD |
+|---|---|---|---|---|---|---|
+| **US30** | **1.29779** | 64 | 60.9375% | +4.31124% | +17.173812% | **-4.570215%** |
+| SPX500 | 0.827093 | 53 | 58.490566% | -4.243359% | +18.661585% | -15.583121% |
+| NAS100 | 0.687711 | 57 | 57.894737% | -12.728016% | +24.678064% | -24.845305% |
+
+### 1d — 2022-01-01 → 2026-09-01, 1,169 bars each, all `pinned: true`
+
+| Symbol | PF | Trades | Win rate | Net | Buy & hold | Max DD |
+|---|---|---|---|---|---|---|
+| **SPX500** | **1.246588** | 43 | 72.093023% | +11.372664% | +60.242758% | -14.627893% |
+| NAS100 | 0.689639 | 36 | 58.333333% | -19.329436% | +78.507951% | -31.245528% |
+| US30 | 0.644028 | 43 | 51.162791% | -16.513792% | +45.37601% | -23.466576% |
+
+All six cells clear the ≥30 sample floor (36–64 trades).
+
+---
+
+## FINDING 4 — THE CONTROL PASSES. THIS RANKING DOES **NOT** TRACK BUY & HOLD.
+
+Buy & hold ranks the instruments **NAS100 > SPX500 > US30** on both timeframes. Sweep 1's trend
+follower reproduced that order exactly, twice, which is what made it uninformative.
+
+**The mean-reverter does not:**
+
+| | 1st | 2nd | 3rd |
+|---|---|---|---|
+| Buy & hold (both TFs) | NAS100 | SPX500 | US30 |
+| Sweep 1, trend follower, 1h | NAS100 | SPX500 | US30 |
+| **Sweep 2, mean-reverter, 1h** | **US30** | SPX500 | **NAS100** |
+| **Sweep 2, mean-reverter, 1d** | **SPX500** | **NAS100** | US30 |
+
+On 1h the mean-reverter puts the **worst** buy & hold instrument first and the **best** one last. That
+is the residual HARD LESSON 54 said to look for: a ranking that survives after drift is accounted for.
+The lesson's test was proposed one cycle ago on a single confounded sweep, and on its first real
+application it cleanly separated an informative result from an uninformative one.
+
+## FINDING 5 — ON 1h THE TWO SWEEPS ARE AN EXACT INVERSION, AND THAT IS MECHANISTICALLY COHERENT
+
+| Symbol | trend follower PF (1h) | mean-reverter PF (1h) |
+|---|---|---|
+| NAS100 | **1.32603** | 0.687711 |
+| SPX500 | 0.635257 | 0.827093 |
+| US30 | 0.533099 | **1.29779** |
+
+The order reverses exactly. **The instrument the breakout system did best on is the one the reversion
+system did worst on, and vice versa** — which is what you would expect if the three indices differ in
+how much they trend versus range, and if these two untuned mechanisms are reading that same property
+from opposite sides. US30 is the most range-bound of the three over this window and NAS100 the most
+trending; each mechanism found the market that suits it.
+
+**US30 1h is the single best risk cell either sweep has produced**: PF 1.29779 on 64 trades at a
+**4.57% max drawdown**, the lowest in twelve cells by a wide margin.
+
+## FINDING 5b — THE INVERSION DOES **NOT** HOLD ON 1d, AND THAT LIMIT IS STATED
+
+On 1d the mean-reverter ranks SPX500 > NAS100 > US30, which is neither the buy & hold order nor an
+inversion of the 1d trend-follower order (NAS100 > SPX500 > US30). US30 is last on both 1d sweeps.
+So the clean trend-versus-range story is a **1h phenomenon in this data, not a general one**, and the
+1d cells do not support it. One timeframe agreeing is not two.
+
+## FINDING 6 — TWELVE CELLS, ZERO BEAT BUY & HOLD ON RETURN
+
+Adding sweep 2, the count is now **12 cells across two mechanisms, two timeframes and three
+instruments, and not one has beaten buy & hold on return.** The best of sweep 2 is US30 1h at +4.31%
+against +17.17%. The strategy-versus-holding gap is not a property of the trend follower; it is so far
+a property of this whole exercise.
+
+---
+
+# SPLIT TEST — NAS100 1d, `donchian_breakout` (queue item 2)
+
+The only cell above PF 1.0 on both timeframes in sweep 1. Split at 2024-04-30.
+
+| | in-sample | out-of-sample | full |
+|---|---|---|---|
+| Window | 2022-01-03 → 2024-04-30 | 2024-05-01 → 2026-08-31 | 2022-01-03 → 2026-08-31 |
+| Bars | 584 | 585 | 1,169 |
+| Profit factor | 1.241028 | **1.143209** | 1.194034 |
+| Net | +9.174315% | **+5.239724%** | +15.505107% |
+| Buy & hold | **+5.689814%** | **+70.08912%** | +78.507951% |
+| Trades | 18 | **17** | 35 |
+| Win rate | 50.0% | 35.294118% | 40.0% |
+| Max DD | -15.259% | -16.929431% | -16.929431% |
+
+Engine verdict: **"holds"** — "+9.17% in-sample, +5.24% out of sample. That is what a real edge looks
+like — unexciting and consistent."
+
+## THE VERDICT IS NOT QUOTABLE, AND THE REASON IS THIS LAB'S OWN RULE
+
+**17 out-of-sample trades is below RATCHET v2 clause 3's floor of 30.** By the project's own standing
+practice a ratio under ~30 trades is not quoted as a result, and that predates and survives the
+ratchet. The engine's "holds" verdict is computed without reference to that floor. **So this split is
+recorded as suggestive and explicitly not banked.** The full-window 35 trades clears the floor; each
+half does not, which is the structural problem with splitting an already-small daily sample.
+
+Two further warnings the engine raised, both material:
+
+1. **One-legged.** The full window is carried by the long leg (+23.10%) while the short leg loses
+   (-17.86%). Per the ledger's standing both-directions requirement the legs must be reported
+   separately, and reported separately this is a long-only result with a loss-making short attached.
+2. **Trails buy & hold by 64.85%** out of sample.
+
+## THE ONE GENUINELY INTERESTING NUMBER IN THE SPLIT
+
+**In-sample, this is the first index cell in this file to beat buy & hold: +9.174315% against
++5.689814%.** And the split window explains why. The in-sample half was a nearly flat market (B&H
++5.69% over 2.3 years); the out-of-sample half was a violent rally (B&H +70.09%). The strategy beat a
+flat market and was left far behind by a rising one.
+
+That is consistent with FINDING 4/5 rather than a separate result: **these mechanisms add value
+relative to holding when drift is small, and are dominated by holding when drift is large.** It is
+also the same shape as the War Formation benchmark result from the same day — `e58a` beat a *falling*
+BTC market by 16 points. Two labs, two instruments, same direction of effect. That is not yet a
+finding; it is a pattern worth naming and testing deliberately.
+
+## QUEUE
+
+1. **Test the low-drift hypothesis directly** rather than inferring it from splits: run the same two
+   mechanisms on the flattest window each instrument has, and on the steepest, and compare. This is
+   the natural next index tick and it costs nothing.
+2. **Do not tune anything toward beating buy & hold on a measured window** — HARD LESSON 49.
+3. **Report legs separately on every future index cell.** The `one_legged` warning showed the totals
+   were hiding a losing short leg; that is exactly what the standing both-directions requirement
+   exists to prevent.
+4. **Do not bank the NAS100 split.** 17 out-of-sample trades is below the floor. If it is revisited,
+   it needs either a longer daily history or a lower timeframe with more trades — and Yahoo's caps
+   mean the second is not available.
+5. Queue items 3 and 4 from sweep 1 (do not sweep Donchian's parameters; check whether YM/NQ add
+   coverage over US30/NAS100) remain open and untouched.
