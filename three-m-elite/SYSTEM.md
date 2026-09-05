@@ -4636,3 +4636,42 @@ behaviour, not an omission.
 
 **CHAMPION OF RECORD (LONG): v58.** Unchanged. **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61.**
 Unchanged.
+
+---
+
+## ██ CYCLE CHECK #14 — STILL NOTHING NEW; NOT RE-NOTIFYING (2026-09-05)
+
+**Scheduled prompt fired again, still carrying the identical fourteenth-generation-stale v37/v53
+snapshot** — same "QUEUE ITEM 1"/"QUEUE ITEM 2" text, same "champion is v37" claim, same "continue
+numbering after v53" instruction. Both items were closed cycles ago (bias gate v54–v57, HARD LESSON 45;
+cascade signature at zero cost, HARD LESSON 34/35/50/52). Champion has been v58 since check #1 and has
+not moved since check #13.
+
+**Independently re-verified, not assumed from check #13's word:** `git log --oneline 806df01..HEAD --
+three-m-elite/` returns nothing — zero commits have touched this lab since check #13 (the only two
+commits on the whole repo in that window are War Formation's own cycle check #17 and Attack 67, neither
+touching this lab). `results/backtests.json` re-read directly end to end: still 25 entries, identical to
+check #13. `git status` on the working tree: clean before this edit. Author scan (`git log --format='%an'
+-60 -- three-m-elite/ | sort | uniq -c`) returns only `Claude` (17) — no non-Claude commit touching this
+lab exists, so no user response to the declared-deviation promotion policy question has landed. No `USER
+DECISION`/`USER DIRECTIVE` marker newer than 2026-09-03 in STRATEGY-LEDGER.md, three-m-elite/SYSTEM.md, or
+CHAMPION-BOARD.md. `get_credits`: balance 542/1000 — above the 500-credit two-backtest ceiling, but moot,
+no experiment queued.
+
+**No backtest run. 0 of 542 available credits spent.** The sole open item remains the declared-deviation
+promotion policy question, unchanged from checks #1–#13. Manufacturing a fourteenth mirror variant purely
+to spend budget would violate the no-invented-mechanism rule and would not answer a policy question
+anyway.
+
+**No new notification sent.** Check #1 pushed this exact question once; nothing about it has changed in
+thirteen subsequent checks. HARD LESSON 26 governs a repeated notification the same way it governs a
+repeated stale-prompt flag: say nothing new, notify nothing new. Silence this cycle is correct
+behaviour, not an omission.
+
+**QUEUE (unchanged, restated for the next cycle):**
+1. **The declared-deviation promotion policy question** — still open, still for the user, still the
+   only thing standing between v60/v61 (validated short) and v64 (validated combined build) and a
+   promotion decision. Nothing to re-run until the user answers.
+
+**CHAMPION OF RECORD (LONG): v58.** Unchanged. **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61.**
+Unchanged.
