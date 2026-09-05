@@ -6757,3 +6757,91 @@ spread is reportable, not vetoing. It is now reported.
 - **Nothing is promoted or demoted by this audit.** It adds a column the board never had.
 - **The funding figures are the baseline's, not the candidates'.** No trader.dev record reports
   `fundingPaid`, so what those builds would have paid is unknown and is not estimated here.
+
+---
+
+# ██ PHASE DECOMPOSITION OF ATTACK 46b — THE BOARD'S ONLY BENCHMARK-BEATING RESULT. IT HOLDS, BUT THE PHASE SAMPLES DO NOT CLEAR THE FLOOR.
+
+Zero credits. No new backtest. `get_trades` on Attack 46b's existing result
+`01M1NGZVYRXPFYS9FFMQ17EN14` (all 38 trades; the stored `adhoc_...` jobId is rejected by `get_trades`
+— the id in `provenance.backtestUrl` works), plus the recorded benchmark curve `bt_8531235119`.
+
+**Why this instead of Attack 80.** Attack 79's queue asked for another new mechanism. But the
+benchmark audit in that same entry found that **Attack 46b is the only result on this board that beats
+buy & hold**, and two whole-window claims elsewhere in this project were overturned by decomposition
+on the same day — War Formation's check #28 was withdrawn outright. Verifying the board's one positive
+result outranked an eighth bare mechanism, seven of which have failed in a row.
+
+## THE PHASES, READ FROM BTC's OWN H2 CURVE
+
+The H2 window is not monotonic. `bt_8531235119`'s equity curve rises to a peak at **2025-10-08** and
+then falls, giving two clean phases:
+
+| Phase | span | BTC |
+|---|---|---|
+| **A — rise** | 2024-06-08 → 2025-10-08 | **+65.1%** |
+| **B — decline** | 2025-10-08 → 2026-08-27 | **-41.4%** |
+
+## THE DECOMPOSITION
+
+| Phase | trades | wins | win rate | 46b $ | 46b % | phase PF |
+|---|---|---|---|---|---|---|
+| **A — rise** | 26 | 7 | 26.9% | +1,092.52 | **+10.93%** | **1.4594** |
+| **B — decline** | 12 | 3 | 25.0% | +946.77 | **+9.47%** | **1.8575** |
+| **TOTAL** | 38 | 10 | 26.3% | +2,039.29 | +20.39% | 1.5856 |
+
+Totals reconcile to the recorded +20.39290865% and PF 1.58559241 exactly.
+
+## FINDING — IT IS NOT AN ENDPOINT ARTEFACT, AND IT IS STRONGER IN THE DECLINE
+
+Attack 46b is **positive in both phases**, and its profit factor is **higher in the falling phase**
+(1.8575) than in the rising one (1.4594). It produced nearly as much profit in phase B as in phase A
+from **half the trades**.
+
+This is the opposite of War Formation's `e58a`, which lost money in every falling phase and turned out
+to be a damped long. Attack 46b earns in both directions of the market. The benchmark-beating result
+recorded in the Attack 79 entry survives the decomposition that destroyed the other one.
+
+## THE SAMPLE PROBLEM, STATED PLAINLY BECAUSE IT IS DECISIVE
+
+**Neither phase clears RATCHET v2 clause 3's floor of 30 trades. Phase B has 12 trades and 3 wins.**
+
+A profit factor of 1.8575 on 12 trades is not a result by this lab's own standing practice, which
+predates the ratchet and survives it. The whole-window 38 trades does clear the floor; splitting it
+does not. So the correct reading is:
+
+- **The whole-window claim stands**: +20.39290865% against buy & hold's +13.461286%, PF 1.58559241 on
+  38 trades. That was already recorded and is unaffected.
+- **The phase claim is suggestive and is not banked.** "Stronger in the decline" is what these 12
+  trades show; 12 trades cannot establish it.
+
+Recording an unbankable number is still worth doing here, because the decomposition was run to test
+whether the whole-window result was an *artefact* — and on that narrower question it gives a clear
+answer: no. An artefact would show profits concentrated in the rising phase. These are not.
+
+## WHERE THIS LEAVES THE BOARD'S TWO CANDIDATES
+
+| | whole window | vs buy & hold | phase-robust? |
+|---|---|---|---|
+| **Attack 46b** (H2) | PF 1.58559241, 38 trades | **+6.93 pp** | **yes, but on 26/12 sub-samples** |
+| Attack 68 (H1/H2) | PF 1.56474476 / 1.13127036, 89/80 | -14.25 / -6.69 pp | **not tested** |
+
+**Attack 68 has the better sample and the worse benchmark; Attack 46b has the better benchmark and the
+worse sample.** Neither dominates. Attack 68's 80 H2 trades would survive a phase split with samples
+near the floor, which makes it the better decomposition target than another new mechanism.
+
+## QUEUE
+
+1. **Decompose Attack 68's H2 by the same phases.** 80 trades splits to something near the floor,
+   unlike 46b's 38, so it can actually settle whether its consistency is drift-riding. This is free and
+   is the highest-value invented-lab item on the board.
+2. **Do not promote Attack 46b on the strength of phase B.** 12 trades. If its counter-drift behaviour
+   matters, the way to establish it is a longer window or the H1 half, not a re-reading of these 12.
+3. **Decompose Attack 46a (H1, 105 trades)** — the larger sample of the same construction, and it
+   *lost* to buy & hold by 32.60 points. If 46a's phases show the same counter-drift shape on 105
+   trades, that is the evidence 46b's 12 cannot provide.
+4. **Attack 80 is deferred, not cancelled.** Seven of eight bare first passes have failed; the board's
+   own standing mandate still asks for new mechanisms, but verifying two live candidates with free
+   calls is worth more than an eighth coin flip.
+5. **Promote the flat-stop load-bearing check to a standing requirement** — still owed from Attack
+   79's queue, untouched by this entry.
