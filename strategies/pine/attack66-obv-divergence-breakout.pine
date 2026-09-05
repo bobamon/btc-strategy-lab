@@ -1,0 +1,149 @@
+//@version=6
+// BTC ATTACK 66 - OBV/PRICE BULLISH DIVERGENCE, CONFIRMED ON BREAKOUT. A GENUINELY NEW MECHANISM, BARE.
+//
+// THE STORED SCHEDULED PROMPT still describes a board state (Attack 37, "earned a filter stack") more
+// than sixty attacks stale and instructs "continue numbering after 37." THE DOCS OVERRIDE IT, again, per
+// the prompt's own instruction: Attack 41 closed Attack 37 on cost, Attack 46 is the long champion (both
+// halves clear, cold-reproduced, filters exhausted per HARD LESSON 49), the short leg has failed on five
+// distinct signal shapes and is reported as a standing structural asymmetry (Attack 64's queue item 1),
+// and Attack 65's own new-mechanism build (a third orthogonal class, volatility-magnitude) also failed,
+// giving the inverted-payoff shape (HARD LESSON 53) its fifth instance. With both standing queue items
+// blocked (Attack 46's out-of-sample test, cannot run under BTCUSDT-only) or merely optional (the
+// funding-clock counter-build diagnostic), the mandate's fallback governs this cycle: propose one
+// genuinely new mechanism, distinct from every mechanism already on the board.
+//
+// ==================== WHAT THIS CLAIMS, IN ONE SENTENCE ====================
+// When price prints a confirmed pivot low BELOW its prior confirmed pivot low, but on-balance volume
+// (cumulative volume flow, signed by each bar's own close-vs-prior-close direction) prints a HIGHER low
+// at those same two pivots -- volume already net-accumulating while price makes a fresh low, a bullish
+// divergence between price and participation -- a subsequent close back above the most recent confirmed
+// pivot high confirms the divergence has resolved, and price tends to continue the reversal toward a
+// measured-move projection of the swing just completed.
+//
+// ==================== WHY THIS IS A NEW INPUT CLASS FOR THIS LAB ====================
+// Every prior mechanism used one of: rolling extremes with no structure filter (33, 48), a calendar
+// anchor (34/35/54/55), a volatility state (36, 65), a failed break of a swing low (37-43), a tap-and-
+// reclaim of a swing level (44-47, champion), a single bar's own range/volume (49), a session range (50),
+// an RSI/PRICE divergence at a confirmed pivot (51/52), a summed order-flow-proxy ABSORPTION signal
+// during a decline (53, volume used as a same-window pressure sum, not a swing-to-swing comparison), a
+// consecutive-close streak (56), an EMA-slope crossover (57/58), and confirmed price-only swing structure
+// (59, 63). NONE has compared a CUMULATIVE VOLUME SERIES across two confirmed pivots against the price
+// series at those same two pivots. Attack 53 used volume as a same-bar/same-window pressure sum, not as
+// a second independent series compared point-to-point the way Attack 51/52 compared RSI to price -- this
+// is that comparison, but with volume flow (OBV) standing in for the oscillator. It is an honest
+// recombination of two previously-tried ingredients (volume: 53; pivot-to-pivot divergence structure:
+// 51/52/59), not a wholly unprecedented data source -- flagged here rather than overclaimed, per this
+// lab's own standard of naming what a build shares with what already failed.
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS ====================
+// ta.pivotlow(low, 5, 5) and ta.pivothigh(high, 5, 5), confirmed 5 bars after the actual extreme, non-
+// repainting. `var float` scalars (not arrays) hold the most recent and prior confirmed pivot low PRICE
+// and the OBV value AT that pivot bar (ta.obv[pivotRight] read on the confirmation bar, a fixed historical
+// offset, not repainting). A `var bool bullDiv` is re-evaluated (not merely set-and-forget) each time a
+// new pivot low confirms: true only when price's new pivot low is BELOW the prior one AND OBV's value at
+// that new pivot is ABOVE its value at the prior one (HARD LESSON 8: the divergence is armed and held in
+// state, re-derived only on the pivot-confirm bar). The TRIGGER is a later, separate bar:
+// `ta.crossover(close, lastPivotHigh)`, while bullDiv is latched true. Stop: the divergence low itself
+// (LESSON 5, actual structure). Target: a MEASURED-MOVE PROJECTION -- breakout price plus the amplitude
+// of the swing just completed (pivot high minus the divergence low) -- a level derived from the swing's
+// own geometry (HARD LESSON 41), independent of R (E14: minRpct constrains the stop distance; swingAmp
+// constrains the target, drawn from a different quantity).
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - enforced by EXCLUSION via rBig, never clamped.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = lastPivLow, the actual confirmed divergence low.
+//   Each leg separately (LESSON 6) - LONG ONLY. A bearish mirror (lower pivot highs, OBV lower high vs
+//        prior higher high) is untested; the short leg is a reported standing asymmetry (Attack 64).
+//   BINDING (E17) - bullDiv AND breakoutTrigger AND rBig AND swingOk all necessarily bind.
+//   REDUNDANCY (E14) - minRpct constrains the stop distance; swingAmp (the target) is independent
+//        geometry drawn from the pivot high/low spread, not derived from R.
+//   LATCH IN SEQUENCE (LESSON 8) - bullDiv is re-derived on the bar a new pivot low confirms;
+//        breakoutTrigger reads a LATER, distinct bar (the crossover of the separately-tracked pivot-high
+//        level). The two conditions cannot share a bar by construction -- a pivot-low confirmation and a
+//        pivot-high crossover are different events on different series.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, flat check gates every entry.
+//   CASCADE (HARD LESSON 35/42/43) - single TP+SL, no partials, LONG at 100% equity (the declared-
+//        deviation sizing fix is a short-side margin artifact only); expect cascadeRatio 1.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17). CODE BARE -- NO RR FLOOR, NO ADDED FILTER:
+//   * BOTH HALVES ABOVE 1.0, TRADES ROUGHLY 60-350 PER HALF -> a genuinely new candidate, ranked
+//     alongside Attack 46, queued for RATCHET v2 filter work.
+//   * PRE-2024 HALF BELOW 1.0 -> DISCARDED by the kill rule. No filters, no rescue, no second half.
+//   * A MAJORITY WIN RATE WITH ratioAvgWinLoss WELL BELOW 1.0 -> instance six of HARD LESSON 53's
+//     inverted-payoff shape; report it as that, not as a novel diagnosis.
+//   * TRADES WELL BELOW ~30 -> a DIRECTION, not a result (LESSON 12); the divergence gate may be too
+//     strict for a single-symbol single-timeframe test.
+//   * A LARGE SHARE OF HOLDS AT maxBars 192 -> the cap is truncating (HARD LESSON 38); report before
+//     drawing any conclusion.
+//   REPORT GROSS, COMMISSION AND ACHIEVED RATIO alongside net, avg loser and win rate (LESSONS 36/39
+//     and the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack66 OBV divergence breakout", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+pivotLeft  = input.int(5, "Pivot confirmation bars, left")
+pivotRight = input.int(5, "Pivot confirmation bars, right")
+minRpct    = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars    = input.int(192, "Max bars in trade")
+
+pl  = ta.pivotlow(low, pivotLeft, pivotRight)
+ph  = ta.pivothigh(high, pivotLeft, pivotRight)
+obv = ta.obv
+
+var float lastPivLow    = na
+var float prevPivLow    = na
+var float lastPivLowOBV = na
+var float prevPivLowOBV = na
+var float lastPivHigh   = na
+var bool  bullDiv       = false
+
+if not na(pl)
+    prevPivLow    := lastPivLow
+    prevPivLowOBV := lastPivLowOBV
+    lastPivLow    := pl
+    lastPivLowOBV := obv[pivotRight]
+    if not na(prevPivLow)
+        bullDiv := lastPivLow < prevPivLow and lastPivLowOBV > prevPivLowOBV
+
+if not na(ph)
+    lastPivHigh := ph
+
+rLong = not na(lastPivLow) ? close - lastPivLow : na
+minR  = close * minRpct / 100
+rBig  = not na(rLong) and rLong >= minR
+
+breakoutTrigger = not na(lastPivHigh) and ta.crossover(close, lastPivHigh)
+
+swingAmp = not na(lastPivHigh) and not na(lastPivLow) ? lastPivHigh - lastPivLow : na
+swingOk  = not na(swingAmp) and swingAmp > 0
+
+goLong = bullDiv and breakoutTrigger and rBig and swingOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := lastPivLow
+    tpPx   := close + swingAmp
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(lastPivLow, title="LastPivotLow")
+plot(lastPivHigh, title="LastPivotHigh")

@@ -5056,3 +5056,108 @@ reward while leaving risk at the full pre-reversion extreme.
    long-only build).
 
 ---
+
+# ATTACK 66 — OBV/PRICE BULLISH DIVERGENCE BREAKOUT, THE SECOND BOTH-HALVES-POSITIVE CANDIDATE IN THIS LAB'S HISTORY, AND THE LARGEST-SAMPLE ONE YET
+
+The stored scheduled prompt still describes a board state (Attack 37, "earned a filter stack") more than
+sixty attacks stale and instructs "continue numbering after 37." **The docs override it, again**, per the
+prompt's own instruction: Attack 41 closed Attack 37 on cost, Attack 46 is the long champion (both halves
+clear, cold-reproduced, filters exhausted per HARD LESSON 49), the short leg has failed on five distinct
+signal shapes and is a reported standing structural asymmetry (Attack 64), and Attack 65's own new-
+mechanism proposal (a volatility-magnitude class) also failed, giving HARD LESSON 53's inverted-payoff
+shape its fifth instance. With both remaining queue items blocked (Attack 46's out-of-sample test) or
+merely optional (the funding-clock counter-build diagnostic), the mandate's fallback governs this cycle:
+propose one genuinely new mechanism, distinct from every mechanism already on the board.
+
+## THE CLAIM UNDER TEST
+
+When price prints a confirmed pivot low BELOW its prior confirmed pivot low, but on-balance volume
+(`ta.obv`, cumulative volume flow signed by each bar's own close-vs-prior-close direction) prints a
+HIGHER low at those same two pivots — volume already net-accumulating while price makes a fresh low, a
+bullish divergence between price and participation — a subsequent close back above the most recent
+confirmed pivot high confirms the divergence has resolved, and price tends to continue the reversal
+toward a measured-move projection of the swing just completed. **This is an honest recombination, not a
+wholly unprecedented data source**: Attack 53 already used volume as a primary signal (a same-window
+order-flow-absorption proxy, not a swing-to-swing comparison) and Attacks 51/52/59 already compared a
+second series to price at confirmed pivots (RSI, and price-only structure). Attack 66 is the first build
+to compare a CUMULATIVE VOLUME series to price point-to-point across two confirmed swing pivots — a
+combination neither prior build made, flagged here rather than overclaimed as a new data class. Pine:
+`strategies/pine/attack66-obv-divergence-breakout.pine`.
+
+## AUDIT (LONG ONLY, one line per leg)
+
+R ≥ 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rLong = close - lastPivLow`, never clamped. Stop beyond
+STRUCTURE (LESSON 5) — `slPx = lastPivLow`, the actual confirmed divergence low. Each leg separately
+(LESSON 6) — LONG ONLY; a bearish mirror is untested and the short leg is a reported standing asymmetry
+(Attack 64). BINDING (E17) — `bullDiv` AND `breakoutTrigger` AND `rBig` AND `swingOk` all necessarily
+bind (137/142 trades on 85,655/78,567 bars). REDUNDANCY (E14) — `minRpct` constrains the stop distance;
+`swingAmp` (the target) is independent geometry drawn from the pivot high/low spread. LATCH IN SEQUENCE
+(LESSON 8) — `bullDiv` is re-derived only on the bar a new pivot low confirms; `breakoutTrigger` reads a
+later, distinct bar (the crossover of the separately-tracked pivot-high level) — cannot share a bar by
+construction. CASCADE (HARD LESSON 42/43) — LONG at 100% equity (the declared-deviation fix is a short-
+side margin artifact only); `cascadeRatio` 1 / `maxCascadeDepth` 1 on both halves, confirmed clean.
+
+## H1 (2022-01-01 → 2024-06-08, never-tuned) AND H2 (2024-06-08 → 2026-09-01), SIDE BY SIDE
+
+| | **Attack 66a (H1)** | **Attack 66b (H2)** |
+|---|---|---|
+| Profit factor | **1.36461764** | **1.00868976** |
+| Trades | 137 | 142 |
+| Win rate | 60.58394161% (a MAJORITY) | 56.33802817% (a MAJORITY) |
+| Achieved win/loss ratio | 0.88782353 | 0.78173456 |
+| Avg winner | $160.24 | $119.66 |
+| Avg loser | -$180.48 | -$153.07 |
+| Max drawdown | 15.24998146% | 13.83983527% |
+| Net return | +35.54% | +0.82% |
+| Commission paid | $1,494.46 | $1,525.67 |
+| Largest loss | -$603.92 | -$338.80 |
+
+## BOTH HALVES CLEAR 1.0. NO KILL RULE, NO FILTER, TWO CREDITS SPENT THIS CYCLE (546 BALANCE — FULL PAIR).
+
+Neither half breaches the workable band (137 and 142 sit near its middle, not its edges). `avgBarsInTrade`
+49.6/47.1, well under `maxBars` 192 on both halves — no truncation confound (HARD LESSON 38). Win rate is
+a majority on BOTH halves, and on BOTH halves the achieved payoff, while below 1.0, is high enough against
+that win rate to clear breakeven with real margin (H1: 60.6% needs ~52.9% at 0.888 payoff; H2: 56.3% needs
+~56.1% at 0.782 payoff — H2's margin over its own breakeven is almost nothing, which is exactly why its PF
+is 1.009 and not higher). **This is NOT a sixth instance of HARD LESSON 53's inverted-payoff shape** — that
+pattern is a majority win rate that still LOSES; both halves here win, even if H2 barely does.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Category **3, bleed on a positive edge** — PF is above 1.0 on both halves (thinly on H2), avg loser is
+neither an outlier against the largest loss (H1: -$603.92 is ~3.3x avg loser -$180.48; H2: -$338.80 is
+~2.2x avg loser -$153.07 — no concentration signature, not category 1) nor is the edge itself negative
+(not category 2). This is the second candidate this lab has ever placed in category 3 (after Attack 37),
+which is the only category worth filtering, because the filter removes losers from a distribution that
+already wins.
+
+## WHAT THIS SETTLES
+
+**Attack 66 is the second both-halves-positive candidate in this lab's history, and the largest-sample
+one yet.** Attack 37 cleared both halves at 322/196 trades (1.024/1.012). Attack 46, the current champion,
+clears both halves at 105/38 trades (1.172/1.586) — but 38 trades sits close to the ~30-trade sample floor
+(LESSON 12), a genuine weakness the board has flagged before. Attack 66 clears both halves at 137/142
+trades (1.365/1.009) — a combined sample of 279, larger than Attack 37's 518 is not, but larger and far
+more BALANCED than Attack 46's 143 (which is lopsided 105/38), and with a materially better H1 profit
+factor and drawdown than either prior candidate. **H2's margin is razor-thin** (net +0.82% over 2.25
+years, PF 1.00868976) — this is not a strong candidate on H2 alone, and should be read as "clears the
+kill rule, does not yet earn a champion claim," not as a decisive win.
+
+## QUEUE
+
+1. **Attack 66 earns a candidate filter stack, one term at a time, re-split on every addition** — the
+   same standard Attack 37 earned and the same one the mandate withheld from every thinner sample on this
+   board. H2's thin margin (1.009) means the bar for "improves PF materially on both halves" is easy to
+   clear in absolute terms but the sample is exactly where HARD LESSON 45/49's ~77%-count-cut wall would
+   bite hardest — expect it to bite here too, and say so plainly if it does.
+2. **Attack 46 (long) remains a candidate alongside Attack 66**, not displaced — its H1 profit factor is
+   lower and its H2 sample is thinner, but its H2 PF (1.586) is the best of any both-halves-positive
+   build on this board. Neither candidate ranks the other pending filter work on both.
+3. **The out-of-sample test for Attack 46 still ranks first among long-side work not yet startable** and
+   still cannot be run under BTCUSDT-only — unchanged, restated because this cycle did not touch it.
+4. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+5. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle (a
+   long-only build).
+
+---
