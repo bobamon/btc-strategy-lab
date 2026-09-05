@@ -787,3 +787,226 @@ run. Neither may be recorded as a result until a real `runId` produces one.**
   it does.
 - **Whether the rolling-mean target actually helps or hurts.** Two predictions are now registered. The
   engine deadlock from tick #3 is unchanged, so they stay unrun.
+
+---
+
+# ██ TICK #6, 2026-09-05 — POOLING NQ+YM CANNOT CLEAR THE SAMPLE FLOOR, AND THE ANSWER DOES NOT DEPEND ON MEASURING THE CORRELATION
+
+Zero credits. **No backtest, no `plan_backtest_window`, no engine call of any kind.** Two inputs only:
+the transcripts already committed here, and web research (URLs cited).
+
+**Environment note, recorded because it changes what a tick can do.** Tick #5's queue item 1 —
+*"measure `US30` 15m and 5m depth on `backtest-lab`"* — **could not be attempted this tick. This
+session has no `backtest-lab` connector at all**; only trader-dev is present, and trader-dev is the
+engine this workstream is forbidden to touch (tick #2, FINDING 4). The item is not stale, it is
+**blocked by session capability**, and it stays queued for a session that has the connector.
+
+---
+
+## ██ FINDING 13 — THE POOLING QUESTION IS DECIDABLE WITHOUT KNOWING THE CORRELATION, AND THE ANSWER IS NO
+
+HARD LESSON 56's corollary left this open in exactly these words:
+
+> *"Pooling two correlated instruments does not give you 2N independent observations; it gives you
+> somewhere between N and 2N depending on a correlation nobody has measured."*
+
+That framing implied the question was stuck behind a measurement no engine here can make. **It is
+not.** The verdict is invariant across the entire plausible range of that correlation, and at the
+bottom of the expected band it does not depend on the correlation at all.
+
+### THE MODEL, STATED BEFORE THE ARITHMETIC
+
+FINDING 10.2 established what a pooled day actually looks like: **one NQ trade and one YM trade, the
+same session, typically one each.** Three independent streams say so:
+
+> `video1038794732` [05:35] *"as you can see **bot nasdaq bot us 30** currently up"*
+> `video1263885792` [03:51] *"$60,000 on Nasdaq, $26,000 on us 30 — **we're taking two trades in a day**"*
+> `video1979454677` [12:29] *"**this is two positions one day**"*
+
+So the pooled book is **N pairs**, not 2N loose draws. Model each pair as two outcomes with equal
+variance σ² and within-pair correlation ρ, pairs independent of each other. Then
+
+```
+Var(pooled mean) = σ²(1 + ρ) / (2N)      ⇒      N_eff = 2N / (1 + ρ)
+```
+
+`N_eff` is the number of *independent* trades the pooled sample is worth. ρ = 0 gives the full 2N;
+ρ = 1 gives N, i.e. pooling buys nothing.
+
+### THE ARITHMETIC, ON THIS WORKSTREAM'S OWN CORRECTED BAND
+
+FINDING 11's corrected expectation on the measured `NDX` 15m coverage (~43 RTH sessions at 0.60–0.80
+book-wide trades/session): **~13–17 trades per instrument, ~26–34 pooled.** Against the 30-trade floor:
+
+| ρ assumed | `N_eff` at the **bottom** of the band (2N = 26) | `N_eff` at the **top** (2N = 34) | clears 30? |
+|---|---|---|---|
+| 0.0 (perfectly independent) | 26.0 | 34.0 | top only |
+| 0.3 | 20.0 | 26.2 | **no** |
+| 0.5 | 17.3 | 22.7 | **no** |
+| 0.7 | 15.3 | 20.0 | **no** |
+| 0.9 | 13.7 | 17.9 | **no** |
+
+**Two things fall out, and neither needs ρ to be measured:**
+
+1. **At the bottom of the band, pooling cannot reach 30 even if the two instruments were perfectly
+   independent.** 26 < 30. No correlation assumption rescues it.
+2. **At the top of the band, clearing 30 requires ρ ≤ ~0.13** (34/30 − 1 = 0.133; ~0.15 on the
+   unrounded 34.4). **Nothing in the published record puts two US equity index futures anywhere near
+   0.13**, and FINDING 14 below sets out what the record actually says.
+
+**And the number that makes the point plainest:** at ρ = 0.9, the pooled book is worth **13.7–17.9**
+independent trades against the single instrument's **13–17**. Running both instruments buys **less
+than one extra independent observation.**
+
+### THE DECLARATION TICK #5's QUEUE ITEM 2 ASKED FOR, MADE NOW AND BEFORE ANY RUN
+
+> **NQ and YM trades MAY NOT be pooled to clear the 30-trade sample floor in this workstream.**
+> A pooled count may be reported as a description of his book. It may not be quoted as a sample size.
+> Any future run that reaches 30 only by pooling is reporting a number that this file has already
+> declared inadmissible.
+
+**What would reverse it, stated so the declaration is falsifiable (HARD LESSON 17):** a measurement of
+the **trade-level** correlation between concurrent NQ and YM positions, over the actual holding period,
+returning **ρ ≤ 0.13** — and even then only for the top of the expected band. Any ρ above that, and the
+declaration stands. Note the asymmetry deliberately: this verdict is cheap to defend and expensive to
+overturn, which is the right way round for a threshold that protects a sample floor.
+
+### THE TRAP THAT WOULD DEFEAT THIS, NAMED IN ADVANCE — DO NOT MEASURE ρ ON 5m BARS
+
+The obvious way a later tick would try to satisfy the reversal condition is to correlate NQ and YM
+**5m or 15m bar returns** and quote the result. **That number would be systematically too low, and it
+would not answer this question.**
+
+The **Epps effect** — measured cross-correlation between two assets falls as the sampling frequency
+rises — is a documented, decades-old empirical regularity, first reported by Epps in 1979 and studied
+since ([arXiv:0704.3798](https://arxiv.org/pdf/0704.3798),
+[On the origin of the Epps effect](https://www.sciencedirect.com/science/article/abs/pii/S0378437107004712),
+[The Epps effect revisited](https://www.tandfonline.com/doi/abs/10.1080/14697680802595668)). The
+literature attributes it mainly to trading asynchronicity and lead–lag structure, with the
+characteristic time scale tied to participants' reaction time.
+
+**Why that matters here:** his positions are held for **hours inside one RTH session**, scaling out
+along a target ladder (FINDING 10.4). The independence question therefore lives at the **holding-period
+horizon**, not the bar horizon. A low 5m correlation is compatible with a high holding-period
+correlation and is not evidence for pooling. **If ρ is ever measured for this purpose, it must be
+measured on the P&L of the concurrent trades themselves, or on returns sampled at the holding
+period — never on the chart timeframe.**
+
+---
+
+## ██ FINDING 14 — HIS DE-SYNC OBSERVATION IS NOT FALSIFIED BY THE PUBLISHED RECORD, BUT IT IS CONTRADICTED BY HIS OWN BOOK IN THE SAME SESSION HE MAKES IT
+
+FINDING 10.6 flagged this as the one descriptive claim worth mining per HARD LESSON 14, and queued it
+as unmeasurable. It is still unmeasurable **on this project's engines** — but it is not unexaminable.
+
+> `video1038794732` [02:28] *"I've noticed **us 30 nasdaq have not been in sync**"*
+> [02:50] *"not only not in sync, even **out of sync completely**"*
+
+### WHAT THE PUBLISHED RECORD SAYS — AND IT PARTLY SUPPORTS HIM
+
+**A caveat on this evidence, stated first.** This session's network egress blocks `WebFetch` on every
+one of these domains; the figures below are **as surfaced by web search**, not read from the primary
+documents. They are cited so a later session with working egress can verify them, and **none of them is
+a measurement made by this project.**
+
+1. **NQ/YM is the *loosest* of the US equity-index futures pairs, not the tightest.** Practitioner
+   sources put **NQ↔ES at ~0.93** and **ES↔YM at ~0.95**, with YM/ES described as the tightest pair
+   ([stsfutures.com](https://stsfutures.com/learn/nq-es-correlation),
+   [futures.aeromir.com](https://futures.aeromir.com/post/110/understanding-futures-correlation-what-every-trader-should-know)).
+   NQ and YM sit at opposite ends of that complex — the tech-concentrated index against the
+   price-weighted industrial one — so **if any equity-index pair de-syncs, it is his.**
+2. **The 2024–2026 period he is speaking in is exactly the period the sources describe as diverging.**
+   The Nasdaq-100/Dow relationship is reported as having *"weakened on shorter timeframes"* with
+   rotation out of tech into value
+   ([forex.com](https://www.forex.com/en/news-and-analysis/nasdaq-100-dow-ratio-focus-on-concentration-rather-than-timing-risk-trends/),
+   [forex.com](https://www.forex.com/en-us/news-and-analysis/nasdaq-100-lags-dow-jones-divergent-signals-among-nvidia-apple-meta/)),
+   and index-provider dashboards report rising dispersion with falling within-sector correlation
+   ([S&P DJI dispersion dashboard](https://www.spglobal.com/spdji/en/documents/performance-reports/dashboard-dispersion-volatility-correlation.pdf)).
+3. **But the baseline is high, not zero.** Rolling correlations across the US benchmark complex are
+   reported climbing over three decades, with SPX↔NDX 12-month rolling correlation of daily returns
+   reaching ~0.98 in March 2026
+   ([CME Group](https://www.cmegroup.com/insights/economic-research/2026/why-us-equity-benchmarks-are-moving-together-and-drifting-apart.html)),
+   and academic work on DJIA vs NASDAQ daily log returns reports persistent positive cross-correlation
+   bounded roughly **0.49–0.93** across scales ([arXiv:2607.06324](https://arxiv.org/pdf/2607.06324)).
+   **"Out of sync completely" is a relative statement inside a complex that never leaves strong
+   positive territory.**
+
+**Verdict on the claim itself: NOT falsified, and HARD LESSON 14's corollary does not trigger.** He is
+describing the loosest pair in the complex during the period the literature says it loosened. That is
+a trader seeing accurately again, which is the pattern that lesson predicts. **What is falsified is
+the use his own arithmetic would be put to** — "out of sync" does not mean ρ ≤ 0.13, and nothing in
+the record suggests it does.
+
+### THE CONTRADICTION, AND IT IS INTERNAL TO ONE TRANSCRIPT
+
+The strongest evidence against operating on the de-sync claim is **in the same seven-minute stream, on
+the same day, three minutes later.** `video1038794732` in order:
+
+| ts | what he says | what it shows |
+|---|---|---|
+| [00:00] | *"I think I'm **buying Nasdaq** waiting for us 30"* | long NQ, intending YM next |
+| [02:28]/[02:50] | *"us 30 nasdaq have not been in sync… **out of sync completely**"* | the claim |
+| [03:58] | *"**US 30 is going to push**"* | expecting YM **up** — the same direction as the NQ long |
+| [05:35] | *"**bot nasdaq bot us 30** currently up"* | **both legs long, concurrently** |
+| [06:09] | *"**target two for us 30 target four for Nasdaq**"* | **both legs winning together** |
+
+**He asserts the two instruments are out of sync and then, minutes later, holds them long together and
+banks them together.** That is not a contradiction in his *observation* — both can be true, since two
+instruments can decouple in magnitude while agreeing in sign. It is a contradiction in the **inference
+this workstream was about to draw from it**: the de-sync claim was queued as *"the actual justification
+for watching two instruments rather than one"* (FINDING 10.6), and the book it justifies is, on this
+day, **one directional bet expressed twice.**
+
+**One honest counterweight, recorded rather than suppressed.** The other stream that holds both may
+show them in *opposite* directions: `video1263885792` has *"Gonna **buy** Nasdaq"* [02:23] alongside
+*"US 30 **cells** are here as well"* [03:02] and *"a beautiful **cell** position"* [03:13] — "cells"
+almost certainly being the transcriber's rendering of "sells" — with both banked at [03:51]. **The
+direction of the YM leg there is inferred from a mis-transcribed word and is not established.** So the
+corpus shows one clearly same-direction pooled day and one probably-opposite one. **Two days settle
+nothing about ρ**, which is precisely why FINDING 13 was built not to need them.
+
+### THE PRACTITIONER LITERATURE IS BLUNT ABOUT THIS EXACT BOOK
+
+Per the mandate's instruction to record the evidence *against*, not only *for*: holding two highly
+correlated index futures concurrently is a **named, documented failure mode**, not a neutral choice.
+The sources describe it as *"one bet doubled, not diversification"*, note that the correlation *"rises
+toward 1.0 exactly when markets are stressed"* — i.e. it fails when it is being relied on — and one
+directly poses the day-trader's question *"they are very correlated… is it better to just stick to 1 of
+the 2 for day trading?"*
+([stsfutures.com](https://stsfutures.com/learn/nq-es-correlation),
+[futures.aeromir.com](https://futures.aeromir.com/post/110/understanding-futures-correlation-what-every-trader-should-know),
+[Forex Factory thread](https://www.forexfactory.com/thread/699928-trading-nq-and-sp500-vs-the-dow)).
+
+**The corresponding statistical statement is standard.** Bailey & López de Prado's deflated-Sharpe work
+formalises effective trials as a function of the trial-correlation matrix (the eigenvalue participation
+ratio), and the worked example most often quoted from that line has **22,500 nominal strategies across
+9 ETFs collapsing to roughly 39 effective independent bets**
+([SSRN 2460551](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2460551),
+[Deflated Sharpe ratio](https://en.wikipedia.org/wiki/Deflated_Sharpe_ratio)). **Nominal count and
+effective count are different quantities whenever the things counted are correlated.** FINDING 13 is
+that same correction applied to a sample floor instead of to a Sharpe ratio.
+
+**One observation about his risk, stated because it is a property of the book and not advice.**
+FINDING 10.5 recorded a base risk of ~5% of account per trade. Two concurrent same-direction legs at
+5% each is **~10% on one direction**, not two diversified 5% bets. This does not touch any
+profit-factor measurement (ratios are sizing-invariant — see the ledger's LEVERAGE note); it matters
+only for reading his results claims, which are already set aside as marketing.
+
+---
+
+## ██ WHAT TICK #6 DID NOT ESTABLISH
+
+- **Nothing was backtested. No `runId` exists for this workstream and none was created.** Every figure
+  in FINDING 13 is arithmetic on a **stated model** applied to a band already in this repo, and it is
+  labelled as such — it is not a measurement of anything.
+- **ρ between NQ and YM was NOT measured**, at any horizon, by this project. FINDING 13 is built to
+  survive not knowing it; that is its point, not a substitute for it.
+- **The external figures in FINDING 14 were not read at source.** `WebFetch` is egress-blocked in this
+  session for every cited domain; they are as reported by web search and need verification by a
+  session with working egress before anything is built on them.
+- **`US30` intraday depth is still unmeasured** — the required engine is absent from this session, so
+  the pooled band's second unverified assumption is untouched.
+- **The direction of the YM leg in `video1263885792` is not established** — it rests on reading
+  "cells" as "sells".
+- **The stated-vs-observed direction contradiction (FINDING 10.1) is still unresolved**, and the
+  rolling-mean target predictions (FINDINGS 7, 12) are still unrun.

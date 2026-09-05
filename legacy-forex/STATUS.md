@@ -533,3 +533,107 @@ and 3M Elite ran real backtests in between. **Tick #1's one-credit-without-a-bac
 unresolved, and the deliberate bracket it proposed (`get_credits` → one `plan_backtest_window` →
 `get_credits`) was NOT performed this tick.** It stays queued for a tick that has a reason to call
 `plan_backtest_window` anyway — queue item 1 above is exactly such a tick.
+
+---
+
+# ██ TICK #6, 2026-09-05 — THE POOLING QUESTION IS CLOSED, AND POOLING LOSES
+
+Zero credits. **No backtest, no `plan_backtest_window`, no engine call of any kind.** Transcripts
+already in the repo, plus web research. Full detail in `SYSTEM.md` FINDINGS 13–14.
+
+## FIRST, WHAT THIS TICK COULD NOT DO
+
+Tick #5's queue item 1 was *"measure `US30` 15m and 5m depth on `backtest-lab`"* — the cheapest open
+item here. **This session has no `backtest-lab` connector.** Only trader-dev is attached, and
+trader-dev is the engine this workstream is forbidden to touch (tick #2, FINDING 4: `NQ`→`IONQUSDT`,
+`YM`→`DYMUSDT`, silently). The item is **blocked by session capability, not stale**, and it stays
+queued for a session that has the connector. Tick #1's credit-bracket experiment, which was to ride
+along with that call, is likewise still unperformed.
+
+## THE HEADLINE — POOLING NQ+YM CANNOT CLEAR THE 30-TRADE FLOOR, AND THE VERDICT DOES NOT NEED ρ
+
+HARD LESSON 56's corollary left this open as *"somewhere between N and 2N depending on a correlation
+nobody has measured."* **The question is decidable without that measurement.**
+
+His pooled book is **N pairs** — one NQ trade and one YM trade in the same session, evidenced in three
+separate streams (*"bot nasdaq bot us 30"*; *"$60,000 on Nasdaq, $26,000 on us 30 — we're taking two
+trades in a day"*; *"this is two positions one day"*). For paired outcomes with within-pair
+correlation ρ, `N_eff = 2N/(1+ρ)`. Against FINDING 11's corrected band (~13–17 single, ~26–34 pooled):
+
+| ρ | `N_eff`, bottom of band | `N_eff`, top of band | clears 30? |
+|---|---|---|---|
+| 0.0 | 26.0 | 34.0 | top only |
+| 0.5 | 17.3 | 22.7 | **no** |
+| 0.9 | 13.7 | 17.9 | **no** |
+
+- **At the bottom of the band, 26 < 30 — pooling fails even at perfect independence.**
+- **At the top, clearing 30 requires ρ ≤ ~0.13.** No published figure for two US equity index futures
+  is remotely that low.
+- **At ρ = 0.9, the pooled book is worth 13.7–17.9 independent trades against the single instrument's
+  13–17 — running both buys less than one extra independent observation.**
+
+**Declared, before any run:** NQ and YM trades **may not be pooled to clear the sample floor**. A
+pooled count may describe his book; it may not be quoted as a sample size. Reversal condition stated
+and falsifiable: a **trade-level, holding-period** ρ ≤ 0.13.
+
+**And the trap is named in advance:** do **not** satisfy that condition by correlating 5m or 15m bars.
+The **Epps effect** — measured correlation falls as sampling frequency rises, documented since Epps
+(1979) — makes a short-horizon number systematically too low, and his trades are held for hours. The
+independence question lives at the holding-period horizon, not the chart horizon.
+
+## THE SECOND FINDING — HIS DE-SYNC OBSERVATION SURVIVES, BUT HIS OWN BOOK CONTRADICTS THE USE OF IT
+
+FINDING 10.6 queued *"us 30 nasdaq… out of sync completely"* as the descriptive claim justifying two
+instruments. Checked against the published record: **not falsified.** NQ/YM is the *loosest* US
+equity-index pair (NQ↔ES ~0.93, ES↔YM ~0.95 in practitioner sources), and 2024–26 material reports the
+Nasdaq-100/Dow relationship weakening on short timeframes. HARD LESSON 14's "traders see accurately"
+pattern holds again, and its drop-the-source corollary does **not** trigger.
+
+**But the inference does not survive, and the counter-evidence is in the same transcript.** In
+`video1038794732`: [02:50] *"out of sync completely"* → [03:58] *"US 30 is going to push"* → [05:35]
+*"bot nasdaq bot us 30 currently up"* → [06:09] *"target two for us 30 target four for Nasdaq"*. **He
+declares them decoupled and then holds them long together and banks them together, minutes apart.**
+Two instruments can decouple in magnitude while agreeing in sign; what fails is the leap from "out of
+sync" to "two independent observations."
+
+Recorded against my own reading: the other two-legged stream (`video1263885792`) may show opposite
+directions, but that rests on reading the transcriber's *"cells"* as *"sells"* and **is not
+established**. Two days settle nothing about ρ — which is why FINDING 13 was built not to need them.
+
+**Caveat on all external figures:** `WebFetch` is egress-blocked in this session for every cited
+domain. The published numbers are **as surfaced by web search, not read at source**, and are cited so a
+session with working egress can verify them. None is a measurement by this project.
+
+## WHAT THIS TICK DID NOT ESTABLISH
+
+- **No number came from a run.** No `runId` was created; none should be until the sample question is
+  settled — and this tick makes that question harder to satisfy, not easier.
+- **ρ was not measured** at any horizon. FINDING 13 survives not knowing it; it does not replace it.
+- **`US30` depth** — still unmeasured, engine absent from this session.
+- The rolling-mean target predictions (FINDINGS 7, 12) and the direction contradiction (FINDING 10.1)
+  are unchanged and unrun.
+
+## QUEUE
+
+1. **`US30` 15m/5m depth on `backtest-lab`** — unchanged, but now known to need a session that
+   actually has that connector. Bracket `get_credits` around the call if it is ever made on an engine
+   that meters (tick #1's open anomaly).
+2. **The pooling declaration is made — honour it.** Any future run reaching 30 only by pooling is
+   reporting an inadmissible sample size. If a tick wants to overturn it, the reversal condition and
+   the horizon it must be measured at are both written down in `SYSTEM.md` FINDING 13.
+3. **The realistic route to a legitimate sample is more calendar, not more instruments.** Both
+   engines' index coverage is a rolling ~60-day Yahoo-style window (tick #3), so a single-instrument
+   15m sample grows only by waiting — or by a data source with real intraday history. That is now the
+   binding sample constraint, and pooling is no longer an escape from it.
+4. Engine deadlock unchanged (tick #3). **Do not run a Legacy Forex backtest on trader-dev under any
+   circumstances** (tick #2, FINDING 4).
+5. **Forward-testing still needs no history** and remains the only honest route available today.
+
+## STATUS LINE
+
+**LEGACY FOREX: STILL BLOCKED, AND THE ONE ESCAPE ROUTE FROM THE SAMPLE FLOOR IS NOW CLOSED.**
+Single-instrument 15m expects ~13–17 trades against a 30 floor; pooling NQ+YM was the only path over
+that line and it is arithmetically unavailable at any correlation the published record supports. The
+workstream's honest position is **not "marginal"** — it is **below the floor on the data reachable
+today**, and the fix is calendar or a deeper data source, not a second instrument. Zero results
+recorded, still correctly.

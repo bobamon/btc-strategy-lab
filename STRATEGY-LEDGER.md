@@ -2798,3 +2798,79 @@ range.** Tick #4's 0.67–0.89 divided a *two-week* trade count (6–8) by a *ni
 span. The internally consistent band is 0.60–0.80. The error was small and it ran in the flattering
 direction — which is the direction these errors usually run, because the flattering answer is the one
 that lets the tick continue.
+
+---
+
+## ██ HARD LESSON 57 — A SAMPLE FLOOR COUNTS *INDEPENDENT* OBSERVATIONS. WHEN THE THINGS COUNTED ARE CORRELATED, DECIDE THE QUESTION WITH `N_eff`, NOT BY MEASURING THE CORRELATION FIRST. (LEGACY FOREX, 2026-09-05)
+
+**Earned:** Legacy Forex tick #6, closing the corollary HARD LESSON 56 left open one tick earlier.
+
+HARD LESSON 56 flagged that pooling NQ and YM to clear the 30-trade floor *"gives you somewhere between
+N and 2N depending on a correlation nobody has measured"*, and parked the question as unanswerable
+because no engine here carries both instruments deeply enough to measure ρ.
+
+**That was the wrong move, and it cost a tick.** The question was decidable without ρ the whole time.
+
+### THE TOOL — ONE LINE, AND IT SHOULD BE REACHED FOR BEFORE ANY MEASUREMENT
+
+For N pairs of correlated observations (within-pair correlation ρ, pairs independent):
+
+```
+N_eff = 2N / (1 + ρ)
+```
+
+ρ = 0 → the full 2N. ρ = 1 → N, i.e. pooling bought nothing. **Sweep ρ across its whole plausible
+range and look at what the verdict does.** Three outcomes, and two of them end the question on the
+spot:
+
+1. **The floor fails even at ρ = 0.** Then no correlation assumption can rescue it and the answer is
+   NO, with no measurement required. *(Here: 26 pooled trades at the bottom of the band, against a 30
+   floor. 26 < 30. Done.)*
+2. **The floor clears even at ρ = 1.** The answer is YES, also with no measurement required.
+3. **The verdict flips somewhere inside the range.** *Only now* is ρ worth measuring — and you have
+   turned a vague question into a specific threshold. *(Here: the top of the band needs ρ ≤ ~0.13, and
+   nothing in the published record puts two US equity index futures within reach of it.)*
+
+**The diagnostic that makes it vivid:** at ρ = 0.9, this workstream's pooled book was worth 13.7–17.9
+independent trades against the single instrument's 13–17. **A second instrument bought less than one
+extra independent observation.** A count that doubles while the information barely moves is exactly
+what a sample floor exists to catch.
+
+### THE HORIZON TRAP — NAME IT BEFORE SOMEONE MEASURES THE WRONG NUMBER
+
+If a ρ measurement *is* needed, it must be taken at the **holding period**, not the chart timeframe.
+The **Epps effect** — measured cross-correlation falls as sampling frequency rises, reported by Epps in
+1979 and studied since — means a 5m-bar correlation is systematically *lower* than the same pair's
+correlation over a multi-hour hold. **A low short-horizon number is the easiest way to satisfy a
+pooling threshold dishonestly without anyone noticing**, because it looks like exactly the measurement
+that was asked for. Specify the horizon in the reversal condition, in writing, at the same time you
+state the threshold.
+
+### HOW THIS BINDS EVERY LAB HERE, NOT JUST THIS ONE
+
+The BTC lab is one instrument, so it looks exempt. It is not. `N_eff` applies wherever a count is
+inflated by correlated units:
+
+- **Pooling instruments** to reach a trade count (the case above).
+- **Long and short legs of the same system** reported as one blended sample — the legs are not
+  independent draws when both key off one regime variable.
+- **Overlapping trades** — concurrent positions in the same direction on one instrument are one bet
+  sized up, whatever `totalTrades` says.
+- **Grid and sweep cells** treated as independent trials. This is the standard formulation:
+  Bailey & López de Prado's deflated Sharpe ratio defines effective trials from the trial-correlation
+  matrix, and the worked example most quoted from that line has **22,500 nominal strategies across 9
+  ETFs collapsing to roughly 39 effective independent bets**
+  ([SSRN 2460551](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2460551)). This lab has run
+  multi-cell sweeps and read their cells as separate evidence.
+
+**The general rule: whenever a sample count is defended by adding more of something, ask what the
+correlation between those things is doing to the count.** Nominal N and effective N are different
+quantities, and the sample floor was always about the second one.
+
+### THE SMALLER LESSON RIDING ALONG — "UNMEASURABLE HERE" IS NOT "UNDECIDABLE"
+
+Tick #5 wrote the pooling question down as blocked on an engine capability. It was actually blocked on
+nobody having tried the arithmetic. **Before recording a question as blocked on a measurement, check
+whether the verdict is invariant across the measurement's whole plausible range** — a sensitivity
+sweep over an unmeasured parameter is free, it is available in every session including the ones with
+no engine at all, and it resolves more questions than it has any right to.
