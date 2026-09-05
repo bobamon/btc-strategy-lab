@@ -1,0 +1,273 @@
+//@version=6
+// ═══════════════════════════════════════════════════════════════════════════════════════════════
+// WAR FORMATION — COMPLETE VISUALISER (2026-09-05)
+//
+// PURPOSE: show EVERYTHING the strategy is thinking, on the chart, in real time. Every gate, every
+// level, every zone, the shield, and a live dashboard telling you exactly which condition is
+// currently blocking a trade. This is an INDICATOR, not a strategy — it takes no positions. It is a
+// faithful mirror of war-formation/pine/alcm-reference.pine, gate for gate.
+//
+// Run it on a 1m chart. The 6h / 1h / 15m / 3m structures are all reconstructed from 1m bars by
+// exact timestamp bucketing, the same way the reference build does it — so what you see here is what
+// the backtest saw.
+//
+// ── THE ORACLE'S OWN WORDS, MAPPED TO WHAT YOU SEE ────────────────────────────────────────────
+//   "The six hour is the God of direction."        -> REGIME row + background tint
+//   "Six hour and the one hour, same colour.
+//    This is the singularity event."               -> SINGULARITY row (bonus, never required:
+//                                                     he says "don't wait for that", and E16 proved
+//                                                     requiring it cuts PF 1.69 -> 0.52)
+//   "You don't want to enter at the top."          -> 15m BREAK row (must break the prior level first)
+//   "Let the Red Army finish. Candles get
+//    smaller. The move gets weaker."               -> COIL row (atr3 < atr30 * K)
+//   "There is your moment."                        -> VELOCITY row (the reclaim, sized vs atr30)
+//   "We just dumped a lot from over the whole
+//    number 28."                                   -> WHOLE-NUMBER band (shaded, entries banned in it)
+//
+// ── WHAT IS DELIBERATELY *NOT* HERE, AND WHY ──────────────────────────────────────────────────
+// His stated exit ("stay while it is your colour") is NOT drawn as an exit, because E15 tested it and
+// it collapsed PF 1.69 -> 0.31: the 3m colour flip fires on noise inside an uptrend, cutting winners
+// at ~20 minutes. The fixed 2R target is load-bearing. His colour rule is shown as a WARNING row
+// instead — which is what it actually is. See ORACLE-RULES.md, queue item 4.
+//
+// THERE IS NO STOP LOSS. The exit is the A.L.C.M. shield: a fixed DOLLAR gap to liquidation. The
+// trade ends at target or at liquidation, nothing else. Drawn as the red shield line.
+// ═══════════════════════════════════════════════════════════════════════════════════════════════
+
+indicator("War Formation — Complete Visualiser", overlay=true, max_lines_count=500, max_labels_count=500, max_boxes_count=500)
+
+// ── INPUTS (identical names/defaults to the reference build) ──────────────────────────────────
+grpG = "Gates"
+greenBull = input.int(4,      "Green 1h candles for BULL",            group=grpG)
+greenBear = input.int(2,      "Green 1h candles at or below for BEAR",group=grpG)
+skipOpen  = input.int(60,     "Skip first N min of 6h block",         group=grpG)
+skipClose = input.int(60,     "Skip last N min of 6h block",          group=grpG)
+coilK     = input.float(0.85, "3m coil: atr(3) < atr(30) * K",        group=grpG)
+velK      = input.float(0.8,  "Velocity: reclaim as x atr(30)",       group=grpG)
+midLo     = input.float(400,  "Whole-number middle, low",             group=grpG)
+midHi     = input.float(600,  "Whole-number middle, high",            group=grpG)
+etOffset  = input.int(-4,     "ET offset from UTC",                   group=grpG)
+witchOn   = input.bool(true,  "Ban longs in witching hour 1-4am ET",  group=grpG)
+
+grpE = "Shield / Exit"
+shieldUsd = input.float(2000, "THE SHIELD: fixed $ gap to liquidation", group=grpE)
+rr        = input.float(2.0,  "Reward : risk",                          group=grpE)
+maxBars   = input.int(4320,   "Max bars in trade (3 days of 1m)",       group=grpE)
+
+grpV = "Display"
+showDash  = input.bool(true,  "Show dashboard",        group=grpV)
+showLvls  = input.bool(true,  "Show 15m break levels", group=grpV)
+showZones = input.bool(true,  "Shade blocked zones",   group=grpV)
+showShield= input.bool(true,  "Draw shield & target",  group=grpV)
+dashPos   = input.string("Top Right", "Dashboard position", options=["Top Right","Top Left","Bottom Right","Bottom Left"], group=grpV)
+
+// ── TIMEFRAME RECONSTRUCTION (exact bucketing, same as the backtest) ──────────────────────────
+MS6H = 21600000, MS1H = 3600000, MS15 = 900000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+b15 = math.floor(time / MS15)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+new15 = b15 != b15[1]
+
+// ── LAYER 1: DIRECTION. "The six hour is the God of direction." ───────────────────────────────
+var float h1o     = na
+var int   grnCur  = 0
+var int   cntCur  = 0
+var int   grnPrev = 0
+var int   cntPrev = 0
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    grnCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(h1o)
+        cntCur := cntCur + 1
+        if close[1] > h1o
+            grnCur := grnCur + 1
+    h1o := open
+
+regimeReady = cntPrev >= 5
+bullRegime  = regimeReady and grnPrev >= greenBull
+bearRegime  = regimeReady and grnPrev <= greenBear
+
+h1Bull = not na(h1o) and close > h1o
+h1Bear = not na(h1o) and close < h1o
+
+// "Six hour and the one hour, same colour. This is the singularity event."
+// Bonus only — NEVER gated on. He said "don't wait for that", and E16 confirmed it.
+singularity = (bullRegime and h1Bull) or (bearRegime and h1Bear)
+
+// ── TIME GATE — skip the open and close of each 6h block ──────────────────────────────────────
+minsIn   = (time - b6 * MS6H) / 60000
+timeGate = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+// ── LAYER 2: THE 15m LEVEL THAT MUST BREAK FIRST ("don't enter at the top") ───────────────────
+var float c15h = na
+var float c15l = na
+var float p15h = na
+var float p15l = na
+
+if new15
+    p15h := c15h
+    p15l := c15l
+    c15h := high
+    c15l := low
+else
+    c15h := na(c15h) ? high : math.max(c15h, high)
+    c15l := na(c15l) ? low  : math.min(c15l, low)
+
+brokeBelow = not na(p15l) and c15l < p15l
+brokeAbove = not na(p15h) and c15h > p15h
+
+// ── THE COIL — "candles get smaller, the move gets weaker" ────────────────────────────────────
+atrFast  = ta.atr(3)
+atrSlow  = ta.atr(30)
+coiled   = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK
+coilPrev = coiled[1]
+velMin   = na(atrSlow) ? na : atrSlow * velK
+coilRatio= (na(atrSlow) or atrSlow == 0) ? na : atrFast / atrSlow
+
+// ── WHOLE-NUMBER MIDDLE — entries banned inside it ────────────────────────────────────────────
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+// ── WITCHING HOUR 1-4am ET — longs banned ─────────────────────────────────────────────────────
+hUTC     = math.floor(time / MS1H) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+longBan  = witchOn and witching
+
+// ── THE TRIGGER — "there is your moment" ──────────────────────────────────────────────────────
+longTrig  = not na(p15l) and not na(velMin) and ta.crossover(close, p15l)  and (close - p15l) >= velMin
+shortTrig = not na(p15h) and not na(velMin) and ta.crossunder(close, p15h) and (p15h - close) >= velMin
+
+goLong  = bullRegime and timeGate and h1Bull and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig
+goShort = bearRegime and timeGate and h1Bear and brokeAbove and coilPrev and not inMiddle and shortTrig
+
+// ═══ SIMULATED POSITION — so the shield and target can be drawn ═══════════════════════════════
+var int   posDir  = 0        // 1 long, -1 short, 0 flat
+var float entryPx = na
+var float shieldPx= na
+var float targetPx= na
+var int   barsIn  = 0
+var line  lnEntry = na
+var line  lnShield= na
+var line  lnTarget= na
+
+hitTarget = posDir ==  1 and high >= targetPx or posDir == -1 and low  <= targetPx
+hitShield = posDir ==  1 and low  <= shieldPx or posDir == -1 and high >= shieldPx
+timedOut  = posDir != 0 and barsIn >= maxBars
+
+if posDir != 0
+    barsIn := barsIn + 1
+
+// close first, so a fresh signal on the same bar can open
+if posDir != 0 and (hitTarget or hitShield or timedOut)
+    lbl = hitTarget ? "TARGET +" + str.tostring(shieldUsd * rr, "#") : hitShield ? "SHIELD −" + str.tostring(shieldUsd, "#") : "TIME OUT"
+    label.new(bar_index, posDir == 1 ? high : low, lbl,
+         style = posDir == 1 ? label.style_label_down : label.style_label_up,
+         color = hitTarget ? color.new(color.teal, 20) : color.new(color.maroon, 20),
+         textcolor = color.white, size = size.small)
+    if not na(lnEntry)
+        line.set_x2(lnEntry,  bar_index)
+        line.set_x2(lnShield, bar_index)
+        line.set_x2(lnTarget, bar_index)
+    posDir := 0
+    barsIn := 0
+
+if posDir == 0 and (goLong or goShort)
+    posDir   := goLong ? 1 : -1
+    entryPx  := close
+    shieldPx := goLong ? close - shieldUsd : close + shieldUsd
+    targetPx := goLong ? close + shieldUsd * rr : close - shieldUsd * rr
+    barsIn   := 0
+    if showShield
+        lnEntry  := line.new(bar_index, entryPx,  bar_index + 1, entryPx,  color=color.new(color.blue, 0),   width=2)
+        lnShield := line.new(bar_index, shieldPx, bar_index + 1, shieldPx, color=color.new(color.red, 0),    width=2, style=line.style_dashed)
+        lnTarget := line.new(bar_index, targetPx, bar_index + 1, targetPx, color=color.new(color.green, 0),  width=2, style=line.style_dashed)
+    label.new(bar_index, goLong ? low : high,
+         (goLong ? "▲ LONG " : "▼ SHORT ") + str.tostring(close, format.mintick) + (singularity ? "  ★SING" : ""),
+         style = goLong ? label.style_label_up : label.style_label_down,
+         color = goLong ? color.new(color.green, 10) : color.new(color.red, 10),
+         textcolor = color.white, size = size.normal)
+
+// extend the live position's lines to the current bar
+if posDir != 0 and not na(lnEntry)
+    line.set_x2(lnEntry,  bar_index)
+    line.set_x2(lnShield, bar_index)
+    line.set_x2(lnTarget, bar_index)
+
+// ═══ DRAWING ══════════════════════════════════════════════════════════════════════════════════
+// 15m levels that must break first — the "don't enter at the top" structure
+plot(showLvls ? p15h : na, "Prior 15m high", color=color.new(color.orange, 0), style=plot.style_stepline, linewidth=1)
+plot(showLvls ? p15l : na, "Prior 15m low",  color=color.new(color.aqua,   0), style=plot.style_stepline, linewidth=1)
+plot(showLvls and not na(h1o) ? h1o : na, "1h open", color=color.new(color.gray, 30), style=plot.style_stepline, linewidth=1)
+
+// regime tint — the God of direction
+bgcolor(bullRegime ? color.new(color.green, 93) : bearRegime ? color.new(color.red, 93) : na, title="6H regime")
+// blocked zones
+bgcolor(showZones and longBan  ? color.new(color.purple, 85) : na, title="Witching hour (longs banned)")
+bgcolor(showZones and inMiddle ? color.new(color.yellow, 88) : na, title="Whole-number middle (banned)")
+bgcolor(showZones and not timeGate ? color.new(color.gray, 88) : na, title="Outside 6h time gate")
+// 6h block boundary
+bgcolor(new6 ? color.new(color.blue, 60) : na, title="New 6h block")
+// coil — the move getting weaker
+barcolor(coiled ? color.new(color.yellow, 0) : na, title="Coiled (candles shrinking)")
+
+// ═══ DASHBOARD — every gate, live, with the blocker named ═════════════════════════════════════
+f_pos(s) =>
+    s == "Top Right" ? position.top_right : s == "Top Left" ? position.top_left : s == "Bottom Right" ? position.bottom_right : position.bottom_left
+
+var table dash = table.new(f_pos(dashPos), 3, 13, border_width=1, frame_width=1, frame_color=color.gray)
+
+f_row(t, r, name, ok, detail) =>
+    table.cell(t, 0, r, name,   text_color=color.white, text_size=size.small, bgcolor=color.new(color.black, 20), text_halign=text.align_left)
+    table.cell(t, 1, r, ok ? "✔" : "✖", text_color=ok ? color.lime : color.red, text_size=size.small, bgcolor=color.new(color.black, 20))
+    table.cell(t, 2, r, detail, text_color=color.silver, text_size=size.small, bgcolor=color.new(color.black, 20), text_halign=text.align_left)
+
+if showDash and barstate.islast
+    dir     = bullRegime ? "BULL" : bearRegime ? "BEAR" : "NONE"
+    longOK  = goLong
+    shortOK = goShort
+    // header
+    table.cell(dash, 0, 0, "WAR FORMATION", text_color=color.white, text_size=size.normal, bgcolor=color.new(color.blue, 30), text_halign=text.align_left)
+    table.cell(dash, 1, 0, dir,            text_color=bullRegime ? color.lime : bearRegime ? color.red : color.gray, text_size=size.normal, bgcolor=color.new(color.blue, 30))
+    table.cell(dash, 2, 0, posDir == 1 ? "IN LONG" : posDir == -1 ? "IN SHORT" : "flat", text_color=color.white, text_size=size.normal, bgcolor=color.new(color.blue, 30), text_halign=text.align_left)
+
+    f_row(dash, 1,  "6H regime",     bullRegime or bearRegime, str.tostring(grnPrev) + "/" + str.tostring(cntPrev) + " green 1h  (bull≥" + str.tostring(greenBull) + ", bear≤" + str.tostring(greenBear) + ")")
+    f_row(dash, 2,  "1h colour",     bullRegime ? h1Bull : bearRegime ? h1Bear : false, h1Bull ? "green (above 1h open)" : h1Bear ? "red (below 1h open)" : "—")
+    f_row(dash, 3,  "★ Singularity", singularity, singularity ? "6h & 1h agree — bonus, NOT required" : "not aligned — he said don't wait")
+    f_row(dash, 4,  "Time gate",     timeGate, str.tostring(math.round(minsIn)) + "/360 min into 6h block")
+    f_row(dash, 5,  "15m break",     bullRegime ? brokeBelow : bearRegime ? brokeAbove : false, bullRegime ? (brokeBelow ? "broke prior 15m LOW ✓" : "waiting for break below") : (brokeAbove ? "broke prior 15m HIGH ✓" : "waiting for break above"))
+    f_row(dash, 6,  "3m coil",       coilPrev, na(coilRatio) ? "—" : "atr3/atr30 = " + str.tostring(coilRatio, "#.##") + "  (need < " + str.tostring(coilK, "#.##") + ")")
+    f_row(dash, 7,  "Whole-number",  not inMiddle, "sub = " + str.tostring(math.round(sub)) + "  (banned " + str.tostring(math.round(midLo)) + "–" + str.tostring(math.round(midHi)) + ")")
+    f_row(dash, 8,  "Witching hour", not longBan, str.tostring(hET) + ":00 ET" + (witching ? "  — 1-4am, longs banned" : ""))
+    f_row(dash, 9,  "Velocity",      bullRegime ? longTrig : bearRegime ? shortTrig : false, na(velMin) ? "—" : "need " + str.tostring(velMin, format.mintick) + " reclaim (" + str.tostring(velK, "#.##") + "× atr30)")
+    f_row(dash, 10, "⚠ Colour warn", true, close < open ? "3m red — weakness, NOT an exit (E15)" : "3m green — your colour, stay in")
+
+    verdict = longOK ? "▲ LONG NOW" : shortOK ? "▼ SHORT NOW" : posDir != 0 ? "HOLDING — target or shield only" : "WAIT"
+    vcol    = longOK ? color.green : shortOK ? color.red : posDir != 0 ? color.blue : color.new(color.gray, 40)
+    table.cell(dash, 0, 11, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vcol, text_halign=text.align_left)
+    table.cell(dash, 1, 11, "",        bgcolor=vcol)
+    table.cell(dash, 2, 11, verdict,   text_color=color.white, text_size=size.normal, bgcolor=vcol, text_halign=text.align_left)
+
+    shieldTxt = posDir == 0 ? "no position" : "entry " + str.tostring(entryPx, format.mintick) + "  shield " + str.tostring(shieldPx, format.mintick) + "  target " + str.tostring(targetPx, format.mintick)
+    table.cell(dash, 0, 12, "SHIELD",  text_color=color.white, text_size=size.small, bgcolor=color.new(color.black, 20), text_halign=text.align_left)
+    table.cell(dash, 1, 12, posDir != 0 ? str.tostring(barsIn) + "b" : "—", text_color=color.silver, text_size=size.small, bgcolor=color.new(color.black, 20))
+    table.cell(dash, 2, 12, shieldTxt, text_color=color.silver, text_size=size.small, bgcolor=color.new(color.black, 20), text_halign=text.align_left)
+
+// ═══ ALERTS ═══════════════════════════════════════════════════════════════════════════════════
+alertcondition(goLong,  "War Formation LONG",  "War Formation: LONG trigger")
+alertcondition(goShort, "War Formation SHORT", "War Formation: SHORT trigger")
+
+// machine-readable plots for debugging against the backtest
+plot(goLong  ? 1 : 0, "LongSignal",  display=display.data_window)
+plot(goShort ? 1 : 0, "ShortSignal", display=display.data_window)
+plot(grnPrev,         "GreenPrev",   display=display.data_window)
+plot(coilRatio,       "CoilRatio",   display=display.data_window)
