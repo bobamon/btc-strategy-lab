@@ -6580,3 +6580,180 @@ removes "the old engine's harness" as a candidate explanation for the streak.
    seasonality · order-flow imbalance proxies · realized-vs-implied vol spread.
 
 ---
+# ATTACK 79 — NORMALIZED SIGNED-VOLUME IMBALANCE (ORDER-FLOW PROXY). FIRST BARE MECHANISM IN EIGHT TO CLEAR H1. REJECTED ON H2.
+
+Executes Attack 78's queue item 7. Engine: `backtest-lab` (backtester24), the second attack to run
+there. No comparison was made to any trader.dev result above.
+
+**A constraint found and recorded first:** the ledger's next open family was *time-of-day seasonality*,
+and it is **inexpressible on this engine**. `backtest-lab`'s expression language exposes only the OHLCV
+arrays plus indicators — there is no timestamp, hour-of-day, session or bar-index variable. Session
+seasonality cannot be built here at all, and that is a property of the engine, not a failed idea. The
+next open family, order-flow imbalance, was taken instead.
+
+## THE CLAIM
+
+Volume signed by close direction, summed over a rolling window and normalized by total volume, is a
+standard OHLCV-only proxy for order-flow imbalance. A persistently positive reading means the bars
+that carried volume were mostly up-bars — accumulation — and that imbalance should precede
+continuation rather than exhaustion.
+
+Distinct from both volume mechanisms already on the board. **Attack 76** used NVI, which accumulates
+*only on bars where volume falls* and ignores volume magnitude on rising-volume bars. **Attack 5**
+(old mandate, rejected) used an unsigned `volume >= 2x avg` verdict switch, which reads participation
+without direction. This build reads **direction-weighted participation**, which neither does.
+
+## CONSTRUCTION
+
+    ofi        = sma(where(close > close[1], volume, -volume), 100) / (sma(volume,100) + 1e-12)
+    entry_long = ofi > 0.25
+    exit_long  = ofi < 0.0
+    stop 1.5%, no target, long only, 15m, 1x, size 100%, fee 5bps, funding on
+
+`crossover(ofi, 0.25)` against a scalar constant **errored on this engine**; the level form above is
+the working equivalent given the opposite-sign exit. Noted for future builds.
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4)
+
+Pre-registered **100–500 trades, low-to-moderate confidence** — deliberately wide, because no attack on
+this board has ever plotted an OFI crossing rate and there was no anchor to narrow it with. Stating
+low confidence rather than manufacturing a tight band.
+
+## RESULTS — BOTH HALVES
+
+| | **H1 (never-tuned)** `bt_4e57195885` | **H2** `bt_95916be6be` |
+|---|---|---|
+| Window | 2022-01-01 → 2024-06-08 | 2024-06-08 → 2026-09-01 |
+| Bars | 85,345 | 78,241 |
+| Pinned | yes | yes |
+| **Profit factor** | **1.29231** | **0.752088** |
+| Trades | 178 | 146 |
+| Win rate | 38.202247% | 30.136986% |
+| Net return | +49.346404% | -24.328059% |
+| Buy & hold, same window | +49.723428% | +13.461286% |
+| Max drawdown | 16.122101% | 37.997026% |
+| Avg winner / loser | $320.83 / -$153.47 | $167.74 / -$96.21 |
+| Exposure | 14.223446% | 14.314745% |
+| Commission | $2,192.68 | $1,225.03 |
+| Funding paid | $478.30 | $166.01 |
+| Liquidations | 0 | 0 |
+
+**Frequency estimate scored: pre-registered 100–500, actual 178 / 146** — both inside the band and
+inside the lab's settled 60–350 workable window. Third consecutive cycle the frequency model landed.
+
+## THE KILL RULE DID NOT APPLY — AND THAT IS ITSELF THE HEADLINE
+
+PF 1.29231 on the never-tuned half. **This is the first bare-mechanism first pass to clear H1 since
+Attack 71** — Attacks 72, 73, 74, 75, 76, 77 and 78 all failed outright, seven in a row across two
+engines. So H2 was run, as the protocol requires when the kill rule does not fire.
+
+## THE VERDICT — REJECTED ON THE H1/H2 PAIR
+
+PF 1.29231 → 0.752088. The mechanism does not survive out of sample.
+
+**But the failure shape here is different from a curve-fit, and the distinction is worth stating.**
+Nothing was tuned. No parameter was swept, no filter stacked, no threshold searched — the window
+lookback (100), the entry threshold (0.25) and the stop (1.5%) were fixed before the first run and
+never touched. **H1's 1.29 cannot be an artefact of fitting, because no fitting occurred.** What the
+spread shows is that direction-weighted participation carried a real long edge in 2022–2024 and lost
+it in 2024–2026. That is regime dependence, not overfitting, and HARD LESSON 22's usual reading
+("fitted, not found") does not apply cleanly to an untuned first pass.
+
+This does not rescue it. A mechanism that works in one regime and reverses in the next is not
+tradable without a regime detector, and building one is a different project. **Rejected.**
+
+## THE FLAT-STOP LOAD-BEARING CHECK (ATTACK 78'S QUEUE ITEM 3) — IT FIRED ON FIRST USE
+
+Attack 78 queued a mandatory check for every `backtest-lab` build: count how many exits reached the
+flat stop, because this engine cannot place a stop beyond structure. **On Attack 79 the stop is
+load-bearing, and heavily so:**
+
+- H1: **80 of 178** trades (45%) sit in the bin at the stop distance (-1.71%)
+- H2: **74 of 146** trades (51%) sit in the bin at the stop distance (-1.63%)
+
+Against Attack 78's 17 of 269 (6%). **So this build's numbers are genuinely confounded by the
+engine's inability to stop beyond structure**, in a way Attack 78's were not. Roughly half of all
+exits are set by an arbitrary 1.5% distance rather than by market structure, and the board's own
+LESSON 5 exists because that placement matters.
+
+The check was proposed one cycle ago as a precaution and it caught a real confound on its first
+application. **It should be promoted from a queue item to a standing requirement.**
+
+## HONEST READING OF H1's BENCHMARK
+
+PF 1.29231 looks strong. Against buy & hold it is **level**: +49.346404% against +49.723428%, a
+0.38-point shortfall. On risk it is far ahead — 16.12% drawdown against buy & hold's 69.88%, at
+14.2% exposure — so return per unit of drawdown is 3.06 against 0.71. But per HARD LESSON 54 the
+return comparison must be stated, and on return this mechanism did not beat holding even in the half
+where it worked.
+
+## QUEUE
+
+1. **Do not sweep the OFI window or threshold.** H1/H2 reversal is a regime property; sweeping the
+   threshold on H1 and re-testing H2 is HARD LESSON 49's error exactly.
+2. **Promote the flat-stop load-bearing check to a standing requirement** for every `backtest-lab`
+   build, per the evidence above.
+3. **Record that time-of-day seasonality is inexpressible on this engine** so no future cycle spends
+   effort discovering it again. It remains open only for a trader.dev Pine build.
+4. **The order-flow family is not closed** — this is one estimator (close-direction sign) of it, and
+   it produced a real H1 edge. A different signing rule (e.g. close position within the bar's range,
+   rather than versus the prior close) is untested, but per item 1 that is a re-derivation, not a
+   parameter sweep, and needs its own cycle.
+5. Remaining open families after this cycle: volume/participation profile (partially consumed by
+   Attacks 5, 76 and now 79) · realized-vs-implied vol spread (**no implied-vol data on this engine —
+   likely inexpressible too, verify before proposing**).
+
+---
+
+# ██ BENCHMARK AUDIT OF THE BOARD'S TWO STANDING CANDIDATES (zero new strategy runs)
+
+Executes the item queued by the 3M Elite tick: `CHAMPION-BOARD.md` has no buy & hold column and no
+funding column anywhere in 79 attacks, because trader.dev reports neither. Attack 68 and Attack 46 are
+the board's two standing candidates and **neither has ever been compared to holding BTC.**
+
+**No strategy was re-run.** The recorded returns below are the existing entries in
+`results/backtests.json`. The baselines are `buy_hold` on BTC/USDT over the identical windows:
+`bt_55f4290898` (H1) and `bt_8531235119` (H2), both `pinned: true`, `binance_perp_archive`, 15m.
+
+### The baselines
+
+| Window | raw buy & hold | perp-executed net | funding paid | B&H max DD |
+|---|---|---|---|---|
+| H1 2022-01-01 → 2024-06-08 | **+49.723428%** | +31.139021% | $1,758.62 | -69.876273% |
+| H2 2024-06-08 → 2026-09-01 | **+13.461286%** | -1.777913% | $1,491.14 | -58.816498% |
+
+### The candidates against them
+
+| Build | recorded net | buy & hold | gap | recorded DD | B&H DD |
+|---|---|---|---|---|---|
+| Attack 68a (H1) | +35.47285533% | +49.723428% | **-14.25 pp** | 11.08160523% | 69.88% |
+| Attack 68b (H2) | +6.77458291% | +13.461286% | **-6.69 pp** | 10.74990922% | 58.82% |
+| Attack 46a (H1) | +17.11847418% | +49.723428% | **-32.60 pp** | 23.45223579% | 69.88% |
+| **Attack 46b (H2)** | **+20.39290865%** | +13.461286% | **+6.93 pp** | **13.6122535%** | 58.82% |
+
+### THE FINDING — ATTACK 46b IS THE FIRST RESULT ON THIS BOARD TO BEAT BUY & HOLD
+
+Attack 46b beats the baseline **on return by 6.93 points and on drawdown by 45 points**, on 38 trades
+(clears the 30 floor) at PF 1.58559241. It is the only one of the four that does. That fact has been
+sitting in `results/backtests.json` since the day Attack 46 was run and was invisible because the
+board has no baseline column.
+
+**Attack 68, the board's designated "strongest both-halves candidate", loses to buy & hold in both
+halves.** Its strength was measured on profit factor and on H1/H2 consistency — both real — but on
+return it trailed holding by 14.25 and 6.69 points. This does not demote it: PF 1.56/1.13 across two
+halves with 89/80 trades remains the most consistent pair on the board, and on drawdown it is far
+ahead of holding (11.08%/10.75% against 69.88%/58.82%). It does mean the board's ranking of its own
+candidates was made without a dimension that changes the ordering.
+
+**Attack 46's own halves disagree sharply** — H1 trails by 32.60 points, H2 beats by 6.93. That is a
+wider H1/H2 spread than the profit factors (1.17/1.59) suggested, and per RATCHET v2 clause 5 the
+spread is reportable, not vetoing. It is now reported.
+
+### CAVEATS
+
+- **Cross-source.** Candidate returns are trader.dev; baselines are `binance_perp_archive`. A buy &
+  hold return depends on two prices and is far more source-robust than a strategy result, but read
+  these gaps to the point, not the basis point.
+- **Nothing is promoted or demoted by this audit.** It adds a column the board never had.
+- **The funding figures are the baseline's, not the candidates'.** No trader.dev record reports
+  `fundingPaid`, so what those builds would have paid is unknown and is not estimated here.
