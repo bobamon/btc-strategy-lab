@@ -6084,3 +6084,116 @@ weekend-vacuum cadence specifically does not survive out of period bare.
    from every rejected strategy on the board (Attacks 33–65, 67/69/70/71, 72, 73, and now 74).
 
 ---
+
+# ATTACK 75 - ROUND-NUMBER SUPPORT RECLAIM. FALSIFIED ON THE NEVER-TUNED HALF, KILL RULE APPLIED.
+
+The stored scheduled prompt again described a board state ("Attack 37, build its filter stack") more
+than seventy attacks stale — Attack 41 closed Attack 37 on cost, Attack 43 closed the whole
+sweep-reversal family, and Attack 68 is the board's strongest both-halves candidate. **The docs
+override it, again**: per Attack 74's own queue item 8, this cycle proposes one further genuinely new
+mechanism, continuing numbering after Attack 74, not Attack 37.
+
+## THE CLAIM
+
+Round nominal dollar levels ($1,000 increments — $30,000, $61,000, $100,000, etc.) act as a
+psychological support magnet in BTC, independent of any rolling technical structure: resting limit
+buys, stop-losses on short positions, and take-profits on longs cluster at round numbers because
+humans anchor to them, not because of recent swing geometry. A bar whose low pierces the nearest
+round-thousand level below the current close but whose close reclaims back above it — while the PRIOR
+bar was already trading above that same level (a genuine retest, not a big bar blowing through several
+levels at once) — reflects that cluster absorbing the flush. Pine:
+`strategies/pine/attack75-round-number-support-reclaim.pine`.
+
+**Genuinely distinct from Attack 48 (round-number magnet, DISCARDED).** Attack 48 traded *with* a
+round-number break as a continuation idea (close moves into a higher round band → target the next round
+number), discarded on a negative edge at high frequency (PF 0.724, 518 trades). This trades *against* a
+failed breakdown through round-number support — a reversal/fade — which Attack 48's own queue item 4
+explicitly did not test (it only flagged round numbers as unexplored *targets*). The relationship
+mirrors how Attack 37 (reversal) relates to Attack 33 (continuation): same level family, opposite trade
+direction, both legitimate constructions. **Also distinct from Attack 37-43** (liquidity sweep reversal,
+closed on cost): same wick-and-reclaim shape, but Attack 37's level was a ROLLING 20-bar swing low
+(structural, price-history-dependent); this uses a FIXED nominal grid (psychological/order-clustering,
+price-history-independent) — the two levels frequently disagree.
+
+## AUDIT (one line per leg)
+
+R >= 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rLong = close - low`, never clamped; same named tension
+as Attack 37's (selects the DEPTH of the wick, which can be shallow by construction). Stop beyond
+STRUCTURE (LESSON 5) — `slPx = low`, the actual price extreme reached during the sweep, strictly below
+`roundBelow` (the signal level), never at the signal level itself. Each leg separately (LESSON 6) — LONG
+ONLY, following this lab's convention for a first pass (Attacks 50/59/63/65/66/72/73/74 all opened
+one-sided); the short leg (a failed breakUP through round-number resistance, faded short, its own
+geometry) is deferred and reported as OUTSTANDING. BINDING (E17) — `sweep` alone is common; `sweep` AND
+`reclaim` AND `contTest` is the binding triple; two credits were budgeted for the H1/H2 pair, so no
+per-term counter build was affordable (moot — see verdict, H2 never spent). REDUNDANCY (E14) —
+`sweep`/`reclaim` read a FIXED NOMINAL PRICE LEVEL; `contTest` reads CONTINUITY across exactly one prior
+bar; `rBig` reads PRICE DISTANCE — three independent quantities. LATCH IN SEQUENCE (LESSON 8,
+fourth-confirmation check) — all three terms evaluate on the SAME current bar against `roundBelow`
+(derived from this bar's own close) and `close[1]` (one bar back); no state is latched across an arming
+event and a later trigger, and `contTest` is not phrased as "already true for N bars," so neither failure
+mode applies. CASCADE (HARD LESSON 42/43) — LONG at 100% equity, single entry id "L"; `cascadeRatio` 1 /
+`maxCascadeDepth` 1, confirmed (253 total rows, 253 unique entries).
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4)
+
+A $1,000 grid recurs far more densely than Attack 37's rolling 20-bar swing low (322/196 trades after
+the R floor). Pre-registered **300-900 trades per half**.
+
+## H1 (NEVER-TUNED HALF, 2022-01-01 → 2024-06-08)
+
+| | **Attack 75a (H1)** |
+|---|---|
+| Profit factor | **0.85028785** |
+| Trades | 253 |
+| Win rate | 35.17786561% |
+| Avg winner | $169.71 |
+| Avg loser | -$108.31 |
+| Achieved win/loss ratio | 1.56682255 |
+| Max drawdown | 40.41381577% |
+| Net return | -26.59420866% |
+| Commission paid | $1,875.98 |
+| Largest loss | -$327.80 |
+
+**Frequency estimate scored: pre-registered 300-900, actual 253** — below the pre-registered band, but
+inside the lab's settled 60-350 workable window.
+
+## KILL RULE APPLIED. ONE CREDIT SPENT THIS CYCLE (528 BALANCE → 527). H2 NOT RUN.
+
+**Not a close call.** PF 0.850 is below 1.0 on the never-tuned half. Per Attack 37/48's own kill-rule
+precedent, this is discarded outright: no filter stack, no rescue, H2 not run, second credit not spent.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Avg loser (-$108.31) against the largest loss (-$327.80, ~3.0x) shows no strong concentration — not
+category 1. PF < 1.0, so this is **category 2, bleed on a negative edge**, the same shape as Attack 48's
+round-number-continuation sibling and Attacks 36/49/50/53b/72b/73/74 — not worth filtering.
+
+## THE VERDICT — DISCARDED ON THE KILL RULE
+
+Unlike Attack 48 (disqualified partly on over-frequency, 518 trades against a 60-350 band), this
+construction landed IN the workable frequency band (253 trades) and still failed on edge alone — a
+cleaner falsification of the mechanism, not a cost problem. **The round-number family has now failed
+both directions tried**: continuation (Attack 48, PF 0.724) and reversal (this cycle, PF 0.850).
+
+## QUEUE
+
+1. **The round-number family (both continuation and reversal variants) is now DISCARDED in both
+   directions tried.** Do not propose a third round-number variant without a genuinely new argument for
+   why it differs from both prior failures.
+2. **Attack 68 (Attack 66 + OBV divergence-magnitude floor) remains the board's strongest both-halves
+   candidate** — PF 1.56474476/1.13127036 on 89/80 trades — unaffected by this cycle.
+3. **Attack 46 (long) remains a candidate alongside Attack 68**, unaffected by this cycle.
+4. **The out-of-sample test for Attack 46 still ranks first among long-side work not yet startable**
+   under BTCUSDT-only — unchanged.
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+7. **This is now the fourth bare-mechanism first pass to fail outright in a row (72, 73, 74, 75), all on
+   different mechanisms.** The next cycle should treat a bare construction clearing H1 decisively as the
+   exception, not the expectation, and should keep proposing genuinely new mechanisms per the standing
+   mandate — whether bare-first-pass mechanisms are structurally exhausted is a decision for the user,
+   not for a cycle to make unilaterally.
+8. **The next cycle proposes ONE further genuinely new mechanism**, distinct from the VWAP family and
+   from every rejected strategy on the board (Attacks 33–65, 67/69/70/71, 72, 73, 74, and now 75).
+
+---
