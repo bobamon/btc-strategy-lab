@@ -8039,3 +8039,99 @@ enforced against far more attractive numbers than these.
    overturned an earlier claim exactly this way). Whole-window cell results have not been decomposed.
 5. **The exposure figure was never read for these cells.** It is free in `run_backtest` and it bounds
    how much of the buy & hold outperformance is simply time spent in cash.
+
+---
+
+# ██ ATTACK 86 — SAMPLE FLOOR CLEARED ON EVERY CELL. AND THE RESEARCH FOUND A BIGGER THREAT THAN THE ONE I FIXED.
+
+Executes the queued fix: same construction, longer window. `source="deep"` (`binance_archive`), 4h,
+all cells `pinned: true`, explicit start/end, fee 5bps, long only, no stop.
+
+**Basis change, stated first: this is SPOT archive, not perps.** No funding, and therefore **not
+directly comparable** to the earlier H1/H2 perp runs. It is an independent, longer test of the same
+mechanism, not a continuation of those numbers.
+
+## RESULT — 2017-08-17 → 2026-09-01 (each cell from its own listing date)
+
+| Pair | PF | Trades | Bars | Net | Buy & hold |
+|---|---|---|---|---|---|
+| XRP | **3.684348** | 51 | 18,242 | +2039.90% | +51.40% |
+| DOGE | **2.855617** | 53 | 15,686 | +2756.17% | +2126.12% |
+| BTC | **2.163366** | 57 | 19,795 | +2809.50% | +1708.72% |
+| SOL | **1.906009** | 73 | 13,272 | +510.58% | +3447.08% |
+| ETH | **1.890028** | 73 | 19,795 | +2064.21% | +702.77% |
+| ADA | **1.676145** | 74 | 18,345 | +1000.03% | -21.78% |
+| BNB | **1.624652** | 81 | 19,311 | +1331.67% | +40691.76% |
+| AVAX | **1.483353** | 62 | 13,020 | +1029.18% | +48.24% |
+| DOT | **1.219696** | 53 | 13,226 | +73.71% | -72.29% |
+| LINK | 0.999236 | 97 | 16,704 | -0.35% | +2195.78% |
+
+**Every cell clears the 30-trade floor** — the smallest is 51, the largest 97, total **674**. This is
+the first Attack 86 result that is bankable per cell rather than only in aggregate.
+
+**9 of 10 above PF 1.0.** LINK sits at 0.999236 — breakeven to four decimals, neither a pass nor a
+meaningful failure.
+
+**The HARD LESSON 54 check passes decisively again.** Buy & hold ranks BNB first (+40,691%) and it is
+**7th** on profit factor; LINK is 3rd on buy & hold and **last** on profit factor; XRP is 7th on buy &
+hold and **1st** on profit factor. The ranking is not tracking drift.
+
+**7 of 10 beat buy & hold on return**, and the three that do not (SOL, BNB, LINK) are precisely the
+three with the largest buy & hold — consistent with a filter that gives up upside in exchange for
+sitting out declines.
+
+## ⚠️ THE THREAT THAT NOW DOMINATES THIS RESULT, AND IT IS NOT THE SAMPLE
+
+The research this tick was aimed at the caveat rather than the case, and it landed hard:
+
+> Survivorship bias **inflates backtested crypto returns by 200–400%**. A documented "top-20 altcoins"
+> backtest showed **+2,800% with survivorship bias against +680% without** — a ~4× inflation factor.
+> Of ~24,000 tokens listed since 2013, **over 14,000 are dead — a failure rate above 58%.**
+
+In equities the same bias is worth 1–3% annually. In crypto it is the dominant term.
+
+**Eight of my ten pairs are survivors selected in 2026.** The coins that died are absent entirely, and
+the research says that omission is worth multiples, not percentage points. **Nothing in the table above
+is corrected for it, and this engine cannot correct for it** — delisted-coin data is not available here.
+
+### THE PART THAT SURVIVES THE OBJECTION
+
+**BTC and ETH are not survivorship-selected in any meaningful sense.** They were the top two assets
+for the entire window; no plausible 2017 selection rule excludes them. Both:
+
+| | PF | Trades | Net | Buy & hold |
+|---|---|---|---|---|
+| BTC | **2.163366** | 57 | +2809.50% | +1708.72% |
+| ETH | **1.890028** | 73 | +2064.21% | +702.77% |
+
+**Both clear the floor, both are well above 1.0, and both beat buy & hold on return over nine and six
+years respectively.** That two-cell result is the honest core of Attack 86. The other eight cells are
+consistent with it but carry a bias the literature sizes at 200–400%.
+
+## VERDICT
+
+**Still not promoted, and the reason has changed.** The sample objection is now answered — every cell
+clears the floor. What replaces it is survivorship, which is larger, is unfixable on this data, and
+which I cannot bound. A candidate whose supporting evidence is 80% survivor-selected is not a
+champion, however good the numbers look.
+
+**What it is: a mechanism with a survivorship-immune two-cell result at PF 2.16 and 1.89 on 57 and 73
+trades, and a survivor-contaminated eight-cell result consistent with it.** That is worth more than
+anything else on this board and less than a promotion.
+
+## QUEUE
+
+1. **Do not add more altcoins to strengthen the result.** More survivors is more bias, not more
+   evidence. The BTC/ETH cells are the evidence.
+2. **Split-test the BTC and ETH cells** — the two that survive the survivorship objection are the two
+   worth spending an out-of-sample test on.
+3. **Do not tune 0.95 / 0.90 / 360.** Nothing has been swept and that remains a large part of why this
+   is worth anything.
+4. Exposure per cell is still unread and is free; it bounds how much of the buy & hold outperformance
+   is simply time in cash.
+
+## SOURCES
+- *Survivorship and Delisting Bias in Cryptocurrency Markets* (U. St. Gallen) — https://www.alexandria.unisg.ch/bitstreams/2bc8397d-47dd-4f66-8467-9004b2c9d212/download
+- StratBase, *Survivorship Bias: Dead Coins Your Backtest Ignores* — https://stratbase.ai/en/blog/survivorship-bias-crypto
+- CoinAPI, *How to Eliminate Survivorship Bias in Crypto Backtesting* — https://www.coinapi.io/blog/how-to-eliminate-survivorship-bias-in-crypto-backtesting
+- Gainium, *Common Backtesting Mistakes* — https://gainium.io/blog/common-backtesting-problems
