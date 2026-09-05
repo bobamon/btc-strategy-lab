@@ -5979,3 +5979,105 @@ a benchmark, and the two legs now point in clearly opposite directions.
    this one, and must not be run from here.
 4. The two open rule questions in `STRATEGY-LEDGER.md` (HARD LESSON 48 / RULE QUESTION FOR THE USER)
    remain unanswered and still gate the E69b and E74 decisions.
+
+---
+
+# ██ CYCLE CHECK #29, 2026-09-05 (zero credits) — CHECK #28's HEADLINE CLAIM IS WRONG. CORRECTED HERE.
+
+Executes check #28's queue item 1: test whether `e58a`'s long leg is genuinely market-independent.
+**It is not.** Check #28 concluded, from a whole-window comparison, that a long-only build returning
++7.47% while BTC fell 8.87% "cannot be drift-riding". That inference does not survive decomposition
+and is withdrawn.
+
+Credits: **524. Zero spent.** No new backtest of any kind was run. This uses `get_trades` on `e58a`'s
+existing job `01M1K3J6GDK0Z51MFX60ECM75F` (all 36 trades) and the already-recorded benchmark curve
+`bt_8c81f9456e`. No War Formation code went near `backtest-lab`; the no-port rule is intact.
+
+## THE METHOD
+
+Check #28 compared two endpoints. That is not enough to establish independence from drift, because a
+window can begin and end at levels that hide its path. BTC's path inside this window is **not
+monotonic**: the benchmark equity curve peaks at +10.28% around 2026-01-16, troughs at -25.21% around
+2026-03-01, and recovers to -9.30% at the close.
+
+Those two turning points — **read from BTC's own curve, not chosen to suit the answer** — define three
+phases. `e58a`'s 36 trades were bucketed by exit time into them and its P&L summed per phase.
+
+## THE DECOMPOSITION
+
+| Phase | trades | wins | e58a $ | e58a % | BTC % |
+|---|---|---|---|---|---|
+| **A — rise** (start → 2026-01-16) | 7 | 5 | +845.69 | **+8.46%** | **+10.28%** |
+| **B — crash** (2026-01-16 → 2026-03-01) | 14 | 4 | -371.65 | **-3.72%** | **-32.19%** |
+| **C — recovery** (2026-03-01 → end) | 15 | 6 | +273.45 | **+2.73%** | **+21.27%** |
+| **TOTAL** | 36 | 15 | +747.50 | +7.47% | -9.30% |
+
+(Percentages are on the $10,000 initial capital, matching how `netProfitPct` is recorded; BTC's are
+compounded from its own curve. The bases differ slightly and the comparison is directional.)
+
+## FINDING — e58a's P&L HAS THE SAME SIGN AS BTC's IN ALL THREE PHASES
+
+It made money when BTC rose, lost money when BTC fell, and made money again when BTC recovered.
+**There is no phase in which it profited from a falling market.** It is directionally aligned with the
+instrument in every sub-period, which is exactly what a long-only build should be, and it is the
+opposite of market-independent.
+
+**The whole-window result is an endpoint artefact.** BTC finished 9.30% down, but its path was
+up-then-down-then-up. `e58a` captured most of the first leg up, shed comparatively little in the
+crash, and captured a little of the recovery. Summed, that clears a negative endpoint-to-endpoint
+change. The +16-point "gap" from check #28 is arithmetically correct and causally misread.
+
+## WHAT SURVIVES, AND IT IS STILL WORTH SOMETHING
+
+The corrected description is **a damped long**, not a market-neutral edge:
+
+| Phase | BTC move | e58a move | participation |
+|---|---|---|---|
+| A rise | +10.28% | +8.46% | **~0.82** |
+| B crash | -32.19% | -3.72% | **~0.12** |
+| C recovery | +21.27% | +2.73% | **~0.13** |
+
+**Downside participation of roughly 0.12 is the real property here.** BTC lost a third of its value in
+phase B and `e58a` gave back 3.72%. That is the same fact as the recorded drawdown — 9.83% against
+buy & hold's 39.07% — arriving from the trade log instead of the summary, and it is a genuine
+characteristic of the build rather than an artefact.
+
+**But upside participation is inconsistent — 0.82 in phase A and 0.13 in phase C** — and that
+inconsistency is not explained. A build that captures 82% of one rally and 13% of another, both inside
+the same four months, has an unexplained dependence on something other than direction. With 7 and 15
+trades those phase figures are far below any sample floor and cannot support a conclusion; they are
+recorded as an open question, not a finding.
+
+## WHY THIS MATTERS BEYOND ONE BUILD
+
+Check #28 was written the same day and reached a confident causal conclusion from a two-endpoint
+comparison. The decomposition that overturns it was **free, used no new data, and took one call.**
+
+HARD LESSON 54 introduced the buy & hold baseline and warned that a ranking can track drift. This is
+the same error one level down: **a whole-window return comparison can hide a path that reverses the
+interpretation.** The baseline is necessary and was worth adding; it is not sufficient on its own.
+
+This also puts the cross-lab "low-drift" pattern named in `INDEX-SWEEP.md` (sweep 2's split test) on
+notice. That pattern was built partly on check #28's reading of `e58a`. **One of its two legs has now
+been withdrawn**, and it should not be treated as a two-instrument pattern until the index side is
+decomposed the same way.
+
+## STATE
+
+Unchanged: no champion, no candidate. `e58a` remains a **reference**, not promoted, and it was never
+promoted on the strength of check #28. What changes is the *description* attached to it: a damped long
+with low downside participation, not a market-independent edge.
+
+## QUEUE
+
+1. **Correct the record wherever check #28's claim was propagated.** It was cited in
+   `INDEX-SWEEP.md`'s sweep-2 entry as one leg of a two-lab pattern. That citation is now stale and
+   belongs to the index tick to fix, not this one.
+2. **Decompose the index split the same way** before the low-drift pattern is entertained again.
+3. **The inconsistent upside participation (0.82 vs 0.13) is the most interesting open question this
+   lab now has**, and it is the first concrete hypothesis worth a credit since E77 — but it needs a
+   sample larger than 7 and 15 trades, and this instrument has only 4.5 months of 1m data.
+4. E71's standing and the two open rule questions (HARD LESSON 48 / RULE QUESTION FOR THE USER) remain
+   exactly as check #28 left them. **Note that E71's verdict is unaffected**: a short leg that lost
+   money is not rescued by this correction, and phase B — where a short should have earned — is
+   precisely where `e58a`'s long lost too.
