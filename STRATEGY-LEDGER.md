@@ -2536,3 +2536,71 @@ that gap four separate times.
 3. **A minority win rate with a near-even or better payoff (e.g. Attack 64, HARD LESSON territory but not
    this one) is a DIFFERENT failure** — an entry problem, not an exit problem — and must not be folded
    into this tally; keep the two shapes counted separately so neither dilutes the other's signal.
+
+## ██ HARD LESSON 54 — IN A MULTI-INSTRUMENT SWEEP, CHECK THE RANKING AGAINST BUY & HOLD BEFORE
+## CONCLUDING ANYTHING ABOUT THE INSTRUMENTS (INDEX SWEEP, 2026-09-05)
+
+**Earned:** the first index sweep on the new engine, 2026-09-05. Two sweeps of `donchian_breakout` on
+untuned defaults across NAS100 / US30 / SPX500 — 1h over 2025-09-05 → 2026-09-01 (1,730 bars) and 1d
+over 2022-01-01 → 2026-09-01 (1,169 bars), every cell `pinned: true`, 35–57 trades per cell.
+
+### THE OBSERVATION THAT LOOKED LIKE A FINDING
+
+The instrument ranking came out **NAS100 > SPX500 > US30 on both sweeps**. Different timeframes,
+barely-overlapping windows, same order twice. On this project's own standards that is the shape of a
+real result: HARD LESSON 44 says a reproduced pattern across independent samples is strong evidence,
+and a reproduced *ordering* across two windows is the kind of thing a cycle would normally bank.
+
+### WHY IT WAS NOT ONE
+
+The buy & hold column ranks the three instruments in the identical order, in both sweeps:
+
+| | NAS100 | SPX500 | US30 |
+|---|---|---|---|
+| 1d strategy PF | 1.194034 | 1.004401 | 0.767016 |
+| 1d buy & hold | +78.507951% | +60.242758% | +45.37601% |
+| 1h strategy PF | 1.32603 | 0.635257 | 0.533099 |
+| 1h buy & hold | +24.678064% | +18.661585% | +17.173812% |
+
+Rank correlation with buy & hold is perfect in both. A long-biased trend follower placed the
+instruments in order of how much they trended up. **That is the strategy restating its own directional
+bias, not information about which instrument suits it.** And the confound is total, not partial:
+there is no residual ordering left over once B&H is accounted for.
+
+### THE RULE
+
+**Before reading any multi-instrument sweep as evidence about instruments, rank the cells by buy &
+hold and compare the two orderings.**
+
+- If the strategy's ranking matches the B&H ranking, the sweep has told you about the instruments'
+  drift, not about the strategy's fit to them. Say so and do not build on it.
+- The informative case is where the two orderings **disagree** — an instrument the strategy beats
+  despite weak drift, or one it fails despite strong drift. That residual is the actual finding.
+- This costs nothing. `backtest-lab` returns `buyHoldPct` on every cell.
+
+### WHY THIS COULD NOT HAVE BEEN LEARNED BEFORE TODAY
+
+**No record in this project has a buy & hold baseline.** The trader.dev engine does not report one, so
+`CHAMPION-BOARD.md`, `war-formation/` and `three-m-elite/` contain none, across seventy-eight attacks
+and sixty-odd experiments. The confound this lesson names has been invisible to every prior cycle by
+construction, not by oversight. The new engine reported it on the first sweep and it immediately
+caught a false positive.
+
+### THE UNCOMFORTABLE COROLLARY, STATED RATHER THAN BURIED
+
+Every cell in that sweep — including the only two above PF 1.0 — **lost to buy & hold**. NAS100 1d
+returned +15.505107% against B&H's +78.507951%. A profit factor above 1.0 is not the same as being
+worth trading, and this project has spent four days using PF > 1.0 as its bar without ever having the
+comparison that would test it. **This does not retroactively invalidate any BTC result** — BTC's
+buy & hold over those windows was never measured, so nothing is known either way — but it does mean
+the question is open for every result on `CHAMPION-BOARD.md`, and it is answerable for free on the new
+engine.
+
+### WHAT THIS DOES NOT SAY
+
+It does not say beating buy & hold is the right bar for every strategy — a hedged or low-exposure
+strategy can be worth trading at a lower return. Attack 78 held 5.75% exposure; comparing that to a
+100%-exposed benchmark on return alone is not like-for-like. The rule here is narrower and is about
+**rankings across instruments**, plus an obligation to report the baseline rather than omit it.
+
+---
