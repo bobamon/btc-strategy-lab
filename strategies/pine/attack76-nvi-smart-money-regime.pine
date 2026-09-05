@@ -1,0 +1,157 @@
+//@version=6
+// BTC ATTACK 76 - NVI SMART-MONEY VOLUME REGIME. A GENUINELY NEW MECHANISM, BARE.
+//
+// The stored scheduled prompt describes a board state ("Attack 37, build its filter stack") more than
+// seventy-five attacks stale. THE DOCS OVERRIDE IT, AGAIN, per the prompt's own standing instruction:
+// Attack 41 closed Attack 37 on cost, Attack 43 closed the whole sweep-reversal family, Attack 68 (Attack
+// 66 + OBV divergence-magnitude floor) is the board's strongest both-halves candidate, and Attack 75's own
+// queue item 8 asked for one further genuinely new mechanism, distinct from every family already on the
+// board. This build is that instruction, continuing numbering after Attack 75, not Attack 37.
+//
+// ==================== WHAT THIS CLAIMS, IN ONE SENTENCE ====================
+// The Negative Volume Index (NVI) is a cumulative series that only accumulates a bar's percentage price
+// change on bars where volume FELL from the prior bar, and holds flat on every bar where volume rose --
+// Fosback's "smart money trades on quiet volume" claim, applied here at bar level instead of the classic
+// daily-close level. When NVI crosses above its own long moving average, price return has been
+// accumulating disproportionately on LOW-participation bars relative to its own trend -- a regime where
+// quiet, low-volume drift is carrying price up rather than crowded, high-volume participation -- and that
+// regime tends to persist because it reflects a change in WHO is driving price, not a same-instrument
+// technical level.
+//
+// ==================== WHY THIS IS A NEW INPUT CLASS FOR THIS LAB ====================
+// STRATEGY-LEDGER's "families still open" list names "volume/participation profile" as untried and
+// distinct from "order-flow imbalance proxies" (Attack 53, a same-window pressure SUM) and from the OBV
+// divergence family (Attack 66-71, a point-to-point comparison of a cumulative volume series against
+// price AT TWO CONFIRMED PIVOTS). NVI is neither: it is a cumulative series that is CONDITIONALLY GATED
+// by whether volume itself rose or fell bar-to-bar, entirely independent of price direction or any pivot
+// structure, then compared only to ITS OWN moving average -- the same shape as a price/EMA trend filter,
+// but built from a volume-gated return series instead of price. No prior BTC attack has used ta.nvi or
+// ta.pvi. Genuinely distinct from every mechanism on the board: not a price channel (33), not a calendar
+// anchor (34/35/50/54/55/74), not a volatility state (6/36/65), not a swing-level tap or failed break
+// (37-47, 59, 63, 71/72's autocorrelation persistence is a return-sign statistic, not a volume-gated
+// return series), not a fixed grid or single-bar impulse (48/49/75), not a price/oscillator or
+// price/OBV divergence (51/52/66-71), not order-flow absorption (53), not a streak or crossover (56-58),
+// not Ichimoku (73).
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS ====================
+// nvi = ta.nvi (allowlisted, engine-native cumulative series). nviEma = ta.ema(nvi, nviEmaLen). The
+// ENTRY TRIGGER is ta.crossover(nvi, nviEma) -- the regime turning bullish is itself the signal, not a
+// filter bolted onto something else (Attack 15's lesson: the signal's own terms deserve the same scrutiny
+// as filters, so this cycle puts the volume-regime term IN the trigger position, where it is maximally
+// exposed to the kill rule). The FLIP RESPONSE (standing objective 2) is the mirror crossunder: if a long
+// position is open when ta.crossunder(nvi, nviEma) fires, it is closed immediately via strategy.close,
+// flattening on the regime change rather than waiting for the fixed stop or target to be hit.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - EXCLUSION via rBig on rLong = close - swingLow, never clamped.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = ta.lowest(low, swingLen)[1], a genuine prior swing low
+//        computed from bars STRICTLY BEFORE the signal bar (the [1] shift, same convention as Attack 37/59/
+//        63/66/71), never the NVI trigger level itself and never the entry bar's own low.
+//   Each leg separately (LESSON 6) - LONG ONLY this cycle, following this lab's established convention for
+//        a first pass on a new mechanism (Attacks 50/59/63/65/66/72/73/74/75 all opened one-sided). The
+//        short leg (NVI crossing BELOW its EMA as a bearish-regime short trigger, its own geometry, never
+//        mirrored) is deferred and reported as OUTSTANDING -- this is an INTERIM result, not a finished one.
+//   BINDING (E17) - justTurnedBull (the NVI/EMA crossover) AND rBig AND haveSwing must all independently
+//        bind; this is the first run of this mechanism and two credits are budgeted this cycle for the
+//        H1/H2 pair (H2 spent only if H1 clears the kill rule), so no per-term counter build was
+//        affordable -- the realized trade count against the pre-run frequency estimate below is the
+//        binding evidence this cycle can afford, and a per-term counter build is queued if this clears
+//        the kill rule and earns a filter stack.
+//   REDUNDANCY (E14) - justTurnedBull reads a VOLUME-GATED CUMULATIVE RETURN series compared to its own
+//        average (no price-level component); swingLow reads a PRICE LEVEL from a distinct rolling window;
+//        rBig reads a PRICE DISTANCE from entry to that level. Three independent quantities -- volume-
+//        participation state, price level, price distance -- none repeats another.
+//   LATCH IN SEQUENCE (LESSON 8, fourth-confirmation check) - the entry trigger IS the crossover itself,
+//        not a filter phrased as "already true for N bars" paired with a separate trigger, so the
+//        generalized same-bar-conjunction failure mode does not apply: there is exactly one transition
+//        event (ta.crossover(nvi, nviEma)) gating entry, checked against rBig/haveSwing which are ordinary
+//        bar-by-bar conditions, not competing latches.
+//   WEEKENDS (structural note 4) - NVI/PVI accumulate through weekend bars exactly as they do on weekdays;
+//        this mechanism has no calendar dependency at all, so weekends are handled by construction, not by
+//        a special-case rule -- stated explicitly per the standing requirement rather than left implicit.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity, single entry id "L", pyramiding=1; expect
+//        cascadeRatio 1 / maxCascadeDepth 1 on both halves, confirmed below.
+//   SL and TP FIXED AT ENTRY (2R, lab convention; HARD LESSON 13 found the R:R axis neutral, so no tuning
+//        credit spent hunting "the best" multiple on a first pass). The regime-flip flatten is a
+//        strategy.close signal exit, not a modification of the fixed SL/TP prices themselves -- same
+//        pattern as the retired VWAP base's "flip signal: close crossing VWAP" rule.
+//
+// ==================== FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4) ====================
+// NVI/EMA(50) crossovers on a 15m series are a genuinely untested quantity in this lab -- no prior attack
+// has plotted this series. Anchored loosely between a slow calendar cadence (Attack 34: 30/23 trades) and
+// a fast oscillator cross (Attack 57's raw EMA crossover: 2,154 hits before any filter, on one half): a
+// 50-bar EMA of a cumulative series should cross far less often than a raw price EMA cross, but with no
+// direct precedent the estimate carries unusually wide error bars. Pre-registering **80-300 trades per
+// half**, explicitly flagged as low-confidence given the total absence of a comparable prior measurement.
+//
+// ==================== OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17), PER THE PROMPT'S OWN KILL RULE ====
+//   * H1 (never-tuned, 2022-01-01 to 2024-06-08) PROFIT FACTOR BELOW 1.0 -> DISCARD immediately. Do not
+//     run H2. Do not add filters to rescue H1.
+//   * H1 clears 1.0 -> run H2 (2024-06-08 to 2026-09-01) as the second and last credit this cycle.
+//   * BOTH halves clear 1.0, trades roughly 60-350 per half -> a genuine both-halves candidate, joining
+//     Attack 37/46/66-68 on the board; report avg loser, win rate and max DD alongside PF (the board's
+//     three-drawdown-category taxonomy), and queue it for a filter stack exactly as Attack 37/66 earned
+//     theirs.
+//   * H1 clears but H2 does not -> report both, DISCARD as a candidate (per Attack 53/72/74's precedent:
+//     this would be the fourth "helps H1, breaks H2" result), not as evidence the volume-participation
+//     family as a whole is dead.
+//   * FEWER THAN ~30 TRADES in a half -> that half's ratio is a DIRECTION per LESSON 12, not a result.
+//   * A LARGE SHARE OF HOLDS AT maxBars 480 -> the cap is truncating (HARD LESSON 38); report before
+//     drawing any conclusion.
+//   REPORT GROSS, COMMISSION, ACHIEVED WIN/LOSS RATIO, AVG LOSER AND WIN RATE alongside net (LESSONS 36/39
+//     and the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack76 NVI Smart-Money Regime", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+nviEmaLen = input.int(50, "NVI regime EMA length")
+swingLen  = input.int(20, "Structural swing-low lookback (bars)")
+minRpct   = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+targetR   = input.float(2.0,  "Target, multiple of R (lab convention)")
+maxBars   = input.int(480,    "Max bars in trade -- 5 days on 15m")
+
+nvi    = ta.nvi
+nviEma = ta.ema(nvi, nviEmaLen)
+
+justTurnedBull = ta.crossover(nvi, nviEma)
+justTurnedBear = ta.crossunder(nvi, nviEma)
+
+swingLow  = ta.lowest(low, swingLen)[1]
+haveSwing = not na(swingLow)
+
+rLong = haveSwing ? close - swingLow : na
+minR  = close * minRpct / 100
+rBig  = not na(rLong) and rLong >= minR
+
+flat   = strategy.position_size == 0
+goLong = flat and justTurnedBull and haveSwing and rBig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if goLong
+    strategy.entry("L", strategy.long)
+    slPx   := swingLow
+    tpPx   := close + targetR * rLong
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if strategy.position_size > 0 and justTurnedBear
+    strategy.close("L")
+    barsIn := 0
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(nvi,    title="NVI")
+plot(nviEma, title="NVI_EMA")

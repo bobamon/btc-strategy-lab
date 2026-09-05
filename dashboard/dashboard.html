@@ -2928,9 +2928,60 @@ const DATA = [
     },
     "verdict": "DISCARDED under the pre-registered kill rule. Pre-2024 (never-tuned) half PF 0.85028785 is below 1.0, so per Attack 37/48's own kill-rule precedent this is discarded outright: no filter stack, no rescue, H2 NOT RUN, second credit not spent.",
     "notes": "PF 0.85028785, DD 40.41381577%, 253 trades, win rate 35.17786561%, avg winner $169.71 vs avg loser -$108.31 (ratio 1.567), net -26.59%, Sharpe -0.524, commission $1,875.98. REPORT PER STANDING INSTRUCTION: avg loser, win rate, max drawdown together. DRAWDOWN CATEGORY per the board's taxonomy: avg loser -$108.31 against the largest loss (-$327.80, ~3.0x) shows no strong concentration (not category 1); PF < 1.0 so this is category 2, bleed on a negative edge, the same shape as Attack 48's round-number-continuation sibling and Attacks 36/49/50/53b/72b/73/74 -- not worth filtering, since filtering only earns its place on a thin-but-POSITIVE edge (category 3, per Attack 37/66/68). FREQUENCY ESTIMATE SCORED: pre-registered 300-900, actual 253 -- below the pre-registered band but inside the lab's settled 60-350 workable window, so the construction itself is not a cost problem the way Attack 33/48 were. cascadeRatio 1 / maxCascadeDepth 1, confirmed clean (253 total rows, 253 unique entries). WHAT THIS SETTLES: the round-number family has now failed BOTH directions tried -- Attack 48's continuation (PF 0.724, 518 trades, over-frequent) and this cycle's reversal/fade (PF 0.850, 253 trades, in-band frequency but still a negative edge). Unlike Attack 48, frequency was not the disqualifier here; the edge itself is negative even at a workable trade count, which is a cleaner falsification of the mechanism (not merely a cost problem). QUEUE: (1) The round-number family (both continuation and reversal variants) is now DISCARDED in both directions tried -- do not propose a third round-number variant without a genuinely new argument for why THIS variant differs from both prior failures. (2) Attack 68 (Attack 66 + OBV divergence-magnitude floor) remains the board's strongest both-halves candidate -- PF 1.56474476/1.13127036 on 89/80 trades -- unaffected by this cycle. (3) Attack 46 remains a candidate alongside Attack 68, unaffected. (4) The out-of-sample test for Attack 46 still ranks first among long-side work not yet startable under BTCUSDT-only -- unchanged. (5) The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed if revisited. (6) The short leg remains a reported standing structural asymmetry. (7) This is now the FOURTH bare-mechanism first pass to fail outright this recent stretch (72, 73, 74, 75), all on different mechanisms -- the next cycle should treat a bare construction clearing H1 decisively as the exception, not the expectation, and should keep proposing genuinely new mechanisms per the standing mandate; if the board decides bare-first-pass mechanisms are structurally exhausted, that is a decision for the user, not for a cycle to make unilaterally. (8) The next cycle proposes ONE further genuinely new mechanism, distinct from the VWAP family and from every rejected strategy on the board (Attacks 33-65, 67/69/70/71, 72, 73, 74, and now 75)."
+  },
+  {
+    "id": "attack76a-nvi-smart-money-regime-h1",
+    "name": "Attack 76a: NVI smart-money volume regime LONG -- never-tuned half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-05",
+    "lastTestedDate": "2026-09-05",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack76-nvi-smart-money-regime.pine",
+    "description": "Per Attack 75's queue item 8: a further genuinely new mechanism, distinct from the VWAP family and every rejected strategy on the board (Attacks 33-65, 67/69/70/71, 72, 73, 74, 75). CLAIM: the Negative Volume Index (NVI) -- a cumulative series that accumulates a bar's percentage price change only on bars where volume FELL from the prior bar, holding flat otherwise (Fosback's 'smart money trades on quiet volume' claim, applied at bar level rather than daily close) -- crossing above its own EMA marks a regime where price return is accumulating disproportionately on low-participation bars, a change in who is driving price rather than a technical level. This is the lab's first use of ta.nvi/ta.pvi and the first entry into the 'volume/participation profile' family named as open in STRATEGY-LEDGER.md, genuinely distinct from the OBV divergence family (Attack 66-71, a point-to-point comparison of a cumulative volume series against price AT TWO CONFIRMED PIVOTS) and from order-flow absorption (Attack 53, a same-window pressure SUM): NVI is a volume-GATED cumulative return series compared only to its own moving average, with no pivot structure and no divergence comparison at all. Entry: ta.crossover(nvi, nviEma) (the regime trigger itself, not a filter on something else) AND R >= 0.8% of price (LESSON 3, by exclusion) on rLong = close - swingLow, where swingLow = ta.lowest(low, 20)[1], a genuine prior structural swing low (LESSON 5). Stop at swingLow, target fixed 2R (lab convention; HARD LESSON 13 found the R:R axis neutral). Flip response: ta.crossunder(nvi, nviEma) closes any open long immediately, the mechanical regime-change response (standing objective 2), mirroring the retired VWAP base's VWAP-cross flatten. Long only this cycle, following this lab's convention for a first pass (Attacks 50/59/63/65/66/72/73/74/75 all opened one-sided); the short leg (NVI crossing below its EMA as a bearish-regime short trigger, its own geometry, never mirrored) is deferred and reported as OUTSTANDING. Pre-registered frequency estimate: 80-300 trades per half, flagged low-confidence given no prior measurement of this series on this engine. KILL RULE: H1 profit factor came back at 0.74337316, below 1.0 -- discarded outright per the standing kill rule. H2 was not run; no filter stack, no rescue.",
+    "metrics": {
+      "netProfitPct": -74.56981843,
+      "profitFactor": 0.74337316,
+      "maxDrawdownPct": 75.64217274,
+      "totalTrades": 1402,
+      "winningTrades": 421,
+      "losingTrades": 981,
+      "winRatePct": 30.02853067,
+      "avgTradePct": -0.05318817,
+      "avgWinningTrade": 51.308083996081,
+      "avgLosingTrade": -29.620474215494,
+      "ratioAvgWinLoss": 1.73218307,
+      "largestWin": 488.149889499998,
+      "largestLoss": -316.06813575,
+      "avgBarsInTrade": 11.27389444,
+      "avgBarsWinning": 18.02612827,
+      "avgBarsLosing": 8.37614679,
+      "sharpeRatio": -2.13380036,
+      "sortinoRatio": -0.99850912,
+      "commissionPaid": 7241.812143050003,
+      "grossProfit": 21600.70336235,
+      "grossLoss": 29057.685205400005,
+      "longTrades": 1402,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1RMA239M8765VYCJTX2PF1K",
+      "strategyId": "01M1RMA2APTN6JF0EQ5RA855WQ",
+      "resultId": "01M1RMA2391MV7CDBYSGTWNKGX",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1RMA2391MV7CDBYSGTWNKGX",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-05T00:00:00Z"
+    },
+    "verdict": "DISCARDED on the kill rule -- H1 (never-tuned half) profit factor 0.74337316, below 1.0. H2 not run, second credit not spent, no filter stack.",
+    "notes": "Frequency estimate scored: pre-registered 80-300, actual 1402 -- a ~5-14x HIGH miss, the largest frequency miss this board has recorded (worse than Attack 3's 4-10x HIGH miss). NVI/EMA(50) crosses far more often on 15m bars than the calendar/pivot-based mechanisms this lab is used to measuring against; the series is smoother than raw price but still crosses its own 50-bar EMA on ordinary chop. Diagnostic: avgBarsLosing (8.38) is less than half avgBarsWinning (18.03), the recurring 'stop inside the noise' shape (HARD LESSON 5/recurring diagnostic) -- moot here since the kill rule already discards the construction, but worth naming since it appeared again. Drawdown category: PF < 1.0 so category 2 (bleed on a negative edge, same shape as Attacks 36/48/49/50/53b/72b/73/74/75) -- avg loser (-$29.62) is diffuse relative to total gross loss ($29,057.69 across 981 losers), not concentrated (largest loss -$316.07 is ~1.1% of total gross loss), so this is bleed, not a sizing problem. One credit spent this cycle (527 balance -> 526)."
   }
 ];
-const BUILT = "2026-09-05 10:14";
+const BUILT = "2026-09-05 11:13";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

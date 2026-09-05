@@ -6197,3 +6197,124 @@ both directions tried**: continuation (Attack 48, PF 0.724) and reversal (this c
    from every rejected strategy on the board (Attacks 33–65, 67/69/70/71, 72, 73, 74, and now 75).
 
 ---
+
+# ATTACK 76 - NVI SMART-MONEY VOLUME REGIME. THE LARGEST FREQUENCY MISS THIS BOARD HAS RECORDED, DISCARDED ON THE KILL RULE.
+
+The stored scheduled prompt again described a board state ("Attack 37, build its filter stack") more
+than seventy-five attacks stale — Attack 41 closed Attack 37 on cost, Attack 43 closed the whole
+sweep-reversal family, and Attack 68 (Attack 66 + OBV divergence-magnitude floor) is the board's
+strongest both-halves candidate. **The docs override it, again**, per the prompt's own standing
+instruction: Attack 75's own queue item 8 asked for one further genuinely new mechanism. This build is
+that instruction, continuing numbering after Attack 75, not Attack 37.
+
+## THE CLAIM
+
+The Negative Volume Index (NVI) is a cumulative series that accumulates a bar's percentage price
+change only on bars where volume **fell** from the prior bar, holding flat on every bar where volume
+rose — Fosback's "smart money trades on quiet volume" claim, applied here at bar level rather than the
+classic daily-close level. When NVI crosses above its own EMA, price return has been accumulating
+disproportionately on low-participation bars relative to its own trend — a regime change in *who* is
+driving price, not a same-instrument technical level — and that regime should persist. This is the
+lab's first use of `ta.nvi`/`ta.pvi` and the first entry into the **volume/participation profile**
+family STRATEGY-LEDGER named as open. Genuinely distinct from the OBV divergence family (Attack 66-71,
+a point-to-point comparison of a cumulative volume series against price at two confirmed pivots) and
+from order-flow absorption (Attack 53, a same-window pressure sum): NVI is a volume-**gated** cumulative
+return series compared only to its own moving average, with no pivot structure and no divergence
+comparison at all. Pine: `strategies/pine/attack76-nvi-smart-money-regime.pine`.
+
+## AUDIT (one line per leg)
+
+R >= 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rLong = close - swingLow`, never clamped. Stop beyond
+STRUCTURE (LESSON 5) — `slPx = ta.lowest(low, 20)[1]`, a genuine prior swing low computed strictly
+before the signal bar, same convention as Attack 37/59/63/66/71. Each leg separately (LESSON 6) — LONG
+ONLY this cycle, following convention (Attacks 50/59/63/65/66/72/73/74/75 all opened one-sided); the
+short leg (NVI crossing below its EMA, its own geometry, never mirrored) is deferred and reported as
+OUTSTANDING. BINDING (E17) — `justTurnedBull` (the NVI/EMA crossover, the signal's own term, not a
+bolted-on filter) AND `rBig` AND `haveSwing` all independently bind; no per-term counter build was
+affordable this cycle (two credits budgeted, moot — H2 never spent). REDUNDANCY (E14) —
+`justTurnedBull` reads a volume-gated cumulative return series compared to its own average (no price-
+level component); `swingLow` reads a PRICE LEVEL; `rBig` reads a PRICE DISTANCE. Three independent
+quantities. LATCH IN SEQUENCE (LESSON 8, fourth-confirmation check) — the entry trigger IS the crossover
+itself, not a filter phrased as "already true for N bars" paired with a separate trigger, so the
+generalized same-bar-conjunction failure mode does not apply. WEEKENDS — no calendar dependency at all;
+NVI/PVI accumulate identically through weekend bars, handled by construction. CASCADE (HARD LESSON
+42/43) — LONG at 100% equity, single entry id "L"; `cascadeRatio` 1 / `maxCascadeDepth` 1, confirmed
+(1,402 total rows, 1,402 unique entries).
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4)
+
+No prior attack has plotted NVI on this engine, so the estimate carried unusually wide error bars.
+Pre-registered **80-300 trades per half**, flagged low-confidence in advance.
+
+## H1 (NEVER-TUNED HALF, 2022-01-01 → 2024-06-08)
+
+| | **Attack 76a (H1)** |
+|---|---|
+| Profit factor | **0.74337316** |
+| Trades | 1,402 |
+| Win rate | 30.02853067% |
+| Avg winner | $51.31 |
+| Avg loser | -$29.62 |
+| Achieved win/loss ratio | 1.73218307 |
+| Max drawdown | 75.64217274% |
+| Net return | -74.56981843% |
+| Commission paid | $7,241.81 |
+| Largest loss | -$316.07 |
+
+**Frequency estimate scored: pre-registered 80-300, actual 1,402 — a ~5-14x HIGH miss, the largest
+frequency miss this board has ever recorded** (previous worst was Attack 3's 4-10x HIGH miss). NVI
+crosses its own 50-bar EMA far more often on 15m bars than the calendar- and pivot-based mechanisms this
+lab is used to measuring against — the series is smoother than raw price but still whipsaws across a
+slow EMA on ordinary chop.
+
+## KILL RULE APPLIED. ONE CREDIT SPENT THIS CYCLE (527 BALANCE → 526). H2 NOT RUN.
+
+**Not a close call.** PF 0.74337316 is well below 1.0 on the never-tuned half. Per Attack 37/48/75's own
+kill-rule precedent, this is discarded outright: no filter stack, no rescue, H2 not run, second credit
+not spent.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Avg loser (-$29.62) against total gross loss ($29,057.69 across 981 losers) is diffuse, not
+concentrated — the largest single loss (-$316.07) is only ~1.1% of total gross loss. PF < 1.0, so this
+is **category 2, bleed on a negative edge**, the same shape as Attacks 36/48/49/50/53b/72b/73/74/75 —
+not worth filtering.
+
+**A secondary diagnostic, moot for the verdict but worth naming:** `avgBarsLosing` (8.38) is less than
+half `avgBarsWinning` (18.03), the recurring "stop inside the noise" shape (HARD LESSON 5). The kill
+rule already discards this construction regardless, so no rescue was attempted, but the recurrence is
+notable — a fast-EMA-cross entry with a fixed structural stop keeps reproducing this shape across
+unrelated mechanisms.
+
+## THE VERDICT — DISCARDED ON THE KILL RULE
+
+The volume-participation family's first attempt fails on raw frequency as much as on edge: 1,402 trades
+against a 60-350 workable band is nearly 4x over the ceiling, and PF is still comfortably below 1.0
+even before that overtrading is accounted for. This is a clean falsification of the bar-level NVI/EMA
+regime construction specifically, not evidence against the volume/participation family as a whole — a
+slower or differently-gated volume-participation construction (a longer EMA, or PVI's positive-volume
+mirror) remains untested.
+
+## QUEUE
+
+1. **Do not re-run this exact construction with a different `nviEmaLen`.** The failure is frequency
+   (5-14x over estimate) compounding a genuine negative edge, not a threshold near a workable point —
+   sweeping the EMA length without first re-deriving the frequency model would repeat Attack 4's
+   mistake of tuning past a diagnosed root cause.
+2. **Attack 68 (Attack 66 + OBV divergence-magnitude floor) remains the board's strongest both-halves
+   candidate** — PF 1.56474476/1.13127036 on 89/80 trades — unaffected by this cycle.
+3. **Attack 46 (long) remains a candidate alongside Attack 68**, unaffected by this cycle.
+4. **The out-of-sample test for Attack 46 still ranks first among long-side work not yet startable**
+   under BTCUSDT-only — unchanged.
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+7. **This is now the fifth bare-mechanism first pass to fail outright in a row (72, 73, 74, 75, 76), all
+   on different mechanisms**, and the first to fail on a frequency miss this large. If a volume-gated
+   cumulative-series construction is tried again, pre-register the trade count from a much wider prior
+   (e.g. 200-1,500) rather than anchoring on calendar/pivot mechanisms whose frequency characteristics
+   do not transfer.
+8. **The next cycle proposes ONE further genuinely new mechanism**, distinct from the VWAP family and
+   from every rejected strategy on the board (Attacks 33–65, 67/69/70/71, 72, 73, 74, 75, and now 76).
+
+---
