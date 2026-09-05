@@ -167,3 +167,116 @@ before any tick budgets on the assumption that pre-flight calls are free.
 **LEGACY FOREX: BLOCKED, NOT FAILING.** No spec, no source material, no data path for its stated
 instruments. Zero results recorded, correctly. The workstream cannot be advanced by this session and
 will not be advanceable by any future session until the user commits the specification.
+
+---
+
+# ██ STATUS CORRECTION AND TICK #2, 2026-09-05 — THE SPEC EXISTS; THE ENGINE-SAFETY QUESTION IS NOW ANSWERED
+
+## FIRST, A CORRECTION TO THIS FILE'S OWN FINDING 1
+
+Everything above was written by a scheduled cloud run whose reasoning was sound and whose **premise
+was stale**. It concluded "there is no `legacy-forex/SYSTEM.md`, and there never has been" and verified
+that three ways against the remote it could see.
+
+**`legacy-forex/SYSTEM.md` did exist at that moment — on a local machine, committed but never pushed.**
+The cloud run was reading a remote that genuinely did not have it. Its checks were correct; its world
+was incomplete, through no fault of its own. The spec, the 18 committed transcripts, and the Pine
+visualiser are all in the repo now.
+
+**Finding 1 above is therefore withdrawn.** It is left in place rather than deleted, because "an agent
+concluded a file never existed when it existed unpushed" is exactly the kind of failure this project
+records instead of tidying away. **Findings 2 and 3 of that entry — the remap mechanism and the
+forex-feed discovery — are unaffected and stand.**
+
+---
+
+## FINDING 4 — THE TWO ENGINES BEHAVE DIFFERENTLY ON THE EXACT SYMBOLS THIS WORKSTREAM NEEDS
+
+This had never been checked on `backtest-lab`, only on trader-dev. Checked now, zero credits:
+
+| Symbol | trader-dev | `backtest-lab` |
+|---|---|---|
+| `NQ` | **silently remapped** → `BYBIT:IONQUSDT.P` (a crypto perp) | **hard error** — no data |
+| `YM` | **silently remapped** → `BYBIT:DYMUSDT.P` (a crypto perp) | **hard error** — no data |
+| `NAS100` | hard error | ✅ resolves → `^NDX`, real index (~29,344) |
+| `US30` | hard error | ✅ resolves, real index |
+
+`search_symbols("NQ")` on `backtest-lab` returns **empty across all four exchanges** — no `IONQ`
+substring match, nothing to silently latch onto.
+
+### THE ROUTING RULE THIS CREATES, AND IT INVERTS THE PROJECT'S DEFAULT
+
+**Legacy Forex work must run on `backtest-lab`, NEVER on trader-dev.** That is the opposite of War
+Formation and 3M Elite, which must run on trader-dev and must not be ported. The reason is not
+preference, it is safety:
+
+- On **trader-dev**, this workstream's two instruments fail in the **worst possible way** — a plausible
+  backtest of a completely different asset, with `parityAdjustments` reporting only a date clamp and
+  never naming the substitution. A cycle could bank a full result for `IONQUSDT` believing it had
+  tested the Nasdaq.
+- On **`backtest-lab`**, they fail in the **best possible way** — loudly, with no result at all.
+
+A hard error is a good outcome here. It cannot be mistaken for a finding.
+
+---
+
+## FINDING 5 — THE FUTURES-VS-CASH OBJECTION IS WEAKER THAN THIS FILE CLAIMED, AND THE REASON IS HIS OWN SESSION RULE
+
+`SYSTEM.md` records the futures/cash mismatch as a major declared deviation: NQ/YM are futures, the
+engine has cash indices, and their sessions, overnight behaviour, roll and sizing all differ.
+
+Research this tick says that objection **mostly does not apply to a strategy like his**, and the
+reason is a rule he already states himself.
+
+Practitioner guidance on backtesting index futures is explicit about session matching:
+
+> "If you trade index futures during Regular Trading Hours (9:30 AM to 4:00 PM EST), **backtest on
+> RTH**. If you trade the overnight session, backtest on ETH... **mixing sessions corrupts your
+> results** because price action, volume, and spread behavior differ significantly."
+
+**He trades New York session only, first entry 09:30 ET** (`8._SESSIONS_TO_TRADE`). That is RTH,
+exactly. The differences that make NQ ≠ NAS100 — the near-24-hour Globex session, overnight gaps,
+thin ETH liquidity — live almost entirely **outside the window he trades**. Cash-index RTH data is
+therefore a *defensible* basis for an RTH-only strategy rather than the serious distortion this file
+previously implied.
+
+**What survives of the objection, and it is not nothing:**
+- **Settlement and basis.** "YM settles at its own time, and its settlement print rarely matches the
+  index's 4 p.m. close to the point." The basis is time-varying and must not be treated as a
+  constant, "especially across a quarterly roll." Directionally aligned, never identical.
+- **Sizing is still unmappable.** His stop is quoted in **points** with contract/tick values
+  (`11._STOP_LOSS_ADJUSTMENT`: "that's a 25 point stop loss"). A cash index has no contract size, so
+  the percentage-stop substitution remains a real declared deviation.
+
+**Net effect on the workstream:** the instrument objection drops from *blocking* to *manageable and
+declared*. **The data-depth blocker is untouched and is still the thing that stops this workstream.**
+
+---
+
+## WHERE THIS WORKSTREAM ACTUALLY STANDS
+
+| | |
+|---|---|
+| Spec | ✅ complete, decoded from 18 transcripts with verbatim quotes |
+| Pine visualiser | ✅ `legacy-forex/pine/VISUAL-legacy-forex-complete.pine` |
+| Engine routing | ✅ resolved — `backtest-lab` only, never trader-dev |
+| Instrument proxy | ✅ defensible for RTH, with declared deviations on sizing and basis |
+| **Data depth** | ❌ **STILL BLOCKING** — 15m ~30 days (573 bars, ~21 sessions), 5m does not resolve |
+| Backtest | ❌ none, and none should be run until the sample question is solved |
+
+At his 2-trade daily cap, ~21 sessions caps the sample near 42 in a perfect world and near 20 in a
+realistic one — below the 30-trade floor. **Nothing has been backtested and no number appears in this
+file or in `SYSTEM.md` that came from a run, because no run has happened.**
+
+## QUEUE
+
+1. **Do not run a Legacy Forex backtest on trader-dev under any circumstances.** Finding 4 is the
+   reason. If a future cycle is tempted, re-read it.
+2. **The data-depth blocker is the only thing left.** A futures source with intraday depth (NQ/YM 5m
+   over years) solves the sample and the instrument question together. Neither engine has one.
+3. **Forward-testing needs no history** — run the Pine live on NQ/YM 5m during New York session and
+   record signals as they occur. Slow, but honest, and available today.
+4. If a 30m proxy is ever run to test whether the *structure + level-break + volume* stack has any
+   edge at all, it must be labelled a proxy and **must never be recorded as a test of his system**.
+5. The nine unnumbered `videoNNNN` transcripts (up to 68 minutes each) are committed but still not
+   decoded; they may refine the rules above.
