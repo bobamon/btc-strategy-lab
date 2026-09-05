@@ -7825,3 +7825,86 @@ here separates "nearness" from plain momentum.
 - Jia, Simkins, Yan, Zhang & Zhao (2025), *Psychological Anchoring Effect and Cross Section of Cryptocurrency Returns* — https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5386180
 - ScienceDirect listing for the same paper — https://www.sciencedirect.com/science/article/abs/pii/S0378426625002122
 - Marquette, *Momentum Crashes and the 52-Week High* — https://epublications.marquette.edu/cgi/viewcontent.cgi?article=1168&context=fin_fac
+
+---
+
+# ██ ATTACK 86 FOLLOW-UP — PRE-REGISTERED BEFORE RUNNING, AND THE EVIDENCE SAYS EXPECT IT TO FAIL
+
+**Nothing was measured this tick.** `backtest-lab` returned `requires re-authorization (token expired)`
+mid-call, so the cross-sectional sweep did not run and **no number below came from a backtest**. What
+follows is a pre-registration written *before* the run, which is what HARD LESSON 17 asks for — state
+the criterion before the result exists, then honour it.
+
+## THE TEST THAT IS QUEUED
+
+Attack 86 (nearness to the 52-week high) produced PF 1.691394 on **7 trades** and PF 1.598577 on **15
+trades** — both above 1.0, both below the 30-trade floor, both explicitly **not banked**. The
+diagnosis was structural: a long-horizon anchor changes state too rarely to generate episodes on one
+instrument.
+
+The queued fix is a **`sweep_backtest` across ~10 crypto pairs at 4h** on the same window, aggregating
+sample across instruments instead of fighting for it on one.
+
+## WHAT THE RESEARCH SAYS TO EXPECT — AND IT IS NOT ENCOURAGING
+
+Searched specifically for the failure case, per the standing research rule.
+
+**Han, Kang & Ryu — *Time-Series and Cross-Sectional Momentum in the Cryptocurrency Market: A
+Comprehensive Analysis under Realistic Assumptions*** is the directly relevant paper, and its finding
+is a warning:
+
+> "When appropriately assessed by accounting for **transaction costs and daily price fluctuations**,
+> many momentum portfolios are **liquidated**, and many with statistically significant returns earn
+> **insignificant profits**, with evidence of cross-sectional momentum being **weak**."
+
+> "Prior studies on cryptocurrency momentum **ignore important real-world considerations**."
+
+The margin is thin even where it survives: positive Sharpe persisted only up to about **29 basis
+points** per trade against an assumed **26 bps** crypto cost. That is a ~3bp buffer — the effect and
+its cost are nearly the same size.
+
+Notably, **reversal** portfolios are reported as more robust to conservative transaction costs than
+momentum ones, which cuts against the direction Attack 86 trades.
+
+## HOW THIS CHANGES THE READING, REGISTERED IN ADVANCE
+
+1. **The published crypto nearness result (Jia et al. 2025, ~0.7–1.4%/week) is a
+   cross-sectional LONG-SHORT SPREAD.** A `sweep_backtest` is **not** that. It runs the same long-only
+   rule on each pair independently — ten parallel time-series tests, not a ranked spread. The engine
+   cannot rank across symbols at each timestamp, so **the published form is not reproducible here at
+   all.** The sweep aggregates *sample*; it does not replicate the *estimator*. Any result must be
+   labelled as a generalisation test, never as a replication.
+2. **Fees are the thing to watch, not profit factor.** The literature's failure mode is precisely that
+   gross edge survives and net edge does not. Per HARD LESSON 37, the gross-vs-net check is free and
+   must be run on every cell: compute fees per trade against average trade before reading any ratio.
+3. **A pass here would be surprising and should be treated with more suspicion than a fail.** Given
+   the paper's finding, an aggregate PF comfortably above 1.0 net of costs across ten pairs is more
+   likely to indicate a construction error than a discovered edge. If it happens, the first response is
+   to look for the mistake, not to promote it.
+4. **Buy & hold is mandatory per cell.** Ten crypto pairs over 2022-01-01 → 2024-06-08 spans a deep
+   bear and a recovery; a long-biased rule will track drift, which is HARD LESSON 54's exact trap.
+
+## THE DEMOTION CRITERION, STATED BEFORE THE RUN
+
+The cross-sectional follow-up **counts as support for the nearness mechanism only if**:
+- the aggregate trade count across cells clears **30**, and
+- a **majority of cells** are above PF 1.0 **net of fees**, and
+- the cells that work are **not** simply the pairs with the largest buy & hold return (the HL54 check).
+
+**If the ranking tracks buy & hold, the family closes** regardless of profit factor.
+
+## STATUS
+
+- Test: **queued, not run.** `backtest-lab` token expired; needs re-authorization.
+- The key in `~/.claude.json` was updated earlier this session, but the live connection was opened with
+  the previous key. A fresh session should pick up the new one.
+- **No result exists and none is recorded.**
+
+## SOURCES
+
+- Han, Kang & Ryu, *Time-Series and Cross-Sectional Momentum in the Cryptocurrency Market: A
+  Comprehensive Analysis under Realistic Assumptions* — https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4675565
+- AUT Centre for Financial Research, same paper (PDF) — https://acfr.aut.ac.nz/__data/assets/pdf_file/0009/918729/Time_Series_and_Cross_Sectional_Momentum_in_the_Cryptocurrency_Market_with_IA.pdf
+- *Cross-sectional interactions in cryptocurrency returns* — https://www.sciencedirect.com/science/article/abs/pii/S1057521924007415
+- *New behaviorally-based cross-sectional reversal portfolios in the cryptocurrency market* — https://www.sciencedirect.com/science/article/abs/pii/S154461232501058X
+- Starkiller Capital, *Cross-sectional Momentum in Cryptocurrency Markets* — https://www.starkiller.capital/post/cross-sectional-momentum-in-cryptocurrency-markets
