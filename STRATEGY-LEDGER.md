@@ -287,6 +287,44 @@ The silent remaps were the real danger: a backtest would have returned **genuine
 wrong instrument**. Strategy 001 remains on file as an external-backtest-only spec should an index
 data path ever be added.
 
+### ██ CORRECTED 2026-09-05 — THE REMAPS STILL HOLD, BUT "BYBIT PERPS ONLY" WAS NEVER TESTED
+
+Re-verified on the Legacy Forex rotation tick with live `plan_backtest_window` calls. Two changes to
+what is written above; full evidence in `legacy-forex/STATUS.md`.
+
+**1. The remap hazard is worse than recorded — `parityAdjustments` does not catch it.** `NQ` still
+resolves to `BYBIT:IONQUSDT.P` and `YM` to `BYBIT:DYMUSDT.P`, but on both calls `parityAdjustments`
+carried **only a date clamp**; no entry names the symbol substitution, and the response's own
+`requested.symbol` comes back already rewritten to the substituted ticker. The tool's own advice —
+*"trust `quick_backtest` `parityAdjustments`"* — is therefore **not sufficient** to prevent a
+wrong-instrument run. **The only reliable guard is reading `applied.displaySymbol` and comparing it
+to what you asked for. Do that on every run in every lab.** (No recorded result needs withdrawing:
+every banked run in this repo is `BTCUSDT`, which matches itself.) The mechanism is a substring match
+against crypto base coins — `search_perps("NQ")` returns `IONQ` and nothing else; `NQ` ⊂ `IONQ`,
+`YM` ⊂ `DYM` — which is why short futures roots fail *silently* while `US30`/`NAS100`/`USTEC`/`US500`
+fail *loudly* with "not in the Bybit USDT perp catalog".
+
+**2. The generalisation from four index tickers to "this engine is Bybit USDT perps only" was
+wrong.** The 2026-09-01 check tested indices and never tested a forex pair. It resolves unchanged,
+with deep history:
+
+| symbol | tf | applied | first bar | last bar | bars |
+|---|---|---|---|---|---|
+| `EURUSD` | 5m | `EURUSD` — unchanged | 2009-09-25 | **2026-05-19** | 1,152,867 |
+| `EURUSD` | 15m | `EURUSD` — unchanged | 2009-09-25 | **2026-05-19** | 318,187 |
+| `XAUUSD` | 5m | `XAUUSD` — unchanged | 2009-09-27 | **2026-05-19** | 959,407 |
+
+**The non-crypto feed is stale by ~3.5 months** (ends 2026-05-19 vs the crypto feed's 2026-09-01), so
+any forex window must state that end date explicitly and the most recent quarter is untestable.
+`search_perps` searches the crypto catalog only, so this feed cannot be enumerated — the two symbols
+above were found by direct probe, and the rest of it is unmapped.
+
+**What this does NOT license.** It does not make EURUSD a stand-in for NQ, and it does not reopen
+the multi-instrument mandate. HARD LESSON 9 and five recorded cross-inheritance failures all say a
+mechanism built for one instrument's anatomy is a *hypothesis* elsewhere, never an inheritance. The
+correction is narrow and factual: **the premise "no non-crypto data exists here" is false**, and any
+future decision that leaned on it was resting on an untested generalisation.
+
 ## ██ HARD LESSON 22 — A LAB CAN ONLY VALIDATE OUTSIDE THE WINDOW IT TUNED ON, AND UNTIL IT DOES, IT HASN'T
 
 **Earned:** BTC Attack 31, 2026-09-03.
