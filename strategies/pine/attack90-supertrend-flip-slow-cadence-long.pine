@@ -1,0 +1,128 @@
+//@version=6
+// BTC ATTACK 90 - SUPERTREND FLIP CONTINUATION LONG, SLOW-CADENCE RETUNE OF ATTACK 89.
+//
+// Attack 89 (ta.supertrend(3.0, 10)) was DISCARDED, not on the kill rule (PF 1.01365036 nominally
+// clears 1.0) but on frequency: 526 H1 trades is well outside this board's settled workable band of
+// ~60-350 per half, and commission ($5,327.26) was ~9.8x net profit ($542.32) -- the same cost
+// signature that discarded Attack 33. Attack 89's own queue item 1 named the fix: "retune the ATR
+// length/factor toward a slower flip cadence first (targeting ~60-350 H1 trades) and re-run BOTH
+// halves as a fresh bare-mechanism pair -- not a filter stack on this result, since this result was
+// never validated as an edge worth stacking on." This cycle is that retune. Credits band (492, the
+// 250-500 tier) authorizes the pre-2024 half only, so H1 is run first per the kill rule; H2 is queued
+// only if H1 clears both the PF floor and the frequency band.
+//
+// ==================== WHAT CHANGED, AND ONLY THIS ====================
+// stFactor 3.0 -> 4.0, stAtrLen 10 -> 21. A wider multiplier requires a larger adverse excursion
+// before the band flips side, and a longer ATR length smooths the band's own volatility estimate so
+// it reacts to sustained regime change rather than single-bar noise spikes -- both push flip
+// frequency down, in the same direction, which is the retune Attack 89's queue asked for. Every other
+// term (rBig, swingOk, stop, target, maxBars) is BYTE-IDENTICAL to Attack 89. This is a mechanism
+// retune, not a ratchet-tracked filter addition: Attack 89 was discarded outright, so there is no
+// "base" for Attack 90 to be measured against -- it stands or falls on the kill rule alone, same as
+// Attack 89 did.
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS ====================
+// ta.supertrend(factor, atrLen) returns [st, dir]. flipLong = ta.crossover(close, st): price closes
+// back above the band after being below it -- a single, unambiguous, non-repainting trigger. Stop:
+// the most recent CONFIRMED swing low (ta.pivotlow, LESSON 5 -- structure, not the SuperTrend line,
+// which this lab's fixed-SL/TP-at-entry rule forbids using as a trailing exit). Target: entry plus
+// the amplitude of the most recent confirmed swing (pivot high minus pivot low), a level derived from
+// the swing's own geometry (HARD LESSON 41), independent of R (E14).
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - EXCLUSION via rBig on rLong = close - lastPivLow, never clamped, unchanged
+//        from Attack 89.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = lastPivLow, the confirmed swing low, never the
+//        SuperTrend line, unchanged from Attack 89.
+//   Each leg separately (LESSON 6) - LONG ONLY; short remains the standing asymmetry (Attack 64).
+//   BINDING (E17) - flipLong AND rBig AND swingOk all necessarily bind: the raw (now slower) flip
+//        fires regardless of stop distance or swing validity, so each added term independently
+//        removes flips the trigger alone would take -- unchanged in structure from Attack 89.
+//   REDUNDANCY (E14) - an ATR-envelope trend-state (now factor 4.0/length 21), price distance to the
+//        confirmed swing low, and confirmed swing amplitude -- three independent quantities across
+//        three domains, unchanged from Attack 89.
+//   LATCH IN SEQUENCE (LESSON 8) - lastPivLow/lastPivHigh are var float scalars updated only on their
+//        own confirmed pivot bars; flipLong is read on a later, separate bar via crossover, never the
+//        same bar a pivot confirms by construction. Unchanged from Attack 89.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, flat check gates every entry.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity; single TP+SL, no partials; expect
+//        cascadeRatio 1 / maxCascadeDepth 1, to be confirmed against totalTrades == unique entries.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17). BARE MECHANISM, H1 ONLY (credits band 250-500, the
+// never-tuned pre-2024 half, per the kill rule):
+//   * H1 ABOVE 1.0 AND TRADES INSIDE ~60-350 -> the retune worked as diagnosed; queue an H2 run before
+//     any filter work, per Attack 89's own instruction not to stack filters on an unvalidated edge.
+//   * H1 ABOVE 1.0 BUT TRADES STILL OUTSIDE ~60-350 (either side) -> the frequency diagnosis needs a
+//     second retune pass (further slower if still too many, faster if now too few) before an H2 run
+//     is worth its credit -- report which direction it missed and by how much (frequency-estimate
+//     scorecard discipline, HARD LESSON 4).
+//   * H1 BELOW 1.0 -> DISCARDED by the kill rule immediately. No H2 run, no filter rescue.
+//   * A MAJORITY WIN RATE WITH ratioAvgWinLoss WELL BELOW 1.0 -> HARD LESSON 53's inverted-payoff
+//     shape, report it as that.
+//   REPORT GROSS, COMMISSION AND ACHIEVED RATIO alongside net, avg loser and win rate (LESSONS 36/39
+//     and the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack90 SuperTrend flip slow-cadence long", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+stFactor   = input.float(4.0, "SuperTrend ATR multiplier")
+stAtrLen   = input.int(21, "SuperTrend ATR length")
+pivotLeft  = input.int(5, "Pivot confirmation bars, left")
+pivotRight = input.int(5, "Pivot confirmation bars, right")
+minRpct    = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars    = input.int(192, "Max bars in trade")
+
+[st, dir] = ta.supertrend(stFactor, stAtrLen)
+
+flipLong = ta.crossover(close, st)
+
+pl = ta.pivotlow(low, pivotLeft, pivotRight)
+ph = ta.pivothigh(high, pivotLeft, pivotRight)
+
+var float lastPivLow  = na
+var float lastPivHigh = na
+
+if not na(pl)
+    lastPivLow := pl
+
+if not na(ph)
+    lastPivHigh := ph
+
+rLong = not na(lastPivLow) ? close - lastPivLow : na
+minR  = close * minRpct / 100
+rBig  = not na(rLong) and rLong >= minR
+
+swingAmp = not na(lastPivHigh) and not na(lastPivLow) ? lastPivHigh - lastPivLow : na
+swingOk  = not na(swingAmp) and swingAmp > 0
+
+goLong = flipLong and rBig and swingOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := lastPivLow
+    tpPx   := close + swingAmp
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(st, title="SuperTrend")
+plot(lastPivLow, title="LastPivotLow")
+plot(lastPivHigh, title="LastPivotHigh")

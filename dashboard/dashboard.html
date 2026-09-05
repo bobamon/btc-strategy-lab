@@ -3693,9 +3693,60 @@ const DATA = [
     },
     "verdict": "PF clears 1.0 only nominally (1.01365036, a margin of +0.0137 over breakeven) on 526 trades -- well outside the board's own settled workable frequency band of roughly 60-350 trades per half (Attack 33: 757, discarded on cost; Attack 37: 322/196, both halves profitable). Commission paid ($5,327.26) is ~9.8x the net profit ($542.32), the same cost-dominated signature that discarded Attack 33 (commission $6,460.27 against a $217.09 net LOSS, 757 trades) -- here the sign is positive only because 55.9% more winners than the break-even split happened to land, not because the edge is robust to cost. ratioAvgWinLoss 0.746 with a 57.6% win rate is the inverted-payoff shape (avg loser -$178.16 > avg winner $132.91) the board already tracks as HARD LESSON 53's pattern in five prior instances.",
     "notes": "DISCARDED. Not a literal kill-rule failure (H1 PF is nominally >1.0), but the trade count and cost profile fail the board's own frequency/cost standard from Attack 33, and the PF margin (0.0137) is not distinguishable from noise at this sample. Per the credits band (496 credits, 250-500 tier), only the pre-2024 half was authorized this cycle regardless of outcome; given this result, an H2 run would not be a good use of the next credit allowance either -- the mechanism needs a slower SuperTrend setting (larger ATR length/factor) to land in the workable frequency band before it is worth a second half, and that is a retune, not owed to this bare-mechanism result. Continues numbering after Attack 88, the last entry on the board; the stored scheduled prompt's 'Attack 37, build its filter stack' framing is more than 85 attacks stale (Attack 41 closed 37 on cost; the OBV-divergence filter stack on Attack 68/82/83 is closed at three terms after Attacks 71/87/88)."
+  },
+  {
+    "id": "attack90a-supertrend-flip-slow-cadence-long-h1",
+    "name": "Attack 90: SuperTrend flip continuation LONG, slow-cadence retune of Attack 89 -- never-tuned half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-05",
+    "lastTestedDate": "2026-09-05",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack90-supertrend-flip-slow-cadence-long.pine",
+    "description": "Attack 89's own queue item 1: retune ta.supertrend's ATR multiplier and length toward a slower flip cadence (3.0/10 -> 4.0/21) to bring trade count down from Attack 89's 526 (well outside the board's ~60-350 workable band) before spending any further credit on the mechanism. Every other term (rBig >=0.8% stop-distance exclusion, confirmed-swing-low stop, confirmed-swing-amplitude measured-move target) is byte-identical to Attack 89. Bare mechanism, no filter stack. Run on the never-tuned pre-2024 half only, per the credits band (492 credits, 250-500 tier -> H1 only).",
+    "metrics": {
+      "netProfitPct": -13.71999556,
+      "profitFactor": 0.95566996,
+      "maxDrawdownPct": 30.15538469,
+      "totalTrades": 434,
+      "winningTrades": 259,
+      "losingTrades": 175,
+      "winRatePct": 59.67741935,
+      "avgTradePct": -0.03161289,
+      "avgWinningTrade": 114.199442913321,
+      "avgLosingTrade": -176.855172974,
+      "ratioAvgWinLoss": 0.64572294,
+      "largestWin": 636.4444515,
+      "largestLoss": -731.165082,
+      "avgBarsInTrade": 47.20046083,
+      "avgBarsWinning": 40.06563707,
+      "avgBarsLosing": 57.76,
+      "sharpeRatio": -0.1161222,
+      "sortinoRatio": -0.0581575,
+      "commissionPaid": 4142.9603559,
+      "grossProfit": 29577.655714550092,
+      "grossLoss": 30949.65527044995,
+      "longTrades": 434,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1SXCNR808TP329E47V3YVE0",
+      "strategyId": "01M1SXCNZQC8SNB268YF5QM0DD",
+      "resultId": "01M1SXCNR8265WHB05JWV2VFA7",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1SXCNR8265WHB05JWV2VFA7",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-05T00:00:00Z"
+    },
+    "verdict": "DISCARDED by the kill rule -- PF 0.95566996 is BELOW 1.0 on the never-tuned half. The slow-cadence retune (factor 4.0/length 21 vs Attack 89's 3.0/10) did cut frequency from 526 to 434 trades, in the diagnosed direction, but not far enough to clear the ~60-350 workable band, and PF moved the wrong way (1.01365036 -> 0.95566996) rather than improving as the slower cadence was meant to select for higher-conviction flips. Drawdown also worsened materially (22.63547866% -> 30.15538469%). ratioAvgWinLoss 0.64572294 with a 59.68% win rate is HARD LESSON 53's inverted-payoff shape again (avg loser -$176.86 exceeds avg winner $114.20, the seventh instance on this board) -- worse than Attack 89's own 0.746.",
+    "notes": "No H2 run: the kill rule discards on H1 alone, and the credits band (492, the 250-500 tier) authorized only the pre-2024 half this cycle regardless of outcome. The SuperTrend flip-continuation family (Attacks 89, 90) is now discarded on two distinct parameterizations, one over-frequent-but-nominally-positive, one closer to the frequency band but net-negative -- a further slowdown is not pre-registered as promising, since the direction (slower = better PF) that motivated this retune did not hold. Continues numbering after Attack 89, the last entry on the board; the stored scheduled prompt's 'Attack 37, build its filter stack' framing is more than 85 attacks stale (Attack 41 closed 37 on cost; the OBV-divergence filter stack on Attack 68/82/83 is closed at three terms after Attacks 71/87/88; Attack 83 remains the board's strongest both-halves candidate, unaffected by this cycle)."
   }
 ];
-const BUILT = "2026-09-05 22:14";
+const BUILT = "2026-09-05 23:11";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
