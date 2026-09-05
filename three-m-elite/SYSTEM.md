@@ -5565,3 +5565,104 @@ metric changed; this is new analysis of existing trades.
 3. **Report `fundingPaid` on future perp results** — still owed from check #25.
 4. **The method generalises: any two-endpoint comparison in this project is now suspect** until
    decomposed. `INDEX-SWEEP.md` carries several; that belongs to the index tick.
+
+---
+
+# ██ v61 / v62 — FVG-GRADED ZONE. THE FIRST GRADING TERM THIS LAB HAS EVER TESTED, AND IT PASSES CLAUSES 1-3.
+
+Four backtests, all on trader-dev (Pine, stateful). Credits 517 → ~513.
+
+## THE CHANGE — ONE TERM
+
+v37 creates a demand zone on **every** bullish engulf; no zone is graded. Research on supply/demand
+reports ungraded zones near a **~48% win rate** against **~65-70%** for zones graded by fair-value-gap
+overlap and HTF alignment. v61/v62 add exactly one gate: **a zone is only created if the engulfing
+candle also left a bullish Fair Value Gap.** Nothing else is touched.
+
+Evidence against, recorded before spending: *"most FVGs are noise, and trading every gap you see is a
+fast way to bleed out an account"*; price revisiting a gap *"can either bounce from them or break
+straight through"*; and ICT, who popularised the concept, *"failed in his 2016 bid to trade to $1
+million"* and *"blew his account"* in the 2024 Robbins cup. Accordingly the FVG is tested **only as a
+quality filter on an existing edge**, never as a signal.
+
+## v61 — ZERO TRADES. A CONSTRUCTION ERROR, AND THE SAME ONE THIS LAB MADE BEFORE.
+
+`resultId 01M1SENCT3E9MHARNWGSZC90FY` — **0 trades**, 163,826 bars.
+
+The FVG was anchored with the engulf as candle **C**, testing `engulf.low > high[two candles back]`.
+Since the candle before the engulf is bearish by definition, that asks the engulf's low to clear the
+high from *before* the drop — nearly impossible. The gate killed every zone.
+
+**This is the same failure mode already on file**: the gap-requiring engulf definition produced *"10
+engulfing candles in 4.7 years… three zero-trade runs and three credits spent chasing the wrong
+terms."* A gap-shaped condition on 24/7 crypto silently disables the gate it is attached to. **Second
+occurrence. It should be a standing pre-run check: any new gap/displacement term must have its
+non-zero firing rate confirmed before a full run is spent on it.**
+
+## v62 — CORRECTED ANCHORING. THE ENGULF IS THE DISPLACEMENT (MIDDLE) CANDLE.
+
+Standard three-candle FVG: A, B (displacement), C. The engulf is **B**, so the gap is
+`C.low > A.high`, confirmed on the 4H candle *after* the engulf. Zone creation is deferred one candle.
+
+| | v37 recorded | v62 |
+|---|---|---|
+| Window | 2022-01-01 → 2026-09-01 | same |
+| runId | — | `01M1SEQ35D1H5XKT24VTEJC122` |
+| Profit factor | 1.25172059 | **2.04955762** |
+| Max drawdown | 8.72815312% | **3.06411441%** |
+| Trades | 155 | **29** |
+
+**Reverted on that window: 29 < 30.** The criterion was pre-registered before the run and was honoured
+rather than adjusted after seeing a near-doubled profit factor.
+
+## THE REAL FINDING — v37's RECORDED NUMBERS DO NOT SURVIVE THE DATA IT NEVER USED
+
+Chasing the 29-trade shortfall exposed something bigger. `plan_backtest_window` shows 15m coverage
+begins **2020-08-19** (211,711 bars), but every 3M result on file starts **2022-01-01** (163,826).
+**Seventeen months of earlier data were available the whole time and never used.**
+
+`resultId 01M1SES9QF5Y18V67JH78FC1DY` — v37, unchanged code, full coverage:
+
+| v37 | recorded (2022→) | **full coverage (2020-08→)** |
+|---|---|---|
+| Profit factor | 1.25172059 | **1.0534251** |
+| Max drawdown | 8.72815312% | **26.97850442%** |
+| Net | +29.75955671% | **+8.87299247%** |
+| Trades | 155 | 241 |
+
+**The champion is barely above breakeven with triple the drawdown on the fuller record.** This is an
+out-of-sample test that was always available and never run. Every v37 citation in this file is
+window-dependent in a way nothing recorded it as being.
+
+## v62 ON FULL COVERAGE — LIKE-FOR-LIKE, AND ALL THREE CLAUSES PASS
+
+`resultId 01M1SETEAG1ADNXCW7JD5SXSGJ` · 211,423 bars · 2020-08-19 → 2026-09-01
+
+| | v37 baseline | **v62** | RATCHET v2 |
+|---|---|---|---|
+| Profit factor | 1.0534251 | **2.04354108** | ✅ clause 1 |
+| Max drawdown | 26.97850442% | **4.50890824%** | ✅ clause 2 |
+| Trades | 241 | **40** | ✅ clause 3 |
+| Net | +8.87299247% | **+25.61599544%** | — |
+| Win rate | 39.41908714% | 52.5% | — |
+| Avg win / loss | 184.16 / -113.76 | 238.87 / -129.20 | — |
+| Commission | $2,219.48 | $446.84 | — |
+
+## ⚠️ NOT KEPT YET — CLAUSE 4 IS UNMET
+
+The trade count falls **241 → 40, an 83% cut**. RATCHET v2 clause 4: *"A change that cuts the trade
+count by more than 50% must pass a split test **before** it can be kept. Not after."*
+
+**That split test has not been run, so v62 is NOT promoted.** It is recorded as the strongest 3M
+candidate on file, pending the split. Note in advance that 40 trades splits to ~20 per half, **below
+the floor per half** — so the split will inform (clause 5 requires the spread be reported) but cannot
+by itself bank the result.
+
+## QUEUE
+
+1. **Run the mandatory split test on v62** before any promotion. Two credits.
+2. **Re-baseline every 3M result on full coverage.** v37's recorded numbers are window-dependent and
+   the whole file compares against them.
+3. **Standing pre-run check:** any new gap/displacement term must have its firing rate confirmed
+   non-zero before a full backtest is spent. Second occurrence of this exact waste.
+4. The short leg is still untested with FVG grading; v60 remains the short reference.

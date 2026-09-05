@@ -1,0 +1,157 @@
+//@version=6
+// 3M ELITE v61 - FVG-GRADED ZONE. Exactly ONE change from v37 (the champion): a demand zone is only
+// created if the engulfing candle that makes it also left a bullish FAIR VALUE GAP.
+//
+// WHY. Independent research on supply/demand zones reports that ungraded zones sit near a ~48% win
+// rate while zones GRADED by fair-value-gap overlap and higher-timeframe alignment reach ~65-70%, and
+// that "a level tested 8 times is weaker as supply/demand than a level price visited once and then
+// exploded away from". v37 does no grading at all: every bullish engulf creates a zone of equal
+// standing. This tests the single cheapest grading term available from the same candles.
+//
+// THE EVIDENCE AGAINST, RECORDED BEFORE THE RUN. Practitioner sources are blunt that "most FVGs are
+// noise, and trading every gap you see is a fast way to bleed out an account", that price revisiting a
+// gap "can either bounce from them or break straight through" with no reliable direction from the gap
+// alone, and that ICT - who popularised the concept - "has a proven live track record for failing
+// miserably" (failed 2016 $1m bid; blew the 2024 Robbins cup account). Accordingly this is tested
+// ONLY as a QUALITY FILTER ON AN EXISTING EDGE, never as a signal in its own right. The zone still has
+// to do all the work v37's zone did; the FVG only decides which zones are allowed to exist.
+//
+// THE CHANGE, PRECISELY.
+//   v37: if bullEngulf                -> create zone
+//   v61: if bullEngulf and fvgOK      -> create zone
+// where fvgOK is the standard three-candle bullish FVG measured on the SAME 4H series the zone lives
+// on: with the engulfing candle as C, the one before it as B, and the one before that as A,
+//   fvgOK  =  C.low > A.high
+// i.e. the engulf's low is above the high of two candles earlier, so the market left an untraded
+// price band behind as it displaced up. Nothing else is touched.
+//
+// UNCHANGED FROM v37: 4H zone reconstruction from 15m bars, engulf by body containment with NO gap
+// clause, zone = [low, open] of the engulf, mitigation on a body close inside with the two-close rule,
+// maxAge=6, dzAge>=1 (HARD LESSON 8 - setup and trigger never on the same bar), one entry per zone,
+// stop = dzBot (structural, LESSON 5), R floor 0.8% by EXCLUSION not clamping (LESSON 3), 2R target,
+// maxBars=96, SL/TP fixed at entry.
+//
+// PRE-REGISTERED FREQUENCY (HARD LESSON 4): 40-90 trades, moderate confidence. v37 makes 155. A 4H
+// bullish FVG is not common, so a large cut is expected; the risk is cutting below the 30 floor.
+//
+// PRE-REGISTERED KEEP/REVERT (RATCHET v2), stated before the run and not to be moved afterwards:
+//   KEEP only if ALL of:
+//     1. PF > 1.25172059            (v37's recorded profit factor)
+//     2. maxDD <= 8.72815312%       (v37's), or <= 9.22815312% if PF improves by more than 0.02
+//     3. trades >= 30
+//   AND, because a cut from 155 to below 78 is more than 50%, clause 4 makes a SPLIT TEST MANDATORY
+//   BEFORE the change can be kept - not after.
+//   Anything failing 1-3 is REVERTED and recorded in the tried-and-reverted table.
+strategy("3M ELITE v61 FVG-graded zone", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rTarget  = input.float(2.0, "Target, x R")
+maxBars  = input.int(96,    "Max bars in trade (entry timeframe)")
+maxAge   = input.int(6,     "Zone freshness cap, 4H candles since creation")
+minRpct  = input.float(0.80,"Min stop distance as % of price (LESSON 3)")
+
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+// ---------- reconstruct the 4H candle from 15m bars: in-progress OHLC ----------
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+// ---------- snapshots of the most recently COMPLETED 4H candles ----------
+// pO/pH/pL/pC = most recent completed. ppO/ppC = the one before. pppH = high of the one before that,
+// which is the only new state v61 adds and exists solely to measure the FVG.
+var float pO   = na
+var float pH   = na
+var float pL   = na
+var float pC   = na
+var float ppO  = na
+var float ppC  = na
+var float ppH  = na
+var float pppH = na
+
+if new4h and not na(o4)
+    ppO  := pO
+    ppC  := pC
+    pppH := ppH
+    ppH  := pH
+    pO   := o4
+    pH   := h4
+    pL   := l4
+    pC   := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+// ---------- engulf on the just-completed candle vs the one before it (body containment, no gap) ----------
+bullEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC < ppO and pC > pO and pC > ppO
+
+// ---------- THE ONE CHANGE: the engulf must also have left a bullish fair value gap ----------
+// three-candle FVG on the zone's own 4H series: engulf.low > high of two candles earlier
+fvgOK = not na(pppH) and not na(pL) and pL > pppH
+
+// ---------- demand zone lifecycle (identical to v37 except the creation gate) ----------
+var float dzTop   = na
+var float dzBot   = na
+var bool  dzLive  = false
+var int   dzTouch = 0
+var int   dzAge   = 0
+var bool  dzTraded = false
+
+if new4h
+    if dzLive and not na(pC) and pC <= dzTop
+        dzTouch := dzTouch + 1
+        if dzTouch >= 2
+            dzLive := false
+    if dzLive
+        dzAge := dzAge + 1
+    if bullEngulf and fvgOK
+        dzTop   := pO
+        dzBot   := pL
+        dzLive  := true
+        dzTouch := 0
+        dzAge   := 0
+        dzTraded := false
+
+// ---------- entry: unchanged from v37 ----------
+minR    = close * minRpct / 100
+rBig    = not na(dzBot) and (close - dzBot) >= minR
+
+longCond = rBig and dzLive and not dzTraded and dzAge >= 1 and dzTouch < 2 and low <= dzTop and close > dzBot and dzAge <= maxAge
+
+flat = strategy.position_size == 0
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if flat and longCond and not na(dzBot) and close > dzBot
+    r = close - dzBot
+    if r > 0
+        strategy.entry("L", strategy.long)
+        dzTraded := true
+        slPx   := dzBot
+        tpPx   := close + r * rTarget
+        barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(dzLive ? 1 : 0, title="DemandZoneLive")
+plot(dzAge,          title="DemandZoneAge")
+plot(fvgOK ? 1 : 0,  title="FVGatCreation")
