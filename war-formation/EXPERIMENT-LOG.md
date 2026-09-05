@@ -5396,3 +5396,48 @@ condition warranted went out at cycle check #4, and nothing has changed in the f
 to justify a second one. The recommendation is unchanged: answer the two open rule questions in
 `STRATEGY-LEDGER.md` (HARD LESSON 48 / RULE QUESTION FOR THE USER), supply new 1m data, hand this lab
 a new queue item, or pause the schedule — none of which this session can do on its own authority.
+
+---
+
+# ██ CYCLE CHECK #17, 2026-09-05 (no credits) — NINETEENTH IDENTICAL FIRING OF THE SAME STALE PROMPT
+
+`git pull --rebase origin main`: local `main` was found detached and holding a forced-updated ref
+(`0eed7a8`, tip already matched `origin/main`'s history through unrelated 3M/BTC-lab commits) plus a
+separate, unrelated local `main` branch carrying 4 stale container-init commits with no common
+ancestor with `origin/main` (same artifact cycle check #16 already diagnosed and reset away) — reset
+local `main` to `origin/main` (`git reset --hard origin/main`) rather than rebase across unrelated
+history. HEAD landed at `0eed7a8` (BTC Attack 67, REJECTED) — no new commits touch `war-formation/`
+since this file's own cycle check #16 (`936b2cc`); the only intervening activity in the shared repo is
+3M/BTC-lab work (Attack 66/67, 3M cycle check #13).
+
+Independently re-verified rather than trusting the chain of sixteen prior self-reports:
+- `results/backtests.json` re-parsed directly (`python3 -c "import json; ..."`) — still exactly 31
+  entries, last four still E75a/E75b/E76/E77. `e58a` (long, 100% equity, band present) and `E71`
+  (short, 25% equity, band present, declared deviation) remain this lab's two reference builds; no
+  drift from any prior citation.
+- `STRATEGY-LEDGER.md` grepped for `RULE QUESTION FOR THE USER` — the same HARD LESSON 48 block, both
+  items still unanswered: E69b's `inMiddle`-band asymmetry (PF short by 0.0103 on the long) and E74's
+  RATCHET v2 clause-2 drawdown-proportionality question (0.45pp over a 0.50pp allowance calibrated for
+  drawdowns an order of magnitude larger than this 25%-equity build's 2.67%/3.61%).
+- `git log --oneline 936b2cc..HEAD` — two commits, both 3M/BTC lab (`0eed7a8`, `806df01`); zero touch
+  `war-formation/`.
+- This session's own stored prompt is, once again, byte-for-byte the pre-E67 text: cites
+  E64a/E64b/E66 as the short leg's state (superseded by E71/E74-E76's margin-sizing fix, HARD LESSON
+  42/43), asks for the same two queue items (short entry geometry; the entry-term binding sweep) that
+  closed at E71/E74-E76 and E69a/E69b/E70a/E70b/E77 respectively, and says nothing about E67 onward.
+- No new 1m data, no concurrent war-formation session collision.
+
+**State unchanged**: no champion, no candidate. References remain **e58a** (long, 100% equity, band
+present) and **E71** (short, 25% equity, band present, declared deviation per HARD LESSON 42), exactly
+as the last fifteen checks reported.
+
+**Zero backtests run. Zero credits spent** (542 available at start of cycle, comfortably above the
+250/500 gates — there is simply no open hypothesis to spend them on). Dashboard not rebuilt — no
+metric has changed since the last rebuild and a timestamp-only rebuild carries no information, per
+checks #5-#16.
+
+**No notification pushed.** Nineteenth firing of an unedited prompt; the one notification this
+condition warranted went out at cycle check #4, and nothing has changed in the fifteen checks since to
+justify a second one. The recommendation is unchanged: answer the two open rule questions in
+`STRATEGY-LEDGER.md` (HARD LESSON 48 / RULE QUESTION FOR THE USER), supply new 1m data, hand this lab
+a new queue item, or pause the schedule — none of which this session can do on its own authority.
