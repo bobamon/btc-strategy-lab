@@ -1,0 +1,149 @@
+//@version=6
+// BTC ATTACK 82 - FILTER-STACK TERM 3 ON ATTACK 68: VOLUME-CLIMAX EXCLUSION AT THE PIVOT LOW.
+//
+// Attack 71's queue closed the Attack 66/68 filter stack at two terms after three term-3 candidates
+// failed (Attack 69/70: swing-amplitude floor, milder failures; Attack 71: pivot-spacing floor, a
+// decisive collapse) -- but explicitly left the door open to "a genuinely new axis argued from a part
+// of the mechanism not yet touched by any of the five filter attempts so far." Attacks 67-71 covered:
+// entry-timing margin (67), OBV magnitude (68), price-normalized swing amplitude (69/70), and pivot
+// time-spacing (71). None of them read raw VOLUME. Attack 81's queue item 7 separately proposed a
+// volume-climax REGIME filter (not trigger) layered onto Attack 68's base as a genuinely different use
+// of that cycle's input class. This build is that instruction, aimed at Attack 68's own setup condition.
+//
+// ==================== THE TERM, ARGUED FROM THE MECHANISM (LESSON 49) ====
+// Attack 66/68's claim is QUIET ACCUMULATION: OBV pushes higher at a new, lower price pivot low --
+// buyers absorbing supply without a matching price decline. A pivot-low bar that is ITSELF a volume
+// CLIMAX (an extreme spike against its own trailing average) is evidence of panic/capitulation selling,
+// not quiet accumulation -- the opposite regime, and the exact mechanism Attack 81 tested standalone and
+// found does not by itself predict a reversal on this instrument (PF 0.865, H1, discarded). This term
+// does not use volume climax as a trigger (Attack 81's failed form); it uses it as an EXCLUSION on
+// Attack 68's own setup, on the theory that a divergence built on top of a capitulation bar is a
+// different, unproven animal from the quiet-accumulation divergence the mechanism actually claims.
+//
+// Threshold reused, not invented: Attack 81's own pre-registered climax definition -- volume >= 2.5x its
+// trailing 20-bar average -- is applied verbatim as the exclusion floor, fixed BEFORE either half is run,
+// per HARD LESSON 49. Not a new number chosen to fit this data; the board's own existing climax
+// definition, repurposed as a filter instead of a trigger.
+//
+// This DOES NOT touch breakoutTrigger, rBig, swingAmp, or Attack 68's own OBV-magnitude floor -- it adds
+// a fourth, independent quantity (raw volume magnitude at the pivot-low bar, vs. its own trailing
+// average) that none of the prior four filter attempts read.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - unchanged, rBig still gates by exclusion on rLong = close - lastPivLow.
+//   Stop beyond STRUCTURE (LESSON 5) - unchanged, slPx = lastPivLow, the confirmed divergence low.
+//   Each leg separately (LESSON 6) - LONG ONLY, unchanged; short leg remains a reported standing
+//        asymmetry (Attack 64).
+//   BINDING (E17) - bullDiv (now including divMagOk AND climaxOk) AND breakoutTrigger AND rBig AND
+//        swingOk all necessarily bind; the new term strictly narrows bullDiv's own arming bar, so it
+//        can only remove trades, never add them.
+//   REDUNDANCY (E14) - climaxOk reads RAW VOLUME MAGNITUDE at the pivot bar against its own 20-bar
+//        average; divMagOk reads normalized OBV magnitude (a cumulative price/volume composite);
+//        rBig reads PRICE distance to lastPivLow; swingAmp reads the PRICE pivot high/low spread --
+//        four independent quantities across three domains (raw volume, OBV, price), not a redundant
+//        pair with any of the other three.
+//   LATCH IN SEQUENCE (LESSON 8) - climaxOk is computed and folded into bullDiv on the SAME bar and in
+//        the SAME if-block where bullDiv itself is re-derived (the pivot-low confirmation bar), exactly
+//        as divMagOk already does -- not a new same-bar setup/trigger conjunction. breakoutTrigger
+//        remains a later, distinct bar.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, flat check gates every entry, unchanged.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity; expect cascadeRatio 1 on both halves, confirmed
+//        below.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4): this is a bar-level exclusion
+// unconditional on price direction, so it should remove a modest, roughly uniform share of Attack 68's
+// 89/80 trades -- registered with MODERATE confidence: a 5-40% cut on each half, i.e. roughly 53-85 (H1)
+// and 48-76 (H2) trades surviving. Both floors sit comfortably above the 30-trade RATCHET v2 clause-3
+// floor even at the pessimistic end.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17), READ AGAINST ATTACK 68 (BASE) ON BOTH HALVES:
+//   * PF IMPROVES ON BOTH HALVES (RATCHET v2 clause 1), DD DOES NOT WORSEN (clause 2 allowance if PF
+//     gain > 0.02) ON BOTH -> KEPT as the new base, filter stack extends to three terms.
+//   * IMPROVES ONE HALF, HURTS THE OTHER -> REJECTED, not averaged (Attack 67/69/70's fate).
+//   * COUNT CUT > 50% ON EITHER HALF -> a split-feasibility problem under clause 4.
+//   * TRADES BELOW ~30 ON EITHER HALF -> a direction, not a result (LESSON 12).
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside net (LESSONS 36/39 and
+//     the board's three-drawdown-category taxonomy).
+
+strategy("BTC Attack82 OBV divergence volume-climax exclusion", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+pivotLeft   = input.int(5, "Pivot confirmation bars, left")
+pivotRight  = input.int(5, "Pivot confirmation bars, right")
+minRpct     = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars     = input.int(192, "Max bars in trade")
+obvRangeLen = input.int(200, "OBV normalizing range lookback")
+divMagPct   = input.float(3.0, "Min OBV divergence magnitude, % of OBV's own range")
+volAvgLen   = input.int(20, "Volume trailing average lookback (Attack 81's own definition)")
+climaxMult  = input.float(2.5, "Volume-climax exclusion multiple (Attack 81's own definition)")
+
+pl  = ta.pivotlow(low, pivotLeft, pivotRight)
+ph  = ta.pivothigh(high, pivotLeft, pivotRight)
+obv = ta.obv
+
+obvRange = ta.highest(obv, obvRangeLen) - ta.lowest(obv, obvRangeLen)
+volAvg   = ta.sma(volume, volAvgLen)
+
+var float lastPivLow    = na
+var float prevPivLow    = na
+var float lastPivLowOBV = na
+var float prevPivLowOBV = na
+var float lastPivHigh   = na
+var bool  bullDiv       = false
+
+if not na(pl)
+    prevPivLow    := lastPivLow
+    prevPivLowOBV := lastPivLowOBV
+    lastPivLow    := pl
+    lastPivLowOBV := obv[pivotRight]
+    volAtPivLow    = volume[pivotRight]
+    volAvgAtPivLow = volAvg[pivotRight]
+    climaxOk       = not na(volAvgAtPivLow) and volAtPivLow <= volAvgAtPivLow * climaxMult
+    if not na(prevPivLow)
+        obvDivMag   = lastPivLowOBV - prevPivLowOBV
+        divMagFloor = obvRange * divMagPct / 100
+        divMagOk    = not na(obvRange) and obvDivMag > divMagFloor
+        bullDiv := lastPivLow < prevPivLow and obvDivMag > 0 and divMagOk and climaxOk
+
+if not na(ph)
+    lastPivHigh := ph
+
+rLong = not na(lastPivLow) ? close - lastPivLow : na
+minR  = close * minRpct / 100
+rBig  = not na(rLong) and rLong >= minR
+
+breakoutTrigger = not na(lastPivHigh) and ta.crossover(close, lastPivHigh)
+
+swingAmp = not na(lastPivHigh) and not na(lastPivLow) ? lastPivHigh - lastPivLow : na
+swingOk  = not na(swingAmp) and swingAmp > 0
+
+goLong = bullDiv and breakoutTrigger and rBig and swingOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := lastPivLow
+    tpPx   := close + swingAmp
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(lastPivLow, title="LastPivotLow")
+plot(lastPivHigh, title="LastPivotHigh")

@@ -6975,3 +6975,162 @@ failed is holding up when re-tested, even as fresh mechanisms keep failing on en
    input class rather than a repeat of its failed standalone-trigger form.
 
 ---
+
+# ATTACK 82 — FILTER-STACK TERM 3 ON ATTACK 68: VOLUME-CLIMAX EXCLUSION AT THE PIVOT LOW. REJECTED — A SPLIT RESULT, H1 COLLAPSES.
+
+The stored scheduled prompt again asks to "build Attack 37's filter stack," describing a board state more
+than eighty attacks stale. **The docs override it**, per the prompt's own standing instruction: Attack 37
+was closed on cost by Attack 41 more than eighty attacks ago; the live filter stack is on Attack 66/68, and
+Attack 71 closed it at two terms pending "a genuinely new axis argued from a part of the mechanism not yet
+touched by any of the five filter attempts so far." Attack 81's queue item 7 separately named that axis: a
+volume-climax REGIME filter (not trigger) layered onto Attack 68's base. This cycle takes that instruction
+rather than proposing an eleventh fresh mechanism cold, since a fourth orthogonal-axis attempt on the
+board's strongest surviving candidate outranks another cold guess after ten straight mechanism failures.
+
+## THE TERM
+
+**Volume-climax exclusion at the pivot low.** Attack 66/68's claim is QUIET ACCUMULATION — OBV pushing
+higher at a new, lower price pivot low, buyers absorbing supply without a matching price decline. A
+pivot-low bar that is ITSELF a volume CLIMAX (an extreme spike against its own trailing average) is
+evidence of panic/capitulation selling, not quiet accumulation — the opposite regime, and the exact
+mechanism Attack 81 tested standalone and found does not by itself predict a reversal on this instrument
+(PF 0.865, discarded). This term does not use volume climax as a trigger (Attack 81's failed form); it
+uses it as an EXCLUSION on Attack 68's own setup, on the theory that a divergence built on top of a
+capitulation bar is a different, unproven animal from the quiet-accumulation divergence the mechanism
+actually claims. Threshold reused, not invented: Attack 81's own pre-registered climax definition —
+volume >= 2.5x its trailing 20-bar average — applied verbatim as the exclusion floor, fixed before either
+half was run, per HARD LESSON 49. Reads raw volume magnitude at the pivot bar against its own trailing
+average — a fourth, independent quantity untouched by Attacks 67 (entry-timing margin), 68 (OBV
+magnitude), 69/70 (price-normalized swing amplitude) or 71 (pivot time-spacing). Byte-identical to Attack
+68 otherwise. Pine: `strategies/pine/attack82-obv-divergence-volume-climax-exclusion.pine`.
+
+## AUDIT (one line per leg)
+
+R >= 0.8% (LESSON 3) — unchanged, `rBig` gates by exclusion. Stop beyond STRUCTURE (LESSON 5) —
+unchanged, `slPx = lastPivLow`. Each leg separately (LESSON 6) — LONG ONLY; short remains a reported
+standing asymmetry (Attack 64). BINDING (E17) — `bullDiv` (now including `divMagOk` AND `climaxOk`) AND
+`breakoutTrigger` AND `rBig` AND `swingOk`; the new term strictly narrows `bullDiv`, can only remove
+trades. REDUNDANCY (E14) — `climaxOk` reads RAW VOLUME MAGNITUDE at the pivot bar vs. its own 20-bar
+average; `divMagOk` reads normalized OBV magnitude (a cumulative price/volume composite); `rBig` reads
+PRICE distance to `lastPivLow`; `swingAmp` reads the PRICE pivot high/low spread — four independent
+quantities across three domains (raw volume, OBV, price). LATCH IN SEQUENCE (LESSON 8) — `climaxOk` is
+computed and folded into `bullDiv` on the SAME bar and in the SAME if-block where `bullDiv` itself is
+re-derived, exactly as `divMagOk` already does — not a new same-bar setup/trigger conjunction.
+CASCADE (HARD LESSON 42/43) — LONG at 100% equity; `cascadeRatio` 1 / `maxCascadeDepth` 1 on both halves,
+confirmed (40 and 44 total rows, unique entries each).
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4)
+
+A bar-level exclusion unconditional on price direction should remove a modest, roughly uniform share of
+Attack 68's 89/80 trades. Registered with MODERATE confidence: **a 5–40% cut on each half**, i.e. roughly
+53–85 (H1) and 48–76 (H2) trades surviving — both comfortably above the 30-trade floor even at the
+pessimistic end.
+
+## H1 AND H2, ATTACK 68 (BASE) VS ATTACK 82 (+ TERM), SIDE BY SIDE
+
+| | Attack 68a (H1) | **Attack 82a (H1)** | Attack 68b (H2) | **Attack 82b (H2)** |
+|---|---|---|---|---|
+| Profit factor | 1.56474476 | **0.78398331** | 1.13127036 | **1.26135315** |
+| Trades | 89 | **40** | 80 | **44** |
+| Win rate | 65.16853933% | **55%** | 58.75% | **61.36363636%** |
+| Avg winner | $169.46 | $118.92 | $124.22 | $114.85 |
+| Avg loser | -$202.62 | **-$185.40** | -$156.39 | **-$144.61** |
+| Achieved win/loss ratio | 0.8363291 | **0.64144089** | 0.79429621 | **0.79418532** |
+| Max drawdown | 11.08160523% | **21.68145003%** | 10.74990922% | **7.13469575%** |
+| Net return | +35.47285533% | **-7.20873439%** | +6.77458291% | **+6.42497699%** |
+| Commission paid | $969.73 | $343.80 | $839.65 | $458.67 |
+| Largest loss | -$565.29 | -$524.92 | -$322.56 | -$257.73 |
+
+**Frequency estimate scored: pre-registered 5–40% cut, actual H1 55.06% cut (89→40, just past the
+registered range) and H2 45.0% cut (80→44, also past it).** Both cuts exceed the RATCHET v2 clause-4
+50% wall on H1; H2 stays just under it. The frequency model under-called the bite on both halves — the
+same miss direction Attack 71's pivot-spacing term made, and the opposite of the 69/70 swing-amplitude
+misses, which over-called their own bite.
+
+## THE VERDICT — REJECTED. A SPLIT RESULT, NOT AVERAGED.
+
+**H1 collapses.** PF falls 1.56474476 → 0.78398331 (an outright reversal below 1.0, not merely a missed
+improvement) while drawdown WORSENS 11.08160523% → 21.68145003% (+10.60pp — far past the 0.50pp clause-2
+allowance, and no allowance is even earned since PF did not improve). Trade count falls 55.06%, past the
+50% clause-4 wall. **FAILS RATCHET v2 outright on H1.**
+
+**H2 clears RATCHET v2 outright, in isolation.** PF improves materially (1.13127036 → 1.26135315,
++0.13008279) and drawdown improves (10.74990922% → 7.13469575%, -3.61pp), trade count cut (45.0%) stays
+under the 50% wall.
+
+Per the mandate's own standing instruction — *"a term that improves PF materially on both halves is the
+target; anything that improves one half and hurts the other is rejected, not averaged"* — **this is
+REJECTED**, exactly Attack 67's and Attack 69/70's fate, but a sharper version of it: this is the first
+term-3 split where one half's failure is decisive (below 1.0, double-digit drawdown worsening) rather
+than a borderline miss. Attack 68 remains the base.
+
+## WHY THE MECHANISM ARGUMENT MISJUDGED THE REGIME, AND WHAT IT REVEALS
+
+**The exclusion removed exactly the wrong trades in H1, and exactly the right trades in H2.** H1
+(2022-01-01 → 2024-06-08) contains this project's largest genuine capitulation events on this
+instrument — the Terra/LUNA collapse (May 2022) and the FTX collapse (November 2022) — both violent,
+extreme-volume selling cascades. On this instrument, a climax-volume pivot low printed **during** one of
+those cascades was apparently among Attack 68's **best** entries, not noise: real capitulation, on this
+specific asset in this specific period, resolved into some of the mechanism's strongest quiet-accumulation
+divergences once OBV began diverging afterward — the opposite of this term's own argued theory, which
+assumed a climax bar at the pivot always signals unresolved panic rather than the moment supply finally
+clears. In the calmer H2 window (no comparable single-event cascade), the same exclusion correctly removed
+noise and improved both PF and drawdown. **The term's mechanism argument was regime-dependent in a way
+that was not anticipated before running**: "quiet accumulation vs. panic capitulation" is not a stable
+distinction independent of *why* the volume spiked — a market-structure-event capitulation and an ordinary
+noisy high-volume bar are not the same thing, and this construction could not tell them apart.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+**H1 flips to category 2** (bleed on a negative edge — PF is now below 1.0), the same shape as Attacks
+36/48/49/50/53b/72b/73–80: not worth filtering further, and consistent with the collapse being a real
+edge failure introduced by the filter, not a sizing artifact (largest loss -$524.92 is ~2.83x avg loser
+-$185.40, no new concentration signature). **H2 remains category 3** (bleed on a positive edge, same as
+Attack 68 itself) — avg loser improved slightly (-$156.39 → -$144.61) alongside the PF and drawdown gains,
+a genuine quality improvement on this half alone.
+
+## WHAT THIS SETTLES
+
+**A fourth, genuinely orthogonal axis has now failed to extend Attack 68's filter stack, and this failure
+is qualitatively worse than the first three.** Attacks 67 (timing margin) and 69/70 (swing amplitude) were
+borderline misses — one clause failing on one half. Attack 71 (pivot spacing) was a decisive collapse on
+BOTH halves at once. This build is a new failure shape: a DECISIVE collapse on one half (H1) alongside a
+clean, outright pass on the other (H2) — proof that a filter term can be a genuine, real improvement in
+one regime and simultaneously a real, structural harm in another, on the same underlying mechanism, using
+a threshold reused verbatim from a separately-validated definition rather than invented for this test.
+**The Attack 66/68 filter stack remains CLOSED at two terms.** Four independent axes (timing margin, OBV
+magnitude ✓ kept, swing amplitude, pivot spacing, and now volume climax) have been tried; only the OBV
+magnitude floor (Attack 68 itself) survived both halves cleanly.
+
+## THIS BOARD NOW HAS ELEVEN CONSECUTIVE POST-ATTACK-68 FAILURES (TEN FRESH MECHANISMS + ONE FILTER TERM)
+
+Attacks 69–71 and 72–81 (eleven attempts) plus this cycle: every attempt to either extend Attack 68's edge
+with a new filter term or find a second both-halves-positive mechanism has failed since Attack 68 itself
+was kept. Attack 68 (PF 1.56474476/1.13127036, 89/80 trades) remains, by a wide margin, the strongest
+result this board has produced.
+
+## QUEUE
+
+1. **Do not attempt a fifth term-3 candidate on Attack 68 without first resolving why a mechanism
+   argument ("panic vs. accumulation") failed to anticipate a regime split this sharp.** A candidate
+   worth naming rather than building yet: gate the exclusion to ordinary bars only, explicitly EXEMPTING
+   climax bars that occur during an already-elevated realized-volatility regime (e.g. ATR14/close above
+   its own 200-bar average, the same regime descriptor from the VWAP-era base) — the argument being that
+   a climax during a already-recognized high-volatility regime is more likely a real capitulation event,
+   while a climax during an otherwise-calm regime is more likely noise. This is a genuinely different,
+   regime-conditioned construction, not a threshold retune of this exact build (HARD LESSON 4/45).
+2. **Attack 68 remains the base and the board's strongest both-halves candidate** — PF
+   1.56474476/1.13127036 on 89/80 trades, unaffected by this cycle's rejection.
+3. **Attack 46 (long) remains a candidate alongside Attack 68**, unaffected by this cycle — its H2 PF
+   (1.586) is still the best of any both-halves-positive build on this board, though its H2 sample (38)
+   sits closer to the 30-trade floor than Attack 68's (80).
+4. **The out-of-sample test for Attack 46 still ranks first among long-side work not yet startable** and
+   still cannot be run under BTCUSDT-only — unchanged.
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+7. **If queue item 1 is not taken up, the next cycle proposes ONE further genuinely new mechanism**,
+   distinct from the VWAP family and from every rejected strategy on the board (Attacks 33–65,
+   67/69/70/71, 72–81, and now 82).
+
+---
