@@ -5661,3 +5661,30 @@ condition warranted went out at cycle check #4, and nothing has changed in the t
 justify a second one. The recommendation is unchanged: answer the two open rule questions in
 `STRATEGY-LEDGER.md` (HARD LESSON 48 / RULE QUESTION FOR THE USER), supply new 1m data, hand this lab
 a new queue item, or pause the schedule — none of which this session can do on its own authority.
+
+---
+
+# ██ CYCLE CHECK #23, 2026-09-05 (no credits) — TWENTY-FIFTH IDENTICAL FIRING OF THE SAME STALE PROMPT
+
+`git pull --rebase origin main`: already at `origin/main` tip (`4304d93`, BTC Attack 73). Zero commits
+touch `war-formation/` since check #22 (`bdbf41d`) — the only intervening commits are `93dd109` (3M
+cycle check #19, no-op) and `4304d93` (BTC Attack 73, discarded). Credits: 530 (above the 500 floor,
+up to two backtests available) — none spent, no open hypothesis.
+
+Re-verified directly rather than trusting the prior chain: `results/backtests.json` still 31 entries,
+last eight ending at E77; `e58a` (long, 100% equity, band present) PF **1.24015239**/36 trades/DD
+**9.82519609%**; `E71` (short, 25% equity, band present, declared deviation) PF **0.97315988**/33
+trades/DD **2.66826642%** — unchanged. `STRATEGY-LEDGER.md:2304-2343` (HARD LESSON 48 / RULE QUESTION
+FOR THE USER) re-read — both items still open, no new user directive addressing either. This session's
+stored prompt is again the byte-for-byte pre-E67 text, asking for work already closed at E67-E77.
+
+**State unchanged**: no champion, no candidate. References remain **e58a** (long) and **E71** (short,
+declared deviation, HARD LESSON 42), as the last twenty-one checks reported.
+
+**Zero backtests run. Zero credits spent. Dashboard not rebuilt** — no metric has changed since the
+last rebuild.
+
+**No notification pushed** — the one notification this condition warranted went out at cycle check #4;
+nothing has changed since to justify another. Recommendation unchanged: answer the two open rule
+questions in `STRATEGY-LEDGER.md`, supply new 1m data, hand this lab a new queue item, or pause the
+schedule.
