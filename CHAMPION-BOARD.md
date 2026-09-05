@@ -5260,3 +5260,114 @@ different sizes to begin with.
    long-only build).
 
 ---
+
+# ATTACK 68 — QUEUE ITEM 1, FILTER-STACK TERM 2 ON ATTACK 66: OBV DIVERGENCE-MAGNITUDE FLOOR. KEPT — BOTH HALVES CLEAR RATCHET v2 OUTRIGHT.
+
+The stored scheduled prompt again asks for "Attack 37's filter stack." **The docs override it**, per the
+prompt's own standing instruction: Attack 37 was closed on cost by Attack 41 more than sixty attacks ago;
+the live queue item 1 is Attack 66's filter stack (queue item 1 as written after Attack 67), and this
+cycle builds its second term.
+
+## THE TERM
+
+**OBV divergence-magnitude floor.** Attack 66's `bullDiv` fires whenever OBV's value at a new pivot low
+is even one unit above its value at the prior pivot low — an infinitesimal divergence counts identically
+to a large one. Attack 67's term 1 (a breakout-margin floor on the TRIGGER bar) was **REJECTED**: it
+cleared H2 hard but left H1 flat on PF while worsening drawdown, failing RATCHET v2 clause 1 outright.
+Term 1's own queue said not to retry an entry-timing margin and instead to target "a divergence-magnitude
+or OBV-quality measure central to the mechanism's own claim" — this term is that instruction, aimed at
+the SETUP condition (`bullDiv`) instead of the trigger. It requires the OBV divergence magnitude
+(`lastPivLowOBV - prevPivLowOBV`) to clear at least **3% of OBV's own 200-bar range** (highest−lowest)
+before the setup arms. The threshold is argued from the mechanism alone (a rounding-error blip in a
+cumulative-sum series is not evidence of real net accumulation) and fixed before either half was run,
+per HARD LESSON 49 — never adjusted after seeing a result. Byte-identical to Attack 66 otherwise. Pine:
+`strategies/pine/attack68-obv-divergence-magnitude-floor.pine`.
+
+## AUDIT (one line per leg)
+
+R >= 0.8% (LESSON 3) — unchanged, `rBig` still gates by exclusion. Stop beyond STRUCTURE (LESSON 5) —
+unchanged, `slPx = lastPivLow`. Each leg separately (LESSON 6) — LONG ONLY, unchanged; short leg remains
+a reported standing asymmetry (Attack 64). BINDING (E17) — `bullDiv` (now including the magnitude floor)
+AND `breakoutTrigger` AND `rBig` AND `swingOk`; the new term strictly narrows `bullDiv`'s own arming bar,
+so it can only remove trades. REDUNDANCY (E14) — the magnitude floor reads a NORMALIZED OBV MAGNITUDE
+(the 200-bar OBV range); `rBig` reads PRICE distance to `lastPivLow`; `swingAmp` reads the PRICE pivot
+high/low spread — three independent quantities across two different series, not a redundant pair. LATCH
+IN SEQUENCE (LESSON 8) — the magnitude check is computed and folded into `bullDiv` in the SAME if-block,
+on the SAME bar, where `bullDiv` itself is re-derived (the pivot-low confirmation bar) — it tightens an
+existing single-bar arming condition exactly as `minRpct` already tightens `rBig`, not a new same-bar
+setup/trigger conjunction; `breakoutTrigger` remains a later, distinct bar. CASCADE (HARD LESSON 42/43)
+— LONG at 100% equity; `cascadeRatio` 1 / `maxCascadeDepth` 1 on both halves, confirmed.
+
+## H1 AND H2, ATTACK 66 (BASE) VS ATTACK 68 (+ TERM), SIDE BY SIDE
+
+| | Attack 66a (H1) | **Attack 68a (H1)** | Attack 66b (H2) | **Attack 68b (H2)** |
+|---|---|---|---|---|
+| Profit factor | 1.36461764 | **1.56474476** | 1.00868976 | **1.13127036** |
+| Trades | 137 | **89** | 142 | **80** |
+| Win rate | 60.58394161% | **65.16853933%** | 56.33802817% | **58.75%** |
+| Avg winner | $160.24 | $169.46 | $119.66 | $124.22 |
+| Avg loser | -$180.48 | **-$202.62** | -$153.07 | **-$156.39** |
+| Max drawdown | 15.24998146% | **11.08160523%** | 13.83983527% | **10.74990922%** |
+| Net return | +35.5360744% | +35.47285533% | +0.82% | **+6.77458291%** |
+| Commission paid | $1,494.46 | $969.73 | $1,525.67 | $839.65 |
+
+## THE VERDICT — KEPT. BOTH HALVES CLEAR RATCHET v2 OUTRIGHT, NO ALLOWANCE NEEDED.
+
+**H1:** PF rises 1.36461764 → 1.56474476 (**+0.20012712**, well past the 0.02 material-gain bar), and
+drawdown **improves** 15.24998146% → 11.08160523% (-4.17pp — an outright improvement, not a cost spent
+against the 0.50pp allowance). Trade count falls 35.0% (137 → 89), under the 50% clause-4 threshold, so
+no split-feasibility problem. Net return is essentially FLAT (+35.5360744% → +35.47285533%, -0.06pp)
+despite removing over a third of the trades — the filter concentrates the same net profit into fewer,
+higher-quality trades rather than adding to it, reported plainly rather than oversold.
+
+**H2:** PF rises 1.00868976 → 1.13127036 (**+0.12258060**), drawdown **improves** 13.83983527% →
+10.74990922% (-3.09pp), net return rises +0.82% → +6.77458291%, and win rate rises 56.34% → 58.75%.
+Trade count falls 43.66% (142 → 80), under the 50% threshold. **H2's razor-thin base margin is exactly
+the population this term predicted it would help most**, and it did.
+
+**Both halves clear RATCHET v2 clauses 1–3 outright — PF improves materially, drawdown improves (not
+merely holds), trade counts stay well above the 30-trade floor.** Neither cut approaches the ~77%
+count-collapse wall of HARD LESSON 45/49. This is the first filter-stack term on this board (on either
+Attack 37 or Attack 66) to clear cleanly on both halves without needing the 0.50pp allowance — **KEPT**,
+and becomes the new base for term 3.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Category **3, bleed on a positive edge, on both halves** — PF is now above 1.0 with real margin on H1
+(1.56) and modest margin on H2 (1.13); avg loser is not an outlier against the largest loss on either
+half (H1: -$565.29 is ~2.79x avg loser -$202.62; H2: -$322.56 is ~2.06x avg loser -$156.39 — no
+concentration signature, not category 1), and the edge itself is positive on both (not category 2). Avg
+loser got WORSE on both halves (H1: -$180.48 → -$202.62; H2: -$153.07 → -$156.39) even as PF and drawdown
+both improved — the filter is not shrinking individual losses, it is removing a subset of trades whose
+net contribution was poor enough to drag the aggregate down despite their average size looking similar.
+
+## WHAT THIS SETTLES
+
+**A filter-stack term can clear both halves of a genuinely new mechanism without gaming either window.**
+Attack 67's term (entry-timing margin) split the halves — helped one, flat-to-hurt the other. Attack 68's
+term (a magnitude floor on the divergence itself, central to the mechanism's own claim) helped both, in
+the same direction, by comparable relative amounts (PF +14.7% relative on H1, +12.2% relative on H2;
+drawdown -27.3% relative on H1, -22.3% relative on H2) — consistent enough to read as the same underlying
+effect on both windows, not a coincidence of two unrelated wins. Attack 66 + this term is now the
+strongest both-halves candidate on this board by PF (1.565/1.131, versus Attack 46's 1.172/1.586 and
+Attack 37's 1.024/1.012), while carrying a more balanced sample (89/80, combined 169) than Attack 46's
+lopsided 105/38.
+
+## QUEUE
+
+1. **Continue the stack — term 3 on Attack 66 + Attack 68's magnitude floor**, one term at a time,
+   re-split on every addition. A candidate direction: a quality floor on the SWING itself (`swingAmp`
+   relative to typical range), argued from the mechanism (a measured-move target drawn from a trivially
+   small swing offers little room to travel) rather than from either half's date-specific losses (LESSON
+   49). Report count-cut percentage before running, per HARD LESSON 45's estimate-first discipline.
+2. **Attack 46 (long) remains a candidate alongside the Attack 66/68 line**, unaffected by this cycle —
+   its H2 PF (1.586) is still the best of any both-halves-positive build on this board, though its H2
+   sample (38) sits closer to the 30-trade floor than Attack 68's (80).
+3. **The out-of-sample test for Attack 46 still ranks first among long-side work not yet startable** and
+   still cannot be run under BTCUSDT-only — unchanged, restated because this cycle did not touch it.
+4. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+5. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle (a
+   long-only build).
+
+---
