@@ -273,6 +273,39 @@ without moving PF.
   **1m only covers 2025-12-16 → 2026-05-03**. A 5m or 1m run is a shorter window than a 15m one, so
   never compare their returns without saying so.
 
+### ██ VERIFIED COVERAGE GRID — measured 2026-09-05 (War Formation cycle check #38, no backtest)
+All eight timeframes probed with `plan_backtest_window`; nothing generalised from a subset. Applies to
+every lab on this engine.
+
+| tf | available | first bar | last bar | bars (BTCUSDT) |
+|---|---|---|---|---|
+| 1m | yes | 2025-12-16 00:22 | **2026-05-03 21:41 — FROZEN** | 199,802 |
+| 2m | **no — `404 no_bars`** | — | — | — |
+| 3m | **no — `404 no_bars`** | — | — | — |
+| 5m | yes | 2024-06-08 11:10 | 2026-09-05 | 235,528 |
+| 15m | yes | 2020-08-19 14:00 | 2026-09-05 | 211,711 |
+| 30m | yes | 2020-03-25 11:00 | 2026-09-05 | 112,913 |
+| 1h | yes | 2020-03-25 11:00 | 2026-09-05 | 56,458 |
+| 4h | yes | 2020-03-25 12:00 | 2026-09-05 | 14,116 |
+| 6h | **no — `404 no_bars`** | — | — | — |
+
+**Two facts here are new and bind every lab:**
+
+1. **The 1m tier is frozen at 2026-05-03** while every other timeframe is live to today. It is also a
+   **fixed-size box identical for every symbol** — BTCUSDT, ETHUSDT and SOLUSDT each return *exactly*
+   199,802 bars spanning *exactly* 11,999,940,000 ms, with starts staggered a few minutes apart (a
+   backfill job, not three histories). **So a bigger 1m sample is not obtainable by waiting or by
+   changing instrument.** Any plan that assumes otherwise is dead on arrival.
+2. **2m, 3m and 6h do not exist on this engine.** Confirmed by hard `404 no_bars`. Anything specified
+   on those timeframes must be synthesised from 1m timestamp arithmetic (as War Formation's cascade
+   does) or it cannot be run here at all.
+
+**And the corollary that cost War Formation sixty experiments:** 1m is the timeframe with the *least*
+history on this engine, not the most. 15m carries **~13x** its calendar span. Before committing a lab
+to a timeframe, read this table — War Formation ran E35-E77 on 1m without ever checking what the other
+tiers held, and check #36 then mistook that self-imposed limit for a property of the archive (withdrawn
+by War Formation E78).
+
 ## ARCHIVED — why the index universe was abandoned (2026-09-01)
 `plan_backtest_window` verification of the original US30/NAS100/YM/NQ universe:
 

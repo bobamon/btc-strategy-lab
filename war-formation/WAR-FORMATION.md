@@ -29,6 +29,13 @@ few trades is structurally the right answer to a commission problem.
 The engine has **no 3m data and no 6h timeframe**, and Pine here **cannot use `request.security`**.
 So every higher timeframe is rebuilt from 1m bars using timestamp arithmetic:
 
+> **VERIFIED 2026-09-05 (cycle check #37).** This claim had stood since v1 without ever being checked.
+> It is **TRUE**: `plan_backtest_window(BTCUSDT, 3m, ...)` and `(BTCUSDT, 6h, ...)` both return a hard
+> `404 no_bars`, as does `2m`. The engine's BTCUSDT timeframe set is **{1m, 5m, 15m, 30m, 1h, 4h}** —
+> so the 3m of the Oracle's own drill-down and the 6h "God of direction" must both be synthesised, and
+> the timestamp arithmetic below is not a convenience, it is the only available route. Full coverage
+> table in `EXPERIMENT-LOG.md` cycle check #37.
+
 ```
 bucket6h  = floor(time / 21600000)     // 360 x 1m
 bucket1h  = floor(time /  3600000)     //  60 x 1m

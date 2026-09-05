@@ -6610,3 +6610,233 @@ finding about the short leg, and it is the first one.**
    largest sample available is not a sampling artefact.
 4. Check #36's Finding 2 (the shield fills optimistically, every PF is an upper bound) is unaffected
    and still stands — and it makes 0.786 an upper bound too.
+# ██ CYCLE CHECK #38, 2026-09-05 (no backtest run) — THE FULL COVERAGE GRID. E78's QUEUE ITEM 2, ANSWERED.
+
+**COLLISION NOTE, resolved in E78's favour.** This check was drafted and run as "#37" against a clean
+`git pull --rebase origin main`. On the pre-push rebase, `origin/main` had moved: a concurrent session
+had landed **E78 / cycle check #37** (`f055152`) in the meantime. That is a genuine same-window
+collision of the kind E65's numbering note already documents, not a stale-prompt duplicate. Per this
+log's standing convention — **execution order wins over a pre-announced label** — E78 keeps #37 and
+**this entry is renumbered #38**, placed after it.
+
+**It also means my Finding 3 below was reached independently by E78, and E78 got there first and with
+better evidence.** E78 withdrew check #36's headline using a *credit and a 115-trade 5m backtest*;
+the version below reaches the same verdict by re-reading trade counts already in `backtests.json`.
+**E78 is the primary result and is credited as such.** The corroboration is kept because it is
+independent — a different quantity, on a different timeframe, arriving at the same place — and
+because it shows check #36's error was visible for free in the lab's own files before a credit was
+spent. What is genuinely new here is Findings 1, 2 and 4.
+
+**Finding 1 is a direct answer to E78's own queue item 2** (*"Check 15m, 1h and 4h coverage too. The
+error in check #36 was generalising from one timeframe; do not repeat it by generalising from two."*).
+That item is now closed: the complete grid is below.
+
+**NO BACKTEST WAS RUN.** Every number below comes from `plan_backtest_window` metadata or from
+`war-formation/results/backtests.json` already on disk. No War Formation code went near `backtest-lab`.
+
+**Credit accounting, now largely explained.** `get_credits` read **509** at the start of this check and
+**506** at the end. I made **10** `plan_backtest_window` calls and zero `quick_backtest` calls. The
+collision above accounts for at least part of the gap: **E78 spent one credit** on the shared free-tier
+pool inside this same window. That leaves 2 unattributed, which is consistent with further concurrent
+activity and **not** consistent with `plan_backtest_window` costing 1 per call (10 calls would have cost
+10). Checks #33-#36 assert flatly that coverage probes are free; this run is **weak evidence for** that
+— the balance moved far less than my call count — but does not confirm it, and I am not asserting it.
+What is certain: no backtest was run from this session.
+
+Rotation: the previous loop-tick commit was `ec7c6fd` (Attack 86, workstream 4), so this run is
+workstream 1. Check #36 was the last War Formation entry; this does not repeat it.
+
+This check does the ledger-audit work the mandate names — *"audit the ledger for claims that were
+never verified"* — on the one claim the entire cascade rests on, and then follows the answer into
+check #36's Finding 1.
+
+---
+
+## FINDING 1 — THE "NO 3m, NO 6h" CLAIM IS TRUE. IT HAD NEVER BEEN CHECKED.
+
+`WAR-FORMATION.md` line 29 has asserted since v1 that *"the engine has no 3m data and no 6h
+timeframe"*. Every bucket in the cascade is rebuilt from 1m timestamp arithmetic because of it. That
+claim is load-bearing for the whole lab and **no run, check or log entry had ever verified it.**
+
+Verified now, free. `3m`, `6h` and `2m` all return a hard `404 no_bars`. The full BTCUSDT grid:
+
+| timeframe | available | first bar | last bar | bars |
+|---|---|---|---|---|
+| **1m** | yes | 2025-12-16 00:22 | **2026-05-03 21:41** | **199,802** |
+| 2m | **no — `404 no_bars`** | — | — | — |
+| **3m** | **no — `404 no_bars`** | — | — | — |
+| 5m | yes | 2024-06-08 11:10 | 2026-09-05 00:05 | 235,528 |
+| 15m | yes | 2020-08-19 14:00 | 2026-09-05 00:00 | 211,711 |
+| 30m | yes | 2020-03-25 11:00 | 2026-09-05 00:00 | 112,913 |
+| 1h | yes | 2020-03-25 11:00 | 2026-09-05 00:00 | 56,458 |
+| **6h** | **no — `404 no_bars`** | — | — | — |
+| 4h | yes | 2020-03-25 12:00 | 2026-09-05 00:00 | 14,116 |
+
+The engine's own error text names the tier it prefers: *"Use a Fresh symbol from /market/coverage
+(15m, 1h, or 4h)."* **The claim holds and the synthesis is mandatory, not a choice.** Both timeframes
+the Oracle actually names — the 3m drill-down and the 6h "God of direction" — are the two the engine
+does not carry.
+
+---
+
+## FINDING 2 — THE 1m TIER IS A FIXED-SIZE BOX, IT IS THE SAME BOX FOR EVERY SYMBOL, AND IT IS FROZEN.
+
+Check #36 established that 1m coverage begins 2025-12-16 and cannot be pushed earlier. Two further
+properties were never measured, and both matter more than the start date:
+
+**(a) It is frozen.** The 1m last bar is **2026-05-03**. Every other timeframe is current to
+**2026-09-05** — today. The 1m feed stopped advancing four months ago while the rest of the archive
+stayed live. **Waiting does not add 1m data.**
+
+**(b) It is the same box for every symbol.** Probed across three instruments:
+
+| symbol | first 1m bar | last 1m bar | span (ms) | bars |
+|---|---|---|---|---|
+| BTCUSDT | 2025-12-16 00:22 | 2026-05-03 21:41 | 11,999,940,000 | **199,802** |
+| ETHUSDT | 2025-12-16 00:34 | 2026-05-03 21:53 | 11,999,940,000 | **199,802** |
+| SOLUSDT | 2025-12-16 00:57 | 2026-05-03 22:16 | 11,999,940,000 | **199,802** |
+
+Identical bar count, identical span to the millisecond, starts staggered a few minutes apart. That is
+a **fixed-size retention window filled by a staggered backfill job**, not three instruments' histories.
+
+**This closes an item checks #34-#36 left open.** Their queue said the 0.82-vs-0.13 participation
+anomaly *"needs a sample larger than 7 and 15 trades, and **this instrument** has only 4.5 months of
+1m data"* — wording that leaves open the possibility of another instrument carrying more. **None does.**
+Every symbol on this engine gets exactly 199,802 one-minute bars. Neither patience nor a symbol change
+is a route to more 1m data.
+
+---
+
+## FINDING 3 — CORROBORATION OF E78 (NOT A NEW RESULT). CHECK #36's CEILING WAS ALSO CONTRADICTED, FOR FREE, BY THIS LAB'S OWN RESULTS FILE.
+
+**E78 withdrew check #36's headline first and with stronger evidence — read it above; this is
+supporting detail arrived at independently, not a competing claim.** E78's route was calendar span
+(5m has ~6x the history of 1m). The route below is trade counts already banked on disk, and it matters
+for one reason only: **the error was detectable for free, before a credit was spent.**
+
+Check #36 reasoned from the 199,802-bar window to a sample-size verdict:
+
+> *"The A.L.C.M. holds roughly three days per trade. Against 199,802 bars that is a structural ceiling
+> near 20–36 trades... **No War Formation configuration can ever comfortably clear the sample floor on
+> this engine.** Not with a better filter, not with a better entry, not with more cycles... E43's 39
+> trades and `e58a`'s 36 are at the ceiling, not below it."*
+
+**The premise is right and the inference is wrong.** `backtests.json`, 29 runs on 1m in that window:
+
+| | |
+|---|---|
+| Runs clearing RATCHET v2's 30-trade floor | **18 of 29 (62%)** |
+| Highest 1m trade count on record | **67** — `wf-e69a-no-h1bull-binding` |
+| Range across recorded 1m configurations | **12 to 67** |
+
+Twelve 1m runs sit at 41 trades or more. E69a is **more than double** the floor check #36 says no
+configuration can comfortably clear, and it is a real strategy variant, not a counter build — it is
+`e58a` with one entry term (`h1Bull`) removed. That single removal takes the count **36 → 67**.
+
+**Why the inference failed:** the ~3-days-per-trade rate is a property of `e58a`'s *gate stack* — the
+most heavily gated configuration in the lab — not a property of the data. The window bounds **bars**;
+the **trade count** is set by gate selectivity, and this lab varies it by a factor of five at will.
+Check #36 measured the holding rate of one build and attributed it to the archive.
+
+**The corrected statement:** the 199,802-bar window bounds statistical power and the number of
+distinct market regimes observable — it does **not** bound sample size below the ratchet floor. The
+floor is clearable and has been cleared by most of the record, including both live candidates:
+**E74** (short, band removed) at 41 trades and **E77** (long, band removed) at 43.
+
+**Consequence: "unbankable by construction" should not be attached to future results.** Check #36's
+queue item 1 instructs exactly that, and it is withdrawn. It is the wrong caveat, and it lowers the
+bar on results that in fact clear clause 3 on their own merits.
+
+---
+
+## FINDING 4 — WHAT THE WINDOW ACTUALLY FORBIDS IS OUT-OF-SAMPLE VALIDATION, AND *THAT* IS PERMANENT.
+
+Check #36 reached for the right conclusion through the wrong quantity. Here is the quantity that
+does bind, measured from `backtests.json`:
+
+| window | timeframe | runs |
+|---|---|---|
+| **2025-12-16 → 2026-05-03** | 1m | **29** |
+| 2024-06-08 → 2025-07-20 | 5m | 1 (E63a) |
+| 2025-07-20 → 2026-09-01 | 5m | 1 (E63b) |
+
+**29 of 31 recorded runs use one byte-identical window, and that window is 100.0% of the 1m archive —
+first bar to last.** Every gate, every threshold, every KEPT and REVERTED verdict from E35 through E77
+was decided inside it. There is no held-out period, and none can be carved out that was not also
+tuned on.
+
+**HARD LESSON 22 names this exact condition:** *"a lab whose only data source starts where its tuning
+starts has never actually been out-of-sample tested, no matter how many gates, filters, or coolBars
+values it has swept — it has only ever cross-validated against itself."* It was earned in the BTC lab
+and flagged as applying here. **It applies to the 1m record completely, and Finding 2 makes that
+permanent:** the 1m feed is frozen, so the 1m tuned window can never become a proper subset of the 1m
+data. 2026-05-03 → 2026-09-05 is **125 days of unseen market history**, growing by one day per day,
+that exists at 5m/15m/30m/1h/4h and will never exist at 1m.
+
+### ██ REVISED IN LIGHT OF E78 — AND THE REVISION IS THE INTERESTING PART
+
+**I drafted this finding to conclude "never validated out of sample, and structurally unvalidatable on
+this engine." E78 makes the second half of that wrong, and I am withdrawing it before it is banked.**
+
+*Unvalidatable* was true only while 1m was assumed to be the lab's only home. E78 broke that
+assumption by porting to 5m and getting **115 trades across 2.2 years** — a genuine second window,
+overlapping the 1m tuning period by only a fraction of its span. **So War Formation is not
+unvalidatable. It has now been validated out of sample exactly once, and it failed:** PF 0.78597499,
+kill rule applied, discarded.
+
+That is a far worse position for the strategy than "unvalidatable" and a far better one for the lab.
+An untestable claim is not a claim; a tested-and-failed claim is knowledge. Note also that E78's own
+reading 2 — *e58a's PF 1.24 on 36 trades was noise* — is made **more** plausible by Finding 3 above:
+if 67-trade configurations were always available on 1m, then the lab's habit of reporting 36-trade
+results as its best evidence was a choice about gate stacking, not a limit imposed by the archive.
+
+**The corrected caveat for every War Formation result on 1m is therefore:** *tuned on 100% of the 1m
+archive with no holdout; the single out-of-sample test that exists (E78, 5m) failed the kill rule, with
+a declared `atr`-basis deviation that leaves the result ambiguous between "1m-specific edge" and
+"36-trade noise."* That is longer than "unbankable by construction" and it is the one that is true.
+
+---
+
+## WHAT THIS CHECK DID NOT ESTABLISH
+
+- **No new backtest, no new metric, no change to any recorded result.** Every number above is either
+  free coverage metadata or a re-read of `backtests.json`. Nothing here is a measurement of the market.
+- **It does not rescue E74.** Re-derived against RATCHET v2: PF 0.97315988 → 1.16714444 (+0.194, clears
+  the >0.02 gate), trades 41 (clears 30), but DD 2.66826642% → 3.61455016% = **+0.947pp worsening
+  against a 0.50pp allowance**. Genuinely blocked, exactly as checks #28-#36 recorded. The
+  drawdown-allowance RULE QUESTION FOR THE USER remains the sole blocker and is unchanged.
+- **It does not resolve the 0.82-vs-0.13 participation anomaly** — Finding 2 makes it *harder*, by
+  removing the symbol-swap route to a bigger sample.
+- **It says nothing about whether the strategy has an edge.** This is an audit of the lab's claims
+  about its own data, not of the mechanism. E78 is the entry that carries a measurement.
+- **Finding 3 is not an independent withdrawal of check #36** — E78 did that first and with a credit.
+  Treat E78 as the citation; cite this only for the point that the error was free to catch.
+- Check #36's Finding 2 (the shield is modelled optimistically; every recorded PF is an upper bound)
+  is untouched and stands.
+
+## STATE
+
+Unchanged by this check: **no champion, no candidate.** References remain `e58a` (long) and `E71`
+(short). `E74` remains the one short-leg improvement and remains blocked on the same unanswered rule
+question. Note that **E78 changes the reading of `e58a`** — see its two competing interpretations —
+without changing its recorded metrics.
+
+## QUEUE
+
+1. ~~"Say unbankable by construction and move on"~~ — **WITHDRAWN** (E78 primarily, Finding 3
+   corroborating). And the replacement I drafted — *"structurally unvalidatable on this engine"* — is
+   **also withdrawn**, by E78: the strategy is validatable at 5m, was validated once, and failed. Use
+   the Finding 4 wording instead.
+2. **E78's queue item 2 is CLOSED by Finding 1.** The full grid is measured: available = {1m, 5m, 15m,
+   30m, 1h, 4h}; absent = {2m, 3m, 6h}. Nothing was generalised from two timeframes; all eight were
+   probed. **The deepest history available to this lab is 15m (2020-08, 211,711 bars) and 30m/1h/4h
+   (2020-03, 112,913 / 56,458 / 14,116 bars)** — 15m has ~13x the calendar span of 1m and has never
+   been tried here. That is the natural target after E78's queue item 1, and it is a re-derivation
+   per HARD LESSON 40, not a rescale.
+3. **Stop treating a bigger 1m sample as obtainable by any means** — not by waiting (frozen feed), not
+   by changing instrument (identical 199,802-bar box for every symbol). Finding 2 closes both routes.
+   This also removes the symbol-swap escape hatch from the 0.82-vs-0.13 participation anomaly.
+4. Check #36's shield-fill caveat (every PF is an upper bound) still belongs on any quoted result.
+5. HARD LESSON 48 / the drawdown-allowance RULE QUESTION remains open and remains the only thing
+   blocking the lab's single live improvement. Unchanged from checks #28-#36.
+6. Do not port to `backtest-lab` to chase the data. The stateless limit is real and the rule stands.
