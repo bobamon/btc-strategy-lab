@@ -5371,3 +5371,126 @@ lopsided 105/38.
    long-only build).
 
 ---
+
+# ATTACK 69 — QUEUE ITEM 1, FILTER-STACK TERM 3 ON ATTACK 66/68: SWING-AMPLITUDE QUALITY FLOOR. REJECTED — H2 FAILS PF AND FALLS BELOW THE TRADE FLOOR.
+
+The stored scheduled prompt again asks for "Attack 37's filter stack," describing a board state more than
+sixty attacks stale. **The docs override it**, per the prompt's own standing instruction: Attack 37 was
+closed on cost by Attack 41; the live queue item 1 is Attack 66/68's filter stack, and Attack 68's own
+queue named this cycle's exact candidate: "a quality floor on the SWING itself (`swingAmp` relative to
+typical range)."
+
+## THE TERM
+
+**Swing-amplitude quality floor.** `swingAmp = lastPivHigh - lastPivLow` is the entire reward geometry
+(`tpPx = close + swingAmp`); nothing in Attack 68 puts a floor on it. This is NOT already implied by
+`rBig`: because `breakoutTrigger` requires `close > lastPivHigh > lastPivLow` at entry, `rLong` (close to
+`lastPivLow`) is always strictly greater than `swingAmp` — so a breakout that runs far past `lastPivHigh`
+before triggering can clear `rBig`'s 0.80%-of-price floor on a trivially small `swingAmp`. This term
+requires `swingAmp`, as % of price, to be at least **1.60%** (2x `minRpct`'s 0.80%) — a reward floor at
+the same scale as the existing risk floor, fixed from the mechanism (not from either half's losses) before
+either half was run. Byte-identical to Attack 68 otherwise. Pine:
+`strategies/pine/attack69-obv-divergence-swing-quality-floor.pine`.
+
+## AUDIT (one line per leg)
+
+R >= 0.8% (LESSON 3) — unchanged, `rBig` still gates by exclusion. Stop beyond STRUCTURE (LESSON 5) —
+unchanged, `slPx = lastPivLow`. Each leg separately (LESSON 6) — LONG ONLY, unchanged; short leg remains a
+reported standing asymmetry (Attack 64). BINDING (E17) — `bullDiv AND breakoutTrigger AND rBig AND
+swingOk` (now including `swingQualityOk`); the new term strictly narrows `swingOk`, so it can only remove
+trades. REDUNDANCY (E14) — `swingQualityOk` reads normalized PRICE distance between the two pivots;
+`rBig` reads PRICE distance from close to `lastPivLow` (always strictly larger at entry, so not the same
+quantity); `divMagOk` (Attack 68) reads a normalized OBV magnitude, a different series — three independent
+quantities. LATCH IN SEQUENCE (LESSON 8) — `swingOk` is read on the same later bar `breakoutTrigger`
+already reads; this term only tightens an existing threshold, no new same-bar setup/trigger pairing.
+CASCADE (HARD LESSON 42/43) — LONG at 100% equity; `cascadeRatio` 1 on both halves, confirmed below.
+
+## H1 AND H2, ATTACK 68 (BASE) VS ATTACK 69 (+ TERM), SIDE BY SIDE
+
+| | Attack 68a (H1) | **Attack 69a (H1)** | Attack 68b (H2) | **Attack 69b (H2)** |
+|---|---|---|---|---|
+| Profit factor | 1.56474476 | **1.75336106** | 1.13127036 | **1.12890949** |
+| Trades | 89 | **38** | 80 | **29** |
+| Win rate | 65.16853933% | **65.78947368%** | 58.75% | **55.17241379%** |
+| Avg winner | $169.46 | $258.44 | $124.22 | $188.32 |
+| Avg loser | -$202.62 | **-$283.45** | -$156.39 | **-$205.32** |
+| Max drawdown | 11.08160523% | **10.82607942%** | 10.74990922% | **9.08883626%** |
+| Net return | +35.47285533% | +27.76041902% | +6.77458291% | +3.44075379% |
+| Commission paid | $969.73 | $398.46 | $839.65 | $303.59 |
+
+Count cut: H1 89→38 (**-57.3%**), H2 80→29 (**-63.75%**) — both OVER the 50% RATCHET v2 clause-4
+threshold, which is exactly why this term required the split test before any keep decision, per HARD
+LESSON 45/49.
+
+## THE VERDICT — REJECTED (H2 fails clause 1 outright, and its post-filter sample falls below the trade floor)
+
+**H1 alone looks strong**: PF rises 1.56474476 → 1.75336106 (+0.18861630, well past the 0.02 bar) and
+drawdown improves 11.08% → 10.83% (-0.26pp). Taken in isolation this would clear RATCHET v2 clauses 1-3.
+
+**H2 does not clear it.** Profit factor is essentially FLAT — a trivial DECREASE, 1.13127036 → 1.12890949
+(-0.00236) — not the "improves materially on both halves" the queue set as the target; anything short of
+an improvement fails clause 1 regardless of size. Drawdown does improve (10.75% → 9.09%, -1.66pp) but an
+improved drawdown does not rescue a profit-factor failure — RATCHET v2's clauses are conjunctive, not
+tradeable against each other. **And the term's own count-cut compounds the problem**: H2 falls from 80 to
+29 trades, one trade below this lab's own ~30-trade interpretability floor (LESSON 12) — even setting the
+PF question aside, 29 trades is too thin a sample to trust the ratio it produces at all.
+
+Per the queue's own standing instruction — *"anything that improves one half and hurts the other is
+rejected, not averaged"* — the term is **REJECTED**. Attack 68 (Attack 66 + OBV divergence-magnitude
+floor) remains the base for term 4.
+
+## WHY THIS TERM BEHAVED DIFFERENTLY FROM TERM 2 (NOT SPECULATION, A READ OF THE NUMBERS)
+
+Term 2 (the OBV magnitude floor, Attack 68) cut both halves by comparable, moderate amounts (35% and 44%)
+and *raised* PF on both by a similar relative magnitude — the signature of a filter removing the same kind
+of noise on both windows. Term 3 cuts far harder on both halves (57% and 64%, both over the 50% wall this
+board has flagged twice before as the point where a filter stops selecting and starts re-sampling, HARD
+LESSON 12/19) and the two halves' remaining populations diverge instead of converging: H1's surviving 38
+trades are a strong, high-conviction subset (avg loser worsens to -$283 but win rate and PF both rise);
+H2's surviving 29 trades are NOT correspondingly stronger — avg loser worsens by almost the same relative
+amount (-$156 → -$205) but PF does not follow, meaning the trades this cut removed on H2 were not
+disproportionately losers the way they were on H1. A 1.60%-of-price swing floor apparently discards a
+materially different SHARE of H2's genuinely profitable population than of H1's, which a single global
+threshold cannot fix without becoming a date-conditioned rule (HARD LESSON 49's trap, restated once more).
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Category **3, bleed on a positive edge**, unchanged from Attack 68's own classification — PF stays above
+1.0 on both halves even in the rejected variant, avg loser is not an outlier against the largest loss on
+either half (H1: -$544.23 largest vs -$283.45 avg, ~1.9x; H2: -$327.20 largest vs -$205.32 avg, ~1.6x — no
+concentration signature), and the edge is positive throughout. This rejection is about sample thinness and
+an unmet improvement bar, not a drawdown-category problem.
+
+## WHAT THIS SETTLES
+
+**A term argued cleanly from the mechanism, fixed before either half ran, can still fail the split test** —
+sound reasoning about *why* a filter should help does not guarantee it helps by the same amount, or at
+all, on both halves once trade count falls this far. This is the second filter term on this stack to be
+rejected (after Attack 67's breakout-margin floor) and the second to fail specifically because one half's
+population responded differently than the other's, even though both terms were argued from the mechanism
+rather than fitted to either half's dates. **Two consecutive both-halves-argued terms have now failed while
+one (Attack 68's magnitude floor) succeeded** — the distinguishing feature so far is the SIZE of the cut:
+Attack 68's cuts (35%/44%) stayed well clear of the 50% wall; both rejected terms (Attack 67's 27%/26%
+looked moderate by count but still failed on H1's flat PF, and this term's 57%/64% failed outright on H2)
+suggest the stack's remaining headroom for a term this aggressive may be exhausted at the current base.
+
+## QUEUE
+
+1. **Try a materially looser swing-quality threshold as term 3's next attempt, or abandon this candidate
+   direction.** If revisited, argue any new threshold from the mechanism again (not from these two halves'
+   losses, per LESSON 49) and pre-register that a milder floor (e.g. 1.0-1.2% of price, closer to `rBig`'s
+   own 0.80% rather than 2x it) is being tested specifically because 1.60% over-cut both halves, not
+   because either half's specific losses looked fixable.
+2. **Attack 68 (Attack 66 + OBV magnitude floor) remains the base and the strongest both-halves candidate
+   on this board** — PF 1.56474476/1.13127036 on 89/80 trades, unaffected by this cycle's rejection.
+3. **Attack 46 (long) remains a candidate alongside the Attack 66/68 line**, unaffected by this cycle —
+   its H2 PF (1.586) is still the best of any both-halves-positive build on this board, though its H2
+   sample (38) sits closer to the 30-trade floor than Attack 68's (80).
+4. **The out-of-sample test for Attack 46 still ranks first among long-side work not yet startable** and
+   still cannot be run under BTCUSDT-only — unchanged, restated because this cycle did not touch it.
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle (a
+   long-only build).
+
+---
