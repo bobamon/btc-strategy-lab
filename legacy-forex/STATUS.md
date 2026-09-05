@@ -442,3 +442,94 @@ result — HARD LESSON 4 says score it against the actual count and never build 
 4. **Forward-testing still needs no history** and is still the only honest route available today: run
    `pine/VISUAL-legacy-forex-complete.pine` live on NQ/YM 5m during New York and record signals.
 5. Measure the NQ/YM de-correlation claim if an engine ever carries both.
+
+---
+
+# ██ TICK #5, 2026-09-05 — THE ONE QUANTITATIVE CLAIM THIS WORKSTREAM HAD WAS COMPUTED ON THE WRONG DENOMINATOR
+
+Zero credits. **No backtest, no `plan_backtest_window`, no engine call of any kind.** Pure re-analysis
+of material already in the repo. Full detail in `SYSTEM.md` FINDINGS 11–12.
+
+## THE HEADLINE — 15m IS BELOW THE SAMPLE FLOOR, NOT STRADDLING IT
+
+Tick #4's FINDING 9 multiplied a trade rate of 0.67–0.89/session by ~43 sessions of `NDX` 15m coverage
+and got ~29–38 trades, giving this workstream its standing "marginal, not hopeless" verdict.
+
+**The two inputs are measured on different units.** The rate is his journal rate — *"every trade that
+I took"* — and tick #4's own FINDING 10 had already established that his trades span **both** NQ and
+YM and that his 2/day cap counts across the book. The bar count is **one** instrument (`NDX`). A
+book-wide rate times single-instrument sessions double-counts.
+
+**His own numbers force this.** A per-instrument rate of 0.67–0.89 implies 1.33–1.78/session across
+two instruments = 13–18 trades per fortnight. He says the fortnight count is *"six to eight trades"*.
+Off by ~2×. Only the book-wide reading is consistent with the source.
+
+| tf | sessions | **single instrument** | **pooled NQ+YM** | vs the 30 floor |
+|---|---|---|---|---|
+| 15m | ~43 | **~13–17** | ~26–34 | single **below**; pooled straddles |
+| 5m | ~12 | **~4–5** | ~7–10 | far below either way |
+
+The pooled 15m band nearly recovers tick #4's figure — **but only under a two-instrument pooled
+backtest that no tick here has ever declared, and that FINDING 9 was not describing.** Pooling to
+clear a sample floor is a methodological choice needing its own justification, and it silently assumes
+`US30` intraday depth matches `NAS100`, **which has never been measured.**
+
+A second, smaller error rides along: the 0.89 top end came from dividing the *two-week* trade count by
+the *nine-day* worked example's span. The internally consistent band is **0.60–0.80** book-wide.
+
+## THE SECOND FINDING — THE TARGET RULE CANNOT RESOLVE ITS OWN RANGE
+
+His worked example is `{3, 0, 2.5, 5, 5, 3}` → 18.5/6 = 3.08. His arithmetic reproduces to the cent.
+But sample SD = 1.855, SE = 0.757, and the **95% CI on that 3.08 is [1.14R, 5.03R]** — wider than the
+entire 1:3–1:5 range the rule is meant to select within. At n=6 the rule cannot distinguish 1:3 from
+1:5, or either from 1:1.1. And the rounding is brutal: **two extra losses move the traded target a
+full R.** Combined with FINDING 7's downward bias, that is a mechanism for ratcheting the target down
+exactly after a bad run.
+
+Searched for published evidence on the rule. **Found none specific to it, and recorded that absence
+rather than substituting adjacent material.** What adjacent material says: the same idea done properly
+uses 100–200 journal trades, not six; calibrating a target to realised R is itself sound; and his
+"slow refresh rate" premise has real support in volatility clustering. **His intent is defensible, his
+estimator is not.** A discriminating pre-registered test is now written down (window 6 vs ~20).
+
+## WHAT THIS TICK DID NOT ESTABLISH
+
+- **No number came from a run.** No `runId` was created and none should be until the sample question
+  is settled.
+- Whether **pooling NQ and YM** is legitimate — the de-correlation claim that bears on it is still
+  unmeasurable on both available engines.
+- Whether **`US30` intraday coverage matches `NAS100`** — the pooled column assumes it, nobody checked.
+- Whether the rolling-mean target helps or hurts. Two falsifiable predictions registered, both unrun.
+
+## QUEUE
+
+1. **Measure `US30` 15m and 5m depth on `backtest-lab`** (zero credits, one `plan_backtest_window`
+   each). The pooled sample band is unverified without it, and it is the cheapest open item here.
+2. **Decide and declare whether NQ+YM trades may be pooled into one sample** *before* any run uses the
+   pooled count to clear the 30-trade floor. Pooling is how 15m gets over the line; doing it silently
+   is how a sample floor gets defeated on paper.
+3. Engine deadlock unchanged (tick #3): `backtest-lab` has the instruments but cannot express the
+   method; trader-dev can express the method but silently remaps the instruments. **Do not run a
+   Legacy Forex backtest on trader-dev under any circumstances** (tick #2, FINDING 4).
+4. If a run becomes possible, the pre-registered questions are now (a) rolling-mean vs fixed target,
+   and (b) window 6 vs ~20, which discriminates noise from bias.
+5. **Forward-testing still needs no history** and remains the only honest route available today.
+6. Check the trade rate against a real count the moment one exists — every figure here is an estimate
+   (HARD LESSON 4).
+
+## STATUS LINE
+
+**LEGACY FOREX: STILL BLOCKED ON THE ENGINE, AND NOW WORSE ON SAMPLE THAN RECORDED.** Single-instrument
+15m is ~13–17 expected trades against a 30 floor. The workstream's "marginal, not hopeless" verdict
+survives **only** as a statement about a pooled two-instrument backtest, and that pooling has never
+been declared or justified. Zero results recorded, still correctly.
+
+## ██ CREDIT NOTE, FOR CONTINUITY WITH TICK #1's OPEN QUESTION
+
+Balance at the start of this tick, measured with `get_credits`: **500**. Tick #1 measured 518; the
+scheduled prompt asserts 524. **This tick spent nothing** — one `get_credits` call and no engine call
+of any kind — so it adds no evidence either way. The drift between ticks is expected: War Formation
+and 3M Elite ran real backtests in between. **Tick #1's one-credit-without-a-backtest anomaly remains
+unresolved, and the deliberate bracket it proposed (`get_credits` → one `plan_backtest_window` →
+`get_credits`) was NOT performed this tick.** It stays queued for a tick that has a reason to call
+`plan_backtest_window` anyway — queue item 1 above is exactly such a tick.

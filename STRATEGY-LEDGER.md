@@ -2738,3 +2738,63 @@ numbered modules had never been quoted in `SYSTEM.md`, and one of them contained
 actually sets the system's target (a rolling mean of achieved R, recomputed daily) while the spec
 recorded only the range that rule's output usually lands in. **Before believing a decode is complete,
 list the source files it cites and diff that against the files that exist.**
+
+---
+
+## ██ HARD LESSON 56 — A RATE AND A DENOMINATOR MUST BE MEASURED ON THE SAME UNIT. CHECK THE UNIT OF A FREQUENCY BEFORE MULTIPLYING IT BY A COUNT. (LEGACY FOREX, 2026-09-05)
+
+HARD LESSON 4 says: **measure trade frequency, never estimate it.** Where an estimate is unavoidable —
+as it is in a workstream with no runnable engine — this lesson governs how to build one without
+fooling yourself.
+
+**What happened.** Legacy Forex tick #4 built the workstream's only quantitative claim by multiplying
+two figures, both individually correct:
+
+- a trade rate of **0.67–0.89 per session**, decoded from the trader's own journal, and
+- **~43 RTH sessions**, from a real `plan_backtest_window` bar count on `NDX` 15m.
+
+Product: ~29–38 trades, "straddles the 30-trade floor", and the workstream was declared *marginal,
+not hopeless*. **The rate is per-session across a two-instrument book; the session count is one
+instrument's feed.** The same tick's own FINDING 10 had established, three paragraphs earlier, that
+his 2/day cap counts across NQ and YM together. Multiplying the two double-counts by ~2×. The
+corrected single-instrument expectation is **~13–17 — below the floor, not straddling it.**
+
+**The tell was inside the source the whole time, and it is arithmetic, not interpretation.** If the
+rate had been per-instrument, his book-wide rate would be 1.33–1.78/session = 13–18 trades a
+fortnight; he states the fortnight count as "six to eight". **A unit error usually contradicts some
+other number the source gives you. Look for that second number before multiplying.**
+
+### THE RULE
+
+**Before multiplying a rate by a count, write the unit of each factor as a fraction and cancel them.**
+`trades / (book · session)` × `sessions / instrument` does not yield `trades` — it leaves a stray
+`instrument⁻¹·book⁻¹` that names exactly the missing conversion. This is dimensional analysis, it
+takes ten seconds, and it would have caught this.
+
+The exposure is **not** specific to instruments. The same shape catches:
+- a rate per *setup* multiplied by a count of *bars*,
+- a rate per *day* multiplied by a count of *sessions* on a 24/7 instrument (BTC has no session),
+- a per-*leg* frequency multiplied by a count of *trades* (long+short),
+- anything derived from a trader's journal, which pools **whatever he traded**, multiplied by coverage
+  of **one thing you can test**.
+
+### THE COROLLARY, AND IT IS THE PART THAT PROTECTS THE SAMPLE FLOOR
+
+The corrected arithmetic reaches the floor again **if** NQ and YM trades are pooled into one sample —
+~26–34 pooled versus ~13–17 single. **That is how a sample floor gets defeated on paper: not by
+faking a number, but by silently widening what counts as one observation.**
+
+**A sample floor cleared only by pooling must declare the pooling before the run, and justify it.**
+Pooling two correlated instruments does not give you 2N independent observations; it gives you
+somewhere between N and 2N depending on a correlation nobody has measured. State which you are
+claiming. In this case the trader's own descriptive observation — *"nasdaq and us 30… out of sync
+completely"* — is the evidence that would settle it, and **no engine in this project can measure it**,
+so the pooled figure stays flagged rather than banked.
+
+### THE SMALLER LESSON RIDING ALONG
+
+**A range built by dividing the numerator of one statement by the denominator of another is not a
+range.** Tick #4's 0.67–0.89 divided a *two-week* trade count (6–8) by a *nine-day* worked example's
+span. The internally consistent band is 0.60–0.80. The error was small and it ran in the flattering
+direction — which is the direction these errors usually run, because the flattering answer is the one
+that lets the tick continue.

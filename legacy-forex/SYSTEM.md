@@ -613,3 +613,177 @@ rather than edited, per this project's habit of not tidying away superseded clai
   there is a specific structural reason to expect it to ratchet downward. Written before any run.
 - **The four gold transcripts were identified, not decoded.** They are a different system and out of
   scope for this file.
+
+---
+
+# ██ TICK #5, 2026-09-05 — THE SAMPLE ESTIMATE WAS COMPUTED ON THE WRONG DENOMINATOR, AND THE TARGET RULE CANNOT RESOLVE ITS OWN RANGE
+
+Zero credits. **No backtest, no engine call of any kind.** This tick re-analyses two things already
+in the repo — FINDING 9's sample arithmetic and FINDING 7's target rule — against the transcripts
+they were derived from. Both come back changed. Per the mandate's preference for correcting a
+previous conclusion over adding a new unverified one, that is the whole of this tick.
+
+## ██ FINDING 11 — FINDING 9 APPLIED A **BOOK-WIDE** TRADE RATE TO **SINGLE-INSTRUMENT** COVERAGE
+
+FINDING 9 is the only quantitative claim this workstream has ever made. It is the basis for the
+standing verdict that 15m is "marginal, not hopeless". **Its two inputs are measured on different
+units, and multiplying them double-counts.**
+
+The arithmetic it recorded:
+
+| tf | bars (tick #3) | RTH sessions | × 0.67–0.89 | verdict recorded |
+|---|---|---|---|---|
+| 15m | 1,119 | ~43 | ~29–38 | "straddles the 30 floor" |
+| 5m | 937 | ~12 | ~8–11 | "short by ~3×" |
+
+The session counts are right. RTH is 09:30–16:00 ET = 6.5h = **26 bars/session on 15m** (1,119/26 =
+43.0) and **78 bars/session on 5m** (937/78 = 12.0). Both reproduce exactly.
+
+**The rate is the problem.** Those bars were measured on `NDX`/`NAS100` — **one instrument**. The rate
+0.67–0.89 comes from his journal, and `10._USING_DATA` [00:49] says what the journal contains:
+*"I'm gonna analyze **every trade that I took**"*. FINDING 10 of this file already established that
+"every trade he took" spans **both** NQ and YM, and that his 2/day cap counts across the book, not per
+instrument. So the rate is **trades per session across a two-instrument book**, and it was multiplied
+by **sessions of a one-instrument feed**.
+
+### HIS OWN NUMBERS FORCE THE BOOK-WIDE READING — THIS IS NOT AN INTERPRETATION
+
+If 0.67–0.89 were a *per-instrument* rate, his book-wide rate across two instruments would be
+**1.33–1.78 trades per session**, which over the two weeks he describes (10 RTH sessions) is
+**13–18 trades**. He says the two-week count is *"anywhere from **six to eight trades**"* [00:41].
+The per-instrument reading contradicts his own stated total by roughly a factor of two. **Only the
+book-wide reading is consistent with the source.**
+
+### THE RATE BAND ITSELF WAS ALSO SLIGHTLY OVERSTATED, IN THE FLATTERING DIRECTION
+
+FINDING 9 obtained 0.67–0.89 by dividing **both** ends of the "six to eight" range by the **nine**
+days of his worked example. But "six to eight" is attached to *"the last two weeks"* [00:40] while
+"about nine days worth" [02:29] is the span of the specific six-trade example. Dividing a two-week
+count by a nine-day span mixes denominators. The two internally consistent readings are:
+
+- *"the last two weeks of trades… six to eight"* ÷ 10 RTH sessions = **0.60–0.80 / session**
+- the worked example, *"six trades… about nine days worth"* = **0.67 / session**
+
+**Defensible band: 0.60–0.80 book-wide.** 0.89 is above anything he states.
+
+### THE CORRECTED ARITHMETIC
+
+All five NY streams cover both instruments, and `video1038794732` [08:37] closes both in one session
+(*"Target two for us 30, target four for NASDAQ"*). Treating the book as split evenly between them —
+an **assumption**, but the observed one — the per-instrument rate is **0.30–0.40 / session**.
+
+| tf | sessions measured | **single instrument** (0.30–0.40) | **pooled NQ+YM** (2× sessions) | vs the 30-trade floor |
+|---|---|---|---|---|
+| 15m | ~43 | **~13–17** | **~26–34** | single: **clearly below**. pooled: straddles |
+| 5m | ~12 | **~4–5** | **~7–10** | **far below either way** |
+
+**What changes, and what survives.** The pooled 15m band (~26–34) lands close to what FINDING 9
+reported (~29–38), so the "straddles the floor" verdict is *recoverable* — **but only under a
+two-instrument pooled backtest that no tick in this workstream has ever declared, and that FINDING 9
+was not describing.** On the single instrument whose coverage was actually measured, the expectation
+is ~13–17: **below the floor, not straddling it.** The 5m verdict hardens further.
+
+### THREE THINGS THIS CORRECTION DOES NOT ESTABLISH
+
+1. **That pooling is legitimate.** Pooling NQ and YM trades into one sample to clear a sample floor is
+   a methodological choice, not a free doubling. It needs justifying before it is used, and his own
+   descriptive observation cuts both ways: *"I've noticed nasdaq and us 30 have not been in sync…
+   out of sync completely"* (`video1038794732` [02:28]/[02:50]). If true, pooling is more defensible
+   (the two legs carry partly independent information); if false, the pooled sample is closer to 43
+   correlated observations than 86 independent ones. **Unmeasured — no engine in this project has both
+   symbols with the depth to check it.**
+2. **That `US30` has coverage equal to `NAS100`.** Tick #3 measured 15m and 5m depth on `NDX`/
+   `NAS100`/`USTEC` only. **`US30` intraday depth has never been measured on `backtest-lab`**, and the
+   pooled column above silently assumes it matches. That check costs nothing and is queued.
+3. **Any of it as a result.** These are estimates against a measured bar count, exactly as FINDING 9
+   was. HARD LESSON 4 stands: score them against a real trade count if a run ever happens, and never
+   build on them meanwhile.
+
+## ██ FINDING 12 — THE ROLLING-MEAN TARGET CANNOT RESOLVE ITS OWN OPERATING RANGE AT n=6
+
+FINDING 7 recorded three defects in the target rule. **There is a fourth, and it is the one that
+decides whether the rule can work at all.** It is computable from the numbers he reads out on the
+video, so it needs no run.
+
+His worked example [01:05]–[02:07], with a loss scored 0 exactly as he scores it:
+
+```
+R outcomes:  3,  0,  2.5,  5,  5,  3      sum = 18.5,  n = 6
+his answer:  18.5 / 6 = 3.08  →  "we are going to go for one, two, threes"
+```
+
+His arithmetic reproduces to the cent (and so does his update, 20.5/7 = 2.93). But the six values have
+a **sample SD of 1.855**, so the standard error of that mean is 1.855/√6 = **0.757**, and the 95%
+confidence interval on his 3.08 is:
+
+> **[1.14 R, 5.03 R]**
+
+**That interval spans the entire range the rule is supposed to choose within.** `SYSTEM.md` originally
+recorded the target as "1:3 to 1:5" because that is where the output lands; at n=6 the output cannot
+statistically distinguish 1:3 from 1:5, or either from 1:1.1. After his own +2 update the interval is
+[1.32, 4.54] — no better. **The rule's precision is an artefact of rounding, not of the data.**
+
+This sharpens FINDING 7's third defect rather than replacing it. That defect said the rule is
+*biased downward* (a winner's R is capped by the target it exited at, a loss drags the mean to 0).
+This one says it is also **too noisy to act on**: the discretisation is brutal, because a single extra
+loss moves the rounded target a whole R —
+
+| further losses appended to his window | mean | rounded target |
+|---|---|---|
+| +0 | 3.08 | **3** |
+| +1 | 2.64 | **3** |
+| +2 | 2.31 | **2** |
+| +3 | 2.06 | **2** |
+
+**Two losses change the traded target by a full R.** Combined with the downward bias, that is a
+mechanism for ratcheting the target down after a bad run — precisely when a system's realised R is
+most likely to be mean-reverting upward.
+
+### WHAT THE LITERATURE SAYS, INCLUDING WHERE IT DOES NOT SUPPORT ME
+
+Searched for published evidence for or against this specific rule. **There is none that I could find**
+— it appears to be his own construction, and I am recording that absence rather than dressing up
+adjacent material as a verdict on it. What the adjacent material does say:
+
+- **On the window length, against him.** Practitioner guidance on deriving targets from a journal is
+  explicit that the log must be large: *"export your last 100–200 trades and get your win rate,
+  average win, average loss, and average R before writing down a single target"*
+  ([fortraders.com](https://fortraders.com/blog/how-to-create-a-realistic-profit-target-plan)). His
+  window is **six**. Same idea, sample size smaller by a factor of ~20.
+- **On calibrating targets to realised R at all, for him.** The principle he is using is sound and
+  independently stated: *"If your win rate data shows your average winner closes at 1.8R, setting 3R
+  targets is statistically counterproductive"*
+  ([journalplus.co](https://journalplus.co/learn/guides/trading-journal-metrics-guide/)). **The rule's
+  intent is defensible. Its estimator is not.**
+- **On his "slow refresh rate" premise, partly for him.** He justifies the rule by claiming R
+  outcomes persist: *"if the markets are giving you one to fives every day, they're probably going to
+  continue to do so for a little while longer"* [07:33]. The standard model treats trade outcomes as
+  independent, but real series are not: volatility clustering (Cont) means bad stretches do cluster
+  ([earnforex.com](https://www.earnforex.com/guides/measuring-winning-and-losing-streaks-in-forex/)).
+  **That supports persistence in the *volatility* that caps achievable R — not the leap to a 6-trade
+  mean being the right estimator of it.** His premise is more defensible than his arithmetic.
+
+### THE PRE-REGISTERED QUESTION, NOW SHARPER — WRITTEN BEFORE ANY RUN, PER HARD LESSON 17
+
+If a run ever becomes possible, measure `targetR = rolling mean of last 6, losses scored 0` against a
+**fixed** target. **Predicted: the rolling-mean variant underperforms the fixed target**, from the
+downward bias (FINDING 7 defect 3) plus the discretisation shown above. Two supporting predictions
+that make the claim falsifiable rather than vague:
+
+1. The realised `targetR` series **spends more time below its own starting value than above it**.
+2. **Widening the window from 6 to ~20 recovers most of the gap** — if the loss is noise-driven as
+   claimed here, a longer window should fix it; if it is bias-driven alone, it should not.
+
+Prediction 2 is the discriminating test between FINDING 7's defect and this one. **Neither has been
+run. Neither may be recorded as a result until a real `runId` produces one.**
+
+## ██ WHAT TICK #5 DID NOT ESTABLISH
+
+- **Nothing was backtested. No `runId` exists for this workstream and none was created.** Every number
+  above is either arithmetic on figures already in the repo, or arithmetic on figures he speaks aloud.
+- **Whether pooling NQ and YM is legitimate** — unmeasured, and the de-correlation claim that bears on
+  it remains unmeasurable on both available engines.
+- **Whether `US30` intraday coverage matches `NAS100`** — never checked, and the pooled column assumes
+  it does.
+- **Whether the rolling-mean target actually helps or hurts.** Two predictions are now registered. The
+  engine deadlock from tick #3 is unchanged, so they stay unrun.
