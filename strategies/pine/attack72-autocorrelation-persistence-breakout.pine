@@ -1,0 +1,144 @@
+//@version=6
+// BTC ATTACK 72 - GENUINELY NEW MECHANISM: LAG-1 RETURN AUTOCORRELATION PERSISTENCE-REGIME BREAKOUT.
+//
+// The stored scheduled prompt describes a board state (Attack 37, "queue item 1: build its filter
+// stack") more than thirty attacks stale. The docs override it, per the prompt's own instruction:
+// Attack 37's stack was already built and closed (Attack 41 discarded it on cost; the OBV-divergence
+// line, Attack 66+68, is the current both-halves base, and its own filter stack closed at two terms
+// after Attacks 67/69/70/71 each failed a RATCHET v2 clause). Attack 71's own queue says the next cycle
+// owed to this board is a genuinely new mechanism -- this build is that instruction, continuing
+// numbering after Attack 71, not Attack 37.
+//
+// ==================== THE CLAIM, ARGUED FROM THE MECHANISM (LESSON 15/17: BEFORE running, not after) ==
+// Lag-1 autocorrelation of returns (ta.correlation(ret, ret[1], length)) measures whether the recent
+// price PATH has been persistent (positive: today's move tends to follow yesterday's direction, a
+// trending tape) or anti-persistent (negative/near-zero: moves tend to reverse bar-to-bar, a choppy or
+// mean-reverting tape). This is a DIFFERENT estimator of the same broad "autocorrelation regime" family
+// this board flagged as still open after Attack 002 (variance-ratio regime, REJECTED -- no edge, and a
+// dual-leg construction that traded BOTH a breakout leg and a fade leg off the same VR split). Attack 72
+// is a single-leg construction: take a structural breakout ONLY while the tape is measurably persistent;
+// stand down (no new entries) when it is not. This directly targets Attack 33's own diagnosed failure --
+// a bare channel breakout that was profitable in principle but DISCARDED ON COST ($6,460.27 commission
+// against a $217.09 net loss, 757 trades) -- by using a totally different data source (return
+// autocorrelation, not a price-channel width or volume measure) to prune the low-conviction breakouts
+// that a bare channel construction cannot distinguish from the high-conviction ones.
+//
+// Mechanism: ret = log(close/close[1]). acf = ta.correlation(ret, ret[1], 100) -- lag-1 autocorrelation
+// of returns over a trailing 100-bar window. persistent = acf > 0.10. Structural breakout: close crosses
+// above the highest high of the prior 20 bars (the level and its companion base low are both read as of
+// the PRIOR bar, so the breakout bar itself never contaminates its own trigger level or its own stop).
+// Long entry: persistent AND breakoutTrigger AND R-floor (LESSON 3, by exclusion). Stop at the base low
+// (structure, LESSON 5) -- never a fraction of ATR beyond the entry price. Target fixed at 2R (lab
+// convention; HARD LESSON 13 found the R:R axis neutral, so no tuning credit spent finding "the best"
+// multiple). Flip/regime response (STANDING REQUIREMENT item 3): when acf drops back to <= 0.10, the
+// setup does not re-arm -- no new entries fire until the tape is persistent again. This is a stated,
+// mechanical stand-down, not an implicit filter; existing open trades still resolve on their own fixed
+// SL/TP, unchanged by a mid-trade regime flip (no custom var-trail, no signal-based early exit).
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - EXCLUSION via rBig on rLong = close - baseLow (the entry/stop distance at the
+//        breakout bar), never clamped: a trade that would need a floor-widened stop is skipped, not taken
+//        with an artificially enlarged risk.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = baseLow, the lowest low of the 20 bars preceding the
+//        breakout (read via [1], excluding the breakout bar itself) -- the floor of the base the breakout
+//        came from, not a tick beyond the signal level itself.
+//   Each leg separately (LESSON 6) - LONG ONLY this cycle, following this lab's own established
+//        convention for a first pass on a new mechanism (Attacks 59/63/65/66 all opened long- or
+//        short-only and reported the other side as a standing asymmetry); the short side (persistent
+//        NEGATIVE-momentum breakdown, its own geometry, never mirrored) is deferred and reported as
+//        outstanding, not silently dropped.
+//   BINDING (E17) - persistent AND breakoutTrigger AND rBig must all bind; this is the FIRST run of this
+//        mechanism so no counter-build has isolated each term's individual hit rate yet (only two credits
+//        are budgeted this cycle for the H1/H2 pair) -- the realized trade count against the pre-run
+//        frequency estimate below is the binding evidence this cycle can afford, and a per-term counter
+//        build is queued if this clears the kill rule.
+//   REDUNDANCY (E14) - acf reads a TIME-SERIES STATISTIC of returns (autocorrelation, unitless, no price
+//        or volume series read elsewhere in this build); breakoutTrigger reads a PRICE LEVEL cross;
+//        rBig/slPx read a PRICE DISTANCE. Three independent quantities across two domains (a statistical
+//        regime measure vs. price structure) -- no other term in this build encodes return persistence.
+//   LATCH IN SEQUENCE (LESSON 8) - `persistent` is a continuously-updated rolling statistic (not a
+//        discrete arm/disarm event with its own invalidation clock), so it cannot collide with
+//        `breakoutTrigger` the way a coil-then-thrust or zone-tap-then-engulf setup/trigger pair can:
+//        there is no "arming bar" for persistence to share with the crossover bar, and a 100-bar rolling
+//        correlation changes slowly enough that multiple breakout triggers are expected to recur across
+//        a single persistent stretch, not just at its first bar (checked against HARD LESSON 8's fourth
+//        confirmation: the trigger does not structurally occur only at the START of the state the filter
+//        demands).
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity; expect cascadeRatio 1 / maxCascadeDepth 1 on both
+//        halves, confirmed below.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale, no custom var-trail.
+//
+// FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4: a hypothesis to score, not a fact):
+//   Attack 33's bare channel breakout (no persistence filter) produced 757 trades across the full ~4.7-
+//   year window; scaled to H1's ~2.42-year share that is roughly 390 raw breakout events before any
+//   filter. The persistence gate (acf > 0.10 over a trailing 100 bars) is expected to remove a large but
+//   uncertain fraction -- pre-registering 150-400 trades per half as the estimate to be scored against
+//   the actual count, in either direction.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17), READ PER THE PROMPT'S OWN KILL RULE:
+//   * H1 (never-tuned, 2022-01-01 to 2024-06-08) PROFIT FACTOR BELOW 1.0 -> DISCARD immediately. Do not
+//     run H2. Do not add filters to rescue H1 (the kill rule is explicit on this point).
+//   * H1 clears 1.0 -> run H2 (2024-06-08 to 2026-09-01) as the second and last credit this cycle.
+//   * BOTH halves clear 1.0 -> a genuine both-halves candidate, joining Attack 37/46/66/68 as the fourth;
+//     report avg loser, win rate and max DD alongside PF (the board's three-drawdown-category taxonomy),
+//     and queue it for a filter stack exactly as Attack 37 and Attack 66 earned theirs.
+//   * H1 clears but H2 does not -> report both, DISCARD as a candidate (per Attack 53's precedent), not
+//     as evidence the whole family is dead -- record what changed between the never-tuned and tuned-era
+//     halves specifically for THIS mechanism.
+//   REPORT GROSS, COMMISSION, ACHIEVED WIN/LOSS RATIO, AVG LOSER AND WIN RATE alongside net (LESSONS
+//     36/39 and the board's three-drawdown-category taxonomy), on whichever half(s) actually run.
+
+strategy("BTC Attack72 ACF persistence breakout", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+acfLen      = input.int(100, "Autocorrelation lookback (bars)")
+acfThresh   = input.float(0.10, "Persistence threshold (lag-1 ACF of returns)")
+breakoutLen = input.int(20, "Structural breakout/base lookback (bars)")
+minRpct     = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+targetR     = input.float(2.0, "Target, multiple of R (lab convention)")
+maxBars     = input.int(192, "Max bars in trade")
+
+ret = math.log(close / close[1])
+acf = ta.correlation(ret, ret[1], acfLen)
+persistent = not na(acf) and acf > acfThresh
+
+hh1 = ta.highest(high, breakoutLen)[1]
+ll1 = ta.lowest(low, breakoutLen)[1]
+
+breakoutTrigger = not na(hh1) and ta.crossover(close, hh1)
+
+baseLow = ll1
+rLong   = not na(baseLow) ? close - baseLow : na
+minR    = close * minRpct / 100
+rBig    = not na(rLong) and rLong >= minR
+
+goLong = persistent and breakoutTrigger and rBig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := baseLow
+    tpPx   := close + targetR * rLong
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(acf, title="LagOneACF")
+plot(hh1, title="BreakoutLevel")
+plot(ll1, title="BaseLow")

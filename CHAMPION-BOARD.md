@@ -5722,3 +5722,123 @@ base.
    long-only build).
 
 ---
+
+# ATTACK 72 — LAG-1 RETURN-AUTOCORRELATION PERSISTENCE-REGIME BREAKOUT. A GENUINELY NEW MECHANISM PER ATTACK 71'S OWN QUEUE. DISCARDED — HELPS H1, BREAKS H2.
+
+The stored scheduled prompt again described a board state (Attack 37, "build its filter stack") more
+than thirty attacks stale. **The docs override it, again**: Attack 71 closed the Attack 66/68 filter
+stack at two terms (three independent term-3 candidates each failed a different RATCHET v2 clause) and
+its own queue item 3 said the next cycle owed to this board is one genuinely new mechanism. This build
+is that instruction, continuing numbering after Attack 71, not Attack 37.
+
+## THE CLAIM UNDER TEST
+
+Lag-1 autocorrelation of returns — `ta.correlation(ret, ret[1], 100)` where `ret = log(close/close[1])`
+— measures whether the tape has been PERSISTENT (positive: today's move tends to follow yesterday's, a
+trending regime) or ANTI-PERSISTENT (near-zero or negative: bar-to-bar reversal, a choppy regime). This
+is a different estimator of the same family Attack 002 tried with a variance ratio (REJECTED, no edge),
+but a single-leg construction: persistence gates ONE breakout entry, with no companion fade leg the way
+002's VR split ran breakout-vs-fade off the same measurement. It directly targets Attack 33's own
+diagnosed failure — a bare channel breakout DISCARDED ON COST ($6,460.27 commission against a $217.09
+net loss, 757 trades) — using an orthogonal data source (return autocorrelation, not price-channel width)
+to prune the low-conviction breakouts a bare construction cannot tell apart from the high-conviction
+ones. Pine: `strategies/pine/attack72-autocorrelation-persistence-breakout.pine`.
+
+## AUDIT (LONG ONLY, one line per leg)
+
+R >= 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rLong = close - baseLow`, never clamped. Stop beyond
+STRUCTURE (LESSON 5) — `slPx = baseLow`, the lowest low of the 20 bars preceding the breakout, read via
+`[1]` so the breakout bar never contaminates its own stop. Each leg separately (LESSON 6) — LONG ONLY,
+following this lab's own convention for a first pass on a new mechanism; the short leg (persistent
+NEGATIVE-momentum breakdown, its own geometry, never mirrored) is deferred and reported as outstanding.
+BINDING (E17) — `persistent` AND `breakoutTrigger` AND `rBig` all necessarily bind (151/141 trades on
+85,655/78,567 bars); no per-term counter build was affordable this cycle (two credits budgeted for the
+H1/H2 pair) and one is queued if a future attempt on this mechanism is warranted. REDUNDANCY (E14) —
+`persistent` reads a TIME-SERIES STATISTIC of returns (autocorrelation, unitless); `breakoutTrigger` reads
+a PRICE LEVEL cross; `rBig`/`slPx` read a PRICE DISTANCE — three independent quantities, no other term in
+this build encodes return persistence. LATCH IN SEQUENCE (LESSON 8) — `persistent` is a continuously
+updated rolling statistic, not a discrete arm/disarm event with its own invalidation clock, so it cannot
+collide with `breakoutTrigger` the way a coil-then-thrust or zone-tap-then-engulf pair can: a 100-bar
+rolling correlation changes slowly enough that multiple breakout triggers recur across a single
+persistent stretch, not just at its first bar (checked against HARD LESSON 8's fourth confirmation — the
+trigger does not structurally occur only at the START of the state the filter demands). CASCADE (HARD
+LESSON 42/43) — LONG at 100% equity; `cascadeRatio` 1 / `maxCascadeDepth` 1 on both halves, confirmed.
+SL and TP FIXED AT ENTRY (2R). No trailing, no averaging down, no martingale.
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4)
+
+Scaled from Attack 33's 757 raw breakout trades across the full ~4.7-year window to H1's ~2.42-year
+share: roughly 390 raw breakout events before any persistence filter, with an uncertain removal fraction.
+Pre-registered **150–400 trades per half**, to be scored against the actual count in either direction.
+
+## H1 (2022-01-01 → 2024-06-08, never-tuned) AND H2 (2024-06-08 → 2026-09-01), SIDE BY SIDE
+
+| | **Attack 72a (H1)** | **Attack 72b (H2)** |
+|---|---|---|
+| Profit factor | **1.19005967** | **0.85657445** |
+| Trades | 151 | 141 |
+| Win rate | 47.01986755% | 39.0070922% |
+| Avg winner | $320.50 | $218.12 |
+| Avg loser | -$239.02 | -$162.85 |
+| Achieved win/loss ratio | 1.3409123 | 1.33937096 |
+| Max drawdown | 30.20719516% | 42.02269675% |
+| Net return | +36.34219525% | -20.08692031% |
+| Commission paid | $1,763.94 | $1,345.06 |
+| Largest loss | -$955.53 | -$532.13 |
+
+**Frequency estimate scored: pre-registered 150–400, actual 151 (H1) and 141 (H2) — both land inside the
+range**, near its low edge. The estimate that has missed badly in both directions on this board (003, 005,
+006) held here, for whatever that is worth on a single cycle.
+
+## KILL RULE APPLIED. TWO CREDITS SPENT THIS CYCLE (533 BALANCE — FULL PAIR).
+
+**H1 clears 1.0 outright** (PF 1.190, 151 trades, well above the ~30-trade floor), so per the prompt's
+own kill rule H2 was run as the registered second credit. **H2 fails**: PF falls to 0.857, a genuine
+reversal of the edge, not merely a missed improvement, on a well-powered, non-degenerate sample (141
+trades). This is the same "helps H1, breaks H2" shape this board has now seen repeatedly — Attack 53's
+order-flow absorption (PF 1.249 → 0.850), the original VWAP base's 1.36-early/0.66-late decomposition,
+and now a second instance of the autocorrelation-regime family itself failing this exact split (after
+Attack 002's variance-ratio version).
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+**H1**: PF above 1.0, avg loser (-$239.02) against the largest loss (-$955.53, ~4.0x) shows a mild but not
+dominant concentration — tentatively **category 3, bleed on a positive edge**, pending the regime holding
+up, which H2 answers in the negative. **H2**: PF below 1.0, avg loser (-$162.85) against the largest loss
+(-$532.13, ~3.3x) shows no strong concentration — **category 2, bleed on a negative edge**, the same
+shape as Attacks 36/48/49/50/53b. Category 2 is not worth filtering; the edge itself is the problem, not
+the size distribution of its losses.
+
+## THE VERDICT — DISCARDED
+
+**H1 clears 1.0 outright; H2 reverses it.** Per Attack 53's own precedent (H1 clears, H2 does not →
+DISCARD as a candidate, not as evidence the whole family is dead), Attack 72 is discarded. It does **not**
+become a third both-halves candidate alongside Attack 37/46/66-68; Attack 68 remains the board's
+strongest both-halves candidate (PF 1.56474476/1.13127036, 89/80 trades).
+
+## WHAT THIS SETTLES
+
+**Autocorrelation regime, as a mechanism family, has now failed twice on this instrument, on two
+different estimators and two different constructions** — Attack 002's dual-leg variance-ratio split, and
+this cycle's single-leg lag-1-ACF persistence gate on a structural breakout. Treat the family as largely
+exhausted here absent a specific new argument for a third estimator; sweeping `acfThresh` or `acfLen` on
+this build is very unlikely to rescue a construction that failed at the kill-rule level, per HARD LESSON
+13's generalized finding that parameter sweeps rarely rescue a construction-level failure.
+
+## QUEUE
+
+1. **Do not tune Attack 72.** No `acfThresh`/`acfLen` sweep — the failure is at the construction level
+   (H2 reverses the edge outright), not a threshold-tuning problem.
+2. **Attack 68 (Attack 66 + OBV divergence-magnitude floor) remains the board's strongest both-halves
+   candidate** — PF 1.56474476/1.13127036 on 89/80 trades — unaffected by this cycle.
+3. **Attack 46 (long) remains a candidate alongside Attack 68**, unaffected by this cycle.
+4. **The out-of-sample test for Attack 46 still ranks first among long-side work not yet startable** and
+   still cannot be run under BTCUSDT-only — unchanged, restated because this cycle did not touch it.
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle (a
+   long-only build).
+7. **The next cycle proposes ONE further genuinely new mechanism**, distinct from the VWAP family and
+   from every rejected strategy on the board (Attacks 33–65, 67/69/70/71, and now 72).
+
+---
