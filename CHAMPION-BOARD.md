@@ -6700,3 +6700,139 @@ itself is exhausted for fresh entries.
    72, 73, 74, 75, 76, 77, 78, and now 79).
 
 ---
+
+# ATTACK 80 — ATR/PRICE VOLATILITY-DECELERATION DIVERGENCE BREAKOUT. A GENUINELY NEW MECHANISM PER ATTACK 79'S OWN QUEUE ITEM 7. DISCARDED ON THE KILL RULE.
+
+The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") more than
+seventy-nine attacks stale, instructing "continue numbering after 37." **The docs override it, again**, per
+the prompt's own standing instruction: Attack 41 closed Attack 37 on cost, Attack 43 closed the whole
+sweep-reversal family, Attack 71 closed the Attack 66/68 filter stack at two terms, and Attacks 72–79 are
+eight consecutive bare-mechanism failures since. Attack 79's own queue named this cycle's direction
+explicitly (item 7): the board's only two both-halves survivors (Attack 37/46, Attack 66/68) share a
+structure — a signal series compared against price at TWO CONFIRMED PIVOTS — while every one of the eight
+recent failures used either a same-bar regime gate (72, 76, 78) or a single-point oscillator/level trigger
+(73, 74, 75, 77, 79). This cycle follows that instruction, continuing numbering after Attack 79, not Attack
+37.
+
+## THE CLAIM
+
+When price prints a confirmed pivot low BELOW its prior confirmed pivot low, but the ATR(14) reading AT
+that new pivot low is LOWER than the ATR reading AT the prior pivot low — the second leg down covered more
+distance with LESS realized volatility than the first — selling pressure is decelerating even as price
+still falls, a volatility-deceleration divergence between price and the intensity of the move producing it.
+A subsequent close back above the most recent confirmed pivot high confirms the deceleration has resolved
+into a reversal, targeting a measured-move projection of the swing just completed. **Genuinely distinct
+from every prior ATR use** (Attacks 6/36/65/77 all compared the CURRENT bar's ATR to its OWN rolling
+history — a same-bar regime gate, never a cross-pivot comparison) **and from the OBV divergence family**
+(Attacks 66–71, a cumulative volume series with memory of the entire series; ATR is a bounded per-bar range
+measure with no cumulative memory and no direction sign — an honest recombination of previously-tried
+ingredients (ATR: 6/36/65/77; pivot-to-pivot divergence structure: 51/52/59/66), not a wholly unprecedented
+data source, flagged as such rather than overclaimed. Same pivot/stop/target mechanics as Attack 66
+(`ta.pivotlow`/`ta.pivothigh` 5/5, stop at the divergence low, target = breakout price + swing amplitude) —
+only the divergence series changed. Pine: `strategies/pine/attack80-atr-divergence-breakout.pine`.
+
+## AUDIT (LONG ONLY, one line per leg)
+
+R >= 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rLong = close - lastPivLow`, never clamped. Stop beyond
+STRUCTURE (LESSON 5) — `slPx = lastPivLow`, the actual confirmed divergence low. Each leg separately (LESSON
+6) — LONG ONLY; a bearish mirror (lower pivot highs, ATR lower at the new high vs. the prior one) is
+untested; the short leg remains a reported standing asymmetry (Attack 64). BINDING (E17) — `volDiv AND
+breakoutTrigger AND rBig AND swingOk` all necessarily bind (253 trades on 85,655 bars); two credits were
+budgeted for the H1/H2 pair, so no per-term counter build was affordable (moot — see verdict, H2 never
+spent). REDUNDANCY (E14) — `minRpct` constrains the STOP distance (price-only); `swingAmp` (the target) is
+independent price geometry from the pivot high/low spread; the ATR-at-pivot comparison is a third,
+independent quantity on a wholly separate series (realized volatility magnitude, not price distance) — not
+a redundant pair with either price term. LATCH IN SEQUENCE (LESSON 8, fourth-confirmation check) — `volDiv`
+is re-derived only on the bar a new pivot low confirms (a transition/confirmation event, not "already true
+for N bars"); `breakoutTrigger` reads a strictly later, distinct bar (the crossover of the separately-
+tracked pivot-high level) — cannot share a bar by construction, the exact shape Attack 66 already proved
+safe. CASCADE (HARD LESSON 42/43) — LONG at 100% equity, single entry id "L"; `cascadeRatio` 1 /
+`maxCascadeDepth` 1, confirmed (253 total rows, 253 unique entries).
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4)
+
+Anchored to Attack 66's identical pivot mechanics (5/5 confirmation, same "new pivot low below prior" first
+clause), which produced 137 (H1) and 142 (H2) trades. The added clause here (ATR lower at the new pivot vs.
+the prior) is a different conditional filter than OBV's, with no counter build affordable within a 2-credit
+budget, so registered with MODERATE confidence: **60-300 trades per half**.
+
+## H1 (NEVER-TUNED HALF, 2022-01-01 → 2024-06-08)
+
+| | **Attack 80a (H1)** |
+|---|---|
+| Profit factor | **0.87765556** |
+| Trades | 253 |
+| Win rate | 53.35968379% (a MAJORITY) |
+| Avg winner | $118.25 |
+| Avg loser | -$154.14 |
+| Achieved win/loss ratio | 0.76713598 |
+| Max drawdown | 35.73345346% |
+| Net return | -22.25273548% |
+| Commission paid | $2,399.96 |
+| Largest loss | -$590.38 |
+
+**Frequency estimate scored: pre-registered 60-300, actual 253 — inside the pre-registered band and the
+lab's settled 60-350 workable window.** The frequency model was accurate; the mechanism failed on edge, not
+on sample size.
+
+## KILL RULE APPLIED. ONE CREDIT SPENT THIS CYCLE (523 BALANCE → 522). H2 NOT RUN.
+
+**Not a close call.** PF 0.87765556 is below 1.0 on the never-tuned half. Per this board's own kill-rule
+precedent (Attacks 37/48/72/73/74/75/76/78/79), this is discarded outright: no filter stack, no rescue, H2
+not run, second credit not spent.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+PF < 1.0, so this is **category 2, bleed on a negative edge**, the same shape as Attacks
+36/48/49/50/53b/72b/73/74/75/76/77/78/79 — not worth filtering. Largest loss (-$590.38) is ~3.8x the average
+loser (-$154.14), no concentration signature (not category 1), moot for the verdict since PF is already
+below 1.0 before any concentration is considered. `avgBarsInTrade` 38.98 sits well under `maxBars` 192, no
+truncation confound (HARD LESSON 38); notably `avgBarsLosing` (43.02) exceeds `avgBarsWinning` (35.44) —
+the opposite of the classic stop-inside-noise shake-out signature named in HARD LESSON 5's diagnostic.
+
+## THE VERDICT — DISCARDED ON THE KILL RULE, AND A SIXTH INSTANCE OF HARD LESSON 53
+
+Win rate 53.36% is a **MAJORITY that still loses** — achieved payoff 0.767 falls well short of the ~0.87
+breakeven that win rate implies. **This is an instance of HARD LESSON 53's inverted-payoff shape** (a
+majority win rate, still net-negative): the entry is finding real directional edge more than half the time,
+but the measured-move target is not capturing it proportionally — an exit-design problem, not a plain
+entry-quality failure, distinct from the eight prior bare-mechanism failures that mostly showed straight
+negative edges. The volatility-deceleration divergence did not, by itself, separate a genuine exhaustion
+low from an ordinary continuation on this instrument at 15m: a large share of "quieter second leg down"
+moments are apparently still resolving as shallow bounces that fall short of the measured-move projection,
+not clean reversals. This is a clean falsification of THIS specific construction (14-length ATR, 5/5 pivot
+confirmation, a measured-move target) — a stricter ATR-deceleration magnitude floor (the Attack-68 pattern:
+tighten the SETUP condition, not the target) remains untested, but per HARD LESSON 4/45 that is a
+re-derivation of the construction, not a rescue filter on this exact build.
+
+## THIS BOARD NOW HAS NINE CONSECUTIVE BARE-MECHANISM FAILURES
+
+Attacks 72–80, nine distinct mechanisms, nine failures, since Attack 68's magnitude-floor filter term was
+the last thing this board kept. Unlike the eight before it, however, Attack 80 followed the two-confirmed-
+pivot structure Attack 79's queue specifically recommended, and it still failed — on the inverted-payoff
+shape rather than a plain negative edge. That is weak evidence against "the structural shape was the
+missing ingredient" as a general fix: a two-pivot comparison construction can fail too, just via a different
+failure mode than a single-point trigger. The pattern worth restating plainly (not re-deciding unilaterally,
+per Attack 78's own flag): the board's bare-first-pass hit rate on distinct new mechanisms since Attack 68
+is now 0-for-9.
+
+## QUEUE
+
+1. **Do not retry this exact construction with a different `atrLen` alone.** H1 already lands inside the
+   pre-registered frequency band on a well-powered sample (253 trades); the failure is the inverted-payoff
+   shape, not a threshold or sample-size problem.
+2. **Attack 68 (Attack 66 + OBV divergence-magnitude floor) remains the board's strongest both-halves
+   candidate** — PF 1.56474476/1.13127036 on 89/80 trades — unaffected by this cycle.
+3. **Attack 46 (long) remains a candidate alongside Attack 68**, unaffected by this cycle.
+4. **The out-of-sample test for Attack 46 still ranks first among long-side work not yet startable** under
+   BTCUSDT-only — unchanged.
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if that
+   family is revisited before another fresh mechanism.
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+7. **The next cycle proposes ONE further genuinely new mechanism**, distinct from the VWAP family and from
+   every rejected strategy on the board (Attacks 33–65, 67/69/70/71, 72, 73, 74, 75, 76, 77, 78, 79, and now
+   80). Given Attack 80's own result, the two-confirmed-pivot recommendation from Attack 79's queue is not
+   retracted (it remains the best-supported structural shape, per Attack 66/68), but it is no longer a
+   near-guarantee — the next candidate should still be argued from the mechanism, not chosen by shape alone.
+
+---

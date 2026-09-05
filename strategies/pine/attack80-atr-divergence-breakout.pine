@@ -1,0 +1,163 @@
+//@version=6
+// BTC ATTACK 80 - ATR/PRICE BEARISH-LOW VOLATILITY-DECELERATION DIVERGENCE, CONFIRMED ON BREAKOUT.
+// A GENUINELY NEW MECHANISM, BARE, FOLLOWING ATTACK 79's OWN QUEUE ITEM 7.
+//
+// THE STORED SCHEDULED PROMPT still describes a board state ("Attack 37, build its filter stack") more
+// than seventy-nine attacks stale, instructing "continue numbering after 37." THE DOCS OVERRIDE IT, again,
+// per the prompt's own standing instruction: Attack 41 closed Attack 37 on cost, Attack 43 closed the
+// whole sweep-reversal family, Attack 71 closed the Attack 66/68 filter stack at two terms after three
+// term-3 candidates failed, and Attacks 72-79 are eight consecutive bare-mechanism failures since. Attack
+// 79's own queue (item 7) named the direction for this cycle explicitly: the board's only two both-halves
+// survivors (Attack 37/46 in the earlier regime, Attack 66/68 more recently) share a structure -- a signal
+// series compared against price at TWO CONFIRMED PIVOTS -- while all eight recent failures (72-79) used
+// either a same-bar regime gate (72, 76, 78) or a single-point oscillator/level trigger (73, 74, 75, 77,
+// 79). This build is that instruction: continuing numbering after Attack 79, not Attack 37.
+//
+// ==================== WHAT THIS CLAIMS, IN ONE SENTENCE ====================
+// When price prints a confirmed pivot low BELOW its prior confirmed pivot low, but the ATR(14) reading AT
+// that new pivot low is LOWER than the ATR reading AT the prior pivot low -- the second leg down covered
+// more distance with LESS realized volatility than the first -- selling pressure is decelerating even as
+// price still falls, a volatility-deceleration divergence between price and the intensity of the move
+// producing it; a subsequent close back above the most recent confirmed pivot high confirms the
+// deceleration has resolved into a reversal, and price tends to continue toward a measured-move projection
+// of the swing just completed.
+//
+// ==================== WHY THIS IS A NEW INPUT CLASS FOR THIS LAB ====================
+// Every prior mechanism used one of: rolling extremes with no structure filter (33, 48), a calendar anchor
+// (34/35/54/55), a SAME-BAR volatility-contraction REGIME gate -- current ATR/BB-width vs. its OWN rolling
+// history, no cross-pivot comparison (6, 36, 65, 77), a failed break of a swing low (37-43), a tap-and-
+// reclaim of a swing level (44-47, champion), a single bar's own range/volume (49), a session range (50),
+// an RSI/PRICE divergence at confirmed pivots (51/52), a same-window order-flow-proxy sum (53), a
+// consecutive-close streak (56), an EMA-slope crossover (57/58), confirmed price-only swing structure
+// (59, 63), a same-bar trend-strength regime gate (78), a CUMULATIVE VOLUME series compared point-to-point
+// across two confirmed pivots (66-71, OBV), and a single-point volume-weighted oscillator threshold cross
+// (79, MFI). NONE has compared a VOLATILITY-MAGNITUDE series (ATR, a bounded per-bar range measure with NO
+// cumulative memory and NO direction sign -- unlike OBV's running sum and unlike RSI/MFI's momentum axis)
+// across two confirmed pivots against the price series at those same two pivots. This is an honest
+// recombination of previously-tried ingredients (ATR: 6/36/65/77, but always same-bar-vs-own-history, never
+// cross-pivot; pivot-to-pivot divergence structure: 51/52/59/66), not a wholly unprecedented data source --
+// flagged here rather than overclaimed, per this lab's own standard.
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS ====================
+// ta.pivotlow(low, 5, 5) and ta.pivothigh(high, 5, 5), confirmed 5 bars after the actual extreme, non-
+// repainting. `var float` scalars (not arrays) hold the most recent and prior confirmed pivot low PRICE and
+// the ATR(14) value AT that pivot bar (ta.atr(14)[pivotRight] read on the confirmation bar, a fixed
+// historical offset, not repainting -- same convention Attack 65 already uses for atrPrior). A `var bool
+// volDiv` is re-evaluated (not merely set-and-forget) each time a new pivot low confirms: true only when
+// price's new pivot low is BELOW the prior one AND ATR's value at that new pivot is BELOW its value at the
+// prior one (HARD LESSON 8: the divergence is armed and held in state, re-derived only on the pivot-confirm
+// bar). The TRIGGER is a later, separate bar: `ta.crossover(close, lastPivotHigh)`, while volDiv is latched
+// true. Stop: the divergence low itself (LESSON 5, actual structure). Target: a MEASURED-MOVE PROJECTION --
+// breakout price plus the amplitude of the swing just completed (pivot high minus the divergence low) -- a
+// level derived from the swing's own geometry (HARD LESSON 41), independent of R (E14: minRpct constrains
+// the stop distance; swingAmp constrains the target, drawn from price geometry; the ATR comparison itself is
+// a third, independent quantity on a different series entirely).
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - enforced by EXCLUSION via rBig, never clamped.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = lastPivLow, the actual confirmed divergence low.
+//   Each leg separately (LESSON 6) - LONG ONLY. A bearish mirror (lower pivot highs, ATR lower at the new
+//        high vs. the prior one) is untested; the short leg is a reported standing asymmetry (Attack 64).
+//   BINDING (E17) - volDiv AND breakoutTrigger AND rBig AND swingOk all necessarily bind.
+//   REDUNDANCY (E14) - minRpct constrains the STOP distance (price-only); swingAmp constrains the TARGET
+//        (price-only, independent geometry from the pivot high/low spread); the ATR-at-pivot comparison is
+//        a third, independent quantity on a wholly separate series (realized volatility magnitude, not
+//        price distance) -- not a redundant pair with either price term.
+//   LATCH IN SEQUENCE (LESSON 8, fourth-confirmation check) - volDiv is re-derived only on the bar a new
+//        pivot low confirms (a transition/confirmation event, not "already true for N bars"); breakoutTrigger
+//        reads a LATER, distinct bar (the crossover of the separately-tracked pivot-high level). The two
+//        conditions cannot share a bar by construction -- a pivot-low confirmation and a pivot-high
+//        crossover are different events on different series, the exact shape Attack 66 already proved safe.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, flat check gates every entry.
+//   CASCADE (HARD LESSON 35/42/43) - single TP+SL, no partials, LONG at 100% equity (the declared-deviation
+//        sizing fix is a short-side margin artifact only); expect cascadeRatio 1.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4). Anchored to Attack 66's identical pivot
+// mechanics (5/5 confirmation, same "new pivot low below prior" first clause), which produced 137 (H1) and
+// 142 (H2) trades. The added clause here (ATR lower at the new pivot vs. the prior) is a different
+// conditional filter than OBV's (unknown base rate, no counter build affordable within a 2-credit budget),
+// so registered with MODERATE confidence, anchored but wider than a point estimate: 60-300 trades per half.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17). CODE BARE -- NO RR FLOOR, NO ADDED FILTER:
+//   * BOTH HALVES ABOVE 1.0, TRADES ROUGHLY 60-350 PER HALF -> a third genuinely new both-halves candidate,
+//     ranked alongside Attack 46 and Attack 66/68, queued for RATCHET v2 filter work.
+//   * PRE-2024 HALF BELOW 1.0 -> DISCARDED by the kill rule. No filters, no rescue, no second half.
+//   * A MAJORITY WIN RATE WITH ratioAvgWinLoss WELL BELOW 1.0 -> another instance of HARD LESSON 53's
+//     inverted-payoff shape; report it as that, not as a novel diagnosis.
+//   * TRADES WELL BELOW ~30 -> a DIRECTION, not a result (LESSON 12); the divergence gate may be too
+//     strict for a single-symbol single-timeframe test.
+//   * A LARGE SHARE OF HOLDS AT maxBars 192 -> the cap is truncating (HARD LESSON 38); report before
+//     drawing any conclusion.
+//   REPORT GROSS, COMMISSION AND ACHIEVED RATIO alongside net, avg loser and win rate (LESSONS 36/39
+//     and the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack80 ATR divergence breakout", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+pivotLeft  = input.int(5, "Pivot confirmation bars, left")
+pivotRight = input.int(5, "Pivot confirmation bars, right")
+atrLen     = input.int(14, "ATR length")
+minRpct    = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars    = input.int(192, "Max bars in trade")
+
+pl  = ta.pivotlow(low, pivotLeft, pivotRight)
+ph  = ta.pivothigh(high, pivotLeft, pivotRight)
+atr = ta.atr(atrLen)
+
+var float lastPivLow    = na
+var float prevPivLow    = na
+var float lastPivLowATR = na
+var float prevPivLowATR = na
+var float lastPivHigh   = na
+var bool  volDiv        = false
+
+if not na(pl)
+    prevPivLow    := lastPivLow
+    prevPivLowATR := lastPivLowATR
+    lastPivLow    := pl
+    lastPivLowATR := atr[pivotRight]
+    if not na(prevPivLow)
+        volDiv := lastPivLow < prevPivLow and lastPivLowATR < prevPivLowATR
+
+if not na(ph)
+    lastPivHigh := ph
+
+rLong = not na(lastPivLow) ? close - lastPivLow : na
+minR  = close * minRpct / 100
+rBig  = not na(rLong) and rLong >= minR
+
+breakoutTrigger = not na(lastPivHigh) and ta.crossover(close, lastPivHigh)
+
+swingAmp = not na(lastPivHigh) and not na(lastPivLow) ? lastPivHigh - lastPivLow : na
+swingOk  = not na(swingAmp) and swingAmp > 0
+
+goLong = volDiv and breakoutTrigger and rBig and swingOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := lastPivLow
+    tpPx   := close + swingAmp
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(lastPivLow, title="LastPivotLow")
+plot(lastPivHigh, title="LastPivotHigh")
