@@ -6953,3 +6953,167 @@ unanswered rule question. `E79` closes E78's queue item 1.
    `get_backtest_result` -- the adhoc result appears to have expired before a session archived it. Its
    metrics are not hand-written here to patch that gap (would violate the no-fabrication rule); E79's own
    record is complete and independently provenanced, and stands as the archival copy of this comparison.
+
+# ██ E80 -- THE 15m PORT, STRUCTURE TIER RE-DERIVED. FIRST BOTH-LEGS-POSITIVE BIDIRECTIONAL RESULT.
+
+**Docs-first check.** This cycle's stored prompt is again the pre-E67 text (attack the short's entry
+geometry; finish the entry-term binding sweep). Both closed long ago -- short geometry at E71/E74-E76;
+the binding sweep at E69a/E69b/E70a/E70b/E77 (long) and E74/E75a/E75b/E76 (short). **The docs win, per
+the prompt's own instruction.** The live, credit-worthy item is E79's own queue item 2: the 15m port,
+which "needs its own re-derivation, not a parameter carry-over... that redesign question should be
+resolved and stated explicitly BEFORE spending a credit on it."
+
+`get_credits` read **502** at the start. Below is the resolution, done as analysis before any credit
+was spent, followed by ONE isolated backtest.
+
+## WHY THE 15m-BUCKET TERM DEGENERATES, PRECISELY
+
+Read literally, `MS15 = 900000` and `new15 = b15 != b15[1]` fires **every single bar** on a native 15m
+chart, because one bar now IS one 15m bucket. Tracing what that does to the existing terms:
+- `c15h`/`c15l` (the "running" current-bucket high/low) never enter their `else` branch -- the branch
+  that gave the running-high/low its meaning at 1m (15 bars/bucket) and 5m (3 bars/bucket). At 15m
+  native it collapses to `c15h = high`, `c15l = low` on every bar: just this bar's own high/low.
+- `p15h`/`p15l` (the "previous completed bucket") become nothing but **the immediately preceding bar's**
+  high/low, reset every single bar.
+- `longTrig = crossover(close, p15l) and (close - p15l) >= velMin` therefore compares `close[N]` against
+  `low[N-1]` while ALSO requiring `close[N-1] <= low[N-2]` -- a comparison against a reference that
+  **changes on every bar**, not a re-test of one fixed prior structure. That is the concrete mechanism
+  behind "degenerates to a trivial one-bar comparison": it isn't merely simpler, it is **incoherent**
+  with the strategy's own concept (sweep a STABLE prior structure, then reclaim it) once the reference
+  itself is redefined out from under the trigger every bar.
+
+## THE RE-DERIVATION (per HARD LESSON 40: redesign, not rescale)
+
+**Bump the structure/location tier up by exactly one level** -- the same move that made the 5m port
+legitimate one level down (5m bars subdivide the 15m bucket 3-to-1, giving a genuine multi-bar running
+reference). At 15m native there is no bar finer than the bucket itself, so the next tier up -- **the 1h
+bucket, 4 bars at 15m resolution** -- is the finest tier that still gives a stable, multi-bar-held
+reference. The strategy already tracks 1h bucket boundaries (`new1h`, for `h1o`/`h1Bull`); this extends
+the same boundary to running high/low, exactly the way `c15h`/`c15l` tracked the 15m bucket in the
+1m/5m builds. `brokeBelow`/`brokeAbove` and `longTrig`/`shortTrig` are rebuilt on `c1h`/`p1h` in place
+of `c15`/`p15`. Nothing else in the cascade changes.
+
+**Single hypothesis, isolated (HARD LESSON 16/E17):** does moving the structure tier from the (degenerate
+at 15m) 15m-bucket to the (non-degenerate at 15m) 1h-bucket restore a coherent, testable signal.
+
+**A separate, already-declared deviation, flagged in advance rather than discovered after the fact:**
+`atrSlow -> atr(2)` = **exactly** 30 minutes at 15m -- an exact match to the 1m build's `atr(30)` and
+5m's `atr(6)`; this term is NOT deviated. `atrFast -> atr(1)` = 15 minutes, the closest achievable proxy
+for the intended 3 minutes (no sub-15m bar exists in this dataset) -- a materially coarser proxy than
+5m's `atr(1)`=5min. Because `atrFast` and `atrSlow` are only 2 bars apart in period here (vs 6 at 5m, 10
+at 1m) they share most of their inputs, so `coiled` is expected to be a weaker, less selective filter
+than at any other timeframe tested. Flagged as a second, distinct, un-isolated deviation -- not bundled
+into the structure-tier hypothesis above, and the first thing to check if this run looks
+coil-gate-degenerate.
+
+**PRE-RUN AUDIT:** R = shieldUsd $2,000 against this window's BTC price range (~$60k-$120k, same window
+as E78/E79): 1.7%-3.3%, clears the 0.8% floor (LESSON 3). Stop is risk-defined per the ALCM spec
+(LESSON 5), unchanged from e58a/E71/E78/E79. Both legs reported separately (LESSON 6). BINDING (E17):
+one variable (structure-tier reference) changed from E79; atr periods are a mechanical unit conversion,
+not a free choice, matching E78->E79's own method. **REDUNDANCY (HARD LESSON 18) -- NEW RISK, FLAGGED:**
+`h1Bull` (close vs the CURRENT hour's open) and the redesigned `brokeBelow`/`brokeAbove` (the CURRENT
+hour's running high/low vs the PRIOR hour's) now both derive from the same 1h bucket, where before
+(1m/5m) they read different tiers. They are not restating the same fact, but they are more correlated
+than the original design -- if this run had failed, checking that redundancy would have been the first
+follow-up, not a new term. Latch order unchanged (LESSON 8). `shieldUsd`/`rr` unchanged from E78/E79 so
+no new occupancy confound relative to them (LESSONS 24/28/29). `maxBars` re-derived to three days at
+15m: 3*24*4 = **288** bars (same mechanical method as E78's 864 for 5m).
+
+**REGISTERED PREDICTION (LESSON 17), before running:** if the 15m-bucket term's *incoherence* (not "15m
+itself") explains why a naive port would fail, the 1h-structure redesign should produce a signal firing
+on a sensible, non-trivial subset of bars and a trade population large enough to read. If PF clears 1.0
+on an adequate sample, this is the first result in the lab's 15m history and material to the "1m-specific
+edge vs 36-trade noise" question E78/E79 could not resolve with a second 5m variant alone. If PF fails,
+the coil-gate deviation flagged above is the first thing to check before blaming the structure redesign.
+
+## RESULT -- 15m, 2024-06-08 -> 2026-09-01, 78,567 bars (same window as E78/E79)
+
+**One credit.** `resultId 01M1SMXCSC9QHDND6NTZ7H2NEF`, `strategyId 01M1SMXCYQ9KD43GRJJJ0TN7N4`.
+
+| | value |
+|---|---|
+| Profit factor | **1.24221581** |
+| Trades | **44** |
+| Win rate | 27.27272727% |
+| Net | **+9.11169035%** |
+| Max drawdown | 17.28630995% |
+| Long | 19 trades, **9 wins**, +$418.75 |
+| Short | 25 trades, **3 wins**, **+$492.42** |
+| Commission | $468.43 |
+| Sharpe / Sortino | 0.48096598 / 0.1171681 |
+
+**The prediction was confirmed.** The signal fires on a sensible, non-degenerate population (44 trades,
+neither ~0% nor ~100% of bars) and PF clears 1.0 on a sample well clear of the 30-trade floor.
+
+## WHAT THIS ESTABLISHES
+
+**This is the first construction in this lab's entire history where BOTH legs are net profitable in the
+same run, at the same time, under one symmetric cascade.** Long: 9 of 19 (47.4% win rate), +$418.75 net.
+Short: 3 of 25 (12% win rate), but a payoff ratio large enough to still net **+$492.42** -- the short leg
+is not merely "less bad" here, it out-earned the long leg in dollar terms on this window. Every prior
+short construction in this project (E9/E9b/E10/E11/E13/E15/E16/E25-E27/E64a/E66/E71/E74-E76/E78/E79) was
+either rejected outright or, at best (E71/E74), kept alive only as an unprofitable-but-improving leg
+gated behind an unresolved drawdown-allowance question. **This is the first time a short leg has been
+net-profit-positive at all, let alone simultaneously with a profitable long leg in the same bidirectional
+build.**
+
+**It directly answers the user's standing directive** ("War formation should work in both directions,
+not just longs or shorts") with a single cascade, no bolted-on second system, both legs reported and
+both legs positive.
+
+**It is also, independently, the first 15m result of any kind in this lab**, and per HARD LESSON 22 /
+check #38 Finding 4, 15m carries ~13x the calendar span of the 1m archive -- this specific window
+(2024-06 to 2026-09, chosen for direct comparability with E78/E79, not the full 2020-08 archive, because
+a fixed-dollar shield against BTC's 2020 price range would breach LESSON 3's floor logic in the other
+direction and introduce a second confound) is still a strict subset of what 15m can eventually offer.
+
+## WHAT THIS DOES NOT ESTABLISH -- STATED PLAINLY
+
+- **No parameter here was tuned on 15m data.** Every input (`shieldUsd`, `rr`, `velK`, `coilK`,
+  `greenBull`/`greenBear`, `midLo`/`midHi`, `etOffset`) is carried unchanged from the 1m/5m builds. That
+  cuts both ways: this result cannot be curve-fit to 15m (nothing here has ever been optimized against
+  it), but it also has not been stress-tested against alternate parameter values on this timeframe --
+  unweighted evidence, not yet a swept one.
+- **Single run, no holdout.** Same standing caveat as every other result in this lab (HARD LESSON 22):
+  one window, no split test performed yet. RATCHET v2's split-test clause applies only to a >50% count
+  cut from a parent, which does not apply here (there is no same-timeframe 15m parent to cut from) --
+  but the general caution about a single un-replicated window still applies in full.
+- **The redundancy flagged above (h1Bull vs the redesigned brokeBelow/brokeAbove) has not been tested.**
+  This run does not distinguish "the structure-tier redesign is doing real work" from "the redesign
+  happens to correlate usefully with h1Bull on this window." That is the natural next isolation.
+- **The coil-gate deviation (atrFast/atrSlow only 2 bars apart) has not been checked for degeneracy.**
+  `coiled`'s true/false split on this run was not inspected; per the registered prediction, that is the
+  first diagnostic to run before over-crediting the structure-tier redesign for the whole result.
+- **Not a ratchet KEEP and not a champion.** There is no same-timeframe 15m parent to ratchet against
+  (this is this lab's first 15m run, exactly as E78 was its first 5m run). It also cannot simply replace
+  `e58a`/`E71` (1m) -- different timeframe, different data, not a comparable substitution. Recorded as
+  `status: testing`: a genuinely new, unreplicated, promising result, not yet a decision.
+- Check #36's shield-fill caveat (every recorded PF is an upper bound) still applies here as everywhere.
+
+## STATE
+
+**No champion.** `e58a` (long, 1m) and `E71` (short, 1m) remain the reference builds for the 1m track;
+`E74` remains blocked on the HARD LESSON 48 drawdown-allowance question. **E80 is a new candidate line,
+not a replacement for either** -- the lab's first bidirectional, both-legs-positive result, on a new
+timeframe, unreplicated.
+
+## QUEUE
+
+1. **Check the coil-gate degeneracy flagged above** -- inspect what fraction of 15m bars have `coiled`
+   true under `atr(1)`/`atr(2)`. If it is near-universal, the coil term is not doing selective work here
+   and the population is being shaped almost entirely by the other gates; if it is well-split, the coil
+   survives the coarser proxy. Free to check (no backtest needed, can be read from a counter-build or
+   reasoned from ATR autocorrelation at adjacent periods) -- do this BEFORE spending a credit on item 2.
+2. **Test the h1Bull / structure-tier redundancy**, per HARD LESSON 48's method (remove one term, hold
+   the other, per leg): does E80 survive with `h1Bull`/`h1Bear` removed (now that brokeBelow/brokeAbove
+   carry 1h information too), and does it survive with the new brokeBelow/brokeAbove removed (now that
+   h1Bull/h1Bear alone might carry the same signal)? Two single-term binding tests, not one.
+3. **A split test**, per RATCHET v2's spirit even though its letter does not strictly require one here:
+   half-window replication (e.g. 2024-06 to 2025-07 vs 2025-07 to 2026-09) before this becomes anyone's
+   reference construction.
+4. Check #36's shield-fill caveat and the HARD LESSON 48 drawdown-allowance RULE QUESTION (blocking E74)
+   remain open and untouched by this run.
+5. Do not port this exact win back to 1m or 5m as a "fix" -- the structure-tier redesign is specific to
+   the fact that 15m has no finer bar to build a stable 15m-bucket reference from; 1m and 5m already had
+   one and their own failures (short-leg collapse) were diagnosed on independent grounds (HARD LESSON 34,
+   the sizing fix in HARD LESSON 42, both atr bases agreeing at E78/E79).

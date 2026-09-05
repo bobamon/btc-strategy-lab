@@ -1383,9 +1383,59 @@ const DATA = [
     },
     "verdict": "THE ATR-DEVIATION CONFOUND IS RULED OUT AS THE CAUSE OF E78's FAILURE. Correcting the atr basis to genuine clock-time equivalents (atr(6)=30min exact, atr(1)~5min closest proxy) produced an almost identical trade population to E78's un-rescaled atr(3)/atr(30): 114 trades vs 115, 21 long winners in BOTH runs, 4 short winners in BOTH runs, win rate 21.93% vs 21.74%. Profit factor moved 0.78597499 -> 0.86373954 (still below 1.0) and max drawdown improved 30.19% -> 21.07%, but the qualitative population -- who wins and who loses -- did not change. The kill rule (PF < 1.0 on a sample clearing the 30-trade floor) applies again: DISCARDED.",
     "notes": "DIRECTLY ANSWERS E78's QUEUE ITEM 1. Because the corrected atr basis reproduced E78's population almost exactly (same long-winner count, same short-winner count, near-identical trade count and win rate) rather than materially reshuffling which trades fire, the atr-basis deviation was not what made 5m fail -- 5m itself is where the edge does not survive, independent of that specific implementation choice. This makes E78's reading 2 (the 1m 36-trade e58a result was noise, not a 1m-specific edge) more likely than reading 1, though a single 5m run still cannot fully separate 'timeframe-specific edge' from 'noise' with certainty. The short leg is confirmed dead again on this leg's largest-ever sample: 4 winners in 63 short trades (6.3%), matching E78's 4/65 (6.2%) almost exactly -- two independent atr-basis constructions now agree on the short leg's collapse. NOT A KEEP, NOT A CANDIDATE: this run exists to close a queue item, not propose a change. Reference builds are unchanged: e58a (long, 100% equity, 1m) and E71 (short, 25% equity, 1m). The drawdown-allowance RULE QUESTION FOR THE USER (HARD LESSON 48, blocking E74) remains open and is untouched by this run. QUEUE: the 15m port (E78's queue item 2, coverage confirmed at check #38: 211,711 bars back to 2020-08) remains the next axis, and per HARD LESSON 40 needs its own re-derivation -- the 15m-bucket breakout term (brokeAbove/brokeBelow) degenerates to a trivial one-bar comparison at 15m and needs a genuine redesign, not a parameter carry-over, before it can be run responsibly."
+  },
+  {
+    "id": "wf-e80-15m-native-1h-structure",
+    "name": "E80: the 15m port with the structure tier RE-DERIVED to the 1h bucket",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "testing",
+    "createdDate": "2026-09-05",
+    "lastTestedDate": "2026-09-05",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "war-formation/pine/e80-15m-native-1h-structure.pine",
+    "description": "E79's own queue item 2: the 15m port needed its own re-derivation, not a parameter carry-over, because on a native 15m chart one bar IS one 15m bucket -- new15 fires every bar, so the 15m-bucket breakout term (brokeAbove/brokeBelow) and its longTrig/shortTrig crossover collapse into a comparison against a reference (p15h/p15l) that reshuffles every single bar, incoherent with the strategy's own concept of sweeping a STABLE prior structure. Per HARD LESSON 40, the fix is a redesign: bump the structure/location tier up by exactly one level, from the (degenerate at 15m) 15m-bucket to the (non-degenerate, 4 bars/bucket at 15m resolution) 1h-bucket, reusing the existing new1h boundary infrastructure to track running high/low the same way c15h/c15l did in the 1m/5m builds. brokeBelow/brokeAbove and longTrig/shortTrig are rebuilt on c1h/p1h. Single hypothesis, isolated (HARD LESSON 16/E17): only the structure-tier reference changed. A separate, declared, un-isolated deviation: atrSlow=atr(2) is an EXACT match to 30 minutes (not deviated); atrFast=atr(1)=15min is the closest achievable proxy for the intended 3 minutes and, being only 2 bars from atrSlow, may make the coil gate weakly selective -- flagged as the first thing to check if this result needed explaining away, which it did not. shieldUsd ($2,000), rr (2.0), and window match E78/E79 for direct comparability; maxBars re-derived to 288 (three days at 15m, same method as E78's 864 for 5m).",
+    "metrics": {
+      "netProfitPct": 9.11169035,
+      "profitFactor": 1.24221581,
+      "maxDrawdownPct": 17.28630995,
+      "totalTrades": 44,
+      "winRatePct": 27.27272727,
+      "avgTradePct": 0.20708387,
+      "sharpeRatio": 0.48096598,
+      "sortinoRatio": 0.1171681,
+      "commissionPaid": 468.4281653,
+      "avgWinningTrade": 389.414632133334,
+      "avgLosingTrade": -117.556454715625,
+      "ratioAvgWinLoss": 3.3125755,
+      "largestWin": 645.3167448,
+      "largestLoss": -354.6206388,
+      "avgBarsInTrade": 99.65909091,
+      "avgBarsWinning": 200,
+      "avgBarsLosing": 62.03125,
+      "longTrades": 19,
+      "shortTrades": 25,
+      "longWinning": 9,
+      "shortWinning": 3,
+      "longNetProfit": 418.74770460001,
+      "shortNetProfit": 492.421330099993
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1SMXCSC9QHDND6NTZ7H2NEF",
+      "strategyId": "01M1SMXCYQ9KD43GRJJJ0TN7N4",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1SMXCSC9QHDND6NTZ7H2NEF",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1.0476190476190477,
+      "verifiedAt": "2026-09-05T00:00:00Z"
+    },
+    "verdict": "FIRST BOTH-LEGS-POSITIVE BIDIRECTIONAL RESULT IN THIS LAB'S HISTORY. PF 1.24221581 on 44 trades (well clear of the 30-trade floor), long +$418.75 (9/19 wins, 47.4%), short +$492.42 (3/25 wins, 12% but a large enough payoff ratio to net-profit outright). Every prior short construction in this project was either rejected or, at best, kept alive as an unprofitable-but-improving leg gated behind an unresolved rule question -- this is the first time a short leg has been net-profit-positive at all, let alone simultaneously with a profitable long leg under one symmetric cascade. The structure-tier redesign (15m-bucket reference -> 1h-bucket reference) confirmed the registered prediction: a coherent, non-degenerate signal on a sensible trade population, not a trivial one-bar artifact.",
+    "notes": "NOT a ratchet KEEP, NOT a champion: this is this lab's first-ever 15m run, so there is no same-timeframe parent to ratchet against, and it cannot directly replace e58a/E71 (1m, different data). Recorded as testing: new, promising, unreplicated. No parameter here was tuned on 15m -- every input is carried unchanged from the 1m/5m builds, which cuts both ways (not curve-fit to 15m, but not stress-tested on it either). Two things not yet checked: (1) whether the coil gate (atrFast/atrSlow only 2 bars apart at this resolution) is near-degenerate, flagged in advance as the first diagnostic if needed; (2) whether h1Bull/h1Bear and the redesigned brokeBelow/brokeAbove, which now both derive from the same 1h bucket, are redundant (HARD LESSON 48's method: remove one term at a time, per leg) -- this run cannot distinguish 'the redesign does real work' from 'the redesign happens to correlate usefully with h1Bull on this window.' A split-window replication (e.g. 2024-06-2025-07 vs 2025-07-2026-09) is the natural next step before this becomes anyone's reference construction. Check #36's shield-fill caveat (every PF is an upper bound) applies here as everywhere. The HARD LESSON 48 drawdown-allowance RULE QUESTION blocking E74 remains open and untouched by this run."
   }
 ];
-const BUILT = "2026-09-05 19:46";
+const BUILT = "2026-09-05 20:44";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

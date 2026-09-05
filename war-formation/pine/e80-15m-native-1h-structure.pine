@@ -1,0 +1,211 @@
+//@version=6
+// WAR FORMATION E80 -- THE 15m PORT, WITH THE STRUCTURE TIER RE-DERIVED (NOT RESCALED).
+//
+// QUEUE ITEM FROM E79 / CHECK #38: at native 15m resolution the "15m-bucket breakout" term
+// (brokeAbove/brokeBelow, and the longTrig/shortTrig sweep-and-reclaim trigger built on the
+// same p15h/p15l reference) DEGENERATES. On 1m (15 bars/bucket) and 5m (3 bars/bucket) the
+// prior-bucket reference (p15l/p15h) is a STABLE level held across multiple bars, so a later
+// bar's crossover genuinely re-tests a fixed prior structure. At 15m-native, one bar IS one
+// 15m bucket: `new15` fires every bar, so p15l/p15h become nothing but the immediately
+// preceding bar's low/high, RESHUFFLED EVERY BAR. longTrig's crossover(close, p15l) then
+// compares close[N] against low[N-1] while also requiring close[N-1] <= low[N-2] -- a
+// mechanical artifact of a shifting reference, not a re-test of one fixed level. That is what
+// "degenerates" means here: not "meaningless," but INCOHERENT with the strategy's own concept
+// (sweep a stable prior structure, then reclaim it).
+//
+// THE RE-DERIVATION (per HARD LESSON 40 -- redesign, not rescale): bump the structure tier up
+// by exactly one level, the same move that made the 5m port legitimate one level down. At 5m,
+// the finest bar (5m) subdivided the 15m bucket, giving a genuine multi-bar running high/low.
+// At 15m-native there is no bar finer than the bucket itself, so the next tier UP -- the 1h
+// bucket, 4 bars at 15m resolution -- is the finest tier that still gives a STABLE reference
+// held across multiple bars. This reuses the h1o bucket-boundary infrastructure already in the
+// strategy (new1h) and simply extends it to track running high/low the same way c15h/c15l did
+// for the 15m bucket in the 1m/5m builds. brokeBelow/brokeAbove and longTrig/shortTrig are now
+// built on c1h/p1h instead of c15/p15. Nothing else in the cascade changes.
+//
+// SINGLE HYPOTHESIS, ISOLATED (HARD LESSON 16 / E17): does moving the structure/location tier
+// from the (degenerate at 15m) 15m-bucket to the (non-degenerate at 15m) 1h-bucket restore a
+// coherent, testable sweep-and-reclaim signal at this timeframe. Nothing else is varied at the
+// same time as this change.
+//
+// A SEPARATE, ALREADY-DECLARED DEVIATION (not this run's question, flagged so it is not
+// discovered after the fact the way E78's atr basis was): atrSlow -> atr(2) = EXACTLY 30
+// minutes at 15m, an exact match to the 1m build's atr(30) and 5m's atr(6) -- this term is
+// NOT deviated. atrFast -> atr(1) = 15 minutes, the closest achievable proxy for the intended
+// 3 minutes (no sub-15m bar exists in this dataset) -- a materially coarser proxy than 5m's
+// atr(1)=5min. Because atrFast and atrSlow are only 2 bars apart in period at 15m (vs 6 at 5m,
+// 10 at 1m) they share most of their inputs, so `coiled` (atrFast < atrSlow*coilK) is expected
+// to be a WEAKER, less selective filter here than at any other timeframe tested. This is a
+// second, distinct deviation from the location-tier redesign above; it is flagged in advance,
+// not bundled into the same hypothesis, and should be re-derived on its own in a follow-up if
+// this run's population looks coil-gate-degenerate (e.g. `coiled` true on nearly every bar).
+//
+// PRE-RUN AUDIT:
+//   R = shieldUsd $2,000 against this window's BTC price range (~$60k-$120k, same window as
+//     E78/E79): 1.7%-3.3%, clears the 0.8% floor (HARD LESSON 3).
+//   Stop is risk-defined per the ALCM spec (HARD LESSON 5), unchanged from e58a/E71/E78/E79.
+//   Both legs reported separately (HARD LESSON 6).
+//   BINDING (E17): one variable (structure-tier reference) changed from E79; atr periods
+//     recomputed to their exact/closest 15m equivalents (mechanical unit conversion, not a
+//     free parameter choice), same as E78->E79's own atr re-derivation step.
+//   REDUNDANCY (HARD LESSON 18) -- NEW RISK, FLAGGED: h1Bull (close vs the CURRENT hour's
+//     open) and the redesigned brokeBelow/brokeAbove (the CURRENT hour's running high/low vs
+//     the PRIOR hour's) now both derive from the same 1h bucket, where before (1m/5m) they
+//     read different tiers (1h open vs 15m bucket extremes). They are not restating the same
+//     fact -- one is "where are we vs this hour's open," the other is "did this hour's range
+//     break the prior hour's range" -- but they are correlated in a way the original design was
+//     not, and if this run fails, checking that redundancy is the first follow-up, not a new
+//     term.
+//   Latch order unchanged from e58a/E79 (HARD LESSON 8). shieldUsd/rr unchanged from E78/E79
+//     so no new occupancy confound relative to them (LESSONS 24/28/29). maxBars re-derived to
+//     three days at 15m: 3 * 24 * 4 = 288 bars (mechanical unit conversion, same method as
+//     E78's 864 for 5m).
+//
+// REGISTERED PREDICTION (HARD LESSON 17), BEFORE RUNNING:
+//   - If the 15m-bucket term's incoherence (not "15m itself") explains why a naive port would
+//     fail, the 1h-structure redesign should produce a signal that fires on a SENSIBLE, non-
+//     trivial subset of bars (neither ~0% nor ~100%) and a trade population large enough to
+//     read (this window's greater bar count over the same calendar span than 1m/5m gives more
+//     room to clear the 30-trade floor even under a selective gate stack).
+//   - If PF clears 1.0 on an adequate sample, this is the first result in the lab's 15m
+//     history and the first construction to test the strategy's mechanism on a different,
+//     independent timeframe from either 1m or 5m -- material to the "1m-specific edge vs
+//     36-trade noise" question E78/E79 could not fully resolve with a second 5m variant alone.
+//   - If PF fails to clear 1.0, the next diagnostic per the redundancy flag above is whether
+//     `coiled` is firing near-universally (the second declared deviation above) before
+//     concluding the location-tier redesign itself is at fault -- two candidate explanations,
+//     not to be conflated (HARD LESSON 16).
+//
+// RESULT, VERDICT and KEEP/REJECT are recorded in EXPERIMENT-LOG.md and results/backtests.json
+// after this run completes, per the lab's provenance rule (never hand-write a metric).
+strategy("War Formation E80 15m native 1h structure", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+greenBull = input.int(4,     "Green 1h candles for BULL")
+greenBear = input.int(2,     "Green 1h candles at or below for BEAR")
+skipOpen  = input.int(60,    "Skip first N minutes of 6h block")
+skipClose = input.int(60,    "Skip last N minutes of 6h block")
+coilK     = input.float(0.85,"Coil: atrFast < atrSlow * K")
+velK      = input.float(0.8, "Velocity: min reclaim as multiple of atrSlow")
+midLo     = input.float(400, "Whole-number middles low")
+midHi     = input.float(600, "Whole-number middles high")
+etOffset  = input.int(-4,    "ET offset from UTC")
+witchOn   = input.bool(true, "Ban longs in witching hour 1-4am ET")
+shieldUsd = input.float(2000,"THE SHIELD: fixed dollar gap to liquidation")
+rr        = input.float(2.0, "Reward:risk")
+maxBars   = input.int(288,   "Max bars in trade -- three days of 15m")
+
+MS6H = 21600000
+MS1H = 3600000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+
+var float h1o     = na
+var int   grnCur  = 0
+var int   cntCur  = 0
+var int   grnPrev = 0
+var int   cntPrev = 0
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    grnCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(h1o)
+        cntCur := cntCur + 1
+        if close[1] > h1o
+            grnCur := grnCur + 1
+    h1o := open
+
+regimeReady = cntPrev >= 5
+bullRegime  = regimeReady and grnPrev >= greenBull
+bearRegime  = regimeReady and grnPrev <= greenBear
+
+minsIn    = (time - b6 * MS6H) / 60000
+timeGate  = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+h1Bull = not na(h1o) and close > h1o
+h1Bear = not na(h1o) and close < h1o
+
+// STRUCTURE TIER, RE-DERIVED: was the 15m bucket (c15h/c15l vs p15h/p15l), degenerate at 15m
+// native. Now the 1h bucket, tracked the same way, 4 bars/bucket at this resolution -- the
+// finest tier that still gives a stable multi-bar reference.
+var float c1hh = na
+var float c1hl = na
+var float p1hh = na
+var float p1hl = na
+
+if new1h
+    p1hh := c1hh
+    p1hl := c1hl
+    c1hh := high
+    c1hl := low
+else
+    c1hh := na(c1hh) ? high : math.max(c1hh, high)
+    c1hl := na(c1hl) ? low  : math.min(c1hl, low)
+
+brokeBelow = not na(p1hl) and c1hl < p1hl
+brokeAbove = not na(p1hh) and c1hh > p1hh
+
+atrFast = ta.atr(1)
+atrSlow = ta.atr(2)
+coiled  = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK
+coilPrev = coiled[1]
+velMin   = na(atrSlow) ? na : atrSlow * velK
+
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+hUTC     = math.floor(time / MS1H) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+longBan  = witchOn and witching
+
+longTrig  = not na(p1hl) and not na(velMin) and ta.crossover(close, p1hl)  and (close - p1hl) >= velMin
+shortTrig = not na(p1hh) and not na(velMin) and ta.crossunder(close, p1hh) and (p1hh - close) >= velMin
+
+goLong  = bullRegime and timeGate and h1Bull and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig
+goShort = bearRegime and timeGate and h1Bear and brokeAbove and coilPrev and not inMiddle and shortTrig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := close - shieldUsd
+    tpPx   := close + shieldUsd * rr
+    barsIn := 0
+
+if flat and goShort
+    strategy.entry("S", strategy.short)
+    slPx   := close + shieldUsd
+    tpPx   := close - shieldUsd * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong  ? 1 : 0, title="LongSignal")
+plot(goShort ? 1 : 0, title="ShortSignal")
