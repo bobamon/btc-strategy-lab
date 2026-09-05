@@ -6845,3 +6845,118 @@ near the floor, which makes it the better decomposition target than another new 
    calls is worth more than an eighth coin flip.
 5. **Promote the flat-stop load-bearing check to a standing requirement** — still owed from Attack
    79's queue, untouched by this entry.
+
+---
+
+# ATTACK 80 — NEARNESS TO THE 52-WEEK HIGH (ANCHORING). A THIRD VERDICT: NOT REJECTED, NOT ACCEPTED, **UNTESTABLE AT THE SAMPLE FLOOR**.
+
+Engine: `backtest-lab`. Long only, **no stop of any kind** — the exit is the state itself, which means
+Attack 79's flat-stop confound cannot apply here by construction.
+
+## THE RESEARCH THAT MOTIVATED IT, INCLUDING THE PART THAT ARGUES AGAINST IT
+
+**For.** George & Hwang (2004), *The 52-Week High and Momentum Investing* (Journal of Finance):
+nearness to the 52-week high forecasts future returns **better than past returns themselves**, and
+those forecasts **do not reverse in the long run**. The proposed mechanism is anchoring — investors
+treat the 52-week high as a reference point and underreact to news when price sits near it.
+
+**For, in this asset class.** Jia, Simkins, Yan, Zhang & Zhao (2025), *Psychological Anchoring Effect
+and Cross Section of Cryptocurrency Returns* (Journal of Banking & Finance): nearness to the 52-week
+high positively predicts next-week crypto returns; a long-short spread earns roughly **0.7% (equal-
+weighted) to 1.4% (value-weighted) per week**, robust to standard controls. The authors note crypto
+is a *cleaner* test than equities because post-earnings-announcement-drift explanations do not apply.
+
+**Against, and it is decisive for how the result must be read.** Barroso & Wang (2021) find George &
+Hwang's result is **limited to small stocks**, with ordinary price momentum explaining the apparent
+52-week-high predictability. So the effect may not be a separate phenomenon at all.
+
+**And the mismatch that matters most here, stated before any number:** *every* result above is
+**cross-sectional** — long the coins near their high, short the coins far from it, across a universe.
+**This build is a single-instrument time-series test on BTC alone.** That is a different estimator of
+a different quantity. The literature's numbers lend the mechanism plausibility; they lend this
+build's results **nothing**, and no part of the 0.7–1.4%/week figure should be read as a prediction
+for what follows.
+
+## THE CLAIM AS BUILT
+
+Nearness = `close / highest(high, N)`. Hold long while nearness is high (near the anchor), exit when
+it decays. Genuinely distinct from everything on this board: **Donchian and Attack 77 trade the
+*break* of a high; this trades the *state* of being near one without breaking it.** A bar at 0.97 of
+the anchor is a signal here and invisible to every breakout build.
+
+    entry_long = close / highest(high, N) > 0.95
+    exit_long  = close / highest(high, N) < 0.90
+    4h, long only, 1x, size 100%, fee 5bps, funding on, NO stop, NO target
+
+## FREQUENCY, REGISTERED BEFORE RUNNING (HARD LESSON 4)
+
+**15–60 trades, low confidence.** No prior on this board, and a state-based hold produces episodes
+rather than crossings.
+
+## BOTH RUNS, H1 (never-tuned half, 2022-01-01 → 2024-06-08, 5,335 bars, both `pinned: true`)
+
+| | **80a — 52-week anchor** (N=2184) | **80b — 60-day anchor** (N=360) |
+|---|---|---|
+| runId | `bt_9688f5f41c` | `bt_16c32150e5` |
+| Profit factor | 1.691394 | 1.598577 |
+| **Trades** | **7** | **15** |
+| Win rate | 28.571429% | 26.666667% |
+| Net return | +29.002918% | +44.990082% |
+| Buy & hold | +48.440379% | +48.440379% |
+| vs buy & hold | **-19.44 pp** | **-3.45 pp** |
+| Max drawdown | 32.179483% | 30.756306% |
+| Avg winner / loser | +32.36% / -5.89% | +28.29% / -5.27% |
+| Exposure | 23.111528% | 36.401125% |
+| Funding paid | $1,313.66 | $1,713.65 |
+| Liquidations | 0 | 0 |
+
+## THE VERDICT — UNTESTABLE, WHICH IS NOT THE SAME AS FAILED
+
+**The kill rule did not fire: both profit factors are above 1.0.** But **neither run clears RATCHET v2
+clause 3's floor of 30 trades**, and the engine raised `small_sample` on both. By this lab's own
+standing practice a ratio under ~30 trades is not quoted as a result. **So PF 1.69 and PF 1.60 are
+recorded and explicitly not banked.**
+
+This is a **structural** property of the mechanism, not bad luck. A long-horizon anchor changes state
+rarely: average hold was 129–176 bars, exposure 23–36%. Cutting the anchor **six-fold** (2184 → 360)
+only took the sample from 7 to 15. There is no anchor length that both keeps this recognisable as
+"nearness to a long-horizon anchor" and produces 30+ episodes on 2.4 years of one instrument.
+
+**Two runs were made and no more.** The second anchor was **pre-committed before it was run**, chosen
+on expected sample size and never on profit factor, and the result was accepted as it came. A third
+attempt would have been searching anchor length for sample and PF simultaneously — the exact error
+HARD LESSONS 45 and 49 name — so it was not made.
+
+## WHAT THE NUMBERS DO AND DO NOT SUGGEST
+
+Both anchors landing at PF ~1.6–1.7 with a ~28% win rate and a ~5–6x payoff ratio is *consistent*,
+and the 60-day version returned **+44.99% against buy & hold's +48.44% at 30.76% drawdown** — 93% of
+the return with roughly **half** the drawdown, at 36% exposure. On 15 trades that is a hint, not a
+finding, and it is written here as a hint.
+
+Against it: **both runs still lost to buy & hold on return**, continuing the pattern that now holds
+across every cell this project has benchmarked. And Barroso & Wang's objection is unanswered — nothing
+here separates "nearness" from plain momentum.
+
+## QUEUE
+
+1. **The right test is cross-sectional, and this engine can do it.** The literature's result is a
+   long-short spread across a *universe*, not a single-instrument hold. `sweep_backtest` runs one
+   strategy across a grid of pairs — that both matches the published form and aggregates the sample
+   across instruments instead of fighting for it on one. **This is the highest-value next step for
+   this mechanism and it is free.**
+2. **Do not sweep the anchor further on BTC alone.** Diagnosed above; two runs is the limit.
+3. **Answer Barroso & Wang before believing anything here** — run plain momentum over the same window
+   and check whether nearness adds anything beyond it. If it does not, the mechanism is momentum
+   wearing a different name and the family should close.
+4. **Attack 79's flat-stop check is inapplicable here** (no stop exists) and remains owed as a
+   standing requirement for every build that has one.
+
+## SOURCES
+
+- George & Hwang (2004), *The 52-Week High and Momentum Investing* — https://www.bauer.uh.edu/tgeorge/papers/gh4-paper.pdf
+- Quantpedia, *52-Weeks High Effect in Stocks* — https://quantpedia.com/strategies/52-weeks-high-effect-in-stocks
+- Alpha Architect, *The Secret to Momentum is the 52-Week High???* — https://alphaarchitect.com/the-secret-to-momentum-is-the-52-week-high/
+- Jia, Simkins, Yan, Zhang & Zhao (2025), *Psychological Anchoring Effect and Cross Section of Cryptocurrency Returns* — https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5386180
+- ScienceDirect listing for the same paper — https://www.sciencedirect.com/science/article/abs/pii/S0378426625002122
+- Marquette, *Momentum Crashes and the 52-Week High* — https://epublications.marquette.edu/cgi/viewcontent.cgi?article=1168&context=fin_fac
