@@ -280,3 +280,60 @@ file or in `SYSTEM.md` that came from a run, because no run has happened.**
    edge at all, it must be labelled a proxy and **must never be recorded as a test of his system**.
 5. The nine unnumbered `videoNNNN` transcripts (up to 68 minutes each) are committed but still not
    decoded; they may refine the rules above.
+
+---
+
+# ██ TICK #3, 2026-09-05 — I OVERSTATED THE DATA BLOCKER. BOTH HALVES OF IT WERE WRONG.
+
+Zero credits. No backtest. Three `plan_backtest_window` calls on `backtest-lab`.
+
+`SYSTEM.md` records the blocker as: *"15m resolves only over ~30 days (573 bars, ~21 sessions) and 5m
+does not resolve at all over 60 days."* **Both halves are wrong, and the error was mine.**
+
+| Symbol | TF | Window | Result |
+|---|---|---|---|
+| `NDX` | 15m | 2026-07-08 → 2026-09-05 | ✅ **1,119 bars**, ~41 sessions |
+| `USTEC` | 15m | same | ✅ **1,119 bars** (identical — same underlying) |
+| `NAS100` | 5m | 2026-08-20 → 2026-09-05 | ✅ **937 bars**, ~11 sessions |
+
+**What I got wrong:**
+1. **15m gives ~41 sessions, not ~21.** My earlier check requested only a 30-day span and I recorded
+   the answer as if it were the cap. The documented ~60-day Yahoo limit is real and I simply
+   under-requested. 1,119 bars, not 573.
+2. **5m does resolve.** I recorded "not at all", having asked for a 60-day 5m window that exceeded
+   its shorter cap. Ask for ~16 days and it returns 937 bars. An error window is not the same as no
+   data, and I treated it as such.
+3. `NDX` and `USTEC` return byte-identical coverage to `NAS100` — no alias has deeper retention, so
+   that idea is closed.
+
+**Revised sample arithmetic:** ~41 sessions at his 2-trade daily cap gives a ceiling near **82**, not
+42. Against his no-trade-day rules a realistic figure is perhaps **20–40** — straddling the 30-trade
+floor rather than sitting clearly below it. **The workstream is marginal, not hopeless.**
+
+## THE BINDING CONSTRAINT IS THE ENGINE, NOT THE DATA
+
+With the data claim corrected, what actually blocks a faithful backtest is unchanged and structural:
+
+- **`backtest-lab` has the instruments but cannot express the method.** Its `custom` strategy is
+  stateless numpy over OHLCV — no pivot function, no latched swing state. His method needs confirmed
+  higher-highs *and* higher-lows, touch-validated S/R levels, break detection against those levels,
+  and a daily trade counter. None of that is expressible.
+- **`trader-dev` can express the method but not the instruments.** Pine holds all the state needed,
+  but `NQ` and `YM` silently remap to `IONQUSDT` and `DYMUSDT`, and `NAS100`/`US30` hard-error.
+
+**So the honest position is: neither engine can run this system faithfully.** That is the same shape
+as War Formation's check #36 finding — the engine with the state lacks the data, the engine with the
+data lacks the state — arrived at independently in a second workstream on the same day.
+
+**What I will not do:** approximate his structure with a Donchian-plus-volume proxy on backtest-lab
+and record it as a test of his method. It would run, it would produce numbers, and the numbers would
+be about a different strategy.
+
+## QUEUE
+
+1. **Correct the blocker text in `SYSTEM.md`** — it currently states two figures now known wrong.
+2. A faithful test needs either pivot/state support on `backtest-lab` or correct NQ/YM symbols on
+   trader-dev. Neither is in this project's control.
+3. **Forward-testing remains available today** and needs no history: run the Pine visualiser live on
+   NQ/YM 5m during New York session and record signals as they occur.
+4. Nine `videoNNNN` transcripts remain undecoded and may refine the rules.

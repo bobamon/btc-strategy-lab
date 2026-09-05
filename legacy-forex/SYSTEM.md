@@ -254,7 +254,7 @@ silent remap to a crypto token.**
 
 ## THE ARITHMETIC THAT BLOCKS THIS
 
-**15m tops out at ~30 days = 573 bars ≈ 21 trading sessions.** His cap is **2 trades per day**, so the
+**[CORRECTED 2026-09-05, see STATUS.md tick #3: 15m actually gives ~1,119 bars / ~41 sessions, and 5m DOES resolve over a shorter window. The figures below were produced by under-requesting the window and are left for the record.]** ~~15m tops out at ~30 days = 573 bars ≈ 21 trading sessions.** His cap is **2 trades per day**, so the
 absolute ceiling is **~42 trades** — and that assumes *every single session* produces two valid
 setups. His own rules make that impossible: consolidation days are skipped, no-volume days are
 skipped, and he says outright *"you may miss three days in a row because the markets aren't good"*
