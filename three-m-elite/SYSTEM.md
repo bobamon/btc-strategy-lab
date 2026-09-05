@@ -5987,3 +5987,97 @@ v60/v61(short)** — PF 1.88616546 / DD 1.71159657% / 39 trades on its original 
 this cycle, `status: testing`) — the short leg's window-dependence gap (the last one open on this
 file) is now closed, and the honest answer is that the validated short does not hold up nearly as
 well as either long-side champion once the full data record is used.
+
+---
+
+# ██ v65 — FVG GRADING ON THE SHORT, FULL COVERAGE: BOTH REMAINING QUEUE ITEMS TAKEN IN ONE RUN, AND THE ANSWER IS A DECISIVE NO (2026-09-05)
+
+**A note on the scheduled prompt, again.** This cycle's stored prompt is still the identical
+v37/v53 snapshot addressed at every prior check (12H/24H bias gate and cascade signature both
+closed at v54–v61, per HARD LESSON 45 and HARD LESSON 34/35/50/52). The champion has also moved
+three times since that snapshot (v37 → v58 → v62-fvg). Per "THE DOCS WIN over this prompt," this
+cycle does not repeat the bias-gate or cascade work and does not send a fresh push about the
+staleness — it takes the two open items left by the entry immediately above instead, and, per this
+cycle's own instructions, does not call the Artifact tool at any point; commit and push is the
+last step.
+
+## THE TWO OPEN ITEMS, TAKEN TOGETHER
+
+The prior entry's queue named two items: (1) FVG grading, which roughly doubled the long leg's
+full-coverage profit factor (v58-full-coverage 1.16728474 → v62-fvg 2.04354108), had never been
+tried on the short; (2) no short construction had ever been built and judged on full coverage from
+the start (v53/v55/v57/v60/v62-63 were all built against the 2022-01-01 window first). One
+construction answers both: `pine/3m-elite-v65-fvg-graded-short-full-coverage.pine` mirrors
+v62-fvg's exact FVG-grading mechanism (a zone is only created if its engulfing candle also left a
+standard three-candle Fair Value Gap, confirmed one 4H candle later via the same deferred
+`pendActive` latch) onto v60's supply-zone construction — bearish gap = `C.high < A.low`, zone =
+`[B's open, B's high]`. Everything else is byte-identical to v60: the source's 20/50/200 SMA-stack
+bear-bias gate, 25%-equity declared-deviation sizing (HARD LESSON 42), R floor 0.8% by exclusion,
+2R target, `maxAge=6`, one entry per zone, fixed SL/TP. Full pre-run audit and pre-registered
+outcomes are in the Pine header. One credit spent (496 on hand after, within the 250–500 →
+one-backtest budget).
+
+## THE REGISTERED PREDICTION FIRED, AND IT WAS THE PESSIMISTIC BRANCH
+
+Pre-registered (LESSON 17): outcome A was PF rising materially above v60-full-coverage's
+1.01300244 with trades clearing the 30-trade floor; outcome B was PF near/below 1.0 or a
+trade-count collapse below the floor.
+
+| | v60 short, full coverage | **v65 (FVG-graded)** |
+|---|---|---|
+| Profit factor | 1.01300244 | **1.54398585** |
+| Max drawdown | 5.0658619% | **1.43695136%** |
+| Trades | 64 | **4** |
+| Win rate | 43.75% | 50.00% |
+| Cascade ratio | 1.0 (64/64) | **1.0 (4/4)** |
+
+**Outcome B, and by a wide margin.** The trade count collapsed **64 → 4, a 94% cut** — far more
+severe than the long leg's own FVG cut (174 → 40, 77%). `get_trades` (free) shows why: only 2
+qualifying entries in the entire 2020-2021 bull stretch, one in the isolated 2022 bear year, one in
+mid-2024, a six-year-scale gap between trade 2 (2021-12-15) and trade 3 (2022-10-13), and **no
+qualifying entry at all in the final two years of coverage** (last exit 2024-08-06).
+
+## PF 1.54 AND DD 1.44% ARE NOT EVIDENCE HERE
+
+Both headline numbers look strong in isolation, and neither is quotable. Four trades misses
+RATCHET v2 clause 3's 30-trade floor **by an order of magnitude**, not marginally the way v56/v57's
+27/10-trade halves did. Two wins and two losses is a coin-flip sample; the cascade ratio staying
+clean at 1.0 confirms the declared-deviation sizing fix (HARD LESSON 42) still holds on this
+construction, but that is the only thing this run actually establishes with confidence.
+
+## WHAT THIS SETTLES
+
+**The FVG-quality effect that helped the long leg does not generalise to this short mirror.** If
+anything, the interaction between a bearish three-candle FVG and a bearish SMA-stack is far more
+mutually exclusive than the analogous bullish pairing on this data — consistent with BTC's full
+6-year coverage window being much more bull-shaped than bear-shaped in structure, so the
+conjunction of "freshly bearish gap" and "established bear stack" is a rare coincidence rather than
+a common confirming pattern. This forecloses one specific lever for improving the short leg; it
+does not reopen the short-leg pause (unchanged since v56/v58) nor touch the long leg's champion.
+
+**The short leg's best full-coverage-native reference remains `3m-elite-v60-short-baseline-full-coverage`**
+(PF 1.01300244, 64 trades) — v65 does not replace it and is recorded `status: rejected` (fails
+RATCHET v2 clause 3 outright), not `testing`, since there is no ambiguity left to resolve on this
+lever.
+
+## QUEUE
+
+1. **`barstate.isfirst` fix for the zero-trade buy&hold benchmark bug** — still unspent, still
+   optional, carried from the last several entries.
+2. **v64's combined long+short flip-rule finding** remains a closed diagnostic, unaffected by this
+   cycle (sizing asymmetry between the 100%-equity long and 25%-equity short, per its own entry).
+3. **No further single-term short-side lever is currently queued.** Between the bias axis (closed,
+   HARD LESSON 45), the FVG-grading axis (closed here), and the cascade/sizing axis (closed,
+   HARD LESSON 42/52), every mechanically-defined idea sourced from the transcripts so far has been
+   tried on the short leg. The next short-side idea needs to come from a fresh read of the source
+   material (per this project's own standing instruction to check the transcripts before inventing),
+   not from re-parameterising an axis already closed three times over.
+4. Short leg direction otherwise unchanged: paused as a promotion candidate, valid as a measured
+   reference (v60/v61(short) on its original window; v60-short-baseline-full-coverage on full
+   coverage).
+
+**CHAMPION OF RECORD (LONG): v62-fvg** — unchanged by this cycle (PF 2.04354108 full coverage /
+2.10461082 H1 / 1.95534435 H2, DD 4.50890824%, 40 trades). **VALIDATED SHORT (NOT A CO-CHAMPION):
+v60/v61(short)** — unchanged (PF 1.88616546 on 2022-01-01 window, `passed`; PF 1.01300244 on full
+coverage, `testing`). **REJECTED THIS CYCLE: v65** (FVG-graded short mirror, PF 1.54398585 on only
+4 trades — informative negative, not a candidate).

@@ -1,0 +1,175 @@
+//@version=6
+// 3M ELITE v65 - FVG-GRADED SHORT MIRROR, BUILT AND JUDGED ON FULL COVERAGE FROM THE START.
+//
+// TWO OPEN QUEUE ITEMS, ANSWERED IN ONE RUN (per v60-short-baseline-full-coverage's own queue):
+//   1. "FVG grading on the short leg remains untested" -- does the same FVG-quality gate that
+//      roughly doubled the long leg's full-coverage profit factor (v58-full-coverage 1.167 ->
+//      v62-fvg 2.044) do anything similar for a leg whose full-coverage number is currently
+//      barely above breakeven (v60-short-baseline-full-coverage: PF 1.01300244, 64 trades)?
+//   2. "A full-coverage-native short construction has never been attempted." Every prior short
+//      build (v53, v55, v57, v60, v62/v63-regime-splits) was built and iterated against the
+//      2022-01-01 window, then re-baselined onto full coverage afterward. This one is judged on
+//      full coverage from the start, matching v62-fvg's own methodology on the long leg.
+//
+// THE CHANGE FROM v60 (short-declared-deviation.pine): v60's supply zone is created the instant
+// a bearish engulf completes, with no grading. v65 adds exactly the one term v61/v62-fvg added
+// to the long: a supply zone is only created if the bearish engulf also left a standard
+// three-candle bearish Fair Value Gap, confirmed one 4H candle later. Candle A = the candle
+// before the engulf, B = the engulf itself (the displacement candle), C = the candle after B.
+// Bearish gap = C.high < A.low (the exact mirror of v62-fvg's bullish C.low > A.high), latched
+// via the same pendActive/pendTop/pendBot/pendAL deferred-confirmation mechanism v62-fvg used
+// (LESSON 8 -- the tap/creation event is a state, not a same-bar coincidence). Zone geometry on
+// confirmation is unchanged from v60: szTop = B's high, szBot = B's open (the mirror of v62-fvg's
+// dzBot = B's low / dzTop = B's open). Everything else -- 4H reconstruction from 15m bars, the
+// source's own 20/50/200 SMA-stack bear-bias gate (stackBear), the 25%-equity declared-deviation
+// sizing per HARD LESSON 42 (v60's own fix for the short's margin-ceiling cascade), R floor 0.8%
+// by exclusion, 2R target, maxAge=6, one entry per zone, fixed SL/TP -- is byte-for-byte v60.
+//
+// PRE-REGISTERED OUTCOMES (LESSON 17), stated before running:
+//   A) PF rises materially above v60-short-baseline-full-coverage's 1.01300244 (analogous to the
+//      long leg's FVG-graded lift) with trades clearing the 30-trade floor -> the FVG-quality
+//      selection effect generalises across direction, and this becomes the new best full-
+//      coverage-native short reference (still not a co-champion vs. the long -- HARD LESSON 45's
+//      standing policy question on declared-deviation promotion remains open and undecided).
+//   B) PF stays near or below 1.0, or the trade count collapses below the ~30-trade quoting floor
+//      -> the FVG-quality effect measured on the long leg does not generalise to the short's
+//      already-thin, already-weak full-coverage sample -- a real, informative negative, not a
+//      failed run.
+//
+// PRE-RUN AUDIT (short leg only, per LESSON 6 as scoped by HARD LESSON 31 -- this is a source-
+// prescribed mirror, not an invented geometry):
+//   R >= 0.8% (LESSON 3) - unchanged from v60, by EXCLUSION via rBig, never clamped.
+//   Stop beyond STRUCTURE (LESSON 5) - unchanged, slPx = szTop (supply zone high).
+//   BINDING (E17) - this run adds one new selection term (the FVG gap) on top of a window change;
+//      both are the thing being measured, not incidental.
+//   REDUNDANCY (E14) - no existing term in this construction measures a three-candle gap; not
+//      duplicated by szTouch/szAge/stackBear/rBig.
+//   LATCH IN SEQUENCE (LESSON 8) - the engulf event (B) and the gap confirmation (C) are latched
+//      via pendActive exactly as v62-fvg's proven pattern requires; the tap/mitigation counters
+//      (szTouch/szAge) are unchanged from v60 and still evaluated every 4H close.
+//   CASCADE (HARD LESSONS 35/42) - v60's declared-deviation sizing (25% equity) is carried
+//      unchanged, so the margin-ceiling cascade fix already proven at v60/v61 stays in place;
+//      VERIFY WITH get_trades AFTER RUNNING that cascadeRatio stays at 1.0.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale, no arrays, no
+//   request.security, no user-defined functions, pyramiding=1.
+strategy("3M ELITE v65 FVG-graded short full coverage", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rTarget  = input.float(2.0, "Target, x R -- held at v37/v53/v57/v60")
+maxBars  = input.int(96,    "Max bars in trade -- held")
+maxAge   = input.int(6,     "Zone freshness cap, 4H candles -- held")
+minRpct  = input.float(0.80,"Min stop distance as % of price (LESSON 3)")
+maFast   = input.int(20,    "THE SOURCE'S STACK: fast MA")
+maMid    = input.int(50,    "THE SOURCE'S STACK: middle MA")
+maSlow   = input.int(200,   "THE SOURCE'S STACK: slow MA -- his higher-timeframe read")
+eqFrac   = input.float(0.25,"DECLARED DEVIATION: fraction of equity per position -- HARD LESSON 42")
+
+sma20  = ta.sma(close, maFast)
+sma50  = ta.sma(close, maMid)
+sma200 = ta.sma(close, maSlow)
+stackBear = not na(sma200) and sma20 < sma50 and sma50 < sma200
+
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+var float o4 = na
+var float h4 = na
+var float l4 = na
+var float pO  = na
+var float pH  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+var float ppL = na
+
+var bool  pendActive = false
+var float pendTop = na
+var float pendBot = na
+var float pendAL  = na
+
+var float szTop   = na
+var float szBot   = na
+var bool  szLive  = false
+var int   szTouch = 0
+var int   szAge   = 0
+var bool  szTraded = false
+
+if new4h and not na(o4)
+    ppO  := pO
+    ppC  := pC
+    ppL  := pL
+    pO   := o4
+    pH   := h4
+    pL   := l4
+    pC   := close[1]
+
+if new4h
+    bearEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC > ppO and pC < pO and pC < ppO
+
+    if szLive and not na(pC) and pC >= szBot
+        szTouch := szTouch + 1
+        if szTouch >= 2
+            szLive := false
+    if szLive
+        szAge := szAge + 1
+
+    if pendActive and not na(pH) and not na(pendAL)
+        if pH < pendAL
+            szTop    := pendTop
+            szBot    := pendBot
+            szLive   := true
+            szTouch  := 0
+            szAge    := 0
+            szTraded := false
+        pendActive := false
+
+    if bearEngulf
+        pendActive := true
+        pendTop := pH
+        pendBot := pO
+        pendAL  := ppL
+
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+minR      = close * minRpct / 100
+rBig      = not na(szTop) and (szTop - close) >= minR
+shortCond = rBig and szLive and not szTraded and szAge >= 1 and szTouch < 2 and high >= szBot and close < szTop and szAge <= maxAge and stackBear
+
+flat = strategy.position_size == 0
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+qtyUse = strategy.equity * eqFrac / close
+
+if flat and shortCond and not na(szTop) and close < szTop
+    r = szTop - close
+    if r > 0
+        strategy.entry("S", strategy.short, qty = qtyUse)
+        szTraded := true
+        slPx   := szTop
+        tpPx   := close - r * rTarget
+        barsIn := 0
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(szLive ? 1 : 0,     title="SupplyZoneLive")
+plot(stackBear ? 1 : 0,  title="StackBear")

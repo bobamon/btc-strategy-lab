@@ -1242,5 +1242,52 @@
       "maxCascadeDepth": 1,
       "verifiedAt": "2026-09-05T00:00:00Z"
     }
+  },
+  {
+    "id": "3m-elite-v65-fvg-graded-short-full-coverage",
+    "name": "3M Elite v65 - FVG-graded supply zone mirrored onto the short leg, built and judged on full coverage from the start",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "short",
+    "status": "rejected",
+    "createdDate": "2026-09-05",
+    "lastTestedDate": "2026-09-05",
+    "backtestStart": "2020-08-19",
+    "backtestEnd": "2026-09-01",
+    "description": "Closes two open queue items at once from 3m-elite-v60-short-baseline-full-coverage: (1) FVG grading, which roughly doubled the long leg's full-coverage profit factor (v58-full-coverage 1.16728474 -> v62-fvg 2.04354108), had never been tried on the short; (2) no short construction had ever been built and judged on full coverage from the start (all prior short work, v53/v55/v57/v60/v62-63, was built against the 2022-01-01 window and re-baselined afterward). v65 mirrors v62-fvg's exact FVG-grading mechanism (a zone is only created if its engulfing candle also left a standard three-candle Fair Value Gap, confirmed one 4H candle later via a deferred pendActive latch) onto v60's bearish supply-zone construction: bearish gap = C.high < A.low, zone = [B's open, B's high]. Everything else is byte-identical to v60 -- the source's 20/50/200 SMA-stack bear-bias gate (stackBear), 25%-equity declared-deviation sizing (HARD LESSON 42), R floor 0.8% by exclusion, 2R target, maxAge=6, one entry per zone, fixed SL/TP. Pine saved at pine/3m-elite-v65-fvg-graded-short-full-coverage.pine with full pre-run audit and pre-registered outcomes in the header.",
+    "notes": "PRE-REGISTERED (LESSON 17): outcome A was PF rising materially above v60-full-coverage's 1.01300244 with trades clearing the 30-trade floor (FVG selectivity generalises across direction); outcome B was PF near/below 1.0 or a trade-count collapse below the floor (the effect does not generalise). OUTCOME B, DECISIVELY. 64 trades -> 4 trades, a 94% cut (far more severe than the long leg's 174->40, a 77% cut) -- the bearish three-candle FVG confirmed one candle after a bear engulf, conjoined with the SMA-stack bear-bias gate, is a near-vanishing intersection on this data: only 2 qualifying entries in the entire 2020-2021 bull stretch, one in the isolated 2022 bear year, and one in mid-2024, with a six-year gap between trade 2 (2021-12-15) and trade 3 (2022-10-13) and NO qualifying entry at all in the final two years of coverage (last exit 2024-08-06). PF 1.54398585 and DD 1.43695136% look superficially strong but rest on 4 trades (2W/2L) -- RATCHET v2 clause 3's 30-trade floor is not merely missed, it is missed by an order of magnitude, so this cannot be promoted, compared, or quoted as evidence of an improved short, only recorded as a real negative finding. Cascade ratio clean at 1.0 (4 unique entries / 4 rows, max depth 1, cascadeHistogram {1:4}) -- the declared-deviation sizing fix (HARD LESSON 42) continues to hold on this construction too. CONCLUSION: the FVG-quality effect that helped the long leg does not generalise to this short mirror -- if anything the interaction between a bearish FVG and a bearish SMA-stack is far more mutually exclusive than the analogous bullish pairing, consistent with the source's own directional-context reading being asymmetric on this data (BTC's structural history is much more bull-shaped than bear-shaped over the full coverage window). The short leg's best full-coverage-native reference remains 3m-elite-v60-short-baseline-full-coverage (PF 1.01300244, 64 trades) -- this run does not replace it, it forecloses one specific lever for improving it.",
+    "metrics": {
+      "netProfitPct": 0.45142481,
+      "profitFactor": 1.54398585,
+      "maxDrawdownPct": 1.43695136,
+      "totalTrades": 4,
+      "winRatePct": 50.0,
+      "avgTradePct": 0.1128562,
+      "sharpeRatio": 0.16919477,
+      "sortinoRatio": 0.00469336,
+      "avgWinningTrade": 64.0635715,
+      "avgLosingTrade": -41.4923308,
+      "ratioAvgWinLoss": 1.54398585,
+      "avgBarsWinning": 45.5,
+      "avgBarsLosing": 10.5,
+      "longTrades": 0,
+      "shortTrades": 4,
+      "commissionPaid": 9.9783186
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v65-fvg-graded-short-full-coverage.pine",
+    "specPath": "three-m-elite/pine/3m-elite-v65-fvg-graded-short-full-coverage.pine",
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1SS5EFZVSTX49640R7PZ9J3",
+      "resultId": "01M1SS5EFZ7WMSHA9G3N2BH1HR",
+      "strategyId": "01M1SS5ENNETF6T4YKNWD1RDK2",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1SS5EFZ7WMSHA9G3N2BH1HR",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "uniqueEntries": 4,
+      "totalRows": 4,
+      "maxCascadeDepth": 1,
+      "verifiedAt": "2026-09-05T00:00:00Z"
+    }
   }
 ]
