@@ -7247,7 +7247,7 @@ The mirror test is still needed before either term is actually dropped from the 
 (15m, both-legs-positive, unreplicated, `status: testing`) remains this lab's newest candidate line --
 E82 shows one of its two structure-tier terms is droppable, without changing E80's own numbers or status.
 
-## QUEUE
+## QUEUE (superseded by E83 below -- kept for history, see E83 for the current queue)
 
 1. ~~Coil-gate degeneracy~~ -- CLOSED BY E81. ~~h1Bull/h1Bear redundancy, first half~~ -- **CLOSED BY
    E82: fully redundant.**
@@ -7260,3 +7260,108 @@ E82 shows one of its two structure-tier terms is droppable, without changing E80
    remain open, unresolved by this run, awaiting the user.
 5. Do not port E80's exact win back to 1m or 5m -- unchanged from E80's own note. Do not drop
    `h1Bull`/`h1Bear` from the build yet -- queue item 2 above must run first.
+
+---
+
+# ██ E83 -- THE MIRROR CLOSES THE PAIR: brokeBelow/brokeAbove IS LOAD-BEARING, h1Bull/h1Bear IS NOT
+
+**SCHEDULING NOTE.** This cycle's stored prompt again described a stale lab state (attack the
+short's entry geometry via E64a/E64b/E66 on 1m/5m, "continue numbering after E66"). That state was
+already superseded and closed against at E81/E82. **The docs win**, per the prompt's own instruction
+and HARD LESSON 26's precedent: this cycle continues from E82's own real, still-open queue item 2 --
+the mirror binding test -- rather than re-deriving territory the lab worked past weeks ago.
+
+**`get_credits` read 491 at the start** -- the 250-500 band, exactly ONE backtest.
+
+**HYPOTHESIS, REGISTERED BEFORE RUNNING (HARD LESSON 17, per HARD LESSON 48's method).** E82 removed
+`h1Bull`/`h1Bear` and held `brokeBelow`/`brokeAbove`: the result was byte-identical to E80 (same 44
+trades, same PF to the last digit) -- `h1Bull`/`h1Bear` is fully redundant GIVEN `brokeBelow`/
+`brokeAbove`. That result does not show the reverse. This run removes `brokeBelow`/`brokeAbove` from
+`goLong`/`goShort`, holding `h1Bull`/`h1Bear` and every other E80 gate byte-identical (BINDING, E17:
+exactly one variable changed from E80). **Predicted before running:** `brokeBelow`/`brokeAbove` (a
+4-bar range-breakout claim) is structurally stronger than `h1Bull`/`h1Bear` (a single close-vs-open
+test) on the same 1h bucket, so this removal was predicted to CHANGE the population materially --
+unlike E82's byte-identical result -- most likely dropping trade count and/or PF below E80's
+44/1.24221581.
+
+**PRE-RUN AUDIT.** R = shieldUsd $2,000, same window as E80/E82: 1.7%-3.3%, clears the 0.8% floor
+(LESSON 3). Stop is risk-defined per the ALCM spec (LESSON 5), unchanged. Both legs reported
+separately (LESSON 6). Latch order unchanged (LESSON 8). No new occupancy confound: shieldUsd/rr/
+maxBars unchanged from E80/E82 (LESSONS 24/28/29). `pine/e83-e80-no-brokebelow-brokeabove.pine`.
+
+## RESULT -- 15m, 2024-06-08 -> 2026-09-01, 78,567 bars, same window as E80/E82
+
+**One credit.** `resultId 01M1SZ353YKZDWD2HK0Y6YKAHC`, `strategyId 01M1SZ359NBXZSRF1TVT50HBGX`.
+
+| | value |
+|---|---|
+| Profit factor | **0.87958829** |
+| Trades | **238** |
+| Win rate | 21.42857143% |
+| Net | **-18.19423434%** |
+| Max drawdown | 42.08209434% |
+| Long | 85 trades, **35 wins**, -$568.00 |
+| Short | 153 trades, **16 wins**, -$1,251.42 |
+| Commission | $1,854.08 |
+| Sharpe / Sortino | -0.38001846 / -0.19921002 |
+
+**The prediction was confirmed, decisively.** Trade count did not merely change -- it exploded
+44 -> 238 (5.4x). PF fell from 1.24221581 to 0.87958829, below 1.0. Both legs flip from net-positive
+to net-negative (long +$418.75 -> -$568.00; short +$492.42 -> -$1,251.42). Max drawdown roughly
+2.4x'd (17.29% -> 42.08%).
+
+## VERDICT
+
+**`brokeBelow`/`brokeAbove` is the load-bearing term of the pair; `h1Bull`/`h1Bear` is not, and
+cannot substitute for it.** Where E82 showed removing `h1Bull`/`h1Bear` (holding `brokeBelow`/
+`brokeAbove`) changes nothing, this run shows removing `brokeBelow`/`brokeAbove` (holding `h1Bull`/
+`h1Bear`) changes everything for the worse: `h1Bull`/`h1Bear` alone is a strictly weaker structural
+claim (a single close-vs-open test) than a confirmed break of the prior hour's range, and lets
+through far more, far worse trades.
+
+**This closes the redundancy question HARD LESSON 48's method called for, with a clean, non-
+symmetric answer.** Combined, E82 + E83 establish: `brokeBelow`/`brokeAbove` alone (with `h1Bull`/
+`h1Bear` dropped) reproduces E80 exactly; `h1Bull`/`h1Bear` alone (with `brokeBelow`/`brokeAbove`
+dropped) does not come close. The simplification implied is to **drop `h1Bull`/`h1Bear` and keep
+`brokeBelow`/`brokeAbove`** -- which is exactly the four-gate build E82 already ran, byte-identical
+to E80's own numbers. No new build is needed to realise this simplification; E82's file already is
+it.
+
+**E83 itself is REJECTED as a construction** -- PF below 1.0, drawdown roughly 2.4x E80's, both legs
+net-negative, clearly worse than E80 on every metric. It is recorded as a diagnostic result, not a
+candidate. RATCHET v2 does not apply a KEEP/REJECT decision here in the sense of replacing anything:
+there is nothing to ratchet against except E80, which this run does not beat on any axis.
+
+## WHAT THIS DOES NOT ESTABLISH
+
+- **Not a test of whether the simplified (four-gate, `h1Bull`/`h1Bear`-dropped) build should become
+  E80's replacement.** E82's numbers already answer that on this window, but no one has yet re-saved
+  a build explicitly framed as "the E80 simplification" and moved it through the ratchet as such --
+  it remains E82's file, filed as a redundancy diagnostic, not a promotion.
+- **Single run, no holdout**, same standing caveat as E80/E81/E82 (HARD LESSON 22).
+- **Does not touch queue items 3-4 below** (split-window replication, the drawdown-allowance RULE
+  QUESTION) -- unchanged, still open, still awaiting the user for item 4.
+
+## STATE
+
+**No champion.** `e58a` (long, 1m) and `E71` (short, 1m) remain the reference builds for the 1m
+track; `E74` remains blocked on the HARD LESSON 48 drawdown-allowance RULE QUESTION, awaiting the
+user. `E80` (15m, both-legs-positive, unreplicated, `status: testing`) remains this lab's newest
+candidate line -- E82+E83 together now fully resolve its one internal redundancy question:
+`brokeBelow`/`brokeAbove` is load-bearing, `h1Bull`/`h1Bear` is not, and E82's file is already the
+minimal (four-gate) equivalent of E80.
+
+## QUEUE
+
+1. ~~Coil-gate degeneracy~~ -- CLOSED BY E81. ~~h1Bull/h1Bear redundancy, both halves~~ -- **CLOSED
+   BY E82+E83: `brokeBelow`/`brokeAbove` load-bearing, `h1Bull`/`h1Bear` droppable.**
+2. **A split-window replication of E80** (2024-06 to 2025-07 vs 2025-07 to 2026-09), per RATCHET v2's
+   spirit, before E80 becomes anyone's reference construction. Unchanged from E80/E81/E82 -- this is
+   now the most important open item, since the internal redundancy question is closed.
+3. Check #36's shield-fill caveat and the HARD LESSON 48 drawdown-allowance RULE QUESTION (blocking
+   E74) remain open, unresolved by this run, awaiting the user.
+4. Do not port E80's exact win (or E82's simplification) back to 1m or 5m -- unchanged from E80's own
+   note; the location-tier redesign is specific to 15m native having no finer bar of its own.
+5. If a future cycle wants to formally promote E82's four-gate build as "the E80 simplification"
+   rather than a redundancy diagnostic, that is a separate, cheap (zero-credit, no new backtest
+   needed) bookkeeping step -- the numbers already exist and are byte-identical to E80's.
