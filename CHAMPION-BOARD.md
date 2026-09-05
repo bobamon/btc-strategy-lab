@@ -6436,3 +6436,127 @@ a re-derivation of the frequency/threshold model, not a rescue filter on this ex
    77).
 
 ---
+
+# ATTACK 78 — ADX/DMI TREND-STRENGTH REGIME LONG. A GENUINELY NEW MECHANISM, DISCARDED ON THE KILL RULE.
+
+The stored scheduled prompt again described a board state ("Attack 37, build its filter stack") more
+than seventy-seven attacks stale — Attack 41 closed Attack 37 on cost, Attack 43 closed the whole
+sweep-reversal family, and Attack 68 (Attack 66 + OBV divergence-magnitude floor) is the board's
+strongest both-halves candidate. **The docs override it, again**, per the prompt's own standing
+instruction: Attack 77's own queue item 8 asked for one further genuinely new mechanism. This build is
+that instruction, continuing numbering after Attack 77, not Attack 37.
+
+## THE CLAIM
+
+The Average Directional Index (ADX) measures trend strength independent of direction. Once ADX is
+already elevated above 25 (Wilder's classic trending threshold), the market has left a choppy,
+directionless regime; a fresh crossover of +DI over -DI (bullish directional dominance taking over)
+occurring while that strong-trend regime is already in force should mark the start of a trending leg
+that persists longer than the same directional signal fired during low-ADX chop. No prior BTC attack has
+used `ta.dmi` or any trend-**strength** regime gate — genuinely distinct from EMA crossover (Attack 57,
+two raw price averages, no strength axis), the volume-participation regime (Attack 76, NVI vs. its own
+EMA, no directional-movement or price-range component), autocorrelation regime (Attack 72, a statistical
+persistence estimate on raw returns), every level/pivot/breakout family (33-48, 50, 59, 63, 66-71,
+73-75 — ADX/DMI never references a price level), and the volatility-contraction family (Attack 6/36/65/
+77 — ADX measures directional-movement strength, not price-dispersion width). Pine:
+`strategies/pine/attack78-adx-dmi-trend-regime.pine`.
+
+## AUDIT (one line per leg)
+
+R >= 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rLong = close - swingLow`, never clamped. Stop beyond
+STRUCTURE (LESSON 5) — `slPx = ta.lowest(low, 20)[1]`, a genuine prior swing low computed strictly
+before the signal bar, same convention as Attack 37/59/63/66/71/76/77. Each leg separately (LESSON 6) —
+LONG ONLY, following this lab's convention for a first pass (Attacks 50/59/63/65/66/72/73/74/75/76/77
+all opened one-sided); the short leg (-DI crossing above +DI while ADX is already strong, its own mirror
+geometry) is deferred and reported as OUTSTANDING. BINDING (E17) — `diCrossUp` AND `adxStrong` AND
+`rBig` AND `haveSwing` all independently bind; two credits were budgeted for the H1/H2 pair, so no
+per-term counter build was affordable (moot — see verdict, H2 never spent). REDUNDANCY (E14) —
+`diPlus`/`diMinus` (DIRECTION, which side dominates) and `adx` (STRENGTH, magnitude of movement,
+direction-agnostic) are computed from the same DMI system but read independent axes — the system's own
+designed use, not a manufactured pair; `swingLow` reads a PRICE LEVEL from an entirely separate window
+with no directional-movement input — a third independent quantity. LATCH IN SEQUENCE (LESSON 8,
+fourth-confirmation check) — `diCrossUp` is a fresh `ta.crossover` event every bar; `adxStrong` is a
+plain level comparison on the current bar's own value, not phrased as "already true for N bars" — the
+same-bar-conjunction failure mode does not apply. CASCADE (HARD LESSON 42/43) — LONG at 100% equity,
+single entry id "L"; `cascadeRatio` 1 / `maxCascadeDepth` 1, confirmed (444 total rows, 444 unique
+entries).
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING
+
+No prior attack has plotted `ta.dmi` on this engine. +DI/-DI are Wilder-smoothed and cross less often
+than a raw fast/slow EMA pair (Attack 57's 2,154 raw H1 crossovers before filtering), and the ADX >= 25
+gate removes crossovers firing during chop. Pre-registered **150-500 trades per half**, low-to-moderate
+confidence.
+
+## H1 (NEVER-TUNED HALF, 2022-01-01 → 2024-06-08)
+
+| | **Attack 78a (H1)** |
+|---|---|
+| Profit factor | **0.6381756** |
+| Trades | 444 |
+| Win rate | 19.14414414% |
+| Avg winner | $109.25 |
+| Avg loser | -$40.53 |
+| Achieved win/loss ratio | 2.6953534 |
+| Max drawdown | 56.62630607% |
+| Net return | -52.65178947% |
+| Commission paid | $3,286.997447 |
+| Largest loss | -$365.30572125 |
+
+**Frequency estimate scored: pre-registered 150-500, actual 444 — inside the pre-registered band but
+above the lab's settled 60-350 workable window**, a mild high miss.
+
+## KILL RULE APPLIED. ONE CREDIT SPENT THIS CYCLE (525 BALANCE → 524). H2 NOT RUN.
+
+**Not a close call.** PF 0.6381756 is well below 1.0 on the never-tuned half — this is the second-worst
+H1 PF this board has recorded on a bare first pass (only Attack 76's NVI regime, 0.7434, is close, and
+that one also failed on a much larger frequency miss). Per Attack 37/48/75/76/77's own kill-rule
+precedent, this is discarded outright: no filter stack, no rescue, H2 not run, second credit not spent.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+PF < 1.0, so this is **category 2, bleed on a negative edge**, the same shape as Attacks
+36/48/49/50/53b/72b/73/74/75/76/77 — not worth filtering. Worth naming: the largest loss (-$365.31) is
+~9.0x the average loser (-$40.53), a wider concentration ratio than most category-2 builds on this
+board, but moot for the verdict since PF is already well below 1.0 before any concentration is
+considered.
+
+## THE VERDICT — DISCARDED ON THE KILL RULE
+
+A 19.1% win rate against an achieved payoff of 2.70 needed roughly 27% wins to break even — a genuine
+entry-quality shortfall, not a marginal miss. Requiring ADX already elevated at the moment of a fresh DI
+crossover does not, by itself, separate durable trend starts from false directional flips on this
+instrument at 15m: a large share of "the trend already looks strong" moments are apparently late-stage
+trends about to exhaust, not early ones about to run, at least on the long side with a plain +DI/-DI
+cross. This is a clean falsification of THIS specific combination (14/14 DMI length, ADX>=25, a fresh
+DI cross) — a stricter ADX threshold, a rising-ADX confirmation instead of a level threshold, or the
+DMI/ADX system applied as a regime FILTER on a different trigger (rather than the trigger itself)
+remains untested, but per HARD LESSON 4/45 that is a re-derivation of the construction, not a rescue
+filter on this exact build.
+
+## QUEUE
+
+1. **Do not re-run this exact construction with a different `adxThresh` alone.** The failure is a
+   genuine negative edge on a well-powered sample (444 trades), not a threshold near a workable point.
+2. **Attack 68 (Attack 66 + OBV divergence-magnitude floor) remains the board's strongest both-halves
+   candidate** — PF 1.56474476/1.13127036 on 89/80 trades — unaffected by this cycle.
+3. **Attack 46 (long) remains a candidate alongside Attack 68**, unaffected by this cycle.
+4. **The out-of-sample test for Attack 46 still ranks first among long-side work not yet startable**
+   under BTCUSDT-only — unchanged.
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+7. **This is now the seventh bare-mechanism first pass to fail outright in a row (72, 73, 74, 75, 76, 77,
+   78), all on different mechanisms.** Combined with the "helps H1, breaks H2" trio (53, 72, 74), the
+   board's own bare-first-pass hit rate on distinct new mechanisms since Attack 68 is now 0-for-7. The
+   next cycle should keep proposing genuinely new mechanisms per the standing mandate, but this pattern
+   is now large enough that a deliberate change of approach — e.g. building the next candidate as a
+   filter/regime layer ON one of the board's already-surviving constructions (Attack 37/46/66-68) rather
+   than another from-scratch bare mechanism — is worth the user's explicit consideration alongside the
+   standing mandate to keep inventing.
+8. **The next cycle proposes ONE further genuinely new mechanism** (or, per queue item 7, considers a
+   filter/regime layer on an already-surviving construction instead), distinct from the VWAP family and
+   from every rejected strategy on the board (Attacks 33–65, 67/69/70/71, 72, 73, 74, 75, 76, 77, and now
+   78).
+
+---

@@ -3030,9 +3030,60 @@ const DATA = [
     },
     "verdict": "DISCARDED on the kill rule -- H1 (never-tuned half) profit factor 0.91078661, below 1.0. H2 not run, second credit not spent, no filter stack.",
     "notes": "Frequency estimate scored: pre-registered 100-450, actual 207 -- inside the pre-registered band and inside the lab's settled 60-350 workable window. cascadeRatio 1 / maxCascadeDepth 1 confirmed (207 total rows, 207 unique entries), matching the audit's expectation. Drawdown category: PF < 1.0 so category 2 (bleed on a negative edge, same shape as Attacks 36/48/49/50/53b/72b/73/74/75/76) -- largest loss (-$272.46) is ~4.6x avg loser (-$59.10), somewhat wider than most category-2 builds on this board but moot for the verdict since PF is already below 1.0. One credit spent this cycle (526 balance -> 525)."
+  },
+  {
+    "id": "attack78a-adx-dmi-trend-regime-h1",
+    "name": "Attack 78a: ADX/DMI trend-strength regime LONG -- never-tuned half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-05",
+    "lastTestedDate": "2026-09-05",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack78-adx-dmi-trend-regime.pine",
+    "description": "Per Attack 77's queue item 8: a further genuinely new mechanism, distinct from the VWAP family and every rejected strategy on the board (Attacks 33-65, 67/69/70/71, 72, 73, 74, 75, 76, 77). CLAIM: the Average Directional Index (ADX) measures trend STRENGTH independent of direction; once ADX is already elevated (>= 25, Wilder's classic trending threshold), a fresh crossover of +DI over -DI (bullish directional dominance taking over) marks the start of a trending leg that should persist longer than a directional signal fired during a low-ADX chop regime. This is the lab's first use of ta.dmi and the first trend-STRENGTH regime gate of any kind. Distinct from EMA crossover (Attack 57: two raw price moving averages, no strength axis, no directional-movement calculation), from the volume-participation regime (Attack 76: NVI vs its own EMA, a cumulative return series gated by volume, no directional-movement or price-range component), from autocorrelation regime (Attack 72: a statistical persistence estimate on raw returns), from every level/pivot/breakout family (33-48, 50, 59, 63, 66-71, 73-75: ADX/DMI never references a specific price level), and from the volatility-contraction family (Attack 6/36/65/77: ADX measures directional-movement strength, not price-dispersion width). Entry: ta.crossover(diPlus, diMinus) AND adx >= 25 (the level condition already in force, not a bar-count filter) AND R >= 0.8% of price (LESSON 3, by exclusion) on rLong = close - swingLow, where swingLow = ta.lowest(low, 20)[1] (LESSON 5). Stop at swingLow, target fixed 2R (lab convention; HARD LESSON 13 found the R:R axis neutral). Flip response: -DI crossing back above +DI (the trend-strength thesis's own directional axis reversing) closes any open long immediately. Long only this cycle, following this lab's convention for a first pass (Attacks 50/59/63/65/66/72/73/74/75/76/77 all opened one-sided); the short leg (-DI over +DI while ADX is already strong, its own mirror geometry) is deferred and reported as OUTSTANDING. Pre-registered frequency: 150-500 trades per half. KILL RULE: H1 profit factor came back at 0.6381756, well below 1.0 -- discarded outright per the standing kill rule. H2 was not run; no filter stack, no rescue.",
+    "metrics": {
+      "netProfitPct": -52.65178947,
+      "profitFactor": 0.6381756,
+      "maxDrawdownPct": 56.62630607,
+      "totalTrades": 444,
+      "winningTrades": 85,
+      "losingTrades": 359,
+      "winRatePct": 19.14414414,
+      "avgTradePct": -0.11858511,
+      "avgWinningTrade": 109.253798886471,
+      "avgLosingTrade": -40.534127723398,
+      "ratioAvgWinLoss": 2.6953534,
+      "largestWin": 729.182002,
+      "largestLoss": -365.305721249999,
+      "avgBarsInTrade": 11.83783784,
+      "avgBarsWinning": 25.87058824,
+      "avgBarsLosing": 8.51532033,
+      "sharpeRatio": -1.97410183,
+      "sortinoRatio": -0.52965036,
+      "commissionPaid": 3286.997447350002,
+      "grossProfit": 9286.572905350002,
+      "grossLoss": 14551.751852699996,
+      "longTrades": 444,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1RV8QXF37ZBKH5DMCGDV9QT",
+      "strategyId": "01M1RV8R2E4GEE8MJGFKZAWV18",
+      "resultId": "01M1RV8QXFQ8A9WHF4BPS6HQXE",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1RV8QXFQ8A9WHF4BPS6HQXE",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-05T00:00:00Z"
+    },
+    "verdict": "DISCARDED on the kill rule -- H1 (never-tuned half) profit factor 0.6381756, below 1.0. H2 not run, second credit not spent, no filter stack.",
+    "notes": "Frequency estimate scored: pre-registered 150-500, actual 444 -- inside the pre-registered band but above the lab's settled 60-350 workable window (a mild high miss). cascadeRatio 1 / maxCascadeDepth 1 confirmed (444 total rows, 444 unique entries), matching the audit's expectation. Drawdown category: PF < 1.0 so category 2 (bleed on a negative edge, same shape as Attacks 36/48/49/50/53b/72b/73/74/75/76/77) -- largest loss (-$365.31) is ~9.0x avg loser (-$40.53), a wider concentration ratio than most category-2 builds on this board, worth naming even though moot for the verdict since PF is already well below 1.0. One credit spent this cycle (525 balance -> 524)."
   }
 ];
-const BUILT = "2026-09-05 12:17";
+const BUILT = "2026-09-05 13:15";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
