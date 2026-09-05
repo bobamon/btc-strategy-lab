@@ -1,0 +1,150 @@
+//@version=6
+// 3M ELITE v62 (FVG-GRADED ZONE LINEAGE) - CORRECTED ANCHORING, FULL DATA COVERAGE.
+//
+// NUMBERING COLLISION, FLAGGED PER THIS LAB'S OWN CONVENTION: a concurrent local session
+// (2026-09-05) named this construction "v61/v62" in SYSTEM.md, colliding with the PRE-EXISTING
+// v61 ("v60's split test", 2026-09-04) and v62 ("short leg bear-regime split", 2026-09-04)
+// already on record. Both are already merged/pushed. This file is the FVG-graded-zone lineage's
+// "v62" specifically (corrected anchoring, full-coverage run, resultId 01M1SETEAG1ADNXCW7JD5SXSGJ,
+// strategyId 01M1SETEJSRCMK2Y62GV2MHR4A v3) - retrieved verbatim via get_strategy since the
+// concurrent session never committed this source to disk (a gap against HARD LESSON 21, closed
+// here). Refer to it as "v62-fvg" in prose to disambiguate from the short-leg "v62".
+//
+// THE CHANGE FROM v37/v61 (fvg-graded-zone.pine): v61 anchored the FVG gap as
+// engulf.low > high[2 candles before the engulf] - since the candle immediately before an
+// engulf is bearish by definition, that asks the engulf's low to clear a high set BEFORE the
+// drop, which is nearly impossible (0 trades, confirmed construction error, second occurrence
+// of the "gap-shaped condition on 24/7 crypto silently disables its own gate" failure mode).
+//
+// v62-fvg corrects the anchor to the STANDARD three-candle FVG: A (candle before the engulf),
+// B (the engulf itself, the displacement candle), C (the candle AFTER the engulf). The gap is
+// C.low > A.high, confirmed one 4H candle after the engulf - zone creation is deferred one
+// candle via the pendActive/pendTop/pendBot/pendAH latch below. Everything else (4H
+// reconstruction from 15m bars, engulf by body containment with no gap clause, zone =
+// [low, open] of the engulf, mitigation on a body close with the two-close rule, maxAge=6,
+// dzAge>=1, one entry per zone, stop = dzBot, R floor 0.8% by exclusion, 2R target, maxBars=96)
+// is unchanged from v37.
+//
+// RESULTS ON RECORD (SYSTEM.md, this cycle):
+//   v37 baseline, full coverage (2020-08-19 -> 2026-09-01): PF 1.0534251, DD 26.97850442%, 241 trades
+//   v62-fvg, same window:                                    PF 2.04354108, DD 4.50890824%, 40 trades
+//   v62-fvg, split H1 (2020-08-19 -> 2024-06-08):             PF 2.10461082, DD 4.50890824%, 24 trades
+//   v62-fvg, split H2 (2024-06-08 -> 2026-09-01):             PF 1.95534435, DD 2.98802262%, 16 trades
+// 24 + 16 = 40, exact partition. Both halves clear PF 1.0 decisively and agree in direction and
+// magnitude with the full sample - no collapse, no reversal. Both halves individually sit below
+// the ~30-trade quoting floor (HARD LESSON 19), so per this lab's own v60/v61(short) precedent
+// they are read for DIRECTION only, not quoted standalone; the full sample's 40 trades is what
+// clears RATCHET v2 clause 3.
+//
+// NOT YET A CLEAN PROMOTION: this has only been compared against v37 re-baselined on full
+// coverage. The ACTUAL current champion of record is v58 (v37 + dzTouch==0), which has never
+// been run on full coverage. That comparison is the mandatory next step before v62-fvg can be
+// promoted over v58 - queued, not run this cycle (credit budget).
+strategy("3M ELITE v62 FVG-graded full coverage", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rTarget  = input.float(2.0, "Target, x R")
+maxBars  = input.int(96,    "Max bars in trade")
+maxAge   = input.int(6,     "Zone freshness cap")
+minRpct  = input.float(0.80,"Min stop distance as % of price")
+
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+var float o4 = na
+var float h4 = na
+var float l4 = na
+var float pO   = na
+var float pH   = na
+var float pL   = na
+var float pC   = na
+var float ppO  = na
+var float ppC  = na
+var float ppH  = na
+
+var bool  pendActive = false
+var float pendTop = na
+var float pendBot = na
+var float pendAH  = na
+
+var float dzTop   = na
+var float dzBot   = na
+var bool  dzLive  = false
+var int   dzTouch = 0
+var int   dzAge   = 0
+var bool  dzTraded = false
+
+if new4h and not na(o4)
+    ppO  := pO
+    ppC  := pC
+    ppH  := pH
+    pO   := o4
+    pH   := h4
+    pL   := l4
+    pC   := close[1]
+
+if new4h
+    bullEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC < ppO and pC > pO and pC > ppO
+
+    if dzLive and not na(pC) and pC <= dzTop
+        dzTouch := dzTouch + 1
+        if dzTouch >= 2
+            dzLive := false
+    if dzLive
+        dzAge := dzAge + 1
+
+    if pendActive and not na(pL) and not na(pendAH)
+        if pL > pendAH
+            dzTop   := pendTop
+            dzBot   := pendBot
+            dzLive  := true
+            dzTouch := 0
+            dzAge   := 0
+            dzTraded := false
+        pendActive := false
+
+    if bullEngulf
+        pendActive := true
+        pendTop := pO
+        pendBot := pL
+        pendAH  := ppH
+
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+minR    = close * minRpct / 100
+rBig    = not na(dzBot) and (close - dzBot) >= minR
+longCond = rBig and dzLive and not dzTraded and dzAge >= 1 and dzTouch < 2 and low <= dzTop and close > dzBot and dzAge <= maxAge
+flat = strategy.position_size == 0
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if flat and longCond and not na(dzBot) and close > dzBot
+    r = close - dzBot
+    if r > 0
+        strategy.entry("L", strategy.long)
+        dzTraded := true
+        slPx   := dzBot
+        tpPx   := close + r * rTarget
+        barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(dzLive ? 1 : 0, title="DemandZoneLive")
