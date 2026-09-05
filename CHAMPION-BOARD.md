@@ -4944,3 +4944,115 @@ short-side edges intrinsically harder to find on this data, independent of const
    as a standing lesson, closing the board's own prior queue item to promote it. See STRATEGY-LEDGER.md.
 
 ---
+
+# ATTACK 65 — VOLATILITY-SHOCK EXHAUSTION REVERSAL LONG, A THIRD ORTHOGONAL SIGNAL CLASS, AND THE
+# INVERTED-PAYOFF SHAPE'S CAUSE FOUND IN THE CONSTRUCTION ITSELF
+
+The stored scheduled prompt still describes a board state (Attack 37, "earned a filter stack") more
+than sixty attacks stale and instructs "continue numbering after 37." **The docs override it, again**,
+per the prompt's own instruction: Attack 41 closed Attack 37 on cost, Attack 46 is the long champion
+(both halves clear, cold-reproduced, filters exhausted per HARD LESSON 49), and the short leg has failed
+on five distinct signal shapes and is now reported as a standing structural asymmetry, not to be chased
+with a sixth absent a materially different argument (Attack 64's own queue item 1). The two remaining
+standing queue items are blocked (Attack 46's out-of-sample test — cannot run under BTCUSDT-only) or
+merely optional (the funding-clock counter-build diagnostic — owed only if that family is revisited). With
+both queues closed off, the mandate's fallback governs this cycle: **propose one genuinely new
+mechanism, distinct from every mechanism already on the board.**
+
+## THE CLAIM UNDER TEST
+After an outsized single-bar downside excursion — a move from the prior close to the current bar's own
+low far larger than recent average true range (the signature of a liquidation cascade or stop-run rather
+than fresh directional information) — that the **same bar** substantially rejects by closing back above
+the midpoint of its own range, price tends to continue reverting toward the level it occupied just before
+the shock. This is a **third orthogonal signal class** for this lab: neither LEVEL/PIVOT (Attacks
+33/34/36/37/43/44-46/59/60-63) nor MOMENTUM-INDICATOR (Attacks 48-52/64) — the arming condition is a pure
+**volatility-magnitude** event on the current bar's own range, referencing no prior swing point,
+resistance/support level, or oscillator value. Mechanics, single bar, no latch (identical construction
+pattern to Attacks 44/45/46): `atrPrior = ta.atr(14)[1]`, `downShock = close[1] - low`,
+`shockCond = downShock > 2.0 * atrPrior`, `rejection = close > low + 0.50 * (high - low)`. Entry at the
+signal bar's close. Stop: the bar's own low (LESSON 5). Target: `close[1]`, the pre-shock level (HARD
+LESSON 41, a level not a stop multiple). R floor 0.8% by exclusion (LESSON 3). Coded BARE — no RR floor,
+no regime gate, no time filter. Pine: `strategies/pine/attack65-shock-exhaustion-reversal-long.pine`.
+
+## AUDIT (LONG ONLY, one line per leg)
+R ≥ 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rLong = close - low`, never clamped. Stop beyond STRUCTURE
+(LESSON 5) — `slPx = low`, the shock bar's own extreme. Each leg separately (LESSON 6) — LONG ONLY, fading
+downside shocks; a mirrored short is untested. BINDING (E17) — `shockCond` AND `rejection` AND `rBig` AND
+`targetOk` all necessarily bind (103 trades on 85,655 bars — a 2x-ATR single-bar threshold binds hard).
+REDUNDANCY (E14) — `shockCond` constrains excursion MAGNITUDE vs. the ATR baseline; `rejection` constrains
+the SHAPE of the close within the bar's own range, independent of magnitude. LATCH IN SEQUENCE (LESSON 8)
+— not applicable, single-bar construction like Attacks 44/45/46: all referenced quantities belong to
+already-closed bars, entry fires at the signal bar's close and fills next bar. CASCADE (HARD LESSON 42/43)
+— LONG at 100% equity (the declared-deviation fix is a short-side margin artifact only); engine reports
+cascadeRatio 1 / maxCascadeDepth 1, confirmed.
+
+## H1 (2022-01-01 → 2024-06-08, never-tuned)
+
+| | **Attack 65a** |
+|---|---|
+| Profit factor | **0.67572739** |
+| Trades | **103** |
+| Win rate | 63.10679612% (a MAJORITY) |
+| Achieved win/loss ratio | 0.39504063 (POOR) |
+| Avg winner | $49.54 |
+| Avg loser | **-$125.41** |
+| Max drawdown | 22.84975858% |
+| Commission paid | $886.69 |
+| Gross P&L (net + commission, HARD LESSON 41) | **-$658.60** |
+
+H2 was not run — the mandate's kill rule fires on H1 alone.
+
+## KILL RULE APPLIED. H2 NOT RUN, ONE CREDIT SPENT THIS CYCLE.
+
+**Profit factor 0.67572739, well below 1.0.** The 547-credit balance would otherwise permit the full
+pair; the kill rule overrides that when H1 fails outright. No filters, no rescue, no H2. **103 trades
+sits squarely in the 60-350 workable band** — this is a defensible sample, not a thin one, so the
+rejection is not a sample-size artifact.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Category **2, bleed on a negative edge** — largest loss -$389.61 against avg loser -$125.41 is a ~3.1x
+ratio, not a concentrated-outlier signature (not category 1), and true gross P&L (net + commission) is
+**-$658.60**, itself negative: the edge is negative before any fee is paid (not category 3, so no filter
+stack is warranted on this construction).
+
+## A FIFTH CONFIRMATION OF THE INVERTED-PAYOFF SHAPE — AND FOR THE FIRST TIME, THE CONSTRUCTION-LEVEL
+## CAUSE IS FOUND, NOT JUST THE SYMPTOM
+
+Win rate 63.11% (a majority) against achieved ratio 0.395 (poor) is HARD LESSON 53's pattern again
+(Attacks 50/51/59/63), a fifth instance and a third on the LONG side. `get_trades` on all 103 entries
+shows median hold **4 bars**, only **1 of 103** trades reaching the 192-bar cap, and only **3 of 38**
+losers (8%) landing under the 0.80% R floor — so this is **not** a cap-truncation artifact (HARD LESSON
+38/39) and **not** a margin-forced-closure artifact (HARD LESSON 42/43, independently confirmed by
+cascadeRatio 1). **The poor payoff is manufactured by the entry condition itself**: `rejection` requires
+the bar to have already recovered HALF its own shock before entry is permitted, so the remaining distance
+to the target (`close[1]`, the pre-shock level) is often small by the time entry fires, while the stop
+sits at the bar's full, un-recovered extreme (`low`). Reward is capped by construction; risk is not. This
+is the first time this lab has traced the inverted-payoff shape to a specific, nameable construction
+defect rather than just re-measuring its presence.
+
+## WHAT THIS SETTLES
+
+**A third orthogonal signal class has now failed the same way as the first two.** Level/pivot mechanisms,
+momentum-indicator mechanisms, and now a pure volatility-magnitude mechanism all land in the same
+majority-win-rate/poor-payoff shape when their target is a level reached by partial reversion. The common
+thread across the shape's five instances is not the entry's signal class — it is **designing an entry
+that requires partial reversion toward the target before granting entry**, which mechanically shrinks
+reward while leaving risk at the full pre-reversion extreme.
+
+## QUEUE
+
+1. **A mirrored short (fading upside shocks) is NOT recommended as the next build** — this cycle's own
+   construction-level diagnosis predicts the same poor-geometry defect would recur symmetrically. If this
+   family is revisited, the fix is a WEAKER rejection requirement (`rejectFrac` well below 0.50, entering
+   nearer the shock extreme with more room left to the target), not a mirror of the failed construction.
+2. **Attack 46 (long) remains the sole both-halves-positive candidate on the board**, both halves clear,
+   cold-reproduced, filters exhausted per HARD LESSON 49; this cycle does not touch that verdict.
+3. **The out-of-sample test for Attack 46 still ranks first among long-side work** and still cannot be
+   run under BTCUSDT-only — unchanged, restated because this cycle did not touch it.
+4. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+5. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle (a
+   long-only build).
+
+---

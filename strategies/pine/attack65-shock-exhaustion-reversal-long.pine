@@ -1,0 +1,162 @@
+//@version=6
+// BTC ATTACK 65 - VOLATILITY-SHOCK EXHAUSTION REVERSAL, LONG. A THIRD ORTHOGONAL SIGNAL CLASS FOR
+// THIS LAB, BUILT AS THE MANDATE'S "ONE GENUINELY NEW MECHANISM" NOW THAT BOTH STANDING QUEUES ARE
+// BLOCKED.
+//
+// THE STORED SCHEDULED PROMPT still describes a board state (Attack 37, "earned a filter stack") more
+// than sixty attacks stale and instructs "continue numbering after 37." THE DOCS OVERRIDE IT, per the
+// prompt's own instruction: Attack 41 already closed Attack 37 on cost, Attack 46 is the long champion
+// (both halves clear, cold-reproduced, filters exhausted per HARD LESSON 49), and the short leg has
+// failed on FIVE distinct signal shapes spanning both named classes (level/pivot: Attacks 60-63;
+// momentum-exhaustion: Attack 64) and is now reported as a standing structural asymmetry, not to be
+// chased with a sixth shape absent a materially different argument (Attack 64's own queue item 1). The
+// remaining open queue items -- Attack 46's out-of-sample test (blocked, cannot run under BTCUSDT-only)
+// and the funding-clock counter-build diagnostic (owed only IF that family is revisited) -- are not
+// mandatory this cycle. With both standing queues blocked or optional, the mandate's own fallback
+// applies: propose ONE genuinely new mechanism, distinct from every mechanism already on the board.
+//
+// ==================== WHAT THIS CLAIMS, IN ONE SENTENCE ====================
+// After an outsized single-bar downside excursion (a move from the prior close to the current low far
+// larger than recent average true range -- the signature of a liquidation cascade or stop-run rather
+// than fresh directional information) that the SAME bar substantially rejects by closing back in the
+// upper half of its own range, price tends to continue reverting toward the level it occupied just
+// before the shock.
+//
+// ==================== WHY THIS IS A GENUINELY NEW, THIRD ORTHOGONAL CLASS ====================
+// Every mechanism on this board's short leg fell into one of two classes Attack 63 named: LEVEL/PIVOT
+// (a price tapping a prior high/low/swing point: Attacks 33, 34, 36, 37, 43, 44/45/46, 59, 60, 61, 62,
+// 63) or MOMENTUM-INDICATOR (an oscillator threshold event: Attacks 48-52, 64). This build's arming
+// condition is neither: it is a VOLATILITY-MAGNITUDE event -- the CURRENT bar's own excursion measured
+// against its OWN trailing ATR, with no reference to any prior swing high/low, resistance/support
+// level, or oscillator value. The only prior-bar reference is the ATR baseline itself (a measure of
+// recent noise, not a level) and the pre-shock close (the target, which HARD LESSON 41 requires be a
+// level rather than a stop multiple -- here it is the most natural level available: where the market
+// was trading one bar ago, before the shock). Also new: this is the LAB'S FIRST mechanism built to fade
+// a single-bar magnitude outlier rather than a multi-bar structure or a rare indicator threshold.
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS, SINGLE BAR ====================
+// atrPrior   = ta.atr(atrLen)[1]                      -- the bar's OWN volatility state is excluded from
+//              its own baseline (no self-reference): the baseline is fixed as of the PRIOR bar's close.
+// downShock  = close[1] - low                         -- the intrabar plunge from the last settled price
+//              to this bar's own low. This is the "shock" magnitude.
+// shockCond  = downShock > shockMult * atrPrior        -- the excursion must be a rare multiple of
+//              recent normal volatility (shockMult, default 2.0), not an ordinary down-wick.
+// rejection  = close > low + rejectFrac * (high - low)  -- the bar closes in the upper half of its own
+//              range (rejectFrac, default 0.50) despite printing that low: intrabar sellers were
+//              overwhelmed by intrabar buyers on the SAME bar, a same-bar rejection candle.
+// goLong     = shockCond and rejection and rBig and targetOk (defined below)
+// Entry fires at THIS bar's close (filled at the next bar's open by the engine's own execution model,
+// identical to Attacks 44/45/46's tap-and-reclaim pattern) -- SINGLE BAR construction, no latch needed:
+// every quantity read (high, low, close, close[1], atr[1]) belongs to bars already fully closed at
+// decision time, so there is no repaint and no cross-bar state to manage.
+// Stop: the shock bar's OWN low (LESSON 5 -- the actual extreme just tested, not an ATR distance or a
+// percentage). Target: close[1], the level the market occupied immediately before the shock (HARD
+// LESSON 41 -- a level, not a multiple of R; E14 -- an independent quantity from the stop distance,
+// drawn from the market's own pre-shock price rather than derived from R or from the shock magnitude).
+//
+// AUDIT, one line per leg (LONG ONLY):
+//   R >= 0.8% (LESSON 3) - EXCLUSION via rBig on rLong = close - low, never clamped. A shock bar whose
+//        stop distance is too close is SKIPPED, not widened.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = low, the actual extreme the shock bar printed.
+//   Each leg separately (LESSON 6) - LONG ONLY, fading DOWNSIDE shocks. A mirrored short (fading
+//        upside shocks) is a distinct, untested candidate, not built this cycle (credit budget below).
+//   BINDING (E17) - shockCond AND rejection AND rBig AND targetOk all necessarily bind; trade count is
+//        read before anything else is interpreted (HARD LESSON 12), and the two substantive terms
+//        (shockCond, rejection) are expected to bind hard given a 2x-ATR single-bar threshold.
+//   REDUNDANCY (E14) - shockCond constrains the MAGNITUDE of the down-excursion relative to recent
+//        volatility (a size condition, comparing today's move to the ATR baseline); rejection
+//        constrains the SHAPE of the close within the bar's own range (a position condition,
+//        independent of size -- a huge-range bar can close anywhere in its range, and a modest-range
+//        bar can close at its high). rBig separately constrains the ABSOLUTE stop distance in %.
+//        targetOk only confirms positive reward remains; it adds no additional selection beyond that.
+//   LATCH IN SEQUENCE (LESSON 8) - not applicable: this is a SINGLE-BAR construction like Attacks
+//        44/45/46, not a multi-bar arm/trigger pattern. All referenced quantities (high, low, close of
+//        the signal bar; close[1] and atr[1] from the prior bar) are already fixed and non-repainting
+//        the instant the signal bar closes; entry fires at that close and fills next bar, so setup and
+//        fill cannot share a bar by the engine's own execution model.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, `flat` gates every entry; maxBars=192 caps the hold
+//        exactly as every other build in this lab.
+//   CASCADE / MARGIN ARTIFACT (HARD LESSON 42/43) - LONG at 100% equity, the same sizing every accepted
+//        long build in this lab uses (Attacks 44/45/46); the declared-deviation fix is a SHORT-side
+//        margin-formula artifact only (HARD LESSON 42) and does not apply here. VERIFY with get_trades
+//        before trusting the result: cascadeRatio should read 1 / maxCascadeDepth 1, as every LONG
+//        build in this lab has shown.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// CODE BARE - NO ADDED FILTER BEYOND THE MECHANISM ITSELF (no RR floor, no regime gate, no time-of-day
+// filter): the mandate requires a bare mechanism on a fresh design, with any filter stack to follow
+// only if both halves clear 1.0 on a defensible sample, exactly as Attack 37 earned its (later
+// exhausted, then closed) filter-stack queue.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17):
+//   * H1 (2022-01-01 to 2024-06-08, never-tuned) BELOW 1.0 -> DISCARDED by the kill rule. No filters,
+//     no rescue, no H2 spent -- one more falsified mechanism, recorded plainly.
+//   * H1 ABOVE 1.0 AND H2 ABOVE 1.0, BOTH IN THE ~60-350 WORKABLE BAND -> this lab's second candidate
+//     ever to clear both halves (after Attack 37, since closed, and Attack 46, the long champion),
+//     queued for RATCHET v2 filter work.
+//   * TRADES WELL ABOVE THE WORKABLE BAND -> reframe as a frequency/cost miss (HARD LESSON 4), not an
+//     edge verdict, as Attacks 59 and 63 were.
+//   * TRADES WELL BELOW ~30 -> a DIRECTION, not a result (LESSON 12); a 2x-ATR single-bar shock with a
+//     50%-range rejection may simply be too rare on 15m BTC to sample cleanly, in which case shockMult
+//     is the first parameter to relax, not the mechanism to abandon.
+//   * A MAJORITY WIN RATE WITH A POOR PAYOFF -> the inverted-payoff shape, HARD LESSON 53's now-numbered
+//     pattern (Attacks 50/51/59/63), recurring a fifth time; report explicitly rather than as novel.
+//   * A MINORITY WIN RATE WITH A NEAR-EVEN PAYOFF -> the plain negative-edge shape (Attack 64); a
+//     distinct failure mode from the above, counted separately per HARD LESSON 53's own closing note.
+//   * LOSS DISTANCES SCATTERED AND SUB-0.8% -> would indicate a harness artifact rather than a
+//     measurement (HARD LESSON 42/43's tell), though not expected on a 100%-equity long.
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside net (LESSONS 36/39 and
+//        the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack65 shock exhaustion reversal LONG", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+atrLen    = input.int(14,   "ATR length for the shock baseline")
+shockMult = input.float(2.0,"Shock threshold -- multiple of prior ATR the down-excursion must exceed")
+rejectFrac= input.float(0.50,"Rejection fraction -- close must sit above low + this fraction of the bar's range")
+minRpct   = input.float(0.80,"Min stop distance as % of price (LESSON 3)")
+maxBars   = input.int(192,  "Max bars in trade")
+
+atrPrior  = ta.atr(atrLen)[1]
+downShock = close[1] - low
+shockCond = not na(atrPrior) and downShock > shockMult * atrPrior
+
+barRange  = high - low
+rejection = barRange > 0 and close > low + rejectFrac * barRange
+
+rLong   = close - low
+minR    = close * minRpct / 100
+rBig    = rLong >= minR
+
+targetLevel = close[1]
+targetOk    = targetLevel > close
+
+goLong = shockCond and rejection and rBig and targetOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := low
+    tpPx   := targetLevel
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(targetLevel, title="TargetLevel(PreShockClose)")
+plot(atrPrior, title="ATRPrior")
