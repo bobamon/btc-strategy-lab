@@ -1010,3 +1010,144 @@ only for reading his results claims, which are already set aside as marketing.
   "cells" as "sells".
 - **The stated-vs-observed direction contradiction (FINDING 10.1) is still unresolved**, and the
   rolling-mean target predictions (FINDINGS 7, 12) are still unrun.
+
+---
+
+# ██ TICK #7, 2026-09-05 — THE SYMBOL SEARCH IS CLOSED BY EXHAUSTION, A THIRD SILENT REMAP IS FOUND, AND FINDING 13's REVERSAL CONDITION WAS STATED ON THE WRONG QUANTITY
+
+Zero credits — and this tick **measured** that rather than assuming it (see the credit note in
+`STATUS.md`). No backtest, no `runId`. Nine `plan_backtest_window` calls and one `search_perps` on
+trader-dev, all pre-flight resolution only.
+
+**Why calling trader-dev at all is not a breach of tick #2's FINDING 4.** That rule forbids running a
+Legacy Forex *backtest* on trader-dev, because the instruments silently remap. Probing *which symbols
+resolve to what* is the opposite activity — it is the measurement that rule was derived from, and it
+is how the rule gets extended. No strategy was created and no run was executed.
+
+## ██ FINDING 15 — TRADER-DEV CARRIES NO US EQUITY INDEX UNDER ANY CONVENTION, AND `SPX` IS A THIRD SILENT REMAP
+
+Tick #1's queue item 3 — *"probe the remaining ticker conventions … to map the non-crypto catalog's
+actual edges"* — has been open since this workstream was created and had never been performed. It is
+performed here and now closes.
+
+**Pre-registered before the calls (HARD LESSON 17):** *does trader-dev's non-crypto feed — the one that
+passes `EURUSD`/`XAUUSD` through unchanged with ~17 years of history — carry any US equity index under
+any vendor convention?* **If YES with intraday depth, the tick-#3 engine deadlock breaks**, because
+trader-dev already has the Pine state this method needs and would then also have the data. **If NO, the
+deadlock is confirmed by exhaustion rather than by not having looked hard enough.**
+
+### THE ANSWER IS NO. EVERY INDEX CONVENTION TESTED FAILS.
+
+`displaySymbol` read on every row, per FINDING 2 — never `parityAdjustments`.
+
+| requested | tf | `applied.displaySymbol` | verdict |
+|---|---|---|---|
+| `NDX` | 15m | — hard error, *"not in the Bybit USDT perp catalog (639 instruments)"* | loud fail |
+| `NQ1!` | 15m | — hard error, same | loud fail |
+| `MNQ` | 15m | — hard error, same | loud fail |
+| `DJI` | 15m | — hard error, same | loud fail |
+| `US100` | 15m | — hard error, same | loud fail |
+| `SPX500` | 15m | — hard error, same | loud fail |
+| **`SPX`** | 15m | **`BYBIT:SPXUSDT.P`** | ⚠️ **SILENT REMAP — 64,805 bars returned** |
+
+Combined with the six already on file (`NQ`→`IONQUSDT`, `YM`→`DYMUSDT`, and hard errors on `US30`,
+`NAS100`, `USTEC`, `US500`), **thirteen conventions have now been tried on trader-dev and not one
+returns a US equity index.** This is no longer "the right ticker has not been found yet"; the vendor
+conventions are exhausted. **The trader-dev side of the engine deadlock is permanent.**
+
+### THE NEW HAZARD, AND IT IS WORSE THAN THE ONE ALREADY RECORDED
+
+`SPX` — the single most common alias for the S&P 500 — returns a **complete, healthy-looking coverage
+response**: 64,805 bars of 15m data, first bar 2024-10-29, a normal date clamp. `parityAdjustments`
+contains **only** `clamped_to_clickhouse_first_bar`. Nothing names the substitution. `requested.symbol`
+comes back already rewritten to `SPXUSDT`. It is `SPX6900`, a memecoin.
+
+**And the mechanism is not what this repo has recorded.** `STRATEGY-LEDGER.md` explains the NQ/YM
+remaps as a *substring* match (`NQ` ⊂ `IONQ`, `YM` ⊂ `DYM`) and draws the moral that **short futures
+roots** are the things at risk. `search_perps("SPX")` returns exactly one row:
+
+```json
+{ "wire": "SPXUSDT", "display": "BYBIT:SPXUSDT.P", "baseCoin": "SPX" }
+```
+
+`baseCoin` is **`SPX` exactly**. This is an **identity collision, not a substring collision** — the
+crypto catalog contains a coin whose ticker *is* the index's ticker. No "avoid short roots that could
+be substrings of a coin name" heuristic catches it, because there is no substring involved.
+
+**The corrected rule, and it is the only safe one:** the length or shape of the requested ticker tells
+you nothing about the risk. **Read `applied.displaySymbol` and compare it by eye to what you asked for,
+on every single call, in every lab.** That guard is unchanged; what changes is that no ticker may be
+assumed safe from inspection because it "looks too specific to collide."
+
+### WHAT THE SWEEP CONFIRMS ABOUT THE FOREX FEED (unchanged, re-measured)
+
+| symbol | tf | `applied.displaySymbol` | first bar | last bar | bars |
+|---|---|---|---|---|---|
+| `GBPUSD` | 15m | **`GBPUSD`** — unchanged | 2009-09-25 | **2026-05-19 10:45Z** | 411,264 |
+| `USDJPY` | 15m | **`USDJPY`** — unchanged | 2009-09-27 | **2026-05-19 11:15Z** | 409,213 |
+
+FINDING 3 generalises cleanly: the non-crypto feed is a real, deep, multi-pair FX feed, and its
+**~3.5-month staleness is a property of the feed, not of `EURUSD`** — both new pairs end on the same
+2026-05-19 date. **None of this helps this workstream.** FINDING 3 item 3 stands unamended: a
+NY-session index method is a *hypothesis* on a currency pair, never an inheritance, and no tick here
+may treat FX depth as a substitute for the instruments the system actually trades.
+
+## ██ FINDING 16 — FINDING 13's REVERSAL CONDITION IS STATED ON THE WRONG QUANTITY. THE VERDICT SURVIVES; THE STATED REASON DOES NOT.
+
+Correcting my own claim from one tick ago, which is the outcome the mandate says to prefer.
+
+FINDING 13 modelled the pooled book as **N pairs** — every trade sitting in a same-session NQ+YM
+couple — giving `N_eff = 2N/(1+ρ)` and the reversal condition **ρ ≤ 0.13**.
+
+**That sets an unmeasured parameter to 1 without saying so.** Let `T` be the pooled trade count and
+`p` the fraction of those trades that actually sit in same-session cross-instrument pairs. With `k`
+pairs and `u = T − 2k` singles, and `p = 2k/T`:
+
+```
+Var(sum) = σ²(T + 2kρ)   ⇒   N_eff = T² / (T + 2kρ) = T / (1 + pρ)
+```
+
+FINDING 13 is the `p = 1` special case. **The real reversal condition is `pρ ≤ 0.133`, not `ρ ≤ 0.13`.**
+
+**Is `p = 1` defensible?** It is *consistent* with the evidence but not *implied* by it. The three
+cited streams do show paired days. But live streams are a **selected sample — the days he chose to
+broadcast** — and his realised book-wide rate is 0.60–0.80 trades/session (FINDING 11). Both readings
+fit that rate: `p = 1` means he trades on ~30–40% of sessions taking a pair each time; `p = 0.5` means
+he trades on ~50% of sessions, half of them paired. **The transcripts cannot distinguish these**,
+because the unstreamed days are exactly the ones not observed. `p` is as unmeasured as `ρ` was, and
+FINDING 13 pinned it at the value most favourable to its own conclusion.
+
+### WHAT THIS DOES AND DOES NOT CHANGE
+
+| top-of-band requirement | `p = 1` (FINDING 13) | `p = 0.5` | `p = 0.25` |
+|---|---|---|---|
+| ρ needed to clear 30 | ≤ 0.13 | ≤ 0.27 | ≤ 0.53 |
+
+**The verdict is unchanged and the declaration stands.** Two reasons, and the first is the load-bearing
+one:
+
+1. **`N_eff ≤ T` always**, for any `p` and any `ρ ≥ 0`. So at the bottom of the band `T = 26 < 30`
+   **fails regardless of both parameters.** This half of FINDING 13 never needed either quantity and is
+   the part that actually carries the conclusion.
+2. At the top of the band, even the loosest column above (`ρ ≤ 0.53` at `p = 0.25`) sits below any
+   holding-period correlation the published record reports for two US equity index futures
+   (FINDING 14). The declaration is not rescued by relaxing `p`.
+
+**So the correction is to the reasoning, not the ruling.** FINDING 13's conclusion — *NQ and YM may not
+be pooled to clear the 30-trade floor* — holds. Its headline claim that *"clearing 30 requires ρ ≤ 0.13"*
+is **withdrawn and replaced** by *"clearing 30 requires `pρ ≤ 0.133`, and is impossible at the bottom of
+the band at any `p` and any `ρ`."* Any future tick attempting the reversal must now measure **both** `p`
+(the pairing fraction, from a trade log) and `ρ` (at the holding-period horizon, never the chart
+horizon — the Epps trap in FINDING 13 is unaffected by this correction and still applies).
+
+## ██ WHAT TICK #7 DID NOT ESTABLISH
+
+- **Nothing was backtested. No `runId` exists for this workstream and none was created.** FINDING 16 is
+  arithmetic on a stated model, exactly as FINDING 13 was, and is not a measurement.
+- **`p` and `ρ` are both still unmeasured.** FINDING 16 makes that fact explicit; it does not fix it.
+- **`US30` intraday depth is still unmeasured** — `backtest-lab` is still absent from this session.
+- **Whether `backtest-lab` has a silent-remap hazard of its own was not tested** here; tick #2 found it
+  hard-errors on `NQ`/`YM`, but no `SPX`-style identity collision was probed on that engine, and the
+  connector is unavailable to do so.
+- The direction contradiction (FINDING 10.1) and the rolling-mean target predictions (FINDINGS 7, 12)
+  are untouched and still unrun.

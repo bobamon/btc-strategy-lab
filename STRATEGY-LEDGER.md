@@ -268,7 +268,14 @@ without moving PF.
 - Exits via `strategy.exit(stop=, limit=, trail_*, qty_percent=)` and `strategy.close`.
 - Symbol universe: **Bybit USDT linear perpetuals only** (639 instruments).
 - Each backtest costs **1 credit**. Weekly grant 1000. At 96 cycles/day, do not backtest every cycle.
-- Always call `plan_backtest_window` first — it clamps dates and reveals symbol remaps.
+- **Pre-flight calls are FREE — measured, not assumed (Legacy Forex tick #7, 2026-09-05).** A
+  `get_credits` bracket around nine `plan_backtest_window` calls (erroring *and* successful, including
+  one returning 64,805 bars) plus one `search_perps` left the balance unchanged at **492**. This closes
+  tick #1's open "one credit vanished without a backtest" anomaly: pre-flight probing was not the cause,
+  and a concurrent session on the same account is the only remaining explanation. **Probe symbols and
+  coverage freely; only `quick_backtest`/`run_backtest` meter.**
+- Always call `plan_backtest_window` first — it clamps dates and reveals symbol remaps. **It does NOT
+  reveal symbol substitutions in `parityAdjustments` — read `applied.displaySymbol` yourself.**
 - **Coverage differs by timeframe:** 15m reaches back to 2020-08, but **5m only starts 2024-06-08** and
   **1m only covers 2025-12-16 → 2026-05-03**. A 5m or 1m run is a shorter window than a 15m one, so
   never compare their returns without saying so.
@@ -332,10 +339,28 @@ carried **only a date clamp**; no entry names the symbol substitution, and the r
 *"trust `quick_backtest` `parityAdjustments`"* — is therefore **not sufficient** to prevent a
 wrong-instrument run. **The only reliable guard is reading `applied.displaySymbol` and comparing it
 to what you asked for. Do that on every run in every lab.** (No recorded result needs withdrawing:
-every banked run in this repo is `BTCUSDT`, which matches itself.) The mechanism is a substring match
+every banked run in this repo is `BTCUSDT`, which matches itself.) ~~The mechanism is a substring match
 against crypto base coins — `search_perps("NQ")` returns `IONQ` and nothing else; `NQ` ⊂ `IONQ`,
 `YM` ⊂ `DYM` — which is why short futures roots fail *silently* while `US30`/`NAS100`/`USTEC`/`US500`
-fail *loudly* with "not in the Bybit USDT perp catalog".
+fail *loudly* with "not in the Bybit USDT perp catalog".~~
+
+**██ THE MECHANISM ABOVE IS WRONG — CORRECTED 2026-09-05, Legacy Forex tick #7.** The substring story
+fits `NQ`/`YM` and produces a **false sense of which tickers are safe**. `SPX` — the most common alias
+for the S&P 500 — silently resolves to **`BYBIT:SPXUSDT.P`** and returns a complete, healthy-looking
+**64,805-bar** 15m coverage response for **SPX6900, a memecoin**, with `parityAdjustments` carrying only
+a date clamp. `search_perps("SPX")` returns `baseCoin: "SPX"` — **exactly**. That is an **identity
+collision, not a substring collision**, so no "avoid short roots that could be substrings of a coin
+name" heuristic catches it.
+
+**The rule that follows binds every lab in this repo:** the shape, length or specificity of a requested
+ticker tells you **nothing** about remap risk. **Read `applied.displaySymbol` on every single call and
+compare it by eye to what you asked for.** Never infer safety from the ticker string, and never trust
+`parityAdjustments` — it does not name substitutions.
+
+**Thirteen conventions have now been probed on this engine and not one returns a US equity index:**
+`NQ`→`IONQUSDT` and `YM`→`DYMUSDT` and `SPX`→`SPXUSDT` (silent remaps); `US30`, `NAS100`, `USTEC`,
+`US500`, `NDX`, `NQ1!`, `MNQ`, `DJI`, `US100`, `SPX500` (loud errors). The index search on trader-dev is
+**closed by exhaustion** — evidence in `legacy-forex/SYSTEM.md` FINDING 15.
 
 **2. The generalisation from four index tickers to "this engine is Bybit USDT perps only" was
 wrong.** The 2026-09-01 check tested indices and never tested a forex pair. It resolves unchanged,
@@ -346,6 +371,13 @@ with deep history:
 | `EURUSD` | 5m | `EURUSD` — unchanged | 2009-09-25 | **2026-05-19** | 1,152,867 |
 | `EURUSD` | 15m | `EURUSD` — unchanged | 2009-09-25 | **2026-05-19** | 318,187 |
 | `XAUUSD` | 5m | `XAUUSD` — unchanged | 2009-09-27 | **2026-05-19** | 959,407 |
+| `GBPUSD` | 15m | `GBPUSD` — unchanged | 2009-09-25 | **2026-05-19** | 411,264 |
+| `USDJPY` | 15m | `USDJPY` — unchanged | 2009-09-27 | **2026-05-19** | 409,213 |
+
+*(Bottom two rows added by Legacy Forex tick #7, 2026-09-05.* **The ~3.5-month staleness is a property
+of the whole feed, not of `EURUSD`** *— all four symbols end on the same 2026-05-19 date. The feed is a
+real multi-pair FX archive, not two lucky probes. It remains unenumerable:* `search_perps` *covers the
+crypto catalog only.)*
 
 **The non-crypto feed is stale by ~3.5 months** (ends 2026-05-19 vs the crypto feed's 2026-09-01), so
 any forex window must state that end date explicitly and the most recent quarter is untestable.

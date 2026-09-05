@@ -637,3 +637,102 @@ that line and it is arithmetically unavailable at any correlation the published 
 workstream's honest position is **not "marginal"** — it is **below the floor on the data reachable
 today**, and the fix is calendar or a deeper data source, not a second instrument. Zero results
 recorded, still correctly.
+
+---
+
+# ██ TICK #7, 2026-09-05 — THE SYMBOL SEARCH IS CLOSED BY EXHAUSTION, AND `SPX` IS A THIRD SILENT REMAP
+
+**Zero credits, and this tick MEASURED that rather than assuming it.** No backtest, no `runId`. Nine
+`plan_backtest_window` calls plus one `search_perps`, all pre-flight symbol resolution. Full detail in
+`SYSTEM.md` FINDINGS 15–16.
+
+**On tick #2's FINDING 4:** that rule forbids running a Legacy Forex *backtest* on trader-dev because
+the instruments silently remap. Probing what the symbols resolve to is the measurement that rule came
+from, not a violation of it. No strategy was created and nothing was run.
+
+## THE HEADLINE — THIRTEEN CONVENTIONS TRIED, NOT ONE RETURNS A US EQUITY INDEX
+
+Tick #1's queue item 3 had been open since this workstream was created, through five subsequent ticks,
+and had never been performed. Performed now, and it closes.
+
+Pre-registered before the calls: *if trader-dev's non-crypto feed carries a US index with intraday
+depth, the tick-#3 engine deadlock breaks — trader-dev already has the Pine state this method needs.
+If not, the deadlock is confirmed by exhaustion rather than by not having looked hard enough.*
+
+**It does not.** `NDX`, `NQ1!`, `MNQ`, `DJI`, `US100`, `SPX500` all hard-error. With the six already on
+file (`NQ`, `YM` silently remapped; `US30`, `NAS100`, `USTEC`, `US500` hard errors), **thirteen vendor
+conventions have now been tested and none resolves to an index.** The trader-dev half of the deadlock
+is now **permanent, not provisional** — this workstream can stop looking for a symbol.
+
+## THE NEW HAZARD — AND IT BREAKS THE MECHANISM THIS REPO HAD RECORDED
+
+**`SPX` silently remaps to `BYBIT:SPXUSDT.P` and returns 64,805 bars of 15m data.** The most common
+alias for the S&P 500 returns a complete, healthy-looking coverage response for **SPX6900, a memecoin**.
+`parityAdjustments` carries only a date clamp; `requested.symbol` comes back already rewritten.
+
+The ledger explained the NQ/YM remaps as a **substring** match and drew the moral that *short futures
+roots* are what to watch for. `search_perps("SPX")` returns `baseCoin: "SPX"` — **exactly**. This is an
+**identity collision, not a substring collision**, so that moral does not protect anyone. The ledger's
+platform-constraints section has been corrected accordingly. **The only guard is reading
+`applied.displaySymbol` on every call, and no ticker may be assumed safe from inspection.**
+
+## THE SELF-CORRECTION — LAST TICK'S REVERSAL CONDITION WAS ON THE WRONG QUANTITY
+
+FINDING 13 (tick #6) declared pooling inadmissible and said clearing 30 would require **ρ ≤ 0.13**.
+That silently set a second unmeasured parameter — the **pairing fraction `p`**, the share of pooled
+trades actually sitting in same-session NQ+YM couples — to 1, its most favourable value for the
+conclusion being drawn. The correct expression is `N_eff = T/(1 + pρ)`, so the condition is
+**`pρ ≤ 0.133`**, which is materially looser (at `p = 0.5` it permits ρ ≤ 0.27).
+
+**The ruling stands; the stated reason is withdrawn.** `N_eff ≤ T` always, so the bottom of the band
+(T = 26 < 30) fails at *any* `p` and *any* `ρ` — that half never needed either parameter and is what
+actually carries the verdict. The live streams are a **selected sample of the days he chose to
+broadcast**, so they cannot pin `p`. Any future reversal attempt must now measure both `p` and `ρ`.
+
+## THE CREDIT ANOMALY FROM TICK #1 IS CLOSED
+
+Tick #1 recorded one credit disappearing across a batch of pre-flight calls and queued a deliberate
+bracket to settle it. **Performed this tick, as designed:**
+
+| step | balance |
+|---|---|
+| `get_credits` before | **492** |
+| one `plan_backtest_window` (`NDX`, hard error) | — |
+| `get_credits` after | **492** |
+| one *successful* `plan_backtest_window` (`SPX`, 64,805 bars) + `search_perps` | — |
+| `get_credits` after | **492** |
+
+**`plan_backtest_window` is free — erroring *and* successful — and so is `search_perps`.** Nine such
+calls this tick cost nothing. Tick #1's missing credit was therefore **not** caused by pre-flight
+calls; a concurrent session on the same account remains the likely explanation and is now the only one
+consistent with this measurement. The ledger's *"each backtest costs 1 credit"* is confirmed as
+complete, and pre-flight probing may be budgeted as free from here on.
+
+## WHAT THIS TICK DID NOT ESTABLISH
+
+- **No number came from a run.** No `runId` was created for this workstream and none should be until the
+  sample question is settled.
+- **`p` and `ρ` are both still unmeasured.** FINDING 16 names the gap; it does not close it.
+- **`US30` depth** — still unmeasured, `backtest-lab` still absent from this session.
+- **Whether `backtest-lab` has an `SPX`-style identity collision of its own** — untestable here.
+- The direction contradiction and the rolling-mean target predictions are unchanged and unrun.
+
+## QUEUE
+
+1. **The symbol hunt on trader-dev is CLOSED. Do not spend another tick on it.** Thirteen conventions,
+   zero indices. Only a new data source changes this, not a new ticker string.
+2. **`US30` 15m/5m depth on `backtest-lab`** — unchanged, still needs a session with that connector.
+   It no longer needs a credit bracket riding along; pre-flight calls are now known free.
+3. **The pooling declaration stands, on the corrected reasoning.** A reversal needs `p` AND `ρ`, with
+   `ρ` measured at the holding-period horizon (the Epps trap in FINDING 13 still applies).
+4. **The realistic route to a legitimate sample is more calendar or a deeper data source** — not a
+   second instrument (tick #6) and not a different ticker string (this tick).
+5. **Forward-testing still needs no history** and remains the only honest route available today.
+
+## STATUS LINE
+
+**LEGACY FOREX: STILL BLOCKED, AND THE TRADER-DEV HALF OF THE BLOCK IS NOW PERMANENT.** Thirteen symbol
+conventions exhausted; no index data exists on the engine that can express the method. The sample floor
+verdict from tick #6 survives a correction to its own reasoning. Zero results recorded, still correctly.
+What this tick actually bought: one long-open queue item closed, one credit anomaly settled by
+measurement, one new engine-wide safety hazard found, and one of my own claims narrowed.
