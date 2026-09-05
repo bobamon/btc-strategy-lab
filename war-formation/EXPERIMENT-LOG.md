@@ -5957,3 +5957,37 @@ questions — to justify a second one. The recommendation is unchanged: answer t
 questions in `STRATEGY-LEDGER.md` (HARD LESSON 48 / RULE QUESTION FOR THE USER), supply new 1m data,
 hand this lab a new queue item, or pause the schedule — none of which this session can do on its own
 authority.
+
+---
+
+# ██ CYCLE CHECK #30, 2026-09-05 (no credits) — THIRTY-SECOND IDENTICAL FIRING OF THE SAME STALE PROMPT
+
+`git pull --rebase origin main`: fast-forwarded from a stale local ref to `origin/main` tip (`4aa9cab`,
+BTC Attack 80, discarded on kill rule). `git log --oneline be66beb..HEAD` shows only two intervening
+commits (`df2fdb1` 3M cycle check #26, `4aa9cab` BTC Attack 80) — neither touches `war-formation/`.
+
+Independently re-verified rather than trusting check #29's self-report:
+- `war-formation/results/backtests.json` re-parsed directly — still exactly 31 entries, last four
+  E75a/E75b/E76/E77, headline figures unchanged (`e58a` long PF 1.24015239/36 trades/DD 9.82519609%;
+  `E71` short PF 0.97315988/33 trades/DD 2.66826642%).
+- `STRATEGY-LEDGER.md:2304-2343` (HARD LESSON 48 / RULE QUESTION FOR THE USER) re-read directly — both
+  open items still unanswered: E69b's inMiddle-band asymmetry and E74's drawdown-allowance-
+  proportionality question.
+- `war-formation/ORACLE-RULES.md` re-read from the top — the A.L.C.M. correction and shield/pencil
+  model are unchanged from check #29's citation.
+- This session's own stored prompt is, once again, byte-for-byte the pre-E67 text: cites E64a/E64b/E66
+  as the state of the short leg (superseded by E71/E74-E76) and asks for the same two queue items
+  already closed at E71/E74-E76 and E69a/E69b/E70a/E70b/E77.
+- No new 1m data, no concurrent war-formation session collision.
+
+**State unchanged**: no champion, no candidate. References remain **e58a** (long) and **E71** (short,
+declared deviation), exactly as the last twenty-nine checks reported.
+
+**Zero backtests run. Zero credits spent** (none needed — no open hypothesis this stored prompt's
+premises still support; get_credits was not called since no spend was under consideration). Dashboard
+not rebuilt — no metric has changed since the last rebuild.
+
+**No notification pushed.** Thirty-second firing of an unedited prompt; nothing has changed since check
+#4's original flag or check #29's re-confirmation. The recommendation is unchanged: answer the two open
+rule questions in `STRATEGY-LEDGER.md`, supply new 1m data, hand this lab a new queue item, or pause the
+schedule.
