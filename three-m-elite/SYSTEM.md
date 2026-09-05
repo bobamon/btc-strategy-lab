@@ -5109,3 +5109,121 @@ correct behaviour, not an omission.
 
 **CHAMPION OF RECORD (LONG): v58.** Unchanged. **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61.**
 Unchanged.
+
+---
+
+# ██ CYCLE CHECK #25, 2026-09-05 (zero credits) — NOT A NO-OP. v37 BENCHMARKED FOR THE FIRST TIME, AND THE ANSWER IS TWO-SIDED.
+
+Twenty-four prior checks were no-ops on a stale prompt. The prompt has been replaced (a rotating
+four-workstream loop, 2026-09-05), and the War Formation tick immediately before this one queued the
+check performed here: **HARD LESSON 54 established that no record in this project carries a buy & hold
+baseline**, because trader.dev does not report one. v37 has been this lab's champion since 2026-09-02
+without anyone knowing what BTC itself did over the same dates.
+
+**Zero trader.dev credits spent. No 3M Elite code was run on any other engine** — no zone, no
+lifecycle, no `var` counter, no per-trade level went near `backtest-lab`. The no-port rule is intact.
+What was measured is `buy_hold` on BTC/USDT: one position, first bar to last. That is a fact about the
+instrument, not a property of the strategy.
+
+## THE BENCHMARK RUNS
+
+| Window | runId | pinned | raw buy & hold | perp-executed net | B&H max DD |
+|---|---|---|---|---|---|
+| Full 2022-01-01 → 2026-09-01 | `bt_e0da4ea13f` | yes | **+69.878127%** | +28.927158% | -69.876273% |
+| H2 2024-06-08 → 2026-09-01 | `bt_8531235119` | yes | **+13.461286%** | -1.777913% | -58.816498% |
+| H1 2022-01-01 → 2024-06-08 | `bt_2c800e3fc5` | yes | **+49.723428%** | — | — |
+
+All `binance_perp_archive`, 15m, explicit dates. The H1 figure is the `buyHoldPct` reported by the
+BTC lab's Attack 78 run over the identical window and source; it is cited as a **market fact for that
+window**, not as a 3M result, and no Attack 78 construction is referenced here.
+
+**Two benchmark numbers, and the difference is not cosmetic.** "Raw buy & hold" is the instrument's
+price return — what a spot holder gets. "Perp-executed" is what actually holding a perpetual futures
+long returns after funding, and over the full window **funding cost $3,982.51 on a $10,000 account —
+41 points of the 70 the price gained.** Both are reported below because they answer different
+questions, and quoting only one would be a choice disguised as a measurement.
+
+## FINDING 1 — ON RETURN, v37 LOSES TO SIMPLY HOLDING BTC. IN EVERY WINDOW.
+
+| Window | v37 net | raw buy & hold | gap |
+|---|---|---|---|
+| Full | +29.75955671% | +69.878127% | **-40.12 pp** |
+| H1 | +24.24592963% | +49.723428% | **-25.48 pp** |
+| H2 | +4.47463187% | +13.461286% | **-8.99 pp** |
+
+This is unambiguous and it is not a near miss. Across the full 4.7 years, across the tuned half, and
+across the never-seen half, **a person who bought BTC and did nothing finished ahead of the champion
+every time.** That question had never been asked of v37, and the answer is unflattering.
+
+## FINDING 2 — ON RISK, IT IS NOT CLOSE IN THE OTHER DIRECTION.
+
+| | v37 return | v37 max DD | return per unit DD |
+|---|---|---|---|
+| Full | +29.75955671% | **8.72815312%** | **3.41** |
+| H2 | +4.47463187% | 7.2938328% | 0.61 |
+
+| | B&H return | B&H max DD | return per unit DD |
+|---|---|---|---|
+| Full | +69.878127% | **69.876273%** | **1.00** |
+| H2 | +13.461286% | 58.816498% | 0.23 |
+
+v37 earned **3.4x more return per unit of drawdown** than holding, on the full window, and 2.7x on H2.
+Buy & hold's 69.88% return came with a 69.88% peak-to-trough drawdown — the engine's own warning on
+that run reads that surviving it live "needs position sizing far below the 100% of equity assumed
+here." v37's worst drawdown across the same 4.7 years was 8.73%.
+
+**So the honest answer depends entirely on whether capital or risk is the binding constraint.** At
+equal capital, holding wins by 40 points. At equal risk, v37 wins by a wide margin — and this is
+precisely the case HARD LESSON 54 explicitly carved out ("a hedged or low-exposure strategy can be
+worth trading at a lower return"). This is not a rescue of a bad result; it is the distinction the
+lesson names, arriving on its first real test.
+
+## FINDING 3 — v37's H1→H2 DEGRADATION PARTLY TRACKS THE MARKET'S, WHICH IS REASSURING
+
+v37 fell from +24.25% (H1) to +4.47% (H2), which on its own looks like decay. Buy & hold fell from
++49.72% to +13.46% over the same halves — **a 73% drop against v37's 82% drop.** Most of v37's
+out-of-sample decline is the market's decline, not the strategy's.
+
+The more robust reading is the profit factor, which is drift-neutral: **1.3363049 → 1.12058245**. It
+held above 1.0 out of sample, which is what made v37 champion in the first place, and nothing measured
+today changes that.
+
+## WHAT THIS DOES AND DOES NOT CHANGE
+
+- **v37 is not demoted.** Nothing here contradicts the split test it passed. It adds a dimension the
+  record lacked.
+- **v37 should no longer be quoted on net return alone.** Any future citation of +29.76% that omits
+  the +69.88% baseline is now an incomplete record, in the same way HARD LESSON 21 made an unsaved
+  source incomplete.
+- **The comparison is cross-source.** v37's figures are trader.dev; the benchmarks are
+  `binance_perp_archive`. A buy & hold return depends on only two prices and is far more source-robust
+  than a strategy result, but the gaps above should be read to the point, not the basis point.
+- **The short leg is untouched by this check.** v60 (PF 1.88616546, 39 trades, DD 1.71159657%) covers
+  the full window and was not benchmarked here; a short leg needs the inverse baseline, which is a
+  different calculation and is queued rather than guessed.
+
+## THE FUNDING FACT, WHICH IS BIGGER THAN THIS LAB
+
+Holding a BTC perpetual long for the full window cost **$3,982.51 in funding on $10,000** — it turned
+a +69.88% price gain into a +28.93% realised return. Every backtest in the BTC lab runs on perps with
+funding enabled, and no record in `CHAMPION-BOARD.md` reports `fundingPaid`. This is not a 3M finding
+and **must not be written into that board from this tick**, but it is queued below as something that
+lab should check for itself.
+
+## STATE
+
+Champion **unchanged: v37**. Short reference unchanged: v60. Dashboard **not rebuilt** — no 3M metric
+changed, and per checks #5–#24 a timestamp-only rebuild carries no information. The benchmark is new
+context around existing metrics, not a new metric.
+
+## QUEUE
+
+1. **Benchmark the short leg (v60) against the inverse baseline** before it is cited again. A short
+   build in a window where BTC rose 69.88% is in the mirror of War Formation's E71 situation, and E71
+   failed that test badly.
+2. **Report `fundingPaid` alongside every future perp result in this lab.** It is free and it moved
+   the benchmark by 41 points.
+3. **Flag to the BTC lab (not from here) that its board has no funding or buy & hold column.** Attack
+   68 and Attack 46 are its two standing candidates and neither has either number.
+4. **Do not re-tune v37 against the benchmark.** Fitting a strategy to beat buy & hold on the window
+   where the baseline was measured is HARD LESSON 49's error with a new target.
