@@ -1195,5 +1195,52 @@
       "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1SJ6CSCJ8ESEAAKKHS97GE8",
       "verifiedAt": "2026-09-05T00:00:00Z"
     }
+  },
+  {
+    "id": "3m-elite-v60-short-baseline-full-coverage",
+    "name": "3M Elite v60 short leg (declared-deviation, source SMA-stack bias) re-baselined on FULL data coverage (2020-08-19 onward)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "short",
+    "status": "testing",
+    "createdDate": "2026-09-05",
+    "lastTestedDate": "2026-09-05",
+    "backtestStart": "2020-08-19",
+    "backtestEnd": "2026-09-01",
+    "description": "Closes queue item 1 left open by 3m-elite-v58-baseline-full-coverage: the long leg (v37, v58) had both been re-baselined on full coverage but the validated short leg (v60/v61(short)) had not. Re-run of the verified strategy (strategyId 01M1NXR34DJZYWWGW0DHYCFNF9, the exact source that produced 3m-elite-v60-short-declared-deviation's 39-trade/PF-1.88616546 result on the project's usual 2022-01-01 window) via run_backtest, window widened to full 15m coverage only -- no code change.",
+    "notes": "v60 short on the 2022-01-01 window: PF 1.88616546, DD 1.71159657%, 39 trades. On full coverage: PF 1.01300244, DD 5.0658619%, 64 trades, net +0.16507626%, Sharpe 0.02566808 (down from 0.83750737). Same direction of degradation as both long-side full-coverage re-baselines (v37: PF 1.25->1.05; v58: PF 1.48->1.17) but far more severe on this leg: the short collapses to essentially breakeven (PF 1.013, barely above 1.0) rather than holding a comfortable margin. The extra 17 months (2020-08-19 to 2022-01-01, which includes the 2020-2021 bull run) evidently supply a stretch where the source's 20/50/200 SMA-stack bear-bias gate + supply-zone mechanism finds little to short profitably, unlike the isolated 2022 bear year (PF 1.858, see 3m-elite-v62-short-bear-regime-split) where it does comparatively well. Cascade ratio remains clean at 1.0 (64 unique entries / 64 rows, max depth 1) on the fuller record too -- confirms cycle check findings that the 1.4x+ cascade signature flagged repeatedly in the (stale) scheduled prompt is exclusively a pre-bias-gate artifact of the old v51/v53 supply-mirror construction, not present in any bias-gated short build (v55 onward) regardless of window. STATUS held at testing (diagnostic re-baseline of an existing validated leg, not a new strategy variant, matching the treatment given to v37/v58's own full-coverage re-baselines) -- v60/v61(short)'s original 'passed' status on the 2022-01-01 window is left unchanged (HARD LESSON 11: don't silently rewrite the past); this is a new, additional data point about window-dependence, not a retraction.",
+    "metrics": {
+      "netProfitPct": 0.16507626,
+      "profitFactor": 1.01300244,
+      "maxDrawdownPct": 5.0658619,
+      "totalTrades": 64,
+      "winRatePct": 43.75,
+      "avgTradePct": 0.00257932,
+      "sharpeRatio": 0.02566808,
+      "sortinoRatio": 0.00276355,
+      "avgWinningTrade": 45.931661021429,
+      "avgLosingTrade": -35.266080069444,
+      "ratioAvgWinLoss": 1.30243171,
+      "avgBarsWinning": 47.17857143,
+      "avgBarsLosing": 29.72222222,
+      "longTrades": 0,
+      "shortTrades": 64,
+      "commissionPaid": 154.0655739
+    },
+    "pineSource": "three-m-elite/pine/3m-elite-v60-short-declared-deviation.pine",
+    "specPath": "three-m-elite/pine/3m-elite-v60-short-declared-deviation.pine",
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1SNK020QF077ZWV7XFG604X",
+      "resultId": "01M1SNK020R373QKCH7QHJF7DK",
+      "strategyId": "01M1NXR34DJZYWWGW0DHYCFNF9",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1SNK020R373QKCH7QHJF7DK",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "uniqueEntries": 64,
+      "totalRows": 64,
+      "maxCascadeDepth": 1,
+      "verifiedAt": "2026-09-05T00:00:00Z"
+    }
   }
 ]

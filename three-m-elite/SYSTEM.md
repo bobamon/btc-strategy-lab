@@ -5887,3 +5887,103 @@ window-superseded): v58** (PF 1.48439273 on 2022-01-01 window / 1.16728474 on fu
 8.70519440% / 19.37771492%, 117 / 174 trades, `dzTouch==0`). **VALIDATED SHORT (NOT A CO-CHAMPION):
 v60/v61(short)** (PF 1.88616546 full sample on the 2022-01-01 window; DD 1.71159657%; 39 trades) —
 unchanged by this cycle, full-coverage re-run still owed (queue item 1 above).
+
+---
+
+# ██ v60 SHORT LEG RE-BASELINED ON FULL COVERAGE — QUEUE ITEM 1 CLEARS, THE LAST WINDOW-DEPENDENCE GAP IS CLOSED (2026-09-05)
+
+**A note on the scheduled prompt, again.** This cycle's stored prompt is still the identical v37/v53
+snapshot addressed at every check since #1 (12H/24H bias gate and cascade signature both closed at
+v54–v61, per HARD LESSON 45 and HARD LESSON 34/35/50/52 — the bias gate was built at v54/v55 and the
+cascade signature was traced to the pre-bias-gate v51/v53 supply-mirror construction specifically,
+not present in any bias-gated short build). Per "THE DOCS WIN over this prompt," this cycle took the
+top queue item left by the entry immediately above instead: re-run the validated short leg (v60,
+declared-deviation sizing + source SMA-stack bias gate) on full coverage, the one re-baseline the
+long leg (v37, v58) had already received but the short leg had not. `git pull --rebase` at the start
+of this cycle (which also required reconciling a stale, diverged local `main` pointer against
+`origin/main` — resolved by fast-forwarding to origin, no local work was at risk) brought in no new
+concurrent 3M work beyond what the entry above already reflects.
+
+## THE RE-RUN
+
+Byte-identical Pine, verified via `get_strategy` against the exact strategyId that produced the
+recorded `3m-elite-v60-short-declared-deviation` result (`01M1NXR34DJZYWWGW0DHYCFNF9`) — no code
+change, only the window widened via `run_backtest`, full 15m coverage 2020-08-19 → 2026-09-01
+(resultId `01M1SNK020R373QKCH7QHJF7DK`):
+
+| | v60 short (2022-01-01 window) | **v60 short (full coverage)** |
+|---|---|---|
+| Profit factor | 1.88616546 | **1.01300244** |
+| Max drawdown | 1.71159657% | **5.0658619%** |
+| Trades | 39 | **64** |
+| Net return | +4.69826377% | **+0.16507626%** |
+| Sharpe | 0.83750737 | **0.02566808** |
+| Cascade ratio | 1.0 (39/39, depth 1) | **1.0** (64/64, depth 1) |
+
+## FINDING — THE SHORT LEG DEGRADES FAR MORE SEVERELY THAN EITHER LONG-SIDE RE-BASELINE
+
+Same direction as v37's (PF 1.25→1.05) and v58's (PF 1.48→1.17) own full-coverage re-baselines, but
+this time the collapse goes almost all the way to breakeven: PF 1.013, net return effectively zero
+over 6+ years. The extra 17 months of data added at the front (2020-08-19 → 2022-01-01, which
+contains the 2020-2021 bull run) evidently gives the source's bear-bias gate and supply-zone
+mechanism a stretch where it finds little to short profitably — consistent with, and now explaining,
+the earlier isolated-regime finding that this same construction does comfortably better in a dedicated
+bear calendar year (2022: PF 1.858, `3m-elite-v62-short-bear-regime-split`) than a bull one (2023: PF
+0.387, `3m-elite-v63-short-bull-regime-split`). Widening the window simply adds more bull-regime bars
+for the short leg to lose money in.
+
+**The cascade ratio stays clean (1.0) on the fuller record too.** This confirms, on a third and final
+data point (the other two being v55's bias-gated short at 1.0 exhaustively re-checked and v60/v61's
+own 2022-window numbers), that the 1.4x+ cascade signature the stale scheduled prompt keeps flagging
+as "QUEUE ITEM 2" is exclusively a property of the pre-bias-gate v51/v53 supply-mirror construction
+(no `stackBear` gate, no `szTouch<2` two-touch cap in the form v60 uses) — every bias-gated short
+build on file, on every window tested, shows cascade ratio exactly 1.0. This item has been closed
+since v55 and stays closed here.
+
+## WHAT THIS MEANS FOR THE PROJECT
+
+**Every headline number on this lab's file (v37, v58, v60-short) was window-dependent, and now every
+one of them has been re-measured on the data that was always available.** The long leg's champion
+(v62-fvg, built and judged on full coverage from the start) is the only construction that does not
+need this caveat — its numbers already are the full-coverage numbers. The short leg has no equivalent
+full-coverage-native construction yet; v60/v61(short) remains the best short-side result on file, but
+its "passed" status was earned against the 2022-01-01 window specifically, and per HARD LESSON 11
+that status is left unchanged rather than retroactively edited — this new full-coverage number is
+recorded as an additional, honestly-labelled data point (`status: testing`), not a silent correction
+of the past.
+
+**No promotion or demotion follows from this measurement.** This was a re-baseline of an existing,
+already-validated leg (matching the `testing`-status treatment given to v37-full-coverage and
+v58-full-coverage), not a new strategy variant competing under RATCHET v2.
+
+## CREDIT ACCOUNTING
+
+One backtest, one credit spent (of up to two available this cycle, 501 on hand). The result was
+unambiguous on its own (PF collapses to near-breakeven, cascade ratio clean) — no split test was run,
+matching the precedent set by v37's and v58's own full-coverage re-baselines (neither received an
+immediate split; v62-fvg's split was run separately, once, specifically to decide a promotion that was
+actually live). Nothing here is a promotion decision, so the same discipline applies: a second credit
+was available but not needed to answer the one question this cycle asked.
+
+## QUEUE
+
+1. **FVG grading on the short leg remains untested** (unchanged — carried from every entry since
+   v61/v62-fvg). Given how severely the short leg degrades on full coverage, this is now the more
+   interesting open short-side question than it was before: does the same FVG-quality gate that
+   roughly doubled the long leg's full-coverage profit factor do anything similar for a leg whose
+   full-coverage number is currently barely above 1.0?
+2. **A full-coverage-native short construction** (built and judged on 2020-08-19 onward from the
+   start, the way v62-fvg was for the long) has never been attempted. All short-side work to date
+   (v53, v55, v57, v60, v62/v63-regime-splits) was built and iterated against the 2022-01-01 window.
+3. `barstate.isfirst` fix for the zero-trade buy&hold benchmark bug — still unspent, still optional.
+4. v64's combined long+short flip-rule finding (coupling is small but nonzero, ~1-2 fewer entries per
+   side) is unaffected by this cycle and remains a closed diagnostic, not a promotion candidate, per
+   its own entry's stated caveats (sizing asymmetry between the 100%-equity long and 25%-equity short).
+
+**CHAMPION OF RECORD (LONG): v62-fvg** — unchanged by this cycle (PF 2.04354108 full coverage /
+2.10461082 H1 / 1.95534435 H2, DD 4.50890824%, 40 trades). **VALIDATED SHORT (NOT A CO-CHAMPION):
+v60/v61(short)** — PF 1.88616546 / DD 1.71159657% / 39 trades on its original 2022-01-01 window
+(status unchanged: `passed`); **PF 1.01300244 / DD 5.0658619% / 64 trades on full coverage** (new
+this cycle, `status: testing`) — the short leg's window-dependence gap (the last one open on this
+file) is now closed, and the honest answer is that the validated short does not hold up nearly as
+well as either long-side champion once the full data record is used.
