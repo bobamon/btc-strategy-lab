@@ -1,0 +1,42 @@
+//@version=6
+// 3M ELITE -- NAIVE SHORT BASELINE, 25%-EQUITY DECLARED DEVIATION (diagnostic, NOT a 3M leg)
+//
+// WHY THIS EXISTS: the prior naive-short-baseline entry (SYSTEM.md, this file's 100%-equity sibling
+// `3m-elite-naive-short-baseline.pine`) fixed the `bar_index==0` zero-trade bug with `barstate.isfirst`
+// but the single resulting trade force-closed one bar later on a $6.00 (0.05%) adverse tick -- proof
+// that 100%-equity/margin_short=100 sizing cannot survive even a naked short with no logic at all
+// (HARD LESSON 42's mechanism in its most minimal form). That run explicitly could not answer the
+// original question -- a same-engine "short and hold" market fact comparable to v60/v65, which use
+// 25%-equity declared-deviation sizing (HARD LESSON 42/43) -- and queued the 25%-equity re-run as the
+// only way to get it. This is that re-run. Nothing else changes: same `barstate.isfirst` single entry,
+// same full-coverage window, only the position-sizing convention matches v60/v61/v65 exactly so the
+// comparison is apples-to-apples.
+//
+// NOT A 3M STRATEGY LEG. No zone, no engulf, no bias gate, no stop, no target -- the short-side mirror
+// of "sell BTC and do nothing." The usual pre-run audit (R floor, structural stop, BINDING, REDUNDANCY,
+// latch-in-sequence) does not apply for the same reason it did not apply to the 100%-equity sibling:
+// there is no selection mechanism to audit and no invented geometry (LESSON 6). SL/TP fixed-at-entry is
+// deliberately absent -- a buy & hold-style baseline is defined by NOT exiting.
+//
+// PRE-REGISTERED READING (LESSON 17): whatever PF/return/DD this returns is a MARKET FACT about
+// 25%-equity short-and-hold BTC over full coverage, not a strategy result. It gives v60's full-coverage
+// PF 1.01300244 (64 trades) and v65's PF 1.54398585 (4 trades) a true same-engine, same-sizing
+// reference point. Two sub-outcomes were registered before running:
+//   A) This baseline is deeply negative (expected, price rose materially over 2020-08-19->2026-09-01)
+//      -> v60's near-breakeven PF reads as real, if weak, positive selectivity versus the market fact.
+//   B) This baseline itself lands near/above breakeven at 25%-equity sizing (possible if the reduced
+//      size lets the position survive to a point where BTC's own multi-year drawdowns turn it
+//      profitable before the multi-year uptrend erases it) -> v60's PF would need to be read AS AGAINST
+//      this number, not against zero, before calling it selectivity at all.
+strategy("3M ELITE naive short baseline (25pct declared deviation)", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+eqFrac = input.float(0.25, "DECLARED DEVIATION: fraction of equity per position -- HARD LESSON 42, matches v60/v61/v65")
+qtyUse = strategy.equity * eqFrac / close
+
+if barstate.isfirst
+    strategy.entry("S0", strategy.short, qty = qtyUse)

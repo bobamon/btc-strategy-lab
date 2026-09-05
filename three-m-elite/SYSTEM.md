@@ -6186,3 +6186,102 @@ unchanged (PF 1.88616546 on 2022-01-01 window, `passed`; PF 1.01300244 on full c
 **THIS CYCLE: naive short baseline recorded `status: research`** — not a strategy candidate, a
 diagnostic that closes the `barstate.isfirst` queue item and independently confirms HARD LESSON 42's
 margin-ceiling mechanism in its most minimal possible form.
+
+---
+
+# ██ NAIVE SHORT BASELINE, 25%-EQUITY SIZING — THE REFERENCE POINT v60/v65 NEEDED, AND IT MAKES v60 LOOK BETTER, NOT WORSE (2026-09-05)
+
+**A note on the scheduled prompt.** This cycle's stored prompt is still the identical v37/v53 snapshot
+addressed at every prior check (12H/24H bias gate and cascade signature both closed at v54–v61, per
+HARD LESSON 45 and HARD LESSON 34/35/50/52 — the bias gate was built and measured at v54/v55, and the
+cascade signature was traced to the pre-bias-gate v51/v53 supply-mirror construction specifically, not
+present in any bias-gated short build on file). The champion has also moved twice since that snapshot
+(v37 → v58 → v62-fvg). Per "THE DOCS WIN over this prompt," neither of the prompt's two queue items is
+repeated. `git pull --rebase` at cycle start brought in the parallel-history merge already reflected in
+SYSTEM.md up to the naive-short-baseline entry immediately above; no new concurrent 3M work landed
+beyond that. Per this cycle's own instructions, the Artifact tool is not called at any point — commit
+and push is the last step.
+
+## THE QUEUE ITEM TAKEN
+
+The entry immediately above left exactly one concrete, well-specified, unspent item: re-run the
+`barstate.isfirst` naive short at 25%-equity declared-deviation sizing (matching v60/v61/v65's own
+convention, HARD LESSON 42/43) instead of the parity-mandated 100%-equity default, because the
+100%-equity version force-closed after a single 15m bar and could not answer the original question — a
+true same-engine "short and hold" market fact comparable to v60/v65. `pine/3m-elite-naive-short-baseline-25pct.pine`
+is byte-identical to the 100%-equity sibling except for the sizing line (`qtyUse = strategy.equity *
+0.25 / close`, `strategy.entry(..., qty = qtyUse)`), lifted verbatim from v60's own declared-deviation
+mechanism. No zone, no engulf, no bias gate, no stop, no target, no exit logic anywhere in the source —
+this is not a 3M leg and the usual pre-run audit (R floor, structural stop, BINDING, REDUNDANCY,
+latch-in-sequence) does not apply, same reasoning as the 100%-equity sibling. One credit spent (490 on
+hand before, within the 250–500 → one-backtest budget).
+
+## THE RESULT — OUTCOME A FIRED, AND IT IS DECISIVE
+
+Full 15m coverage 2020-08-19 → 2026-09-01 (resultId `01M1SZXR0G4RX9Y5A9SKND0A8V`), pre-registered
+outcomes stated in the Pine header before running:
+
+| | 100%-equity sibling | **25%-equity (this run)** |
+|---|---|---|
+| Profit factor | 0 | **0** |
+| Max drawdown | 0.15044435% | **40.13486296%** |
+| Net return | -0.15044435% | **-37.68518618%** |
+| Trades | 1 | **1** |
+| Bars in trade | 2 | **13,015** (~135 days) |
+| Cascade ratio | 1.0 (clean) | **1.0 (clean)** |
+
+`get_trades` (free, resultId above): entry bar 0, 2020-08-19, price 11864.50, qty 0.21 BTC
+(`0.25 * 10000 / 11864.50`); exit bar 13014, 2021-01-02, price 29789 — the first leg of the 2020-2021
+bull run, roughly **+151% against the short**. The reduced sizing buys survival time (135 days instead
+of one 15-minute bar) but not solvency: the position is still margin-called out less than 5 months into
+a 6-year window, long before ever reaching the 2022 bear year where a short would have profited.
+**Outcome A, registered before running, fired**: this is a market fact about the difficulty of naive
+short-and-hold on this instrument and window, not a strategy result.
+
+## WHY THIS MATTERS MORE THAN A LABEL "DIAGNOSTIC" SUGGESTS
+
+This is the reference point v60's own full-coverage number needed and never had. Read against zero,
+v60-full-coverage's PF 1.01300244 (64 trades) reads as barely-above-breakeven, close to a coin flip.
+Read against **this** number — the actual behaviour of "just short BTC and hold" at the identical
+25%-equity sizing convention, on the identical full-coverage window — the same PF 1.01300244 sits next
+to a naive baseline that loses 37.69% of capital and gets margin-called out in five months. **The gap
+between PF 0 (this run) and PF 1.01300244 (v60) is the real, measured size of the source's zone/bias-
+gate mechanism's contribution on the short side, and it is larger than v60's headline PF suggested when
+read in isolation.** This does not promote v60 (still `testing` on full coverage, still below the
+2022-window `passed` number) and does not change any status — it recontextualises an existing number
+with a genuine market fact that was queued, not guessed, for three prior cycles.
+
+## WHAT THIS DOES AND DOES NOT SETTLE
+
+Settles: the `barstate.isfirst` fix generalises to non-trivial sizing (confirms the 100%-equity
+sibling's diagnosis was about margin, not about `barstate.isfirst` itself); a genuine same-engine,
+same-sizing short-and-hold reference number now exists for both v60 and v65; cascade ratio stays clean
+(1.0) at this sizing too, a fourth data point for HARD LESSON 42's fix holding across every
+bias-gated-or-naive short construction tried so far. Does not settle: whether v60 (or any future short
+construction) is promotable — that remains gated on RATCHET v2 against the long champion's own
+standard, unaffected by a reference baseline. Does not touch the long leg (champion v62-fvg, unchanged)
+or reopen any closed axis (bias, FVG-grading, cascade/sizing — all closed per the entries above).
+
+## CREDIT ACCOUNTING
+
+One backtest, one credit spent (of exactly one allowed this cycle, 490 credits on hand at cycle start,
+250–500 bracket). `get_trades` used for the entry/exit detail was free.
+
+## QUEUE
+
+1. **No further single-term short-side mechanism lever is currently queued** (unchanged from the last
+   several entries) — bias axis, FVG-grading axis, cascade/sizing axis, and now the naive-baseline
+   reference-point question are all closed. The next short-side idea needs new source material this
+   lab does not currently have (per v50's finding that the referenced "last week's cluster lesson"
+   video was never captured), not another baseline or parameter variant.
+2. v64's combined long+short flip-rule finding remains a closed diagnostic, unaffected by this cycle.
+3. Short leg direction unchanged: paused as a promotion candidate, valid as a measured reference
+   (v60/v61(short) on its original 2022-01-01 window, `passed`; v60-short-baseline-full-coverage,
+   `testing`; this cycle's naive baseline, `research`, for context only).
+
+**CHAMPION OF RECORD (LONG): v62-fvg** — unchanged (PF 2.04354108 full coverage / 2.10461082 H1 /
+1.95534435 H2, DD 4.50890824%, 40 trades). **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61(short)** —
+unchanged (PF 1.88616546 on 2022-01-01 window, `passed`; PF 1.01300244 on full coverage, `testing`).
+**THIS CYCLE: 25%-equity naive short baseline recorded `status: research`** — not a strategy candidate,
+a market-fact reference point that recontextualises v60's full-coverage PF as real, if modest,
+selectivity rather than a number floating near an undefined breakeven.

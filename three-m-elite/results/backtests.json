@@ -1330,5 +1330,46 @@
     },
     "verdict": "N/A -- diagnostic, not a strategy candidate",
     "notes": "barstate.isfirst DOES fix the zero-trade bug: 1 trade generated (bar_index==0 produced none). But the trade is NOT a hold-to-end baseline -- get_trades (jobId 01M1SWMVSDMGBC5R8M5MSDMB1A) shows entry at bar 0 (price 11864.50) and exit at bar 1 (price 11870.50), just one 15m bar and a $6 / 0.05% adverse move later, with zero strategy.exit or strategy.close anywhere in the source. That leaves only one explanation: the engine force-closed the position for insufficient margin. This is the cleanest possible reproduction of HARD LESSON 42's margin ceiling -- zero strategy logic, a single order, and even a naked short with no stop still cannot survive one bar at the parity-mandated 100%-equity/margin-short-100 sizing before a trivial adverse tick forces a close. It confirms the margin ceiling is a pure artifact of that sizing convention, not of anything 3M-specific, and explains structurally why v60/v61/v65 needed the 25%-equity declared-deviation fix to produce a trustworthy short number at all: NO short position at 100% equity survives long enough on this engine to mean anything. A true same-engine 'short and hold' market fact is therefore not obtainable without re-running this at 25%-equity declared-deviation sizing (matching v60/v65's convention) -- queued, not run this cycle (1-backtest budget already spent, 493 credits on hand at cycle start)."
+  },
+  {
+    "id": "3m-elite-naive-short-baseline-25pct-full-coverage",
+    "name": "3M Elite naive short baseline, 25pct declared-deviation sizing -- diagnostic, not a 3M leg",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "short",
+    "status": "research",
+    "createdDate": "2026-09-05",
+    "lastTestedDate": "2026-09-05",
+    "backtestStart": "2020-08-19",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/pine/3m-elite-naive-short-baseline-25pct.pine",
+    "pineSource": "three-m-elite/pine/3m-elite-naive-short-baseline-25pct.pine",
+    "description": "Closes the queue item left open by 3m-elite-naive-short-baseline-full-coverage: that 100%-equity naive short force-closed after a single 15m bar, proving the margin ceiling but answering nothing about a true same-engine 'short and hold' market fact. This build is byte-identical (single entry gated on barstate.isfirst, no zone/engulf/bias/stop/target/exit logic) except position size uses the same 25%-equity declared-deviation convention as v60/v61/v65 (HARD LESSON 42/43: qty = strategy.equity * 0.25 / close), so it is directly comparable to those legs' full-coverage numbers on the same sizing basis, not just the same engine.",
+    "metrics": {
+      "profitFactor": 0,
+      "maxDrawdownPct": 40.13486296,
+      "netProfitPct": -37.68518618,
+      "totalTrades": 1,
+      "winRatePct": 0,
+      "sharpeRatio": -1.07275935,
+      "avgTradePct": -37.68518618,
+      "shortTrades": 1,
+      "longTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "resultId": "01M1SZXR0G4RX9Y5A9SKND0A8V",
+      "jobId": "adhoc_01M1SZXR0G4X9XQ6D1TP0MB04K",
+      "strategyId": "01M1SZXERGSJ2RKX3NT6XJQ6GB",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1SZXR0G4RX9Y5A9SKND0A8V",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "uniqueEntries": 1,
+      "totalRows": 1,
+      "maxCascadeDepth": 1,
+      "verifiedAt": "2026-09-05T00:00:00Z"
+    },
+    "verdict": "N/A -- diagnostic, not a strategy candidate. Outcome A (deeply negative) registered before running, and it fired.",
+    "notes": "At 25%-equity sizing the position survives far longer than the 100%-equity sibling (13,015 bars / ~135 days vs 1 bar) but is still margin-called out well before the window ends: get_trades (resultId 01M1SZXR0G4RX9Y5A9SKND0A8V) shows entry at bar 0, 2020-08-19, price 11864.50, qty 0.21 BTC (=0.25*10000/11864.50), and exit at bar 13014, 2021-01-02, price 29789 -- the first leg of the 2020-2021 bull run, roughly +151% against the short. Net P&L -$3768.52 (-37.69% of initial capital), PF 0, maxDD 40.13%, cascadeRatio 1 (clean, single entry, no forced-partial-close artifact per HARD LESSON 50). PRE-REGISTERED OUTCOME A FIRED: this is a market fact, not a strategy result -- 'sell BTC and hold' at this sizing convention is a near-total loss inside the first 5 months of a 6-year window, well before reaching the 2022 bear year where a short would actually have profited. THIS IS THE REFERENCE POINT v60 and v65 needed: v60's full-coverage PF 1.01300244 (64 trades, near-breakeven, 'barely above 1.0') now reads as REAL, if weak, positive selectivity -- the same 25%-equity sizing convention applied to a naive, always-in short produces a catastrophic single-trade loss, not a market-neutral baseline near breakeven. The gap between this (-37.69%, PF 0) and v60 (near-breakeven, PF 1.01) is the actual size of the zone/bias-gate mechanism's contribution on the short side, and it is larger than v60's own headline PF suggested when read against zero. Does not change any promotion status: the long champion (v62-fvg) and validated short (v60/v61) are unaffected. Closes the last open item from the naive-short-baseline diagnostic chain; no further single-term short-side lever is currently queued (unchanged from v65/v60-full-coverage's own entries) -- the next short-side idea needs new source material, not another baseline variant."
   }
 ]
