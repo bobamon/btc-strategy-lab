@@ -74,7 +74,7 @@ tried-and-reverted table. The mechanism registry below is now history, not a to-
 ## Families still open for future cycles
 volume/participation profile · time-of-day seasonality (Asia/London/US overlap) · order-flow imbalance proxies
 · funding-rate / basis effects
-· autocorrelation regime via other estimators (Hurst, ACF sign)
+· ~~autocorrelation regime via other estimators (Hurst, ACF sign)~~ — **CLOSED 2026-09-05.** Variance-ratio form (Attack 2, PF 0.60) and ACF(1)-sign form (Attack 78, PF 0.558476, runId bt_2c800e3fc5) both falsified on BTCUSDT 15m. Hurst is a third estimator of the same falsified property; do not spend a cycle on it without a new reason.
 · microstructure round-number behaviour · realized-vs-implied vol spread
 
 ---

@@ -6436,3 +6436,147 @@ a re-derivation of the frequency/threshold model, not a rescue filter on this ex
    77).
 
 ---
+# ATTACK 78 — ROLLING LAG-1 AUTOCORRELATION SIGN REGIME. A GENUINELY NEW MECHANISM, DISCARDED ON THE KILL RULE. FIRST INVENTED-LAB ATTACK RUN ON THE NEW ENGINE.
+
+Continues numbering after Attack 77, executing that cycle's queue item 8 ("one further genuinely new
+mechanism"). **Engine provenance, stated up front because it is a break with every prior attack on this
+board: this build ran on the `backtest-lab` MCP (backtester24), not on trader.dev.** Attacks 1–77 are
+trader.dev Pine results. No number here is comparable to any number above it, and none was compared.
+The kill rule is an absolute threshold (PF < 1.0 on the never-tuned half), not a ratchet against a base,
+so a fresh mechanism measured entirely within one engine is internally consistent. Nothing was ported.
+
+## THE CLAIM
+
+The sign of the lag-1 autocorrelation of returns over a rolling window separates a momentum regime
+(positive ACF — moves persist) from a mean-reverting one (negative ACF — moves fade), and entering
+long with a trend trigger only while that estimator is positive should select the regime where the
+trigger works. Drawn from `STRATEGY-LEDGER.md`'s own "families still open" list: *autocorrelation
+regime via other estimators (Hurst, ACF sign)*. Attack 2 (VRS-1) consumed the **variance-ratio** form
+of this family and was rejected at PF 0.60; a variance ratio is a multi-lag variance-dispersion
+estimator dominated by volatility clustering, whereas ACF(1) reads the return-to-return dependence
+directly. Different estimator, same latent property, explicitly left open by the ledger.
+
+Chosen partly because it is **natively stateless**, so it fits this engine's expression language
+without amputation — unlike a swing-structure build (see the audit note below).
+
+## CONSTRUCTION
+
+    acf1       = sma(r*shift(r,1),50) / (stdev(r,50)^2 + 1e-12),  r = roc(close,1)
+    entry_long = (acf1 > 0.1) & crossover(close, sma(close,100))
+    exit_long  = crossunder(close, sma(close,100))
+    stop 1.5%, no target, long only, 15m, 1x, size 100%, fee 5bps, funding on
+
+## AUDIT (one line per leg)
+
+R >= 0.8% (LESSON 3) — satisfied **by construction**, not by exclusion: the stop is a flat 1.5% of
+price, which is above the 0.8% floor at every price in the window. Stop beyond STRUCTURE (LESSON 5) —
+**NOT SATISFIED, AND IT COULD NOT BE.** `backtest-lab`'s `custom` strategy exposes only boolean
+entry/exit expressions plus a global `stop_loss_pct`; there is no per-trade price-level stop, so the
+prior-swing-low convention used by Attacks 37/59/63/66/76/77 is inexpressible on this engine. This is
+a real deviation from the board's standard and is the reason the note below was checked. Each leg
+separately (LESSON 6) — LONG ONLY, this lab's convention for a first pass; the short leg (negative-ACF
+regime with a downside trigger) is deferred and reported as OUTSTANDING. BINDING (E17) — `acf1 > 0.1`
+AND the SMA100 crossover; no per-term counter build was run. REDUNDANCY (E14) — `acf1` reads a
+normalized return-dependence statistic over a 50-bar window; `sma(close,100)` reads a price level over
+a different window. LATCH IN SEQUENCE (LESSON 8) — `crossover` is a fresh single-bar event gated by a
+threshold on a continuous statistic; there are not two competing latches on one bar. CASCADE (HARD
+LESSON 42/43) — single entry, `liquidations: 0` confirmed in the result, 1x leverage.
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4)
+
+Pre-registered **100–400 trades**, moderate confidence, anchored on close/SMA100 crossings at 15m
+(~700–1,000 raw over 85k bars) with the ACF threshold expected to retain roughly a quarter.
+
+## H1 (NEVER-TUNED HALF, 2022-01-01 → 2024-06-08)
+
+`runId bt_2c800e3fc5` · `pinned: true` · `binance_perp_archive` · 85,345 bars
+
+| | **Attack 78a (H1)** |
+|---|---|
+| Profit factor | **0.558476** |
+| Trades | 269 |
+| Win rate | 12.639405% |
+| Avg winner | $146.389315 |
+| Avg loser | -$37.924173 |
+| Achieved win/loss ratio | 3.85995 |
+| Max drawdown | 45.966172% |
+| Net return | -39.34944% |
+| Buy & hold, same window | +49.723428% |
+| Commission paid | $2,219.3116 |
+| Funding paid | $82.1469 |
+| Exposure | 5.754291% |
+| Avg bars held | 18.256506 |
+| Liquidations | 0 |
+
+**Frequency estimate scored: pre-registered 100–400, actual 269** — inside the band, and inside the
+lab's settled 60–350 workable window. Second consecutive cycle where the frequency model landed right
+(Attack 77 was 207 against 100–450).
+
+## KILL RULE APPLIED. H2 NOT RUN.
+
+**Not a close call.** PF 0.558476 on the never-tuned half. Discarded outright: no filter stack, no
+rescue, H2 not run.
+
+## THE FREE DIAGNOSTIC (HARD LESSON 37) — THIS IS A NEGATIVE EDGE, NOT A COST PROBLEM
+
+Fees were $2,219.31 over 269 trades = **$8.25 per trade**. Net average trade is -$14.63, so the
+**gross average trade before fees is about -$6.38 — still negative.** The mechanism does not have an
+edge that commission is eating; it has no edge. Per HARD LESSON 36 this is unambiguously the "weak"
+branch rather than the "expensive" branch, and no cost-reduction fix applies.
+
+Confirming it from the payoff side (HARD LESSON 39): an achieved win/loss ratio of 3.86 needs a win
+rate of about **20.6%** to break even. Actual win rate is **12.64%**. The gap is wide, not marginal.
+
+## A METHODOLOGICAL NOTE WORTH CARRYING FORWARD — THE MISSING STRUCTURAL STOP DID NOT CONFOUND THIS RESULT
+
+The audit above flags that this engine cannot place a stop beyond structure. That objection was
+checked rather than waved away, and on **this** build it does not bind: the trade distribution puts
+only **17 of 269** trades in the bin at the stop distance (-1.61%), with **153** clustered in the
+-0.41%…+0.19% bin. Almost every exit was the `crossunder` signal at a small loss, not the stop. The
+flat 1.5% stop was **not load-bearing**, so the verdict rests on the entry and the signal exit, which
+were both expressed faithfully.
+
+**This does not generalise to builds where the stop is load-bearing** — which is most of this board,
+and all of War Formation. It is a per-build check, and it should be run on every future
+`backtest-lab` attack before the result is trusted: read the distribution, count how many exits
+reached the flat stop, and say so.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+PF < 1.0, so **category 2, bleed on a negative edge** — the same shape as Attacks
+36/48/49/50/53b/72b/73/74/75/76/77. Not worth filtering. Worth one observation: exposure was only
+**5.75%**, so a -45.97% drawdown was produced while in the market a twentieth of the time. The bleed is
+dense, not diffuse.
+
+## THE VERDICT — DISCARDED ON THE KILL RULE
+
+The ACF(1)-sign form of the autocorrelation-regime family fails on the same axis as Attack 2's
+variance-ratio form, at a lower profit factor. Two different estimators of the same latent property
+have now both been falsified on this instrument and timeframe. That is a stronger statement about the
+family than either result alone: **the autocorrelation-regime family should be treated as closed for
+BTCUSDT 15m**, not merely as two unlucky parameterisations.
+
+**This is the seventh bare-mechanism first pass to fail outright in a row (72, 73, 74, 75, 76, 77, 78),
+now across two different backtest engines.** The engine change did not alter the pattern, which
+removes "the old engine's harness" as a candidate explanation for the streak.
+
+## QUEUE
+
+1. **Do not sweep `acf1`'s threshold or window.** Per HARD LESSON 4/45 and Attack 77's queue item 1,
+   the diagnosed failure is a negative gross edge, not a threshold miss. Sweeping past a measured
+   negative edge is the error those lessons name.
+2. **Mark the autocorrelation-regime family closed** in the ledger's "families still open" list —
+   both the variance-ratio (Attack 2) and ACF-sign (Attack 78) estimators are now falsified. Hurst
+   remains formally untested but is a third estimator of the same falsified property.
+3. **Run the flat-stop load-bearing check on every future `backtest-lab` attack** before trusting its
+   verdict, as described above. Candidate for a numbered hard lesson if it recurs.
+4. **Attack 68 remains the board's strongest both-halves candidate** (PF 1.56474476/1.13127036 on
+   89/80 trades) — unaffected by this cycle, and a trader.dev result.
+5. **Attack 46 (long) remains a candidate alongside Attack 68** — unaffected.
+6. **The short leg remains a reported standing structural asymmetry** — unaffected.
+7. **Next invented-lab tick proposes ONE further genuinely new mechanism**, distinct from every
+   rejected strategy on the board (Attacks 33–65, 67/69/70/71, 72–78) and from the now-closed
+   autocorrelation family. Remaining open families: volume/participation profile · time-of-day
+   seasonality · order-flow imbalance proxies · realized-vs-implied vol spread.
+
+---
