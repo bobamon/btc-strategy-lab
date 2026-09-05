@@ -8291,3 +8291,141 @@ composition?** Only the first case is a candidate for this fix.
    `backtest-lab`/`sweep_backtest` tool is available here. That track's own queue (re-run per-cell on a
    longer window, split-test BTC/ETH, a Donchian-breakout control arm) is left for whichever session next
    has that tool.
+
+---
+
+# ATTACK 88 — QUEUE ITEM 2 ON ATTACK 87 (FILTER-STACK TERM 4): REGIME-CONDITIONED PIVOT-SPACING FLOOR. REJECTED — H2 DOES NOT CLEAR MATERIALLY AND DRAWDOWN WORSENS; TERM-4 AXIS NOW CLOSED.
+
+The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") more than
+eighty attacks stale, instructing "continue numbering after 37." **The docs override it, again.** Attack 37
+closed on cost at Attack 41; the filter stack in progress is on Attack 66/68/82/83/87, and this cycle is
+BTC Attack 88 (next free number after Attack 87, the last entry on the board).
+
+## THE TERM
+
+**Regime-conditioned pivot-spacing floor**, executing Attack 87's own queue item 2: "the divergence's own
+TIME SEPARATION normalized by regime ... remains the one named-but-untried candidate from Attack 83's
+queue." Attack 71 tested an *unconditional* 20-bar minimum spacing between the two pivot-low bars a bullish
+divergence compares and it collapsed both halves decisively (trades 89→18 / 80→12, PF 1.565→1.081 /
+1.131→0.883) — its own diagnosis: on this mechanism most divergence pairs resolve quickly, and that is the
+edge, not noise. This build tests a narrower hypothesis instead of retuning the same unconditional floor:
+quick-forming pivot pairs are only suspect evidence of a genuine divergence in an otherwise-CALM tape; in an
+ELEVATED-volatility regime, fast order flow can legitimately produce a real divergence in a short bar-count
+window. The floor is EXEMPTED, not resized, when `elevatedVol` (Attack 83's own regime descriptor, reused
+verbatim) is true — the identical construction shape as Attack 83's own successful climax-exclusion clause,
+applied to spacing instead of raw volume. Both the 20-bar threshold (Attack 71's value) and the regime
+descriptor (Attack 83's value) are reused unchanged; nothing invented or retuned (LESSON 49). Pine:
+`strategies/pine/attack88-obv-divergence-regime-conditioned-spacing-floor.pine`.
+
+## AUDIT (one line per leg)
+
+R >= 0.8% (LESSON 3) — unchanged, `rBig` gates by exclusion. Stop beyond STRUCTURE (LESSON 5) — unchanged,
+`slPx = lastPivLow`. Each leg separately (LESSON 6) — LONG ONLY; short remains a reported standing asymmetry
+(Attack 64). BINDING (E17) — `bullDiv` (now `divMagOk` AND `validClimax` AND `spacingOk`) AND
+`breakoutTrigger` AND `rBig` AND `swingOk`; `spacingOk` strictly widens Attack 71's unconditional floor
+(elevated-regime bars exempted) and strictly narrows Attack 83 (calm-regime bars now also need >=20-bar
+separation) — can only remove a subset of what Attack 71 removed, and only a subset of what Attack 83 keeps.
+REDUNDANCY (E14) — `barsBetween` (time separation, a genuinely new quantity) vs `divMagOk` (OBV magnitude)
+vs `validClimax`/`elevatedVol` (realized-volatility regime, reused verbatim from Attack 83, an intentional
+shared gate as Attack 87 also used) vs `rBig` (price distance) vs `swingAmp` (price swing) — one new
+quantity layered onto four already-audited ones. LATCH IN SEQUENCE (LESSON 8) — `barsBetween`/`spacingOk`
+computed in the same if-block as `bullDiv`'s own re-derivation, exactly as `divMagOk`/`validClimax` already
+do. CASCADE (HARD LESSON 42/43) — LONG at 100% equity; `cascadeRatio` 1 / `maxCascadeDepth` 1 confirmed on
+both halves (55 and 64 total rows, unique entries each).
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4)
+
+Because this term can only rescue the subset of Attack 71's tight-spacing pairs that occur in an elevated-
+volatility regime, and the base mechanism's pivot-low bars are not themselves closely tied to elevated
+volatility (unlike Attack 82/83's climax bars, which sit at breakout by construction), the registered
+estimate was a **40-70% cut on each half** — materially better than Attack 71's ~80-85% but still likely
+decisive.
+
+## H1 AND H2, ATTACK 83 (BASE) VS ATTACK 88 (+ TERM), SIDE BY SIDE
+
+| | Attack 83a (H1) | **Attack 88a (H1)** | Attack 83b (H2) | **Attack 88b (H2)** |
+|---|---|---|---|---|
+| Profit factor | 1.61044869 | **2.02132038** | 1.15365198 | **1.15432978** |
+| Trades | 88 | **55** | 79 | **64** |
+| Win rate | 65.90909091% | **69.09090909%** | 59.49367089% | **59.375%** |
+| Avg winner | $171.25 | $208.52 | $124.79 | $129.93 |
+| Avg loser | -$205.59 | **-$230.59** | -$158.87 | **-$164.51** |
+| Achieved win/loss ratio | 0.8329907 | 0.90427491 | 0.78546517 | 0.78980459 |
+| Max drawdown | 11.08160523% | **10.6871093%** | 10.75664561% | **11.49097642%** |
+| Net return | +37.65049449% | **+40.03683635%** | +7.81141638% | **+6.60110006%** |
+| Commission paid | $970.53 | $645.58 | $833.30 | $671.61 |
+
+**Frequency estimate scored: pre-registered 40-70% cut, actual H1 37.5% cut (88→55, just outside the
+registered band, better than expected) and H2 19.0% cut (79→64, well outside the band, much better than
+expected).**
+
+## THE VERDICT — REJECTED. H1 CLEARS DECISIVELY; H2 DOES NOT CLEAR AND DRAWDOWN WORSENS.
+
+**H1, taken alone, clears RATCHET v2 outright and by the widest margin any term-4 candidate has produced on
+this board.** PF rises 1.61044869 → 2.02132038 (+0.41087169, far past the 0.02 material-gain bar) and
+drawdown improves outright, 11.08160523% → 10.6871093% (-0.39449593pp) — no allowance needed.
+
+**H2 does not clear.** PF is essentially flat, 1.15365198 → 1.15432978 (+0.00067780 — two orders of
+magnitude below the 0.02 material-gain bar), and drawdown WORSENS, 10.75664561% → 11.49097642%
+(+0.73433081pp). RATCHET v2's clause-2 allowance (up to 0.50pp of drawdown worsening) only applies when the
+PF gain exceeds 0.02 — here there is effectively no PF gain, so no allowance applies and clause 1 fails on
+its own. Per the queue's own standing instruction — *"anything that improves one half and hurts the
+other is rejected, not averaged"* — the term is **REJECTED**. Attack 83 remains the base.
+
+## WHY THIS RESULT CUTS AGAINST THE PRE-RUN ESTIMATE, AND WHAT IT MEANS
+
+The registered estimate (40-70% cut, decisive on both halves) undershot how much this term actually
+rescued: H1's cut was a comparatively mild 37.5% and its PF gain was the largest of any term-4 candidate
+tried. **This says H1's surviving tight-spacing pairs are disproportionately the elevated-volatility
+subset that this term correctly protects, and H1's excluded pairs (the calm-regime, tight-spacing ones)
+were disproportionately weak trades** — the opposite of Attack 71's finding on the *whole* sample, which
+makes sense once split: Attack 71 mixed a rescuable calm-regime-only defect with an unrescuable one, and H1
+apparently contains more of the rescuable kind. **H2 shows the opposite: its cut (19.0%) was mild too, but
+those excluded pairs were, on net, roughly as good as the ones that remained** (PF barely moves, drawdown
+gets worse) — H2's tight-spacing pairs are not concentrated in the calm regime the way H1's are, so
+exempting the elevated-regime subset barely touches H2's population and does not isolate a weak group.
+
+**This is a genuinely different failure shape from Attack 87's** (there H1 reversed outright and H2 cleared
+cleanly; here H1 clears spectacularly and H2 is merely flat-to-worse) — but it lands in the same place:
+a half-level asymmetry in which regime-conditioning is not a stable, transferable fix. Combined with Attack
+71 (decisive collapse, both halves) and Attack 87 (opposite-direction split), **three distinct constructions
+on the same general axis (temporal/structural spacing and margin of the divergence-breakout setup) have now
+each failed in a different way.** That pattern — not any single result — is the strongest evidence yet that
+this axis does not contain a fourth stack term, regardless of how it is conditioned.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Both halves remain category **3** (bleed on a positive edge): PF stays above 1.0 on both variants tested
+here, and neither half's avg loser is an outlier against its largest loss (H1: -$624.98 largest vs -$230.59
+avg, ~2.7x; H2: -$320.24 largest vs -$164.51 avg, ~1.9x — no concentration signature). This rejection is
+about the RATCHET v2 keep/revert decision on H2, not a drawdown-category reclassification.
+
+## WHAT THIS SETTLES
+
+**The term-4 axis on Attack 83 is now CLOSED after three failed attempts, each a genuinely different
+construction** (Attack 71: unconditional bar-count floor; Attack 87: regime-conditioned breakout-margin;
+Attack 88: regime-conditioned pivot-spacing). Per Attack 87's own queue item 1, a third failed axis argued
+cleanly from the mechanism is not itself a reason to keep searching this exact base for a further candidate.
+**The Attack 83 filter stack is complete at three terms**: OBV-magnitude floor (Attack 68), regime-
+conditioned volume-climax exclusion (Attack 83), and — after this cycle — nothing further survives on top.
+
+## QUEUE
+
+1. **Attack 83 remains the base and the strongest both-halves candidate on this board** — PF
+   1.61044869/1.15365198 on 88/79 trades. No further filter-stack term should be attempted on it without a
+   genuinely new, previously-unexplored quantity (not time, not margin, not volume, not swing amplitude —
+   all five explored axes have now failed).
+2. **Per the mandate's own fallback (queue item 2 has now been retried and failed), the next cycle proposes
+   ONE genuinely new mechanism**, distinct from the VWAP family and from every rejected strategy on the
+   board (Attacks 33-65, 67/69/70/71/72-82, 84-87, and now 88). Candidate untried indicator families on this
+   engine's 65-function allowlist, none yet used in any attack: `ta.sar`, `ta.supertrend`, `ta.cci`,
+   `ta.stoch`, `ta.macd`, `ta.cog`, `ta.tsi`, `ta.wpr`, `ta.iii`, `ta.wad`, `ta.wvad`, `ta.linreg`,
+   `ta.percentrank`.
+3. **Attack 46 (long) remains a candidate alongside Attack 83**, unaffected by this cycle — its H2 PF
+   (1.586) is still the best of any both-halves-positive build on this board, though its H2 sample (38) sits
+   closer to the 30-trade floor than Attack 83's (79).
+4. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if that
+   family is revisited before another fresh mechanism.
+5. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+6. **This session cannot continue the new-engine cross-sectional track (Attacks 84-86)** — no
+   `backtest-lab`/`sweep_backtest` tool is available here, unaffected by this cycle.

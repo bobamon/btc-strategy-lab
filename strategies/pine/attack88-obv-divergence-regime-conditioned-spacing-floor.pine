@@ -1,0 +1,181 @@
+//@version=6
+// BTC ATTACK 88 - QUEUE ITEM 2 ON ATTACK 87: REGIME-CONDITIONED VERSION OF ATTACK 71's PIVOT-SPACING FLOOR.
+//
+// The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") more
+// than eighty attacks stale, instructing "continue numbering after 37." THE DOCS OVERRIDE IT, AGAIN: Attack
+// 37 closed on cost at Attack 41; the filter stack in progress is on Attack 66/68/82/83/87, and this cycle
+// is BTC Attack 88 (next free number after Attack 87, the last entry on the board). Attack 87's own queue
+// item 2 named the one remaining untried term-4 candidate on Attack 83: "the divergence's own TIME
+// SEPARATION normalized by regime (distinct from Attack 71's raw bar-count spacing)." This build executes
+// that item, before falling back to Attack 87's own queue item 3 (a genuinely new mechanism) if it fails.
+//
+// THE TERM, ARGUED FROM THE MECHANISM (LESSON 49, not from either half's dates). Attack 71 tested an
+// UNCONDITIONAL 20-bar minimum spacing between the two pivot-low bars a bullish divergence compares, and it
+// collapsed both halves decisively (trades cut 89->18 and 80->12, PF 1.565->1.081 and 1.131->0.883). Its own
+// diagnosis: on this mechanism, divergence pairs that resolve QUICKLY are the majority of the edge, not
+// noise -- "divergence pairs separated by more time are not more reliable, they are rarer." That diagnosis
+// was measured on the WHOLE sample, not split by volatility regime. This build tests a narrower, genuinely
+// different hypothesis: that quick-forming pivot pairs are only suspect evidence of a real divergence in an
+// otherwise-CALM tape (little intrinsic reason for OBV to swing meaningfully bar-to-bar), and are NOT
+// suspect when the market is already in an ELEVATED-volatility regime (fast order flow can legitimately
+// produce a genuine divergence in a short bar-count window). The floor is therefore EXEMPTED, not resized,
+// when `elevatedVol` (Attack 83's own ATR14/close-vs-its-200-bar-average regime descriptor, reused
+// verbatim) is true -- the identical construction shape as Attack 83's own successful climax-exclusion
+// term (`validClimax = not (isClimax and not elevatedVol)`), applied here to spacing instead of raw volume.
+// Both the 20-bar threshold (Attack 71's own value) and the regime descriptor (Attack 83's own value) are
+// reused unchanged -- nothing is invented or retuned for this test (LESSON 49).
+//
+// This DOES NOT touch bullDiv's OBV-magnitude clause (divMagOk, Attack 68), the climax-exclusion clause
+// (validClimax, Attack 83), breakoutTrigger, rBig, or swingAmp -- it only adds a third, regime-conditioned
+// clause alongside them, folded into the same pivot-low arming bar. Pine:
+// `strategies/pine/attack88-obv-divergence-regime-conditioned-spacing-floor.pine`.
+//
+// AUDIT (one line per leg):
+//   R >= 0.8% (LESSON 3) - unchanged, rBig still gates by exclusion on rLong = close - lastPivLow.
+//   Stop beyond STRUCTURE (LESSON 5) - unchanged, slPx = lastPivLow, the confirmed divergence low.
+//   Each leg separately (LESSON 6) - LONG ONLY, unchanged; short leg remains a reported standing
+//        asymmetry (Attack 64).
+//   BINDING (E17) - bullDiv (now divMagOk AND validClimax AND spacingOk) AND breakoutTrigger AND rBig AND
+//        swingOk all necessarily bind; spacingOk is a strict WIDENING relative to Attack 71's unconditional
+//        floor (elevated-regime bars are exempted) and a strict NARROWING relative to Attack 83/no-spacing-
+//        term (calm-regime bars now also need >=20-bar separation) -- it can only remove a SUBSET of what
+//        Attack 71 removed, and only a subset of what Attack 83 currently keeps.
+//   REDUNDANCY (E14) - barsBetween (bar-count time separation between the two pivot-low bars, a NEW
+//        quantity not read by any existing clause) vs divMagOk (normalized OBV magnitude at those bars) vs
+//        validClimax/elevatedVol (realized-volatility regime, REUSED verbatim from Attack 83 -- not a new
+//        independent axis, an intentional shared gate exactly as Attack 87 also reused it) vs rBig (price
+//        distance to lastPivLow) vs swingAmp (price swing) -- one genuinely new quantity (time separation)
+//        layered onto four already-audited ones, sharing the regime descriptor by design, not by oversight.
+//   LATCH IN SEQUENCE (LESSON 8) - barsBetween and spacingOk are computed and folded into bullDiv on the
+//        SAME bar and in the SAME if-block where bullDiv itself is re-derived (the pivot-low confirmation
+//        bar), exactly as divMagOk and validClimax already do -- not a new same-bar setup/trigger
+//        conjunction. breakoutTrigger remains a later, distinct bar.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, flat check gates every entry, unchanged.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity; expect cascadeRatio 1 on both halves, confirmed
+//        below.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4): Attack 71 found that MOST divergence pairs
+// on this mechanism resolve within 20 bars regardless of anything else measured, which is why its
+// unconditional floor cut 79.78% (H1) and 85.0% (H2) of trades. This term only RESCUES the subset of those
+// tight-spacing pairs that occur in an elevated-volatility regime -- it cannot rescue calm-regime tight
+// pairs, which Attack 71's own diagnosis says are the bulk of the edge. Registering honestly: because the
+// base mechanism (bullish OBV divergence + breakout) does not itself require or correlate strongly with
+// elevated volatility at the PIVOT-LOW bar specifically (unlike the climax bars in Attack 82/83, which are
+// close to breakout by construction), I expect only a MINORITY of Attack 83's surviving 88/79 trades to be
+// exempted by `elevatedVol`, and therefore expect this term to still cut a LARGE fraction of trades on both
+// halves -- pre-registering a 40-70% cut on each half, materially better than Attack 71's ~80-85% but still
+// likely a decisive rather than marginal reduction. A cut inside that band that still passes RATCHET v2
+// would mean the elevated-regime subset specifically concentrates the edge; a cut near or above Attack 71's
+// own 80-85% would mean the regime split does not meaningfully separate the tight-spacing population and
+// the axis is exhausted in every form tried.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17), READ AGAINST ATTACK 83 (BASE) ON BOTH HALVES:
+//   * PF IMPROVES ON BOTH HALVES (RATCHET v2 clause 1), DD DOES NOT WORSEN (clause 2 allowance if PF gain >
+//     0.02) ON BOTH, TRADES >= 30 ON BOTH (clause 3) -> KEPT as the new base for term 4, the stack closes at
+//     four terms.
+//   * IMPROVES ONE HALF, HURTS THE OTHER -> REJECTED, exactly Attack 67/69/70/71/82/87's fate, not averaged.
+//   * COUNT CUT > 50% ON EITHER HALF -> a split-feasibility problem under clause 4, and per Attack 71's own
+//     precedent this alone can decide the result before PF is even examined.
+//   * TRADES BELOW ~30 ON EITHER HALF -> a direction, not a result (LESSON 12).
+//   * EITHER WAY: if this is the third failed term-4 axis (after Attack 71 and Attack 87), the filter stack
+//     on Attack 83 is CLOSED at three terms and the next cycle owes a genuinely new mechanism per Attack
+//     87's own queue item 3.
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside net (LESSONS 36/39 and the
+//     board's three-drawdown-category taxonomy).
+
+strategy("BTC Attack88 OBV divergence regime-conditioned spacing floor", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+pivotLeft   = input.int(5, "Pivot confirmation bars, left")
+pivotRight  = input.int(5, "Pivot confirmation bars, right")
+minRpct     = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars     = input.int(192, "Max bars in trade")
+obvRangeLen = input.int(200, "OBV normalizing range lookback")
+divMagPct   = input.float(3.0, "Min OBV divergence magnitude, % of OBV's own range")
+volAvgLen   = input.int(20, "Volume trailing average length (climax definition)")
+climaxMult  = input.float(2.5, "Volume climax multiple of its own trailing average")
+atrLen      = input.int(14, "ATR length (regime descriptor)")
+regimeLen   = input.int(200, "Regime lookback for ATR/close's own average")
+spacingMinBars = input.int(20, "Min bar spacing between pivot lows, calm regime only (Attack 71's own value)")
+
+pl  = ta.pivotlow(low, pivotLeft, pivotRight)
+ph  = ta.pivothigh(high, pivotLeft, pivotRight)
+obv = ta.obv
+
+obvRange = ta.highest(obv, obvRangeLen) - ta.lowest(obv, obvRangeLen)
+
+volAvg  = ta.sma(volume, volAvgLen)
+isClimax = volume >= volAvg * climaxMult
+
+atrPct       = ta.atr(atrLen) / close
+atrPctAvg    = ta.sma(atrPct, regimeLen)
+elevatedVol  = atrPct > atrPctAvg
+
+var float lastPivLow    = na
+var float prevPivLow    = na
+var float lastPivLowOBV = na
+var float prevPivLowOBV = na
+var int   lastPivLowBar = na
+var int   prevPivLowBar = na
+var float lastPivHigh   = na
+var bool  bullDiv       = false
+
+if not na(pl)
+    prevPivLow    := lastPivLow
+    prevPivLowOBV := lastPivLowOBV
+    prevPivLowBar := lastPivLowBar
+    lastPivLow    := pl
+    lastPivLowOBV := obv[pivotRight]
+    lastPivLowBar := bar_index[pivotRight]
+    if not na(prevPivLow)
+        obvDivMag   = lastPivLowOBV - prevPivLowOBV
+        divMagFloor = obvRange * divMagPct / 100
+        divMagOk    = not na(obvRange) and obvDivMag > divMagFloor
+        validClimax = not (isClimax and not elevatedVol)
+        barsBetween = lastPivLowBar - prevPivLowBar
+        spacingTooTight = barsBetween < spacingMinBars
+        spacingOk   = not (spacingTooTight and not elevatedVol)
+        bullDiv := lastPivLow < prevPivLow and obvDivMag > 0 and divMagOk and validClimax and spacingOk
+
+if not na(ph)
+    lastPivHigh := ph
+
+rLong = not na(lastPivLow) ? close - lastPivLow : na
+minR  = close * minRpct / 100
+rBig  = not na(rLong) and rLong >= minR
+
+breakoutTrigger = not na(lastPivHigh) and ta.crossover(close, lastPivHigh)
+
+swingAmp = not na(lastPivHigh) and not na(lastPivLow) ? lastPivHigh - lastPivLow : na
+swingOk  = not na(swingAmp) and swingAmp > 0
+
+goLong = bullDiv and breakoutTrigger and rBig and swingOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := lastPivLow
+    tpPx   := close + swingAmp
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(lastPivLow, title="LastPivotLow")
+plot(lastPivHigh, title="LastPivotHigh")
