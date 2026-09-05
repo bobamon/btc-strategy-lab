@@ -5807,3 +5807,83 @@ at `pine/3m-elite-v58-first-touch-only.pine`). **Unchanged by this cycle** — c
 4.50890824%, 40 trades, full data coverage from 2020-08-19), split-tested clean this cycle, pending
 comparison against v58 on the same window. **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61(short)**
 (PF 1.88616546 full sample; DD 1.71159657%; 39 trades). Unchanged by this cycle.
+
+---
+
+# ██ v58 RE-BASELINED ON FULL COVERAGE — QUEUE ITEM 1 CLEARS, v62-fvg PROMOTED TO CHAMPION (2026-09-05)
+
+**A note on the scheduled prompt, again.** This cycle's stored prompt is the same v37/v53 snapshot
+addressed at every check since #1 (12H/24H bias gate and cascade signature both closed at v54–v61,
+per HARD LESSON 45 and HARD LESSON 34/35/50/52). Per "THE DOCS WIN over this prompt," this cycle
+took the entry immediately above's own top queue item instead: re-run v58 on full coverage and
+compare directly against v62-fvg, the one comparison that decides whether v62-fvg is promotable.
+`git pull --rebase` at the start of this cycle brought in no new concurrent work beyond what that
+entry already reflects, so there is no numbering collision to flag this time.
+
+## THE COMPARISON, RUN
+
+Byte-identical Pine to the verified `3m-elite-v58-cold-reproduction` (strategyId
+`01M1NPK9330DEE97KX7KCCW8MJ`, confirmed via `run_backtest` re-using that exact saved strategy — no
+code change, only the window widened), full 15m coverage 2020-08-19 → 2026-09-01
+(resultId `01M1SJ6CSCJ8ESEAAKKHS97GE8`):
+
+| | v58 (2022-01-01 window) | **v58 (full coverage)** | v62-fvg (full coverage) |
+|---|---|---|---|
+| Profit factor | 1.48439273 | **1.16728474** | **2.04354108** |
+| Max drawdown | 8.70519440% | **19.37771492%** | **4.50890824%** |
+| Trades | 117 | **174** | 40 |
+| Net return | +42.53848648% | **+20.74524159%** | +25.61599544% |
+| Sharpe | 0.9292181 | **0.35463055** | — |
+| Cascade ratio | — | **1.0** (174/174, depth 1) | 1.0 (40/40) |
+
+**v58 degrades on the fuller record, same direction as v37's own re-baseline (PF 1.25→1.05, DD
+8.73%→26.98%) but less severely** — v58 stays comfortably above breakeven where v37 barely cleared
+it, so `dzTouch==0` is doing real selectivity work even on the extra 17 months, just not enough to
+hold its 2022-window headline. The cascade ratio is clean (1.0) on this long leg — the 1.4x+
+cascade signature flagged repeatedly in stale cycles of the scheduled prompt is, and has only ever
+been, a short-leg phenomenon (v51/v53's supply-mirror builds), not present here.
+
+## PROMOTION: v62-fvg CLEARS EVERY RATCHET V2 CLAUSE AGAINST v58-FULL-COVERAGE
+
+| RATCHET v2 clause | v62-fvg vs v58-full-coverage | Result |
+|---|---|---|
+| 1. PF improves | 1.16728474 → 2.04354108 | ✅ +0.876 |
+| 2. DD does not worsen | 19.37771492% → 4.50890824% | ✅ improves 14.87pp |
+| 3. Trades ≥ 30 | 40 | ✅ |
+| 4. >50% count-cut split test (241→40 vs v37, or 174→40 vs v58, both >50%) | H1 PF 2.10461082 (24 trades) / H2 PF 1.95534435 (16 trades), already run against the v37 comparator, unchanged construction | ✅ both halves clear PF 1.0, no collapse, no reversal |
+
+All four clauses clear. **v62-fvg is promoted: `status` raised `testing` → `passed` in
+`results/backtests.json` for the full-coverage record and both split halves.** Per this project's
+own discipline against silently rewriting the past, v58's own prior "passed" entries (on the
+2022-01-01 window it was actually ratcheted against at the time) are left exactly as recorded —
+they were a real, correctly-judged improvement over v37 on that window. Nothing is demoted to
+`rejected`; only the champion pointer below moves.
+
+## WHAT THIS MEANS FOR THE WINDOW CONVENTION GOING FORWARD
+
+Both champions on file (v37, v58) now have full-coverage numbers materially weaker than their
+2022-01-01 headline; v62-fvg is the first construction on this lab's file EVER BUILT AND JUDGED on
+full coverage from the start, and it still holds up (H1/H2 both clear PF 1.0 independently). This is
+read as one more data point, not yet a rule: full coverage should be the default window for any new
+3M construction from here on, and any future promotion candidate should be compared against
+whichever champion's full-coverage number is on file, not its stale 2022-window one — exactly the
+comparison this cycle just completed for v58.
+
+## QUEUE
+
+1. **Short leg on full coverage is still open.** v60/v61(short) (PF 1.88616546, DD 1.71159657%, 39
+   trades) has never been re-run on the full 2020-08-19 start — same gap v37 and v58 both had. Not
+   run this cycle (credit budget: 1 of up to 2 spent).
+2. **v64 combined long+short flip-rule build is still `status: testing`** (queue item carried from
+   the previous entry, untouched by this cycle — it predates and is independent of the full-coverage
+   question).
+3. FVG grading on the short leg remains untested (unchanged from the entry above).
+4. `barstate.isfirst` fix for the zero-trade buy&hold benchmark bug — still unspent, still optional.
+
+**CHAMPION OF RECORD (LONG): v62-fvg** (PF 2.04354108 full coverage / 2.10461082 H1 / 1.95534435 H2,
+DD 4.50890824%, 40 trades, `pine/3m-elite-v62-fvg-graded-full-coverage.pine`, full 2020-08-19 →
+2026-09-01 coverage). **Promoted this cycle**, superseding v58. **PRIOR CHAMPION (still `passed`,
+window-superseded): v58** (PF 1.48439273 on 2022-01-01 window / 1.16728474 on full coverage, DD
+8.70519440% / 19.37771492%, 117 / 174 trades, `dzTouch==0`). **VALIDATED SHORT (NOT A CO-CHAMPION):
+v60/v61(short)** (PF 1.88616546 full sample on the 2022-01-01 window; DD 1.71159657%; 39 trades) —
+unchanged by this cycle, full-coverage re-run still owed (queue item 1 above).
