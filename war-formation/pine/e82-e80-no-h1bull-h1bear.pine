@@ -1,0 +1,176 @@
+//@version=6
+// WAR FORMATION E82 -- E80's QUEUE ITEM 2, FIRST HALF: h1Bull/h1Bear REMOVED, brokeBelow/brokeAbove HELD.
+//
+// E80 flagged a NEW redundancy risk at 15m native that did not exist at 1m/5m: h1Bull (close vs
+// THIS hour's open) and the redesigned brokeBelow/brokeAbove (THIS hour's running high/low vs the
+// PRIOR hour's) now both derive from the SAME 1h bucket, where before (1m/5m) they read two
+// different tiers (1h open vs 15m bucket extremes). HARD LESSON 48's method: sweep binding
+// SEPARATELY per term, per leg -- do not assume a term that binds on one leg binds on the other,
+// and do not assume two now-correlated terms are doing the same or different work without testing
+// each removal in isolation.
+//
+// THIS RUN removes h1Bull/h1Bear from goLong/goShort, holding brokeBelow/brokeAbove and every
+// other gate unchanged from E80. The mirror test (remove brokeBelow/brokeAbove, hold h1Bull/
+// h1Bear) is NOT run this cycle -- this cycle's credit budget (495, the 250-500 band) permits
+// exactly ONE backtest, so the two single-term binding tests HARD LESSON 48 calls for cannot both
+// run in one sitting. The mirror test remains open for a future cycle with budget for it.
+//
+// SINGLE HYPOTHESIS, ISOLATED (HARD LESSON 16/E17): does E80 survive with h1Bull/h1Bear removed.
+// If PF holds (within noise of E80's 1.24221581 on 44 trades) with h1Bull/h1Bear removed, that
+// term is redundant with brokeBelow/brokeAbove on this window and could be dropped for a simpler
+// build (HARD LESSON 8's redundancy concern). If PF drops materially, h1Bull/h1Bear IS carrying
+// distinct information despite deriving from the same 1h bucket, and the redesign's two terms are
+// correlated but not interchangeable.
+//
+// PRE-RUN AUDIT:
+//   R = shieldUsd $2,000, same window as E80 (~$60k-$120k BTC range): 1.7%-3.3%, clears the 0.8%
+//     floor (HARD LESSON 3).
+//   Stop is risk-defined per the ALCM spec (HARD LESSON 5), unchanged from E80.
+//   Both legs reported separately (HARD LESSON 6).
+//   BINDING (E17): exactly one variable changed from E80 -- h1Bull/h1Bear dropped from goLong/
+//     goShort. atr periods, shieldUsd, rr, maxBars, coilK, velK, the whole-number band, timeGate,
+//     witching-hour ban -- all byte-identical to E80.
+//   REDUNDANCY (HARD LESSON 18/48): this IS the redundancy test E80 flagged in advance -- not a
+//     new term, the planned first half of it.
+//   Latch order unchanged (HARD LESSON 8). No occupancy confound: shieldUsd/rr/maxBars unchanged
+//     from E80 (LESSONS 24/28/29).
+//
+// REGISTERED PREDICTION (HARD LESSON 17), BEFORE RUNNING: brokeBelow/brokeAbove (a range-breakout
+// condition over 4 bars) is a strictly stronger structural claim than h1Bull/h1Bear (a single
+// close-vs-open comparison) on the same 1h bucket -- any bar satisfying brokeBelow with close below
+// the prior hour's low is very likely (though not certain) to also have close < h1o. So the
+// prediction is that h1Bull/h1Bear removal changes the trade population LITTLE: PF and trade count
+// close to E80's 44/1.24221581, not a collapse. A large change would mean the two terms are less
+// correlated in practice than the bucket-derivation argument suggests.
+//
+// RESULT, VERDICT and KEEP/REJECT are recorded in EXPERIMENT-LOG.md and results/backtests.json
+// after this run completes, per the lab's provenance rule (never hand-write a metric).
+strategy("War Formation E82 no h1Bull h1Bear", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+greenBull = input.int(4,     "Green 1h candles for BULL")
+greenBear = input.int(2,     "Green 1h candles at or below for BEAR")
+skipOpen  = input.int(60,    "Skip first N minutes of 6h block")
+skipClose = input.int(60,    "Skip last N minutes of 6h block")
+coilK     = input.float(0.85,"Coil: atrFast < atrSlow * K")
+velK      = input.float(0.8, "Velocity: min reclaim as multiple of atrSlow")
+midLo     = input.float(400, "Whole-number middles low")
+midHi     = input.float(600, "Whole-number middles high")
+etOffset  = input.int(-4,    "ET offset from UTC")
+witchOn   = input.bool(true, "Ban longs in witching hour 1-4am ET")
+shieldUsd = input.float(2000,"THE SHIELD: fixed dollar gap to liquidation")
+rr        = input.float(2.0, "Reward:risk")
+maxBars   = input.int(288,   "Max bars in trade -- three days of 15m")
+
+MS6H = 21600000
+MS1H = 3600000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+
+var float h1o     = na
+var int   grnCur  = 0
+var int   cntCur  = 0
+var int   grnPrev = 0
+var int   cntPrev = 0
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    grnCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(h1o)
+        cntCur := cntCur + 1
+        if close[1] > h1o
+            grnCur := grnCur + 1
+    h1o := open
+
+regimeReady = cntPrev >= 5
+bullRegime  = regimeReady and grnPrev >= greenBull
+bearRegime  = regimeReady and grnPrev <= greenBear
+
+minsIn    = (time - b6 * MS6H) / 60000
+timeGate  = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+// h1Bull/h1Bear REMOVED from this build's gates (still computed/plotted for audit, not gated on).
+h1Bull = not na(h1o) and close > h1o
+h1Bear = not na(h1o) and close < h1o
+
+var float c1hh = na
+var float c1hl = na
+var float p1hh = na
+var float p1hl = na
+
+if new1h
+    p1hh := c1hh
+    p1hl := c1hl
+    c1hh := high
+    c1hl := low
+else
+    c1hh := na(c1hh) ? high : math.max(c1hh, high)
+    c1hl := na(c1hl) ? low  : math.min(c1hl, low)
+
+brokeBelow = not na(p1hl) and c1hl < p1hl
+brokeAbove = not na(p1hh) and c1hh > p1hh
+
+atrFast = ta.atr(1)
+atrSlow = ta.atr(2)
+coiled  = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK
+coilPrev = coiled[1]
+velMin   = na(atrSlow) ? na : atrSlow * velK
+
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+hUTC     = math.floor(time / MS1H) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+longBan  = witchOn and witching
+
+longTrig  = not na(p1hl) and not na(velMin) and ta.crossover(close, p1hl)  and (close - p1hl) >= velMin
+shortTrig = not na(p1hh) and not na(velMin) and ta.crossunder(close, p1hh) and (p1hh - close) >= velMin
+
+goLong  = bullRegime and timeGate and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig
+goShort = bearRegime and timeGate and brokeAbove and coilPrev and not inMiddle and shortTrig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := close - shieldUsd
+    tpPx   := close + shieldUsd * rr
+    barsIn := 0
+
+if flat and goShort
+    strategy.entry("S", strategy.short)
+    slPx   := close + shieldUsd
+    tpPx   := close - shieldUsd * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong  ? 1 : 0, title="LongSignal")
+plot(goShort ? 1 : 0, title="ShortSignal")

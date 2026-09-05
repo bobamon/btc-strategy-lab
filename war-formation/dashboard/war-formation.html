@@ -1481,9 +1481,59 @@ const DATA = [
     },
     "verdict": "E80's OWN AUDIT RISK IS REFUTED, NOT CONFIRMED. `coiled` fires on 6104/78567 = 7.77% of 15m bars -- far from near-universal (~100%), the specific failure mode E80 flagged in advance ('coiled true on nearly every bar'). At 15m native, coilK 0.85 against atr(1)/atr(2) is a TIGHT, selective filter, not a degenerate rubber stamp, despite the narrower 2-bar gap between atrFast/atrSlow. The P&L/PF/drawdown numbers in this record are the counter-build's own artifact (a 1-bar-hold long entered on ~7.8% of all bars, most of them outside any favorable regime) and are NOT a measure of edge -- only totalTrades/barsEvaluated is the finding.",
     "notes": "Diagnostic only, not a ratchet decision -- no KEEP/REJECT applies. This clears E80's queue item 1 and unblocks item 2 (the h1Bull/brokeBelow-vs-h1Bear/brokeAbove redundancy binding test, one term at a time per leg, per HARD LESSON 48's method) for a future cycle: this cycle's single-backtest credit budget (250-500 band) was spent entirely on this population check, exactly as E80's queue specified ('do this BEFORE spending a credit on item 2'). direction/status are schema placeholders for a non-directional counter build: 'long' only because strategy.entry always used strategy.long (coiled is not itself a direction signal), 'research' because this is a diagnostic, not a strategy under test. Queue items 2 (redundancy binding tests) and 3 (split-window replication) remain open and untouched by this run. The RATCHET v2 clause 2 rule question blocking E74 also remains open, unresolved by this run, awaiting the user. SCHEDULING NOTE: the prompt that triggered this cycle was stale -- it described the lab's state as of E66 ('no champion, no candidate... continue numbering after E66', short-leg framed as three failed constructions to attack on entry geometry) and asked for shield/entry-geometry work already completed and superseded by E67-E80 (the margin-sizing fix at HARD LESSON 42/43, the completed four-term binding sweeps on both legs at E69/E70/E75/E76, and E80's first-ever both-legs-positive bidirectional result on 15m). This cycle followed the actual current state in EXPERIMENT-LOG.md/STRATEGY-LEDGER.md over the stale prompt, per this lab's own standing rule and HARD LESSON 26's precedent, and worked E80's real open queue instead of re-deriving E64a-E66 territory."
+  },
+  {
+    "id": "wf-e82-e80-no-h1bull-h1bear",
+    "name": "E82: E80's queue item 2, first half -- h1Bull/h1Bear removed, brokeBelow/brokeAbove held",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "research",
+    "createdDate": "2026-09-05",
+    "lastTestedDate": "2026-09-05",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "war-formation/pine/e82-e80-no-h1bull-h1bear.pine",
+    "description": "E80 flagged a new redundancy risk at 15m native: h1Bull/h1Bear (close vs the current 1h bucket's open) and the redesigned brokeBelow/brokeAbove (the current 1h bucket's running high/low vs the prior bucket's) now both derive from the same 1h bucket, unlike at 1m/5m where they read two different tiers. Per HARD LESSON 48's method (sweep binding separately per term, per leg -- never assume a now-correlated term is doing the same or no work without testing its removal in isolation), this run removes h1Bull/h1Bear from goLong/goShort, holding brokeBelow/brokeAbove and every other E80 gate byte-identical (BINDING, HARD LESSON 16/E17: exactly one variable changed). The mirror test (remove brokeBelow/brokeAbove, hold h1Bull/h1Bear) is NOT run this cycle -- the 250-500 credit band permits exactly one backtest -- and remains open for a future cycle. REGISTERED PREDICTION (HARD LESSON 17), stated before running: brokeBelow/brokeAbove is a strictly stronger structural claim on the same 1h bucket than h1Bull/h1Bear (a single close-vs-open test), so removing h1Bull/h1Bear was predicted to change the population little, not collapse it.",
+    "metrics": {
+      "netProfitPct": 9.11169035,
+      "profitFactor": 1.24221581,
+      "maxDrawdownPct": 17.28630995,
+      "totalTrades": 44,
+      "winRatePct": 27.27272727,
+      "avgTradePct": 0.20708387,
+      "sharpeRatio": 0.48096598,
+      "sortinoRatio": 0.1171681,
+      "commissionPaid": 468.4281653,
+      "avgWinningTrade": 389.414632133334,
+      "avgLosingTrade": -117.556454715625,
+      "ratioAvgWinLoss": 3.3125755,
+      "largestWin": 645.3167448,
+      "largestLoss": -354.6206388,
+      "avgBarsInTrade": 99.65909091,
+      "avgBarsWinning": 200,
+      "avgBarsLosing": 62.03125,
+      "longTrades": 19,
+      "shortTrades": 25,
+      "longWinning": 9,
+      "shortWinning": 3,
+      "longNetProfit": 418.74770460001,
+      "shortNetProfit": 492.421330099993
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1SVRDKH1QVBB1ZVXWSFM27K",
+      "strategyId": "01M1SVRDYWR37N753D99B18DKR",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1SVRDKHMK9SNZJR2PSAH6TM",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1.0476190476190477,
+      "verifiedAt": "2026-09-05T00:00:00Z"
+    },
+    "verdict": "h1Bull/h1Bear IS FULLY REDUNDANT WITH brokeBelow/brokeAbove ON THIS WINDOW, GIVEN THE OTHER FOUR GATES -- NOT MERELY 'CHANGES LITTLE' AS PREDICTED, BUT BYTE-IDENTICAL. Every metric matches E80 to the figure printed: 44 trades (19 long/25 short), 12 winners (9 long/3 short), PF 1.24221581, net +9.11169035%, max drawdown 17.28630995%, cascadeRatio 1.0476190476190477. Removing h1Bull/h1Bear from goLong/goShort did not drop, add, or reshuffle a single trade. On this window, given bullRegime/bearRegime, timeGate, brokeBelow/brokeAbove, coilPrev, the whole-number band and longTrig/shortTrig already in place, h1Bull/h1Bear never independently vetoed a bar the other gates had not already vetoed or already allowed.",
+    "notes": "ANSWERS E80's QUEUE ITEM 2, FIRST HALF. h1Bull/h1Bear can be dropped from this cascade with zero cost to this window's measured population -- a genuine simplification finding (HARD LESSON 8's redundancy concern), not a PF improvement, since the numbers are identical rather than better. NOT YET A DECISION TO DROP THE TERM: the mirror test (remove brokeBelow/brokeAbove instead, hold h1Bull/h1Bear) has not been run, so it is not yet known whether brokeBelow/brokeAbove alone is the fully-sufficient term or whether h1Bull/h1Bear would also be individually sufficient in the other direction -- this run only shows brokeBelow/brokeAbove-plus-the-rest already implies h1Bull/h1Bear's constraint, not that h1Bull/h1Bear could stand in for brokeBelow/brokeAbove. Needs a fresh credit budget for the mirror test before either term is actually dropped from the build. NOT A RATCHET DECISION: this is a diagnostic per HARD LESSON 48's method, recorded as `status: research`, not a KEEP/REJECT against E80 -- the population is E80's own population, unchanged. E80 (`testing`) remains this lab's newest 15m candidate line, still unreplicated; e58a (long, 1m) and E71 (short, 1m) remain the 1m-track reference builds. Queue item 3 (split-window replication of E80) and the HARD LESSON 48 drawdown-allowance RULE QUESTION (blocking E74) remain open, untouched by this run. SCHEDULING NOTE: this cycle's stored prompt was again the pre-E67 text (attack the short's entry geometry on 1m/5m, 'continue numbering after E66') -- stale, per the same staleness E81 already documented. The docs (EXPERIMENT-LOG.md/STRATEGY-LEDGER.md) win, per the prompt's own instruction and HARD LESSON 26's precedent: this cycle continued E81's own queue instead of re-deriving E64a-E66 territory the lab worked past weeks ago."
   }
 ];
-const BUILT = "2026-09-05 21:44";
+const BUILT = "2026-09-05 22:43";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
