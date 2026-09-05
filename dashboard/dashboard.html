@@ -3081,9 +3081,60 @@ const DATA = [
     },
     "verdict": "DISCARDED on the kill rule -- H1 (never-tuned half) profit factor 0.6381756, below 1.0. H2 not run, second credit not spent, no filter stack.",
     "notes": "Frequency estimate scored: pre-registered 150-500, actual 444 -- inside the pre-registered band but above the lab's settled 60-350 workable window (a mild high miss). cascadeRatio 1 / maxCascadeDepth 1 confirmed (444 total rows, 444 unique entries), matching the audit's expectation. Drawdown category: PF < 1.0 so category 2 (bleed on a negative edge, same shape as Attacks 36/48/49/50/53b/72b/73/74/75/76/77) -- largest loss (-$365.31) is ~9.0x avg loser (-$40.53), a wider concentration ratio than most category-2 builds on this board, worth naming even though moot for the verdict since PF is already well below 1.0. One credit spent this cycle (525 balance -> 524)."
+  },
+  {
+    "id": "attack79a-mfi-oversold-reclaim-h1",
+    "name": "Attack 79a: MFI oversold-extreme reclaim LONG -- never-tuned half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-05",
+    "lastTestedDate": "2026-09-05",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack79-mfi-oversold-reclaim-long.pine",
+    "description": "Per Attack 78's queue item 8: a further genuinely new mechanism, distinct from the VWAP family and every rejected strategy on the board (Attacks 33-65, 67/69/70/71, 72, 73, 74, 75, 76, 77, 78). CLAIM: the Money Flow Index (MFI) is a volume-WEIGHTED oscillator, unlike RSI (price-only) or OBV (an unbounded cumulative running sum); a rare oversold extreme (MFI crossing below 20) marks selling pressure exhausting on real volume, and a subsequent close back above that extreme bar's own high confirms buyers have reclaimed control, continuing toward the nearest recent structural resistance. This is the lab's first use of ta.mfi and its first genuinely volume-WEIGHTED (not price-only, not cumulative-sum) oscillator entry. Arm/trigger latch pattern copied from Attack 64's proven-safe RSI construction, flipped long: armed on ta.crossunder(mfi, 20), latching the arming bar's own high/low; invalidated if MFI recovers above 50 or maxWaitBars (40) elapse without a trigger; TRIGGER on a strictly later bar via ta.crossover(close, armedHigh). Stop = armedLow (LESSON 5, structure). Target = prior 20-bar high excluding current bar (HARD LESSON 41, a level not an R-multiple). R >= 0.8% of price by exclusion (LESSON 3). Long only this cycle, following this lab's convention for a first pass. Pre-registered frequency: 20-150 trades per half, low confidence (no prior MFI measurement on this engine). KILL RULE: H1 profit factor came back at 0.74271995, below 1.0 -- discarded outright per the standing kill rule. H2 was not run; no filter stack, no rescue.",
+    "metrics": {
+      "netProfitPct": -30.89123355,
+      "profitFactor": 0.74271995,
+      "maxDrawdownPct": 35.28716701,
+      "totalTrades": 180,
+      "winningTrades": 87,
+      "losingTrades": 93,
+      "winRatePct": 48.33333333,
+      "avgTradePct": -0.17161796,
+      "avgWinningTrade": 102.502622754598,
+      "avgLosingTrade": -129.105930484409,
+      "ratioAvgWinLoss": 0.79394202,
+      "largestWin": 445.486812,
+      "largestLoss": -865.48653825,
+      "avgBarsInTrade": 29.44444444,
+      "avgBarsWinning": 30.50574713,
+      "avgBarsLosing": 28.4516129,
+      "sharpeRatio": -0.95370651,
+      "sortinoRatio": -0.24887756,
+      "commissionPaid": 1542.2177554,
+      "grossProfit": 8917.728179650016,
+      "grossLoss": 12006.851535049991,
+      "longTrades": 180,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1RYJB7Z2G1H4ND50DE2TAD9",
+      "strategyId": "01M1RYJBDYJXE5TPGAAESX75P0",
+      "resultId": "01M1RYJB7ZGYFV2VMXDS6RKYBK",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1RYJB7ZGYFV2VMXDS6RKYBK",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-05T00:00:00Z"
+    },
+    "verdict": "DISCARDED on the kill rule -- H1 (never-tuned half) profit factor 0.74271995, below 1.0. H2 not run, second credit not spent, no filter stack.",
+    "notes": "Frequency estimate scored: pre-registered 20-150, actual 180 -- a mild high miss just above the pre-registered band, still inside the lab's settled 60-350 workable window. cascadeRatio 1 / maxCascadeDepth 1 confirmed (180 total rows, 180 unique entries), matching the audit's expectation. avgBarsInTrade 29.44 well under maxBars 192, no truncation confound (HARD LESSON 38). Drawdown category: PF < 1.0 so category 2 (bleed on a negative edge, same shape as Attacks 36/48/49/50/53b/72b/73/74/75/76/77/78) -- largest loss (-$865.49) is ~6.7x avg loser (-$129.11), a somewhat wider concentration ratio than most category-2 builds on this board but moot for the verdict since PF is already below 1.0. Win rate 48.33% (a minority, not the HARD LESSON 53 inverted-payoff shape which requires a MAJORITY win rate that still loses) combined with an achieved payoff below 1.0 (0.794) -- a plain negative edge on both axes at once, not one axis compensating for the other. One credit spent this cycle (524 balance -> 523)."
   }
 ];
-const BUILT = "2026-09-05 13:15";
+const BUILT = "2026-09-05 14:13";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

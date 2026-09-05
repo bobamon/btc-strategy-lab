@@ -1,0 +1,184 @@
+//@version=6
+// BTC ATTACK 79 - MONEY FLOW INDEX OVERSOLD-EXTREME RECLAIM LONG. A GENUINELY NEW MECHANISM, BARE.
+//
+// The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") more
+// than seventy-eight attacks stale -- Attack 41 closed Attack 37 on cost, Attack 43 closed the whole
+// sweep-reversal family, Attack 71 closed the Attack 66/68 filter stack at two terms (three term-3
+// candidates failed), and Attack 68 (Attack 66 + OBV divergence-magnitude floor) remains the board's
+// strongest both-halves candidate (PF 1.56474476/1.13127036, 89/80 trades). THE DOCS OVERRIDE IT, AGAIN,
+// per the prompt's own standing instruction: Attack 78's own queue item 8 asked for one further genuinely
+// new mechanism, distinct from every family already on the board (or, per queue item 7, a filter/regime
+// layer on an already-surviving construction -- but both Attack 46 and the Attack 66/68 line have their
+// filter stacks already exhausted/closed per HARD LESSON 49 and Attack 71's own verdict, so there is no
+// unexhausted surviving base to layer onto; the mandate's own fallback -- propose one new mechanism --
+// governs this cycle). This build continues numbering after Attack 78, not Attack 37.
+//
+// ==================== WHAT THIS CLAIMS, IN ONE SENTENCE ====================
+// The Money Flow Index (MFI) is a volume-WEIGHTED oscillator -- unlike RSI, which reads price alone, MFI
+// reads typical price change weighted by that same bar's own volume; a rare oversold extreme (MFI
+// crossing below 20) marks selling pressure exhausting on volume, and a subsequent close back above that
+// extreme bar's own high confirms buyers have reclaimed control, with price tending to continue toward
+// the nearest recent structural resistance.
+//
+// ==================== WHY THIS IS A NEW INPUT CLASS FOR THIS LAB ====================
+// No prior BTC attack has used ta.mfi. Distinct from every RSI-based build (Attack 51/52's RSI/price
+// divergence, Attack 64's RSI(80) overbought-exhaustion reversal): RSI is computed from CLOSE-TO-CLOSE
+// gains and losses only -- it has no volume input of any kind. MFI weights each bar's typical-price move
+// by that bar's own VOLUME before summing positive vs. negative money flow, so it can diverge sharply
+// from RSI on a low-volume price extreme (RSI can hit an extreme on thin volume; MFI cannot reach the
+// same extreme without real participation behind the move) -- a genuinely different input class, not a
+// relabeled RSI. Distinct from every OBV-based build (Attack 66-71): OBV is an UNBOUNDED cumulative
+// running sum of signed volume carrying memory of the ENTIRE prior series; MFI is a BOUNDED 0-100
+// oscillator computed over a fixed rolling window (14 bars) with no cumulative memory at all -- a running
+// sum vs. a rolling ratio, structurally opposite constructions built from the same raw inputs (price,
+// volume). Distinct from the NVI volume-participation regime (Attack 76): NVI is a cumulative return
+// series that only updates on LOW-volume days (an accumulation-day filter); MFI updates on every bar,
+// weighting by volume directly rather than gating by a volume-vs-average comparison. Distinct from
+// ADX/DMI (Attack 78, price range/direction, no volume) and the Bollinger squeeze family (Attack 6/36/65/
+// 77, price dispersion, no volume). This is the lab's first oscillator entry that is genuinely
+// volume-WEIGHTED rather than price-only or a cumulative volume-flow sum.
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS ====================
+// mfi = ta.mfi(hlc3, mfiLen) -- the allowlisted, engine-native Money Flow Index on typical price. ARM is
+// ta.crossunder(mfi, mfiOversold) -- a TRANSITION event (the START of the extreme), not an "already been
+// true for N bars" filter (HARD LESSON 8's fourth-confirmation check: pairing a transition trigger with a
+// durational filter fails because the trigger fires near the start of that state; crossunder(mfi,20)
+// avoids this by construction, same pattern proven safe in Attack 64). On arming, two `var float` scalars
+// latch the arming bar's own low (future stop, LESSON 5 structure) and high (future trigger level), and a
+// `var int` scalar latches the arming bar's index. INVALIDATION: the latch clears if MFI recovers back
+// above mfiReArmAbove without the trigger firing (the exhaustion thesis is stale) or if maxWaitBars pass
+// with no trigger (HARD LESSON 8's generalised rule: a latch is only useful if the state it creates can
+// outlive the event that created it, so this bounds how long it may outlive it). TRIGGER, a LATER,
+// DISTINCT bar (bar_index > armedBar enforced explicitly, the Attack 59/63/64 proven-safe pattern):
+// ta.crossover(close, armedHigh) -- price closing back above the extreme bar's own high. Stop: armedLow,
+// the actual MFI-extreme bar's own low (LESSON 5, structure, not the signal level). Target: the prior
+// targetLookback-bar high, EXCLUDING the current bar (HARD LESSON 41: a level, not a multiple of the
+// stop; E14: an independent quantity from the stop distance, drawn from price structure rather than R).
+// SIZING: 100% equity -- the declared-deviation qty= fix (HARD LESSON 42/43) is a SHORT-side margin
+// artifact only; this is a LONG-only build, same convention as Attack 66/68/78.
+//
+// AUDIT, one line per leg (LONG ONLY):
+//   R >= 0.8% (LESSON 3) - EXCLUSION via rBig on rLong = close - armedLow, never clamped. A trigger whose
+//        stop is too close is SKIPPED, not widened.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = armedLow, the actual MFI-extreme bar's own low.
+//   Each leg separately (LESSON 6) - LONG ONLY, not blended with any short-side result.
+//   BINDING (E17) - armed AND (bar_index > armedBar) AND reclaimTrigger AND rBig AND targetOk all
+//        necessarily bind; this is the first run of this mechanism and two credits are budgeted this
+//        cycle for the H1/H2 pair (H2 spent only if H1 clears the kill rule), so no per-term counter
+//        build was affordable -- the realized trade count against the pre-run frequency estimate below is
+//        the binding evidence this cycle can afford.
+//   REDUNDANCY (E14) - minRpct constrains the STOP distance (close - armedLow); targetLookback (the
+//        target) is an independent quantity, the market's own recent high, not derived from R; mfi itself
+//        (the arming series) is a bounded volume-weighted oscillator, a third independent quantity from
+//        either price-distance term.
+//   LATCH IN SEQUENCE (LESSON 8, fourth-confirmation check) - armed latches on ta.crossunder(mfi,
+//        mfiOversold), a transition event, not an "already true for N bars" filter; reclaimTrigger reads
+//        a strictly later bar (bar_index > armedBar enforced explicitly) via crossover of a level fixed
+//        at arm time. The two conditions cannot share a bar: crossover requires close[1] <= armedHigh,
+//        and the arming bar's own close is set when MFI first crosses UNDER the oversold threshold (a
+//        weak, down-pressured bar), almost never above its own high on the same bar.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, `flat` check gates every entry; the latch is consumed
+//        (armed := false) the instant it fires, so it cannot re-trigger on a later bar.
+//   WEEKENDS (structural note 4) - MFI computes off ordinary typical price and volume with no calendar
+//        dependency; weekend bars are handled identically to weekday bars, by construction.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity, single entry id "L", pyramiding=1; expect
+//        cascadeRatio 1 / maxCascadeDepth 1, confirmed below.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// ==================== FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4) ====================
+// No prior BTC attack has plotted ta.mfi on this engine. Anchored against Attack 64's RSI(80)-extreme
+// arm+trigger latch pattern (the closest prior construction: an oscillator-extreme arm followed by a
+// later structural-level trigger), which produced 44 H1 trades. MFI's volume weighting could push the
+// count either direction relative to that anchor -- rarer if volume confirmation makes the extreme harder
+// to reach, more frequent if MFI's rolling-window construction (vs. RSI's own smoothing) crosses the
+// threshold more often -- so this is registered with LOW confidence and a wide band: pre-registering
+// 20-150 trades per half.
+//
+// ==================== OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17), PER THE PROMPT'S OWN KILL RULE ====
+//   * H1 (never-tuned, 2022-01-01 to 2024-06-08) PROFIT FACTOR BELOW 1.0 -> DISCARD immediately. Do not
+//     run H2. Do not add filters to rescue H1.
+//   * H1 clears 1.0 -> run H2 (2024-06-08 to 2026-09-01) as the second and last credit this cycle.
+//   * BOTH halves clear 1.0, trades roughly 60-350 per half -> a genuine both-halves candidate, joining
+//     Attack 37/46/66-68 on the board; report avg loser, win rate and max DD alongside PF (the board's
+//     three-drawdown-category taxonomy), and queue it for a filter stack exactly as Attack 37/66 earned
+//     theirs.
+//   * H1 clears but H2 does not -> report both, DISCARD as a candidate (per Attack 53/72/74's precedent:
+//     helps H1, breaks H2), not as evidence the volume-weighted-oscillator family as a whole is dead.
+//   * FEWER THAN ~30 TRADES in a half -> that half's ratio is a DIRECTION per LESSON 12, not a result.
+//   * TRADES WELL BELOW THE PRE-REGISTERED BAND -> MFI(20) crossunders may simply be too rare on this
+//     asset's 4.7-year up-drifting history; report as a frequency finding, not an edge verdict.
+//   * A LARGE SHARE OF HOLDS AT maxBars 192 -> the cap is truncating (HARD LESSON 38); report before
+//     drawing any conclusion.
+//   REPORT GROSS, COMMISSION, ACHIEVED WIN/LOSS RATIO, AVG LOSER AND WIN RATE alongside net (LESSONS
+//     36/39 and the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack79 MFI Oversold Reclaim LONG", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+mfiLen        = input.int(14, "MFI length")
+mfiOversold   = input.float(20.0, "MFI oversold threshold (arm)")
+mfiReArmAbove = input.float(50.0, "MFI level that invalidates a stale arm")
+maxWaitBars   = input.int(40, "Max bars to wait for the trigger before the arm expires")
+targetLookback= input.int(20, "Bars for the prior structural high (target)")
+minRpct       = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars       = input.int(192, "Max bars in trade")
+
+mfi = ta.mfi(hlc3, mfiLen)
+
+var bool  armed     = false
+var float armedHigh = na
+var float armedLow  = na
+var int   armedBar  = na
+
+if ta.crossunder(mfi, mfiOversold)
+    armed     := true
+    armedHigh := high
+    armedLow  := low
+    armedBar  := bar_index
+
+if armed and mfi > mfiReArmAbove
+    armed := false
+
+if armed and not na(armedBar) and (bar_index - armedBar) > maxWaitBars
+    armed := false
+
+reclaimTrigger = armed and not na(armedBar) and bar_index > armedBar and not na(armedHigh) and ta.crossover(close, armedHigh)
+
+rLong = not na(armedLow) ? close - armedLow : na
+minR  = close * minRpct / 100
+rBig  = not na(rLong) and rLong >= minR
+
+targetLevel = ta.highest(high, targetLookback)[1]
+targetOk    = not na(targetLevel) and targetLevel > close
+
+goLong = reclaimTrigger and rBig and targetOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := armedLow
+    tpPx   := targetLevel
+    barsIn := 0
+    armed  := false
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(armedHigh, title="ArmedHigh")
+plot(armedLow, title="ArmedLow")
+plot(mfi, title="MFI")

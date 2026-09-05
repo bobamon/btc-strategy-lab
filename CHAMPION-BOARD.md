@@ -6560,3 +6560,143 @@ filter on this exact build.
    78).
 
 ---
+
+# ATTACK 79 — MFI OVERSOLD-EXTREME RECLAIM LONG. A GENUINELY NEW MECHANISM, DISCARDED ON THE KILL RULE.
+
+The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") more than
+seventy-eight attacks stale — Attack 41 closed Attack 37 on cost, Attack 43 closed the whole sweep-
+reversal family, and Attack 71 closed the Attack 66/68 filter stack at two terms. **The docs override it,
+again**, per the prompt's own standing instruction. Attack 78's own queue named two options: propose one
+further genuinely new mechanism, or build a filter/regime layer on an already-surviving construction
+(Attack 37/46/66-68). Neither Attack 46 nor the Attack 66/68 line has an open filter slot — Attack 46's
+filters are exhausted per HARD LESSON 49, and Attack 71 closed the 66/68 stack at two terms after three
+term-3 candidates failed — so there is no unexhausted base to layer onto. The mandate's own fallback
+governs: this cycle proposes one new mechanism, continuing numbering after Attack 78, not Attack 37.
+
+## THE CLAIM
+
+The Money Flow Index (MFI) is a volume-**weighted** oscillator — unlike RSI, which reads price alone, MFI
+weights each bar's typical-price move by that bar's own volume before summing positive vs. negative money
+flow. A rare oversold extreme (MFI crossing below 20) marks selling pressure exhausting on real volume,
+not just on price; a subsequent close back above that extreme bar's own high confirms buyers have
+reclaimed control, and price tends to continue toward the nearest recent structural resistance. No prior
+BTC attack has used `ta.mfi`. Distinct from every RSI build (Attack 51/52's divergence, Attack 64's
+overbought-exhaustion reversal): RSI has no volume input at all. Distinct from every OBV build (Attack
+66-71): OBV is an unbounded cumulative running sum with memory of the entire series; MFI is a bounded
+0-100 oscillator over a fixed rolling window with no cumulative memory — a running sum vs. a rolling ratio,
+opposite constructions from the same raw inputs. Distinct from the NVI volume-participation regime (Attack
+76): NVI updates only on low-volume days (a gating filter); MFI weights every bar directly. Distinct from
+ADX/DMI (Attack 78) and the Bollinger squeeze family (Attack 6/36/65/77): neither uses volume. Arm/trigger
+latch pattern copied from Attack 64's proven-safe RSI construction, flipped long. Pine:
+`strategies/pine/attack79-mfi-oversold-reclaim-long.pine`.
+
+## AUDIT (LONG ONLY, one line per leg)
+
+R >= 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rLong = close - armedLow`, never clamped. Stop beyond
+STRUCTURE (LESSON 5) — `slPx = armedLow`, the actual MFI-extreme bar's own low. Each leg separately
+(LESSON 6) — LONG ONLY. BINDING (E17) — `armed AND (bar_index > armedBar) AND reclaimTrigger AND rBig AND
+targetOk` all necessarily bind (180 trades on 85,655 bars); two credits were budgeted for the H1/H2 pair,
+so no per-term counter build was affordable (moot — see verdict, H2 never spent). REDUNDANCY (E14) —
+`minRpct` constrains the STOP distance (`close - armedLow`); `targetLookback` (the target) is an
+independent quantity, the market's own recent high; `mfi` itself is a third independent quantity, a
+bounded volume-weighted oscillator distinct from either price-distance term. LATCH IN SEQUENCE (LESSON 8,
+fourth-confirmation check) — `armed` latches on `ta.crossunder(mfi, mfiOversold)`, a transition event, not
+an "already true for N bars" filter; `reclaimTrigger` reads a strictly later bar (`bar_index > armedBar`
+enforced explicitly) via crossover of a level fixed at arm time — the two conditions cannot share a bar by
+the same construction Attack 64 already proved safe. CASCADE (HARD LESSON 42/43) — LONG at 100% equity,
+single entry id "L"; `cascadeRatio` 1 / `maxCascadeDepth` 1, confirmed (180 total rows, 180 unique
+entries).
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4)
+
+No prior attack has plotted MFI on this engine. Anchored against Attack 64's RSI(80) arm+trigger latch
+(the closest prior construction), which produced 44 H1 trades — but MFI's volume weighting could push the
+count either direction relative to that anchor, so this was registered with LOW confidence and a wide
+band: **20-150 trades per half**.
+
+## H1 (NEVER-TUNED HALF, 2022-01-01 → 2024-06-08)
+
+| | **Attack 79a (H1)** |
+|---|---|
+| Profit factor | **0.74271995** |
+| Trades | 180 |
+| Win rate | 48.33333333% (a minority) |
+| Avg winner | $102.50 |
+| Avg loser | -$129.11 |
+| Achieved win/loss ratio | 0.79394202 |
+| Max drawdown | 35.28716701% |
+| Net return | -30.89123355% |
+| Commission paid | $1,542.22 |
+| Largest loss | -$865.49 |
+
+**Frequency estimate scored: pre-registered 20-150, actual 180** — a mild high miss just above the
+pre-registered band, but still inside the lab's settled 60-350 workable window; the frequency model was
+close to right, the mechanism failed on edge.
+
+## KILL RULE APPLIED. ONE CREDIT SPENT THIS CYCLE (524 BALANCE → 523). H2 NOT RUN.
+
+**Not a close call.** PF 0.74271995 is well below 1.0 on the never-tuned half. Per this board's own
+kill-rule precedent, this is discarded outright: no filter stack, no rescue, H2 not run, second credit not
+spent.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+PF < 1.0, so this is **category 2, bleed on a negative edge**, the same shape as Attacks
+36/48/49/50/53b/72b/73/74/75/76/77/78 — not worth filtering. The largest loss (-$865.49) is ~6.7x the
+average loser (-$129.11), a somewhat wider concentration ratio than most category-2 builds on this board,
+but moot for the verdict since PF is already below 1.0 before any concentration is considered. Win rate
+48.33% is a minority, so this is **not** HARD LESSON 53's inverted-payoff shape (which requires a
+*majority* win rate that still loses) — here both axes are sub-breakeven at once: a plain negative edge,
+not one axis compensating for the other.
+
+## THE VERDICT — DISCARDED ON THE KILL RULE
+
+Volume-weighting the oscillator did not, by itself, separate a genuine selling-exhaustion bounce from an
+ordinary oversold poke on this instrument at 15m: nearly half the arm+trigger pairs win, but losers run
+36% wider than winners on average, the same "stop inside the noise" shape this board has seen from most
+of its fast-oscillator entries. This is a clean falsification of THIS specific construction (14-length MFI,
+20/50 thresholds, a 20-bar target lookback) — a stricter oversold threshold, a longer MFI length, or an
+MFI-as-regime-filter (rather than trigger) construction remains untested, but per HARD LESSON 4/45 that is
+a re-derivation of the mechanism, not a rescue filter on this exact build.
+
+## THIS BOARD NOW HAS EIGHT CONSECUTIVE BARE-MECHANISM FAILURES
+
+Attacks 72, 73, 74, 75, 76, 77, 78, and now 79 — eight distinct mechanisms, eight failures, since Attack
+68's magnitude-floor filter term was the last thing this board kept. Attack 78's queue already flagged
+this pattern at seven and named it worth the user's explicit consideration; it is now one longer. The
+frequency model has landed inside or near its pre-registered band on the last several attempts (Attack 77:
+inside; Attack 78: inside but high; Attack 79: just above), which rules out "we can't estimate frequency"
+as the recurring problem. The recurring problem is finding edge on a bare first pass at all, on this
+asset, at this timeframe, over this window. **Restating Attack 78's flag rather than re-deciding it
+unilaterally**: continuing to invent bare mechanisms one at a time is the standing mandate and this cycle
+followed it, but the board's own evidence now says that approach has a measured 0-for-8 hit rate since
+Attack 68. The two both-halves survivors this entire board has ever produced (Attack 37/46 in the earlier
+regime, Attack 66/68 more recently) share a structure worth naming plainly: both compare a signal series
+against price at TWO CONFIRMED PIVOTS (a divergence or reclaim measured over a completed swing), not a
+single-bar oscillator threshold crossing. Every one of the eight recent failures (72-79) either used a
+same-bar regime gate (72, 76, 78) or a single-point oscillator/level trigger (73, 74, 75, 77, 79) rather
+than a two-pivot comparison. This is a pattern worth testing directly, not a certainty — the next
+genuinely-new-mechanism cycle should consider building around a two-pivot comparison structure specifically
+(not necessarily OBV again) rather than another single-point trigger, before concluding the asset/timeframe
+itself is exhausted for fresh entries.
+
+## QUEUE
+
+1. **Do not retry this exact construction with a different `mfiOversold`/`mfiLen` alone.** The failure is
+   a genuine negative edge on both win rate and payoff at once, not a threshold near a workable point.
+2. **Attack 68 (Attack 66 + OBV divergence-magnitude floor) remains the board's strongest both-halves
+   candidate** — PF 1.56474476/1.13127036 on 89/80 trades — unaffected by this cycle.
+3. **Attack 46 (long) remains a candidate alongside Attack 68**, unaffected by this cycle.
+4. **The out-of-sample test for Attack 46 still ranks first among long-side work not yet startable** under
+   BTCUSDT-only — unchanged.
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+7. **The next cycle proposes ONE further genuinely new mechanism**, and per this cycle's own observation
+   above, should weight a two-confirmed-pivot comparison structure (the shape shared by every both-halves
+   survivor this board has produced) over another single-point oscillator or same-bar regime gate — not as
+   a rule, but as the best-supported direction given eight consecutive failures of the other shape.
+   Distinct from the VWAP family and from every rejected strategy on the board (Attacks 33–65, 67/69/70/71,
+   72, 73, 74, 75, 76, 77, 78, and now 79).
+
+---
