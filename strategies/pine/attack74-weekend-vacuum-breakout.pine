@@ -1,0 +1,163 @@
+//@version=6
+// BTC ATTACK 74 - WEEKEND LIQUIDITY-VACUUM BREAKOUT. A GENUINELY NEW MECHANISM PER ATTACK 73'S OWN QUEUE.
+//
+// The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") more
+// than seventy attacks stale. THE DOCS OVERRIDE IT, AGAIN: Attack 71 closed the Attack 66/68 OBV-
+// divergence filter stack at two terms; Attack 72 (lag-1 autocorrelation persistence breakout) and Attack
+// 73 (Ichimoku Kumo+Chikou breakout) were the two genuinely-new-mechanism attempts that followed and both
+// were DISCARDED (72: H1 cleared, H2 reversed; 73: killed on H1). Attack 73's own queue item 7 said the
+// next cycle owed to this board is a further fresh mechanism, distinct from every family already tried:
+// VWAP, channel/weekly/range breakouts, liquidity sweep, level tap-and-hold, round-number, impulse-bar,
+// session-range (Asian), RSI/OBV divergence, order-flow absorption, funding-settlement, streak
+// exhaustion, EMA crossover, swing structure breakout, volatility-shock reversal, autocorrelation regime,
+// Ichimoku cloud. This build is that instruction, continuing numbering after Attack 73, not Attack 37.
+//
+// ==================== THE CLAIM, ARGUED FROM THE MECHANISM (LESSON 15/17: BEFORE running) ====================
+// STRATEGY-LEDGER's "families still open" list names time-of-day seasonality; the only prior use of
+// calendar/session timing as the ENTRY mechanism itself (rather than a bolted-on filter) is Attack 50,
+// which anchored on the DAILY Asia/London session split (00:00-08:00 UTC vs 08:00-24:00 UTC, recurring
+// every day). This build uses a WEEKLY cadence instead: BTC trades 24/7, but weekday flow is dominated by
+// institutional and algorithmic desks that step back over the weekend, leaving Saturday 00:00 UTC through
+// Sunday 23:59 UTC as a genuine low-conviction, thin-book accumulation window -- not because volatility
+// happens to be low that particular weekend (Attack 36's narrow-range-day claim, which is a REALIZED-RANGE
+// observation regardless of calendar) but because the PARTICIPANTS THEMSELVES are structurally different
+// on those two calendar days. When Monday's return of weekday flow pushes price decisively through the
+// top of that specific 2-day range within a bounded 48-hour window (Monday + Tuesday UTC), the break
+// reflects real participation overpowering a thin-book range, and should behave differently from a same-
+// timeframe poke through an arbitrary rolling N-bar extreme.
+//
+// GENUINELY DISTINCT from every family on this board: not a rolling N-bar channel (Attack 33, no calendar
+// anchor at all); not a full calendar-WEEK high/low with an unbounded following-week trigger window
+// (Attack 34/35 -- this uses only the 2-day WEEKEND slice as the reference range, with a bounded 48-hour
+// trigger, a liquidity-return story rather than a swing-structure story); not a volatility-coil release
+// regardless of calendar (Attack 36); not a failed-break reversal (Attack 37-43, trades AGAINST the
+// break); not a tap-and-hold of a swing extreme (Attack 44-47); not a fixed grid or single-bar impulse
+// (Attack 48/49); not an intraday DAILY session split (Attack 50, recurs every day, no weekly cadence);
+// not an oscillator/volume divergence (Attack 51/52/66-71); not order-flow absorption, funding-settlement,
+// streak exhaustion, EMA crossover, swing-structure breakout, volatility-shock reversal, autocorrelation
+// regime, or a time-displaced consensus cloud (Attacks 53-65, 72, 73). New anchor (weekly liquidity cycle,
+// not daily session or calendar-week swing structure), new reference window (2-day weekend slice), new
+// trigger bound (48 hours immediately following, not open-ended).
+//
+// ==================== AUDIT, ONE LINE PER LEG ====================
+//   R >= 0.8% (LESSON 3) -- EXCLUSION via rBig on rLong = close - wknLow (the breakout bar's distance to
+//        the FAR side of the weekend range), never clamped. NOTE, stated honestly: because entry sits just
+//        above wknHigh and the stop sits at wknLow, rLong is approximately the weekend range's own width --
+//        the R floor functions mostly as a minimum-range-width filter here, not an independent constraint,
+//        an intrinsic property of this construction rather than a hidden redundant term (see E14 below).
+//   Stop beyond STRUCTURE (LESSON 5) -- slPx = wknLow, the OPPOSITE side of the very range that was broken,
+//        never the breakout level (wknHigh) itself and never the trigger bar's own low.
+//   Each leg separately (LESSON 6) -- LONG ONLY this cycle, following this lab's established convention
+//        for a first pass on a new mechanism (Attacks 50/59/63/65/66/72/73 all opened one-sided and
+//        reported the other side as a standing asymmetry). The short leg (a weekend-range BREAKDOWN below
+//        wknLow, its own geometry, never mirrored) is deferred and reported as OUTSTANDING -- this is an
+//        INTERIM result per the standing both-directions requirement, not a finished one.
+//   BINDING (E17) -- triggerWindow (Mon/Tue UTC only) AND haveRange AND breakoutTrigger (fresh crossover of
+//        wknHigh) AND rBig must all independently bind; this is the first run of this mechanism and, per
+//        Attack 72/73's own precedent, two credits are budgeted this cycle for the H1/H2 pair, so no per-
+//        term counter build was affordable -- the realized trade count against the pre-run frequency
+//        estimate below is the binding evidence this cycle can afford, and a per-term counter build is
+//        queued if this clears the kill rule.
+//   REDUNDANCY (E14) -- triggerWindow reads a CALENDAR/TIME quantity (day-of-week arithmetic, no price
+//        component); wknHigh/wknLow/breakoutTrigger read a PRICE LEVEL formed over a distinct 2-day
+//        calendar slice; rBig/slPx read a PRICE DISTANCE from entry to the range's far edge. Three
+//        independent quantities (time, level, distance); no other term in this build repeats any of them.
+//   LATCH IN SEQUENCE (LESSON 8, fourth-confirmation check) -- the weekend range accumulates ONLY while
+//        isWeekend is true and is structurally frozen (stops updating) the instant isWeekend goes false,
+//        which happens strictly before triggerWindow (Mon/Tue) can ever be true on the same bar -- setup
+//        (Sat/Sun accumulation) and trigger (Mon/Tue breakout) can never share a bar by construction,
+//        mirroring Attack 34's newWeek pattern and Attack 50's inAsian/canTrade split. Checked explicitly
+//        against the generalized "trigger near the START of the filter's state" failure mode and it does
+//        not apply: triggerWindow is not phrased as "already true for N bars", it is a disjoint calendar
+//        window from the accumulation window.
+//   WEEKENDS (structural note 4) -- weekends are not merely handled, they ARE the mechanism's reference
+//        window; stated explicitly rather than assumed.
+//   CASCADE (HARD LESSON 42/43) -- LONG at 100% equity, single entry id "L", pyramiding=1; expect
+//        cascadeRatio 1 / maxCascadeDepth 1 on both halves, confirmed below.
+//   SL and TP FIXED AT ENTRY (2R, lab convention; HARD LESSON 13 found the R:R axis neutral, so no tuning
+//        credit spent hunting "the best" multiple on a first pass). No trailing, no averaging down, no
+//        martingale, no custom var-trail.
+//
+// DAY-OF-WEEK ARITHMETIC (hour() and dayofweek() are unimplemented on this engine per Attack 50/54's own
+// discovered convention; `time` is bar-open UTC epoch ms). Unix epoch (1970-01-01T00:00:00Z) was a
+// THURSDAY, so dayIdx = floor(time/86400000) % 7 gives 0=Thu, 1=Fri, 2=Sat, 3=Sun, 4=Mon, 5=Tue, 6=Wed.
+//
+// ==================== FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4) ====================
+//   ~126 calendar weeks in H1 (2022-01-01 to 2024-06-08), ~117 in H2. Not every week's weekend range will
+//   be wide enough to clear the 0.8% R floor, and not every week breaks wknHigh (as opposed to wknLow, the
+//   untraded side) within the 48-hour Mon/Tue window. Anchoring loosely between Attack 34's weekly cadence
+//   (30/23 trades -- a full week's swing range, much wider, so much rarer to have a QUALIFYING break-and-
+//   hold) and Attack 50's daily cadence (564 trades on a comparable-length window, but recurring 7x more
+//   often than a weekly setup can): pre-registering 50-110 trades per half, to be scored against the
+//   actual count in either direction.
+//
+// ==================== OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17), PER THE PROMPT'S OWN KILL RULE ====
+//   * H1 (never-tuned, 2022-01-01 to 2024-06-08) PROFIT FACTOR BELOW 1.0 -> DISCARD immediately. Do not
+//     run H2. Do not add filters to rescue H1.
+//   * H1 clears 1.0 -> run H2 (2024-06-08 to 2026-09-01) as the second and last credit this cycle.
+//   * BOTH halves clear 1.0 -> a genuine both-halves candidate, joining Attack 37/46/66-68 on the board;
+//     report avg loser, win rate and max DD alongside PF (the board's three-drawdown-category taxonomy),
+//     and queue it for a filter stack exactly as Attack 37/66 earned theirs.
+//   * H1 clears but H2 does not -> report both, DISCARD as a candidate (per Attack 53/72's precedent), not
+//     as evidence the whole family (time-of-day/calendar seasonality) is dead.
+//   * FEWER THAN ~30 TRADES in a half -> that half's ratio is a DIRECTION per LESSON 12, not a result.
+//   REPORT GROSS, COMMISSION, ACHIEVED WIN/LOSS RATIO, AVG LOSER AND WIN RATE alongside net, on whichever
+//     half(s) actually run.
+
+strategy("BTC Attack74 Weekend Vacuum Breakout", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+minRpct = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+targetR = input.float(2.0,  "Target, multiple of R (lab convention)")
+maxBars = input.int(480,    "Max bars in trade -- 5 days on 15m")
+
+dayIdx    = math.floor(time / 86400000) % 7   // 0=Thu,1=Fri,2=Sat,3=Sun,4=Mon,5=Tue,6=Wed (arithmetic; dayofweek() unimplemented on this engine)
+isWeekend = dayIdx == 2 or dayIdx == 3
+isMonTue  = dayIdx == 4 or dayIdx == 5
+
+var float wknHigh = na
+var float wknLow  = na
+
+if isWeekend and not isWeekend[1]
+    wknHigh := high
+    wknLow  := low
+else if isWeekend
+    wknHigh := math.max(wknHigh, high)
+    wknLow  := math.min(wknLow, low)
+
+haveRange = not na(wknHigh) and not na(wknLow)
+
+breakoutTrigger = isMonTue and haveRange and ta.crossover(close, wknHigh)
+
+rLong = haveRange ? close - wknLow : na
+minR  = close * minRpct / 100
+rBig  = not na(rLong) and rLong >= minR
+
+flat   = strategy.position_size == 0
+goLong = flat and breakoutTrigger and rBig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if goLong
+    strategy.entry("L", strategy.long)
+    slPx   := wknLow
+    tpPx   := close + targetR * rLong
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(wknHigh, title="WeekendHigh")
+plot(wknLow,  title="WeekendLow")

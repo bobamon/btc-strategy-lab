@@ -5954,3 +5954,133 @@ the simpler constructions already on the board.
    from every rejected strategy on the board (Attacks 33–65, 67/69/70/71, 72, and now 73).
 
 ---
+
+# ATTACK 74 — WEEKEND LIQUIDITY-VACUUM BREAKOUT. A GENUINELY NEW MECHANISM PER ATTACK 73'S OWN QUEUE. HELPS H1, BREAKS H2 — DISCARDED, THE THIRD SUCH REVERSAL IN A ROW.
+
+The stored scheduled prompt again described a board state ("Attack 37, build its filter stack") more than
+seventy attacks stale. **The docs override it, again**: Attack 71 closed the Attack 66/68 OBV-divergence
+filter stack at two terms; Attack 72 (lag-1 autocorrelation persistence breakout) and Attack 73 (Ichimoku
+Kumo+Chikou breakout) were the two genuinely-new-mechanism attempts that followed, both discarded (72: H1
+cleared, H2 reversed; 73: killed on H1). Attack 73's own queue item 7 said the next cycle owed to this
+board is a further fresh mechanism, distinct from every family already tried. This build is that
+instruction, continuing numbering after Attack 73, not Attack 37.
+
+## THE CLAIM
+
+BTC trades 24/7, but weekday flow is dominated by institutional/algorithmic desks that step back over the
+weekend, leaving **Saturday 00:00 UTC through Sunday 23:59 UTC** as a structurally thin-conviction,
+thin-book accumulation window — not a realized-range observation (Attack 36's narrow-range-day claim,
+which cares about volatility regardless of calendar day) but a claim about *who is trading*, tied to the
+calendar. When Monday's return of weekday flow pushes price decisively through the top of that specific
+2-day range within a **bounded 48-hour window (Monday + Tuesday UTC)**, the break should reflect real
+participation overpowering a thin-book range. Genuinely distinct from Attack 34/35 (the full calendar
+WEEK's high/low, an unbounded following-week trigger — a swing-structure story) and from Attack 50 (a
+DAILY Asia/London session split recurring every day — no weekly cadence at all). Pine:
+`strategies/pine/attack74-weekend-vacuum-breakout.pine`.
+
+## AUDIT (one line per leg)
+
+R >= 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rLong = close - wknLow`, never clamped; stated honestly,
+because entry sits just above `wknHigh` and the stop sits at `wknLow`, `rLong` is approximately the
+weekend range's own width, so the floor mostly functions as a minimum-range-width filter here, an
+intrinsic property of the construction rather than a hidden redundant term. Stop beyond STRUCTURE (LESSON
+5) — `slPx = wknLow`, the opposite side of the broken range, never the breakout level itself. Each leg
+separately (LESSON 6) — LONG ONLY, following this lab's convention for a first pass (Attacks
+50/59/63/65/66/72/73 all opened one-sided); the short leg (a weekend-range breakdown below `wknLow`, its
+own geometry, never mirrored) is deferred and reported as OUTSTANDING — this is an INTERIM result, not a
+finished one. BINDING (E17) — `isMonTue` AND `haveRange` AND `breakoutTrigger` AND `rBig` all
+independently bind; two credits were budgeted this cycle for the H1/H2 pair, so no per-term counter build
+was affordable, queued if this clears the kill rule (moot — see verdict). REDUNDANCY (E14) — `isMonTue`
+(TIME, no price component) vs. `wknHigh`/`wknLow` (a PRICE LEVEL over a distinct 2-day calendar slice) vs.
+`rBig`/`slPx` (PRICE DISTANCE) — three independent quantities. LATCH IN SEQUENCE (LESSON 8, fourth-
+confirmation check) — the weekend range accumulates only while `isWeekend` is true and freezes the instant
+it goes false, strictly before `isMonTue` can be true on the same bar — setup and trigger can never share a
+bar by construction, mirroring Attack 34's `newWeek` pattern and Attack 50's `inAsian`/`canTrade` split;
+`isMonTue` is not phrased as "already true for N bars," so the generalized failure mode does not apply.
+WEEKENDS (structural note 4) — weekends are not merely handled, they ARE the mechanism's reference window.
+CASCADE (HARD LESSON 42/43) — LONG at 100% equity, single entry id "L"; `cascadeRatio` 1 / `maxCascadeDepth`
+1 on both halves, confirmed (82 and 80 total rows, 82 and 80 unique entries).
+
+## DAY-OF-WEEK ARITHMETIC
+
+`dayofweek()`/`hour()` are unimplemented on this engine per Attack 50/54's own discovered convention.
+Unix epoch (1970-01-01T00:00:00Z) was a **Thursday**, so `dayIdx = floor(time/86400000) % 7` gives
+0=Thu, 1=Fri, 2=Sat, 3=Sun, 4=Mon, 5=Tue, 6=Wed. `isWeekend = dayIdx==2 or dayIdx==3`; `isMonTue =
+dayIdx==4 or dayIdx==5`.
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4)
+
+~126 calendar weeks in H1, ~117 in H2. Anchored between Attack 34's weekly cadence (30/23 trades on a
+full-week swing range) and Attack 50's daily cadence (564 trades, recurring 7x more often). Pre-registered
+**50–110 trades per half**.
+
+## H1 AND H2, SIDE BY SIDE
+
+| | **Attack 74a (H1)** | **Attack 74b (H2)** |
+|---|---|---|
+| Profit factor | **1.40137516** | **0.75569742** |
+| Trades | 82 | 80 |
+| Win rate | 45.12195122% | 35% |
+| Avg winner | $574.03 | $380.06 |
+| Avg loser | -$336.80 | -$270.81 |
+| Achieved win/loss ratio | 1.70437519 | 1.40343807 |
+| Max drawdown | 26.83158758% | 53.47445893% |
+| Net return | +60.83162318% | -34.40259459% |
+| Commission paid | $897.51 | $762.37 |
+| Largest loss | -$779.37 | -$691.76 |
+
+**Frequency estimate scored: pre-registered 50-110, actual 82 (H1) and 80 (H2) — both land inside the
+range**, on the same trade count almost symmetrically split across the two halves.
+
+## KILL RULE APPLIED. TWO CREDITS SPENT THIS CYCLE (530 BALANCE → 528).
+
+**H1 clears 1.0 outright** (PF 1.401, 82 trades, well above the ~30-trade floor), so per the kill rule H2
+was run as the registered second credit. **H2 fails**: PF falls to 0.756, a genuine reversal of the edge
+on a well-powered, non-degenerate sample (80 trades).
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+**H1**: PF above 1.0, avg loser (-$336.80) against the largest loss (-$779.37, ~2.3x) shows no strong
+concentration — tentatively **category 3, bleed on a positive edge**, pending the regime holding up, which
+H2 answers in the negative. **H2**: PF below 1.0, avg loser (-$270.81) against the largest loss (-$691.76,
+~2.6x) shows no strong concentration — **category 2, bleed on a negative edge**, the same shape as Attacks
+36/48/49/50/53b/72b/73.
+
+## THE VERDICT — DISCARDED, THE THIRD "HELPS H1, BREAKS H2" RESULT IN A ROW
+
+Per Attack 53/72's own precedent (H1 clears, H2 does not → DISCARD as a candidate, not as evidence the
+whole family is dead), Attack 74 is discarded. It does **not** become a third both-halves candidate
+alongside Attack 37/46/66-68; Attack 68 remains the board's strongest both-halves candidate (PF
+1.56474476/1.13127036, 89/80 trades).
+
+## WHAT THIS SETTLES
+
+**This is the third consecutive "helps H1, breaks H2" result across three unrelated mechanisms** — Attack
+53's order-flow absorption, Attack 72's autocorrelation persistence, and now this cycle's weekend-vacuum
+breakout. That is worth naming as a pattern in its own right, not just three unlucky mechanisms: **a bare
+breakout construction that clears the never-tuned half decisively (PF > 1.3) has now failed to survive
+into the recent half three times running**, which should raise the prior against trusting ANY single-half
+"clears 1.0" result on this board as evidence of a durable edge, independent of which mechanism produced
+it. This does **not** settle the time-of-day/calendar-seasonality family as a whole — Attack 50's Asian-
+range breakout failed differently (the inverted-payoff shape, not an H1/H2 reversal) — but a weekly
+weekend-vacuum cadence specifically does not survive out of period bare.
+
+## QUEUE
+
+1. **Do not tune Attack 74.** No sweep of the Mon/Tue window width, `minRpct`, `targetR` or `maxBars` —
+   the failure is a regime reversal (H2 PF < 1.0 outright), not a threshold to sweep.
+2. **Attack 68 (Attack 66 + OBV divergence-magnitude floor) remains the board's strongest both-halves
+   candidate** — PF 1.56474476/1.13127036 on 89/80 trades — unaffected by this cycle.
+3. **Attack 46 (long) remains a candidate alongside Attack 68**, unaffected by this cycle.
+4. **The out-of-sample test for Attack 46 still ranks first among long-side work not yet startable** and
+   still cannot be run under BTCUSDT-only — unchanged, restated because this cycle did not touch it.
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+7. **The "helps H1, breaks H2" pattern (now 3-for-3 across Attacks 53, 72, 74) is a standing risk to flag
+   on every future bare-mechanism first pass**, not a closed question — the next genuinely-new mechanism
+   should be judged with this prior in mind before its H1-only result is trusted.
+8. **The next cycle proposes ONE further genuinely new mechanism**, distinct from the VWAP family and
+   from every rejected strategy on the board (Attacks 33–65, 67/69/70/71, 72, 73, and now 74).
+
+---
