@@ -1,0 +1,161 @@
+//@version=6
+// BTC ATTACK 73 - GENUINELY NEW MECHANISM: ICHIMOKU KUMO BREAKOUT WITH CHIKOU (LAGGING SPAN) CONFIRMATION.
+//
+// The stored scheduled prompt describes a board state ("Attack 37, build its filter stack") more than
+// seventy attacks stale. The docs override it, per the prompt's own standing instruction: Attack 37's
+// stack was built and closed on cost by Attack 41 back in this lab's early history; the OBV-divergence
+// line (Attack 66 + Attack 68's magnitude floor) is the board's current strongest both-halves candidate,
+// and its own filter stack closed at two terms after three independent term-3 candidates (Attacks 69,
+// 70, 71) each failed a RATCHET v2 clause. Attack 72 (lag-1 return-autocorrelation persistence breakout)
+// was that cycle's genuinely-new-mechanism attempt and was DISCARDED (H1 cleared 1.0, H2 reversed to
+// 0.857). Attack 72's own queue said the next cycle owed to this board is a further, genuinely new
+// mechanism, distinct from every family already tried (VWAP, channel/weekly/range breakouts, liquidity
+// sweep, level tap-and-hold, round-number, impulse-bar, session-range, RSI/OBV divergence, order-flow
+// absorption, funding-settlement, streak exhaustion, EMA crossover, swing structure breakout, volatility
+// shock reversal, autocorrelation regime). This build is that instruction, continuing numbering after
+// Attack 72, not Attack 37.
+//
+// ==================== THE CLAIM, ARGUED FROM THE MECHANISM (LESSON 15/17: BEFORE running, not after) ==
+// Every breakout mechanism tried on this board so far (33, 34/35, 36, 46, 50, 57/58, 59/63) defines its
+// level from a RAW price extreme (a rolling high/low, a calendar high/low, a session high/low) or from a
+// fast/slow moving-average cross. The Ichimoku Kumo (cloud) is a different kind of level entirely: its
+// two edges (Senkou Span A and B) are each built from AVERAGES OF RANGE EXTREMES at two different
+// lookbacks (9/26-bar midpoint and 52-bar midpoint) and then displaced FORWARD in time by 26 bars, so the
+// cloud a bar sits inside today was computed from price action a full 26 bars before "now" arrived at
+// that computation. That displacement is the mechanism's actual claim: a support/resistance zone built
+// from where the market's own consensus range sat a lag ago is a different (and slower-moving,
+// consensus-weighted) object than any raw N-bar extreme this board has tested, and price decisively
+// clearing it should mean something a same-bar extreme cannot capture. The Chikou (lagging) span adds an
+// orthogonal confirmation: today's close compared against the close price from 26 bars ago (the price
+// level the Chikou line is plotted against) checks whether the move is unobstructed relative to where
+// price actually was a lag ago, not merely relative to the cloud's own construction.
+//
+// Mechanism (LONG ONLY, bare, no filter stack): tenkan = (highest(high,9)+lowest(low,9))/2. kijun =
+// (highest(high,26)+lowest(low,26))/2. senkouA_raw = (tenkan+kijun)/2. senkouB_raw =
+// (highest(high,52)+lowest(low,52))/2. The cloud IN EFFECT at the current bar is senkouA_raw and
+// senkouB_raw as they stood 26 bars ago (senkouA_raw[26], senkouB_raw[26]) -- this is the standard
+// Ichimoku forward-displacement read backward, using only the `[]` history operator, no
+// request.security, no arrays. cloudTop = max of the two; cloudBottom = min of the two. Entry trigger:
+// close crosses over cloudTop (ta.crossover). Chikou confirmation: close > close[26] (today's close
+// stands above the close price 26 bars back -- the price the lagging span is compared against). Long
+// entry: breakoutTrigger AND chikouOk AND R-floor (LESSON 3, by exclusion). Stop at cloudBottom -- the
+// OPPOSITE edge of the same cloud the entry broke out of, a genuinely different object from cloudTop
+// (LESSON 5: entry level and stop level are never the same object). Target fixed at 2R (lab convention;
+// HARD LESSON 13 found the R:R axis neutral, so no tuning credit spent hunting "the best" multiple).
+// Flip/regime response (STANDING REQUIREMENT item 3): a bearish flip is close crossing back under
+// cloudBottom -- because the entry condition itself requires a FRESH crossover of cloudTop, price cannot
+// re-trigger a new long without first reclaiming the cloud top again, so the stand-down is structural to
+// the trigger definition, not a separate bolted-on counter. Existing open trades still resolve on their
+// own fixed SL/TP, unchanged by a mid-trade flip (no custom var-trail, no signal-based early exit).
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - EXCLUSION via rBig on rLong = close - cloudBottom (the entry/stop distance at
+//        the breakout bar), never clamped: a trade needing a floor-widened stop is skipped, not taken
+//        with an artificially enlarged risk.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = cloudBottom, the far edge of the same Kumo the breakout
+//        cleared -- a distinct object from cloudTop (the entry/trigger level), never a tick beyond the
+//        signal price itself.
+//   Each leg separately (LESSON 6) - LONG ONLY this cycle, following this lab's own established
+//        convention for a first pass on a new mechanism (Attacks 59/63/65/66/72 all opened long- or
+//        short-only and reported the other side as a standing asymmetry); the short side (a bearish Kumo
+//        breakdown with its own geometry, never mirrored) is deferred and reported as outstanding.
+//   BINDING (E17) - breakoutTrigger AND chikouOk AND rBig must all independently bind; this is the FIRST
+//        run of this mechanism, and per Attack 72's own precedent only two credits are budgeted this
+//        cycle for the H1/H2 pair, so no per-term counter build was affordable -- the realized trade
+//        count against the pre-run frequency estimate below is the binding evidence this cycle can
+//        afford, and a per-term counter build is queued if this clears the kill rule.
+//   REDUNDANCY (E14) - cloudTop/cloudBottom encode a PRICE-RANGE CONSENSUS statistic (averaged range
+//        extremes at three different lookbacks, time-displaced); chikouOk reads a RAW CLOSE-TO-CLOSE
+//        comparison across time with no range component at all; rBig/slPx read a PRICE DISTANCE from
+//        entry to the cloud's far edge. Three independent quantities, no other term in this build repeats
+//        any of them.
+//   LATCH IN SEQUENCE (LESSON 8, fourth-confirmation check) - breakoutTrigger is a crossing/transition
+//        event (ta.crossover); chikouOk is a SINGLE-BAR point comparison (close vs. close[26] evaluated
+//        on the same bar as the trigger), not a filter phrased as "already been true for N bars" the way
+//        the coil/thrust, zone-tap/engulf and EMA-crossover/rising failures were -- so there is no
+//        arm-then-expire timing mismatch for this pair to fall into. Checked explicitly against the
+//        generalized rule and it does not apply here.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity, single entry id "L", pyramiding=1; expect
+//        cascadeRatio 1 / maxCascadeDepth 1 on both halves, confirmed below.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale, no custom var-trail.
+//
+// FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4: a hypothesis to score, not a fact):
+//   cloudTop is itself a smoothed, time-displaced level (built from 9/26/52-bar range midpoints), slower
+//   moving than a raw N-bar extreme but still crossed by volatile 15m BTC price often. No directly
+//   comparable prior measurement exists on this board for a cloud-edge cross specifically; anchoring
+//   loosely on the VWAP-cross flip frequency (007's family) and the EMA-crossover order of magnitude
+//   (Attack 57's raw 2154 crosses before filtering) as bounds either side of this level's smoothness,
+//   pre-registering 200-700 trades per half, to be scored against the actual count in either direction.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17), READ PER THE PROMPT'S OWN KILL RULE:
+//   * H1 (never-tuned, 2022-01-01 to 2024-06-08) PROFIT FACTOR BELOW 1.0 -> DISCARD immediately. Do not
+//     run H2. Do not add filters to rescue H1.
+//   * H1 clears 1.0 -> run H2 (2024-06-08 to 2026-09-01) as the second and last credit this cycle.
+//   * BOTH halves clear 1.0 -> a genuine both-halves candidate, joining Attack 37/46/66-68 on the board;
+//     report avg loser, win rate and max DD alongside PF (the board's three-drawdown-category taxonomy),
+//     and queue it for a filter stack exactly as Attack 37/66 earned theirs.
+//   * H1 clears but H2 does not -> report both, DISCARD as a candidate (per Attack 53/72's precedent),
+//     not as evidence the whole family is dead.
+//   REPORT GROSS, COMMISSION, ACHIEVED WIN/LOSS RATIO, AVG LOSER AND WIN RATE alongside net, on whichever
+//     half(s) actually run.
+
+strategy("BTC Attack73 Ichimoku Kumo+Chikou breakout", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+tenkanLen   = input.int(9, "Tenkan lookback")
+kijunLen    = input.int(26, "Kijun lookback")
+senkouBLen  = input.int(52, "Senkou B lookback")
+cloudShift  = input.int(26, "Cloud/Chikou displacement (bars)")
+minRpct     = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+targetR     = input.float(2.0, "Target, multiple of R (lab convention)")
+maxBars     = input.int(192, "Max bars in trade")
+
+tenkan = (ta.highest(high, tenkanLen) + ta.lowest(low, tenkanLen)) / 2
+kijun  = (ta.highest(high, kijunLen) + ta.lowest(low, kijunLen)) / 2
+senkouA_raw = (tenkan + kijun) / 2
+senkouB_raw = (ta.highest(high, senkouBLen) + ta.lowest(low, senkouBLen)) / 2
+
+cloudA = senkouA_raw[cloudShift]
+cloudB = senkouB_raw[cloudShift]
+cloudTop    = math.max(cloudA, cloudB)
+cloudBottom = math.min(cloudA, cloudB)
+
+cloudReady = not na(cloudTop) and not na(cloudBottom)
+
+breakoutTrigger = cloudReady and ta.crossover(close, cloudTop)
+chikouOk = not na(close[cloudShift]) and close > close[cloudShift]
+
+rLong = cloudReady ? close - cloudBottom : na
+minR  = close * minRpct / 100
+rBig  = not na(rLong) and rLong >= minR
+
+goLong = breakoutTrigger and chikouOk and rBig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := cloudBottom
+    tpPx   := close + targetR * rLong
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(cloudTop, title="CloudTop")
+plot(cloudBottom, title="CloudBottom")
+plot(chikouOk ? 1 : 0, title="ChikouOk")

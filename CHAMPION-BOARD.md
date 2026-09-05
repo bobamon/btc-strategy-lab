@@ -5842,3 +5842,115 @@ this build is very unlikely to rescue a construction that failed at the kill-rul
    from every rejected strategy on the board (Attacks 33–65, 67/69/70/71, and now 72).
 
 ---
+
+# ATTACK 73 — ICHIMOKU KUMO BREAKOUT WITH CHIKOU CONFIRMATION. A GENUINELY NEW MECHANISM PER ATTACK 72'S OWN QUEUE. DISCARDED AT THE KILL RULE.
+
+The stored scheduled prompt again described a board state ("Attack 37, build its filter stack") more
+than seventy attacks stale. **The docs override it, again**: Attack 71 closed the Attack 66/68 filter
+stack at two terms, Attack 72 (lag-1 autocorrelation persistence breakout) was that cycle's genuinely-new-
+mechanism attempt and was discarded (H1 cleared, H2 reversed), and Attack 72's own queue said the next
+cycle owed to this board is a further fresh mechanism, distinct from every family already tried
+(VWAP, channel/weekly/range breakouts, liquidity sweep, level tap-and-hold, round-number, impulse-bar,
+session-range, RSI/OBV divergence, order-flow absorption, funding-settlement, streak exhaustion, EMA
+crossover, swing structure breakout, volatility-shock reversal, autocorrelation regime). This build is
+that instruction, continuing numbering after Attack 72, not Attack 37.
+
+## THE CLAIM
+
+The Ichimoku Kumo (cloud) is built from averages of range extremes at three lookbacks (9/26/52 bars)
+and displaced FORWARD 26 bars, so the cloud in effect at any given bar was computed from price action a
+full lag before "now" arrived at that computation — a time-displaced consensus-range level, genuinely
+different in construction from every raw N-bar extreme, calendar level, or moving-average cross already
+tried on this board. The Chikou (lagging) span adds an orthogonal confirmation: today's close compared
+against the close 26 bars ago, the price the lagging span is plotted against. Entry: `close` crosses
+over `cloudTop` (the higher of `senkouA_raw[26]`/`senkouB_raw[26]`, using only the `[]` history operator
+— no `request.security`) AND `chikouOk` (`close > close[26]`) AND R >= 0.8% of price (LESSON 3, by
+exclusion) on `rLong = close - cloudBottom`. Stop at `cloudBottom` — the opposite edge of the same cloud
+(LESSON 5: a distinct object from the entry level). Target fixed 2R (lab convention; HARD LESSON 13
+found the R:R axis neutral). Long only, bare, no filter stack. Pine:
+`strategies/pine/attack73-ichimoku-kumo-chikou-breakout.pine`.
+
+## AUDIT (one line per leg)
+
+R >= 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rLong = close - cloudBottom`, never clamped. Stop beyond
+STRUCTURE (LESSON 5) — `slPx = cloudBottom`, the far edge of the same Kumo the breakout cleared, a
+distinct object from `cloudTop` (the entry/trigger level). Each leg separately (LESSON 6) — LONG ONLY,
+following this lab's convention for a first pass on a new mechanism (Attacks 59/63/65/66/72 all opened
+one-sided); the short leg (a bearish Kumo breakdown, its own geometry, never mirrored) is deferred and
+reported as outstanding. BINDING (E17) — `breakoutTrigger` AND `chikouOk` AND `rBig` must all
+independently bind; per Attack 72's own precedent, only two credits were budgeted this cycle for the
+H1/H2 pair, so no per-term counter build was affordable (moot here since the kill rule fired on one
+credit). REDUNDANCY (E14) — `cloudTop`/`cloudBottom` encode a price-range CONSENSUS statistic (averaged
+range extremes, time-displaced); `chikouOk` reads a raw close-to-close comparison with no range
+component; `rBig`/`slPx` read a price DISTANCE — three independent quantities. LATCH IN SEQUENCE (LESSON
+8, fourth-confirmation check) — `breakoutTrigger` is a crossing event; `chikouOk` is a SINGLE-BAR point
+comparison (`close` vs. `close[26]` on the same bar as the trigger), not a filter phrased as "already
+been true for N bars" — checked explicitly against the generalized rule and it does not apply here.
+CASCADE (HARD LESSON 42/43) — LONG at 100% equity, single entry id "L"; `cascadeRatio` 1 /
+`maxCascadeDepth` 1, confirmed (301 rows, 301 unique entries). SL and TP FIXED AT ENTRY (2R). No
+trailing, no averaging down, no martingale, no custom var-trail.
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING
+
+No directly comparable prior cloud-edge-cross measurement exists on this board; loosely anchored between
+the VWAP-cross flip frequency and Attack 57's raw EMA-crossover count (2,154 on H1 before filtering),
+pre-registered **200-700 trades per half**.
+
+## H1 ONLY (2022-01-01 → 2024-06-08, never-tuned) — KILL RULE APPLIED, H2 NOT RUN
+
+| | Attack 73a (H1) |
+|---|---|
+| Profit factor | **0.80911871** |
+| Trades | 301 |
+| Win rate | 35.21594684% |
+| Avg winner | $165.91 |
+| Avg loser | -$111.46 |
+| Achieved win/loss ratio | 1.4884731 |
+| Max drawdown | 53.92299588% |
+| Net return | -41.48768427% |
+| Commission paid | $2,196.41 |
+| Largest loss | -$481.09 |
+
+**Frequency estimate scored: pre-registered 200-700, actual 301 — inside the range.**
+
+## THE VERDICT — DISCARDED AT THE KILL RULE. ONE CREDIT SPENT (BALANCE 531 → 530).
+
+**PF 0.809, well below 1.0, on a well-powered, non-degenerate sample.** Per the mandate's kill rule, the
+never-tuned half failing means discard immediately — no filters, no rescue, H2 not run. A payoff of 1.49
+needs ~40.2% wins to break even; the mechanism achieved 35.2%, a genuine shortfall, not a marginal miss.
+A slower, time-displaced consensus-range level is not, by itself, a better breakout filter than the raw
+N-bar extremes this board has already tried and rejected in the same family (Attacks 33, 46, 50, 57-59,
+63).
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Avg loser (-$111.46) against the largest loss (-$481.09, ~4.3x) shows no strong concentration signature
+— not category 1. The edge is negative (PF < 1.0), so **category 2, bleed on a negative edge**, the same
+shape as Attacks 36/48/49/50/53b/72b. Not worth filtering — filtering only earns its place on a
+thin-but-positive edge (category 3, per Attack 37/66/68).
+
+## WHAT THIS SETTLES
+
+**A fourth breakout construction using a "smarter" level definition has now failed the same way**: a
+raw N-bar extreme (33/46/50/59/63) and now a time-displaced consensus range (this cycle) both fail to
+turn a bare breakout into a durable edge on this instrument without a filter stack behind them, and this
+one failed before a filter stack could even be considered (kill rule on H1). The Kumo's added complexity
+(three lookbacks, a 26-bar displacement, a lagging-span confirmation) did not buy a better base rate than
+the simpler constructions already on the board.
+
+## QUEUE
+
+1. **Do not tune Attack 73.** No sweep of `tenkanLen`/`kijunLen`/`senkouBLen`/`cloudShift` — the failure
+   is at the construction level (kill rule on H1), not a threshold to sweep.
+2. **Attack 68 (Attack 66 + OBV divergence-magnitude floor) remains the board's strongest both-halves
+   candidate** — PF 1.56474476/1.13127036 on 89/80 trades — unaffected by this cycle.
+3. **Attack 46 (long) remains a candidate alongside Attack 68**, unaffected by this cycle.
+4. **The out-of-sample test for Attack 46 still ranks first among long-side work not yet startable** and
+   still cannot be run under BTCUSDT-only — unchanged, restated because this cycle did not touch it.
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+7. **The next cycle proposes ONE further genuinely new mechanism**, distinct from the VWAP family and
+   from every rejected strategy on the board (Attacks 33–65, 67/69/70/71, 72, and now 73).
+
+---
