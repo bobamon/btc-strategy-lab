@@ -5227,3 +5227,110 @@ context around existing metrics, not a new metric.
    68 and Attack 46 are its two standing candidates and neither has either number.
 4. **Do not re-tune v37 against the benchmark.** Fitting a strategy to beat buy & hold on the window
    where the baseline was measured is HARD LESSON 49's error with a new target.
+
+---
+
+# ██ CYCLE CHECK #26, 2026-09-05 (zero credits) — v37 SURVIVES THE DECOMPOSITION THAT OVERTURNED WAR FORMATION'S CLAIM. IT IS PROFITABLE IN ALL THREE MARKET PHASES.
+
+War Formation's cycle check #29, earlier today, withdrew a market-independence claim after showing
+that a whole-window return comparison hid a path that reversed the interpretation. **Check #25's v37
+benchmark was the same kind of two-endpoint comparison and was therefore owed the same audit.** This
+check applies it. The result goes the other way.
+
+Credits: **524. Zero spent.** No new backtest. `get_trades` on v37's existing result
+`01M1JPDW0AK2BY6W4MCR03SXFQ` (all 155 trades; the stored `adhoc_...` jobId is not accepted by
+`get_trades` — the result id in `provenance.backtestUrl` is), plus the already-recorded benchmark
+curve `bt_e0da4ea13f`. **No 3M code ran on any other engine.** The no-port rule is intact.
+
+## THE PHASES, READ FROM BTC's OWN CURVE
+
+Turning points taken from the benchmark equity curve, not chosen to suit the answer:
+
+| Phase | span | BTC |
+|---|---|---|
+| **A — bear** | 2022-01-01 → 2022-12-06 | **-66.1%** |
+| **B — bull** | 2022-12-06 → 2025-08-10 | **+553.4%** |
+| **C — decline** | 2025-08-10 → 2026-08-26 | **-40.3%** |
+
+The curve is the *perp-executed* buy & hold, so its levels carry funding drag, and its final point is
+2026-08-26 rather than 2026-09-01 (downsampling). Phase **directions** are unaffected; the magnitudes
+should be read as the funding-inclusive path, not raw price.
+
+## THE DECOMPOSITION
+
+| Phase | trades | wins | win rate | v37 $ | v37 % | BTC % | phase PF |
+|---|---|---|---|---|---|---|---|
+| **A — bear** | 51 | 20 | 39.2% | +823.24 | **+8.23%** | -66.1% | **1.2117** |
+| **B — bull** | 75 | 35 | 46.7% | +2,069.76 | **+20.70%** | +553.4% | **1.3570** |
+| **C — decline** | 29 | 11 | 37.9% | +82.96 | **+0.83%** | -40.3% | **1.0388** |
+| **TOTAL** | 155 | 66 | 42.6% | +2,975.96 | +29.76% | — | 1.2517 |
+
+Phase totals reconcile to the recorded `netProfitPct` of **+29.75955671%** exactly.
+
+## FINDING 1 — v37 IS POSITIVE IN ALL THREE PHASES, INCLUDING TWO SEVERE BEAR MARKETS
+
+**This is the claim War Formation's `e58a` failed.** `e58a` lost money in its one falling phase and was
+directionally aligned with BTC in every sub-period. v37 is not: it earned **+8.23% while BTC lost
+two-thirds of its value**, and stayed positive through a second 40% decline.
+
+Profit factor above 1.0 in every phase, on 51 / 75 / 29 trades. The edge is not a drift artefact.
+
+**Sample-floor honesty:** phases A (51) and B (75) clear RATCHET v2 clause 3's floor of 30. **Phase C's
+29 trades does not** — by one trade. Its PF of 1.0388 is also the weakest of the three and is close
+enough to 1.0 that it should be read as "roughly flat", not "profitable". So the strong statement rests
+on A and B; C is reported and not leaned on.
+
+## FINDING 2 — THIS CORRECTS CHECK #25's FINDING 3
+
+Check #25 said v37's H1→H2 decline "partly tracks the market's own", inferring that from two half-window
+aggregates. The phase view says something more specific and less comfortable: **the decay is
+concentrated in phase C, the most recent year**, where PF falls to 1.0388 from 1.3570 in the bull and
+1.2117 in the 2022 bear.
+
+That is not "tracking the market" — v37 was strongly profitable in the *2022* bear and is barely
+profitable in the *2025-26* decline. Two down markets, very different results. **The degradation is
+recent and time-ordered, not regime-ordered**, which is the more concerning of the two readings and
+was invisible to the H1/H2 split because H2 straddles the end of the bull and the start of the decline.
+
+## FINDING 3 — WHAT THE BENCHMARK COMPARISON ACTUALLY MEANS, PHASE BY PHASE
+
+| Phase | v37 | buy & hold | who wins |
+|---|---|---|---|
+| A bear | +8.23% | -66.1% | **v37, overwhelmingly** |
+| B bull | +20.70% | +553.4% | **holding, overwhelmingly** |
+| C decline | +0.83% | -40.3% | **v37** |
+
+Check #25 reported that v37 loses to buy & hold on return in every window. That remains true and is
+not withdrawn. **But the phase view explains why: holding won the full window entirely on the strength
+of phase B.** v37 beat holding in both bear phases and was left far behind in the bull.
+
+The honest characterisation is **a low-participation absolute-return build**: it captures a small
+fraction of large up-moves and avoids most of large down-moves. Whether that is worth trading is a
+question about the user's constraint — capital or risk — exactly as check #25 framed it, and this
+decomposition supports that framing rather than overturning it.
+
+## WHY THIS ENTRY EXISTS AT ALL
+
+The audit was run because a *different* lab found an error in the same method earlier the same day.
+The methods are shared across workstreams even though the strategies are strictly separate; a
+correction in one is a reason to re-audit the others. **In this case the audit confirmed the result
+instead of overturning it, which is the outcome that makes the audit worth trusting when it does
+overturn something.**
+
+## STATE
+
+Champion **unchanged: v37**, now with a stronger evidential basis than it had this morning, not a
+weaker one. Short reference unchanged: v60, still unbenchmarked. Dashboard **not rebuilt** — no 3M
+metric changed; this is new analysis of existing trades.
+
+## QUEUE
+
+1. **Phase C is the open problem.** PF 1.0388 over the most recent year, on a sample one trade below
+   the floor. The question is whether v37's edge is decaying or whether 2025-26 is simply a hostile
+   regime — and those need opposite responses. **Do not tune against phase C**; per HARD LESSON 49
+   designing a filter by looking at when a strategy stopped working fits it to that window.
+2. **Benchmark and decompose v60's short leg** — still owed from check #25's queue item 1 and
+   untouched by this check.
+3. **Report `fundingPaid` on future perp results** — still owed from check #25.
+4. **The method generalises: any two-endpoint comparison in this project is now suspect** until
+   decomposed. `INDEX-SWEEP.md` carries several; that belongs to the index tick.
