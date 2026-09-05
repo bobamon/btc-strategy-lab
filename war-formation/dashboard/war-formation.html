@@ -1333,9 +1333,59 @@ const DATA = [
     },
     "verdict": "REGISTERED PREDICTION CONFIRMED EXACTLY: this build reproduces E69b's 43-trade population and 18W/25L split precisely (41.86046512% win rate to 8 significant figures), and drawdown scaled down by 3.92x (9.28471029% -> 2.36726687%), matching E72's own 3.916x scaling factor to within noise. The equity-fraction insensitivity E72 established for e58a generalises to the band-removed build too. NOT A KEEP against E72 (RATCHET v2 clause 1: PF fell 1.26239697 -> 1.24975173, the same direction and similar magnitude as E69b's fall against e58a at 100% equity), but that was never the question -- this run exists to make E74 comparable, not to propose a change.",
     "notes": "THE FIRST TRUE APPLES-TO-APPLES BAND-REMOVED COMPARISON BETWEEN THE TWO LEGS: LONG (E77) PF 1.24975173 / DD 2.36726687% / 43 trades / 41.86046512% win vs SHORT (E74) PF 1.16714444 / DD 3.61455016% / 41 trades / 41.46341463% win, both at 25% equity, both with the whole-number band removed, same window. The long remains meaningfully stronger than the short (PF +0.083) even on fully matched terms -- the long/short asymmetry documented since E71/E72 is not an equity-fraction artifact and is not explained by the band. This closes the queue item carried forward since E74 ('re-run the LONG without the whole-number band at 25% equity'). NO CHAMPION: 43 and 41 trades both clear the 30-trade floor (RATCHET v2 clause 3) but the 1m window remains 4.5 months of ONE regime and cannot support a split (HARD LESSON 22/LESSON 22), so nothing here can be promoted. Reference builds are unchanged: e58a (long, 100% equity, band present) and E71 (short, 25% equity, band present) remain this lab's two reference builds; E77 and E74 are the band-removed comparability pair, not replacements."
+  },
+  {
+    "id": "wf-e79-5m-rederived-atr-basis",
+    "name": "E79: E78 on 5m with the atr basis RE-DERIVED to genuine clock-time equivalents",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-05",
+    "lastTestedDate": "2026-09-05",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "war-formation/pine/e79-5m-rederived-atr-basis.pine",
+    "description": "E78 (the ALCM cascade ported to 5m) carried atr(3)/atr(30) over unchanged from the 1m build -- a DECLARED DEVIATION E78 itself flagged, since on 5m bars that measures 15min/150min of real time instead of the 1m build's intended 3min/30min. Per HARD LESSON 40 this is a re-derivation, not a rescale: this build corrects atrSlow to atr(6) (6*5m = 30 minutes, an EXACT match to the 1m build's atr(30) -- this also corrects the velocity floor velMin, which reads atrSlow alone) and atrFast to atr(1) (5 minutes, the closest achievable proxy for 3 minutes at this bar resolution, since sub-bar windows do not exist). Byte-identical to E78 otherwise: same shieldUsd ($2,000), rr (2.0), maxBars (864), cascade, gates and both-direction entries. Answers E78's own queue item 1 -- 'before accepting reading 1 or 2, re-run the 1m build on 5m with a corrected atr basis' -- by isolating the atr-deviation confound as the single changed variable (HARD LESSON 16/E17).",
+    "metrics": {
+      "netProfitPct": -11.62327653,
+      "profitFactor": 0.86373954,
+      "maxDrawdownPct": 21.07275805,
+      "totalTrades": 114,
+      "winRatePct": 21.92982456,
+      "avgTradePct": -0.10195857,
+      "sharpeRatio": -0.34969409,
+      "sortinoRatio": -0.12918423,
+      "commissionPaid": 1116.45215275,
+      "avgWinningTrade": 294.714507308,
+      "avgLosingTrade": -95.844835229775,
+      "ratioAvgWinLoss": 3.07491277,
+      "largestWin": 630.034672000001,
+      "largestLoss": -333.610536599999,
+      "avgBarsInTrade": 273.14035088,
+      "avgBarsWinning": 585.64,
+      "avgBarsLosing": 185.35955056,
+      "longTrades": 51,
+      "shortTrades": 63,
+      "longWinning": 21,
+      "shortWinning": 4,
+      "longNetProfit": -313.428787749983,
+      "shortNetProfit": -848.898865000005
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1SHKDHNXG8NEFCWC86375QX",
+      "strategyId": "01M1SHKDS7W4RSNTV5SJCW5NMF",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1SHKDHNXG8NEFCWC86375QX",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1.008849557522124,
+      "verifiedAt": "2026-09-05T00:00:00Z"
+    },
+    "verdict": "THE ATR-DEVIATION CONFOUND IS RULED OUT AS THE CAUSE OF E78's FAILURE. Correcting the atr basis to genuine clock-time equivalents (atr(6)=30min exact, atr(1)~5min closest proxy) produced an almost identical trade population to E78's un-rescaled atr(3)/atr(30): 114 trades vs 115, 21 long winners in BOTH runs, 4 short winners in BOTH runs, win rate 21.93% vs 21.74%. Profit factor moved 0.78597499 -> 0.86373954 (still below 1.0) and max drawdown improved 30.19% -> 21.07%, but the qualitative population -- who wins and who loses -- did not change. The kill rule (PF < 1.0 on a sample clearing the 30-trade floor) applies again: DISCARDED.",
+    "notes": "DIRECTLY ANSWERS E78's QUEUE ITEM 1. Because the corrected atr basis reproduced E78's population almost exactly (same long-winner count, same short-winner count, near-identical trade count and win rate) rather than materially reshuffling which trades fire, the atr-basis deviation was not what made 5m fail -- 5m itself is where the edge does not survive, independent of that specific implementation choice. This makes E78's reading 2 (the 1m 36-trade e58a result was noise, not a 1m-specific edge) more likely than reading 1, though a single 5m run still cannot fully separate 'timeframe-specific edge' from 'noise' with certainty. The short leg is confirmed dead again on this leg's largest-ever sample: 4 winners in 63 short trades (6.3%), matching E78's 4/65 (6.2%) almost exactly -- two independent atr-basis constructions now agree on the short leg's collapse. NOT A KEEP, NOT A CANDIDATE: this run exists to close a queue item, not propose a change. Reference builds are unchanged: e58a (long, 100% equity, 1m) and E71 (short, 25% equity, 1m). The drawdown-allowance RULE QUESTION FOR THE USER (HARD LESSON 48, blocking E74) remains open and is untouched by this run. QUEUE: the 15m port (E78's queue item 2, coverage confirmed at check #38: 211,711 bars back to 2020-08) remains the next axis, and per HARD LESSON 40 needs its own re-derivation -- the 15m-bucket breakout term (brokeAbove/brokeBelow) degenerates to a trivial one-bar comparison at 15m and needs a genuine redesign, not a parameter carry-over, before it can be run responsibly."
   }
 ];
-const BUILT = "2026-09-04 17:39";
+const BUILT = "2026-09-05 19:46";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

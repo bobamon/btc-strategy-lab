@@ -6840,3 +6840,116 @@ without changing its recorded metrics.
 5. HARD LESSON 48 / the drawdown-allowance RULE QUESTION remains open and remains the only thing
    blocking the lab's single live improvement. Unchanged from checks #28-#36.
 6. Do not port to `backtest-lab` to chase the data. The stateless limit is real and the rule stands.
+
+---
+
+# ██ E79 -- E78's QUEUE ITEM 1 ANSWERED: THE ATR-DEVIATION CONFOUND IS RULED OUT
+
+**Docs-first check.** This cycle's stored prompt is, once again, the pre-E67 text (queue item 1: attack
+the short's entry geometry; queue item 2: finish the entry-term binding sweep). Both are long closed --
+short geometry at E71/E74-E76 (HARD LESSON 42's margin-sizing fix); the binding sweep on both legs at
+E69a/E69b/E70a/E70b/E77 (long) and E74/E75a/E75b/E76 (short). **The docs win, per the prompt's own
+instruction.** The live, credit-worthy item on the board is check #38's queue item 5→E78's own queue
+item 1: *"Re-run the 1m build on 5m with a corrected atr basis before accepting reading 1 or 2."*
+
+**One credit.** `resultId 01M1SHKDHNXG8NEFCWC86375QX`, `strategyId 01M1SHKDS7W4RSNTV5SJCW5NMF`.
+
+## THE CORRECTION, AND WHY IT IS ONE HYPOTHESIS, NOT TWO
+
+E78 carried `atr(3)`/`atr(30)` over byte-identical from the 1m build. On 1m bars that reads 3 and 30
+minutes -- the coil's fast/slow reference and the velocity floor `velMin` (which reads `atrSlow` alone).
+On 5m bars the SAME bar counts read 15 and 150 minutes: a fivefold inflation of both quantities, and a
+DECLARED DEVIATION E78 itself flagged rather than hid.
+
+Per HARD LESSON 40 (geometry in bars does not transfer across timeframes) this needed a re-derivation:
+`atrSlow -> atr(6)` (6 x 5m = 30 minutes, an EXACT match to the 1m build's intent -- correcting both the
+coil AND `velMin` in one move, since both were built on the same 1m-native "30 minutes"). `atrFast ->
+atr(1)` (5 minutes, the closest achievable proxy for 3 minutes; sub-bar windows do not exist on a 5m
+chart). **This is ONE hypothesis cleanly isolated** (HARD LESSON 16/E17) -- "does the atr time-basis
+matter" -- not two, because both the coil and the velocity floor share the same underlying quantity and
+were corrected together for the same reason. Nothing else changed from E78: same `shieldUsd` ($2,000),
+`rr` (2.0), `maxBars` (864), cascade, gates, both directions.
+
+**PRE-RUN AUDIT:** R = shieldUsd $2,000 against 5m-window BTC prices ($60k-$120k) is 1.7%-3.3%, clears
+LESSON 3's 0.8% floor. Stop is risk-defined per the ALCM spec (LESSON 5). Both legs reported separately
+(LESSON 6). Single-variable change, nothing stacked (E17). No term added or removed, only the basis of
+two existing terms corrected together as one unit (E14). Cascade bucket order unchanged from E78
+(LESSON 8). `shieldUsd`/`maxBars` unchanged from E78 so no new occupancy confound is introduced by this
+run relative to it (LESSONS 24/28/29).
+
+**REGISTERED PREDICTION, BEFORE RUNNING (LESSON 17):** if E78's failure was an artifact of the atr
+deviation, correcting it should meaningfully reshuffle the trade population (different bars pass the
+coil/velocity gates) and could plausibly move PF across the 1.0 line. If the failure is a property of
+5m itself rather than that one parameter choice, the corrected run should reproduce a population close
+to E78's, with PF moving only modestly.
+
+## RESULT -- 5m, 2024-06-08 -> 2026-09-01, 234,663 bars
+
+| | E78 (atr(3)/atr(30), un-rescaled) | **E79 (atr(1)/atr(6), re-derived)** |
+|---|---|---|
+| Profit factor | 0.78597499 | **0.86373954** |
+| Trades | 115 | **114** |
+| Win rate | 21.73913043% | **21.92982456%** |
+| Net | -18.26452824% | **-11.62327653%** |
+| Max drawdown | 30.19142159% | **21.07275805%** |
+| Long | 50 trades, **21 wins**, -$1,258.54 | 51 trades, **21 wins**, -$313.43 |
+| Short | 65 trades, **4 wins**, -$567.91 | 63 trades, **4 wins**, -$848.90 |
+| Commission | $1,024.75 | $1,116.45 |
+
+**The prediction that mattered was the second one, and it was confirmed.** The long-winner count is
+IDENTICAL (21 in both runs) and the short-winner count is IDENTICAL (4 in both runs). Total trade count
+moved by exactly 1 (115 -> 114). This is not a reshuffled population -- it is essentially the SAME
+population, with PF improving modestly (0.786 -> 0.864, still under 1.0) and drawdown improving more
+(30.19% -> 21.07%) purely from a smaller number of adverse-basis edge cases.
+
+## WHAT THIS ESTABLISHES
+
+**The atr-deviation confound is RULED OUT as the cause of E78's failure.** If the un-rescaled atr(3)/
+atr(30) basis had been materially distorting which bars qualify as "coiled" or clear the velocity floor,
+correcting it to genuine clock-time equivalents should have admitted or excluded a meaningfully different
+set of trades. It did not. **5m itself, not the specific atr implementation, is where the edge does not
+survive.**
+
+**Kill rule applies again: PF 0.86373954 < 1.0 on 114 trades (well clear of the 30-trade floor).
+DISCARDED.**
+
+This makes E78's **reading 2** (`e58a`'s 1m PF 1.24 on 36 trades was noise, not a 1m-specific edge) more
+plausible than reading 1 (the edge is genuinely 1m-specific) -- though a second 5m construction still
+cannot fully separate "timeframe-specific edge" from "noise" with certainty; that would need an
+independent timeframe (15m), not a second variant of the same one.
+
+**The short leg is confirmed dead again, on its largest-ever sample under a second, independent atr
+basis:** 4 winners in 63 short trades (6.3%), matching E78's 4/65 (6.2%) almost exactly. Two different
+atr constructions now agree.
+
+## NOT A KEEP, NOT A CANDIDATE
+
+This run exists to close a queue item, not to propose a change, exactly like E71-E77's own comparability
+runs. Reference builds are unchanged: **e58a** (long, 1m, 100% equity) and **E71** (short, 1m, 25%
+equity, declared deviation per HARD LESSON 42). The HARD LESSON 48 drawdown-allowance RULE QUESTION FOR
+THE USER (blocking E74) remains open and is untouched by this run.
+
+## STATE
+
+No champion, no candidate. `E74` remains the one short-leg improvement, still blocked on the same
+unanswered rule question. `E79` closes E78's queue item 1.
+
+## QUEUE
+
+1. **E78's queue item 1 is CLOSED.** The atr-basis deviation is not the explanation for the 5m failure;
+   do not re-run this cell again with a third atr construction -- two independent bases now agree.
+2. **The 15m port (E78's queue item 2 / check #38's finding) is the next axis**, and per HARD LESSON 40
+   it needs its own re-derivation, not a parameter carry-over: on a 15m chart the 15m-bucket breakout
+   term (`brokeAbove`/`brokeBelow`, currently "this bar's running high/low vs the prior 15m bucket's")
+   degenerates to a trivial one-bar comparison, because each bar IS one 15m bucket. That redesign
+   question should be resolved and stated explicitly BEFORE spending a credit on it, not discovered
+   after the fact the way E78's atr deviation was.
+3. Check #36's shield-fill caveat (every recorded PF is an upper bound, since real liquidation fills
+   worse than a backtested stop) still belongs on any quoted result, including E79's.
+4. HARD LESSON 48 / the drawdown-allowance RULE QUESTION remains open and remains the only thing
+   blocking the lab's single live improvement (E74). Still needs the user, not a backtest.
+5. **Known gap, stated rather than patched:** E78 itself was never recorded in `results/backtests.json`
+   (only in this log) and its `jobId` from the log (`01M1SFN67Z0T52PFNJB19NX9RP`) now 404s via
+   `get_backtest_result` -- the adhoc result appears to have expired before a session archived it. Its
+   metrics are not hand-written here to patch that gap (would violate the no-fabrication rule); E79's own
+   record is complete and independently provenanced, and stands as the archival copy of this comparison.
