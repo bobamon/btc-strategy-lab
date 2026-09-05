@@ -7908,3 +7908,134 @@ The cross-sectional follow-up **counts as support for the nearness mechanism onl
 - *Cross-sectional interactions in cryptocurrency returns* — https://www.sciencedirect.com/science/article/abs/pii/S1057521924007415
 - *New behaviorally-based cross-sectional reversal portfolios in the cryptocurrency market* — https://www.sciencedirect.com/science/article/abs/pii/S154461232501058X
 - Starkiller Capital, *Cross-sectional Momentum in Cryptocurrency Markets* — https://www.starkiller.capital/post/cross-sectional-momentum-in-cryptocurrency-markets
+
+---
+
+# ██ ATTACK 86 CROSS-SECTIONAL RESULT — ALL THREE PRE-REGISTERED CRITERIA PASS, AND THE CONTROL SURVIVES
+
+Every criterion below was **written down and committed before any of these runs existed** (see the
+pre-registration entry immediately above). Nothing was moved afterwards.
+
+Engine: `backtest-lab` via the backtester24 connector. All 40 cells `pinned: true`,
+`binance_perp_archive`, explicit start/end, fee 5bps, long only, no stop, no target — the exit is the
+state itself.
+
+## THE TEST
+
+`nearness = close / highest(high, 360)` on 4h. Long while nearness > 0.95, flat when it decays below
+0.90. Ten crypto pairs, both halves.
+
+## RESULT 1 — NEARNESS, BOTH HALVES
+
+**H1 · 2022-01-01 → 2024-06-08 · 172 trades across 10 cells**
+
+| Pair | PF | Trades | Net | Buy & hold |
+|---|---|---|---|---|
+| ETH | **3.040047** | 13 | +65.70% | -0.84% |
+| SOL | **2.521561** | 22 | +196.49% | -5.91% |
+| DOGE | **2.398748** | 19 | +107.60% | -13.27% |
+| BNB | **1.810980** | 15 | +52.07% | +31.68% |
+| AVAX | **1.680189** | 22 | +82.45% | -69.37% |
+| BTC | **1.598577** | 15 | +44.99% | +48.44% |
+| XRP | **1.012642** | 12 | +0.66% | -40.56% |
+| ADA | **1.006541** | 16 | +0.40% | -66.26% |
+| DOT | 0.823258 | 16 | -8.89% | -75.62% |
+| LINK | 0.532694 | 22 | -38.66% | -17.53% |
+
+**H2 · 2024-06-08 → 2026-09-01 · 147 trades across 10 cells**
+
+| Pair | PF | Trades | Net | Buy & hold |
+|---|---|---|---|---|
+| XRP | **7.682992** | 10 | +301.34% | +177.30% |
+| DOGE | **2.922093** | 14 | +118.35% | -44.08% |
+| BTC | **2.058761** | 10 | +43.39% | +13.25% |
+| BNB | **1.707750** | 14 | +29.34% | +1.71% |
+| SOL | **1.536628** | 14 | +25.02% | -36.33% |
+| DOT | **1.340227** | 11 | +19.03% | -87.05% |
+| ETH | **1.293505** | 17 | +24.25% | -33.04% |
+| ADA | **1.290234** | 16 | +23.93% | -55.08% |
+| LINK | **1.143437** | 22 | +10.89% | -29.91% |
+| AVAX | 0.683614 | 19 | -25.09% | -78.36% |
+
+**8/10 above PF 1.0 in H1. 9/10 in H2. All 10 beat buy & hold in H2; 8/10 in H1.**
+
+## THE THREE PRE-REGISTERED CRITERIA, SCORED
+
+| Criterion | Result |
+|---|---|
+| Aggregate trades ≥ 30 | ✅ **319** across both halves |
+| Majority of cells PF > 1.0 net of fees | ✅ **17 of 20 cells** |
+| Working cells are NOT just the largest buy & hold (HL54) | ✅ **ranking does not track B&H** |
+
+On the third: BTC has the **best** H1 buy & hold (+48.44%) and ranks **6th** on profit factor. AVAX has
+nearly the **worst** (-69.37%) and ranks **5th**. In H2, DOT's buy & hold is **-87.05%** and it still
+returns PF 1.340227. The rank correlation that killed the index sweep is **absent here**.
+
+## RESULT 2 — THE CONTROL, WHICH IS THE PART THAT MATTERS
+
+The pre-registration said a pass would be *more* suspicious than a fail, and named the likely
+artefact: **a low-exposure long-only filter beating a 100%-exposed benchmark in a falling market is
+near-automatic and says nothing about anchoring.** Eight of ten coins fell in H2, several
+catastrophically. That objection had to be measured, not argued.
+
+**The control:** identical construction, identical cells, identical windows, same 360-bar lookback —
+but a plain trend filter instead of nearness (`close > sma(close,360)`, exit on the reverse). If
+Barroso & Wang are right that *"price momentum explains the predictability of 52-week high
+momentum"*, the two should perform alike.
+
+**They do not.**
+
+| | Nearness | Plain trend (SMA360) |
+|---|---|---|
+| Cells PF > 1.0, H1 | **8 / 10** | 5 / 10 |
+| Cells PF > 1.0, H2 | **9 / 10** | 6 / 10 |
+| Cells PF > 1.0, both halves | **17 / 20** | **11 / 20** |
+| Win rate range | **22.7% – 61.5%** | 4.5% – 21.9% |
+| Max drawdown range | **19.6% – 43.5%** | 27.9% – 84.8% |
+| Trades per cell | 10 – 22 | 32 – 90 |
+
+Same lookback, same instruments, same dates, same costs. Nearness wins on cells-above-1.0 in **both**
+halves, carries **far lower drawdowns** (worst 43.5% vs 84.8%), a **two-to-three times higher win
+rate**, and does it with **three to four times fewer trades**.
+
+**So the "it is just a trend filter avoiding bear markets" explanation is tested and rejected.** Both
+are trend filters over the same horizon. Only one of them works. Barroso & Wang's objection — that
+plain momentum accounts for the nearness effect — **is not supported in this setting**.
+
+## WHAT THIS IS NOT, STATED AS PLAINLY AS THE RESULT
+
+1. **Not a replication of the published effect.** Jia et al. measure a cross-sectional long-**short
+   spread**; this is ten independent long-only time-series tests. The engine cannot rank across
+   symbols per timestamp. The published estimator remains untested here.
+2. **No individual cell clears the 30-trade floor.** Nearness cells run 10–22 trades. The aggregate of
+   319 clears any threshold, but **RATCHET v2 clause 3 is a per-result rule and no single cell passes
+   it.** Every per-cell profit factor above is recorded and **not banked**. The control's cells (32–90
+   trades) *do* clear the floor, which is an awkward asymmetry: the losing arm has the better sample.
+3. **The cells are not independent.** Crypto majors are heavily correlated; 20 cells is emphatically
+   not 20 independent experiments, and the effective sample is far smaller than the count suggests.
+4. **Survivorship.** These are ten coins that still existed and still mattered in 2026. Coins that died
+   are absent, which biases a long-only filter's apparent performance upward.
+5. **Two regimes, one asset class.** Both halves are crypto-wide. Nothing here says anything about
+   equities, forex or indices.
+
+## THE VERDICT
+
+**This is the strongest result this lab has produced, and it is still not a champion.** It passes every
+gate that was set in advance, survives the specific artefact that was predicted in advance, and beats
+a matched control on both halves. It fails the per-cell sample floor, which is a rule this project has
+enforced against far more attractive numbers than these.
+
+**Recorded as a candidate requiring a longer window, not as a promotion.**
+
+## QUEUE
+
+1. **Re-run on a longer window per cell to clear the 30-trade floor honestly.** `source="deep"` reaches
+   2017 for spot; more years is the clean fix, and it does not touch the construction.
+2. **Do not tune the 0.95 / 0.90 thresholds or the 360 lookback.** Nothing here was swept and that is
+   a large part of why the result is worth anything. Sweeping now would forfeit that.
+3. **Test a third arm: Donchian breakout on the same cells.** Nearness beat a moving-average filter;
+   whether it beats a *breakout* filter is the remaining momentum-explains-it variant.
+4. **Phase-decompose the best cells before believing them** (HARD LESSON 54, and check #34 which
+   overturned an earlier claim exactly this way). Whole-window cell results have not been decomposed.
+5. **The exposure figure was never read for these cells.** It is free in `run_backtest` and it bounds
+   how much of the buy & hold outperformance is simply time spent in cash.
