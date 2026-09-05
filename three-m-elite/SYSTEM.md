@@ -5241,3 +5241,47 @@ correct behaviour, not an omission.
 
 **CHAMPION OF RECORD (LONG): v58.** Unchanged. **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61.**
 Unchanged.
+
+---
+
+## ██ CYCLE CHECK #28 — STILL NOTHING NEW; NOT RE-NOTIFYING (2026-09-05)
+
+**Scheduled prompt fired again, still carrying the identical twenty-eighth-generation-stale v37/v53
+snapshot** — same "QUEUE ITEM 1" (implement the 12H/24H bias gate) / "QUEUE ITEM 2" (resolve the
+cascade signature) text, same "champion is v37 at PF 1.25172059/155 trades" claim, same "continue
+numbering after v53" instruction, plus the same 2026-09-03 "both directions" directive this lab
+already satisfied at v60/v61 (short leg, validated, split-tested clean). Both queue items were closed
+cycles ago: the bias gate at v54–v57 (HARD LESSON 45), the cascade signature at zero cost (HARD
+LESSON 34/35/50/52 — margin-forced liquidation-unwind tranching, not a latch bug). Champion has been
+v58 since check #1 and has not moved since check #14.
+
+**Independently re-verified, not assumed from check #27's word:** `git log --oneline 2bf79bf..HEAD --
+three-m-elite/` returns nothing — zero commits have touched this lab since check #27 (the intervening
+repo history carries only War Formation's own cycle check #31 and a BTC Attack entry, neither touching
+this lab). `results/backtests.json` re-read directly still returns 25 entries, identical to check #27
+in name/status/PF for every row (champion v58 long PF 1.48439273/117 trades cold-reproduced; v60/v61
+validated short PF 1.88616546 full sample, split clean H1 1.47025018/H2 3.00186566; v62/v63 regime
+splits still `testing`; v64 combined-flip PF 1.5576495 still `testing`). Author scan (`git log
+--format='%an' -30 -- three-m-elite/`) still returns only `Claude` — no user commit exists anywhere in
+reachable history, so no answer to the declared-deviation promotion policy question has landed. No
+`USER DECISION`/`USER DIRECTIVE` marker newer than 2026-09-03 anywhere in STRATEGY-LEDGER.md,
+three-m-elite/SYSTEM.md, or CHAMPION-BOARD.md. `git status` on the working tree was clean before this
+edit. `get_credits`: balance 521/1000 — moot, no experiment queued.
+
+**No backtest run. 0 of 521 available credits spent.** The sole open item remains the
+declared-deviation promotion policy question, unchanged from checks #1–#27. Manufacturing a
+twenty-eighth mirror variant purely to spend budget would violate the no-invented-mechanism rule and
+would not answer a policy question anyway.
+
+**No new notification sent.** Check #1 pushed this exact question once; nothing about it has changed
+in twenty-seven subsequent checks. HARD LESSON 26 governs a repeated notification the same way it
+governs a repeated stale-prompt flag: say nothing new, notify nothing new. Silence this cycle is
+correct behaviour, not an omission.
+
+**QUEUE (unchanged, restated for the next cycle):**
+1. **The declared-deviation promotion policy question** — still open, still for the user, still the
+   only thing standing between v60/v61 (validated short) and v64 (validated combined build) and a
+   promotion decision. Nothing to re-run until the user answers.
+
+**CHAMPION OF RECORD (LONG): v58.** Unchanged. **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61.**
+Unchanged.
