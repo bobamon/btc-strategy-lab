@@ -5494,3 +5494,118 @@ suggest the stack's remaining headroom for a term this aggressive may be exhaust
    long-only build).
 
 ---
+
+# ATTACK 70 — QUEUE ITEM 1, FILTER-STACK TERM 3 RETRY ON ATTACK 66/68: LOOSER SWING-AMPLITUDE FLOOR (1.20%). REJECTED — H1 FAILS THE DRAWDOWN ALLOWANCE.
+
+The stored scheduled prompt again asks for "Attack 37's filter stack," describing a board state now more
+than sixty attacks stale (Attack 37 was closed on cost by Attack 41). **The docs override it**, per the
+prompt's own standing instruction: the live queue item 1 is Attack 66/68's filter stack, and Attack 69's
+own queue named this cycle's exact candidate: a looser swing-amplitude floor, 1.0-1.2% of price, to test
+whether Attack 69's 1.60% (2x `minRpct`) threshold was itself the cause of its over-cut.
+
+## THE TERM
+
+**Swing-amplitude quality floor at 1.20% of price** (1.5x `minRpct`'s 0.80%, versus Attack 69's 2x). Same
+mechanism argument as Attack 69 — `swingAmp` is the entire reward geometry and is not already floored by
+`rBig` — at a smaller, still mechanism-derived multiple of the existing risk-floor constant, fixed before
+either half ran. Byte-identical to Attack 69 otherwise (`swingFloorPct` 1.60 → 1.20). Pine:
+`strategies/pine/attack70-obv-divergence-swing-quality-floor-1.2pct.pine`.
+
+## AUDIT (one line per leg)
+
+Identical to Attack 69's audit — this cycle only changes one numeric threshold, not the logic. R >= 0.8%
+(LESSON 3) — unchanged, `rBig` gates by exclusion. Stop beyond STRUCTURE (LESSON 5) — unchanged, `slPx =
+lastPivLow`. Each leg separately (LESSON 6) — LONG ONLY; short remains a reported standing asymmetry
+(Attack 64). BINDING (E17) — `bullDiv AND breakoutTrigger AND rBig AND swingOk` (including
+`swingQualityOk`); strictly narrows `swingOk`, can only remove trades. REDUNDANCY (E14) — `swingQualityOk`
+(normalized price distance between pivots) vs. `rBig` (price distance close→`lastPivLow`, always strictly
+larger at entry) vs. `divMagOk` (normalized OBV magnitude) — three independent quantities. LATCH IN
+SEQUENCE (LESSON 8) — `swingOk` read on the same bar `breakoutTrigger` already reads, only the threshold
+moved. CASCADE (HARD LESSON 42/43) — LONG at 100% equity; `cascadeRatio` 1 / `maxCascadeDepth` 1 on both
+halves, confirmed.
+
+## H1 AND H2, ATTACK 68 (BASE) VS ATTACK 70 (+ TERM), SIDE BY SIDE
+
+| | Attack 68a (H1) | **Attack 70a (H1)** | Attack 68b (H2) | **Attack 70b (H2)** |
+|---|---|---|---|---|
+| Profit factor | 1.56474476 | **1.64557498** | 1.13127036 | **1.16637287** |
+| Trades | 89 | **52** | 80 | **46** |
+| Win rate | 65.16853933% | **65.38461538%** | 58.75% | **56.52173913%** |
+| Avg winner | $169.46 | $224.65 | $124.22 | $162.85 |
+| Avg loser | -$202.62 | **-$257.86** | -$156.39 | **-$181.50** |
+| Max drawdown | 11.08160523% | **11.87457447%** | 10.74990922% | **8.65867434%** |
+| Net return | +35.47285533% | +29.96438194% | +6.77458291% | +6.03945249% |
+| Commission paid | $969.73 | $553.77 | $839.65 | $483.58 |
+
+Count cut: H1 89→52 (**-41.57%**), H2 80→46 (**-42.5%**) — both under the 50% RATCHET v2 clause-4 threshold.
+
+## THE VERDICT — REJECTED. H2 CLEARS CLEANLY; H1 FAILS CLAUSE 2 OUTRIGHT.
+
+**H2, taken alone, clears RATCHET v2 without qualification**: PF rises 1.13127036 → 1.16637287
+(+0.03510251, past the 0.02 material-gain bar) and drawdown **improves outright** 10.74990922% →
+8.65867434% (-2.09123488pp) — no allowance needed. This is exactly the loosened-threshold effect the queue
+predicted: a milder floor cuts less and preserves more of H2's edge than Attack 69's 1.60% did.
+
+**H1 does not clear it.** PF also improves materially (1.56474476 → 1.64557498, +0.08083022, well past the
+0.02 bar), but drawdown **worsens** 11.08160523% → 11.87457447% (**+0.79296924pp**). RATCHET v2's own text
+allows drawdown to worsen by up to 0.50pp when the PF gain exceeds 0.02 — the PF gain here easily clears
+that bar (+0.081), but the actual worsening (+0.793pp) is **more than 1.5x the 0.50pp cap itself**. The
+allowance was earned but the damage exceeds what it covers. Clause 2 fails on H1 regardless of the PF gain.
+
+Per the queue's own standing instruction — *"anything that improves one half and hurts the other is
+rejected, not averaged"* — the term is **REJECTED**. Attack 68 (Attack 66 + OBV divergence-magnitude
+floor) remains the base for term 4.
+
+## WHY THIS IS A DIFFERENT FAILURE SHAPE FROM ATTACK 69'S
+
+Attack 69 (1.60% floor) failed because H2's PF went flat-to-down and its count fell below the 30-trade
+floor — a **sample-thinness** failure, concentrated in H2. Attack 70 (1.20% floor) failed because H1's
+drawdown moved the wrong way while its PF and count both looked fine — a **risk-shape** failure,
+concentrated in H1. Loosening the threshold fixed H2's problem (PF now clears, and cleanly) but did not
+fix H1's, and introduced a new one there instead: at 1.20%, H1 keeps enough of its larger, worse-tailed
+trades (largest loss -$567.05, essentially unchanged from Attack 68's -$565.29) that the concentrated
+losers left in the surviving 52-trade sample pull drawdown up even as the aggregate PF improves. **The two
+halves are not failing on the same axis at either threshold tested**, which is itself information: a
+single global `swingFloorPct` has not yet been found that clears both RATCHET v2's PF clause and its
+drawdown clause on both halves simultaneously — one threshold (1.60%) breaks H2 on sample and PF; the other
+(1.20%) breaks H1 on drawdown. That is closer to "no single cutoff works" than to "the right cutoff is
+somewhere in between," and the direction of the next test should treat it that way rather than trying a
+third point on the same one-dimensional line.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Category **3, bleed on a positive edge, on both halves** — PF stays above 1.0 on both (H1: 1.646, H2:
+1.166); avg loser is not an outlier against the largest loss on either half (H1: -$567.05 is ~2.2x avg
+loser -$257.86; H2: -$327.20 is ~1.8x avg loser -$181.50 — no concentration signature, not category 1);
+the edge is positive throughout (not category 2). This rejection is about the drawdown clause on H1, not a
+drawdown-category reclassification.
+
+## WHAT THIS SETTLES
+
+**Both tested points on the swing-amplitude-floor line (1.60% and 1.20%) fail RATCHET v2, on different
+clauses, on different halves.** Two consecutive both-halves-argued thresholds on the same mechanism-derived
+axis have now failed for structurally different reasons — this is closer to evidence that the axis itself
+does not have a global optimum that clears both halves than to a signal that a third point would find one.
+Per Attack 69's own registered fallback, this candidate direction is **abandoned** rather than tried a
+third time on the same line.
+
+## QUEUE
+
+1. **The swing-amplitude-floor candidate direction is abandoned** — two thresholds (1.60%, 1.20%) each
+   failed a different RATCHET v2 clause on a different half. Term 3 on Attack 68 should look for a
+   candidate that does not share this axis (e.g. a property of the OBV series or the pivot structure other
+   than the price-normalized swing distance), or the stack should be considered complete at two terms
+   (Attack 66 + Attack 68) pending a fresh mechanism per the mandate.
+2. **Attack 68 (Attack 66 + OBV magnitude floor) remains the base and the strongest both-halves candidate
+   on this board** — PF 1.56474476/1.13127036 on 89/80 trades, unaffected by this cycle's rejection.
+3. **Attack 46 (long) remains a candidate alongside the Attack 66/68 line**, unaffected by this cycle —
+   its H2 PF (1.586) is still the best of any both-halves-positive build on this board, though its H2
+   sample (38) sits closer to the 30-trade floor than Attack 68's (80).
+4. **The out-of-sample test for Attack 46 still ranks first among long-side work not yet startable** and
+   still cannot be run under BTCUSDT-only — unchanged, restated because this cycle did not touch it.
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle (a
+   long-only build).
+
+---

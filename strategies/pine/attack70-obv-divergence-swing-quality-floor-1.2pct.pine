@@ -1,0 +1,134 @@
+//@version=6
+// BTC ATTACK 70 - QUEUE ITEM 1, FILTER-STACK TERM 3 RETRY ON ATTACK 66/68: LOOSER SWING-AMPLITUDE FLOOR.
+//
+// Attack 69's swing-amplitude quality floor at 1.60% of price (2x minRpct) was REJECTED: H1 looked
+// strong alone (PF 1.56474476 -> 1.75336106) but H2 failed clause 1 outright (PF 1.13127036 ->
+// 1.12890949, a trivial DECREASE) while cutting H2's count 80 -> 29, one trade below this lab's own
+// ~30-trade interpretability floor. Attack 69's own queue named the next candidate explicitly: "a
+// materially looser swing-quality threshold... a milder floor (e.g. 1.0-1.2% of price, closer to
+// rBig's own 0.80% rather than 2x it)... because 1.60% over-cut both halves, not because either half's
+// specific losses looked fixable."
+//
+// ==================== THE TERM, ARGUED FROM THE MECHANISM (LESSON 49: not from either half's dates) ====
+// Same mechanism argument as Attack 69: swingAmp is the entire reward geometry and nothing before Attack
+// 69 floored it. The prior attempt fixed the floor at 2x minRpct (1.60%) purely because that was "the
+// existing constant already on this board" doubled -- an arbitrary multiple, not a value chosen for its
+// scale relative to the noise floor. This term uses 1.5x minRpct instead (0.80% -> 1.20%), still fixed
+// from the SAME existing constant and still requiring the reward geometry to be a strict multiple of the
+// risk floor rather than merely nonzero, but a smaller multiple, argued only from wanting to test whether
+// 1.60% (2x) was itself the cause of the over-cut -- exactly the diagnosis Attack 69's queue registered
+// BEFORE this run, not a fit to either half's post-hoc losses. The value (1.20%) is fixed before either
+// half is run and will not be adjusted after seeing a result.
+//
+// This DOES NOT touch bullDiv, breakoutTrigger, or rBig -- it only tightens swingOk, exactly as Attack 69
+// did, at a lower threshold.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - unchanged, rBig still gates by exclusion on rLong = close - lastPivLow.
+//   Stop beyond STRUCTURE (LESSON 5) - unchanged, slPx = lastPivLow, the confirmed divergence low.
+//   Each leg separately (LESSON 6) - LONG ONLY, unchanged; short leg remains a reported standing
+//        asymmetry (Attack 64).
+//   BINDING (E17) - bullDiv AND breakoutTrigger AND rBig AND swingOk (now including swingQualityOk) all
+//        necessarily bind; the new term is a strict narrowing of swingOk's own condition, so it can only
+//        remove trades, never add them.
+//   REDUNDANCY (E14) - swingQualityOk reads swingAmp/close, the normalized PRICE distance between the
+//        two pivots; rBig reads the PRICE distance from close to lastPivLow (always strictly larger at
+//        entry -- see Attack 69's note); divMagOk (Attack 68) reads a normalized OBV magnitude, a
+//        different series entirely. Three independent quantities, not a redundant pair.
+//   LATCH IN SEQUENCE (LESSON 8) - swingOk is read on the same later bar breakoutTrigger already reads
+//        (already part of goLong's conjunction); this term only tightens the threshold within that
+//        existing bar, it does not add a new same-bar setup/trigger pairing.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, flat check gates every entry, unchanged.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity; expect cascadeRatio 1 on both halves, confirmed
+//        below.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17), READ AGAINST ATTACK 68 (THE BASE) ON BOTH HALVES:
+//   * PF IMPROVES ON BOTH HALVES (RATCHET v2 clause 1), DD DOES NOT WORSEN (clause 2 allowance if PF
+//     gain > 0.02) ON BOTH -> KEPT as the new base for term 4.
+//   * IMPROVES ONE HALF, HURTS THE OTHER, OR EITHER HALF FLAT/DOWN ON PF -> REJECTED, exactly Attack
+//     69's fate, not averaged.
+//   * COUNT CUT > 50% ON EITHER HALF (base is 89/80, so a floor of 45/40) -> a split-feasibility problem
+//     under clause 4; report plainly rather than promoting on a shrunken sample.
+//   * TRADES BELOW ~30 ON EITHER HALF -> a direction, not a result (LESSON 12).
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside net (LESSONS 36/39 and
+//     the board's three-drawdown-category taxonomy).
+
+strategy("BTC Attack70 OBV divergence swing quality floor 1.2pct", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+pivotLeft    = input.int(5, "Pivot confirmation bars, left")
+pivotRight   = input.int(5, "Pivot confirmation bars, right")
+minRpct      = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars      = input.int(192, "Max bars in trade")
+obvRangeLen  = input.int(200, "OBV normalizing range lookback")
+divMagPct    = input.float(3.0, "Min OBV divergence magnitude, % of OBV's own range")
+swingFloorPct = input.float(1.20, "Min swing amplitude, % of price (1.5x the R floor)")
+
+pl  = ta.pivotlow(low, pivotLeft, pivotRight)
+ph  = ta.pivothigh(high, pivotLeft, pivotRight)
+obv = ta.obv
+
+obvRange = ta.highest(obv, obvRangeLen) - ta.lowest(obv, obvRangeLen)
+
+var float lastPivLow    = na
+var float prevPivLow    = na
+var float lastPivLowOBV = na
+var float prevPivLowOBV = na
+var float lastPivHigh   = na
+var bool  bullDiv       = false
+
+if not na(pl)
+    prevPivLow    := lastPivLow
+    prevPivLowOBV := lastPivLowOBV
+    lastPivLow    := pl
+    lastPivLowOBV := obv[pivotRight]
+    if not na(prevPivLow)
+        obvDivMag  = lastPivLowOBV - prevPivLowOBV
+        divMagFloor = obvRange * divMagPct / 100
+        divMagOk   = not na(obvRange) and obvDivMag > divMagFloor
+        bullDiv := lastPivLow < prevPivLow and obvDivMag > 0 and divMagOk
+
+if not na(ph)
+    lastPivHigh := ph
+
+rLong = not na(lastPivLow) ? close - lastPivLow : na
+minR  = close * minRpct / 100
+rBig  = not na(rLong) and rLong >= minR
+
+breakoutTrigger = not na(lastPivHigh) and ta.crossover(close, lastPivHigh)
+
+swingAmp       = not na(lastPivHigh) and not na(lastPivLow) ? lastPivHigh - lastPivLow : na
+swingAmpPct    = not na(swingAmp) ? swingAmp / close * 100 : na
+swingQualityOk = not na(swingAmpPct) and swingAmpPct >= swingFloorPct
+swingOk        = not na(swingAmp) and swingAmp > 0 and swingQualityOk
+
+goLong = bullDiv and breakoutTrigger and rBig and swingOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := lastPivLow
+    tpPx   := close + swingAmp
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(lastPivLow, title="LastPivotLow")
+plot(lastPivHigh, title="LastPivotHigh")
