@@ -11,6 +11,11 @@ not share a codebase, and they must never be merged or cross-contaminated.
 
 **Backtest engine — USE THE NEW ONE:** the `backtest-lab` MCP (`https://backtester24.com/mcp`).
 The old `trader-dev` MCP is still installed. Read "ENGINE NOTES" at the bottom before choosing.
+Both MCPs are registered at **user scope** in `~/.claude.json`. If `backtest-lab` is absent or its key
+has expired, re-add it with a fresh key from backtester24 — **never commit the key to this repo**:
+```bash
+claude mcp add --transport http --scope user backtest-lab https://backtester24.com/mcp --header "Authorization: Bearer <YOUR_KEY>"
+```
 
 **READ FIRST, BEFORE ANY WORK:**
 1. `STRATEGY-LEDGER.md` — hard lessons numbered to 50. Each cost real credits and a wrong conclusion.

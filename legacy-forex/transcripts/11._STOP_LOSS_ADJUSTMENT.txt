@@ -1,0 +1,193 @@
+# 11._STOP_LOSS_ADJUSTMENT
+# duration 587s | language en
+
+[00:00] Okay, so we're going to talk about stop losses and adjustments.
+[00:04] Now we've already gone over stop loss placement, right?
+[00:07] We're placing them below support resistance.
+[00:09] So for example, if this is going to break out, and we're going to go long, right around
+[00:15] this zone, our stop loss just needs to simply start just below that support.
+[00:20] That's a 25 point stop loss, which is solid.
+[00:23] That's actually a really good number.
+[00:25] Now again, we can tighten this and we can get kind of aggressive with it.
+[00:29] We really want to, then we can catch a one to five faster.
+[00:33] But I like to give it some space, give it some room.
+[00:35] I don't need it to be super duper tight because I know that with this strategy, I'm most likely
+[00:41] going to boom, especially if there's volume in everything that I need there.
+[00:45] So when I'm looking at this initial setup here, right?
+[00:48] Couple things that I'm noticing.
+[00:50] First thing being obviously higher high, higher low, beautiful leg, beautiful top, beautiful
+[00:58] start, higher high, higher low, boom.
+[01:02] If this breaks out of this resistance here and creates a higher high once more, we are
+[01:07] gone.
+[01:08] We're going to the moon.
+[01:10] That's how I feel.
+[01:12] That's how I feel about this trade because I'm confident in my strategy and you have
+[01:15] to have confidence every time you go into a trade.
+[01:18] So I placed my stop loss just below that resistance because I don't think it's
+[01:21] going to reverse.
+[01:22] And if price does reverse back down into this area, I want to get out anyways.
+[01:26] I don't want to hold this down into here.
+[01:28] I'm not going to use this support down here as my protection zone.
+[01:33] I don't want to have a stop loss that big.
+[01:35] That's ridiculous.
+[01:36] 64 points.
+[01:37] No, my account's gone if I do that.
+[01:39] So we're going to keep it nice and tight, not too tight, but nice and tight.
+[01:43] And we have a 25 point stop.
+[01:46] So what do we do as price is moving?
+[01:51] We're going for a one to five, but is there a way where we can protect our capital?
+[01:57] Yes, there is.
+[01:58] Every single time it takes the five minute chart and show you guys even better.
+[02:03] Every single time that candle goes from a entry zone to one to one, one to two, one
+[02:12] to three, one to four.
+[02:13] Every time this thing moves up in the same distance as our stop loss, which is 25
+[02:17] points, we're going to adjust our stop loss.
+[02:20] OK, so as of right now, I'm going to calculate this.
+[02:24] Price is at 43 points.
+[02:28] We're going to put our stops to break even.
+[02:31] It really is that simple.
+[02:33] Our stop loss is now at break even.
+[02:35] So if price decides to reverse and crash out and destroy us, we lose no money.
+[02:42] Now let me tell you guys something.
+[02:43] You would rather break even every day than lose money every day over risking.
+[02:48] Trust me when I say that.
+[02:50] So we've moved one point up, right?
+[02:53] 25 points.
+[02:54] More than that now, but 25 points up.
+[02:56] We have our stops to break even.
+[02:58] Now, if we break even, we break even.
+[03:01] Life goes on.
+[03:02] OK, we didn't though.
+[03:04] We didn't though.
+[03:05] And here's why price now from our entry point is at 50 points in profit.
+[03:13] So we now and you guys can play with this.
+[03:16] You don't have to do this every time.
+[03:17] But if you want to do the strategy correctly, you can now take your stop
+[03:21] loss and move it 25 points into profit.
+[03:25] So no matter what happens now, 25 points is a little lower.
+[03:30] You're guaranteed a 25 point win, which is a one to one.
+[03:35] No matter what happens, you locked in a win.
+[03:38] You can rest assured that you're going to win today.
+[03:41] If price breaks back down, you've won today.
+[03:44] You have won.
+[03:45] Now you can play with this.
+[03:46] You can get a little more aggressive and put that stop right there on that resistance
+[03:50] zone. You can do that.
+[03:51] But if you just want to keep it basic and simple, you just put it at that one to one
+[03:57] and you let it push.
+[03:59] And guess what?
+[03:59] As price starts to push up even higher, you just adjust with it.
+[04:05] Now, again, right here, price did come down and you end up closing in at one to one.
+[04:09] That's OK.
+[04:10] That's going to happen.
+[04:11] Not every example is going to be perfect.
+[04:12] Not every trade is going to be perfect.
+[04:14] Yeah, you might have missed out on 50 points, but that's OK.
+[04:19] You're going to miss out sometimes.
+[04:20] How about the times where you save yourself from losing?
+[04:23] How about the times where price reverses on you and takes you out?
+[04:27] It's OK because those times where you do hit a one to five is going to make up
+[04:31] for the break evens.
+[04:32] It's going to make up for only catching 25 points.
+[04:34] Just trust me.
+[04:36] I know there's people who want to trade aggressively and no stop loss at all.
+[04:39] Let's just exit when I'm happy.
+[04:41] That's not normal.
+[04:42] You should want to trade the correct way.
+[04:45] This is the correct way.
+[04:47] Now, I'll find another example to show you guys.
+[04:50] Maybe we can do a selling example, but it's the same thing.
+[04:55] It's just being consistent with it is what's very important.
+[05:00] So if we go over, this is a really nice clean example here.
+[05:04] And guess what?
+[05:05] Oh, my gosh, that just excites me because that's at session.
+[05:10] Now, let me show you guys what happens when you look at an example
+[05:12] from our session and how beautiful it can be.
+[05:15] OK, overall.
+[05:17] Price is kind of consolidating.
+[05:19] We're not really going up or down or moving sideways just a little bit.
+[05:23] But if price can break through this trend line here, break through the support zone here,
+[05:31] we're gone.
+[05:32] We're going to the downside.
+[05:33] Like we have confidence in that so we can pre mark our short position here.
+[05:37] Boom.
+[05:38] We can have a nice tight stop loss above and we can target that one to five once again.
+[05:43] We're going to stick to the same roles, except this time we're trading during session
+[05:47] and we have good volume.
+[05:48] So if this breaks, we know that there's now a lower, low, lower, high, lower, low, lower,
+[05:53] high, we're an embarrassed market structure.
+[05:54] We broke a trend, we broke a support.
+[05:57] Everything's telling us to sell here.
+[05:58] We have volume, so many confluences.
+[06:00] Boom.
+[06:02] Gosh, this is why I love trading during New York session only because you have this.
+[06:07] You get these type of moves instead of the other shit we just saw.
+[06:10] This is what you trade during session.
+[06:12] As you can see, price has begun to break that support.
+[06:16] We took our sell position.
+[06:17] We've already hit a one to one.
+[06:20] So boom, we put our stops to break even just like that.
+[06:23] Just like that, our stops are break even.
+[06:25] Oh, well, that happened very fast.
+[06:27] OK, we're now at a one to five.
+[06:30] As you can see, we're now at a one to five.
+[06:32] We're going to take our which tool is I using here, our stop loss tool.
+[06:38] And we're going to put that down to a one to one.
+[06:42] I can't our stops right above here.
+[06:43] So probably right around here.
+[06:46] You see, mark this up.
+[06:50] Yeah, we had a 20 point stop.
+[06:51] So boom, right there, right on the money.
+[06:56] Barely, barely not getting taken out by a freaking hair.
+[07:00] Boom, we dropped to a one, one to two.
+[07:03] This is about a one to three now.
+[07:05] So we adjust to that one to five and we let this candle play out.
+[07:08] See what happens.
+[07:10] More volume came in.
+[07:11] I mean, we can continue to just trail this thing.
+[07:14] It doesn't have to be perfect.
+[07:15] We can adjust, but at the end of the day, as price moves,
+[07:18] we slowly want to trailer stop in the profit.
+[07:20] Maybe we don't get so aggressive.
+[07:21] Maybe we don't go at a one to one.
+[07:23] Maybe we just come in a little bit and then a little more and a little more.
+[07:27] And I mean, shit, instead of just closing that one to five,
+[07:30] what if we just come here and let it keep dropping and continue to go?
+[07:35] There's no rule saying we can't go for more than a one to five.
+[07:39] Now, we may get stopped out here.
+[07:41] But what is that?
+[07:42] I mean, gosh, that is nasty.
+[07:45] That's nasty.
+[07:47] That's probably like a one to eight, one to nine.
+[07:49] That's possible.
+[07:50] You really can get that, but you have to trail your stop loss.
+[07:54] You have to slowly trail your stop loss and follow the market as it moves.
+[07:58] You don't have to trade like this, but I will say one thing
+[08:02] at worst, at the least, please put your stops to break even at a one to one
+[08:08] point five at the worst.
+[08:10] No matter what you're going to show your stop loss all the way through.
+[08:13] That's fine.
+[08:13] Go for one to three is go for one to five.
+[08:15] You're still going to be profitable, but stops have got to go to break even.
+[08:19] Anytime you're at a one to one point five.
+[08:23] OK, you have to understand that first.
+[08:26] Now, whether or not you want to trade in aggressive ways, slower ways,
+[08:39] because there's obviously a lot of different ways to use this strategy.
+[08:42] You can have tighter stop losses hitting your one to five faster.
+[08:46] You can have bigger stop losses protecting your capital a little bit.
+[08:51] But really, if that thing reverses your dead or you can just have an OK,
+[08:56] medium stop loss, but trail it or you can not trail it and just put
+[09:01] your stops to break even at a one to one five or don't adjust your stops at all.
+[09:05] Just go for a one to three, sit back and watch what happens.
+[09:08] There's a lot of different ways to trade it.
+[09:10] And I guarantee you that if you're consistent and you make sure there's volume,
+[09:14] make sure there's breaks of support or resistance, make sure there's trend,
+[09:17] make sure that there is market structure going the correct way.
+[09:21] If all of these key attributes are present, no matter how you trade it,
+[09:25] you're going to be successful, but you are going to have to fine tune
+[09:29] just a little bit how you trade just a little bit until you're the most
+[09:34] profitable for how you like to trade.
+[09:36] But overall, if you're consistent with everything I just mentioned,
+[09:39] you're profitable regardless.
+[09:41] It's just about fine tuning and seeing what works for you and your trading style.
+[09:45] Remember that.

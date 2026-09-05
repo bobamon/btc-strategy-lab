@@ -1,0 +1,159 @@
+//@version=6
+// BTC ATTACK 81 - VOLUME-CLIMAX CAPITULATION REVERSAL LONG.
+// A GENUINELY NEW MECHANISM PER ATTACK 80's OWN QUEUE ITEM 7, APPLYING ATTACK 65's OWN QUEUE-ITEM-1
+// CONSTRUCTION FIX (WEAKER REJECTION FRACTION, MORE ROOM TO TARGET) TO A NEW INPUT CLASS.
+//
+// THE STORED SCHEDULED PROMPT still describes a board state ("Attack 37, build its filter stack") more
+// than eighty attacks stale, instructing "continue numbering after 37." THE DOCS OVERRIDE IT, again, per
+// the prompt's own standing instruction: Attack 41 closed Attack 37 on cost, Attack 43 closed the whole
+// sweep-reversal family, Attack 71 closed the Attack 66/68 filter stack at two terms, and Attacks 72-80 are
+// NINE consecutive bare-mechanism failures since Attack 68. This build continues numbering after Attack 80,
+// not Attack 37.
+//
+// ==================== WHAT THIS CLAIMS, IN ONE SENTENCE ====================
+// A single bar whose volume spikes to an extreme multiple of its own recent rolling average, printed at a
+// fresh local low, marks capitulation-driven selling exhausting the available supply on that leg down; a
+// modest same-bar close back off the low (NOT a half-range recovery) confirms buyers stepping back in
+// before the move can travel far, and price tends to continue reverting toward the level it held before
+// this leg down began.
+//
+// ==================== WHY THIS IS A NEW INPUT CLASS FOR THIS LAB ====================
+// Every prior volume-based construction used a WEIGHTED OR CUMULATIVE composite of volume and price
+// direction: OBV (Attacks 66-71) is an unbounded running sum with memory of the entire series; MFI
+// (Attack 79) is a bounded 0-100 oscillator weighting typical-price moves by volume; NVI (Attack 76) only
+// updates on LOW-volume days, the opposite regime. NONE of them reads raw volume MAGNITUDE on its own bar
+// against its own recent average, with no price-direction weighting at all. Attack 65 used exactly this
+// "single-bar magnitude shock + weak same-bar rejection" shape, but on PRICE range vs. ATR, not on volume
+// -- this is the same shape applied to an entirely different series. This is an honest recombination
+// (single-bar shock/rejection structure: Attack 65; fresh-N-bar-low structure: Attacks 59/63/66; raw
+// volume as the magnitude axis: unprecedented on this board), not a wholly unprecedented data source,
+// flagged as such rather than overclaimed.
+//
+// ==================== THE CONSTRUCTION FIX THIS BUILD APPLIES, NAMED EXPLICITLY ====================
+// Attack 65's own queue (item 1) diagnosed WHY five prior builds landed in HARD LESSON 53's majority-win/
+// poor-payoff shape: requiring the signal bar to have ALREADY recovered half its own range before entry is
+// granted (rejectFrac 0.50) mechanically caps reward (little distance left to a pre-shock-level target)
+// while risk still sits at the bar's full, un-recovered extreme. Attack 65's queue said the fix, if this
+// shape is revisited, is "a WEAKER rejection requirement... entering nearer the shock extreme with more
+// room left to the target" -- NOT a mirror of the failed construction. This build is the first to apply
+// that fix: rejectFrac here is 0.15 (enter after only a modest close-off-low), and the target is NOT the
+// immediately preceding bar's close (small room by construction) but the highest CLOSE over the same
+// lookback window used to confirm the fresh low -- the level price held before this specific leg down
+// started, offering materially more room than a single-bar-back reference.
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS, SINGLE BAR ====================
+// avgVolPrior = ta.sma(volume, lenVol)[1] -- prior-bar-ending average, excludes the signal bar itself so
+//   the spike cannot inflate its own baseline.
+// volSpike = volume > spikeMult * avgVolPrior -- raw volume magnitude anomaly, no price weighting.
+// freshLow = low <= ta.lowest(low, lenLow) -- this bar's low is the lowest of the last lenLow bars
+//   (LESSON 5: the stop sits at a real, confirmed local extreme, not an arbitrary point).
+// rejection = close > low + rejectFrac * (high - low), rejectFrac = 0.15 -- a MODEST close-off-low, the
+//   Attack-65-queue fix, not the 0.50 fraction that manufactured the inverted-payoff shape five times.
+// preLegHigh = ta.highest(close, lenLow)[1] -- the highest CLOSE in the lenLow bars before this one: the
+//   level price held before the leg down that produced the fresh low. Independent of the stop distance.
+// Entry at the signal bar's close (identical convention to Attacks 44/45/46/65 -- single bar, no latch,
+//   all referenced quantities belong to already-closed data as of this bar's own close under
+//   process_orders_on_close=true).
+// Stop: the signal bar's own low (LESSON 5, actual structure).
+// Target: preLegHigh (HARD LESSON 41, a level, not a stop multiple; independent price geometry from the
+//   stop distance, per E14 below).
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - EXCLUSION via rBig on rLong = close - low, never clamped.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = low, the actual confirmed fresh-lenLow-bar low.
+//   Each leg separately (LESSON 6) - LONG ONLY; fading upside volume climaxes at fresh highs is untested,
+//        and per Attack 65's own finding a mirrored short is not assumed to behave symmetrically.
+//   BINDING (E17) - volSpike AND freshLow AND rejection AND rBig AND targetOk all necessarily bind (see
+//        trade count below; two credits were budgeted for the H1/H2 pair, so no per-term counter build was
+//        affordable).
+//   REDUNDANCY (E14) - minRpct constrains the STOP distance (close-to-low, price-only); preLegHigh (the
+//        target) is an independent quantity, the market's own pre-decline price level; rejectFrac
+//        constrains the SHAPE of the close within the bar's own range (independent of both magnitude
+//        terms, same redundancy answer Attack 65 already gave for this exact clause); volSpike is a
+//        fourth, wholly independent quantity on a different series entirely (volume magnitude, not price).
+//   LATCH IN SEQUENCE (LESSON 8) - NOT APPLICABLE, single-bar construction identical in shape to Attacks
+//        44/45/46/65: every referenced quantity (avgVolPrior, freshLow's lookback, preLegHigh) is drawn
+//        from already-closed bars as of the signal bar's own close; there is no two-condition-across-bars
+//        latch to sequence.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity, single entry id "L" (the declared-deviation sizing
+//        fix is a short-side margin artifact only); expect cascadeRatio 1 / maxCascadeDepth 1.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4). Two independent magnitude gates multiply
+// down frequency (volSpike at 2.5x a trailing 20-bar volume average; freshLow at a 10-bar low), but crypto
+// volume is fat-tailed enough that 2.5x-average spikes are not rare in isolation, and rejectFrac 0.15 is a
+// loose filter that will pass most bars that already clear the first two gates. Anchored loosely against
+// Attack 65's single-bar-shock construction (103 trades from a stricter 2x-ATR price-magnitude gate) but on
+// a different, likely more frequently-triggered series (volume, not price range) intersected with a
+// fresh-10-bar-low requirement that Attack 66's pivot work suggests binds a few hundred times over a full
+// half. Registered with LOW-MODERATE confidence given no counter build was affordable: 40-280 trades per
+// half.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17). CODE BARE -- NO RR FLOOR, NO ADDED FILTER:
+//   * BOTH HALVES ABOVE 1.0, TRADES ROUGHLY 60-350 PER HALF -> a third genuinely new both-halves candidate,
+//     ranked alongside Attack 46 and Attack 66/68, queued for RATCHET v2 filter work.
+//   * PRE-2024 HALF BELOW 1.0 -> DISCARDED by the kill rule. No filters, no rescue, no second half.
+//   * A MAJORITY WIN RATE WITH ratioAvgWinLoss WELL BELOW 1.0 -> another instance of HARD LESSON 53's
+//     inverted-payoff shape, DESPITE the rejectFrac fix -- report that the fix alone did not resolve it,
+//     do not re-litigate the diagnosis.
+//   * TRADES WELL BELOW ~30 -> a DIRECTION, not a result (LESSON 12); the two-gate intersection may be too
+//     strict for a single-symbol single-timeframe test.
+//   * A LARGE SHARE OF HOLDS AT maxBars 192 -> the cap is truncating (HARD LESSON 38); report before
+//     drawing any conclusion.
+//   REPORT GROSS, COMMISSION AND ACHIEVED RATIO alongside net, avg loser and win rate (LESSONS 36/39 and
+//     the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack81 volume climax capitulation reversal long", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+lenVol     = input.int(20, "Volume average lookback")
+spikeMult  = input.float(2.5, "Volume spike multiplier")
+lenLow     = input.int(10, "Fresh-low / pre-leg-high lookback")
+rejectFrac = input.float(0.15, "Rejection fraction of bar range (Attack 65 queue fix)")
+minRpct    = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars    = input.int(192, "Max bars in trade")
+
+avgVolPrior = ta.sma(volume, lenVol)[1]
+volSpike    = volume > spikeMult * avgVolPrior
+
+freshLow = low <= ta.lowest(low, lenLow)
+
+rejection = close > low + rejectFrac * (high - low)
+
+preLegHigh = ta.highest(close, lenLow)[1]
+
+rLong = close - low
+minR  = close * minRpct / 100
+rBig  = rLong >= minR
+
+targetOk = not na(preLegHigh) and preLegHigh > close
+
+goLong = volSpike and freshLow and rejection and rBig and targetOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := low
+    tpPx   := preLegHigh
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(preLegHigh, title="PreLegHigh")
+plot(slPx, title="StopLevel")

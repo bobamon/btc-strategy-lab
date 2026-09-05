@@ -1,0 +1,166 @@
+//@version=6
+// BTC ATTACK 78 - ADX/DMI TREND-STRENGTH REGIME LONG. A GENUINELY NEW MECHANISM, BARE.
+//
+// The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") more
+// than seventy-seven attacks stale -- Attack 41 closed Attack 37 on cost, Attack 43 closed the whole
+// sweep-reversal family, and Attack 68 (Attack 66 + OBV divergence-magnitude floor) is the board's
+// strongest both-halves candidate (PF 1.56474476/1.13127036, 89/80 trades). THE DOCS OVERRIDE IT, AGAIN,
+// per the prompt's own standing instruction: Attack 77's own queue item 8 asked for one further genuinely
+// new mechanism, distinct from every family already on the board. This build is that instruction,
+// continuing numbering after Attack 77, not Attack 37.
+//
+// ==================== WHAT THIS CLAIMS, IN ONE SENTENCE ====================
+// The Average Directional Index (ADX) measures trend STRENGTH independent of direction; once ADX is
+// already elevated (the market has left a choppy, directionless regime), a fresh crossover of +DI over
+// -DI (bullish directional dominance taking over) marks the start of a trending leg that tends to persist
+// for longer than a directional signal fired during a low-ADX chop regime would.
+//
+// ==================== WHY THIS IS A NEW INPUT CLASS FOR THIS LAB ====================
+// No prior BTC attack has used ta.dmi (the Wilder directional-movement system) or a trend-STRENGTH regime
+// gate of any kind. Distinct from EMA crossover (Attack 57: compares two raw price moving averages
+// directly, no strength axis, no directional-movement calculation) and its slope-filtered descendant
+// (Attack 58). Distinct from the volume-participation regime (Attack 76, NVI vs. its own EMA -- a
+// cumulative RETURN series gated by volume, no price-range or directional-movement component at all).
+// Distinct from autocorrelation regime (Attack 72 -- a statistical persistence estimate on raw returns,
+// no moving-average or price-range input). Distinct from every level/pivot/breakout family (33-48, 50,
+// 59, 63, 66-71, 73-75) -- ADX/DMI never references a specific price LEVEL at all, only the SMOOTHED RATE
+// of directional price movement over the DI length. Distinct from the volatility-contraction family
+// (Attack 6/36/65/77) -- ADX measures the STRENGTH of directional movement, not the WIDTH of price
+// dispersion; a market can have high ADX with narrow Bollinger width or vice versa, so the two are
+// measuring genuinely different things off the same OHLC series. Also distinct from the divergence
+// families (51/52/66-71) and order-flow absorption (53): no comparison against a second series at two
+// pivots, no same-window pressure sum.
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS ====================
+// [diPlus, diMinus, adx] = ta.dmi(diLen, adxSmoothing) -- the allowlisted, engine-native Wilder DMI/ADX
+// tuple. adxStrong = adx >= adxThresh -- the market is ALREADY in a strong-trend regime (a level
+// condition on the current bar, not a bar-count "already true for N bars" filter). diCrossUp =
+// ta.crossover(diPlus, diMinus) -- +DI overtaking -DI is the single trigger event, fresh every bar.
+// goLong fires only when the crossover EVENT coincides with the regime already being strong -- the ADX
+// filter and the DI crossover are the two independent axes (strength, direction) that the DMI/ADX system
+// was built to combine; requiring both is the standard use of this indicator family, not two stacked
+// unrelated filters.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - EXCLUSION via rBig on rLong = close - swingLow, never clamped.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = ta.lowest(low, swingLen)[1], a genuine prior swing low
+//        computed from bars STRICTLY BEFORE the signal bar (the [1] shift, same convention as Attack
+//        37/59/63/66/71/76/77), never the DMI trigger level itself (DMI has no price-level output at
+//        all) and never the entry bar's own low.
+//   Each leg separately (LESSON 6) - LONG ONLY this cycle, following this lab's established convention
+//        for a first pass on a new mechanism (Attacks 50/59/63/65/66/72/73/74/75/76/77 all opened one-
+//        sided). The short leg (-DI crossing above +DI while ADX is already strong, its own mirror
+//        geometry) is deferred and reported as OUTSTANDING -- this is an INTERIM result, not a finished
+//        one.
+//   BINDING (E17) - diCrossUp AND adxStrong AND rBig AND haveSwing must all independently bind; this is
+//        the first run of this mechanism and two credits are budgeted this cycle for the H1/H2 pair (H2
+//        spent only if H1 clears the kill rule), so no per-term counter build was affordable -- the
+//        realized trade count against the pre-run frequency estimate below is the binding evidence this
+//        cycle can afford.
+//   REDUNDANCY (E14) - diPlus/diMinus and adx are computed from the same underlying directional-movement
+//        series inside ta.dmi, but they read DIFFERENT quantities off it: the diPlus/diMinus crossover
+//        reads DIRECTION (which side currently dominates), while adx reads STRENGTH (how forcefully
+//        EITHER side is moving, direction-agnostic) -- a market can show high ADX with no fresh DI cross
+//        (an already-established trend, no new signal) or a fresh DI cross with low ADX (a weak,
+//        choppy flip), so the two terms do independent work despite the shared indicator family; this is
+//        the DMI/ADX system's own designed use, not a manufactured pair. swingLow (for rLong/slPx) reads
+//        a PRICE LEVEL from an entirely separate rolling window with no directional-movement input at
+//        all -- a third independent quantity.
+//   LATCH IN SEQUENCE (LESSON 8, fourth-confirmation check) - diCrossUp is evaluated fresh every bar via
+//        ta.crossover (exactly one true trigger event, the crossing bar); adxStrong is a plain level
+//        comparison on the current bar's own adx value, not a boolean latched across bars or phrased as
+//        "already true for N bars" -- the generalized same-bar-conjunction failure mode (Attack 57) does
+//        not apply.
+//   WEEKENDS (structural note 4) - ADX/DMI compute off ordinary bar highs/lows/closes with no calendar
+//        dependency; weekend bars are treated identically to weekday bars, handled by construction.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity, single entry id "L", pyramiding=1; expect
+//        cascadeRatio 1 / maxCascadeDepth 1 on both halves, confirmed below.
+//   SL and TP FIXED AT ENTRY (2R, lab convention; HARD LESSON 13 found the R:R axis neutral, so no
+//        tuning credit spent hunting "the best" multiple on a first pass). The regime-flip flatten
+//        (-DI crossing back above +DI -- the trend-strength thesis's own directional axis reversing) is a
+//        strategy.close signal exit, not a modification of the fixed SL/TP prices -- same pattern as
+//        Attack 76's NVI regime flatten and Attack 77's basis-crossunder flatten.
+//
+// ==================== FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4) ====================
+// No prior BTC attack has plotted ta.dmi on this engine. +DI/-DI are Wilder-smoothed series that cross
+// less often than a fast/slow raw EMA pair (Attack 57's 2,154 raw H1 crossovers before filtering) because
+// the DI lines themselves are already a smoothed directional-movement ratio, not raw price; the adxStrong
+// gate (adx >= 25, the classic Wilder trending threshold) then removes crossovers that fire during chop,
+// which by definition is a large share of any market's time. Pre-registering **150-500 trades per half**,
+// low-to-moderate confidence given the total absence of a prior DMI/ADX measurement on this engine.
+//
+// ==================== OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17), PER THE PROMPT'S OWN KILL RULE ====
+//   * H1 (never-tuned, 2022-01-01 to 2024-06-08) PROFIT FACTOR BELOW 1.0 -> DISCARD immediately. Do not
+//     run H2. Do not add filters to rescue H1.
+//   * H1 clears 1.0 -> run H2 (2024-06-08 to 2026-09-01) as the second and last credit this cycle.
+//   * BOTH halves clear 1.0, trades roughly 60-350 per half -> a genuine both-halves candidate, joining
+//     Attack 37/46/66-68 on the board; report avg loser, win rate and max DD alongside PF (the board's
+//     three-drawdown-category taxonomy), and queue it for a filter stack exactly as Attack 37/66 earned
+//     theirs.
+//   * H1 clears but H2 does not -> report both, DISCARD as a candidate (per Attack 53/72/74's precedent:
+//     helps H1, breaks H2 -- now a named recurring pattern on this board), not as evidence the trend-
+//     strength-regime family as a whole is dead.
+//   * FEWER THAN ~30 TRADES in a half -> that half's ratio is a DIRECTION per LESSON 12, not a result.
+//   * A LARGE SHARE OF HOLDS AT maxBars 480 -> the cap is truncating (HARD LESSON 38); report before
+//     drawing any conclusion.
+//   REPORT GROSS, COMMISSION, ACHIEVED WIN/LOSS RATIO, AVG LOSER AND WIN RATE alongside net (LESSONS
+//     36/39 and the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack78 ADX-DMI Trend Regime", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+diLen         = input.int(14, "DMI/ADX length")
+adxSmoothing  = input.int(14, "ADX smoothing")
+adxThresh     = input.float(25.0, "ADX trending threshold (Wilder classic)")
+swingLen      = input.int(20, "Structural swing-low lookback (bars)")
+minRpct       = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+targetR       = input.float(2.0,  "Target, multiple of R (lab convention)")
+maxBars       = input.int(480,    "Max bars in trade -- 5 days on 15m")
+
+[diPlus, diMinus, adx] = ta.dmi(diLen, adxSmoothing)
+
+adxStrong = adx >= adxThresh
+diCrossUp = ta.crossover(diPlus, diMinus)
+
+swingLow  = ta.lowest(low, swingLen)[1]
+haveSwing = not na(swingLow)
+
+rLong = haveSwing ? close - swingLow : na
+minR  = close * minRpct / 100
+rBig  = not na(rLong) and rLong >= minR
+
+flat   = strategy.position_size == 0
+goLong = flat and diCrossUp and adxStrong and haveSwing and rBig
+
+regimeFail = ta.crossover(diMinus, diPlus)
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if goLong
+    strategy.entry("L", strategy.long)
+    slPx   := swingLow
+    tpPx   := close + targetR * rLong
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if strategy.position_size > 0 and regimeFail
+    strategy.close("L")
+    barsIn := 0
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(adx,    title="ADX")
+plot(diPlus, title="DIPlus")
+plot(diMinus, title="DIMinus")

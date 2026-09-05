@@ -1,0 +1,21 @@
+model: small | videos: 18
+model loaded
+done 10._USING_DATA: 189 segments, 482s audio in 37s -> C:\Users\ecarr\Claude\index-strategy-lab\legacy-forex\transcripts\10._USING_DATA.txt
+done 11._STOP_LOSS_ADJUSTMENT: 190 segments, 587s audio in 43s -> C:\Users\ecarr\Claude\index-strategy-lab\legacy-forex\transcripts\11._STOP_LOSS_ADJUSTMENT.txt
+done 3._WHAT_TO_TRADE: 35 segments, 113s audio in 9s -> C:\Users\ecarr\Claude\index-strategy-lab\legacy-forex\transcripts\3._WHAT_TO_TRADE.txt
+done 4._WHAT_ARE_CONTRACTS_AND_TICKS: 175 segments, 840s audio in 69s -> C:\Users\ecarr\Claude\index-strategy-lab\legacy-forex\transcripts\4._WHAT_ARE_CONTRACTS_AND_TICKS.txt
+done 5._ANALYZING_TIME_FRAMES: 43 segments, 203s audio in 16s -> C:\Users\ecarr\Claude\index-strategy-lab\legacy-forex\transcripts\5._ANALYZING_TIME_FRAMES.txt
+done 6._PRICE_ACTION_AND_MARKET_STRUCTURE: 102 segments, 480s audio in 35s -> C:\Users\ecarr\Claude\index-strategy-lab\legacy-forex\transcripts\6._PRICE_ACTION_AND_MARKET_STRUCTURE.txt
+done 7._SUPPORT_AND_RESISTANCE: 110 segments, 453s audio in 33s -> C:\Users\ecarr\Claude\index-strategy-lab\legacy-forex\transcripts\7._SUPPORT_AND_RESISTANCE.txt
+done 8._SESSIONS_TO_TRADE: 32 segments, 148s audio in 12s -> C:\Users\ecarr\Claude\index-strategy-lab\legacy-forex\transcripts\8._SESSIONS_TO_TRADE.txt
+done 9._VOLUME: 182 segments, 831s audio in 57s -> C:\Users\ecarr\Claude\index-strategy-lab\legacy-forex\transcripts\9._VOLUME.txt
+done video1038794732: 107 segments, 534s audio in 28s -> C:\Users\ecarr\Claude\index-strategy-lab\legacy-forex\transcripts\video1038794732.txt
+done video1083955301: 629 segments, 3946s audio in 163s -> C:\Users\ecarr\Claude\index-strategy-lab\legacy-forex\transcripts\video1083955301.txt
+done video1142991957: 533 segments, 2894s audio in 145s -> C:\Users\ecarr\Claude\index-strategy-lab\legacy-forex\transcripts\video1142991957.txt
+done video1263885792: 63 segments, 427s audio in 20s -> C:\Users\ecarr\Claude\index-strategy-lab\legacy-forex\transcripts\video1263885792.txt
+done video1270175432: 86 segments, 494s audio in 24s -> C:\Users\ecarr\Claude\index-strategy-lab\legacy-forex\transcripts\video1270175432.txt
+done video1639421319: 531 segments, 2897s audio in 157s -> C:\Users\ecarr\Claude\index-strategy-lab\legacy-forex\transcripts\video1639421319.txt
+done video1855004398: 121 segments, 599s audio in 25s -> C:\Users\ecarr\Claude\index-strategy-lab\legacy-forex\transcripts\video1855004398.txt
+done video1870420481: 683 segments, 3261s audio in 181s -> C:\Users\ecarr\Claude\index-strategy-lab\legacy-forex\transcripts\video1870420481.txt
+done video1979454677: 238 segments, 1149s audio in 62s -> C:\Users\ecarr\Claude\index-strategy-lab\legacy-forex\transcripts\video1979454677.txt
+ALL DONE

@@ -1,0 +1,192 @@
+# 10._USING_DATA
+# duration 482s | language en
+
+[00:00] Okay, so I want to go over the gathering data section,
+[00:03] how we can gather data from back testing
+[00:05] and then applying it to today's market
+[00:08] and actually benefiting from it extremely well.
+[00:11] Now look, a lot of people are not gonna talk about this.
+[00:13] Most traders won't talk about this
+[00:14] because most traders, if not all traders outside
+[00:17] of the really, really good ones don't do this.
+[00:21] But if you want to be successful, this is very important.
+[00:23] This is gonna save you from losing a lot of trades
+[00:27] and knowing exactly when to get out.
+[00:29] So we're gonna go over this really quick.
+[00:31] I'm gonna show you guys exactly how you can calculate
+[00:34] and you guys can start applying that today.
+[00:37] But what I like to do is like to go over
+[00:40] the last two weeks of trades,
+[00:41] which is typically anywhere from six to eight trades
+[00:45] depending on the day.
+[00:47] So I'm gonna go to the last two weeks of data.
+[00:49] I'm gonna analyze every trade that I took
+[00:52] and figure out the median of where I either got stopped out
+[00:58] or the risk to a war that I was able to capture overall.
+[01:02] Now it might seem kinda complicated,
+[01:03] but I'll show you guys.
+[01:05] Okay, so this is Monday's trade.
+[01:07] I was able to catch a one to three.
+[01:11] So what I can do now is write out one to three.
+[01:16] Okay, boom.
+[01:16] So we have our one to three right here.
+[01:18] We have a loss.
+[01:21] That's okay, loss has happened.
+[01:23] Here we have a one to two point five.
+[01:28] Okay, I'm gonna write this out as well.
+[01:30] One to two point five.
+[01:36] Okay, next trade, beautiful trade, a one to five.
+[01:40] Markets have been very good lately by the way guys.
+[01:42] This is not always this good,
+[01:44] but it's been very good lately.
+[01:47] Okay, here we have another one to five.
+[01:49] So what does that mean?
+[01:51] We're gonna write down one to five
+[01:53] and understand that as of now,
+[01:56] markets have been very good.
+[01:57] Here we go, we have a one to three point two six.
+[02:01] We'll just call it a one to three.
+[02:02] We don't have to be very, very specific with it.
+[02:05] One to three.
+[02:07] And then that's about all we have.
+[02:09] So this is enough data right here.
+[02:11] Okay, so if we take this data,
+[02:13] we pull out a calculator and we say,
+[02:15] okay, we have one to three.
+[02:19] We'll start from the very beginning, right?
+[02:22] This is the last one, two, three, four, five,
+[02:24] six trades from Monday to Monday.
+[02:26] So nearly two weeks of trading.
+[02:29] Okay, about nine days worth.
+[02:31] It's perfect.
+[02:32] This is a great amount of data.
+[02:34] So we have a one to three.
+[02:35] Okay, so we have a three plus a zero
+[02:39] plus a two point five,
+[02:42] plus a one point,
+[02:44] now I'm sorry, a five plus a five plus a three.
+[02:48] So if you notice, I only calculated the second number.
+[02:52] I don't care about the one.
+[02:54] So it's a three here.
+[02:56] We take the three, zero for a loss,
+[02:59] two point five, five, five and a three.
+[03:02] And that gives us our average end point
+[03:04] where we're ending every day,
+[03:06] where our profit is hitting,
+[03:07] what our risk reward has been.
+[03:09] Overall, that's 18.5.
+[03:12] We're now going to divide 18.5 by one,
+[03:15] two, three, four, five, six trades.
+[03:19] That gives us 3.08.
+[03:22] Okay, I'm gonna pull this up on a calculator
+[03:24] just to show you guys exactly what this looks like.
+[03:27] But we basically had,
+[03:31] we'll do this again, three plus zero plus 2.5.
+[03:35] So we have three plus zero plus 2.5,
+[03:39] plus five five and three,
+[03:43] plus five plus five plus three.
+[03:47] That equals 18.5.
+[03:49] We divide that by six because we did six days worth.
+[03:53] Boom, we are averaging a one, two, three.
+[03:56] What does that mean for us?
+[03:57] How do we use that data to become successful?
+[04:01] What does that do for us?
+[04:02] Well, we know we're averaging a one to three,
+[04:05] which means we are going to go for one, two, threes.
+[04:08] Now, as the next day comes on, right, it's 6.30 a.m.,
+[04:12] we're going to take this trade,
+[04:13] we're going to go for a one, two, three.
+[04:17] Now, I can already tell you right now, not a good day.
+[04:21] We could sell here on this trend line break.
+[04:23] We'd be lucky, lucky to hit a one to two.
+[04:27] At the end of the day, this may even be a loss.
+[04:30] And I'll put this in replay and kind of show you guys,
+[04:32] but it doesn't look great, right?
+[04:35] Session starts, we have a trend line.
+[04:38] We could say the trend line break,
+[04:39] we're probably getting closer to here.
+[04:41] We'd be lucky to have hit a one to two, three, five,
+[04:45] one to two, two, eight.
+[04:46] We'll just call it a one to two,
+[04:47] most likely be a one to two,
+[04:48] because I probably have my stops adjusted here
+[04:51] after a one to two.
+[04:52] So we're able to hit that one to two,
+[04:54] we can go back and recalculate.
+[04:57] It really is as simple as that.
+[04:58] So if we had 18.5 originally,
+[05:01] and you got to write all this stuff in your notes,
+[05:02] and then right now, we just hit a two.
+[05:06] So we add plus two, because we hit a one to two.
+[05:09] That equals 20.5.
+[05:11] We would then divide that by now seven trades
+[05:13] and see we're down to 2.9.
+[05:14] So it didn't affect us too bad,
+[05:16] but we are a one to two, nine.
+[05:18] So we'd probably still do a one to three for the next day,
+[05:21] which I can't do because it's current.
+[05:24] But we'd probably still, like I said,
+[05:26] do a one to three around that.
+[05:28] But understanding that all you're doing
+[05:31] is inputting data as time goes on
+[05:33] and using data in your advantage,
+[05:36] because we know price is averaging a one to three.
+[05:38] It's probably gonna happen again
+[05:39] because the markets are so repetitive.
+[05:41] We're going for that one to three.
+[05:43] One to five gets hit, three days in a row.
+[05:46] Okay, the average is now one to four.
+[05:47] We're going to now do a one to four on our trades.
+[05:49] We're gonna adjust that,
+[05:51] and we're gonna go for more gains.
+[05:54] It's as simple as that.
+[05:55] We're using data, and we're calculating all of it,
+[05:59] taking the median of our trades
+[06:02] and going for that again, present day.
+[06:06] People do not tell you this secret.
+[06:08] They do not tell you how to find the risk toward
+[06:10] you should use in the current markets.
+[06:12] But this does work.
+[06:13] I've been using this for years now
+[06:15] and it works for me every single time.
+[06:18] Every single time it has been accurate,
+[06:20] because as you can see, when you take the data,
+[06:26] the data of the last two weeks,
+[06:28] price typically is moving in that direction.
+[06:32] So we have the one to threes,
+[06:34] and if I was to go through and look at the previous data,
+[06:38] a lot of one to fives, a lot of one to fives,
+[06:41] a lot of one to threes around that area.
+[06:43] And that's why we got to that one to five point.
+[06:46] We got one to threes, and we got one to five, one to five,
+[06:48] one to two point five and a loss, and then a one to three.
+[06:51] So if we're looking at this area,
+[06:53] the markets are getting to an okay point.
+[06:56] We're going for one to twos, one to threes on average.
+[06:58] We know that because of the previous market,
+[07:01] and we're just taking advantage of it.
+[07:04] It's as simple as that.
+[07:05] And as fusing as it sounds, rewatch this,
+[07:08] practice the calculations and you'll get it
+[07:10] and you'll see, but they do work.
+[07:12] They do follow suit every single time.
+[07:15] Now, now we're at a one to three average.
+[07:18] Does that mean the next trade is going to be one to three?
+[07:20] For sure, no.
+[07:21] It could be a loss and it could drop our average down,
+[07:24] but overall there's a good chance
+[07:25] that we're in this one to three zone
+[07:27] because that's what the market's been telling us lately.
+[07:30] The markets have a slow refresh rate,
+[07:33] meaning if the markets are giving you one to fives
+[07:35] every day, they're probably going to continue
+[07:37] to do so for a little while longer,
+[07:39] and then slowly taper back down.
+[07:41] They don't happen like this.
+[07:42] You don't go from hitting one to fives every single day
+[07:45] to just hitting break evens every single day for a month.
+[07:48] It's such a slow change that you're able to calculate
+[07:53] and able to use those as an advantage.
+[07:55] So just a little tip on how to be an advantage trader
+[07:58] and use the numbers and your advantage.
+[08:00] So yeah, something like that.

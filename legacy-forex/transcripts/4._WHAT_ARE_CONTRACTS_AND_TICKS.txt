@@ -1,0 +1,178 @@
+# 4._WHAT_ARE_CONTRACTS_AND_TICKS
+# duration 840s | language en
+
+[00:00] Yeah, okay, I got you. Do it right now. Alright guys, Mamba just called me, told me exactly what's
+[00:04] going on. Before this is gone, I have to teach you guys what is proper contract sizing, how to
+[00:08] use risk management, and what are ticks. Let's get into it. Most traders blow their accounts,
+[00:12] not due to bad strategy, but because of bad risk management. In this video, I'm going to go for
+[00:16] everything you guys need to know to become a profitable trader and a risk expert. Mamba's
+[00:20] already gone and broken down a golden strategy for you guys to use telling you what assets
+[00:24] the trade during what time of day, what risk reward to go for. And now it's time to
+[00:27] understand how to use proper risk management to start seeing good gains on your account. You have
+[00:32] to know what proper contract size to use when you're going to take a trade to risk the amount you want
+[00:36] to risk. If you don't understand what risk to reward even is, it's how much you want to risk.
+[00:40] So let's say it's $400, that's your risk. If you go for $400 in profit, that is a one to one
+[00:46] risk to reward. If you're risking $400, but you make $800, that's risking $400,
+[00:51] but you made two times your risk. So that's a one to two risk to reward risk to reward can
+[00:55] be very important because if you keep your risk minimal and your reward larger, it's going to be a
+[00:59] lot harder for you to be not profitable if you're stacking your wins and minimizing your losses.
+[01:04] Now let's get right into it to make it less confusing because like anything guys, at first it
+[01:08] may be hard, but make sure you watch this video entirely to fully understand because I'm going
+[01:11] to go over live examples, the exact calculations and numbers you need. And I'm going to dumb
+[01:15] it down to make it super easy for you guys. So the very first thing that you guys need
+[01:19] to understand is what our contracts and what our ticks, every single asset that you're going
+[01:23] to be trading, whether it's NQ Nasdaq, whether it's YM, US 30 Dow Jones, if you're trading ES,
+[01:28] the S&P, they all have a dollar cost per tick. I'm going to go over and show you guys what it is
+[01:33] for each asset and then go over examples for you guys to make it 10 times more easy for you guys.
+[01:38] I'm going to share my screen and I actually made this PDF for you guys to follow along. You can
+[01:41] get it for completely free attached right here, but I'm going to go through it,
+[01:44] share my screen and walk you guys through this PDF on contract sizes for each asset that you may
+[01:49] be trading. So here you can see futures decision sizing by contract. If you scroll down the
+[01:53] first thing that you're going to see is NQ position sizing. Me personally, I love trading Nasdaq. I know
+[01:57] a lot of you guys do as well. So I'm going to go over first Nasdaq and how to properly risk with it.
+[02:01] So going back to what the dollar cost is per tick, first off, what is a tick? A tick when we're
+[02:06] talking about Nasdaq is a 0.25 increment. There was four ticks in one point. An easy way to
+[02:12] kind of think about it is how there's four quarters in $1. Think of a tick as like a quarter.
+[02:16] It's a 0.25 increment. I'm going to jump over here to my trading view. The first thing to
+[02:20] understand is that if you look over here in the corner makes that it is green right here and it does
+[02:24] not have like a red D that shows you delayed data. But on here guys, on the right side of my screen,
+[02:29] I'm just going to replay price over into here. What you can understand is if you look on the right
+[02:33] side of my screen and I kind of zoom in, you see on the right how it has that 0.50. If I match
+[02:38] it there, do you see when I move up? It's moving up 0.25, 0.5, then 0.75. And back there,
+[02:45] that's a full point and 0.25, 0.5, 0.75. That's a whole other point. You see how it's going by 0.25
+[02:52] increments. It's not going how you maybe have seen it before when it goes from like, you know,
+[02:56] 9, 5, 5, 0.1 and then 0.2 or like whatever. No, it goes in 0.25 increments. I'm going to go
+[03:03] over the example one more time to really get it down in your guys' brain. So right here,
+[03:06] you see 24, 9, 5, 4.5. This 0.5 and stuff is once again still the ticks. That's the
+[03:13] decimal places. It's this 4 right here. That's an actual point. Every time that 4 goes from 4 to 5,
+[03:19] it's going up and down by $20 because on NASDAQ, it's $5 per tick. There's 4 ticks in 1 point.
+[03:26] So it's $20 per point. So if it's going up 1 point, it's going up $20. Why this is important
+[03:31] to know is that once you know what the dollar cost is per point, is that not you need to
+[03:36] figure out how much you're risking and what size stop loss do you want on that trade. So now
+[03:41] that you know what the cost is per point, we go back over. Now it's time to figure out how big of a
+[03:46] stop loss do you want and how many points and how much do you want to risk. That's what we need to
+[03:50] know now. So for this example that's on the sheet, let's go over. You can see here, this is the
+[03:54] equation. Contracts, which is what you're going to enter equals how much you want to risk
+[03:58] divided by the stop loss and points time, the tick value per point. So if your risk
+[04:05] is $800 and you want a 20 point stop loss on NASDAQ, which is something that
+[04:09] Mamba uses 20 points on NASDAQ, let's say 30 points on YM, 20 point stop loss on NASDAQ,
+[04:15] it would be 800 divided by 20 times 20 with 20 times 20, 400, what's 800 divided by 400,
+[04:22] two contracts. So you would use two contracts with a 20 point stop loss on NASDAQ to risk
+[04:30] $800. I once again want to reiterate it is so important to understand how much you're risking
+[04:36] because for anyone out there who may be struggling with trading, taking big losses is the biggest
+[04:41] hit. You can take these little wins, little wins, and then one big loss wipes it all out.
+[04:45] That's because you do not have proper risk management. You don't even know how much
+[04:48] you're risking. So you need to know how much you want to risk every single trade. So for
+[04:52] example, let's say you're trading on a $100,000 rise account by Legacy Fund of Futures. If
+[04:57] you're trading on a $100,000 account and let's say you want to risk 1%, which is $1,000 on
+[05:02] NASDAQ, you could see right here, 800 obviously isn't the whole thousand. So you'd have to do
+[05:07] more than two contracts. But this is the type of equation you would do to figure out
+[05:11] how many contracts to use for that $1,000 risk. But now let's say you're trading a smaller account
+[05:16] and you're trying to risk less than that. Let's say you're trying to only risk $250 on
+[05:20] like a 25K account. We'll come back over to this example. We know that with $800 risk that
+[05:24] was two contracts, and I wanted to risk $400, that would only be one contract. But one thing
+[05:29] that's very important to know is you can't do less than one contract. You can't do 0.5,
+[05:34] you can't do 0.75, you can't do 1.5 contracts. No, they have to be in whole numbers. So
+[05:40] because of that is why there's such thing called micro. So on here, you see that with NQ we're
+[05:46] trading E-mini futures, that's mini. If we go down, you now see we're an MNQ that is micro.
+[05:52] Micro is one tenth of what a mini is. So remember on NQ before, remember it was $5 per tick. What is
+[06:00] one tenth of that? That is 50 cents. So looking at this example, you could see with micro Nasdaq 100
+[06:06] futures, 50 cents per tick, four ticks per point. So that's $2 per point. So instead of having $20
+[06:12] per point, what's the tenth of that? $2. So what does this make more sense is because if you're
+[06:17] trading a smaller account and you want to risk less than what one contract would give you,
+[06:21] you have to go down to micro. I have other examples I'm going to go over, but this is basically showing
+[06:26] you guys the difference between that because a lot of people ask, when do I use a mini, when do I use
+[06:30] a micro? You use micros if one mini is too much risk, if you're trying to risk smaller or if
+[06:35] you're trading something like gold and in, you know, using full two contracts is too much,
+[06:39] but using one contract is too little, you'll go and use micro and find somewhere in the middle
+[06:43] and use like 15 micros, which would be equivalent to like 1.5 minis. But like I said, it has to
+[06:48] be whole numbers. You cannot do decimal places when it comes to contracts. Now that is just on
+[06:53] NQ. On our website, we have every single tick value on every single asset, but on here, I picked
+[06:58] obviously what the top ones are. That was NASDAQ. Now let's go down to what YM is. YM is Dow Jones.
+[07:03] Some of you guys might know it as US 30, but on YM, the one thing that's very important to
+[07:07] understand is that, yes, it is the same $5 per point, but there's no decimal places on YM
+[07:13] when you're looking at futures. So if you come over to here, you can see right here,
+[07:16] we're still on NASDAQ. Let's go over to YM. And you guys see over here, there's no decimal places.
+[07:23] It's $46,942. It's not 42.25.5.5. All this type of stuff. No, it is whole numbers. So it's $5 per
+[07:31] point, but one tick equals one point on YM. The equation is going to stay the same. Everything's
+[07:36] going to stay the same when it comes to calculating it, except you have to understand
+[07:40] that it's going to be a little different. You can't use the same contract size as if
+[07:43] the tick value and stuff aren't matching up. So for this example, you could see here,
+[07:46] if I wanted to risk $800 and the stop loss was still 20 points, but on Dow Jones on YM,
+[07:52] if I wanted to risk $800, I would divide it by 20 times 520 because that's the size stop loss,
+[07:58] 20 point stop loss and 5 because that is the tick value. It's $5 per tick, but because
+[08:04] per tick is per point on YM, it's basically $5 per point. So 20 times 5 divided by $800 is
+[08:11] 8 contracts. That's how many contracts you would use for a 20 point stop loss on YM mini.
+[08:18] And once again, we still have micro. We scroll down, have the micro for us. So once again,
+[08:24] what's one tenth of $5.5. So it is 50 cents per point. So coming down to here, once again,
+[08:31] if I want to risk $800 and the stop loss is 20 points, you do 800 divided by 20,
+[08:36] but times point 5, 80 contracts. It sounds crazy. You're like, what, I would do 80 contracts.
+[08:40] Yes. 80 contracts on micro is the same as eight contracts on many. I hope it's starting to make
+[08:47] a little more sense for you guys. I'm going to go over one more example, but now it is going to be on
+[08:50] gold because gold is a lot different. It's going to sound a lot larger, but you know, I'm going to
+[08:54] go over for you guys. I know a lot of people out there love to trade gold as well. So gold
+[08:58] is GC, GC persistent sizing gold futures is $10 per tick and there's 10 ticks per point. So what
+[09:06] does that mean? What's 10 times 10? That is $100 per point. So let's say you have like a two point
+[09:11] stop loss. That's already $200 risk if you're on one contract. So this would obviously be example
+[09:16] of when you go down to micros, but let's go over this example first. So with contracts, once again,
+[09:20] how much do you want to risk? So doing the 800 and this example, I want to risk $800,
+[09:24] but now we know the 20 point stop loss, but it is $100 per point. So here you see
+[09:30] 800 divided by 20 times 100. It would be 0.4 contracts. What did I say earlier? You can't
+[09:38] do decimal place contracts. So this would be an example of instead of using like 0.4 contracts,
+[09:44] because you can't do that. And then one would be too much. You would go down and you would use
+[09:48] micro Y because with the same $800 risk, but because it's one 10th, you know, right here,
+[09:53] you see, you do the $800 risk times $20 or 20 points times $10 per tick because it's one 10th,
+[09:59] that's only four contracts. This would be a good example as to why you would go use micro if it
+[10:04] doesn't work out when you're trying to trade many. I hope you guys are understanding this now. But now,
+[10:08] instead of just looking at this sheet, I'm going to go over to here and let's just go back over to
+[10:12] the NASDAQ. And let's just say we were to get into a position. Let's go over how to risk if
+[10:17] that wasn't exactly 20 points because all the examples we know over was a 20 point stop
+[10:21] loss. Let's just say that we were trading NQ, we're trading Mamba strategy. We have a resistance
+[10:26] up here. I didn't break kind of like a support down in here. And then at open, you could see we
+[10:30] had the push to the downside. Let's say we entered in here and you wanted your stop loss
+[10:34] up in this area, right? Let's just say it was 25 points right here. It says 25. Let's say it was
+[10:40] a 25 point stop loss instead of 20, right? Or let's just do 30 because I know a lot of you
+[10:44] guys do 30 point stop losses on, you know, whether it's NASDAQ or YM or anything like that.
+[10:49] Let's just say it's 30, right? So it's 30 point stop loss. That means that 30 points
+[10:54] as a take profit is a one to one ratio, right? So because we're on NASDAQ, we're gonna go back over
+[10:58] here. Let's go back up for you guys. What is the dollar per tick? It's $5 per tick. There's five ticks
+[11:05] per point. So that's $20 per point, right? So let's change our risk to only 400. But let's change
+[11:11] our stop loss size to 30 points. So I'm going to pull out a calculator for all you guys out
+[11:15] there who may have a calculator and make it a little bit easier. So here's the calculator.
+[11:18] Once again, we're changing our risk to 400 and we're changing our stop loss to 30 points.
+[11:23] So same equation, but we're gonna change the numbers a little bit. So once again, we're gonna do,
+[11:27] instead of 20, we're gonna do 30 points. We're doing 30 point stop loss times $20 per point.
+[11:33] That's 600. Now you see that we're gonna have to do, instead of 800, we're doing $400 risk,
+[11:39] we're doing 400 divided by 600. That's 0.6, right? Once again, you can't do decimal places.
+[11:44] So this is when you have to think like, all right, do I want to do a whole contract?
+[11:48] Or would that be risking a little bit too much? So instead is when you could go down to
+[11:53] micro and instead do six micros, which would be equivalent to like 0.6 minis. But like I said,
+[11:59] you can't do decimal places when it comes to entering contract sizes. They have to be whole
+[12:02] numbers. This would be an example. You would go down and instead you would trade on MNQ instead
+[12:07] of NQ if it didn't work out for you example, or exactly with that. So we could even pull back
+[12:12] up and just change that risk from 400 to let's say you guys are risking a thousand,
+[12:16] right? You want to risk $1,000, but still it's 30 point stop loss times $20 per tick,
+[12:22] still 600. But now you're doing a thousand dollars risk divided by that 600. And that is 1.6. So then
+[12:28] once again, that would still be if you want to go and use either 16 micros or just either pick using
+[12:33] two contracts when it comes to a mini, it's up to you guys pop back over to trading view guys,
+[12:37] it's really up to you just to find your support and resistances coming in in your
+[12:40] accession open, find where your stop loss is going to be. And then from there, if you
+[12:44] guys are someone who uses a fixed stop loss when it comes to 20 points, 30 points,
+[12:47] you'll know what contract size to use every single time. If you're trading the same assets,
+[12:51] if you're still trading NQ, if you're still trading YM, you'll know what contract size to use and it'll
+[12:57] become just this repetitive thing every single morning. I'm like, Oh, today on NQ, I'm using a
+[13:02] 20 point stop loss. I know it's, you know, $20 per point. I want to risk $400. I know
+[13:07] what contract size to use. That's how quick you guys should be able to do it going forward
+[13:10] after watching this video. But if you have any further questions, we have plenty of resources
+[13:14] on the legacy funding YouTube and inside of our discord. But once again, download the PDF,
+[13:19] go through it and continue to practice with your calculator to understand how to properly risk
+[13:23] because having proper risk management is what will get you guys to that next level. When it
+[13:27] comes to talking about risk to reward and how important risk to reward is when you're
+[13:30] hearing it from me or hearing it from Mamba, you can't even let risk to reward work for
+[13:34] you if you're not risking properly. If you don't even know how much you're risking, you don't
+[13:38] know how to have that proper risk to reward. So make sure you guys understand how to properly
+[13:42] risk because you don't want to be one of those traders that's getting these little wins when
+[13:44] those big losses, you know, it feels like taking one step forward, two steps back, one step forward,
+[13:49] two steps back and you're going nowhere. Make sure your losses are minimal. You're having
+[13:53] good risk management and having good risk for reward to make up for your losses and end
+[13:57] of profitable in the long run. I believe in you guys and good luck.
