@@ -287,3 +287,329 @@ dishonest and are refused:
    is a legitimate experiment, but it must never be recorded as a test of the Legacy method.
 
 **Nothing has been backtested. No number in this file came from a strategy run, because none was run.**
+
+---
+
+# ██ TICK #4, 2026-09-05 — THE NINE `videoNNNN` TRANSCRIPTS DECODED, AND THE CORPUS IS NOT ONE SYSTEM
+
+Zero credits. No backtest. No engine call of any kind. This tick did what queue item 5 of the
+original decode and queue item 4 of STATUS tick #3 both asked for: read the nine undecoded
+`videoNNNN` transcripts, plus the two numbered modules this file had never cited (`4.` and `10.`).
+
+**The single most important result is a provenance finding, and it comes first because it changes how
+every other quote in this file must be read.**
+
+## ██ FINDING 6 — THE 18 TRANSCRIPTS ARE TWO DIFFERENT TRADERS RUNNING TWO DIFFERENT SYSTEMS
+
+This file's header says *"Source: … 18 videos"* and treats the whole committed corpus as one man's
+method. **It is not.** Two coaches from the same prop firm (Legacy Funded) are mixed in the same
+directory, and nothing in the filenames distinguishes them.
+
+| | **"Mamba"** — the Legacy Forex Trader this file specifies | **"Coach Luca" / Luca No Limit** |
+|---|---|---|
+| Session | **New York**, first entry 09:30 ET | **Asia session**, plus "power hour" |
+| Instrument | **NQ and YM / US30** | **gold — `MGC` (micro) / `GC`** |
+| Timeframes | **5m and 15m only**, "we don't go to the H4" | **1m, 5m, 15m, 30m and 1h**, split-screen |
+| Stop basis | fixed points (20 NQ / 30 YM), placed at structure | **ATR-derived**, read off his own indicator |
+| Extra tooling | none named | 200 MA + "three smooth moving averages", **fair value gaps**, previous-day high/low, session high/low bands, `edgematrix.com` "no limit indicator" |
+| Directional stance | structure decides; consolidation = no trade | **"I'd rather be wrong trading with the trend than wrong trading against it"** |
+
+Verbatim, so this cannot be argued with later:
+
+> `video1083955301` [00:04] "welcome back to another **Asia session** stream"
+> `video1083955301` [00:48] "looking at **gold**. Let's go over to **MGC**"
+> `video1639421319` [00:50] "**Coach Luca**… Luca no limit"
+> `video1639421319` [00:58] "I trade the **Asia session** here"
+> `video1083955301` [12:00] "the **200 moving average**"
+> `video1870420481` [20:34] "**What is ATR**, ATR stands for the average true range"
+> `video1083955301` [19:02] "**fair value gaps** only valid when you hold it"
+
+And the two men are explicitly colleagues, not the same person:
+
+> `video1083955301` [53:12] "You play golf in **mamba** luka. Yes, sir."
+> `video1083955301` [53:19] "tomorrow morning during **mamba stream**"
+> `4._WHAT_ARE_CONTRACTS_AND_TICKS` [00:00] "**Mamba** just called me, told me exactly what's going on"
+> `4._WHAT_ARE_CONTRACTS_AND_TICKS` [13:30] "hearing it from me **or hearing it from Mamba**"
+
+### THE SPLIT, FILE BY FILE — USE THIS BEFORE QUOTING ANY TRANSCRIPT AGAIN
+
+| Mamba — **in scope for this spec** | Luca — **OUT OF SCOPE, a different system** |
+|---|---|
+| `3._WHAT_TO_TRADE`, `5._ANALYZING_TIME_FRAMES`, `6._PRICE_ACTION_AND_MARKET_STRUCTURE`, `7._SUPPORT_AND_RESISTANCE`, `8._SESSIONS_TO_TRADE`, `9._VOLUME`, `10._USING_DATA`, `11._STOP_LOSS_ADJUSTMENT` | `4._WHAT_ARE_CONTRACTS_AND_TICKS` (narrated by Luca *about* Mamba) |
+| `video1038794732`, `video1263885792`, `video1270175432`, `video1855004398`, `video1979454677` — five NY live sessions on Nasdaq + US30 | `video1083955301`, `video1142991957`, `video1639421319`, `video1870420481` — four Asia live sessions on gold |
+
+**Nothing in this file was corrupted by the mix** — every rule above was decoded from the eight
+numbered Mamba modules, and all eight are in the left column. But it was luck, not method: the two
+uncited modules included the one Luca narrates, and a tick that had decoded the four long
+`videoNNNN` files as "more of the same trader" would have imported ATR stops, fair value gaps and a
+200 MA into an NQ/YM system that has none of them. **The four gold transcripts must not be used to
+refine any rule in this file.** If they are ever worked, they are a fifth workstream, not this one.
+
+---
+
+## ██ FINDING 7 — THE TARGET IS NOT "1:3 TO 1:5". IT IS A ROLLING MEAN OF ACHIEVED R, RECOMPUTED DAILY
+
+`10._USING_DATA` was never cited in this file, and it contains the most mechanical rule in the whole
+course — the one that actually sets the target. The row in THE COMPLETE MECHANICAL SPECIFICATION
+above reads *"Target: 1:3 to 1:5 R"*, which reads as a discretionary range. It is not a range. It is
+an output.
+
+**His procedure, verbatim and in order:**
+
+> [00:38] "what I like to do is like to go over **the last two weeks of trades**, which is typically
+> anywhere from **six to eight trades** depending on the day."
+> [00:49] "I'm gonna analyze every trade that I took and figure out the median of where I either got
+> stopped out or the risk to a war that I was able to capture overall."
+> [01:18] "We have a loss. That's okay, loss has happened." → **scored as `0`**, see [02:56].
+> [02:48] "if you notice, I only calculated the **second number**. I don't care about the one."
+> [02:56] "We take the three, **zero for a loss**, two point five, five, five and a three."
+> [03:47] "That equals **18.5**. We divide that by **six** because we did six days worth. Boom, we are
+> averaging a one, two, three."
+> [04:02] "we know we're averaging a one to three, which means **we are going to go for one, two,
+> threes**."
+> [05:06] "we just hit a two. So we add plus two… That equals **20.5**. We would then divide that by
+> now **seven** trades and see we're down to **2.9**."
+> [05:43] "One to five gets hit, three days in a row. Okay, the average is now one to four. **We're
+> going to now do a one to four on our trades.**"
+
+**Mechanised, exactly:**
+
+1. Keep the achieved R multiple of each closed trade. A loss contributes **0**, not −1.
+2. Window = the last ~6–8 closed trades (his worked example uses **6**; he calls it "the last two
+   weeks", "about nine days worth").
+3. `targetR = sum(achieved R) / count`, rounded to the nearest whole R for use.
+4. Set **tomorrow's** target to that number. Recompute after every trade closes.
+5. His stated justification is persistence, not prediction: [07:30] *"The markets have a **slow
+   refresh rate**… if the markets are giving you one to fives every day, they're probably going to
+   continue to do so for a little while longer, and then slowly taper back down."*
+
+### THREE THINGS THAT MUST BE RECORDED ALONGSIDE IT, BECAUSE THEY ARE DEFECTS IN THE RULE ITSELF
+
+1. **He says "median" and computes the arithmetic mean, twice.** [00:52] and [05:59] both say
+   *median*; every calculation he performs is a sum divided by a count. His own example cannot expose
+   the error — the set is `{0, 2.5, 3, 3, 5, 5}`, whose mean is 3.083 and whose median is 3.0, and he
+   rounds both to "one to three". **Mechanise the arithmetic he performs, not the word he uses**, and
+   note that the two diverge on any skewed sample.
+2. **Scoring a loss as 0 makes this NOT an expectancy figure**, and it must never be read as one. It
+   is the mean achieved R across all trades with losses zeroed — a number that is positive by
+   construction, for a system with any winners at all. It is a target-selection heuristic. Treating it
+   as evidence of profitability would be a straightforward misreading, and he does not claim otherwise.
+3. **It is self-referential in a way that can only ratchet the target down.** The recorded R of a
+   winner is capped by the target that was set for it, because he exits there. A run of 1:3 exits can
+   therefore never lift the average above 3, while any loss drags it toward 0. The only thing that
+   can raise it is a trade left running past target — which his own management rule ([05:43] onward)
+   discourages. **This is a testable structural claim about the rule and it is the first thing a
+   backtest of this system should measure.** It is written down here before any run, per HARD
+   LESSON 17.
+
+**This also explains the "1:3 to 1:5" quote in `9.` [05:53] — *"typically one to three to one to five
+is that sweet zone"* — as a description of where the output usually lands, not as the rule.** The
+rule is `10.`; the range is its observed range.
+
+---
+
+## ██ FINDING 8 — THE STOP HAS A HARD MAXIMUM, AND THAT MAXIMUM IS A SETUP FILTER
+
+This file records the stop as *"just beyond the broken level (~20–25 pts on NQ), never the far level"*
+and flags the tension with this project's own LESSON 5. Both halves of that were right, and both were
+incomplete: there is a **second, independent constraint** — a cap on how far the structural stop is
+allowed to be, and a setup whose structure sits beyond the cap is **rejected**, not re-stopped.
+
+> `11._STOP_LOSS_ADJUSTMENT` [00:07] "We're placing them **just below support/resistance**… That's a
+> **25 point** stop loss, which is solid."
+> `11.` [01:26] "I'm **not** going to use this support down here as my protection zone. I don't want a
+> stop loss that big. That's ridiculous. **64 points. No, my account's gone if I do that.**"
+
+And, second-hand through Luca but consistent with the above, the fixed sizes he is said to work to:
+
+> `4._WHAT_ARE_CONTRACTS_AND_TICKS` [04:09] "**Mamba uses 20 points on NASDAQ**, let's say **30 points
+> on YM**, 20 point stop loss on NASDAQ"
+> `4.` [10:40] "let's just do 30 because I know a lot of you guys do **30 point stop losses** on, you
+> know, whether it's NASDAQ or YM"
+> `4.` [12:44] "if you guys are someone who uses a **fixed stop loss** when it comes to 20 points, 30
+> points, you'll know what contract size to use every single time"
+
+**⚠ Provenance caveat, stated because it changes the weight of the number:** the "20 on NQ / 30 on YM"
+figures are **Luca reporting Mamba's practice**, not Mamba's own words. Mamba's first-hand numbers are
+"25 points, which is solid" (accepted) and "64 points" (rejected). Treat 20/30 as corroborating
+evidence for the magnitude, not as a quoted rule.
+
+**Mechanised:** place the stop just beyond the broken level; if the resulting distance exceeds roughly
+**25–30 points on NQ / YM** (~0.10–0.13% of price at 2026 index levels), **do not take the trade.**
+
+**Why this matters more than it looks.** It is a *gate*, and gates change trade counts, which is the
+binding problem for this whole workstream (STATUS.md). It also partially answers this project's
+LESSON 5 objection: LESSON 5 says a stop planted just past the entry level sits in the noise. A
+maximum-distance rule does not fix that, but it does mean his stop distance is bounded from above as
+well as anchored from below, so the two rules are not the same object and must be measured
+separately.
+
+### THE CONTRACT ARITHMETIC, RECORDED BECAUSE IT MAKES THE POINT-STOP TRANSLATABLE
+
+`4.` gives the sizing identity explicitly ([03:54]): `contracts = risk$ / (stopPoints × $perPoint)`.
+
+| instrument | per tick | ticks per point | **$ per point** |
+|---|---|---|---|
+| **NQ** (E-mini Nasdaq) | $5.00 | 4 (0.25 increments) | **$20** |
+| **MNQ** (micro) | $0.50 | 4 | **$2** |
+| **YM** (E-mini Dow) | $5.00 | **1 — no decimals** | **$5** |
+| **MYM** (micro) | $0.50 | 1 | **$0.50** |
+| GC (gold, Luca's) | $10.00 | 10 | $100 |
+
+This does **not** repair the cash-index deviation recorded in the DATA CAVEAT above — a cash index has
+no contract size — but it does mean a **20-point NQ stop is a known dollar quantity ($400 per mini)**
+rather than an unmappable one, and it makes the fixed-percentage substitution auditable instead of
+merely declared.
+
+---
+
+## ██ FINDING 9 — HIS OWN STATED TRADE RATE IS ~0.7–0.9 PER SESSION, NOT THE 2/DAY CAP
+
+The largest open question in this workstream is whether a sample can exist at all (STATUS.md).
+Every estimate so far has been derived from the **cap** — "max 2 trades/day" — because that was the
+only number in the record. `10._USING_DATA` supplies the realised rate, from his own journal:
+
+> [00:38] "the last two weeks of trades, which is typically anywhere from **six to eight trades**"
+> [02:22] "this is the last one, two, three, four, five, **six trades** from Monday to Monday. So
+> nearly two weeks of trading. Okay, **about nine days worth**."
+
+**6 trades / 9 sessions = 0.67 per session. 8 trades / ~10 sessions = 0.8 per session.** Call it
+**0.67–0.89**, i.e. roughly **one third of his own cap.** The cap is not the operative number and
+never was; the no-trade day, the consolidation skip and the volume gate do the actual work, exactly as
+`9.` [07:13] says (*"you may miss three days in a row because the markets aren't good"*).
+
+**Consequence for the sample arithmetic** — using STATUS tick #3's corrected coverage, which is
+measured, not assumed:
+
+| tf | measured bars (`NAS100`/`NDX`, tick #3) | RTH sessions | **× 0.67–0.89** |
+|---|---|---|---|
+| 15m | 1,119 | ~43 (26 bars/session) | **~29–38 trades** |
+| 5m | 937 | ~12 (78 bars/session) | **~8–11 trades** |
+
+So: **15m straddles the 30-trade floor and 5m cannot reach it by a factor of three.** This is the
+first sample estimate in this workstream anchored on a figure the trader himself stated rather than on
+a ceiling I derived. It is still an estimate — HARD LESSON 4 says to score it against the actual count,
+never to build on it — and it is recorded here as a pre-registered prediction for whenever a run
+becomes possible.
+
+---
+
+## ██ FINDING 10 — WHAT THE FIVE NY LIVE SESSIONS SHOW HIM ACTUALLY DOING, AND WHERE IT CONTRADICTS THE COURSE
+
+Per HARD LESSON 14, the live streams are mined for what they SHOW, not for their results claims —
+which are pure marketing (`$250,000`, `a quarter mill`, `put the house on it`) and are not evidence of
+anything. Five behaviours are mechanical, repeated, and either new or contradictory.
+
+### 1. He pre-marks BOTH directions on BOTH instruments before the open — four levels, not one
+
+> `video1263885792` [01:28] "Be prepared for **all four positions** on the screen."
+> `video1855004398` [01:57] "if I'm going to take **a buy position, it's going to be above this high**
+> here; **for cells we could drop right below**." → [02:37] "here's our **two little positions** here."
+> `video1263885792` [00:31] "also kind of like this **long position above** the previous support…"
+> [03:02] "**US 30 cells are here as well**"
+
+**This contradicts the course rule as this file states it.** `6.` says bullish structure → buys only,
+bearish → sells only, and this file's spec table encodes that as a hard directional gate. In the live
+sessions he marks a break level on *each* side of the current range, on *each* of NQ and YM, and takes
+whichever breaks. That is a **bracket**, not a directional filter.
+
+**Not resolved here, and deliberately so.** The course modules are the stated method and the streams
+are the observed behaviour; this project's rule is to record the contradiction rather than pick a
+winner (HARD LESSON 14 is about the seam between what a trader says and what he does, and this is that
+seam). The visualiser now draws the un-armed counter-structure level as a dotted bracket so the
+difference is visible on the chart, with the course's gate left ON by default.
+
+### 2. Both instruments are traded CONCURRENTLY, and the 2/day cap counts across the book
+
+> `video1038794732` [05:35] "as you can see **bot nasdaq bot us 30**"
+> `video1263885792` [03:58] "$60,000 on Nasdaq, $26,000 on us 30 — **we're taking two trades in a day**"
+> `video1979454677` [12:29] "**this is two positions one day**" (one US30, one Nasdaq, sequential)
+
+`3._WHAT_TO_TRADE`'s *"if NQ isn't trading so good… we move on to YM"* reads as a sequential fallback.
+In practice both are live at once, and **"two trades" means two across the pair**, typically one each.
+A backtest must count the cap across the two instruments, not per instrument — that halves the ceiling
+against a naive per-symbol reading.
+
+### 3. No entry before 09:30, stated first-hand as a rule he has been punished for breaking
+
+> `video1270175432` [00:14] "We try to sell **two minutes before session opens** and **get destroyed**."
+> [00:42] "Yeah, we'll wait now. **We'll definitely wait. It's not worth it.** Trust me."
+> [00:47] "Even if it does work out — and **most of the time it doesn't** — it's not worth it."
+
+Corroborates `8.`'s 09:30 gate from a second, independent source. The 09:10 analysis window is
+analysis only; this is the clearest first-hand statement of it in the corpus.
+
+### 4. The target is a numbered ladder and he scales out along it — he does not exit once
+
+"Target one / two / three / four / five" appears in **all five** NY streams (27 mentions), and the
+exits are partial:
+
+> `video1270175432` [03:12] "I'm gonna **start closing some of these positions**" … [03:45] "target
+> three just got smashed"
+> `video1038794732` [05:43] "**take my quarter mill**, a lot of positions"
+> `video1979454677` [14:29] "**I'll close most my position here.** I'm actually happy with another 50"
+> `video1263885792` [06:27] "**Target two** over here if you took it, **target four** over here, looks
+> like it might even hit the **target five**"
+
+**This joins up with FINDING 7.** The ladder is the 1R…5R rungs; `10._USING_DATA`'s rolling mean is the
+rule that says *which rung to call the day at*. This file previously had the ladder nowhere and the
+rolling mean nowhere, and recorded only the descriptive range between them. Scaling out also means a
+single-exit backtest is not modelling him, and that the "achieved R" fed back into FINDING 7 is
+ambiguous between the first rung closed and the last — **his own examples use the final target hit**
+(`10.` [01:07] "I was able to catch a one to three").
+
+### 5. Risk is a percentage of account with a stated base and a stated halving
+
+> `video1263885792` [00:15] "this first position I would risk **very very little**, maybe **one two
+> percent** of your account"
+> [00:26] "**Most of time I'll risk like five percent**"
+> [00:27] "So like I'll probably go **two and a half percent**, **cut my risk in half** on a trade like
+> this. Just because it's so small"
+> `video1979454677` [02:46] "the markets have been very horrible to us this week. **I'm going very
+> small positions**"
+
+This file's spec table said only *"lower conviction → smaller size, never a tighter stop"* — correct,
+but with no magnitudes. The magnitudes are: **base ~5% of account per trade, halved to ~2.5% on a
+lower-conviction setup, and 1–2% on a marginal or early one**, with a further reduction applied to a
+whole bad *week*, not just a bad setup.
+
+**Stated plainly because the number is extreme:** 5% of account per trade is roughly ten times the
+conventional 0.5%, and at that risk a run of six losses is a ~26% drawdown. That is an observation
+about his sizing, not an endorsement of it, and it does not affect any profit-factor measurement of
+the *signal* (leverage and sizing are ratio-invariant — see the ledger's LEVERAGE note). It matters
+only for reading his results claims, which are already set aside as marketing.
+
+### 6. One descriptive observation worth mining rather than his prescriptions
+
+> `video1038794732` [02:28] "I've noticed **us 30 nasdaq have not been in sync**" … [02:50] "not only
+> not in sync, even **out of sync completely**"
+
+Per HARD LESSON 14 this is the class of claim that survives mechanisation — it is a statement about
+the market, cheap to measure (rolling correlation of NQ vs YM returns during RTH), and it is the
+actual justification for watching two instruments rather than one. **Queued, not tested.** No engine
+in this project has both symbols with the depth to measure it.
+
+---
+
+## ██ CORRECTIONS THIS TICK MAKES TO THE SPEC TABLE ABOVE
+
+The table under THE COMPLETE MECHANICAL SPECIFICATION is superseded on four rows. It is left in place
+rather than edited, per this project's habit of not tidying away superseded claims.
+
+| Row | Was | **Now, with source** |
+|---|---|---|
+| Target | "1:3 to 1:5 R" | **`targetR` = mean achieved R of the last ~6 trades, losses scored 0, recomputed daily** (`10.` [00:38]–[05:43]). 1:3–1:5 is where that output usually lands, not the rule. |
+| Stop | "just beyond the broken level (~20–25 pts on NQ), never the far level" | unchanged, **plus a hard maximum**: a structural stop beyond ~25–30 pts **rejects the setup** (`11.` [01:26]) |
+| Frequency | "max 2/day, 3 exceptionally" | cap unchanged, but **realised rate is ~0.67–0.89 per session** (`10.` [00:38]/[02:22]), and the cap **counts across NQ+YM together**, not per instrument |
+| Direction | "Bullish → longs only. Bearish → shorts only." | that is the **stated** rule; the live sessions show **both sides pre-marked on both instruments**. Contradiction recorded, not resolved. |
+
+## ██ WHAT THIS TICK DID NOT ESTABLISH
+
+- **No number here came from a run.** No backtest, no engine call, zero credits. The sample estimate
+  in FINDING 9 is a pre-registered prediction, explicitly not a result.
+- **The stated-vs-observed direction contradiction is unresolved**, and cannot be resolved from
+  transcripts alone — only a run that measures both configurations can.
+- **Whether the rolling-mean target actually helps** is untested and, per FINDING 7's third defect,
+  there is a specific structural reason to expect it to ratchet downward. Written before any run.
+- **The four gold transcripts were identified, not decoded.** They are a different system and out of
+  scope for this file.

@@ -2675,3 +2675,66 @@ strategy can be worth trading at a lower return. Attack 78 held 5.75% exposure; 
 **rankings across instruments**, plus an obligation to report the baseline rather than omit it.
 
 ---
+
+## ██ HARD LESSON 55 — A TRANSCRIPT CORPUS IS NOT AUTOMATICALLY ONE SYSTEM. ESTABLISH WHO IS SPEAKING
+## BEFORE YOU DECODE A SINGLE RULE (LEGACY FOREX TICK #4, 2026-09-05)
+
+**Earned:** decoding the nine undecoded `videoNNNN` transcripts in `legacy-forex/transcripts/`.
+
+`legacy-forex/SYSTEM.md` opened with *"Source: … 18 videos"* and specified a New York / NQ+YM system
+from them. **Four of those eighteen are a different coach running a different system:** Asia session,
+gold (`MGC`), 1m through 1h, ATR-derived stops, fair value gaps, a 200 MA — none of which exist in the
+NQ/YM method. A fifth, the module the spec had never cited, is that second coach narrating the first
+coach's rules second-hand.
+
+Nothing in the filenames says so. `video1083955301.txt` and `video1038794732.txt` are the same shape
+of name; one is gold in Asia and the other is Nasdaq in New York.
+
+### WHY THIS ESCAPED THREE PRIOR TICKS
+
+The spec was decoded from the eight *numbered* modules, which happen to all be the intended trader.
+The unnumbered livestreams were deferred as "may refine the rules" across three ticks. **The corpus
+was never audited for authorship because it had never been read in full**, and the phrase that carried
+the assumption — "18 videos" — was written on the first tick and inherited unquestioned by every one
+after it.
+
+**No recorded rule turned out to be contaminated. That was luck, not method.** A tick that had read
+the four long gold files as "more of the same trader" would have imported an ATR stop basis and fair
+value gaps into a system whose author says *"there's no overall bias"* and quotes his stops in fixed
+points.
+
+### THE RULE
+
+**Before decoding any rule from a multi-file transcript corpus, establish authorship file by file and
+record the mapping.** Cheap and mechanical:
+
+1. Read the first ~20 lines of every file — a livestream almost always opens with a self-introduction,
+   a session name, and an instrument.
+2. Grep the whole corpus for names, session names, instrument tickers, and tool names
+   (`grep -inE "asia|new york|london|<tickers>|moving average|ATR|<names>"`). Divergence in *any* of
+   those four is the tell.
+3. Write the file-by-file split into the spec **before** quoting anything, and cite the corpus half a
+   quote came from, not just the filename.
+
+### THE GENERALISATION, AND IT IS NOT HYPOTHETICAL
+
+**This is the sixth cross-inheritance failure in this project**, after the no-mirror rule, E18's
+volatility-filter transfer, the BTC location rule, HARD LESSON 9's coil port, and the "Bybit perps
+only" generalisation. Every previous one was a finding travelling between labs. **This one is a
+finding travelling between two people inside what was believed to be one lab** — the same error one
+level further down, and correspondingly harder to see.
+
+**It applies directly to the other two workstreams and has never been checked in either.**
+`war-formation/transcripts/` and `three-m-elite/transcripts/` are both timestamp-named files
+(`2026-08-09 03-24-31.txt`) carrying no authorship marker in the filename, exactly the exposure that
+produced this. **Whether either corpus is single-author is UNKNOWN — this lesson does not claim they
+are mixed, it records that nobody has looked.** The check costs one grep and belongs on the next tick
+of each.
+
+### THE SMALLER LESSON RIDING ALONG
+
+**A source file the spec never cites is not "already covered" — it is unexamined.** Two of the eleven
+numbered modules had never been quoted in `SYSTEM.md`, and one of them contained the rule that
+actually sets the system's target (a rolling mean of achieved R, recomputed daily) while the spec
+recorded only the range that rule's output usually lands in. **Before believing a decode is complete,
+list the source files it cites and diff that against the files that exist.**

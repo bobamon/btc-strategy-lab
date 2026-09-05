@@ -2,8 +2,13 @@
 // ═══════════════════════════════════════════════════════════════════════════════════════════════
 // LEGACY FOREX TRADER — COMPLETE VISUALISER (2026-09-05)
 //
-// A faithful, mechanical rendering of the course's system, decoded from its own 18 videos.
+// A faithful, mechanical rendering of MAMBA's system — the New York / NQ+YM trader.
 // See legacy-forex/SYSTEM.md for every rule with its verbatim quote and timestamp.
+//
+// ⚠ THE COMMITTED TRANSCRIPT CORPUS IS TWO TRADERS, NOT ONE (SYSTEM.md FINDING 6, 2026-09-05).
+//   Eight numbered modules + five NY live streams are MAMBA — NQ/YM, New York, 5m/15m. That is
+//   this file. Four "videoNNNN" live streams + module 4 are COACH LUCA — gold (MGC), Asia session,
+//   1m-1h, ATR stops, fair value gaps, a 200 MA. NOTHING from Luca belongs in this indicator.
 //
 // INDICATOR, not a strategy — it takes no positions. It draws every element of his method and a
 // dashboard that names the exact condition currently blocking a trade.
@@ -22,11 +27,24 @@
 //   4. BREAK      price breaks the level in the structure's direction. The retest is a BONUS,
 //                 not a gate: "we don't have to do that"    (7. 05:35)
 //   5. VOLUME     must be present. "If there's no volume, there's no trading."  (9. 07:51)
-//   6. STOP       just beyond the broken level, never the far one — "64 points, my account's
-//                 gone if I do that"                        (11. 01:26)
-//   7. TARGET     1:3 to 1:5 R                              (9. 05:53)
+//   6. STOP       just beyond the broken level, never the far one — AND capped: a structural stop
+//                 wider than ~25-30 pts REJECTS the setup — "64 points, my account's gone if I
+//                 do that"                                  (11. 00:07 / 01:26)
+//   7. TARGET     NOT a fixed 1:3-1:5. It is the mean achieved R of his last ~6 closed trades,
+//                 losses scored 0, rounded, recomputed daily — "we are averaging a one, two,
+//                 three... which means we are going to go for one, two, threes"  (10. 00:38-05:43)
+//                 1:3-1:5 (9. 05:53) is where that output usually LANDS, not the rule.
 //   8. MANAGE     +1R -> break-even (by +1.5R at the latest); +2R -> lock +1R; then trail (11. 02:28 / 08:02)
-//   9. LIMIT      max 2 trades/day, 3 exceptionally         (9. 12:01)
+//   9. LIMIT      max 2 trades/day, 3 exceptionally — and the cap counts ACROSS NQ+YM together,
+//                 not per instrument (video1263885792 03:58). Realised rate is ~0.67-0.89 per
+//                 session, about a third of the cap (10. 00:38 / 02:22).
+//
+// ── ONE CONTRADICTION, DRAWN RATHER THAN RESOLVED ─────────────────────────────────────────────
+// The modules gate direction on structure (bullish -> buys only). The live streams show him
+// pre-marking a break level on BOTH sides of BOTH instruments and taking whichever goes:
+//   "Be prepared for all four positions on the screen."     (video1263885792 01:28)
+// The course gate is left ON by default. "Show counter-structure bracket" draws the level he would
+// have marked but this gate forbids, as a dotted line, so the disagreement is visible on the chart.
 //
 // ── DELIBERATELY NOT DRAWN ────────────────────────────────────────────────────────────────────
 // No higher-timeframe bias filter. That is not an omission — he rules it out explicitly:
@@ -55,17 +73,25 @@ volLen   = input.int(20,    "Volume average length",               group=gVol)
 volMult  = input.float(1.0, "Volume must exceed avg ×",            group=gVol)
 
 gRisk = "Risk"
-stopPad  = input.float(0.05, "Stop padding beyond level, % of price", group=gRisk)
-rTarget  = input.float(4.0,  "Target, R multiple (his 3-5 zone)",     group=gRisk)
-beAtR    = input.float(1.0,  "Move to break-even at R",               group=gRisk)
-lockAtR  = input.float(2.0,  "Lock +1R at R",                         group=gRisk)
-maxTrades= input.int(2,      "Max trades per day",                    group=gRisk)
+stopPad   = input.float(0.05, "Stop padding beyond level, % of price", group=gRisk)
+useMaxStop= input.bool(true,  "Reject setup if stop too wide (11. 01:26)", group=gRisk)
+maxStopPts= input.float(30.0, "Max stop distance, index points",      group=gRisk, tooltip="He accepts 25 pts ('solid') and refuses 64 pts ('my account's gone'). Luca reports him at 20 on NQ / 30 on YM. Index points, so it applies to NQ/YM/NAS100/US30 alike.")
+beAtR     = input.float(1.0,  "Move to break-even at R",               group=gRisk)
+lockAtR   = input.float(2.0,  "Lock +1R at R",                         group=gRisk)
+maxTrades = input.int(2,      "Max trades per day (counts across NQ+YM)", group=gRisk)
+
+gTgt = "Target — 10._USING_DATA"
+useAdaptR = input.bool(true, "Target = rolling mean achieved R (his actual rule)", group=gTgt)
+rrWindow  = input.int(6, "Trades in the window", group=gTgt, minval=1, maxval=8, tooltip="'the last two weeks of trades, which is typically anywhere from six to eight trades' (10. 00:38). His worked example uses 6.")
+rTarget   = input.float(3.0, "Fallback / fixed target, R", group=gTgt, tooltip="Used until the window has filled, or if the adaptive rule is switched off.")
 
 gV = "Display"
 showDash = input.bool(true, "Dashboard",        group=gV)
 showLvls = input.bool(true, "S/R levels",       group=gV)
 showStruct=input.bool(true, "Structure labels", group=gV)
 showTrade= input.bool(true, "Trade levels",     group=gV)
+showLadder=input.bool(true, "Target ladder 1R-5R (his 'target one..five')", group=gV)
+showBrkt = input.bool(true, "Counter-structure bracket (what the streams show)", group=gV)
 
 // ── 1. SESSION ────────────────────────────────────────────────────────────────────────────────
 inSess  = not useSession or not na(time(timeframe.period, sessTime, sessTZ))
@@ -137,14 +163,59 @@ if newDay
     tradesToday := 0
 underCap = tradesToday < maxTrades
 
+// ── ROLLING ACHIEVED-R WINDOW — 10._USING_DATA, the rule that actually sets the target ───────
+// "I only calculated the second number. I don't care about the one." (10. 02:48)
+// "We take the three, ZERO FOR A LOSS, two point five, five, five and a three." (10. 02:56)
+// "That equals 18.5. We divide that by six... we are averaging a one, two, three." (10. 03:47)
+// Eight shift registers rather than an array: arrays are on this project's forbidden list.
+// NOTE: he says "median" (10. 00:52, 05:59) and computes the arithmetic MEAN every time. His own
+// example cannot tell them apart ({0,2.5,3,3,5,5}: mean 3.083, median 3.0, both called "one to
+// three"). Mechanising the arithmetic he performs, not the word he uses. See SYSTEM.md FINDING 7.
+var float r1 = na, var float r2 = na, var float r3 = na, var float r4 = na
+var float r5 = na, var float r6 = na, var float r7 = na, var float r8 = na
+
+sumR = (rrWindow >= 1 and not na(r1) ? r1 : 0.0) + (rrWindow >= 2 and not na(r2) ? r2 : 0.0) +
+       (rrWindow >= 3 and not na(r3) ? r3 : 0.0) + (rrWindow >= 4 and not na(r4) ? r4 : 0.0) +
+       (rrWindow >= 5 and not na(r5) ? r5 : 0.0) + (rrWindow >= 6 and not na(r6) ? r6 : 0.0) +
+       (rrWindow >= 7 and not na(r7) ? r7 : 0.0) + (rrWindow >= 8 and not na(r8) ? r8 : 0.0)
+cntR = (rrWindow >= 1 and not na(r1) ? 1 : 0) + (rrWindow >= 2 and not na(r2) ? 1 : 0) +
+       (rrWindow >= 3 and not na(r3) ? 1 : 0) + (rrWindow >= 4 and not na(r4) ? 1 : 0) +
+       (rrWindow >= 5 and not na(r5) ? 1 : 0) + (rrWindow >= 6 and not na(r6) ? 1 : 0) +
+       (rrWindow >= 7 and not na(r7) ? 1 : 0) + (rrWindow >= 8 and not na(r8) ? 1 : 0)
+
+avgAchR   = cntR > 0 ? sumR / cntR : na
+windowFull= cntR >= rrWindow
+// "we are averaging a one, two, three... we are going to go for one, two, threes" — rounded to a
+// whole R, floored at 1 so a bad window cannot produce a sub-1R target he never trades.
+rTargetUse = useAdaptR and windowFull and not na(avgAchR) ? math.max(1.0, math.round(avgAchR)) : rTarget
+
+// ── THE STOP-WIDTH GATE — a setup whose structure sits too far away is REJECTED, not re-stopped ─
+// "That's a 25 point stop loss, which is solid." (11. 00:07)
+// "64 points. No, my account's gone if I do that." (11. 01:26)
+padNow      = close * stopPad / 100
+projStopL   = na(resLvl) ? na : resLvl - padNow      // long stops below the broken resistance
+projStopS   = na(supLvl) ? na : supLvl + padNow      // short stops above the broken support
+projRlong   = na(projStopL) ? na : math.abs(close - projStopL)
+projRshort  = na(projStopS) ? na : math.abs(close - projStopS)
+stopOKlong  = not useMaxStop or (not na(projRlong)  and projRlong  <= maxStopPts)
+stopOKshort = not useMaxStop or (not na(projRshort) and projRshort <= maxStopPts)
+
 // ── THE SIGNAL ────────────────────────────────────────────────────────────────────────────────
-goLong  = inSess and bullStruct and brokeRes and volOK and underCap
-goShort = inSess and bearStruct and brokeSup and volOK and underCap
+goLong  = inSess and bullStruct and brokeRes and volOK and underCap and stopOKlong
+goShort = inSess and bearStruct and brokeSup and volOK and underCap and stopOKshort
+
+// The break he would have marked on the OTHER side, which the course's structure gate forbids.
+// Drawn, never traded — see the header note on the stated-vs-observed contradiction.
+brktLvl = bullStruct ? supLvl : bearStruct ? resLvl : na
+plot(showBrkt and not na(brktLvl) ? brktLvl : na, "Counter-structure bracket",
+     color=color.new(color.gray, 35), style=plot.style_circles, linewidth=1)
 
 // ── SIMULATED TRADE — so stop, target and the trail rule can be drawn ────────────────────────
 var int   dir     = 0
 var float entryPx = na, var float stopPx = na, var float tgtPx = na, var float initR = na
+var float tgtR    = na                       // the target THIS trade was opened against
 var line  lnE = na, var line  lnS = na, var line  lnT = na
+var line  lad1 = na, var line lad2 = na, var line lad3 = na, var line lad4 = na, var line lad5 = na
 
 curR = dir == 0 or na(initR) or initR == 0 ? na : (dir == 1 ? (close - entryPx) : (entryPx - close)) / initR
 
@@ -160,12 +231,24 @@ hitT = dir ==  1 and high >= tgtPx  or dir == -1 and low  <= tgtPx
 hitS = dir ==  1 and low  <= stopPx or dir == -1 and high >= stopPx
 
 if dir != 0 and (hitT or hitS)
-    outR = hitT ? rTarget : (dir == 1 ? (stopPx - entryPx) : (entryPx - stopPx)) / initR
-    txt  = hitT ? "TARGET +" + str.tostring(rTarget, "#.#") + "R" : outR >= 0 ? "TRAIL +" + str.tostring(outR, "#.#") + "R" : "STOP −1R"
+    outR = hitT ? tgtR : (dir == 1 ? (stopPx - entryPx) : (entryPx - stopPx)) / initR
+    txt  = hitT ? "TARGET +" + str.tostring(tgtR, "#.#") + "R" : outR >= 0 ? "TRAIL +" + str.tostring(outR, "#.#") + "R" : "STOP −1R"
     label.new(bar_index, dir == 1 ? high : low, txt, style = dir == 1 ? label.style_label_down : label.style_label_up,
          color = outR > 0 ? color.new(color.teal, 20) : color.new(color.maroon, 20), textcolor=color.white, size=size.small)
     if not na(lnE)
         line.set_x2(lnE, bar_index), line.set_x2(lnS, bar_index), line.set_x2(lnT, bar_index)
+    if not na(lad1)
+        line.set_x2(lad1, bar_index), line.set_x2(lad2, bar_index), line.set_x2(lad3, bar_index)
+        line.set_x2(lad4, bar_index), line.set_x2(lad5, bar_index)
+    // push the achieved R into his rolling window — a loss scores 0, per 10. 02:56
+    r8 := r7
+    r7 := r6
+    r6 := r5
+    r5 := r4
+    r4 := r3
+    r3 := r2
+    r2 := r1
+    r1 := math.max(outR, 0)
     dir := 0
 
 if dir == 0 and (goLong or goShort)
@@ -175,12 +258,22 @@ if dir == 0 and (goLong or goShort)
     pad      = close * stopPad / 100
     stopPx  := goLong ? lvl - pad : lvl + pad     // "just below that support", never the far level
     initR   := math.abs(entryPx - stopPx)
-    tgtPx   := goLong ? entryPx + initR * rTarget : entryPx - initR * rTarget
+    tgtR    := rTargetUse
+    tgtPx   := goLong ? entryPx + initR * tgtR : entryPx - initR * tgtR
     tradesToday += 1
     if showTrade
         lnE := line.new(bar_index, entryPx, bar_index+1, entryPx, color=color.blue,  width=2)
         lnS := line.new(bar_index, stopPx,  bar_index+1, stopPx,  color=color.red,   width=2, style=line.style_dashed)
         lnT := line.new(bar_index, tgtPx,   bar_index+1, tgtPx,   color=color.green, width=2, style=line.style_dashed)
+    if showLadder
+        // "target one... target two... target three... target four... target five" — all five NY
+        // streams. He scales out along these rungs; 10._USING_DATA decides which one calls the day.
+        s = dir
+        lad1 := line.new(bar_index, entryPx + s*initR*1, bar_index+1, entryPx + s*initR*1, color=color.new(color.olive,50), style=line.style_dotted)
+        lad2 := line.new(bar_index, entryPx + s*initR*2, bar_index+1, entryPx + s*initR*2, color=color.new(color.olive,50), style=line.style_dotted)
+        lad3 := line.new(bar_index, entryPx + s*initR*3, bar_index+1, entryPx + s*initR*3, color=color.new(color.olive,50), style=line.style_dotted)
+        lad4 := line.new(bar_index, entryPx + s*initR*4, bar_index+1, entryPx + s*initR*4, color=color.new(color.olive,50), style=line.style_dotted)
+        lad5 := line.new(bar_index, entryPx + s*initR*5, bar_index+1, entryPx + s*initR*5, color=color.new(color.olive,50), style=line.style_dotted)
     label.new(bar_index, goLong ? low : high,
          (goLong ? "▲ LONG break " : "▼ SHORT break ") + str.tostring(lvl, format.mintick) + "  #" + str.tostring(tradesToday),
          style = goLong ? label.style_label_up : label.style_label_down,
@@ -189,6 +282,9 @@ if dir == 0 and (goLong or goShort)
 if dir != 0 and not na(lnE)
     line.set_x2(lnE, bar_index), line.set_x2(lnS, bar_index), line.set_x2(lnT, bar_index)
     line.set_y1(lnS, stopPx), line.set_y2(lnS, stopPx)
+if dir != 0 and not na(lad1)
+    line.set_x2(lad1, bar_index), line.set_x2(lad2, bar_index), line.set_x2(lad3, bar_index)
+    line.set_x2(lad4, bar_index), line.set_x2(lad5, bar_index)
 
 // ── SHADING ───────────────────────────────────────────────────────────────────────────────────
 bgcolor(useSession and not inSess ? color.new(color.gray, 90) : na,  title="Outside New York session")
@@ -198,7 +294,7 @@ bgcolor(inSess and bearStruct     ? color.new(color.red, 94) : na,   title="Bear
 barcolor(useVol and not volOK ? color.new(color.gray, 50) : na,      title="No volume")
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────────────────────
-var table d = table.new(position.top_right, 3, 11, border_width=1, frame_width=1, frame_color=color.gray)
+var table d = table.new(position.top_right, 3, 13, border_width=1, frame_width=1, frame_color=color.gray)
 f_row(t, r, k, ok, v) =>
     table.cell(t, 0, r, k, text_color=color.white,  text_size=size.small, bgcolor=color.new(color.black,20), text_halign=text.align_left)
     table.cell(t, 1, r, ok ? "✔" : "✖", text_color=ok ? color.lime : color.red, text_size=size.small, bgcolor=color.new(color.black,20))
@@ -218,13 +314,28 @@ if showDash and barstate.islast
     f_row(d, 6, "Support",    supValid,     na(supLvl) ? "—" : str.tostring(supLvl, format.mintick) + "  " + str.tostring(supTouch) + " touches (need " + str.tostring(minTouch) + ")")
     f_row(d, 7, "Break",      brokeRes or brokeSup, brokeRes ? "broke RESISTANCE ✓" : brokeSup ? "broke SUPPORT ✓" : "waiting for a break")
     f_row(d, 8, "Volume",     volOK,        na(volRat) ? "—" : str.tostring(volRat, "#.##") + "× avg  (need > " + str.tostring(volMult, "#.##") + ")")
-    f_row(d, 9, "Trades today", underCap,   str.tostring(tradesToday) + " / " + str.tostring(maxTrades) + "  (his cap: 2, 3 exceptionally)")
+    // which side's stop width is the live question depends on which side structure permits
+    projR    = bullStruct ? projRlong : bearStruct ? projRshort : na
+    stopOKnow= bullStruct ? stopOKlong : bearStruct ? stopOKshort : true
+    f_row(d, 9, "Stop width", stopOKnow, na(projR) ? "—" : str.tostring(projR, "#.#") + " pts  (max " + str.tostring(maxStopPts, "#") + " — he refused 64)")
+    f_row(d, 10, "Target",    true,      (useAdaptR ? (windowFull ? "1:" + str.tostring(rTargetUse, "#") + "  from mean " + str.tostring(avgAchR, "#.##") + "R of last " + str.tostring(cntR) + " (10._USING_DATA)"
+                                                                  : "1:" + str.tostring(rTargetUse, "#") + "  FALLBACK — window " + str.tostring(cntR) + "/" + str.tostring(rrWindow) + " trades")
+                                                    : "1:" + str.tostring(rTargetUse, "#") + "  fixed (adaptive rule off)"))
+    f_row(d, 11, "Trades today", underCap, str.tostring(tradesToday) + " / " + str.tostring(maxTrades) + "  (cap counts across NQ+YM)")
 
-    verdict = goLong ? "▲ LONG NOW" : goShort ? "▼ SHORT NOW" : dir != 0 ? ("HOLDING  " + (na(curR)?"":str.tostring(curR,"#.##") + "R")) : consolidating ? "NO TRADE — consolidation" : "WAIT"
+    // name the FIRST unmet condition, in his own order, so the dashboard says what is blocking
+    blocker = not inSess        ? "NO TRADE — outside New York session"
+      : consolidating           ? "NO TRADE — consolidation"
+      : not (brokeRes or brokeSup) ? "WAIT — no break of a validated level"
+      : not volOK               ? "NO TRADE — no volume"
+      : not stopOKnow           ? "NO TRADE — stop too wide (" + str.tostring(projR, "#.#") + " pts)"
+      : not underCap            ? "NO TRADE — daily cap reached"
+      : "WAIT"
+    verdict = goLong ? "▲ LONG NOW" : goShort ? "▼ SHORT NOW" : dir != 0 ? ("HOLDING  " + (na(curR)?"":str.tostring(curR,"#.##") + "R  → 1:" + str.tostring(tgtR,"#"))) : blocker
     vc = goLong ? color.green : goShort ? color.red : dir != 0 ? color.blue : color.new(color.gray,40)
-    table.cell(d, 0, 10, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
-    table.cell(d, 1, 10, "", bgcolor=vc)
-    table.cell(d, 2, 10, verdict, text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+    table.cell(d, 0, 12, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+    table.cell(d, 1, 12, "", bgcolor=vc)
+    table.cell(d, 2, 12, verdict, text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
 
 alertcondition(goLong,  "Legacy LONG",  "Legacy Forex: LONG — structure bullish, resistance broken, volume present")
 alertcondition(goShort, "Legacy SHORT", "Legacy Forex: SHORT — structure bearish, support broken, volume present")
@@ -232,3 +343,6 @@ alertcondition(goShort, "Legacy SHORT", "Legacy Forex: SHORT — structure beari
 plot(goLong ? 1:0,  "LongSignal",  display=display.data_window)
 plot(goShort ? 1:0, "ShortSignal", display=display.data_window)
 plot(curR,          "CurrentR",    display=display.data_window)
+plot(avgAchR,       "MeanAchievedR (10._USING_DATA)", display=display.data_window)
+plot(rTargetUse,    "TargetR in use", display=display.data_window)
+plot(bullStruct ? projRlong : bearStruct ? projRshort : na, "ProjectedStopPts", display=display.data_window)

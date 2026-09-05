@@ -337,3 +337,108 @@ be about a different strategy.
 3. **Forward-testing remains available today** and needs no history: run the Pine visualiser live on
    NQ/YM 5m during New York session and record signals as they occur.
 4. Nine `videoNNNN` transcripts remain undecoded and may refine the rules.
+
+---
+
+# ██ TICK #4, 2026-09-05 — THE CORPUS IS TWO TRADERS, AND THE TARGET RULE WAS NEVER DECODED
+
+Zero credits. **No backtest, no `plan_backtest_window`, no engine call of any kind.** This tick is
+pure decode: the nine `videoNNNN` transcripts (queue item 4 of tick #3, and item 5 of the original
+`SYSTEM.md` queue — outstanding since the workstream opened) plus the two numbered modules
+`SYSTEM.md` had never cited, `4._WHAT_ARE_CONTRACTS_AND_TICKS` and `10._USING_DATA`.
+
+Full detail, with every verbatim quote and timestamp, is in `SYSTEM.md` FINDINGS 6–10.
+
+## THE HEADLINE — THE 18 TRANSCRIPTS ARE NOT ONE SYSTEM
+
+`SYSTEM.md` opened with *"Source: … 18 videos"* and treated the whole directory as one man's method.
+**Two coaches from the same prop firm are mixed in it**, and nothing in the filenames separates them:
+
+- **Mamba** — New York session, NQ and YM, 5m/15m only, structure + level break + volume. This is the
+  Legacy Forex Trader the workstream exists to specify. Eight numbered modules and five of the nine
+  live streams.
+- **Coach Luca ("Luca No Limit")** — **Asia session**, **gold (`MGC`)**, 1m through 1h, **ATR-derived
+  stops**, **fair value gaps**, a **200 MA**, previous-day high/low, his own `edgematrix.com`
+  indicator. Module `4.` (which he narrates *about* Mamba) and four of the nine live streams.
+
+They are explicitly colleagues, not the same person: *"tomorrow morning during **mamba stream**"*
+(`video1083955301` [53:19]); *"**Mamba** just called me"* (`4.` [00:00]).
+
+**No existing rule in `SYSTEM.md` was corrupted** — all eight modules it decoded are Mamba's. But that
+was luck: the two modules it had *not* cited included the one Luca narrates, and a tick that had read
+the four long `videoNNNN` files as "more of the same trader" would have imported ATR stops, FVGs and a
+200 MA into a system that has none of them. The file-by-file split is now recorded in `SYSTEM.md`
+FINDING 6 and must be consulted before quoting any transcript in this directory again.
+
+## THREE MECHANICAL RULES THAT WERE IN THE SOURCE AND NOT IN THE SPEC
+
+1. **The target is an output, not a range.** `10._USING_DATA` — never cited before — gives the rule
+   that sets it: average the achieved R of the last ~6 closed trades **with a loss scored 0**, round
+   it, and trade that R tomorrow; recompute after every close. `SYSTEM.md` had recorded only *"1:3 to
+   1:5 R"*, which is where that output usually lands. Three defects in the rule are recorded with it,
+   including that it is **structurally biased downward** (a winner's recorded R is capped by the
+   target it exited at, while a loss drags the mean toward 0) — written down before any run, per
+   HARD LESSON 17.
+2. **The stop has a hard maximum, and the maximum is a setup filter.** *"That's a 25 point stop loss,
+   which is solid"* vs *"64 points. No, my account's gone if I do that"* (`11.` [00:07]/[01:26]). A
+   structural stop wider than ~25–30 points **rejects the setup**; it is not re-stopped nearer. That
+   is a gate, and gates change trade counts, which is this workstream's binding problem.
+3. **The 2/day cap counts across NQ and YM together**, not per instrument — he runs both concurrently
+   (*"bot nasdaq bot us 30"*, `video1038794732` [05:35]; *"we're taking two trades in a day"* while
+   holding one of each, `video1263885792` [03:58]). A per-symbol reading would have doubled the
+   ceiling.
+
+## ONE CONTRADICTION, RECORDED AND NOT RESOLVED
+
+The modules gate direction on structure (bullish → buys only). **The live streams show him pre-marking
+a break level on both sides of both instruments and taking whichever goes** — *"Be prepared for all
+four positions on the screen"* (`video1263885792` [01:28]). Stated method vs observed behaviour. The
+course gate stays ON by default in the Pine; the forbidden counter-structure level is now drawn as a
+dotted bracket so the disagreement is visible rather than buried. Only a run can settle it.
+
+## THE SAMPLE ESTIMATE IS NOW ANCHORED ON HIS OWN NUMBER, AND IT GOT WORSE FOR 5m
+
+Every prior estimate in this file was derived from the **cap** (2/day), because that was the only
+figure available. `10._USING_DATA` gives the realised rate from his own journal: *"the last two weeks
+of trades, which is typically anywhere from **six to eight trades**"* [00:38], and his worked example
+is *"**six trades**… about **nine days** worth"* [02:22] — **0.67–0.89 trades per session, roughly a
+third of his cap.**
+
+Applied to tick #3's measured coverage:
+
+| tf | bars measured (tick #3) | RTH sessions | × 0.67–0.89 | vs the 30-trade floor |
+|---|---|---|---|---|
+| 15m | 1,119 | ~43 | **~29–38** | straddles it |
+| 5m | 937 | ~12 | **~8–11** | **short by ~3×** |
+
+Tick #3 said the workstream was "marginal, not hopeless" on a 20–40 guess. That verdict survives for
+15m and is now sourced rather than guessed. **For 5m it does not: 5m cannot produce a quotable sample
+on this data source, and that is now a firmer statement than tick #3's.** This is an estimate, not a
+result — HARD LESSON 4 says score it against the actual count and never build on it.
+
+## WHAT THIS TICK DID NOT ESTABLISH
+
+- **No number here came from a run.** Nothing was backtested; no `runId` exists for this workstream and
+  none should until the sample question is settled.
+- The stated-vs-observed direction contradiction is **unresolved** and cannot be resolved from
+  transcripts.
+- Whether the rolling-mean target helps or hurts is **untested**, with a stated reason to expect it to
+  ratchet down.
+- The four gold transcripts were **identified, not decoded**. They are a different system; if they are
+  ever worked they are a fifth workstream, and nothing from them may enter this one.
+- The `US30`/`NQ` de-correlation claim (`video1038794732` [02:28], *"not in sync… out of sync
+  completely"*) is a **descriptive** observation of the kind HARD LESSON 14 says to mine, it is cheap
+  to measure, and **no engine in this project has both symbols with the depth to measure it.** Queued.
+
+## QUEUE
+
+1. **Before quoting any transcript in this directory, check FINDING 6's file-by-file split.** This is
+   now the first rule of this workstream.
+2. The engine deadlock from tick #3 is unchanged: `backtest-lab` has the instruments but cannot
+   express the method; trader-dev can express the method but silently remaps the instruments. **Do not
+   run a Legacy Forex backtest on trader-dev under any circumstances** (tick #2, FINDING 4).
+3. If a run ever becomes possible, **measure the rolling-mean target against a fixed target** — that
+   is the one pre-registered question this workstream now has, and FINDING 7 predicts the direction.
+4. **Forward-testing still needs no history** and is still the only honest route available today: run
+   `pine/VISUAL-legacy-forex-complete.pine` live on NQ/YM 5m during New York and record signals.
+5. Measure the NQ/YM de-correlation claim if an engine ever carries both.
