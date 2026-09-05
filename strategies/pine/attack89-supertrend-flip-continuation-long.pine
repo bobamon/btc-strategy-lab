@@ -1,0 +1,148 @@
+//@version=6
+// BTC ATTACK 89 - SUPERTREND FLIP CONTINUATION LONG. A GENUINELY NEW MECHANISM, BARE.
+//
+// THE STORED SCHEDULED PROMPT describes a board state ("Attack 37, build its filter stack") more than
+// eighty attacks stale, instructing "continue numbering after 37." THE DOCS OVERRIDE IT, per the
+// prompt's own instruction: Attack 41 closed Attack 37 on cost; the OBV-divergence filter stack on
+// Attack 68/82/83 is CLOSED at three terms after Attack 71/87/88 each failed a distinct term-4
+// candidate; Attack 83's own queue (item 2) named the next step as ONE genuinely new mechanism, listing
+// untried indicators on this engine's 65-function allowlist including ta.supertrend, never used in any
+// prior attack. This cycle builds that.
+//
+// ==================== WHAT THIS CLAIMS, IN ONE SENTENCE ====================
+// When price closes back above the SuperTrend band (an ATR-adaptive stop-and-reverse line) after having
+// been below it, the market has already absorbed enough of the prevailing volatility to flip the
+// dominant trend state, and the new uptrend leg tends to continue toward a measured-move projection of
+// the swing that preceded the flip before mean-reverting.
+//
+// ==================== WHY THIS IS A NEW INPUT CLASS FOR THIS LAB ====================
+// Every prior mechanism used one of: rolling extremes with no structure filter (33, 48), a calendar
+// anchor (34/35/54/55), a volatility state used as a REGIME GATE not a trigger (36, 65, 76, 78), a
+// failed break of a swing low (37-43), a tap-and-reclaim of a swing level (44-47), a single bar's own
+// range/volume (49), a session range (50), an RSI/price divergence (51/52), a summed order-flow-proxy
+// absorption signal (53), a consecutive-close streak (56), a LAGGING EMA-slope crossover (57/58),
+// confirmed price-only swing structure (59, 63), an OBV/price divergence family (66-71, 82, 83, 87, 88),
+// lag-1 return autocorrelation (72), Ichimoku kumo/chikou (73), a weekend calendar window (74), a
+// round-number level reclaim (75), NVI smart-money regime (76), Bollinger Band width squeeze (77),
+// ADX/DMI trend-strength regime (78), MFI oversold reclaim (79), ATR/price divergence (80), and volume-
+// climax capitulation (81). NONE has used an ATR-ENVELOPE STOP-AND-REVERSE LINE as the entry trigger
+// itself. This is related to the EMA-slope crossover family (57/58) in that both are trend-STATE flips,
+// but SuperTrend's line is not a lagging average of price -- it is a volatility-adaptive band that
+// jumps discretely on a flip and is itself derived from ATR, giving it a fundamentally different
+// (and typically much faster) flip timing than an EMA-slope cross. Flagged here rather than overclaimed,
+// per this lab's own standard (Attack 66) of naming what a build shares with what already exists.
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS ====================
+// ta.supertrend(factor, atrLen) returns [st, dir], the band line and its discrete direction state.
+// flipLong = ta.crossover(close, st): the bar price closes back above the band after being below it --
+// a single, unambiguous, non-repainting trigger (built-in function, evaluated bar-by-bar on close,
+// process_orders_on_close=true). Stop: the most recent CONFIRMED swing low (ta.pivotlow, LESSON 5,
+// actual structure -- NOT the SuperTrend line itself, which is forbidden as a trailing exit under this
+// lab's own fixed-SL/TP-at-entry rule and the engine's ban on custom var-trail). Target: a MEASURED-MOVE
+// PROJECTION -- entry price plus the amplitude of the most recent confirmed swing (pivot high minus
+// pivot low), a level derived from the swing's own geometry (HARD LESSON 41), independent of R (E14:
+// minRpct constrains the stop distance; swingAmp constrains the target, drawn from a different
+// quantity).
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - enforced by EXCLUSION via rBig, never clamped.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = lastPivLow, the most recent confirmed swing low, not the
+//        SuperTrend line and not a fixed-ATR offset from entry.
+//   Each leg separately (LESSON 6) - LONG ONLY. A bearish mirror (ta.crossunder(close, st)) is
+//        untested; the short leg is a reported standing asymmetry (Attack 64).
+//   BINDING (E17) - flipLong AND rBig AND swingOk all necessarily bind: flipLong alone fires on every
+//        SuperTrend flip regardless of stop distance or swing validity, so rBig and swingOk each
+//        independently remove flips the raw trigger would otherwise take.
+//   REDUNDANCY (E14) - flipLong reads an ATR-ENVELOPE TREND-STATE (a volatility-adaptive band, a domain
+//        no prior attack has used as a trigger); rBig reads PRICE DISTANCE from entry to the confirmed
+//        swing low; swingOk reads PRICE SWING AMPLITUDE between the confirmed swing high and low. Three
+//        independent quantities across three domains -- trend-state, stop-distance, target-geometry.
+//   LATCH IN SEQUENCE (LESSON 8) - lastPivLow and lastPivHigh are `var float` scalars updated only on
+//        their own confirmed pivot bars (a fixed historical offset via ta.pivotlow/ta.pivothigh, non-
+//        repainting); flipLong is read on a LATER, separate bar via ta.crossover, never on the same bar
+//        a pivot confirms by construction (a pivot needs pivotRight bars of lookahead to confirm, while
+//        flipLong is a same-bar crossover test against whatever pivot values are already latched).
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, flat check gates every entry.
+//   CASCADE (HARD LESSON 42/43) - single TP+SL, no partials, LONG at 100% equity (the short-side margin
+//        ceiling is not implicated by a long-only build); expect cascadeRatio 1.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale. The SuperTrend line is used
+//        ONLY as a one-shot entry trigger, never re-read after entry.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17). CODE BARE -- NO RR FLOOR, NO ADDED FILTER, ONE HALF
+// ONLY (credits band 250-500, never-tuned pre-2024 half, per the kill rule):
+//   * PRE-2024 HALF (H1) ABOVE 1.0, TRADES ROUGHLY 60-350 -> a genuinely new candidate, provisionally
+//     queued for an H2 run in a future cycle (credits permitting) before any filter work.
+//   * H1 BELOW 1.0 -> DISCARDED by the kill rule immediately. No filters, no rescue, no H2 run --
+//     credits are not spent confirming a dead mechanism.
+//   * A MAJORITY WIN RATE WITH ratioAvgWinLoss WELL BELOW 1.0 -> the inverted-payoff shape (HARD LESSON
+//     53); report it as that, not as a novel diagnosis.
+//   * TRADES WELL BELOW ~30 -> a DIRECTION, not a result (LESSON 12); SuperTrend flips at this factor/
+//        length may be too frequent or too rare for a single-symbol single-timeframe test.
+//   * A LARGE SHARE OF HOLDS AT maxBars 192 -> the cap is truncating (HARD LESSON 38); report before
+//        drawing any conclusion.
+//   REPORT GROSS, COMMISSION AND ACHIEVED RATIO alongside net, avg loser and win rate (LESSONS 36/39 and
+//     the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack89 SuperTrend flip continuation long", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+stFactor   = input.float(3.0, "SuperTrend ATR multiplier")
+stAtrLen   = input.int(10, "SuperTrend ATR length")
+pivotLeft  = input.int(5, "Pivot confirmation bars, left")
+pivotRight = input.int(5, "Pivot confirmation bars, right")
+minRpct    = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars    = input.int(192, "Max bars in trade")
+
+[st, dir] = ta.supertrend(stFactor, stAtrLen)
+
+flipLong = ta.crossover(close, st)
+
+pl = ta.pivotlow(low, pivotLeft, pivotRight)
+ph = ta.pivothigh(high, pivotLeft, pivotRight)
+
+var float lastPivLow  = na
+var float lastPivHigh = na
+
+if not na(pl)
+    lastPivLow := pl
+
+if not na(ph)
+    lastPivHigh := ph
+
+rLong = not na(lastPivLow) ? close - lastPivLow : na
+minR  = close * minRpct / 100
+rBig  = not na(rLong) and rLong >= minR
+
+swingAmp = not na(lastPivHigh) and not na(lastPivLow) ? lastPivHigh - lastPivLow : na
+swingOk  = not na(swingAmp) and swingAmp > 0
+
+goLong = flipLong and rBig and swingOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := lastPivLow
+    tpPx   := close + swingAmp
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(st, title="SuperTrend")
+plot(lastPivLow, title="LastPivotLow")
+plot(lastPivHigh, title="LastPivotHigh")

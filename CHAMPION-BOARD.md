@@ -8429,3 +8429,115 @@ conditioned volume-climax exclusion (Attack 83), and — after this cycle — no
 5. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
 6. **This session cannot continue the new-engine cross-sectional track (Attacks 84-86)** — no
    `backtest-lab`/`sweep_backtest` tool is available here, unaffected by this cycle.
+
+---
+
+# ATTACK 89 — SUPERTREND FLIP CONTINUATION LONG. A GENUINELY NEW MECHANISM PER ATTACK 88's OWN QUEUE ITEM 2. DISCARDED — PF CLEARS 1.0 ONLY NOMINALLY, AT A TRADE COUNT THAT REPEATS ATTACK 33's COST SIGNATURE.
+
+The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") more than
+eighty-five attacks stale, instructing "continue numbering after 37." **The docs override it, again**, per
+the prompt's own instruction: Attack 37 closed on cost at Attack 41; the OBV-divergence filter stack on
+Attack 68/82/83 is CLOSED at three terms after Attack 71/87/88 each failed a distinct term-4 candidate; and
+Attack 88's own queue item 2 named the next step as ONE genuinely new mechanism, listing `ta.supertrend`
+among the untried indicators on this engine's 65-function allowlist. This cycle builds that. Numbering
+continues after Attack 88, the last entry on the board.
+
+## THE MECHANISM
+
+**SuperTrend flip continuation, long only.** `ta.supertrend(3.0, 10)` returns an ATR-adaptive stop-and-
+reverse band; `flipLong = ta.crossover(close, st)` triggers the instant price closes back above the band
+after being below it. Claim, in one sentence: **a SuperTrend flip means the market has already absorbed
+enough of the prevailing volatility to change its dominant trend state, and the new uptrend leg continues
+toward a measured-move target before mean-reverting.** Stop is the most recent CONFIRMED swing low
+(`ta.pivotlow`, LESSON 5 — structure, not the SuperTrend line itself, which this lab's fixed-SL/TP-at-entry
+rule forbids using as a trailing exit). Target is entry plus the amplitude of the most recent confirmed
+swing (LESSON 41 — a level, not a stop-multiple). R gated by exclusion at >=0.8% (LESSON 3). Coded BARE, no
+filter stack. Pine: `strategies/pine/attack89-supertrend-flip-continuation-long.pine`.
+
+**Why this is new, and what it is related to.** No prior attack has used an ATR-envelope stop-and-reverse
+line as an entry trigger. It shares a "trend-state flip" shape with the EMA-slope crossover family (57/58),
+but SuperTrend's line jumps discretely on a flip and is itself ATR-derived, not a lagging average of price
+— a different, faster flip mechanism, flagged rather than overclaimed per Attack 66's own standard.
+
+## AUDIT (one line per leg)
+
+R >= 0.8% (LESSON 3) — `rBig` gates by exclusion on `rLong = close - lastPivLow`. Stop beyond STRUCTURE
+(LESSON 5) — `slPx = lastPivLow`, the confirmed swing low, never the SuperTrend line. Each leg separately
+(LESSON 6) — LONG ONLY; short remains the standing asymmetry (Attack 64). BINDING (E17) — `flipLong` AND
+`rBig` AND `swingOk` all necessarily bind: the raw SuperTrend flip fires regardless of stop distance or
+swing validity, so each added term independently removes flips the trigger alone would take. REDUNDANCY
+(E14) — an ATR-envelope trend-state (new domain), price distance to the confirmed swing low, and confirmed
+swing amplitude — three independent quantities across three domains. LATCH IN SEQUENCE (LESSON 8) —
+`lastPivLow`/`lastPivHigh` are `var float` scalars updated only on their own confirmed pivot bars;
+`flipLong` is read on a later, separate bar via crossover, never the same bar a pivot confirms by
+construction. CASCADE (HARD LESSON 42/43) — LONG at 100% equity; `cascadeRatio` 1, `maxCascadeDepth` 1,
+526 total rows, 526 unique entries, confirmed. SL/TP FIXED AT ENTRY, no trailing, no martingale.
+
+## OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17)
+
+Bare mechanism, one half only (credits band 250-500 → pre-2024 half, per the mandate):
+- H1 above 1.0, ~60-350 trades → genuinely new candidate, queued for an H2 run before any filter work.
+- H1 below 1.0 → discarded immediately by the kill rule, no H2 run.
+- Majority win rate with `ratioAvgWinLoss` well below 1.0 → the inverted-payoff shape (HARD LESSON 53).
+- Trades well below ~30 → a direction, not a result (LESSON 12); well above the band → over-frequency,
+  Attack 33's own failure mode.
+
+## RESULT — H1 ONLY (2022-01-01 → 2024-06-08, never tuned)
+
+| Metric | Attack 89a (H1) |
+|---|---|
+| Profit factor | **1.01365036** |
+| Trades | **526** |
+| Win rate | 57.60456274% |
+| Avg winner | $132.91 |
+| Avg loser | -$178.16 |
+| Achieved win/loss ratio | 0.7460199 |
+| Max drawdown | 22.63547866% |
+| Net return | +5.42324888% |
+| Commission paid | $5,327.26 |
+| Largest loss | -$600.12 |
+
+## THE VERDICT — DISCARDED. NOT A LITERAL KILL-RULE FAILURE, BUT THE SAME FAILURE MODE AS ATTACK 33 IN EVERYTHING THAT MATTERS.
+
+**PF is nominally above 1.0** (1.01365036, +0.0137 over breakeven) — this is not a kill-rule discard by the
+letter of the rule. But **526 trades is well outside the board's own settled workable frequency band of
+roughly 60-350 per half** (Attack 33: 757, discarded on cost; Attack 37: 322/196, both halves profitable).
+**Commission paid ($5,327.26) is ~9.8x the net profit ($542.32)** — the identical cost-dominated signature
+that discarded Attack 33 (commission $6,460.27 against a $217.09 net LOSS, 757 trades). The only reason
+this result is nominally positive rather than nominally negative is that a few more winners than a coin-
+flip split happened to land; at this trade count and cost ratio, a PF margin of 0.0137 is not distinguishable
+from noise. **`ratioAvgWinLoss` 0.746 with a 57.6% win rate is HARD LESSON 53's inverted-payoff shape**
+(avg loser -$178.16 exceeds avg winner $132.91) — the sixth instance of that pattern on this board. Max
+drawdown 22.64% is also roughly double the current champion stack's (Attack 83: 11.08%/10.76%).
+
+**None of the three drawdown categories fit cleanly.** This is not concentrated (largest loss -$600.12 is
+only ~3.4x the avg loser -$178.16), and it is not quite "bleed on a positive edge" either, because the edge
+itself is barely distinguishable from zero before cost. Call it what Attack 33 already was: **a mechanism
+whose raw signal fires too often for this instrument's fee structure to tolerate**, regardless of which
+side of breakeven the coin lands on.
+
+## WHY NO H2 RUN
+
+The credits band (496 credits, the 250-500 tier) authorized the pre-2024 half only this cycle, so no H2 run
+was available regardless of outcome. Independent of that cap: this result would not have justified spending
+a future full-pair allowance on H2 as-is. The mechanism needs a slower SuperTrend setting (larger ATR
+length and/or factor) to land inside the workable frequency band before a second half is worth running —
+that is a retune of the bare mechanism, not owed to this result, and not attempted here (LESSON 49: a
+change motivated by looking at where this run struggled would be fitted to this exact half).
+
+## QUEUE
+
+1. **If the SuperTrend family is revisited, retune the ATR length/factor toward a slower flip cadence
+   first** (targeting ~60-350 H1 trades) and re-run BOTH halves as a fresh bare-mechanism pair — not a
+   filter stack on this result, since this result was never validated as an edge worth stacking on.
+2. **Attack 83 remains the strongest both-halves candidate on this board** (PF 1.61044869/1.15365198 on
+   88/79 trades), unaffected by this cycle.
+3. **Attack 46 (long) remains a candidate alongside Attack 83**, unaffected by this cycle.
+4. **Untried indicator families remain, minus SuperTrend**: `ta.sar`, `ta.cci`, `ta.stoch`, `ta.macd`,
+   `ta.cog`, `ta.tsi`, `ta.wpr`, `ta.iii`, `ta.wad`, `ta.wvad`, `ta.linreg`, `ta.percentrank` — the next
+   genuinely-new-mechanism cycle should pick one of these, or the retuned SuperTrend variant above.
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if that
+   family is revisited before another fresh mechanism.
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+7. **This session cannot continue the new-engine cross-sectional track (Attacks 84-86)** — no
+   `backtest-lab`/`sweep_backtest` tool is available here, unaffected by this cycle.
