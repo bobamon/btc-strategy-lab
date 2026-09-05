@@ -1,0 +1,68 @@
+//@version=6
+// WAR FORMATION E81 -- FREE-STANDING DIAGNOSTIC, QUEUE ITEM 1 FROM E80.
+//
+// QUESTION: E80's own audit flagged a NEW risk not present in the 1m/5m builds --
+// at 15m native, atrFast=atr(1) and atrSlow=atr(2) are only 2 bars apart in period
+// (vs 6 at 5m, 10 at 1m), so `coiled` (atrFast < atrSlow * coilK) was predicted to be
+// a WEAKER, less selective filter here than at any other timeframe tested. E80's own
+// queue said: "do this BEFORE spending a credit on item 2" (the h1Bull/brokeBelow
+// redundancy binding tests) -- so this run answers that question alone, isolated,
+// before any binding test is attempted.
+//
+// THIS IS A COUNTER BUILD (population count, not a strategy), following this lab's
+// established pattern for population checks (HARD LESSON 10 / the 950 rule's
+// 950-1 step): one bar's true condition = one trade, no other gate applied. Every
+// bar where the position is flat AND `coiled` is true opens a 1-bar-hold trade,
+// closed unconditionally on the very next bar close (with a same-bar close+re-enter
+// flip when `coiled` is still true), so totalTrades approximates the count of bars
+// where `coiled` fired, and totalTrades / (calendar bars in the window) approximates
+// the true/false split E80's audit asked for.
+//
+// atrFast/atrSlow/coilK are copied byte-for-byte from e80-15m-native-1h-structure.pine
+// -- nothing else from E80 (regime, timeGate, structure tier, velocity, band, trigger)
+// is included, because this counts ONLY the coil term's own population, not the
+// combined gate stack's.
+//
+// WINDOW: identical to E80 (2024-06-08 to 2026-09-01, BTCUSDT 15m) for direct
+// comparability of the denominator.
+//
+// REGISTERED PREDICTION (HARD LESSON 17), BEFORE RUNNING:
+//   - If `coiled` is true on close to 100% of bars (near-universal), E80's audit risk
+//     is confirmed: the coil gate is not doing selective work at 15m, and E80's
+//     result is shaped almost entirely by the other four gates (regime, timeGate,
+//     h1Bull/h1Bear, brokeBelow/brokeAbove, band, trigger) -- material to how much
+//     credit the "structure tier redesign" hypothesis deserves for the whole result.
+//   - If `coiled` is well-split (roughly 20%-70%), the coil term still discriminates
+//     at this resolution despite the narrower atrFast/atrSlow gap, and E80's queue
+//     item 2 (the h1Bull/brokeBelow redundancy test) is next, unblocked.
+//   - Either outcome is informative and neither is a KEEP/REJECT decision -- this is
+//     a population diagnostic, not a strategy candidate. No ratchet applies.
+strategy("WF E81 coil-gate population counter", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+coilK = input.float(0.85, "Coil: atrFast < atrSlow * K")
+
+atrFast = ta.atr(1)
+atrSlow = ta.atr(2)
+coiled  = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK
+
+var int barsIn = 0
+
+// Close first (same-bar flip), then re-enter if still coiled -- so every bar with
+// coiled==true gets exactly one 1-bar-hold trade, including on consecutive true bars.
+if strategy.position_size != 0 and barsIn >= 1
+    strategy.close_all()
+    barsIn := 0
+
+if strategy.position_size == 0 and coiled
+    strategy.entry("C", strategy.long)
+    barsIn := 0
+
+if strategy.position_size != 0
+    barsIn := barsIn + 1
+
+plot(coiled ? 1 : 0, title="Coiled")

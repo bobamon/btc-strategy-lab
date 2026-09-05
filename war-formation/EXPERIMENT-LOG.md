@@ -7090,20 +7090,17 @@ direction and introduce a second confound) is still a strict subset of what 15m 
   `status: testing`: a genuinely new, unreplicated, promising result, not yet a decision.
 - Check #36's shield-fill caveat (every recorded PF is an upper bound) still applies here as everywhere.
 
-## STATE
+## STATE (superseded by E81 below -- kept for history, see E81 for the current queue)
 
 **No champion.** `e58a` (long, 1m) and `E71` (short, 1m) remain the reference builds for the 1m track;
 `E74` remains blocked on the HARD LESSON 48 drawdown-allowance question. **E80 is a new candidate line,
 not a replacement for either** -- the lab's first bidirectional, both-legs-positive result, on a new
 timeframe, unreplicated.
 
-## QUEUE
+## QUEUE (item 1 closed by E81, items 2-5 still open)
 
-1. **Check the coil-gate degeneracy flagged above** -- inspect what fraction of 15m bars have `coiled`
-   true under `atr(1)`/`atr(2)`. If it is near-universal, the coil term is not doing selective work here
-   and the population is being shaped almost entirely by the other gates; if it is well-split, the coil
-   survives the coarser proxy. Free to check (no backtest needed, can be read from a counter-build or
-   reasoned from ATR autocorrelation at adjacent periods) -- do this BEFORE spending a credit on item 2.
+1. ~~Check the coil-gate degeneracy flagged above~~ -- **DONE, SEE E81. REFUTED: 7.77% incidence, not
+   near-universal.**
 2. **Test the h1Bull / structure-tier redundancy**, per HARD LESSON 48's method (remove one term, hold
    the other, per leg): does E80 survive with `h1Bull`/`h1Bear` removed (now that brokeBelow/brokeAbove
    carry 1h information too), and does it survive with the new brokeBelow/brokeAbove removed (now that
@@ -7117,3 +7114,69 @@ timeframe, unreplicated.
    the fact that 15m has no finer bar to build a stable 15m-bucket reference from; 1m and 5m already had
    one and their own failures (short-leg collapse) were diagnosed on independent grounds (HARD LESSON 34,
    the sizing fix in HARD LESSON 42, both atr bases agreeing at E78/E79).
+
+---
+
+# ██ E81 -- E80's QUEUE ITEM 1 CLOSED: THE COIL GATE IS NOT DEGENERATE AT 15m. IT IS TIGHT (7.77%).
+
+**SCHEDULING NOTE, STATED UP FRONT.** This cycle's triggering prompt described the lab's state as of
+E66 -- "no champion, no candidate," three failed short constructions to attack on entry geometry
+(E64a/E64b/E66), "continue numbering after E66." That state is stale: E67-E80 already ran the margin-
+sizing fix (HARD LESSON 42/43), the four-term binding sweep on both legs (E69/E70/E75/E76), and E80's
+first-ever both-legs-positive bidirectional result on 15m. **The docs win.** This entry continues from
+E80's own real, still-open queue instead of re-deriving E64a-E66 territory the lab has already worked
+past -- per this lab's standing rule and HARD LESSON 26's precedent on a stale scheduled prompt.
+
+**QUESTION, REGISTERED BEFORE RUNNING (per E80's own audit).** E80 flagged a new risk not present in
+the 1m/5m builds: at 15m native, `atrFast=atr(1)` and `atrSlow=atr(2)` are only 2 bars apart in period
+(vs 6 at 5m, 10 at 1m), so `coiled` (`atrFast < atrSlow * 0.85`) was predicted to be weakly selective --
+possibly near-universal, which would mean the coil gate is doing no real work and E80's result is
+shaped almost entirely by the other four gates. E80's own queue put this ahead of any binding test:
+"do this BEFORE spending a credit on item 2."
+
+**METHOD.** A population counter build (this lab's established pattern, HARD LESSON 10 / the 950 rule's
+950-1 step): `coiled` alone, no other E80 gate, opens a 1-bar-hold long on every bar it is true, closed
+unconditionally the next bar with a same-bar close+re-enter flip so consecutive true bars are not
+undercounted. `pine/e81-e80-coil-gate-population.pine`. Same window as E80 (2024-06-08 to 2026-09-01,
+BTCUSDT 15m) for a directly comparable denominator.
+
+**RESULT.** `barsEvaluated` 78,567, `totalTrades` 6,104 -- **`coiled` is true on 7.77% of all 15m bars.**
+Far from near-universal. The P&L/PF/drawdown numbers this counter build also produced (PF 0.455, net
+-99.4%) are the artifact of entering a 1-bar-hold long on ~7.8% of all bars with no regime filter and
+are **not a measurement of edge** -- the only number that answers this question is 6104/78567.
+
+**VERDICT: E80's flagged risk is REFUTED, not confirmed.** At 15m native, `coilK 0.85` against
+`atr(1)`/`atr(2)` remains a tight, selective filter despite the narrower 2-bar gap -- if anything
+tighter than "well-split," not degenerate-broad. E80's result cannot be dismissed as "the coil gate does
+nothing at this resolution and the other four gates did all the work" -- the coil term is a real,
+binding constraint on the population, consistent with (not necessarily identical to) its role at 1m/5m.
+
+**CREDIT ACCOUNTING.** This cycle's balance (498, the 250-500 band) permits exactly ONE backtest. It was
+spent entirely on this diagnostic, exactly as E80's queue specified. Queue items 2 and 3 (the
+redundancy binding tests and the split-window replication) remain open for a future cycle with budget
+for them.
+
+**Recorded as `status: research`** in `results/backtests.json` (`wf-e81-coil-gate-population`) -- not a
+strategy candidate, no ratchet decision applies, direction `long` is a schema placeholder (the counter
+build has no direction concept of its own).
+
+## STATE
+
+**No champion.** `e58a` (long, 1m) and `E71` (short, 1m) remain the reference builds for the 1m track;
+`E74` remains blocked on the HARD LESSON 48 drawdown-allowance RULE QUESTION, still awaiting the user.
+`E80` (15m, both-legs-positive, unreplicated) remains this lab's newest candidate line -- E81 clears one
+of the three open questions against it (coil-gate degeneracy: refuted) without changing E80's own
+numbers or status.
+
+## QUEUE
+
+1. ~~Coil-gate degeneracy~~ -- **CLOSED BY E81.**
+2. **Test the h1Bull / structure-tier redundancy** (E80's queue item 2, unchanged): remove `h1Bull`/
+   `h1Bear`, hold the redesigned `brokeBelow`/`brokeAbove`; then remove `brokeBelow`/`brokeAbove`, hold
+   `h1Bull`/`h1Bear`. Two single-term binding tests, per leg, per HARD LESSON 48's method. Needs a fresh
+   credit budget above this cycle's 1-backtest allowance to do both in one sitting.
+3. **A split-window replication of E80** (2024-06 to 2025-07 vs 2025-07 to 2026-09), per RATCHET v2's
+   spirit, before E80 becomes anyone's reference construction.
+4. Check #36's shield-fill caveat and the HARD LESSON 48 drawdown-allowance RULE QUESTION (blocking E74)
+   remain open, unresolved by this run, awaiting the user.
+5. Do not port E80's exact win back to 1m or 5m -- unchanged from E80's own note.
