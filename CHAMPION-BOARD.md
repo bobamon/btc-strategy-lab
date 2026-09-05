@@ -6836,3 +6836,142 @@ is now 0-for-9.
    near-guarantee — the next candidate should still be argued from the mechanism, not chosen by shape alone.
 
 ---
+
+# ATTACK 81 — VOLUME-CLIMAX CAPITULATION REVERSAL LONG. A GENUINELY NEW MECHANISM PER ATTACK 80'S OWN QUEUE ITEM 7, APPLYING ATTACK 65'S OWN CONSTRUCTION FIX. DISCARDED ON THE KILL RULE.
+
+The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") more than
+eighty attacks stale, instructing "continue numbering after 37." **The docs override it, again**, per the
+prompt's own standing instruction: Attack 41 closed Attack 37 on cost, Attack 43 closed the whole
+sweep-reversal family, Attack 71 closed the Attack 66/68 filter stack at two terms, and Attacks 72–80 are
+nine consecutive bare-mechanism failures since Attack 68. This cycle continues numbering after Attack 80,
+not Attack 37.
+
+## THE CLAIM
+
+A single bar whose volume spikes to an extreme multiple (2.5x) of its own trailing 20-bar average, printed
+at a fresh 10-bar low, marks capitulation-driven selling exhausting the available supply on that leg down;
+a **modest** same-bar close back off the low confirms buyers stepping back in before the move can travel
+far, and price tends to continue reverting toward the level it held before this specific leg down began.
+
+**New input class.** Every prior volume-based construction on this board weighted or accumulated volume
+against price direction: OBV (66–71) is an unbounded cumulative running sum with memory of the whole
+series; MFI (79) is a bounded 0–100 oscillator weighting typical-price moves by volume; NVI (76) only
+updates on LOW-volume days, the opposite regime. None reads raw volume MAGNITUDE on its own bar against its
+own recent average, with no price-direction weighting at all. The single-bar shock+rejection shape is
+borrowed from Attack 65 (there: price-range magnitude vs. ATR; here: volume magnitude) — an honest
+recombination, flagged as such, not a wholly unprecedented data source.
+
+**The construction fix this build applies, named explicitly.** Attack 65's own queue (item 1) diagnosed why
+five prior builds landed in HARD LESSON 53's majority-win/poor-payoff shape: requiring the signal bar to
+have already recovered **half** its own range before entry is granted mechanically caps reward while risk
+sits at the bar's full, un-recovered extreme. Attack 65's queue named the fix, if this shape were revisited:
+a **weaker** rejection fraction, entering nearer the extreme with more room to target. This build is the
+first to apply that fix — `rejectFrac` 0.15, not 0.50 — and additionally targets the highest CLOSE over the
+same 10-bar lookback (the level held before this leg down started) rather than just the immediately
+preceding bar's close, for more room still. Pine:
+`strategies/pine/attack81-volume-climax-capitulation-reversal-long.pine`.
+
+## AUDIT (LONG ONLY, one line per leg)
+
+R ≥ 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rLong = close - low`, never clamped. Stop beyond STRUCTURE
+(LESSON 5) — `slPx = low`, the confirmed fresh-10-bar low. Each leg separately (LESSON 6) — LONG ONLY;
+fading upside volume climaxes at fresh highs is untested, and per Attack 65's own finding a mirrored short
+is not assumed to behave symmetrically. BINDING (E17) — `volSpike` AND `freshLow` AND `rejection` AND
+`rBig` AND `targetOk` all necessarily bind (297 trades on 85,655 bars). REDUNDANCY (E14) — `minRpct`
+constrains the STOP distance (price-only); `preLegHigh` (the target) is an independent quantity, the
+market's own pre-decline level; `rejectFrac` constrains the SHAPE of the close within the bar's own range,
+independent of both magnitude terms (the same redundancy answer Attack 65 already gave for this clause);
+`volSpike` is a fourth, wholly independent quantity on a different series entirely (volume magnitude, not
+price). LATCH IN SEQUENCE (LESSON 8) — not applicable, single-bar construction identical in shape to
+Attacks 44/45/46/65: every referenced quantity is drawn from already-closed bars as of the signal bar's own
+close. CASCADE (HARD LESSON 42/43) — LONG at 100% equity, single entry id "L"; `cascadeRatio` 1 /
+`maxCascadeDepth` 1, confirmed (297 total rows, 297 unique entries).
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4)
+
+Two independent magnitude gates multiply down frequency, but crypto volume is fat-tailed enough that 2.5x
+spikes are not rare in isolation. Anchored loosely to Attack 65 (103 trades from a stricter 2x-ATR gate)
+and Attack 66's pivot base rates. Registered with LOW-MODERATE confidence, no counter build affordable:
+**40-280 trades per half.**
+
+## H1 (NEVER-TUNED HALF, 2022-01-01 → 2024-06-08)
+
+| | **Attack 81a (H1)** |
+|---|---|
+| Profit factor | **0.86534793** |
+| Trades | 297 |
+| Win rate | 46.80134680% (a minority) |
+| Avg winner | $106.45 |
+| Avg loser | -$108.22 |
+| Achieved win/loss ratio | 0.9836329 |
+| Max drawdown | 44.46262178% |
+| Net return | -23.02478582% |
+| Commission paid | $2,202.35 |
+| Largest loss | -$522.82 |
+
+**Frequency estimate scored: pre-registered 40-280, actual 297** — just above the pre-registered band, but
+still inside the lab's settled 60-350 workable window. The frequency model was close to right; the
+mechanism failed on edge.
+
+## KILL RULE APPLIED. ONE CREDIT SPENT THIS CYCLE (522 BALANCE → 521). H2 NOT RUN.
+
+**Not a close call in direction, but notable in shape.** PF 0.86534793 is below 1.0 on the never-tuned
+half. Per this board's standing kill-rule precedent, this is discarded outright: no filter stack, no
+rescue, H2 not run, second credit not spent.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY, AND A NOTE ON THE CONSTRUCTION FIX
+
+PF < 1.0, so this is **category 2, bleed on a negative edge** — largest loss (-$522.82) is ~4.8x avg loser
+(-$108.22), no strong concentration signature, moot for the verdict since PF is already below 1.0.
+
+**The rejectFrac fix worked, on its own narrow terms, and it still wasn't enough.** Win rate 46.80% is a
+**minority**, and achieved `ratioAvgWinLoss` is 0.9836 — close to fair, near 1:1. This is explicitly **NOT**
+another instance of HARD LESSON 53's inverted-payoff shape (that shape requires a *majority* win rate that
+still loses; here the win rate is already sub-50%). Weakening the rejection fraction from 0.50 to 0.15 and
+targeting a further-back level did produce a near-fair payoff, unlike the five 0.50-fraction builds that
+manufactured payoffs well below what their win rate implied — so Attack 65's queue-item-1 diagnosis holds
+up under a direct test on a new input class. But a near-coin-flip entry with a slightly sub-50% win rate
+and a slightly sub-1.0 payoff is still, simply, a small negative edge: fixing the exit geometry cannot
+rescue an entry that isn't finding real directional edge often enough in the first place.
+
+## THE VERDICT — DISCARDED ON THE KILL RULE
+
+Raw volume magnitude, gated to a fresh local low with a lightly-recovered close, did not separate genuine
+capitulation from an ordinary high-volume down bar on this instrument at 15m: entries win slightly under
+half the time at close to fair odds, which nets a small loss after commission. This is a clean
+falsification of THIS specific construction (2.5x/20-bar volume spike, 10-bar fresh low, 0.15 rejection
+fraction, pre-leg-high target) — a stricter spike multiplier, a longer fresh-low lookback, or volume-climax
+as a REGIME filter layered onto an already-surviving base (rather than a standalone trigger) remains
+untested, but per HARD LESSON 4/45 that is a re-derivation of the mechanism, not a rescue filter on this
+exact build.
+
+## THIS BOARD NOW HAS TEN CONSECUTIVE BARE-MECHANISM FAILURES
+
+Attacks 72–81, ten distinct mechanisms, ten failures, since Attack 68's magnitude-floor filter term was the
+last thing this board kept. This cycle is the first of the ten to directly test and confirm a
+previously-only-theorized fix (Attack 65's queue-item-1 rejection-fraction diagnosis) rather than propose an
+untested new shape cold — and the fix held up (near-fair payoff achieved) while the underlying edge still
+didn't clear zero. That is a small positive: this board's own diagnostic reasoning about *why* prior builds
+failed is holding up when re-tested, even as fresh mechanisms keep failing on entry quality itself.
+
+## QUEUE
+
+1. **Do not retry this exact construction with a different `spikeMult`/`lenLow` alone.** H1 lands just
+   above the pre-registered band on a well-powered sample (297 trades); the failure is a plain small
+   negative edge on a near-fair payoff, not a threshold or sample-size problem.
+2. **Attack 68 (Attack 66 + OBV divergence-magnitude floor) remains the board's strongest both-halves
+   candidate** — PF 1.56474476/1.13127036 on 89/80 trades — unaffected by this cycle.
+3. **Attack 46 (long) remains a candidate alongside Attack 68**, unaffected by this cycle.
+4. **The out-of-sample test for Attack 46 still ranks first among long-side work not yet startable** under
+   BTCUSDT-only — unchanged.
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if that
+   family is revisited before another fresh mechanism.
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+7. **The next cycle proposes ONE further genuinely new mechanism**, distinct from the VWAP family and from
+   every rejected strategy on the board (Attacks 33–65, 67/69/70/71, 72–80, and now 81). Given the board's
+   own running tally is now ten bare-mechanism failures since Attack 68, the next cycle should weigh
+   whether to keep proposing fresh mechanisms cold versus attempting a volume-climax REGIME filter (not
+   trigger) layered onto Attack 68's already-surviving base — a genuinely different use of this cycle's
+   input class rather than a repeat of its failed standalone-trigger form.
+
+---
