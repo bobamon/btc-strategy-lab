@@ -5866,3 +5866,116 @@ condition warranted went out at cycle check #4, and nothing has changed in the t
 since to justify a second one. The recommendation is unchanged: answer the two open rule questions in
 `STRATEGY-LEDGER.md` (HARD LESSON 48 / RULE QUESTION FOR THE USER), supply new 1m data, hand this lab
 a new queue item, or pause the schedule — none of which this session can do on its own authority.
+
+---
+
+# ██ CYCLE CHECK #28, 2026-09-05 (zero credits) — NOT A NO-OP. THE BENCHMARK GAP, MEASURED FOR THE FIRST TIME IN THIS LAB'S HISTORY.
+
+The twenty-seven checks before this one were no-ops for a stated reason: a stale pre-E67 prompt, two
+unanswered rule questions, and no new queue item. **The prompt has been replaced** (a new rotating
+four-workstream loop, 2026-09-05) and, more importantly, the index-sweep workstream minted **HARD
+LESSON 54** the same day, which hands this lab a question it has never asked and can answer for free.
+
+Credits: **524** (`get_credits` called directly). **Zero spent this check.** No new War Formation
+backtest was run and no War Formation code was executed anywhere.
+
+## WHAT WAS MEASURED, AND WHY IT IS NOT A PORT
+
+HARD LESSON 54 established that **no record anywhere in this project carries a buy & hold baseline** —
+trader.dev does not report one. Every War Formation result, including `e58a`, has therefore been read
+without ever knowing what BTC itself did over the same dates.
+
+That baseline is a **fact about the market**, not a property of the strategy. Measuring it does not
+require running War Formation on another engine and **none was run**: the call was `buy_hold` on
+BTC/USDT, which holds one position from the first bar to the last. **The standing rule that War
+Formation is not to be ported to `backtest-lab` is intact** — no cascade, no shield, no `var` counter,
+no Oracle rule touched that engine. Only the instrument's own return was read.
+
+`runId bt_8c81f9456e` · `pinned: true` · `binance_perp_archive` · 1m · 198,721 bars ·
+**2025-12-16 → 2026-05-03**, which is `e58a`'s recorded window to the day.
+
+## THE BENCHMARK
+
+| | value |
+|---|---|
+| BTC buy & hold, e58a's window | **-8.871454%** |
+| Same, net of fees and funding if actually held | -9.467173% |
+| Buy & hold max drawdown | **-39.06665%** |
+| Entry price 2025-12-16 | 86,346.1 |
+| Exit price 2026-05-03 | 78,666.9 |
+
+**`e58a`'s window was a falling market.** BTC lost roughly 8.9% of its value across it, with a 39%
+peak-to-trough drawdown along the way. Nothing in this lab's 5,868-line log records that, because
+until today there was no way to see it.
+
+## FINDING 1 — e58a's LONG LEG BEAT THE MARKET BY ~16 POINTS, WHILE HOLDING A QUARTER OF THE DRAWDOWN
+
+| | e58a (long) | BTC buy & hold | gap |
+|---|---|---|---|
+| Net return | **+7.47495942%** | -8.871454% | **+16.35 pp** |
+| Max drawdown | **9.82519609%** | 39.06665% | **4.0x smaller** |
+
+This is the **first favourable benchmark comparison in the project's history**, and it is the exact
+opposite of what the index sweep found the same day (where every cell lost to buy & hold, and the
+apparent instrument ranking dissolved into drift).
+
+It also answers HARD LESSON 54's own confound in `e58a`'s favour rather than against it. The confound
+is that a strategy can appear to work when it is merely riding drift. **The drift here is negative.**
+A long-only build returned +7.47% in a market that fell 8.87%, so its return cannot be drift-riding;
+whatever produced it, it was not the market going up.
+
+The exposure caveat also runs the favourable way here. HARD LESSON 54 warns against comparing a
+low-exposure strategy to a 100%-exposed benchmark on return alone — but that warning is about a
+low-exposure strategy being unfairly *penalised*. `e58a` is in the market rarely and still beat a
+fully-exposed benchmark, which makes the gap harder to explain away, not easier.
+
+## FINDING 2 — THE SHORT LEG IS WORSE THAN ITS PROFIT FACTOR SUGGESTS, AND THIS IS THE SHARPER RESULT
+
+`E71` (short, 25% equity, the declared-deviation build) covers the **identical window**:
+net **-0.20431733%**, PF **0.97315988**, 33 trades, DD 2.66826642%.
+
+PF 0.973 reads as "very nearly breakeven, nearly there". Against the benchmark it reads differently:
+**the short leg lost money in a market that fell 8.87%.** A short-biased build had the direction of
+the entire window in its favour and still finished negative. That is a considerably worse verdict than
+0.973 conveys on its own, and it was invisible without the baseline.
+
+This does not contradict HARD LESSON 34/42/43 (the margin ceiling and the sizing fix) — E71 already
+carries that fix. It sharpens what remains: after the harness problem was corrected, the short leg's
+residual performance is not marginal, it is **negative in its own best-case regime**.
+
+## THE CAVEATS, STATED RATHER THAN BURIED
+
+1. **This is a cross-source comparison and it must be labelled one.** `e58a`'s +7.475% is a trader.dev
+   result; the benchmark is `binance_perp_archive` via `backtest-lab`. Both are BTCUSDT over the same
+   dates. A buy & hold return is a far more source-robust quantity than a strategy result — it depends
+   only on two prices — but it is not zero-risk, and the two numbers were produced by different
+   pipelines. **The 16.35pp gap should be read as approximately 16 points, not to the basis point.**
+2. **Nothing here is a split test.** Per HARD LESSON 22 an in-sample number is not a finding, and
+   `e58a` still has no out-of-sample window — 4.5 months of 1m data is all this instrument has. The
+   benchmark comparison adds a *dimension* of evidence, not a *window* of it.
+3. **e58a is not promoted.** It remains research, not champion and not candidate. One favourable
+   benchmark reading on 36 trades in a single regime does not clear a bar that a split test exists to
+   test. The occupancy confound of HARD LESSON 24/28/29 is also untouched by this check.
+4. **One regime, and a distinctive one.** A falling market is precisely where a long-only build's
+   outperformance is most interesting and least representative. This says nothing about how `e58a`
+   behaves in a rising market, and there is no data to find out.
+
+## STATE
+
+**Unchanged in the ledger sense**: no champion, no candidate. References remain **e58a** (long) and
+**E71** (short). But the state is no longer *uninformative* — for the first time both references have
+a benchmark, and the two legs now point in clearly opposite directions.
+
+## QUEUE
+
+1. **The benchmark gap is now the strongest single argument for spending credits on this lab.** If any
+   War Formation experiment is worth a credit, it is one that tests whether the long leg's
+   market-independence survives a change — not another entry-gate sweep.
+2. **Re-read E71's standing as a candidate.** A short leg that is negative in a falling market may
+   warrant demotion below "reference" rather than continued parameter work. This is a judgement call
+   with a rule question attached and is **not** being made unilaterally here.
+3. **Apply the same free check to every other reference in this project.** 3M Elite's v37 champion has
+   never been benchmarked either, and the same method costs nothing. That belongs to the 3M tick, not
+   this one, and must not be run from here.
+4. The two open rule questions in `STRATEGY-LEDGER.md` (HARD LESSON 48 / RULE QUESTION FOR THE USER)
+   remain unanswered and still gate the E69b and E74 decisions.
