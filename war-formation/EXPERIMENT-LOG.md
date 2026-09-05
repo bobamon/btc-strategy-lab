@@ -6414,3 +6414,106 @@ proportionality question, now the sole blocker on the only live short-leg improv
 equity-fraction framing for a combined bidirectional script if that is wanted, supply new 1m data, hand
 this lab a new queue item, or pause the schedule — none of which this session can do on its own
 authority.
+
+---
+
+# ██ CYCLE CHECK #36, 2026-09-05 (zero credits) — THE SAMPLE CEILING IS A HARD DATA LIMIT, NOT A CHOICE. AND THE SHIELD IS MODELLED OPTIMISTICALLY.
+
+Credits: **517**, zero spent. No backtest run. No War Formation code near `backtest-lab`.
+
+Check #35 (the scheduled worker) decomposed E71's short leg by market phase and closed check #34's
+open gap. That work is not repeated here. This check asks two questions neither had asked.
+
+---
+
+## FINDING 1 — THE 4.5-MONTH WINDOW IS A HARD COVERAGE LIMIT. THIS LAB HAS BEEN CHASING A VALIDATION IT CANNOT OBTAIN.
+
+Every War Formation experiment runs on ~4.5 months of 1m data, and the reference file records the
+consequence as a known ceiling: *"~3 days per trade across 4.5 months of 1m data caps this family near
+20-30 trades. No configuration here is validated and none can be on this window."*
+
+**What was never checked is whether that window is a limit or a choice.** Checked now, free:
+
+`plan_backtest_window(BTCUSDT, 1m, from 2020-01-01, to 2026-09-01)` →
+
+| | |
+|---|---|
+| Applied from | **2025-12-16 00:22** — `clamped_to_clickhouse_first_bar` |
+| Applied to | **2026-05-03 21:41** — `clamped_to_clickhouse_last_bar` |
+| Coverage | **199,802 bars**, and that is the entire archive |
+
+**A request for six and a half years returned four and a half months.** The engine's 1m coverage for
+BTCUSDT *begins* on 2025-12-16. There is no earlier 1m data to ask for.
+
+### WHY THIS MATTERS MORE THAN ANY EXPERIMENT ON THE BOARD
+
+The A.L.C.M. holds roughly three days per trade. Against 199,802 bars that is a **structural ceiling
+near 20–36 trades**, and RATCHET v2 clause 3 requires **30**. So:
+
+- **No War Formation configuration can ever comfortably clear the sample floor on this engine.** Not
+  with a better filter, not with a better entry, not with more cycles. The constraint is the archive.
+- Sixty-odd experiments have been run against a validation standard **this data cannot satisfy**.
+  E43's 39 trades and `e58a`'s 36 are at the ceiling, not below it.
+- The honest framing for every future War Formation result is therefore **"unbankable by
+  construction"**, in the same category as Attack 86's cross-sectional cells — real measurements that
+  cannot clear a floor for reasons that have nothing to do with the strategy.
+
+**This is not a reason to stop.** It is a reason to stop expecting a verdict that the data cannot
+deliver, and to say so on every result rather than implying the next experiment might settle it.
+
+### WHAT WOULD ACTUALLY CHANGE THIS
+A 1m archive with years of history. `backtest-lab` has exactly that — 1m back to 2017 — and **War
+Formation must not be ported to it**, because its stateless expressions cannot hold the 6h/1h/15m
+cascade counters or the fixed-dollar shield. That standing rule is correct and is not being revisited.
+The consequence is simply that **the engine with the state has no data, and the engine with the data
+has no state.** That is the real position, and it should be recorded as such rather than rediscovered
+every twenty checks.
+
+---
+
+## FINDING 2 — EVERY RECORDED RESULT ASSUMES THE SHIELD FILLS CLEANLY. THE LITERATURE SAYS THAT IS THE ONE THING LIQUIDATION DOES NOT DO.
+
+The A.L.C.M. specification is explicit and is the user's own correction: **there is no stop loss.** The
+exit is a fixed-dollar gap to liquidation; the position ends at target or at liquidation, nothing else.
+
+Every backtest implements that as `strategy.exit(..., stop=slPx)` — a stop order at the shield price,
+which a backtester fills **at that price**. Research on leveraged futures says a real liquidation does
+not behave that way:
+
+> "Order books can **thin out during fast-moving markets**, and liquidation orders may **execute at
+> unfavourable prices**. This causes additional losses beyond your margin, known as **negative
+> equity**."
+
+> "Relying solely on a fixed liquidation distance without a stop loss leaves you vulnerable."
+
+**So every War Formation loss on record is the best case.** The modelled loss is exactly `shieldUsd`;
+the realised loss in a fast move would be that plus slippage, and in the tail, more than the margin
+posted. The direction of the error is known — always against the strategy, never for it — and its size
+is unmeasured.
+
+**This does not invalidate any recorded number.** It means every recorded profit factor is an **upper
+bound**, and the gap widens precisely in the violent conditions the strategy is designed to trade. A
+build at PF 1.14 (v7) or 0.92 (E43) has no margin to absorb that; a build at 1.69 might.
+
+**It is also not a reason to add a stop.** The user's specification is explicit and stands. The correct
+response is to record the caveat on the results, not to change the strategy.
+
+---
+
+## STATE
+
+Unchanged: no champion, no candidate. `e58a` remains a reference, now described as a damped long
+(check #34) with a market-aligned short mirror (check #35). HARD LESSON 48 and the drawdown-allowance
+RULE QUESTION remain open and unanswered.
+
+## QUEUE
+
+1. **Stop writing "no configuration here is validated and none can be on this window" as if the window
+   might change.** It cannot. Finding 1 makes it permanent on this engine; say "unbankable by
+   construction" and move on.
+2. **Add the shield-fill caveat to any result that is ever quoted outside this log.** Every profit
+   factor is an upper bound.
+3. **The 0.82-vs-0.13 upside participation anomaly from check #34 is still the only concrete
+   hypothesis worth a credit** — and Finding 1 explains why it cannot be resolved: 7 and 15 trades per
+   phase is what 199,802 bars allows.
+4. Do not port to `backtest-lab` to chase the data. The stateless limit is real and the rule stands.
