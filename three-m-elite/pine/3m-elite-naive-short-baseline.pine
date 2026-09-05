@@ -1,0 +1,38 @@
+//@version=6
+// 3M ELITE -- NAIVE SHORT BASELINE (diagnostic, NOT a 3M leg, not a promotion candidate)
+//
+// WHY THIS EXISTS: cycle check #30 (SYSTEM.md) measured a raw buy & hold LONG baseline for the
+// champion's own window on a different engine (binance_perp_archive, zero trader.dev credits)
+// because trader.dev does not report a buy & hold figure on its own -- and flagged as queued rather
+// than guessed that "a short leg needs the inverse baseline, which is a different calculation."
+// The entry immediately before this one in SYSTEM.md records TWO trader.dev credits already spent
+// chasing exactly this on `bar_index == 0` as the single-entry gate, both returning ZERO TRADES --
+// bar_index does not appear to reset to 0 at a widened backtest window's first bar on this engine.
+// That entry flagged `barstate.isfirst` as the untested fix. This build uses it.
+//
+// THIS IS NOT A 3M STRATEGY LEG. No zone, no engulf, no bias gate, no stop, no target -- it is the
+// short-side mirror of "sell BTC and do nothing," on the SAME engine v60/v65 report their own numbers
+// on, so it is directly comparable to them without a cross-source caveat (unlike check #30's
+// binance_perp_archive long comparison). The usual pre-run audit (R floor, structural stop, BINDING,
+// REDUNDANCY, latch-in-sequence) does not apply for the same reason it did not apply to check #30's
+// long-side check: there is no selection mechanism to audit, and no invented geometry per LESSON 6 --
+// this has no geometry at all. SL/TP fixed-at-entry (the pre-run audit's usual requirement) is
+// deliberately absent: a buy & hold-style baseline is defined by NOT exiting, the same convention
+// check #30 used for the long side.
+//
+// PRE-REGISTERED READING (LESSON 17): whatever PF/return/DD this returns is a MARKET FACT about
+// short-and-hold BTC over this window on trader.dev's own engine, not a strategy result. It exists to
+// give v60's full-coverage PF 1.01300244 (64 trades, near-breakeven) and v65's PF 1.54398585 (4
+// trades) a same-engine reference point for how hard it is to make money short-and-hold over this
+// window at all -- if naive short-and-hold is deeply negative (expected, since price rose ~70% over
+// this window per check #30), that context is what makes v60's near-breakeven PF read as a real,
+// if weak, positive selectivity effect rather than nothing.
+strategy("3M ELITE naive short baseline (barstate.isfirst)", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+if barstate.isfirst
+    strategy.entry("S0", strategy.short)

@@ -1515,9 +1515,50 @@ const DATA = [
       "maxCascadeDepth": 1,
       "verifiedAt": "2026-09-05T00:00:00Z"
     }
+  },
+  {
+    "id": "3m-elite-naive-short-baseline-full-coverage",
+    "name": "3M Elite naive short baseline (barstate.isfirst fix) -- diagnostic, not a 3M leg",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "short",
+    "status": "research",
+    "createdDate": "2026-09-05",
+    "lastTestedDate": "2026-09-05",
+    "backtestStart": "2020-08-19",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/pine/3m-elite-naive-short-baseline.pine",
+    "pineSource": "three-m-elite/pine/3m-elite-naive-short-baseline.pine",
+    "description": "Closes the barstate.isfirst queue item carried since the v62-fvg split-test cycle (SYSTEM.md): the prior cycle spent 2 credits chasing a same-engine short-side inverse of check #30's buy & hold long baseline, gated on `bar_index == 0`, and got ZERO TRADES both times. This build gates the single entry on `barstate.isfirst` instead -- no zone, no engulf, no bias gate, no stop, no target, no exit logic at all: open one 100%-equity short at the first bar under the project's standard parity profile (margin_short=100) and do nothing else. Not a 3M leg and not a promotion candidate; a diagnostic to see whether a same-engine 'short and hold' market fact, comparable to v60/v65 without a cross-source caveat, is even obtainable.",
+    "metrics": {
+      "profitFactor": 0,
+      "maxDrawdownPct": 0.15044435,
+      "netProfitPct": -0.15044435,
+      "totalTrades": 1,
+      "winRatePct": 0,
+      "sharpeRatio": -0.40710742,
+      "avgTradePct": -0.15044435,
+      "shortTrades": 1,
+      "longTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "resultId": "01M1SWMVSDMGBC5R8M5MSDMB1A",
+      "jobId": "adhoc_01M1SWMVSDCFMBERTZ40VXVGSC",
+      "strategyId": "01M1SWM1KBE88FDRMC9XD43BRR",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1SWMVSDMGBC5R8M5MSDMB1A",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "uniqueEntries": 1,
+      "totalRows": 1,
+      "maxCascadeDepth": 1,
+      "verifiedAt": "2026-09-05T00:00:00Z"
+    },
+    "verdict": "N/A -- diagnostic, not a strategy candidate",
+    "notes": "barstate.isfirst DOES fix the zero-trade bug: 1 trade generated (bar_index==0 produced none). But the trade is NOT a hold-to-end baseline -- get_trades (jobId 01M1SWMVSDMGBC5R8M5MSDMB1A) shows entry at bar 0 (price 11864.50) and exit at bar 1 (price 11870.50), just one 15m bar and a $6 / 0.05% adverse move later, with zero strategy.exit or strategy.close anywhere in the source. That leaves only one explanation: the engine force-closed the position for insufficient margin. This is the cleanest possible reproduction of HARD LESSON 42's margin ceiling -- zero strategy logic, a single order, and even a naked short with no stop still cannot survive one bar at the parity-mandated 100%-equity/margin-short-100 sizing before a trivial adverse tick forces a close. It confirms the margin ceiling is a pure artifact of that sizing convention, not of anything 3M-specific, and explains structurally why v60/v61/v65 needed the 25%-equity declared-deviation fix to produce a trustworthy short number at all: NO short position at 100% equity survives long enough on this engine to mean anything. A true same-engine 'short and hold' market fact is therefore not obtainable without re-running this at 25%-equity declared-deviation sizing (matching v60/v65's convention) -- queued, not run this cycle (1-backtest budget already spent, 493 credits on hand at cycle start)."
   }
 ];
-const BUILT = "2026-09-05 21:57";
+const BUILT = "2026-09-05 22:59";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

@@ -6081,3 +6081,108 @@ lever.
 v60/v61(short)** — unchanged (PF 1.88616546 on 2022-01-01 window, `passed`; PF 1.01300244 on full
 coverage, `testing`). **REJECTED THIS CYCLE: v65** (FVG-graded short mirror, PF 1.54398585 on only
 4 trades — informative negative, not a candidate).
+
+---
+
+# ██ NAIVE SHORT BASELINE — `barstate.isfirst` FIXES THE ZERO-TRADE BUG, AND THE ONE TRADE IT PRODUCES IS THE CLEANEST REPRODUCTION OF HARD LESSON 42 ON FILE (2026-09-05)
+
+**A note on the scheduled prompt, again.** This cycle's stored prompt is still the identical v37/v53
+snapshot addressed at every prior check (12H/24H bias gate and cascade signature both closed at
+v54–v61, per HARD LESSON 45 and HARD LESSON 34/35/50/52; the champion has moved three times since
+that snapshot, v37 → v58 → v62-fvg, and both remaining long/short full-coverage gaps closed at
+v58-baseline-full-coverage and v60-short-baseline-full-coverage). Per "THE DOCS WIN over this
+prompt," and per this project's own queue (v65's entry above lists exactly two open items: the
+`barstate.isfirst` fix and a closed short-side diagnostic axis), this cycle took the top item: the
+`barstate.isfirst` fix for the zero-trade buy&hold/naive-short benchmark bug, carried unspent across
+the last four entries. `git pull --rebase` at cycle start brought in no new concurrent 3M work beyond
+what v65 already reflects (fast-forward only, no divergence to reconcile). No genuinely new,
+un-tried, mechanically-specifiable idea turned up on a fresh transcript grep for terms this lab has
+not yet checked (liquidity/sweep/mitigation-block/order-block/displacement/inducement/breaker/
+premium-discount/session — all absent or, for "session", describing the author's own manual routine
+around discretionary forex/NAS sessions, not a mechanical rule for a 24/7 instrument), consistent
+with the last several entries' finding that every source-derived mechanical axis has been tried.
+
+## WHAT WAS BUILT
+
+`pine/3m-elite-naive-short-baseline.pine` — zero 3M mechanism. No zone, no engulf, no bias gate, no
+stop, no target, no exit logic anywhere in the source. One line of actual logic:
+
+```
+if barstate.isfirst
+    strategy.entry("S0", strategy.short)
+```
+
+Standard parity header (100%-equity sizing, `margin_short=100`), full 15m coverage 2020-08-19 →
+2026-09-01 (same window as v58/v60/v62-fvg/v65's full-coverage re-baselines). This is not a 3M leg
+and not a promotion candidate — it exists to answer whether a same-engine "short and hold" market
+fact (the short-side mirror of check #30's long-side buy & hold benchmark) is obtainable at all on
+trader.dev, so v60's near-breakeven full-coverage PF (1.01300244) and v65's 4-trade PF (1.54398585)
+would have a same-engine reference point instead of only the cross-source `binance_perp_archive`
+comparison check #30 used for the long leg.
+
+## THE RESULT: THE FIX WORKS, BUT NOT THE WAY IT WAS EXPECTED TO
+
+`barstate.isfirst` does fix the zero-trade bug — `bar_index == 0` produced zero trades twice in the
+prior cycle; this produced **one**. But that one trade is not a hold-to-end baseline. `get_trades`
+(free, jobId `01M1SWMVSDMGBC5R8M5MSDMB1A`):
+
+| | value |
+|---|---|
+| Entry | bar 0, price 11864.50 |
+| Exit | bar 1, price 11870.50 |
+| Bars in trade | 2 (one 15m bar held) |
+| Adverse move | $6.00 (0.05%) |
+| Net P&L | -$15.04 (-0.15%) |
+| Profit factor | 0 (grossProfit $0, grossLoss $15.04) |
+| Cascade | 1 row / 1 unique entry, depth 1 — clean |
+
+**There is no `strategy.exit` or `strategy.close` anywhere in this source.** The position closes
+itself, one bar in, on a six-dollar adverse tick. The only mechanism that can do that is the engine's
+own margin enforcement: at the parity-mandated 100%-equity size with `margin_short=100` (zero margin
+buffer), there is no headroom at all, so any adverse tick — however small — forces a close.
+
+## WHY THIS IS THE MOST INFORMATIVE VERSION OF HARD LESSON 42 YET
+
+Every prior sighting of the margin ceiling (v51, v53, v57, v60) was inside a real construction, with
+zone logic, a bias gate, and a stop/target — leaving room to wonder whether the mechanism was somehow
+implicated. **This build has no mechanism at all.** A single naked short, no logic before or after
+the entry, still cannot survive one bar at 100%-equity/`margin_short=100` sizing. This is a clean,
+minimal-case proof that the margin ceiling is a pure artifact of that sizing convention on this
+engine — not of anything 3M-specific, not of any zone or bias-gate interaction — confirming HARD
+LESSON 42's fix (25%-equity declared deviation, used by v60/v61/v65) was never optional for a
+trustworthy short number: no 100%-equity short position, however constructed, survives long enough
+on this engine to measure anything real.
+
+## WHAT THIS DOES NOT ANSWER
+
+The original question — a same-engine "short and hold" market-fact baseline, comparable to v60/v65
+without a cross-source caveat — is still open. It cannot be answered at 100%-equity sizing (this
+result proves why); it would need re-running at 25%-equity declared-deviation sizing (matching
+v60/v61/v65's own convention) to mean anything as a hold-to-end comparator. **Not run this cycle** —
+the 1-backtest budget (493 credits, 250–500 bracket) was spent on the `barstate.isfirst` fix itself,
+and that fix's own result turned out to need a second run to actually answer the original question.
+Queued below rather than guessed.
+
+## CREDIT ACCOUNTING
+
+One backtest, one credit spent (of exactly one allowed this cycle, 493 on hand). `get_trades` used to
+diagnose the single-trade result was free.
+
+## QUEUE
+
+1. **A 25%-equity declared-deviation naive short baseline** (same sizing convention as v60/v61/v65)
+   is the only way to get an actual same-engine "short and hold" market fact — one credit, well-
+   specified, not run this cycle.
+2. **No further single-term short-side mechanism lever is currently queued** (unchanged from v65) —
+   every mechanically-defined idea sourced from the transcripts has been tried on the short leg
+   (bias axis, FVG-grading axis, cascade/sizing axis, all closed). The next idea needs new source
+   material this lab does not currently have (per v50's finding that the referenced "last week's
+   cluster lesson" video was never captured), not another parameter variant.
+3. v64's combined long+short flip-rule finding remains a closed diagnostic, unaffected by this cycle.
+
+**CHAMPION OF RECORD (LONG): v62-fvg** — unchanged (PF 2.04354108 full coverage / 2.10461082 H1 /
+1.95534435 H2, DD 4.50890824%, 40 trades). **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61(short)** —
+unchanged (PF 1.88616546 on 2022-01-01 window, `passed`; PF 1.01300244 on full coverage, `testing`).
+**THIS CYCLE: naive short baseline recorded `status: research`** — not a strategy candidate, a
+diagnostic that closes the `barstate.isfirst` queue item and independently confirms HARD LESSON 42's
+margin-ceiling mechanism in its most minimal possible form.
