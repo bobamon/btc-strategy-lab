@@ -5609,3 +5609,116 @@ third time on the same line.
    long-only build).
 
 ---
+
+# ATTACK 71 — QUEUE ITEM 1, FILTER-STACK TERM 3 ON ATTACK 68: PIVOT-SPACING FLOOR. REJECTED — DECISIVE COLLAPSE ON BOTH HALVES.
+
+The stored scheduled prompt again describes a board state (Attack 37) more than seventy attacks stale.
+**The docs override it**: the live queue item 1 is Attack 66/68's filter stack, and Attack 70's own
+queue closed the swing-amplitude-floor axis (two thresholds, two different RATCHET v2 clauses failed on
+two different halves) and named the next candidate explicitly: a term "that does not share this axis
+(e.g. a property of the OBV series or the pivot structure other than the price-normalized swing
+distance)."
+
+## THE TERM
+
+**Pivot-spacing floor**: the two confirmed pivot-low bars that `bullDiv` compares must be at least
+**20 bars apart** (2x the existing 10-bar `pivotLeft+pivotRight` confirmation lag — a scale derived from
+the mechanism's own existing constant, not from either half's dates). Argued from the mechanism: two
+pivot lows confirmed back-to-back are barely a "swing" — comparing OBV at two points that close together
+in time is closer to noise than to a genuine divergence. This is a **third, independent quantity** — a
+bar-count/time separation — untouched by Attack 68's OBV-magnitude floor (price/OBV values at the two
+pivots) or the abandoned Attack 69/70 axis (normalized price distance between the pivot high and low).
+Byte-identical to Attack 68 otherwise. Pine:
+`strategies/pine/attack71-obv-divergence-pivot-spacing-floor.pine`.
+
+## AUDIT (one line per leg)
+
+R >= 0.8% (LESSON 3) — unchanged, `rBig` gates by exclusion. Stop beyond STRUCTURE (LESSON 5) —
+unchanged, `slPx = lastPivLow`. Each leg separately (LESSON 6) — LONG ONLY; short remains a reported
+standing asymmetry (Attack 64). BINDING (E17) — `bullDiv` (now including `divMagOk` AND `spacingOk`)
+AND `breakoutTrigger` AND `rBig` AND `swingOk`; strictly narrows `bullDiv`, can only remove trades.
+REDUNDANCY (E14) — `spacingOk` (bar-count time separation between the two pivot-low bars) vs `divMagOk`
+(normalized OBV magnitude at those same bars) vs `rBig` (price distance to `lastPivLow`) vs `swingAmp`
+(price pivot high/low spread) — four independent quantities across three domains (time, OBV, price).
+LATCH IN SEQUENCE (LESSON 8) — `spacingOk` computed and folded into `bullDiv` on the same bar as
+`bullDiv`'s own re-derivation, exactly as `divMagOk` already does. CASCADE (HARD LESSON 42/43) — LONG at
+100% equity; `cascadeRatio` 1 / `maxCascadeDepth` 1 on both halves, confirmed.
+
+## H1 AND H2, ATTACK 68 (BASE) VS ATTACK 71 (+ TERM), SIDE BY SIDE
+
+| | Attack 68a (H1) | **Attack 71a (H1)** | Attack 68b (H2) | **Attack 71b (H2)** |
+|---|---|---|---|---|
+| Profit factor | 1.56474476 | **1.08079772** | 1.13127036 | **0.88299912** |
+| Trades | 89 | **18** | 80 | **12** |
+| Win rate | 65.16853933% | **55.55555556%** | 58.75% | **41.66666667%** |
+| Avg winner | $169.46 | $170.11 | $124.22 | $188.44 |
+| Avg loser | -$202.62 | **-$196.74** | -$156.39 | **-$152.44** |
+| Max drawdown | 11.08160523% | **12.79358121%** | 10.74990922% | **7.76105585%** |
+| Net return | +35.47285533% | +1.27169518% | +6.77458291% | -1.24847002% |
+| Commission paid | $969.73 | $170.45 | $839.65 | $118.11 |
+
+Count cut: H1 89→18 (**-79.78%**), H2 80→12 (**-85.0%**) — both far past the 50% RATCHET v2 clause-4
+wall and past HARD LESSON 45/49's own ~77% sample wall.
+
+## THE VERDICT — REJECTED, DECISIVELY, NOT MARGINALLY.
+
+Unlike Attacks 67/69/70 (one clause failing on one half, a close call), this term fails outright on
+**both** halves and on **multiple** clauses at once. H1: PF barely clears 1.0 (1.081, nowhere near the
+0.02 material-gain bar against 1.565) while trades collapse to 18 — under the ~30-trade floor (LESSON
+12) on its own, before any RATCHET v2 argument is even needed. H2: PF **falls below 1.0** (0.883,
+an outright reversal of the edge, not merely a missed improvement) with trades at 12. Both halves fail
+clause 1 (no material PF gain; H2 fails it outright), clause 3 (well under 30 trades), and clause 4 (cut
+size alone rules out a split-feasibility rescue). **REJECTED.** Attack 68 remains the base.
+
+## WHY THE MECHANISM ARGUMENT MISJUDGED THE BINDING STRENGTH
+
+The term was argued from a real defect (comparing OBV at two nearly-adjacent pivot bars is weak
+evidence), and the audit is clean — but the floor's *actual* bite was not anticipated. A large share of
+Attack 68's surviving 89/80 divergence pairs apparently form from pivot lows confirmed **within** the
+20-bar window (i.e., the OBV/price divergence typically resolves quickly, across a compact swing, not a
+drawn-out one) — the opposite of the assumption that a "genuine" divergence needs a wide temporal berth.
+This is informative in its own right: on this mechanism, divergence pairs separated by more time are not
+more reliable, they are rarer, and cutting them removes most of the edge along with the noise this term
+meant to target.
+
+## THE DRAWDOWN, BY THE BOARD'S OWN TAXONOMY
+
+Not classifiable in the useful sense — the sample (18 and 12 trades) is too thin for the three-category
+taxonomy to mean anything. Reported for completeness: avg loser -$196.74 (H1) / -$152.44 (H2), largest
+loss -$530.18 (H1) / -$257.73 (H2) — no concentration signature relative to avg loser on either half, but
+the trade counts are too small to draw a category conclusion from.
+
+## WHAT THIS SETTLES
+
+**Three consecutive term-3 candidates on Attack 68 have now failed** — two milder failures on the
+swing-amplitude axis (Attack 69/70, one clause on one half each) and one decisive failure on an
+orthogonal time axis (this build, both halves, multiple clauses). Per Attack 70's own fallback — "the
+stack should be considered complete at two terms (Attack 66 + Attack 68) pending a fresh mechanism per
+the mandate" — and given this cycle's result adds a *stronger*, not weaker, case for that fallback, the
+filter stack on Attack 66/68 is considered **complete at two terms**. The next cycle owed to this board
+is a **genuinely new mechanism**, per the mandate's own fallback clause, not a fourth attempt on the same
+base.
+
+## QUEUE
+
+1. **The Attack 66/68 filter stack is CLOSED at two terms** (Attack 66 base + Attack 68's OBV
+   divergence-magnitude floor). Three term-3 candidates across two independent axes (price-normalized
+   swing amplitude; pivot-structure time spacing) have now failed. Do not attempt a fourth term-3
+   candidate on this base without a genuinely new axis argued from a part of the mechanism not yet
+   touched by any of the five filter attempts so far (Attacks 67, 68, 69, 70, 71).
+2. **Attack 68 (Attack 66 + OBV magnitude floor) remains the base and the strongest both-halves candidate
+   on this board** — PF 1.56474476/1.13127036 on 89/80 trades, unaffected by this cycle's rejection.
+3. **Per the mandate's own fallback, the next cycle proposes ONE genuinely new mechanism**, distinct
+   from the VWAP family and from every rejected strategy on the board (Attacks 33-65, plus the now-closed
+   67/69/70/71 filter attempts).
+4. **Attack 46 (long) remains a candidate alongside the Attack 66/68 line**, unaffected by this cycle —
+   its H2 PF (1.586) is still the best of any both-halves-positive build on this board, though its H2
+   sample (38) sits closer to the 30-trade floor than Attack 68's (80).
+5. **The out-of-sample test for Attack 46 still ranks first among long-side work not yet startable** and
+   still cannot be run under BTCUSDT-only — unchanged, restated because this cycle did not touch it.
+6. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if
+   that family is revisited before another fresh mechanism.
+7. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle (a
+   long-only build).
+
+---

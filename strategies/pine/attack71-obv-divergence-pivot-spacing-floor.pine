@@ -1,0 +1,144 @@
+//@version=6
+// BTC ATTACK 71 - QUEUE ITEM 1, FILTER-STACK TERM 3 ON ATTACK 68: PIVOT-SPACING FLOOR.
+//
+// THE STORED SCHEDULED PROMPT still describes a board state (Attack 37) more than seventy attacks
+// stale. THE DOCS OVERRIDE IT: Attack 37 was closed on cost by Attack 41; the live queue item 1 is
+// Attack 66/68's filter stack. Term 3's own queue (Attack 70) closed off the swing-amplitude-floor axis
+// after TWO thresholds (1.60%, 1.20%) each failed RATCHET v2 on a DIFFERENT clause on a DIFFERENT half --
+// evidence the axis has no global optimum, not that a third point would find one. Attack 70's own
+// instruction was explicit: term 3 should look for a candidate "that does not share this axis (e.g. a
+// property of the OBV series or the pivot structure other than the price-normalized swing distance)".
+// This build is that instruction: a PIVOT-STRUCTURE TIME AXIS, not price, not OBV magnitude.
+//
+// ==================== THE TERM, ARGUED FROM THE MECHANISM (LESSON 49: not from either half's dates) ====
+// Attack 66/68's bullDiv compares OBV's value at two confirmed pivot lows however close together those
+// two pivots happen to fall -- including two pivot lows confirmed back-to-back, separated by little more
+// than the pivotLeft+pivotRight (5+5=10 bar) confirmation lag itself. Two lows that close together are
+// barely a "swing" at all; they are closer to noise inside one consolidation range, and a divergence
+// measured across them compares OBV at two points that are almost the same point. This term requires the
+// two confirmed pivot-low bars to be separated by AT LEAST 20 bars (2x the 10-bar total confirmation
+// window -- a scale derived from the mechanism's own existing lag, not from either half's trade dates)
+// before the setup arms -- a floor on the SPACING of the compared pivots, not their price or their OBV
+// magnitude. This is a THIRD, independent quantity: Attack 68's divMagOk reads a normalized OBV magnitude
+// at the two pivot bars; Attack 69/70's swingFloorPct read a normalized PRICE distance between the pivot
+// high and the pivot low; this term reads a BAR-COUNT (time) separation between the two pivot LOWS handled
+// by neither prior filter. The threshold (20 bars) is fixed before running on either half, never adjusted
+// after seeing the results, per HARD LESSON 49.
+//
+// This DOES NOT touch breakoutTrigger, rBig, or swingAmp, and does not change divMagOk's own logic --
+// it only adds a second, independent condition to bullDiv's arming test.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - unchanged, rBig still gates by exclusion on rLong = close - lastPivLow.
+//   Stop beyond STRUCTURE (LESSON 5) - unchanged, slPx = lastPivLow, the confirmed divergence low.
+//   Each leg separately (LESSON 6) - LONG ONLY, unchanged; short leg remains a reported standing
+//        asymmetry (Attack 64).
+//   BINDING (E17) - bullDiv (now including divMagOk AND spacingOk) AND breakoutTrigger AND rBig AND
+//        swingOk all necessarily bind; spacingOk is a strict narrowing of bullDiv's own arming bar, so it
+//        can only remove trades, never add them.
+//   REDUNDANCY (E14) - spacingOk reads a BAR-COUNT (time) separation between the two pivot-low
+//        confirmation bars; divMagOk reads a normalized OBV MAGNITUDE at those same two bars; rBig reads
+//        PRICE distance to lastPivLow; swingAmp reads the PRICE pivot high/low spread -- four independent
+//        quantities from three different domains (time, OBV, price), not a redundant set.
+//   LATCH IN SEQUENCE (LESSON 8) - spacingOk is computed and folded into bullDiv on the SAME bar and in
+//        the SAME if-block where bullDiv itself is re-derived (the pivot-low confirmation bar) -- it adds
+//        to an existing single-bar arming condition exactly as divMagOk already does, not a new same-bar
+//        setup/trigger conjunction. breakoutTrigger remains a later, distinct bar.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, flat check gates every entry, unchanged.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity; expect cascadeRatio 1 on both halves, confirmed
+//        below.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17), READ AGAINST ATTACK 68 (THE BASE) ON BOTH HALVES:
+//   * PF IMPROVES ON BOTH HALVES (RATCHET v2 clause 1), DD DOES NOT WORSEN (clause 2 allowance if PF
+//     gain > 0.02) ON BOTH -> KEPT as the new base for term 4.
+//   * IMPROVES ONE HALF, HURTS THE OTHER -> REJECTED, not averaged, exactly Attack 67/70's fate.
+//   * COUNT CUT > 50% ON EITHER HALF -> a split-feasibility problem under clause 4; report plainly
+//     rather than promoting on a shrunken sample (HARD LESSON 45/49's ~77% wall is the thing to watch
+//     for).
+//   * TRADES BELOW ~30 ON EITHER HALF -> a direction, not a result (LESSON 12).
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside net (LESSONS 36/39 and
+//     the board's three-drawdown-category taxonomy).
+
+strategy("BTC Attack71 OBV divergence pivot-spacing floor", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+pivotLeft      = input.int(5, "Pivot confirmation bars, left")
+pivotRight     = input.int(5, "Pivot confirmation bars, right")
+minRpct        = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars        = input.int(192, "Max bars in trade")
+obvRangeLen    = input.int(200, "OBV normalizing range lookback")
+divMagPct      = input.float(3.0, "Min OBV divergence magnitude, % of OBV's own range")
+minSpacingBars = input.int(20, "Min bars between confirmed pivot lows (2x total pivot lag)")
+
+pl  = ta.pivotlow(low, pivotLeft, pivotRight)
+ph  = ta.pivothigh(high, pivotLeft, pivotRight)
+obv = ta.obv
+
+obvRange = ta.highest(obv, obvRangeLen) - ta.lowest(obv, obvRangeLen)
+
+var float lastPivLow    = na
+var float prevPivLow    = na
+var float lastPivLowOBV = na
+var float prevPivLowOBV = na
+var int   lastPivLowBar = na
+var int   prevPivLowBar = na
+var float lastPivHigh   = na
+var bool  bullDiv       = false
+
+if not na(pl)
+    prevPivLow    := lastPivLow
+    prevPivLowOBV := lastPivLowOBV
+    prevPivLowBar := lastPivLowBar
+    lastPivLow    := pl
+    lastPivLowOBV := obv[pivotRight]
+    lastPivLowBar := bar_index
+    if not na(prevPivLow)
+        obvDivMag    = lastPivLowOBV - prevPivLowOBV
+        divMagFloor  = obvRange * divMagPct / 100
+        divMagOk     = not na(obvRange) and obvDivMag > divMagFloor
+        pivotSpacing = lastPivLowBar - prevPivLowBar
+        spacingOk    = pivotSpacing >= minSpacingBars
+        bullDiv := lastPivLow < prevPivLow and obvDivMag > 0 and divMagOk and spacingOk
+
+if not na(ph)
+    lastPivHigh := ph
+
+rLong = not na(lastPivLow) ? close - lastPivLow : na
+minR  = close * minRpct / 100
+rBig  = not na(rLong) and rLong >= minR
+
+breakoutTrigger = not na(lastPivHigh) and ta.crossover(close, lastPivHigh)
+
+swingAmp = not na(lastPivHigh) and not na(lastPivLow) ? lastPivHigh - lastPivLow : na
+swingOk  = not na(swingAmp) and swingAmp > 0
+
+goLong = bullDiv and breakoutTrigger and rBig and swingOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := lastPivLow
+    tpPx   := close + swingAmp
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(lastPivLow, title="LastPivotLow")
+plot(lastPivHigh, title="LastPivotHigh")
