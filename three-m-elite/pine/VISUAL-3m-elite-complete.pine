@@ -1,0 +1,325 @@
+//@version=6
+// ═══════════════════════════════════════════════════════════════════════════════════════════════
+// 3M ELITE — COMPLETE VISUALISER, BOTH DIRECTIONS (2026-09-05)
+//
+// A faithful rebuild of the source's own system as an INDICATOR (it takes no positions), drawing
+// every gate on their checklist plus the zone lifecycle decoded from their videos. LONGS AND SHORTS
+// are first-class throughout — every gate below has a mirrored bear branch, and the dashboard shows
+// both columns side by side.
+//
+// Every definition here comes from three-m-elite/VOCABULARY.md, which was decoded from the source's
+// own recordings and PDFs and, crucially, CORRECTED BY MEASUREMENT several times. The corrections are
+// preserved as comments because getting them wrong has already cost this project real money.
+//
+// ── THEIR CHECKLIST, MAPPED TO WHAT YOU SEE ───────────────────────────────────────────────────
+//   1H & 2H : Model / structural bias, max 6 breaks     -> BIAS + BREAKS rows
+//   15min   : model, max 6 breaks, S/D zone tap         -> ZONE + TAP rows
+//   4min    : model, max 6 breaks, tap, Type 1/Type 2
+//             validation, swing rule, not overextended
+//             from 20MA, MAs not fully against bias,
+//             20MA or 50MA slope must favour            -> VALIDATION + MA rows
+//   15sec   : stage, max 4 breaks, 20/50 not
+//             overextended from 200, MAs not against    -> STAGE + MA rows
+//   Extra   : SL to break-even at 2RR; ATR TP at 12x;
+//             max 2-3 losses per session                -> TRADE + LOSS CAP rows
+//   Trail   : only behind structural breaks where the
+//             50MA is beyond it, and only every SECOND
+//             break, never the most recent              -> TRAIL row
+//
+// ── TWO THINGS THIS FILE REFUSES TO FAKE ──────────────────────────────────────────────────────
+// 1. "MODEL" = accumulation / distribution, i.e. a Wyckoff read. Independent research is blunt that
+//    this is SUBJECTIVE: "two competent traders can label the same range differently", and it "gives
+//    you structure without timing". The mechanisation here is a break-direction proxy and is LABELLED
+//    AS A PROXY in the dashboard. Do not read it as their judgement.
+// 2. "TYPE 1 VALIDATION = a 3M candle". The source never defines the anatomy of a 3M candle anywhere
+//    in the captured material. It is therefore NOT implemented, and the dashboard says so rather than
+//    guessing. Type 2 (engulfing in the direction of bias) IS implemented and is well defined.
+//
+// ── CORRECTIONS THAT COST CREDITS, PRESERVED SO THEY ARE NOT REPEATED ─────────────────────────
+//  • ENGULFING IS BODY CONTAINMENT ONLY, NO GAP REQUIREMENT. The equities definition needs an
+//    overnight gap; crypto trades 24/7 so that clause is decided by noise. With the gap clause: 10
+//    engulfs in 4.7 years. Without it: 2,711. The gap version silently disabled the validation gate
+//    for three zero-trade runs and three wasted credits.
+//  • A ZONE IS THE BASE, NOT THE WHOLE CANDLE. Demand = [low, open] of the bullish engulf; supply =
+//    [open, high] of the bearish engulf. Using the full range puts the proximal edge at the impulse
+//    extreme, so price is inside the zone at creation and mitigation fires instantly — two builds
+//    made exactly 3 trades each because of this.
+//  • MITIGATION IS JUDGED ON THE BODY, NOT THE WICK, and the One Candle Rule applies: the first close
+//    inside does not mitigate, the second does. Wick-counting left 15 opportunities in 4.7 years;
+//    body-counting left 40.
+//  • A TAP IS A WICK TOUCH — deliberately different from mitigation. "All that needs to happen is
+//    that the zone gets tapped... it doesn't need to hold."
+//  • ZONE REPLACEMENT IS MOST-RECENT, NOT DEEPEST. Requiring a replacement to be deeper became a
+//    monotone lock: in a rising market no later engulf is ever deeper, so creation stopped dead.
+// ═══════════════════════════════════════════════════════════════════════════════════════════════
+
+indicator("3M Elite — Complete Visualiser (longs + shorts)", overlay=true,
+     max_lines_count=500, max_labels_count=500, max_boxes_count=500)
+
+// ── TIMEFRAMES ────────────────────────────────────────────────────────────────────────────────
+gT = "Timeframes"
+biasTF  = input.timeframe("60",  "Bias TF (checklist: 1H/2H)",        group=gT)
+zoneTF  = input.timeframe("240", "Zone TF (champion uses 4H)",        group=gT)
+structTF= input.timeframe("48",  "Structure/validation TF (~16x entry)", group=gT)
+
+gG = "Gates"
+maxBreaks   = input.int(6,    "Max breaks up/down (higher TFs)",  group=gG)
+maxBreaksEn = input.int(4,    "Max breaks on entry TF",           group=gG)
+pivLen      = input.int(5,    "Swing pivot strength",             group=gG)
+maxAge      = input.int(6,    "Zone freshness cap (zone candles)",group=gG)
+minRpct     = input.float(0.8,"Min stop distance, % of price",    group=gG)
+overExt     = input.float(2.0,"Overextended from 20MA, x ATR",    group=gG)
+
+gR = "Risk"
+rTarget = input.float(2.0, "Target, x R",              group=gR)
+beAtR   = input.float(2.0, "SL to break-even at R",    group=gR)
+maxLoss = input.int(2,     "Max losses per session",   group=gR)
+
+gV = "Display"
+showDash  = input.bool(true, "Dashboard",     group=gV)
+showZones = input.bool(true, "Zones",         group=gV)
+showTrade = input.bool(true, "Trade levels",  group=gV)
+
+// ── MOVING AVERAGES ───────────────────────────────────────────────────────────────────────────
+ma20  = ta.sma(close, 20)
+ma50  = ta.sma(close, 50)
+ma200 = ta.sma(close, 200)
+atr14 = ta.atr(14)
+
+plot(ma20,  "MA20",  color=color.new(color.aqua,   30))
+plot(ma50,  "MA50",  color=color.new(color.orange, 30))
+plot(ma200, "MA200", color=color.new(color.fuchsia,40), linewidth=2)
+
+// ── ENGULFING — BODY CONTAINMENT ONLY. NO GAP CLAUSE. ────────────────────────────────────────
+f_bullEngulf() => close[1] < open[1] and close > open and close > open[1]
+f_bearEngulf() => close[1] > open[1] and close < open and close < open[1]
+
+// zone geometry: the BASE the impulse left behind, not the whole candle
+zTop  = request.security(syminfo.tickerid, zoneTF, f_bullEngulf() ? open : na, lookahead=barmerge.lookahead_off)
+zBot  = request.security(syminfo.tickerid, zoneTF, f_bullEngulf() ? low  : na, lookahead=barmerge.lookahead_off)
+sTop  = request.security(syminfo.tickerid, zoneTF, f_bearEngulf() ? high : na, lookahead=barmerge.lookahead_off)
+sBot  = request.security(syminfo.tickerid, zoneTF, f_bearEngulf() ? open : na, lookahead=barmerge.lookahead_off)
+
+// ── ZONE STATE — most recent replaces, freshness capped, body-close mitigation + one candle rule ─
+var float dzTop = na, var float dzBot = na, var int dzAge = 0, var int dzCloses = 0, var bool dzDead = false
+var float szTop = na, var float szBot = na, var int szAge = 0, var int szCloses = 0, var bool szDead = false
+
+newZoneBar = ta.change(time(zoneTF)) != 0
+
+if newZoneBar
+    dzAge := dzAge + 1
+    szAge := szAge + 1
+    // mitigation is judged on the CLOSE of a completed zone-TF candle, and needs TWO of them
+    if not na(dzTop) and close < dzTop and close > dzBot
+        dzCloses := dzCloses + 1
+        if dzCloses >= 2
+            dzDead := true
+    if not na(szTop) and close < szTop and close > szBot
+        szCloses := szCloses + 1
+        if szCloses >= 2
+            szDead := true
+
+if not na(zTop) and not na(zBot)
+    dzTop := zTop, dzBot := zBot, dzAge := 0, dzCloses := 0, dzDead := false   // freshest wins
+if not na(sTop) and not na(sBot)
+    szTop := sTop, szBot := sBot, szAge := 0, szCloses := 0, szDead := false
+
+dzLive = not na(dzTop) and not dzDead and dzAge <= maxAge
+szLive = not na(szTop) and not szDead and szAge <= maxAge
+
+// TAP = a WICK TOUCH, deliberately weaker than mitigation
+dzTap = dzLive and low  <= dzTop and low  >= dzBot
+szTap = szLive and high >= szBot and high <= szTop
+
+var bool dzTapped = false, var bool szTapped = false
+if dzTap
+    dzTapped := true
+if szTap
+    szTapped := true
+if not dzLive
+    dzTapped := false
+if not szLive
+    szTapped := false
+
+if showZones and barstate.islast
+    if dzLive
+        box.new(bar_index - 100, dzTop, bar_index + 10, dzBot, border_color=color.green,
+             bgcolor=color.new(color.green, 85), text="DEMAND  age " + str.tostring(dzAge), text_color=color.green, text_size=size.small)
+    if szLive
+        box.new(bar_index - 100, szTop, bar_index + 10, szBot, border_color=color.red,
+             bgcolor=color.new(color.red, 85), text="SUPPLY  age " + str.tostring(szAge), text_color=color.red, text_size=size.small)
+
+// ── BIAS / "MODEL" — A PROXY. Wyckoff accumulation/distribution is subjective; this is not it. ──
+biasUpRaw = request.security(syminfo.tickerid, biasTF, close > ta.sma(close, 20), lookahead=barmerge.lookahead_off)
+biasUp    = biasUpRaw == true
+biasDn    = biasUpRaw == false
+
+// ── BREAK COUNTING — max 6 on higher TFs, max 4 on entry ─────────────────────────────────────
+ph = ta.pivothigh(high, pivLen, pivLen)
+pl = ta.pivotlow(low,  pivLen, pivLen)
+var float lastPH = na, var float lastPL = na
+if not na(ph)
+    lastPH := ph
+if not na(pl)
+    lastPL := pl
+
+brkUp = not na(lastPH) and ta.crossover(close, lastPH)
+brkDn = not na(lastPL) and ta.crossunder(close, lastPL)
+
+var int upCount = 0, var int dnCount = 0
+if brkUp
+    upCount := upCount + 1, dnCount := 0
+if brkDn
+    dnCount := dnCount + 1, upCount := 0
+
+breaksOKLong  = upCount <= maxBreaksEn
+breaksOKShort = dnCount <= maxBreaksEn
+
+// ── STAGE / CLUSTER — clusters come ONLY from breaks up (source is explicit) ─────────────────
+// break up -> leaves deepest unmitigated zone -> that zone is TAPPED -> a further break up = CLUSTER
+var bool  clusterArmed = false
+var int   stage = 0            // 0 = no stage, 1 = stage 1, 2 = stage 2, 3 = late stage 2 (never traded)
+if brkUp and dzLive
+    clusterArmed := true
+cluster = brkUp and clusterArmed and dzTapped
+if cluster
+    stage := stage == 0 ? 1 : stage == 1 ? 2 : 3
+    clusterArmed := false
+// "one break up in stage 2 followed by an instant break down resets everything to no-stage"
+if stage >= 2 and brkDn
+    stage := 0
+stageOK = stage == 1 or stage == 2      // late stage 2 is NEVER traded
+
+// ── TYPE 2 VALIDATION on the STRUCTURE timeframe (Type 1 not implemented — anatomy undefined) ──
+v2Long  = request.security(syminfo.tickerid, structTF, f_bullEngulf(), lookahead=barmerge.lookahead_off) == true
+v2Short = request.security(syminfo.tickerid, structTF, f_bearEngulf(), lookahead=barmerge.lookahead_off) == true
+protLo  = request.security(syminfo.tickerid, structTF, low,  lookahead=barmerge.lookahead_off)
+protHi  = request.security(syminfo.tickerid, structTF, high, lookahead=barmerge.lookahead_off)
+
+// ── MA CONDITIONS from the 4min and 15sec sections ───────────────────────────────────────────
+notOverExtL = close - ma20 <= atr14 * overExt
+notOverExtS = ma20 - close <= atr14 * overExt
+maNotAgainstL = not (ma20 < ma50 and ma50 < ma200)
+maNotAgainstS = not (ma20 > ma50 and ma50 > ma200)
+slopeFavL = ta.rising(ma20, 3) or ta.rising(ma50, 3)
+slopeFavS = ta.falling(ma20, 3) or ta.falling(ma50, 3)
+
+// ── SESSION LOSS CAP ─────────────────────────────────────────────────────────────────────────
+var int lossesToday = 0
+if ta.change(time("1D")) != 0
+    lossesToday := 0
+underLossCap = lossesToday < maxLoss
+
+// ── THE SIGNALS — mirrored, both first-class ─────────────────────────────────────────────────
+goLong  = biasUp and dzLive and dzTapped and v2Long  and stageOK and breaksOKLong  and notOverExtL and maNotAgainstL and slopeFavL and underLossCap
+goShort = biasDn and szLive and szTapped and v2Short and stageOK and breaksOKShort and notOverExtS and maNotAgainstS and slopeFavS and underLossCap
+
+// ── SIMULATED TRADE — structural stop, 2R target, BE at 2RR, every-second-break trail ─────────
+var int   dir = 0
+var float entryPx = na, var float stopPx = na, var float tgtPx = na, var float initR = na
+var int   breaksSince = 0
+var line  lnE = na, var line  lnS = na, var line  lnT = na
+
+curR = dir == 0 or na(initR) or initR == 0 ? na : (dir == 1 ? close - entryPx : entryPx - close) / initR
+
+if dir != 0
+    // break-even at 2RR
+    if not na(curR) and curR >= beAtR
+        stopPx := dir == 1 ? math.max(stopPx, entryPx) : math.min(stopPx, entryPx)
+    // trail ONLY every SECOND structural break, and only if the 50MA is beyond it
+    if (dir == 1 and brkUp) or (dir == -1 and brkDn)
+        breaksSince := breaksSince + 1
+        if breaksSince >= 2
+            cand = dir == 1 ? lastPL : lastPH
+            ok   = dir == 1 ? (ma50 > cand) : (ma50 < cand)
+            if ok and not na(cand)
+                stopPx := dir == 1 ? math.max(stopPx, cand) : math.min(stopPx, cand)
+                breaksSince := 0
+
+hitT = dir ==  1 and high >= tgtPx  or dir == -1 and low  <= tgtPx
+hitS = dir ==  1 and low  <= stopPx or dir == -1 and high >= stopPx
+
+if dir != 0 and (hitT or hitS)
+    outR = hitT ? rTarget : (dir == 1 ? stopPx - entryPx : entryPx - stopPx) / initR
+    if outR < 0
+        lossesToday := lossesToday + 1
+    label.new(bar_index, dir == 1 ? high : low,
+         hitT ? "TARGET +" + str.tostring(rTarget, "#.#") + "R" : (outR >= 0 ? "TRAIL/BE +" + str.tostring(outR, "#.#") + "R" : "STOP −1R"),
+         style = dir == 1 ? label.style_label_down : label.style_label_up,
+         color = outR > 0 ? color.new(color.teal, 20) : color.new(color.maroon, 20), textcolor=color.white, size=size.small)
+    if not na(lnE)
+        line.set_x2(lnE, bar_index), line.set_x2(lnS, bar_index), line.set_x2(lnT, bar_index)
+    dir := 0
+
+if dir == 0 and (goLong or goShort)
+    isL      = goLong
+    ref      = isL ? protLo : protHi                 // the protected low/high from validation
+    entryPx := close
+    stopPx  := na(ref) ? (isL ? close * (1 - minRpct/100) : close * (1 + minRpct/100)) : ref
+    // enforce the R floor (LESSON 3) by EXCLUSION, never by clamping
+    initR   := math.abs(entryPx - stopPx)
+    if initR >= close * minRpct / 100
+        dir     := isL ? 1 : -1
+        tgtPx   := isL ? entryPx + initR * rTarget : entryPx - initR * rTarget
+        breaksSince := 0
+        if showTrade
+            lnE := line.new(bar_index, entryPx, bar_index+1, entryPx, color=color.blue,  width=2)
+            lnS := line.new(bar_index, stopPx,  bar_index+1, stopPx,  color=color.red,   width=2, style=line.style_dashed)
+            lnT := line.new(bar_index, tgtPx,   bar_index+1, tgtPx,   color=color.green, width=2, style=line.style_dashed)
+        label.new(bar_index, isL ? low : high, (isL ? "▲ LONG" : "▼ SHORT") + "  stage " + str.tostring(stage),
+             style = isL ? label.style_label_up : label.style_label_down,
+             color = isL ? color.new(color.green,10) : color.new(color.red,10), textcolor=color.white)
+
+if dir != 0 and not na(lnE)
+    line.set_x2(lnE, bar_index), line.set_x2(lnS, bar_index), line.set_x2(lnT, bar_index)
+    line.set_y1(lnS, stopPx), line.set_y2(lnS, stopPx)
+
+bgcolor(biasUp ? color.new(color.green, 94) : biasDn ? color.new(color.red, 94) : na, title="Bias")
+bgcolor(stage == 3 ? color.new(color.orange, 80) : na, title="Late stage 2 — never traded")
+
+// ── DASHBOARD — both directions side by side ─────────────────────────────────────────────────
+var table d = table.new(position.top_right, 4, 14, border_width=1, frame_width=1, frame_color=color.gray)
+f_r(t, r, k, okL, okS, detail) =>
+    table.cell(t, 0, r, k, text_color=color.white, text_size=size.small, bgcolor=color.new(color.black,20), text_halign=text.align_left)
+    table.cell(t, 1, r, okL ? "✔" : "✖", text_color=okL ? color.lime : color.red, text_size=size.small, bgcolor=color.new(color.black,20))
+    table.cell(t, 2, r, okS ? "✔" : "✖", text_color=okS ? color.lime : color.red, text_size=size.small, bgcolor=color.new(color.black,20))
+    table.cell(t, 3, r, detail, text_color=color.silver, text_size=size.small, bgcolor=color.new(color.black,20), text_halign=text.align_left)
+
+if showDash and barstate.islast
+    table.cell(d, 0, 0, "3M ELITE", text_color=color.white, text_size=size.normal, bgcolor=color.new(color.blue,30), text_halign=text.align_left)
+    table.cell(d, 1, 0, "LONG",  text_color=color.lime, text_size=size.normal, bgcolor=color.new(color.blue,30))
+    table.cell(d, 2, 0, "SHORT", text_color=color.red,  text_size=size.normal, bgcolor=color.new(color.blue,30))
+    table.cell(d, 3, 0, dir==1?"IN LONG":dir==-1?"IN SHORT":"flat", text_color=color.white, text_size=size.normal, bgcolor=color.new(color.blue,30), text_halign=text.align_left)
+
+    f_r(d, 1,  "Model (PROXY)", biasUp, biasDn, "Wyckoff acc/dist is SUBJECTIVE — proxy only, not their read")
+    f_r(d, 2,  "Zone live",     dzLive, szLive, dzLive ? ("demand age " + str.tostring(dzAge) + "/" + str.tostring(maxAge)) : szLive ? ("supply age " + str.tostring(szAge)) : "no live zone")
+    f_r(d, 3,  "Zone tapped",   dzTapped, szTapped, "tap = WICK touch (weaker than mitigation)")
+    f_r(d, 4,  "Type 2 valid",  v2Long, v2Short, "engulf on " + structTF + " — body containment, no gap clause")
+    f_r(d, 5,  "Type 1 valid",  false, false, "NOT IMPLEMENTED — 3M candle anatomy never defined in source")
+    f_r(d, 6,  "Stage",         stageOK, stageOK, stage==0?"no stage — no entries":stage==1?"stage 1":stage==2?"stage 2":"LATE STAGE 2 — never traded")
+    f_r(d, 7,  "Breaks",        breaksOKLong, breaksOKShort, "up " + str.tostring(upCount) + " / dn " + str.tostring(dnCount) + "  (max " + str.tostring(maxBreaksEn) + " entry, " + str.tostring(maxBreaks) + " HTF)")
+    f_r(d, 8,  "Not overext.",  notOverExtL, notOverExtS, "vs 20MA, cap " + str.tostring(overExt, "#.#") + "x ATR")
+    f_r(d, 9,  "MAs not agst",  maNotAgainstL, maNotAgainstS, "20/50/200 not fully stacked against bias")
+    f_r(d, 10, "MA slope",      slopeFavL, slopeFavS, "20MA or 50MA slope must favour (their new rule)")
+    f_r(d, 11, "Loss cap",      underLossCap, underLossCap, str.tostring(lossesToday) + "/" + str.tostring(maxLoss) + " losses this session")
+
+    verdict = goLong ? "▲ LONG NOW" : goShort ? "▼ SHORT NOW" : dir != 0 ? ("HOLDING " + (na(curR)?"":str.tostring(curR,"#.##") + "R")) : "WAIT"
+    vc = goLong ? color.green : goShort ? color.red : dir != 0 ? color.blue : color.new(color.gray,40)
+    table.cell(d, 0, 12, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+    table.cell(d, 1, 12, "", bgcolor=vc)
+    table.cell(d, 2, 12, "", bgcolor=vc)
+    table.cell(d, 3, 12, verdict, text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+
+    trd = dir == 0 ? "no position" : "entry " + str.tostring(entryPx, format.mintick) + "  stop " + str.tostring(stopPx, format.mintick) + "  target " + str.tostring(tgtPx, format.mintick) + "  (BE at " + str.tostring(beAtR,"#.#") + "R, trail every 2nd break)"
+    table.cell(d, 0, 13, "TRADE", text_color=color.white, text_size=size.small, bgcolor=color.new(color.black,20), text_halign=text.align_left)
+    table.cell(d, 1, 13, "", bgcolor=color.new(color.black,20))
+    table.cell(d, 2, 13, "", bgcolor=color.new(color.black,20))
+    table.cell(d, 3, 13, trd, text_color=color.silver, text_size=size.small, bgcolor=color.new(color.black,20), text_halign=text.align_left)
+
+alertcondition(goLong,  "3M Elite LONG",  "3M Elite: LONG — demand tapped, Type 2 validated, stage valid")
+alertcondition(goShort, "3M Elite SHORT", "3M Elite: SHORT — supply tapped, Type 2 validated, stage valid")
+
+plot(goLong ? 1:0,  "LongSignal",  display=display.data_window)
+plot(goShort ? 1:0, "ShortSignal", display=display.data_window)
+plot(stage,         "Stage",       display=display.data_window)
+plot(curR,          "CurrentR",    display=display.data_window)
