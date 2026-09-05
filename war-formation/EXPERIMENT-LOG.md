@@ -6311,3 +6311,106 @@ with low downside participation, not a market-independent edge.
    exactly as check #28 left them. **Note that E71's verdict is unaffected**: a short leg that lost
    money is not rescued by this correction, and phase B — where a short should have earned — is
    precisely where `e58a`'s long lost too.
+
+---
+
+# ██ CYCLE CHECK #35, 2026-09-05 (zero credits) — THE SHORT LEG'S PHASE DECOMPOSITION, AND WHY QUEUE ITEM 1 HAS NO CLEAN TARGET LEFT
+
+Continues the pattern checks #33/#34 opened: use data already on file for free rather than re-running
+the stale prompt. This session's own stored prompt is, once again, byte-for-byte the pre-E67 text —
+citing E64a/E64b/E66 as the state of the short leg and asking for exactly the two queue items (short
+entry geometry; the entry-term binding sweep) that closed at E71/E74-E76 and
+E69a/E69b/E70a/E70b/E77 respectively. Checks #28-#34 already established and re-verified this
+staleness at length; not repeated here beyond the confirmation below.
+
+`git pull --rebase origin main`: already up to date with `origin/main`, no rebase needed. Credits:
+**517** (`get_credits`, above the 500 floor — up to two backtests would be available). **Zero spent.**
+`war-formation/results/backtests.json` re-parsed directly: still 31 entries, `e58a` and `E71` unchanged
+from check #34's citation. `git log` shows no war-formation commit since the `b46ef1a` parallel-history
+merge (only 3M Elite, Legacy Forex and BTC Attack activity since). `STRATEGY-LEDGER.md` re-checked for
+any `HARD LESSON` past 54 or `USER DIRECTIVE` past 2026-09-03: none. HARD LESSON 48 and the RULE
+QUESTION FOR THE USER (drawdown-allowance proportionality) remain open and unanswered.
+
+## WHAT WAS MEASURED
+
+Check #34 decomposed `e58a`'s (long) 36 trades into three phases defined by BTC's own benchmark curve
+(A — rise, start→2026-01-16, BTC +10.28%; B — crash, →2026-03-01, BTC -32.19%; C — recovery, →end, BTC
++21.27%) and found it directionally aligned with the market throughout. **E71 (short) never had the
+same treatment**, and check #34's own queue flagged the gap explicitly ("phase B — where a short should
+have earned — is precisely where e58a's long lost too"). This measures it, for free: `get_trades` on
+E71's existing job (`01M1NFX7YNWMQAZJDVVWRJAWRZ`), all 33 trades already on record, bucketed by exit
+time into the identical phase boundaries. No new backtest, no War Formation code near `backtest-lab`.
+
+| Phase | trades | wins | win rate | E71 $ | E71 % | BTC % | participation* |
+|---|---|---|---|---|---|---|---|
+| **A — rise** | 5 | 1 | 20.00% | -70.36 | **-0.7036%** | +10.28% | -0.0684 |
+| **B — crash** | 13 | 6 | 46.15% | +86.04 | **+0.8604%** | -32.19% | +0.0267 |
+| **C — recovery** | 15 | 5 | 33.33% | -36.11 | **-0.3611%** | +21.27% | -0.0170 |
+| **TOTAL** | 33 | 12 | 36.36% | -20.43 | -0.2043% | -9.30% (net) | — |
+
+*participation = E71's phase %P&L divided by BTC's phase %move, sign preserved — a short scores
+negative participation when BTC rises and positive when BTC falls, both being the "correct" sign. The
+total reconciles to the recorded `netProfitPct` (-0.20431733%) to four decimal places: a re-derivation
+from the trade log, not an independent number.
+
+## FINDING — E71 IS DIRECTIONALLY SANE IN ALL THREE PHASES, THE OPPOSITE FAILURE MODE FROM e58a
+
+Sign-wise E71 does exactly what a short should: it lost in both up-phases (A, C) and gained in the
+down-phase (B). **It is not confused about direction.** But the magnitude runs backwards from what a
+short in this window would want: its worst per-move participation (-0.0684, phase A) is *larger in
+absolute terms* than its best (+0.0267, phase B) — it leaks more per point of adverse move than it
+collects per point of favourable move. `e58a` showed the opposite shape (~0.82 favourable vs ~0.12
+adverse in the corresponding phases). **Both legs are "damped" relative to the instrument, but E71 is
+damped asymmetrically against itself** — sufficient on its own to explain a small net loss in a window
+where the crash (its one favourable phase) is roughly as large in magnitude as the two up-phases
+combined (32.19% vs 31.55%).
+
+The per-phase win rate tells the same story from a different angle: **20.00% in phase A**, far below
+the leg's own 36.36% average and far below the ~33% breakeven this RR≈2.0 geometry needs, versus
+46.15% in phase B (comfortably above breakeven) and 33.33% in phase C (almost exactly at breakeven).
+**Phase A's five trades are the single worst-performing bucket in the entire E71 record**, both in win
+rate and in participation.
+
+## WHY THIS DOES NOT REOPEN QUEUE ITEM 1 AS A NEW BACKTEST THIS CYCLE
+
+The prompt's queue item 1 asks for one cleanly isolatable hypothesis about the short's entry geometry.
+This finding sharpens *where* to look (phase-A-shaped sustained uptrends specifically, not the short
+leg generally) but **every mechanical lever it would suggest has already been run, per-leg, per HARD
+LESSON 48's own rule**:
+- The whole-number band, on the short → **E74**: PF 0.97315988 → 1.16714444, already an improvement,
+  already blocked by the ratchet's drawdown clause (the still-open RULE QUESTION FOR THE USER).
+- h1Bear, brokeAbove, timeGate, on the short → **E75a, E75b, E76**: all rejected, PF fell in every case.
+That is all four entry terms, tested per-leg, with only one live lead (E74) — and it is not a mechanics
+question still open to test, it is the same drawdown-allowance rule question checks #28-#34 have
+already surfaced twice. **There is no fifth term to sweep and no new geometry lever this finding puts
+on the table.** What it does is explain E74's improvement rather than motivate a new experiment:
+removing the band most plausibly trims the worst of the phase-A-shaped false entries identified here.
+
+## CAVEATS
+
+1. Five trades in phase A is far below any sample floor; 20.00% win rate on n=5 is suggestive, not a
+   finding on its own — exactly the caveat check #34 attached to `e58a`'s own phase-A/C asymmetry
+   (7 and 15 trades).
+2. This is descriptive of the existing E71 record, not a new measurement of the market or a new
+   backtest. It changes what E74's improvement is attributed to, not any recorded metric.
+3. Same cross-source caveat as check #33: BTC's phase percentages come from the `backtest-lab` buy &
+   hold curve (`bt_8c81f9456e`); E71's come from trader.dev. Both are BTCUSDT over the identical window,
+   read to the nearest percent, not the basis point.
+
+## STATE
+
+Unchanged: no champion, no candidate. References remain **e58a** (long) and **E71** (short). **E74**
+remains the one short-leg result that improves on E71, and remains blocked by the same unanswered
+ratchet question.
+
+**Zero backtests run. Zero credits spent.** Dashboard not rebuilt — no metric changed, per checks
+#5-#34.
+
+**No notification pushed.** This is yet another firing of the same stale prompt (see checks #22-#34 for
+the prior run of these); the only new content this cycle is the free phase decomposition above, and it
+does not change lab state or unblock either open rule question. The recommendation is unchanged from
+checks #28-#34: answer HARD LESSON 48 / RULE QUESTION FOR THE USER (the drawdown-allowance
+proportionality question, now the sole blocker on the only live short-leg improvement, E74), decide the
+equity-fraction framing for a combined bidirectional script if that is wanted, supply new 1m data, hand
+this lab a new queue item, or pause the schedule — none of which this session can do on its own
+authority.
