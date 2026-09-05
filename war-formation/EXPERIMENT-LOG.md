@@ -6517,3 +6517,96 @@ RULE QUESTION remain open and unanswered.
    hypothesis worth a credit** — and Finding 1 explains why it cannot be resolved: 7 and 15 trades per
    phase is what 199,802 bars allows.
 4. Do not port to `backtest-lab` to chase the data. The stateless limit is real and the rule stands.
+
+---
+
+# ██ E78 / CYCLE CHECK #37, 2026-09-05 — THE SAMPLE CEILING IS BREAKABLE AFTER ALL. CHECK #36 WAS WRONG. THE EDGE DOES NOT SURVIVE THE MOVE.
+
+One credit. `resultId 01M1SFN67Z0T52PFNJB19NX9RP`, `strategyId 01M1SFN6GG2KM33T8WPYNHXFD8`.
+
+## FIRST — CHECK #36's HEADLINE IS WITHDRAWN
+
+Check #36 concluded, in bold: *"No War Formation configuration can EVER comfortably clear the sample
+floor on this engine — not with a better filter, not with a better entry, not with more cycles. The
+constraint is the archive."*
+
+**That was wrong, and the error was that I checked one timeframe and generalised to the engine.**
+
+| Timeframe | trader-dev coverage |
+|---|---|
+| 1m | 2025-12-16 → 2026-05-03 — **4.5 months**, 199,802 bars |
+| 3m | **no data at all** (`no ClickHouse bars`) |
+| **5m** | **2024-06-08 → 2026-09-01 — 2.2 years, 235,528 bars** |
+
+**5m has nearly six times the calendar span of 1m.** The archive was never the constraint; the
+*timeframe* was, and nobody had checked the others. Sixty-odd experiments ran on the one timeframe
+with the least history available.
+
+## THE PORT, AND WHAT TRANSFERS CLEANLY
+
+Per HARD LESSON 40 — geometry in bars does not transfer across timeframes — each term was classified
+before running rather than scaled by reflex:
+
+| Term | Transfers? |
+|---|---|
+| 6h/1h/15m cascade | ✅ exactly — timestamp bucketing, timeframe-independent |
+| Time gate (skip first/last 60 min of block) | ✅ exactly — minute-based |
+| Witching hour, whole-number band | ✅ exactly — clock and price based |
+| THE SHIELD ($2,000) and 2R target | ✅ exactly — dollars, not bars |
+| `maxBars` 4320 → **864** | ✅ scaled correctly, still three days |
+| `atr(3)` / `atr(30)` | ❌ **DECLARED DEVIATION** — now 15 min / 150 min, was 3 min / 30 min |
+
+The coil and the velocity floor both read `atr`, so **both are measuring a different quantity than
+the 1m build does.** That is the one thing this run cannot claim to have tested faithfully.
+
+## RESULT — 5m, 2024-06-08 → 2026-09-01, 234,663 bars
+
+| | E78 (5m) | `e58a` (1m, for context only) |
+|---|---|---|
+| Profit factor | **0.78597499** | 1.24015239 |
+| **Trades** | **115** | 36 |
+| Win rate | 21.73913043% | 41.67% |
+| Net | -18.26452824% | +7.47495942% |
+| Max drawdown | 30.19142159% | 9.82519609% |
+| Long | 50 trades, 21 wins, **-$1,258.54** | — |
+| Short | 65 trades, **4 wins**, -$567.91 | — |
+| Commission | $1,024.75 | — |
+
+**Frequency: pre-registered 60–300, actual 115** — inside the band.
+
+## THE KILL RULE APPLIES. DISCARDED.
+
+PF 0.78597499 is below 1.0 on a sample that, for the first time in this lab's history, **clears the
+30-trade floor**. No filter stack, no rescue.
+
+## THE TWO READINGS, AND I CANNOT SEPARATE THEM
+
+1. **The edge is genuinely 1m-specific.** The velocity reclaim is a one-minute phenomenon and a
+   five-minute bar is too coarse to see it. The `atr` deviation is real and could alone account for
+   the failure.
+2. **`e58a`'s PF 1.24 on 36 trades was noise, and 115 trades is showing what the mechanism actually
+   does.** 36 trades is *at* the floor, not above it, and this lab has never had a sample that could
+   contradict it.
+
+Reading 2 is the more parsimonious and matches this project's own standard for what 36 trades is
+worth. **Neither is established.** What *is* established is that the question is now answerable, which
+check #36 said it never could be.
+
+## THE SHORT LEG, AGAIN
+
+**4 winners in 65 short trades — a 6.2% win rate.** This is the same short-side collapse recorded
+across E9/E9b/E10/E11/E15/E16 and diagnosed in HARD LESSON 34. On the largest short sample this lab
+has ever had, the short leg is not merely weak; it barely wins at all. **That is now a bankable
+finding about the short leg, and it is the first one.**
+
+## QUEUE
+
+1. **Re-run the 1m build on 5m with a corrected `atr` basis** before accepting reading 1 or 2. The
+   honest 5m equivalent of "3 minutes of volatility" is not `atr(3)`; it may need a different
+   construction entirely, which per HARD LESSON 40 is a re-derivation, not a parameter change.
+2. **Check 15m, 1h and 4h coverage too.** The error in check #36 was generalising from one timeframe;
+   do not repeat it by generalising from two.
+3. **The short leg should be considered dead pending evidence, not merely unproven.** 4 of 65 on the
+   largest sample available is not a sampling artefact.
+4. Check #36's Finding 2 (the shield fills optimistically, every PF is an upper bound) is unaffected
+   and still stands — and it makes 0.786 an upper bound too.
