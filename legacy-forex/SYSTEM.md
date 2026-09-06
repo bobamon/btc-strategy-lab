@@ -1151,3 +1151,181 @@ horizon — the Epps trap in FINDING 13 is unaffected by this correction and sti
   connector is unavailable to do so.
 - The direction contradiction (FINDING 10.1) and the rolling-mean target predictions (FINDINGS 7, 12)
   are untouched and still unrun.
+
+---
+
+# ██ TICK #8, 2026-09-06 — THE DELIVERABLE ITSELF HAD NEVER BEEN AUDITED, AND ITS LEVEL GATE WAS COUNTING THE WRONG THING
+
+**Zero credits. No backtest, no `plan_backtest_window`, no engine call of any kind.** Pure code-vs-source
+audit: `pine/VISUAL-legacy-forex-complete.pine` read line by line against the transcripts it claims to
+mechanise. Every defect below is verifiable from the committed code and the committed transcript, with
+no market data involved.
+
+**Why this and not another symbol/sample tick.** Every route out of the sample-and-engine deadlock is
+closed or out of this project's control (ticks #3, #6, #7). The one route the workstream has repeatedly
+called "the only honest one available today" is **forward-testing the Pine live**. That makes the Pine
+the workstream's entire deliverable — and in eight ticks **nobody had ever checked whether it does what
+the file says it does.** It does not, in six places.
+
+## ██ FINDING 17 — SIX DEFECTS IN THE VISUALISER, ONE OF WHICH INVERTS THE MEANING OF ITS LEVEL GATE
+
+### 17.1 — THE TOUCH COUNTER COUNTED BARS, NOT TOUCHES, OVER A WINDOW CONTAINING THE LEVEL'S OWN PIVOT
+
+v1's validator:
+
+```
+f_touches(lvl) =>
+    int n = 0
+    for i = 0 to 199
+        if math.abs(high[i] - lvl) <= tol or math.abs(low[i] - lvl) <= tol
+            n += 1
+```
+
+Two independent errors compound here.
+
+**(a) It increments once per BAR inside the band, not once per visit.** His definition is visits, and he
+counts them out loud, one per approach:
+
+> *"We have one touch two touch three four five six seven touches **with those wicks** to this support
+> zone price can't break it."* — `7._SUPPORT_AND_RESISTANCE` [00:47]
+> *"one touch two touch three touch four touch almost another touch there"* — `7.` [01:04]
+
+A single approach that loiters for eight bars scores 8 under v1 and 1 under his own counting.
+
+**(b) The scan includes the level's own formation window.** `resLvl = lastPH`, a `ta.pivothigh`. The
+pivot bar satisfies `|high − lvl| = 0` and scores a touch **by construction**, and each of the
+`2 × pivLen = 10` neighbouring bars scores one whenever the local swing is smaller than the tolerance
+band (`0.10%` of price).
+
+**The consequence, stated as a falsifiable condition rather than a measurement:** `minTouch = 3` is
+satisfied *at the instant the pivot confirms, with zero revisits,* whenever at least two of the ten bars
+adjacent to the pivot have an extreme within 0.10% of it — i.e. **whenever the 11-bar pivot window spans
+less than ~0.1% of price.** On a 5-minute index chart that is not a corner case. I have **not measured**
+how often it holds and no number here claims to; the point is that the gate's pass rate is governed by
+local quietness, which is the opposite of what "a level price cannot break" means.
+
+**So the defect does not make the gate too strict — it makes it near-inert, and inert in a way that
+selects for quiet swings.** A gate advertised as "validated by repeated touches" was, in the common case,
+passing every fresh pivot.
+
+**⚠ THE FIX IS EXPECTED TO BE DANGEROUS, AND THAT IS RECORDED BEFORE ANYONE RUNS IT.** Counting distinct
+visits and excluding the pivot window is strictly stricter. Combined with `resLvl` being the *most recent*
+pivot — a level price has by definition only just made, and usually has not had time to revisit three
+times before it breaks — **`minTouch = 3` on the corrected counter may take the signal count to zero.**
+That is HARD LESSON 8's exact tell and HARD LESSON 10's exact instruction: **measure the term before
+testing the conjunction.** So:
+- `minTouch` was **NOT retuned.** Retuning a threshold to keep signals alive, with no measurement, is
+  curve-fitting against a number nobody has looked at.
+- v2 computes **both** counts every bar, shows them side by side on the dashboard
+  (`3 visits / 47 bars-in-band`), and plots all four to the data window. The first live session on a
+  chart settles the magnitude in seconds, for free, without a credit.
+- v1's counting is retained behind a `touchMode` input so the two are diffable on one chart. It is there
+  for comparison, not for use.
+
+### 17.2 — THE ROLE FLIP WAS ADVERTISED IN THE FILE HEADER AND ABSENT FROM THE CODE
+
+v1's header listed, as step 3 of the stack, *"a broken level flips role (7. 00:27 / 01:51)"*. **No line of
+v1 implemented it.** `resLvl`/`supLvl` were simply the last two pivots; nothing was ever remembered after
+a break. The source states the rule three times and calls it common:
+
+> *"But guess what support resistance does it turns into each other?"* — `7.` [01:51]
+> *"So support broke and then became resistance so you see how they can turn into each other and they do
+> very often."* — `7.` [02:16-02:19]
+> *"Resistance now support... a break and a retest of support into resistance"* — `7.` [07:14]
+
+v2 tracks flipped levels (a broken support becomes a resistance candidate and vice versa), voids one when
+price closes back through it, and draws both. **It does not let them fire signals by default** — that
+would alter the signal set in the same commit that corrects the level test, and then neither change could
+be attributed. The input exists and is off.
+
+**Note that the stop placement was already consistent with the flip** and this is worth recording as the
+one thing v1 got right here: *"We can have our stop loss below where it would come back to retest"*
+(`7.` [05:43]) — the stop sits behind the broken level in its new role, which is what both versions do.
+
+### 17.3 — INTRABAR SEQUENCING: THE STOP WAS MOVED WITH THIS BAR'S CLOSE, THEN TESTED AGAINST THIS BAR'S LOW
+
+v1's order of operations was: manage the stop using `close` → compute `hitS` using `low` → book the exit.
+A bar that closed at +2R therefore lifted the stop to +1R and was then tested against **its own low**,
+which may have printed before the run-up that justified the lift. That books trail-exits that never
+happened. v2 manages on the previous bar's R (`close[1]`), which is the standard no-lookahead ordering.
+
+### 17.4 — AN AMBIGUOUS BAR BOOKED THE WIN
+
+`outR = hitT ? tgtR : ...` — when a bar touched both target and stop, v1 recorded the **target**. The
+conservative convention is the stop, and here it is not merely convention: **achieved R feeds the
+rolling-mean target rule** (`10._USING_DATA`), so an optimistic tie-break biases the *target itself*
+upward on every such bar, which then widens the target, which produces more ambiguous bars. v2 books the
+stop and labels a break-even exit as break-even rather than as a trail.
+
+### 17.5 — ONE MAX-STOP INPUT FOR TWO INSTRUMENTS THAT NEED DIFFERENT ONES
+
+v1 had a single `maxStopPts = 30.0` whose own tooltip read *"Luca reports him at 20 on NQ / 30 on YM"* —
+the file stated the two-number rule and implemented the one-number version. The source, with Luca
+explicitly relaying Mamba's figures (module 4 is Luca's per FINDING 6, but here he is quoting Mamba
+directly, so it is admissible for this and only this):
+
+> *"Mamba uses 20 points on NASDAQ, let's say 30 points on YM"* — `4._WHAT_ARE_CONTRACTS_AND_TICKS` [04:09]
+
+And Mamba's own module-11 charts show **25 points** (*"that's a 25 point stop loss, which is solid"*
+[00:20]), **20 points** (*"yeah, we had a 20 point stop"* [06:50]) and a refusal at **64** (*"my account's
+gone if I do that"* [01:26]).
+
+**30 points is ~0.14% of NQ and ~0.07% of YM.** The same integer is a materially different gate on the two
+instruments, and a gate that changes trade counts is precisely this workstream's binding problem. v2
+resolves per instrument, defaults 20/30 from the quote, and **prints the resolved instrument on the
+dashboard** — per FINDING 15, a ticker string is never trusted silently, so the resolution is shown for
+eye-checking rather than assumed.
+
+### 17.6 — THE TRAIL RULE IS UNDER-DETERMINED IN THE SOURCE, AND v1 HARD-CODED ONE READING SILENTLY
+
+This is the finding I expected to be a defect and which turned out to be an **ambiguity in the source**,
+so the correction is to stop pretending it is settled. Module 11 supports three different rules inside
+nine minutes:
+
+| reading | evidence |
+|---|---|
+| **Step every +1R** | *"Every time this thing moves up in the same distance as our stop loss, which is 25 points, we're going to adjust our stop loss"* [02:13-02:17]; *"as price starts to push up even higher, you just adjust with it"* [03:59] |
+| **Freeze at +1R** | what his **worked example actually does**: *"we're now at a one to five... we're going to take our stop loss tool and we're going to put that down to a one to one"* [06:27-06:38] |
+| **Break-even only** | offered as a complete alternative: *"or don't adjust your stops at all"* [09:01] |
+
+Only the floor is stated as non-negotiable: *"at worst, at the least, please put your stops to break even
+at a one to one point five at the worst"* [08:02-08:19].
+
+v1 implemented **freeze at +1R** and presented it in the header as the rule. v2 makes it an input across
+all three readings, **defaults to freeze** — because that is the one he *demonstrates* rather than
+*describes*, and HARD LESSON 14 says the demonstration is the more reliable half of a trader's account —
+and the dashboard names the live mode. **This is a source ambiguity, not a modelling choice, and it must
+not be resolved by taste.** It is also now a pre-registered question: if a run ever becomes possible, the
+three modes are a clean three-way comparison on one mechanism.
+
+### A SEVENTH ITEM, RECORDED AS A KNOWN LIMITATION RATHER THAN FIXED
+
+The simulator exits in **one piece** at `tgtR` while drawing the 1R–5R ladder he scales out along
+(FINDING 10.4). A scale-out would make "achieved R" a weighted blend, and **nothing in the source states
+the weights** — how much comes off at target one versus target three is never said. Inventing weights to
+make the simulator prettier would put a fabricated number into the rolling-mean target. Left as-is, and
+now stated in the code rather than silently true.
+
+## ██ WHAT THE AUDIT DOES *NOT* CHANGE
+
+- **The decoded rules in this file are unaffected.** Every FINDING 1–16 stands. This is a defect report
+  against the *implementation*, not against the specification.
+- **No signal count, hit rate or performance figure appears anywhere in this tick**, corrected or
+  otherwise. The v2 code has never been run on a chart by this session and cannot be — there is no
+  TradingView here and the engine deadlock is unchanged.
+- **17.1's "near-inert" verdict is an argument from the code and the definition of a pivot, not a
+  measurement.** It is falsifiable exactly as stated, and v2 was built to make the measurement free.
+
+## ██ WHAT TICK #8 DID NOT ESTABLISH
+
+- **Nothing was backtested; no `runId` exists for this workstream and none was created.**
+- **Whether v2 compiles.** It is `//@version=6` and uses only constructs already present in v1 plus
+  `str.upper`/`str.contains` and a tuple return. **It has not been compiled** — there is no Pine compiler
+  in this session — and the first person to load it should expect to fix syntax, not logic.
+- **How much 17.1 actually changes the level gate.** That is a one-chart observation and it is now
+  instrumented, not argued.
+- **Whether any of the six defects would have changed a conclusion.** None could have: this workstream has
+  never banked a result, so there is nothing to withdraw. **That is the one piece of luck here** — had the
+  engine deadlock broken earlier and a run been banked off v1, four of these six defects
+  (17.1, 17.3, 17.4, 17.6) would have silently shaped its numbers.
+- `US30` depth, `p`, `ρ`, and the direction contradiction are all untouched and unchanged.

@@ -1,6 +1,7 @@
 //@version=6
 // ═══════════════════════════════════════════════════════════════════════════════════════════════
-// LEGACY FOREX TRADER — COMPLETE VISUALISER (2026-09-05)
+// LEGACY FOREX TRADER — COMPLETE VISUALISER
+// v1 2026-09-05  ·  v2 2026-09-06 (tick #8 code audit — see SYSTEM.md FINDING 17)
 //
 // A faithful, mechanical rendering of MAMBA's system — the New York / NQ+YM trader.
 // See legacy-forex/SYSTEM.md for every rule with its verbatim quote and timestamp.
@@ -9,6 +10,8 @@
 //   Eight numbered modules + five NY live streams are MAMBA — NQ/YM, New York, 5m/15m. That is
 //   this file. Four "videoNNNN" live streams + module 4 are COACH LUCA — gold (MGC), Asia session,
 //   1m-1h, ATR stops, fair value gaps, a 200 MA. NOTHING from Luca belongs in this indicator.
+//   (Module 4 is the one exception this file draws on, and only where Luca is quoting Mamba's own
+//   numbers back — flagged at the point of use.)
 //
 // INDICATOR, not a strategy — it takes no positions. It draws every element of his method and a
 // dashboard that names the exact condition currently blocking a trade.
@@ -22,22 +25,40 @@
 //   1. SESSION    New York only, first entry 09:30 ET      (8. 00:14 / 00:44)
 //   2. STRUCTURE  HH+HL = longs only. LL+LH = shorts only.
 //                 Anything else is consolidation = NO TRADE (6. 01:53 / 06:22)
-//   3. LEVEL      support = floor, resistance = ceiling, validated by repeated touches;
-//                 a broken level flips role                 (7. 00:27 / 01:51)
+//   3. LEVEL      support = floor, resistance = ceiling, validated by repeated DISTINCT touches;
+//                 a broken level flips role                 (7. 00:27 / 00:47 / 01:51)
 //   4. BREAK      price breaks the level in the structure's direction. The retest is a BONUS,
-//                 not a gate: "we don't have to do that"    (7. 05:35)
+//                 not a gate: "we don't need it to come back and retest"  (7. 05:35)
 //   5. VOLUME     must be present. "If there's no volume, there's no trading."  (9. 07:51)
 //   6. STOP       just beyond the broken level, never the far one — AND capped: a structural stop
-//                 wider than ~25-30 pts REJECTS the setup — "64 points, my account's gone if I
-//                 do that"                                  (11. 00:07 / 01:26)
+//                 wider than his per-instrument maximum REJECTS the setup — "64 points, my
+//                 account's gone if I do that"              (11. 00:07 / 01:26)
 //   7. TARGET     NOT a fixed 1:3-1:5. It is the mean achieved R of his last ~6 closed trades,
 //                 losses scored 0, rounded, recomputed daily — "we are averaging a one, two,
 //                 three... which means we are going to go for one, two, threes"  (10. 00:38-05:43)
 //                 1:3-1:5 (9. 05:53) is where that output usually LANDS, not the rule.
-//   8. MANAGE     +1R -> break-even (by +1.5R at the latest); +2R -> lock +1R; then trail (11. 02:28 / 08:02)
+//   8. MANAGE     break-even at +1R (+1.5R at the latest) is the only part he states as
+//                 non-negotiable; what happens ABOVE that is under-determined in the source —
+//                 see the TRAIL note below. (11. 02:13 / 03:59 / 06:38 / 08:02 / 09:01)
 //   9. LIMIT      max 2 trades/day, 3 exceptionally — and the cap counts ACROSS NQ+YM together,
-//                 not per instrument (video1263885792 03:58). Realised rate is ~0.67-0.89 per
+//                 not per instrument (video1263885792 03:58). Realised rate is ~0.6-0.8 per
 //                 session, about a third of the cap (10. 00:38 / 02:22).
+//
+// ── THE TRAIL IS UNDER-DETERMINED IN THE SOURCE — v2 STOPS PRETENDING OTHERWISE ────────────────
+// Module 11 supports THREE different trail rules, in the same nine minutes, and v1 silently
+// hard-coded one of them as if it were the rule:
+//   (a) STEP EVERY +1R — "Every time this thing moves up in the same distance as our stop loss,
+//       which is 25 points, we're going to adjust our stop loss" [02:13]; "as price starts to
+//       push up even higher, you just adjust with it" [03:59].
+//   (b) FREEZE AT +1R — what his own worked example actually does: at 1:5 he moves the stop to
+//       1:1 and leaves it. "We're now at a one to five... we're going to put that down to a one
+//       to one" [06:27-06:38].
+//   (c) BREAK-EVEN ONLY — offered explicitly as a complete alternative: "or don't adjust your
+//       stops at all" [09:01], with the floor being "at worst, at the least, please put your
+//       stops to break even at a one to one point five at the worst" [08:02-08:19].
+// Only the break-even floor is stated as non-negotiable. The mode is now an INPUT, defaulting to
+// (b) because that is the one he demonstrates rather than describes, and the dashboard names the
+// live mode. This is a source ambiguity, not a modelling choice — do not resolve it by taste.
 //
 // ── ONE CONTRADICTION, DRAWN RATHER THAN RESOLVED ─────────────────────────────────────────────
 // The modules gate direction on structure (bullish -> buys only). The live streams show him
@@ -50,6 +71,34 @@
 // No higher-timeframe bias filter. That is not an omission — he rules it out explicitly:
 //   "There's no overall bias. We're not seeing what the daily is doing."   (5. 03:00)
 // This is the opposite of the War Formation and 3M systems, and the three must not be mixed.
+//
+// ── WHAT v2 CHANGED, AND WHY (SYSTEM.md FINDING 17) ───────────────────────────────────────────
+//  1. TOUCH COUNTING WAS COUNTING BARS, NOT TOUCHES, AND COUNTED THE LEVEL'S OWN PIVOT WINDOW.
+//     v1 incremented once per BAR whose high or low sat within tolerance of the level, scanning
+//     all 200 lookback bars including the pivot's own formation neighbourhood. The pivot bar
+//     scores a touch by construction (|high - lvl| = 0), and each of the 2*pivLen neighbours
+//     scores one whenever the local swing spans less than the tolerance. So "3 touches" could be
+//     — and on a quiet swing usually was — satisfied the instant the pivot confirmed, with ZERO
+//     revisits. His own definition is distinct visits: "one touch two touch three four five six
+//     seven touches with those wicks" (7. 00:47). v2 counts distinct band ENTRIES and excludes
+//     the pivot's own +/- pivLen window. BOTH counts are shown side by side so the size of the
+//     correction is visible on a live chart instead of argued about.
+//     ⚠ THIS MAY TAKE THE SIGNAL COUNT TO ZERO. That is HARD LESSON 8's tell and it is expected
+//     to be checked, not assumed either way. `minTouch` is NOT retuned here — retuning it without
+//     a measurement would be exactly the fabrication this project forbids.
+//  2. THE ROLE FLIP WAS ADVERTISED IN THE HEADER AND ABSENT FROM THE CODE. "Support broke and
+//     then became resistance... they turn into each other and they do very often" (7. 01:51-02:19),
+//     "a break and a retest of support into resistance" (7. 07:14). v2 tracks and draws flipped
+//     levels. It does NOT let them fire signals by default — that would change the signal set and
+//     the audit at the same time.
+//  3. INTRABAR SEQUENCING. v1 moved the stop using THIS bar's close and then tested THIS bar's
+//     low against the moved stop, so a bar that closed at +2R could book a "+1R trail" exit on a
+//     low that happened before the run-up. v2 manages on the PREVIOUS bar's R.
+//  4. AN AMBIGUOUS BAR (target and stop both touched) BOOKED THE WIN. Now books the stop, the
+//     conservative convention. It matters because achieved R feeds the rolling-mean target.
+//  5. ONE MAX-STOP FOR TWO INSTRUMENTS. "Mamba uses 20 points on NASDAQ, let's say 30 points on
+//     YM" (4. 04:09 — Luca quoting Mamba). 30 points is ~0.14% of NQ and ~0.07% of YM: the same
+//     number is a materially different gate. v2 resolves per instrument and shows which is live.
 // ═══════════════════════════════════════════════════════════════════════════════════════════════
 
 indicator("Legacy Forex Trader — Complete Visualiser", overlay=true, max_lines_count=500, max_labels_count=500, max_boxes_count=500)
@@ -65,7 +114,13 @@ pivLen   = input.int(5,  "Swing pivot strength (bars each side)",  group=gStruct
 
 gLvl = "Support / resistance"
 touchTol = input.float(0.10, "Touch tolerance, % of price",        group=gLvl)
-minTouch = input.int(3,      "Touches to validate a level",        group=gLvl, minval=2)
+minTouch = input.int(3,      "Touches to validate a level",        group=gLvl, minval=2,
+     tooltip="v2: this now gates on DISTINCT visits, not bars-in-band. It is a much stricter test than v1's. NOT retuned — the correct value is a measurement nobody has made yet.")
+touchMode= input.string("Distinct visits (v2, his definition)", "Touch counting", options=["Distinct visits (v2, his definition)","Bars in band (v1 behaviour)"], group=gLvl,
+     tooltip="Kept switchable so v1's behaviour is reproducible and the two can be compared on one chart. 'Bars in band' is known wrong; it is here for diffing, not for use.")
+showFlip = input.bool(true,  "Draw flipped levels (broken support -> resistance)", group=gLvl)
+flipTrades=input.bool(false, "Allow flipped levels to fire signals", group=gLvl,
+     tooltip="OFF by default on purpose: turning it on changes the signal set, and v2's job was to correct the level test, not to alter what fires.")
 
 gVol = "Volume"
 useVol   = input.bool(true, "Require volume",                      group=gVol)
@@ -75,9 +130,14 @@ volMult  = input.float(1.0, "Volume must exceed avg ×",            group=gVol)
 gRisk = "Risk"
 stopPad   = input.float(0.05, "Stop padding beyond level, % of price", group=gRisk)
 useMaxStop= input.bool(true,  "Reject setup if stop too wide (11. 01:26)", group=gRisk)
-maxStopPts= input.float(30.0, "Max stop distance, index points",      group=gRisk, tooltip="He accepts 25 pts ('solid') and refuses 64 pts ('my account's gone'). Luca reports him at 20 on NQ / 30 on YM. Index points, so it applies to NQ/YM/NAS100/US30 alike.")
-beAtR     = input.float(1.0,  "Move to break-even at R",               group=gRisk)
-lockAtR   = input.float(2.0,  "Lock +1R at R",                         group=gRisk)
+instMode  = input.string("Auto from ticker", "Instrument", options=["Auto from ticker","NQ / NAS100","YM / US30"], group=gRisk,
+     tooltip="Auto matches the ticker string. Per SYSTEM.md FINDING 15 a ticker string is never trusted silently, so the resolved instrument is printed on the dashboard — check it by eye.")
+maxStopNQ = input.float(20.0, "Max stop, NQ / NAS100 (index points)", group=gRisk, tooltip="'Mamba uses 20 points on NASDAQ' (4. 04:09). His own module-11 charts show 25 pts ('solid', 00:20) and 20 pts (06:50), and he refuses 64 ('my account's gone', 01:26).")
+maxStopYM = input.float(30.0, "Max stop, YM / US30 (index points)", group=gRisk, tooltip="'let's say 30 points on YM' (4. 04:09).")
+beAtR     = input.float(1.0,  "Move to break-even at R",               group=gRisk, tooltip="'at worst, at the least, please put your stops to break even at a one to one point five at the worst' (11. 08:02). 1.0 is the stated trigger; 1.5 is the stated latest.")
+lockAtR   = input.float(2.0,  "Start locking profit at R",             group=gRisk)
+trailMode = input.string("Freeze at +1R (what he demonstrates)", "Trail rule above break-even", options=["Break-even only (11. 09:01)","Freeze at +1R (what he demonstrates)","Step every +1R (11. 02:13)"], group=gRisk,
+     tooltip="The source supports all three; only the break-even floor is non-negotiable. See the TRAIL note in this file's header.")
 maxTrades = input.int(2,      "Max trades per day (counts across NQ+YM)", group=gRisk)
 
 gTgt = "Target — 10._USING_DATA"
@@ -103,13 +163,16 @@ pl = ta.pivotlow(low,   pivLen, pivLen)
 
 var float lastPH = na, var float prevPH = na
 var float lastPL = na, var float prevPL = na
+var int   lastPHbar = na, var int lastPLbar = na       // v2: needed to exclude a level's own pivot window
 
 if not na(ph)
     prevPH := lastPH
     lastPH := ph
+    lastPHbar := bar_index - pivLen
 if not na(pl)
     prevPL := lastPL
     lastPL := pl
+    lastPLbar := bar_index - pivLen
 
 hh = not na(lastPH) and not na(prevPH) and lastPH > prevPH
 lh = not na(lastPH) and not na(prevPH) and lastPH < prevPH
@@ -127,30 +190,77 @@ if showStruct and not na(pl)
     label.new(bar_index - pivLen, pl, hl ? "HL" : ll ? "LL" : "L", style=label.style_label_up,
          color=color.new(hl ? color.green : color.red, 40), textcolor=color.white, size=size.tiny)
 
-// ── 3. LEVELS — the most recent validated swing high / low, with touch counts ─────────────────
+// ── 3. LEVELS — validated by DISTINCT touches, excluding the level's own pivot window ─────────
+// v1 counted every BAR inside the tolerance band, over a window that included the pivot's own
+// formation neighbourhood — so a level was "validated" the moment it formed, with no revisits.
+// He counts visits: "one touch two touch three four five six seven touches with those wicks"
+// (7. 00:47) and "one touch two touch three touch four touch almost another touch" (7. 01:04).
+// A visit = an entry into the band from outside it. Both counts are returned so the correction's
+// magnitude is visible rather than asserted.
 tol = close * touchTol / 100
 
-f_touches(lvl) =>
-    int n = 0
+f_touches(lvl, lvlBar) =>
+    int nRaw  = 0
+    int nDist = 0
+    bool inBand = false
     if not na(lvl)
-        for i = 0 to 199
-            if math.abs(high[i] - lvl) <= tol or math.abs(low[i] - lvl) <= tol
-                n += 1
-    n
+        for i = 199 to 0
+            bi = bar_index - i
+            skip = bi < 0 or (not na(lvlBar) and math.abs(bi - lvlBar) <= pivLen)
+            if not skip
+                near = math.abs(high[i] - lvl) <= tol or math.abs(low[i] - lvl) <= tol
+                if near
+                    nRaw += 1
+                    if not inBand
+                        nDist += 1
+                        inBand := true
+                else
+                    inBand := false
+    [nRaw, nDist]
 
 resLvl = lastPH
 supLvl = lastPL
-resTouch = f_touches(resLvl)
-supTouch = f_touches(supLvl)
-resValid = not na(resLvl) and resTouch >= minTouch
-supValid = not na(supLvl) and supTouch >= minTouch
+[resRaw, resDist] = f_touches(resLvl, lastPHbar)
+[supRaw, supDist] = f_touches(supLvl, lastPLbar)
+
+useDist  = touchMode == "Distinct visits (v2, his definition)"
+resCount = useDist ? resDist : resRaw
+supCount = useDist ? supDist : supRaw
+resValid = not na(resLvl) and resCount >= minTouch
+supValid = not na(supLvl) and supCount >= minTouch
 
 plot(showLvls and resValid ? resLvl : na, "Resistance", color=color.new(color.red,  0), style=plot.style_stepline, linewidth=2)
 plot(showLvls and supValid ? supLvl : na, "Support",    color=color.new(color.green,0), style=plot.style_stepline, linewidth=2)
 
+// ── 3b. THE ROLE FLIP — v1 advertised it in the header and never implemented it ───────────────
+// "But guess what support resistance does it turns into each other?" (7. 01:51)
+// "So support broke and then became resistance... they do very often" (7. 02:16-02:19)
+// "Resistance now support... a break and a retest of support into resistance" (7. 07:14)
+// A flipped level stays live until price closes back through it (the reclaim invalidates it).
+var float flipRes = na, var float flipSup = na
+brokeResRaw = resValid and ta.crossover(close,  resLvl)
+brokeSupRaw = supValid and ta.crossunder(close, supLvl)
+if brokeSupRaw
+    flipRes := supLvl        // a broken floor becomes a ceiling
+if brokeResRaw
+    flipSup := resLvl        // a broken ceiling becomes a floor
+if not na(flipRes) and close > flipRes
+    flipRes := na
+if not na(flipSup) and close < flipSup
+    flipSup := na
+
+plot(showFlip and not na(flipRes) ? flipRes : na, "Flipped resistance (was support)", color=color.new(color.orange, 20), style=plot.style_stepline, linewidth=1)
+plot(showFlip and not na(flipSup) ? flipSup : na, "Flipped support (was resistance)", color=color.new(color.aqua,   20), style=plot.style_stepline, linewidth=1)
+
 // ── 4. BREAK ──────────────────────────────────────────────────────────────────────────────────
-brokeRes = resValid and ta.crossover(close,  resLvl)
-brokeSup = supValid and ta.crossunder(close, supLvl)
+// Optional: a flipped level may also carry a break. OFF by default — see the input tooltip.
+brokeFlipL = flipTrades and not na(flipSup) and ta.crossover(close,  flipSup)
+brokeFlipS = flipTrades and not na(flipRes) and ta.crossunder(close, flipRes)
+brokeRes = brokeResRaw or brokeFlipL
+brokeSup = brokeSupRaw or brokeFlipS
+// the level a long/short would actually be stopped behind
+brkLvlLong  = brokeFlipL and not brokeResRaw ? flipSup : resLvl
+brkLvlShort = brokeFlipS and not brokeSupRaw ? flipRes : supLvl
 
 // ── 5. VOLUME ─────────────────────────────────────────────────────────────────────────────────
 volAvg = ta.sma(volume, volLen)
@@ -192,9 +302,17 @@ rTargetUse = useAdaptR and windowFull and not na(avgAchR) ? math.max(1.0, math.r
 // ── THE STOP-WIDTH GATE — a setup whose structure sits too far away is REJECTED, not re-stopped ─
 // "That's a 25 point stop loss, which is solid." (11. 00:07)
 // "64 points. No, my account's gone if I do that." (11. 01:26)
+// v2: resolved per instrument. 30 pts is ~0.14% of NQ and ~0.07% of YM — one number cannot serve
+// both, and v1 applied 30 to whatever chart it was on.
+tkr   = str.upper(syminfo.ticker)
+autoYM= str.contains(tkr, "YM") or str.contains(tkr, "US30") or str.contains(tkr, "DJI") or str.contains(tkr, "DOW")
+isYM  = instMode == "YM / US30" or (instMode == "Auto from ticker" and autoYM)
+instNm= isYM ? "YM / US30" : "NQ / NAS100"
+maxStopPts = isYM ? maxStopYM : maxStopNQ
+
 padNow      = close * stopPad / 100
-projStopL   = na(resLvl) ? na : resLvl - padNow      // long stops below the broken resistance
-projStopS   = na(supLvl) ? na : supLvl + padNow      // short stops above the broken support
+projStopL   = na(brkLvlLong)  ? na : brkLvlLong  - padNow   // long stops below the broken level
+projStopS   = na(brkLvlShort) ? na : brkLvlShort + padNow   // short stops above the broken level
 projRlong   = na(projStopL) ? na : math.abs(close - projStopL)
 projRshort  = na(projStopS) ? na : math.abs(close - projStopS)
 stopOKlong  = not useMaxStop or (not na(projRlong)  and projRlong  <= maxStopPts)
@@ -218,21 +336,34 @@ var line  lnE = na, var line  lnS = na, var line  lnT = na
 var line  lad1 = na, var line lad2 = na, var line lad3 = na, var line lad4 = na, var line lad5 = na
 
 curR = dir == 0 or na(initR) or initR == 0 ? na : (dir == 1 ? (close - entryPx) : (entryPx - close)) / initR
+// v2 fix: manage on the PREVIOUS bar's R. v1 moved the stop using this bar's close and then
+// tested this bar's low against it, booking exits on lows that preceded the move that caused them.
+curRprev = dir == 0 or na(initR) or initR == 0 ? na : (dir == 1 ? (close[1] - entryPx) : (entryPx - close[1])) / initR
 
-// manage the stop exactly as he describes it
-if dir != 0 and not na(curR)
-    if curR >= lockAtR
-        newStop = dir == 1 ? entryPx + initR : entryPx - initR      // lock +1R
+// manage the stop — see the TRAIL note in the header; the mode is an input because the source
+// genuinely supports three readings and only the break-even floor is stated as non-negotiable.
+if dir != 0 and not na(curRprev)
+    float wantR = na
+    if curRprev >= beAtR
+        wantR := 0.0                                              // break-even (11. 02:28 / 08:02)
+    if trailMode != "Break-even only (11. 09:01)" and curRprev >= lockAtR
+        wantR := 1.0                                              // lock +1R (11. 03:21 / 06:38)
+    if trailMode == "Step every +1R (11. 02:13)" and curRprev >= lockAtR
+        wantR := math.max(1.0, math.floor(curRprev) - 1.0)         // step with it (11. 02:13 / 03:59)
+    if not na(wantR)
+        newStop = dir == 1 ? entryPx + wantR * initR : entryPx - wantR * initR
         stopPx := dir == 1 ? math.max(stopPx, newStop) : math.min(stopPx, newStop)
-    else if curR >= beAtR
-        stopPx := dir == 1 ? math.max(stopPx, entryPx) : math.min(stopPx, entryPx)   // break-even
 
 hitT = dir ==  1 and high >= tgtPx  or dir == -1 and low  <= tgtPx
 hitS = dir ==  1 and low  <= stopPx or dir == -1 and high >= stopPx
 
 if dir != 0 and (hitT or hitS)
-    outR = hitT ? tgtR : (dir == 1 ? (stopPx - entryPx) : (entryPx - stopPx)) / initR
-    txt  = hitT ? "TARGET +" + str.tostring(tgtR, "#.#") + "R" : outR >= 0 ? "TRAIL +" + str.tostring(outR, "#.#") + "R" : "STOP −1R"
+    // v2 fix: an ambiguous bar (both touched) books the STOP, not the target. Achieved R feeds the
+    // rolling-mean target, so an optimistic tie-break biases the target upward on every such bar.
+    outR = hitS ? (dir == 1 ? (stopPx - entryPx) : (entryPx - stopPx)) / initR : tgtR
+    txt  = not hitS ? "TARGET +" + str.tostring(tgtR, "#.#") + "R"
+             : outR > 0.001  ? "TRAIL +" + str.tostring(outR, "#.#") + "R"
+             : outR > -0.001 ? "BREAK-EVEN" : "STOP −1R"
     label.new(bar_index, dir == 1 ? high : low, txt, style = dir == 1 ? label.style_label_down : label.style_label_up,
          color = outR > 0 ? color.new(color.teal, 20) : color.new(color.maroon, 20), textcolor=color.white, size=size.small)
     if not na(lnE)
@@ -254,9 +385,11 @@ if dir != 0 and (hitT or hitS)
 if dir == 0 and (goLong or goShort)
     dir     := goLong ? 1 : -1
     entryPx := close
-    lvl      = goLong ? resLvl : supLvl
+    lvl      = goLong ? brkLvlLong : brkLvlShort
     pad      = close * stopPad / 100
-    stopPx  := goLong ? lvl - pad : lvl + pad     // "just below that support", never the far level
+    stopPx  := goLong ? lvl - pad : lvl + pad     // "our stop loss is below where it would come
+                                                  //  back to retest" (7. 05:43) — the broken level,
+                                                  //  never the far one
     initR   := math.abs(entryPx - stopPx)
     tgtR    := rTargetUse
     tgtPx   := goLong ? entryPx + initR * tgtR : entryPx - initR * tgtR
@@ -268,6 +401,8 @@ if dir == 0 and (goLong or goShort)
     if showLadder
         // "target one... target two... target three... target four... target five" — all five NY
         // streams. He scales out along these rungs; 10._USING_DATA decides which one calls the day.
+        // NOTE: this simulator exits in ONE piece at tgtR. The ladder is drawn, not traded — a
+        // scale-out would make "achieved R" a blend, and nothing in the source says the weights.
         s = dir
         lad1 := line.new(bar_index, entryPx + s*initR*1, bar_index+1, entryPx + s*initR*1, color=color.new(color.olive,50), style=line.style_dotted)
         lad2 := line.new(bar_index, entryPx + s*initR*2, bar_index+1, entryPx + s*initR*2, color=color.new(color.olive,50), style=line.style_dotted)
@@ -294,38 +429,48 @@ bgcolor(inSess and bearStruct     ? color.new(color.red, 94) : na,   title="Bear
 barcolor(useVol and not volOK ? color.new(color.gray, 50) : na,      title="No volume")
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────────────────────
-var table d = table.new(position.top_right, 3, 13, border_width=1, frame_width=1, frame_color=color.gray)
+var table d = table.new(position.top_right, 3, 15, border_width=1, frame_width=1, frame_color=color.gray)
 f_row(t, r, k, ok, v) =>
     table.cell(t, 0, r, k, text_color=color.white,  text_size=size.small, bgcolor=color.new(color.black,20), text_halign=text.align_left)
     table.cell(t, 1, r, ok ? "✔" : "✖", text_color=ok ? color.lime : color.red, text_size=size.small, bgcolor=color.new(color.black,20))
     table.cell(t, 2, r, v, text_color=color.silver, text_size=size.small, bgcolor=color.new(color.black,20), text_halign=text.align_left)
 
+f_tch(lvl, dst, raw) =>
+    na(lvl) ? "—" : str.tostring(lvl, format.mintick) + "   " + str.tostring(dst) + " visits / " + str.tostring(raw) + " bars-in-band  (need " + str.tostring(minTouch) + ")"
+
 if showDash and barstate.islast
     st = bullStruct ? "BULLISH — buys only" : bearStruct ? "BEARISH — sells only" : "CONSOLIDATION"
+    tfOK = timeframe.period == "5" or timeframe.period == "15"
     table.cell(d, 0, 0, "LEGACY FOREX", text_color=color.white, text_size=size.normal, bgcolor=color.new(color.blue,30), text_halign=text.align_left)
     table.cell(d, 1, 0, syminfo.ticker,  text_color=color.white, text_size=size.normal, bgcolor=color.new(color.blue,30))
     table.cell(d, 2, 0, dir==1?"IN LONG":dir==-1?"IN SHORT":"flat", text_color=color.white, text_size=size.normal, bgcolor=color.new(color.blue,30), text_halign=text.align_left)
 
     f_row(d, 1, "Session",    inSess,       inSess ? "New York — live" : "outside NY — no trades")
-    f_row(d, 2, "Timeframe",  timeframe.period=="5"or timeframe.period=="15", timeframe.period + "m" + (timeframe.period=="5"or timeframe.period=="15" ? "" : "  ← he trades 5m/15m ONLY"))
-    f_row(d, 3, "Instrument", true,         syminfo.ticker + "  (he trades NQ / YM only)")
+    f_row(d, 2, "Timeframe",  tfOK,         timeframe.period + "m" + (tfOK ? "" : "  ← he trades 5m/15m ONLY"))
+    f_row(d, 3, "Instrument", true,         syminfo.ticker + "  → read as " + instNm + ", max stop " + str.tostring(maxStopPts, "#") + " pts")
     f_row(d, 4, "Structure",  not consolidating, st)
-    f_row(d, 5, "Resistance", resValid,     na(resLvl) ? "—" : str.tostring(resLvl, format.mintick) + "  " + str.tostring(resTouch) + " touches (need " + str.tostring(minTouch) + ")")
-    f_row(d, 6, "Support",    supValid,     na(supLvl) ? "—" : str.tostring(supLvl, format.mintick) + "  " + str.tostring(supTouch) + " touches (need " + str.tostring(minTouch) + ")")
-    f_row(d, 7, "Break",      brokeRes or brokeSup, brokeRes ? "broke RESISTANCE ✓" : brokeSup ? "broke SUPPORT ✓" : "waiting for a break")
-    f_row(d, 8, "Volume",     volOK,        na(volRat) ? "—" : str.tostring(volRat, "#.##") + "× avg  (need > " + str.tostring(volMult, "#.##") + ")")
+    f_row(d, 5, "Resistance", resValid,     f_tch(resLvl, resDist, resRaw))
+    f_row(d, 6, "Support",    supValid,     f_tch(supLvl, supDist, supRaw))
+    f_row(d, 7, "Flipped",    not na(flipRes) or not na(flipSup),
+         (na(flipRes) ? "" : "res " + str.tostring(flipRes, format.mintick) + "  ") +
+         (na(flipSup) ? "" : "sup " + str.tostring(flipSup, format.mintick) + "  ") +
+         (na(flipRes) and na(flipSup) ? "none live" : (flipTrades ? "(can fire)" : "(drawn only)")))
+    f_row(d, 8, "Break",      brokeRes or brokeSup, brokeRes ? "broke RESISTANCE ✓" : brokeSup ? "broke SUPPORT ✓" : "waiting for a break")
+    f_row(d, 9, "Volume",     volOK,        na(volRat) ? "—" : str.tostring(volRat, "#.##") + "× avg  (need > " + str.tostring(volMult, "#.##") + ")")
     // which side's stop width is the live question depends on which side structure permits
     projR    = bullStruct ? projRlong : bearStruct ? projRshort : na
     stopOKnow= bullStruct ? stopOKlong : bearStruct ? stopOKshort : true
-    f_row(d, 9, "Stop width", stopOKnow, na(projR) ? "—" : str.tostring(projR, "#.#") + " pts  (max " + str.tostring(maxStopPts, "#") + " — he refused 64)")
-    f_row(d, 10, "Target",    true,      (useAdaptR ? (windowFull ? "1:" + str.tostring(rTargetUse, "#") + "  from mean " + str.tostring(avgAchR, "#.##") + "R of last " + str.tostring(cntR) + " (10._USING_DATA)"
+    f_row(d, 10, "Stop width", stopOKnow, na(projR) ? "—" : str.tostring(projR, "#.#") + " pts  (max " + str.tostring(maxStopPts, "#") + " — he refused 64)")
+    f_row(d, 11, "Target",    true,      (useAdaptR ? (windowFull ? "1:" + str.tostring(rTargetUse, "#") + "  from mean " + str.tostring(avgAchR, "#.##") + "R of last " + str.tostring(cntR) + " (10._USING_DATA)"
                                                                   : "1:" + str.tostring(rTargetUse, "#") + "  FALLBACK — window " + str.tostring(cntR) + "/" + str.tostring(rrWindow) + " trades")
                                                     : "1:" + str.tostring(rTargetUse, "#") + "  fixed (adaptive rule off)"))
-    f_row(d, 11, "Trades today", underCap, str.tostring(tradesToday) + " / " + str.tostring(maxTrades) + "  (cap counts across NQ+YM)")
+    f_row(d, 12, "Trail rule", true,      trailMode + "   (source is ambiguous — see header)")
+    f_row(d, 13, "Trades today", underCap, str.tostring(tradesToday) + " / " + str.tostring(maxTrades) + "  (cap counts across NQ+YM)")
 
     // name the FIRST unmet condition, in his own order, so the dashboard says what is blocking
     blocker = not inSess        ? "NO TRADE — outside New York session"
       : consolidating           ? "NO TRADE — consolidation"
+      : not (resValid or supValid) ? "WAIT — no level has " + str.tostring(minTouch) + " distinct touches yet"
       : not (brokeRes or brokeSup) ? "WAIT — no break of a validated level"
       : not volOK               ? "NO TRADE — no volume"
       : not stopOKnow           ? "NO TRADE — stop too wide (" + str.tostring(projR, "#.#") + " pts)"
@@ -333,9 +478,9 @@ if showDash and barstate.islast
       : "WAIT"
     verdict = goLong ? "▲ LONG NOW" : goShort ? "▼ SHORT NOW" : dir != 0 ? ("HOLDING  " + (na(curR)?"":str.tostring(curR,"#.##") + "R  → 1:" + str.tostring(tgtR,"#"))) : blocker
     vc = goLong ? color.green : goShort ? color.red : dir != 0 ? color.blue : color.new(color.gray,40)
-    table.cell(d, 0, 12, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
-    table.cell(d, 1, 12, "", bgcolor=vc)
-    table.cell(d, 2, 12, verdict, text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+    table.cell(d, 0, 14, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+    table.cell(d, 1, 14, "", bgcolor=vc)
+    table.cell(d, 2, 14, verdict, text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
 
 alertcondition(goLong,  "Legacy LONG",  "Legacy Forex: LONG — structure bullish, resistance broken, volume present")
 alertcondition(goShort, "Legacy SHORT", "Legacy Forex: SHORT — structure bearish, support broken, volume present")
@@ -346,3 +491,8 @@ plot(curR,          "CurrentR",    display=display.data_window)
 plot(avgAchR,       "MeanAchievedR (10._USING_DATA)", display=display.data_window)
 plot(rTargetUse,    "TargetR in use", display=display.data_window)
 plot(bullStruct ? projRlong : bearStruct ? projRshort : na, "ProjectedStopPts", display=display.data_window)
+// v2 instrumentation — the numbers a forward test needs to settle the touch-counting correction
+plot(resDist,       "ResTouches distinct", display=display.data_window)
+plot(resRaw,        "ResTouches bars-in-band (v1)", display=display.data_window)
+plot(supDist,       "SupTouches distinct", display=display.data_window)
+plot(supRaw,        "SupTouches bars-in-band (v1)", display=display.data_window)

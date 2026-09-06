@@ -736,3 +736,101 @@ conventions exhausted; no index data exists on the engine that can express the m
 verdict from tick #6 survives a correction to its own reasoning. Zero results recorded, still correctly.
 What this tick actually bought: one long-open queue item closed, one credit anomaly settled by
 measurement, one new engine-wide safety hazard found, and one of my own claims narrowed.
+
+---
+
+# ██ TICK #8, 2026-09-06 — THE ONE THING THIS WORKSTREAM CAN ACTUALLY SHIP HAD NEVER BEEN AUDITED
+
+**Zero credits. No backtest, no `plan_backtest_window`, no engine call of any kind.** Full detail in
+`SYSTEM.md` FINDING 17.
+
+## WHY THIS TICK IS AN AUDIT AND NOT ANOTHER SAMPLE ARGUMENT
+
+Seven ticks have now established, from different directions, that this workstream cannot be backtested
+faithfully anywhere reachable: the symbol hunt is closed by exhaustion (tick #7), pooling cannot rescue
+the sample floor (tick #6), and the engine deadlock — state without data, data without state — is outside
+this project's control (tick #3). Each of those ticks ended by naming **forward-testing the Pine** as the
+only honest route available today.
+
+**So the Pine is the deliverable, and in eight ticks nobody had ever read it against the transcripts it
+claims to mechanise.** Read now, line by line. It does not do what its own header says, in six places.
+
+## THE HEADLINE — THE LEVEL GATE WAS COUNTING BARS, AND COUNTING THE LEVEL'S OWN PIVOT
+
+His validation rule is repeated distinct touches, and he counts them out loud one per approach:
+*"one touch two touch three four five six seven touches with those wicks"* (`7.` [00:47]).
+
+v1 incremented a counter once **per bar** whose high or low sat inside a 0.10% band, scanning a 200-bar
+window that **included the level's own formation neighbourhood**. Since `resLvl` is a `ta.pivothigh`, the
+pivot bar scores a touch by construction and its ten neighbours score one each whenever the local swing is
+quieter than the tolerance. **`minTouch = 3` was therefore satisfiable at the instant a pivot confirmed,
+with zero revisits.**
+
+The defect does not make the gate too strict. **It makes it near-inert, and inert in a way that selects
+for quiet swings** — the opposite of "a level price cannot break."
+
+**The fix is expected to be dangerous and that is written down before anyone runs it.** Counting distinct
+visits is strictly stricter, and the level is always the *most recent* pivot, which price has usually not
+had time to revisit three times before breaking. **The corrected gate may produce zero signals** — HARD
+LESSON 8's exact tell. So `minTouch` was **not** retuned: v2 shows **both** counts on the dashboard
+(`3 visits / 47 bars-in-band`) and plots all four to the data window, so one live chart settles the
+magnitude for free. Retuning a threshold nobody has measured is the failure this project exists to avoid.
+
+## THE OTHER FIVE, IN ONE LINE EACH
+
+2. **The role flip was in the header and not in the code.** *"Support broke and then became resistance...
+   they do very often"* (`7.` [02:16]), stated three times, implemented nowhere. Now tracked and drawn —
+   and deliberately **not** allowed to fire signals, so the level-test correction can be attributed alone.
+3. **Intrabar lookahead.** v1 moved the stop using this bar's close, then tested this bar's low against
+   the moved stop — booking trail-exits on lows that preceded the move that caused them. Now managed on
+   the previous bar.
+4. **An ambiguous bar booked the win.** Target and stop both touched recorded the target. It matters
+   because achieved R feeds his rolling-mean target rule, so the bias compounds into the target itself.
+   Now books the stop.
+5. **One max-stop for two instruments.** The tooltip already said *"20 on NQ / 30 on YM"* and the code
+   applied 30 to both. 30 points is ~0.14% of NQ and ~0.07% of YM. Now resolved per instrument, with the
+   resolution **printed on the dashboard** for eye-checking (FINDING 15: never trust a ticker string).
+6. **The trail rule is under-determined in the source — and this one is not a bug.** Module 11 supports
+   step-every-1R [02:13], freeze-at-1R (what his worked example does, [06:38]) and break-even-only
+   [09:01] within nine minutes; only the break-even floor is stated as non-negotiable. v1 hard-coded one
+   and presented it as the rule. Now an input across all three, defaulting to the one he **demonstrates**
+   rather than describes, with the live mode named on the dashboard.
+
+A seventh item is recorded as a limitation rather than fixed: the simulator exits in one piece while
+drawing the ladder he scales out along, because **nothing in the source states the scale-out weights** and
+inventing them would push a fabricated number into the rolling-mean target.
+
+## WHAT THIS TICK DID NOT ESTABLISH
+
+- **No number came from a run.** No `runId` exists for this workstream and none was created.
+- **Whether v2 compiles.** There is no Pine compiler in this session. It uses only v1's constructs plus
+  `str.upper`/`str.contains` and one tuple return; expect to fix syntax, not logic.
+- **How much defect 1 actually moves the level gate.** That is now an instrumented one-chart observation,
+  not an argument — which is the point of instrumenting it.
+- **Whether any defect changed a past conclusion.** None could have: this workstream has never banked a
+  result. **Had the deadlock broken earlier and a run been banked off v1, four of the six defects would
+  have silently shaped its numbers.** That is luck, not process, and it is the argument for auditing a
+  deliverable before it is needed rather than after.
+- `US30` depth, `p`, `ρ`, the direction contradiction and the rolling-mean-target predictions are all
+  unchanged and unrun.
+
+## QUEUE
+
+1. **First live chart settles defect 1.** Load v2 on NQ or YM 5m and read the two touch counts off the
+   dashboard. If the distinct count rarely reaches 3, `minTouch` needs a measured value — not a guessed
+   one — and the level definition itself (most-recent pivot vs a persistent zone) is the next suspect.
+2. **v2 has never been compiled.** Fix syntax on first load and commit the corrected file.
+3. **The three trail modes are now a clean pre-registered three-way test** if a run ever becomes possible,
+   alongside the two questions already registered (rolling-mean vs fixed target; window 6 vs ~20).
+4. **The symbol hunt stays closed** (tick #7). **Do not run a Legacy Forex backtest on trader-dev under
+   any circumstances** (tick #2, FINDING 4).
+5. `US30` 15m/5m depth on `backtest-lab` — still needs a session with that connector.
+6. **Forward-testing still needs no history** and is still the only honest route available today. It is
+   now the route with a deliverable worth trusting slightly more than it was yesterday.
+
+## STATUS LINE
+
+**LEGACY FOREX: STILL BLOCKED ON THE ENGINE — BUT THE DELIVERABLE IS NO LONGER SILENTLY WRONG.** The
+external blockers are unchanged and outside this project's control. What changed is internal: the one
+artefact this workstream can actually ship had six defects, one of which inverted the meaning of its level
+gate, and none had been looked for in eight ticks. Zero results recorded, still correctly.
