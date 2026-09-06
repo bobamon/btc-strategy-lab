@@ -6638,3 +6638,53 @@ question was already pushed to the user once (check #1, 2026-09-04).
 1.95534435 H2, DD 4.50890824%, 40 trades). **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61(short)** —
 unchanged (PF 1.88616546 on 2022-01-01 window, `passed`; PF 1.01300244 on full coverage, `testing`).
 **THIS CYCLE: no change.** v67 (rejected) still stands as the most recent real result on file.
+
+---
+
+## ██ CYCLE CHECK #35 — QUEUE STILL EMPTY; NOT RE-NOTIFYING (2026-09-06)
+
+**The scheduled prompt is still the identical v37/v53 snapshot**, unchanged since check #1 — same
+"QUEUE ITEM 1" (12H/24H bias gate) and "QUEUE ITEM 2" (cascade signature), both closed long ago (bias
+gate v54–v61 / HARD LESSON 32/45; cascade HARD LESSON 34/35/50/52), same publish-prompt-hang warning
+(not applicable — this cycle makes no `Artifact` call, and none is made below). Per "THE DOCS WIN over
+this prompt," nothing from it is repeated.
+
+`git pull --rebase origin main` at cycle start was a clean fast-forward onto `ff7fa17` (three concurrent
+commits landed since check #34, all in the other two labs — War Formation E88a/E88b and Legacy Forex
+tick #13/Attack 96 — nothing touching `three-m-elite/`). HEAD came up detached from the fetched ref;
+confirmed `origin/main` and the fetched commit are identical (`ff7fa174`) before proceeding, same
+non-issue check #34 already worked through with the then-stale local `main`.
+
+**Re-verified end to end, same method as checks #32–#34:** `three-m-elite/transcripts/` still 10 files;
+`VOCABULARY.md`'s STILL MISSING table still lists the 3M candle anatomy and the swing rule as genuinely
+absent from the material; `results/backtests.json` still 36 entries, last entry still v67 (`status:
+rejected`); `git log -- three-m-elite/` shows nothing landed between check #34's commit and this one.
+Checked all git authors in reachable history (`ecarr`/`Claude` only) for anything answering the
+declared-deviation promotion policy question — none exists; `ecarr`'s own commits are unrelated (lab
+mandate change, initial commit). Credit balance moved 478 → 476 since check #34, consistent with the
+other two labs' backtests in the interleaved commits above, not with any 3M spend. State is otherwise
+byte-for-byte the same as check #34 left it.
+
+**Checked the queue check #34 left for anything actionable:** all three items unchanged — (1) the
+promotion-policy question is still for the user, not this session, to answer; (2) no further
+single-term short-side lever is queued (bias, FVG-grading, cascade/sizing, MA-overextension all closed
+axes); (3) the candle anatomy and swing rule remain unresolvable from the ten captured transcripts.
+Nothing new to run.
+
+**No backtest run. 0 of 476 available credits spent.** Manufacturing a variant to spend the budget
+would repeat the exact mistake this lab's mandate forbids (do not re-engineer the frame, do not invent
+a mechanism the source does not prescribe) on a cycle with genuinely nothing queued.
+
+**No new notification sent** — per HARD LESSON 26, a repeated stale-prompt flag and a repeated open
+question are not new information; nothing has changed since check #34's assessment, and the policy
+question was already pushed to the user once (check #1, 2026-09-04).
+
+**QUEUE (unchanged, restated for the next cycle):**
+1. The declared-deviation promotion policy question remains open, still for the user.
+2. No further single-term short-side lever queued; needs new source material.
+3. VOCABULARY.md's Type 1 candle anatomy and the swing rule remain genuinely undecoded.
+
+**CHAMPION OF RECORD (LONG): v62-fvg** — unchanged (PF 2.04354108 full coverage / 2.10461082 H1 /
+1.95534435 H2, DD 4.50890824%, 40 trades). **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61(short)** —
+unchanged (PF 1.88616546 on 2022-01-01 window, `passed`; PF 1.01300244 on full coverage, `testing`).
+**THIS CYCLE: no change.** v67 (rejected) still stands as the most recent real result on file.
