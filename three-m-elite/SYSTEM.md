@@ -7275,4 +7275,87 @@ measured on unstable samples, and the stable samples all have mediocre edge.
 - StratBase, *Expectancy in Trading* — https://stratbase.ai/en/blog/expectancy-trading-formula
 - CrossTrade, *Win Rate vs Expectancy* — https://crosstrade.io/learn/performance-metrics/win-rate-vs-expectancy
 - TradeZella, *Trading Expectancy* — https://www.tradezella.com/blog/trading-expectancy
+
+---
+
+# ██ v69 — THIRD INSTRUMENT: v62-fvg ON SOLUSDT. THE GENERALISATION SERIES NOW DECLINES MONOTONICALLY AND SOL IS GROSS-NEGATIVE (2026-09-06)
+
+**The scheduled prompt fired again, still as the stale v37/v53 snapshot** — "QUEUE ITEM 1" (bias
+gate) and "QUEUE ITEM 2" (cascade signature), both closed since v54–v61 and reconfirmed clean on
+every long-leg build including v68. Per "THE DOCS WIN over this prompt," neither is repeated. This
+lab is at v68 on disk at cycle start; this entry is v69.
+
+**`git pull --rebase origin main` at cycle start:** local HEAD was detached after a prior fetch;
+resolved by checking out `main` and hard-resetting to `origin/main` (fast-forward only, no local
+commits lost — none existed). No concurrent 3M-elite commits to reconcile. **Credits: 460 (250–500
+bracket → exactly ONE backtest).**
+
+## THE REAL QUEUE — TAKEN FROM v68'S OWN CARRIED-FORWARD QUEUE, NOT THE STALE PROMPT
+
+v68 left four items. Item 1 was the sharpest and cheapest to close: **test v62-fvg on a third
+instrument (SOL)** — two points (BTC, ETH) cannot distinguish "BTC-specific" from "BTC and ETH
+happen to differ"; three can. Fully specified, no new pine file needed (same byte-identical-source,
+symbol-override methodology already used for the ETH test).
+
+**PRE-REGISTERED OUTCOMES (LESSON 17), stated before running:** PF well above 1.0 near BTC's 2.04
+→ the gate generalises and ETH is the outlier; PF near ETH's ~0.98 → two of three instruments show
+no edge from the gate, confirming BTC-specific; PF below ETH's ~0.98 → the gate actively hurts on
+altcoins as a pattern, not a one-off.
+
+## THE BUILD AND RUN
+
+Byte-identical `pine/3m-elite-v62-fvg-graded-full-coverage.pine` — no code change, only the
+`symbol` parameter — pointed at SOLUSDT on the instrument's full coverage window (2021-10-15,
+SOL's first ClickHouse bar, through 2026-09-01). `resultId 01M1V5P8K12DJ89N4FQG158MQ8`.
+
+| | BTC (v62-fvg, champion) | ETH (v62-fvg) | **SOL — v62-fvg (this run)** |
+|---|---|---|---|
+| Profit factor | 2.04354108 | 0.97825349 | **0.87179834** |
+| Trades | 40 | 49 | **63** |
+| Net | +25.61599544% | -0.8260768% | **-8.568871%** |
+| Max drawdown | 4.50890824% | 8.49043491% | **23.32909586%** |
+| Cascade | 1.0 clean | 1.0 clean | **1.0 clean (63/63, depth 1)** |
+
+## THE VERDICT: THE THIRD, SHARPEST OUTCOME FIRED
+
+**PF 0.87179834 is below ETH's own 0.97825349 — not "in the same neighbourhood," genuinely worse.**
+The series across three instruments now reads **BTC 2.04 → ETH 0.98 → SOL 0.87**, monotonically
+declining and never recovering above 1.0 off BTC. This closes v68's queue item 1: three points
+agree the gate is BTC-specific, and the direction of travel off BTC is downward, not merely flat.
+
+**Gross edge per trade (HARD LESSON 37) sharpens this further.** Gross = net + commission =
+-856.88709955 + 669.04099955 = **-$187.85, or -$2.98/trade — negative.** This is a different and
+harsher failure than ETH's: on ETH the gate selected lower-quality-but-still-positive-gross trades
+(×0.59 of ungraded). On SOL, with no ungraded SOL baseline run to compare against, the graded
+construction alone is already gross-negative — **the trades it selects lose money before commission
+is even charged.** Cost is not the story here; the selection itself is.
+
+## WHAT THIS MEANS FOR THE CHAMPION
+
+**No change.** v62-fvg is unaffected — different instrument, no RATCHET v2 comparison applies. But
+the caveat it carries strengthens again: it is now a **BTCUSDT-specific, single-term result whose
+edge does not merely fail to travel — it inverts and worsens** on two out of two alternative
+instruments tried, both with clean (1.0) cascades so the result is not a measurement artifact.
+
+## CREDIT ACCOUNTING
+
+One backtest spent, as the 250–500 bracket allows. No further runs this cycle.
+
+## QUEUE
+
+1. **BNB or a fourth instrument** would show whether SOL/ETH's decline continues or whether BTC is
+   simply an outlier in the other direction — four points read a trend more safely than three.
+2. **v56's source MA-stack bias rule on SOL** (queue item 4 from the rejected-filters re-screen,
+   still open) — does the *source's own* bias term generalise where the lab-invented FVG term does
+   not? Different axis, unattempted on any instrument but BTC.
+3. **Do not stack further terms on the FVG base.** Unchanged from v67/v68 — a base this thin (40
+   trades) cannot support more filters, and now it is shown not to travel either.
+4. VOCABULARY.md's Type 1 (3M candle anatomy) and the swing rule remain genuinely undecoded across
+   all ten captured transcripts.
+
+**CHAMPION OF RECORD (LONG): v62-fvg** — unchanged (PF 2.04354108 full coverage, DD 4.50890824%, 40
+trades, BTCUSDT only). **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61(short)** — unchanged (PF
+1.88616546 on the 2022-01-01 window, `passed`; PF 1.01300244 on full coverage, `testing`). **THIS
+CYCLE: no champion change.** v69 (this entry) is a diagnostic on a non-champion instrument, recorded
+with status `testing` in `results/backtests.json`.
 - PineConnector, *What Is the Expectancy Ratio?* — https://www.pineconnector.com/blogs/pico-blog/what-is-expectancy-ratio

@@ -1504,5 +1504,51 @@
     },
     "verdict": "DIAGNOSTIC, not a RATCHET v2 decision -- this does not compete against v62-fvg (different instrument) and does not touch the BTC champion. Answers the pre-registered question: PF 1.02872954 on ETH, in the same near-breakeven neighbourhood as v62-fvg's own ETH result (0.97825349), NOT the 'worse than 0.98' outcome that would have implicated the FVG gate specifically. THE INSTRUMENT IS THE PROBLEM, not the grading term -- BTC's edge (PF 2.04 graded / 1.05 ungraded on BTC full coverage) simply does not travel to ETH, with or without FVG grading.",
     "notes": "Full comparison, same ETH window (2021-03-15 to 2026-09-01), same v37 lineage: ungraded PF 1.02872954 / DD 27.31398997% / 316 trades / net +7.98609566%, vs FVG-graded (v62-fvg-on-ETH) PF 0.97825349 / DD 8.49043491% / 49 trades / net -0.8260768%. Two things are true at once: (1) neither construction clears PF 1.0 by a meaningful margin on ETH, closing the generalisation question from the prior cycle's queue item 3 with 'BTC-specific mechanism' rather than 'FVG-specific artifact' -- and (2) the FVG grading term is NOT inert on ETH even though it does not fix the PF problem: it cuts drawdown by 18.8pp (27.31% -> 8.49%) and trade count by 84.5% (316 -> 49) for a PF that is statistically indistinguishable from ungraded's 1.03. Cascade ratio 1.0 (316/316, depth 1), clean -- consistent with v62-fvg's own clean cascade and with the cascade signature having ALREADY been resolved at v54-v61 (HARD LESSON 35/50: it was a margin-liquidation unwind on the SHORT leg only, PF-transparent, fixed by 25%-equity sizing at v60; no long-leg build, including this one, has ever shown the defect). Does not change the champion (v62-fvg, BTCUSDT-only, unchanged) or its own caveat (already recorded: 'v62 is a BTCUSDT result, not a demonstrated method'). Closes the second-instrument cycle's queue item 3; queue item 2 (a third/fourth instrument, SOL/BNB) remains open for a future cycle, unattempted here (one-backtest credit bracket)."
+  },
+  {
+    "id": "3m-elite-v69-v62-fvg-on-sol",
+    "name": "3M Elite v62-fvg (FVG-graded champion mechanism) on SOLUSDT, full coverage -- third instrument in the generalisation series (BTC -> ETH -> SOL)",
+    "symbol": "SOLUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "backtestStart": "2021-10-15",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/pine/3m-elite-v62-fvg-graded-full-coverage.pine",
+    "pineSource": "three-m-elite/pine/3m-elite-v62-fvg-graded-full-coverage.pine",
+    "description": "Queue item 1 from the v68 entry's own carried-forward queue: 'test the FVG gate on a third instrument (SOL). Two points cannot distinguish BTC-specific from ETH is unusual. Three can.' Byte-identical v62-fvg source (pine/3m-elite-v62-fvg-graded-full-coverage.pine -- 4H reconstruction from 15m bars, standard three-candle FVG anchor C.low > A.high confirmed one candle after the bullish engulf, zone = [low, open] of the engulf, mitigation on a body close with the two-close rule, maxAge=6, dzAge>=1, one entry per zone, stop = dzBot, R floor 0.8% by exclusion, 2R target, maxBars=96, no bias gate), only the symbol parameter changed to SOLUSDT, on the instrument's full ClickHouse coverage (2021-10-15, SOL's first bar, through 2026-09-01) -- same methodology as the v68 ETH test, no new file needed since no code changed (HARD LESSON 21: this note plus the reused pineSource path is the record). LONG ONLY, unchanged from every prior v62-fvg run (LESSON 6 -- legs are not independent in this lab, v24). This is the single backtest this cycle's credit bracket (460, 250-500) allowed.",
+    "metrics": {
+      "profitFactor": 0.87179834,
+      "maxDrawdownPct": 23.32909586,
+      "netProfitPct": -8.568871,
+      "totalTrades": 63,
+      "winningTrades": 22,
+      "losingTrades": 41,
+      "winRatePct": 34.92063492,
+      "sharpeRatio": -0.13062621,
+      "sortinoRatio": -0.01315124,
+      "avgTradePct": -0.13601383,
+      "ratioAvgWinLoss": 1.6247151,
+      "longTrades": 63,
+      "shortTrades": 0,
+      "commissionPaid": 669.04099955
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "resultId": "01M1V5P8K12DJ89N4FQG158MQ8",
+      "jobId": "adhoc_01M1V5P8K1WA7CJ6X84MC0CC8W",
+      "strategyId": "01M1V5P8TEG1NB9TVGQMGNH3CV",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1V5P8K12DJ89N4FQG158MQ8",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "uniqueEntries": 63,
+      "totalRows": 63,
+      "maxCascadeDepth": 1,
+      "verifiedAt": "2026-09-06T00:00:00Z"
+    },
+    "verdict": "DIAGNOSTIC, not a RATCHET v2 decision -- this does not compete against v62-fvg (different instrument) and does not touch the BTC champion. Answers the pre-registered question with the sharpest of the three outcomes named in advance: PF 0.87179834 is BELOW ETH's own 0.97825349, not merely 'in the same neighbourhood' -- the generalisation series now reads BTC 2.04354108 -> ETH 0.97825349 -> SOL 0.87179834, monotonically declining and never recovering above 1.0 off BTC.",
+    "notes": "Gross edge per trade (HARD LESSON 37): gross = net + commission = -856.88709955 + 669.04099955 = -187.8461, i.e. -$2.98/trade -- NEGATIVE gross edge, not merely cost-crushed positive edge like BTC ($12.89 ungraded) or ETH ($14.24 ungraded / $8.42 graded). This is a different and harsher failure mode than ETH's: on ETH the FVG gate selected lower-quality-but-still-positive-gross trades (x0.59); on SOL, absent an ungraded SOL baseline to compare against, the graded construction alone is already gross-negative -- the gate is not merely failing to add value here, the trades it selects lose money before commission is even charged. Cascade ratio 1.0 (63/63, depth 1), clean -- consistent with every long-leg build in this lab; the cascade defect (HARD LESSON 35/50) remains a short-leg-only, already-fixed (v60, 25%-equity sizing) artifact. Closes the v68 entry's queue item 1 (three-instrument point now exists: BTC/ETH/SOL). Does not change the champion (v62-fvg, BTCUSDT-only, unchanged) or the validated short (v60/v61(short), unchanged). Queue item 4 from the rejected-filters re-screen entry (does v56's source bias rule raise gross edge on SOL too, or is it BTC-specific like FVG) remains open and unattempted -- one-backtest bracket allowed only this run."
   }
 ]
