@@ -1,0 +1,191 @@
+//@version=6
+// WAR FORMATION E92 -- E91's QUEUE ITEM 1, ANSWERED WITHOUT GUESSING AT THE SHIELD FIRST.
+//
+// SCHEDULING NOTE. This cycle's stored prompt again describes lab state as of E66 ("no champion, no
+// candidate... continue numbering after E66," short-leg entry-geometry as the open question via
+// E64a/E64b/E66). That work finished at E70-E79 many cycles ago; E81/E89/E90/E91 already flagged this
+// same staleness. The docs win, per the prompt's own instruction and this lab's repeated precedent.
+// This cycle continues E91's own queue item 1: "A shield-width sweep against the 6h reference ...
+// Count the population at the candidate shield width BEFORE building the strategy version."
+//
+// WHY THIS IS NOT A SHIELD SWEEP: rewardDist (p6hh-close / close-p6hl) is a property of PRICE
+// STRUCTURE and the entry population alone -- it does not depend on shieldUsd anywhere in the
+// mechanism (shieldUsd only sets the stop/liquidation gap on a STRATEGY build, which this counter
+// build does not have). So E91's own six $500-wide bins already ARE the full population at every
+// candidate shield width simultaneously: for a candidate shield S and floor minRRv=m, "does it clear
+// 30 trades" is just "how many of E91's 45 trades have rewardDist >= m*S", answerable from E91's own
+// published cumulative counts (>=2500:2, >=2000:3, >=1500:6, >=1000:12, >=500:25, >=0:45) WITHOUT a
+// new backtest -- and it already rules out every threshold >= $500, because count(>=500)=25 < 30
+// regardless of which (S,m) produces that $500 threshold. Spending a credit to re-derive that would
+// be the HARD LESSON 21/25 waste the second E79 entry this cycle-family already flagged.
+//
+// THE ACTUAL OPEN QUESTION, AND WHAT THIS RUN MEASURES: whether any threshold BELOW $500 -- the only
+// region left where clearing 30 trades is even arithmetically possible (20 of the 45 trades live
+// there) -- corresponds to a shield that is still LESSON-3-compliant (>=0.8% of price; ~$480-960
+// across this window's $60k-120k BTC range, per E79's own citation) at a non-degenerate minRRv
+// (this lab's own working floor for "means something," ~0.5, per E90/E91's language). This subdivides
+// E91's own <$500 bin into five $100-wide bins so the exact cumulative count at $100/$200/$300/$400
+// is known, rather than assumed uniform -- HARD LESSON 11 forbids reasoning about an unmeasured
+// interior shape.
+//
+// METHOD: BYTE-IDENTICAL to e91-e90-6hblock-reward-distance-population.pine in every gate and in the
+// rewardDist formula itself (p6hh-close / close-p6hl, same c6hh/c6hl/p6hh/p6hl state, same latch
+// order). The ONLY change is the bin/qty encoding: five $100-wide bins from $0-$500, plus one
+// catch-all for >=$500 (already known to total 25 from E91 and not needed at finer resolution here).
+//
+// PRE-RUN AUDIT:
+//   Not a strategy candidate -- no R floor, no stop-placement, no BINDING-as-a-strategy audit applies
+//   (same exemption E81/E90/E91 recorded for themselves).
+//   BINDING (E17): goLong/goShort/rewardDist are byte-identical to E91 -- the exact same 45-trade
+//     population (20 long, 25 short), so this run's finer bins are directly comparable to E91's coarse
+//     ones, term for term. Only the qty-encoding bin edges changed.
+//   REDUNDANCY (HARD LESSON 18): no new state -- c6hh/c6hl/p6hh/p6hl are carried over unchanged from
+//     E91.
+//   Latch order (LESSON 8): unchanged from E91.
+//   OCCUPANCY CONFOUND (HARD LESSON 24/28/29): not applicable -- 1-bar-hold counter, no held position.
+//
+// REGISTERED PREDICTION (HARD LESSON 17), BEFORE RUNNING:
+//   (a) If the sub-$500 mass concentrates toward the LOW end ($0-200), a LESSON-3-compliant shield
+//       (~$500-960) at minRRv~0.25-0.5 could plausibly reach a threshold near $150-300 and admit
+//       enough of the 20 sub-$500 trades to clear 30 total -- reopening the line, though still at a
+//       minRRv this lab has already called a "wall" (HARD LESSON 45) rather than a real floor.
+//   (b) If the mass concentrates toward the HIGH end ($300-500) or is roughly even across all five
+//       bins, no LESSON-3-compliant shield at any minRRv above the degenerate range can reach 30
+//       trades, and the level-target line closes completely on this 15m track -- not "insufficient
+//       at the shields tried," but arithmetically closed given LESSON 3's own floor.
+//   Both outcomes are informative; this is a genuine measurement, not a foregone conclusion.
+//
+// RESULT and interpretation are recorded in EXPERIMENT-LOG.md and results/backtests.json after this
+// run completes, per the lab's provenance rule (never hand-write a metric).
+strategy("WF E92 sub-$500 reward-distance population counter", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=50000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+greenBull = input.int(4,     "Green 1h candles for BULL")
+greenBear = input.int(2,     "Green 1h candles at or below for BEAR")
+skipOpen  = input.int(60,    "Skip first N minutes of 6h block")
+skipClose = input.int(60,    "Skip last N minutes of 6h block")
+coilK     = input.float(0.85,"Coil: atrFast < atrSlow * K")
+velK      = input.float(0.8, "Velocity: min reclaim as multiple of atrSlow")
+midLo     = input.float(400, "Whole-number middles low")
+midHi     = input.float(600, "Whole-number middles high")
+etOffset  = input.int(-4,    "ET offset from UTC")
+witchOn   = input.bool(true, "Ban longs in witching hour 1-4am ET")
+
+MS6H = 21600000
+MS1H = 3600000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+
+var float h1o     = na
+var int   grnCur  = 0
+var int   cntCur  = 0
+var int   grnPrev = 0
+var int   cntPrev = 0
+
+var float c6hh = na
+var float c6hl = na
+var float p6hh = na
+var float p6hl = na
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    p6hh    := c6hh
+    p6hl    := c6hl
+    grnCur  := 0
+    cntCur  := 0
+    c6hh    := high
+    c6hl    := low
+else
+    c6hh := na(c6hh) ? high : math.max(c6hh, high)
+    c6hl := na(c6hl) ? low  : math.min(c6hl, low)
+
+if new1h
+    if not na(h1o)
+        cntCur := cntCur + 1
+        if close[1] > h1o
+            grnCur := grnCur + 1
+    h1o := open
+
+regimeReady = cntPrev >= 5
+bullRegime  = regimeReady and grnPrev >= greenBull
+bearRegime  = regimeReady and grnPrev <= greenBear
+
+minsIn    = (time - b6 * MS6H) / 60000
+timeGate  = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+var float c1hh = na
+var float c1hl = na
+var float p1hh = na
+var float p1hl = na
+
+if new1h
+    p1hh := c1hh
+    p1hl := c1hl
+    c1hh := high
+    c1hl := low
+else
+    c1hh := na(c1hh) ? high : math.max(c1hh, high)
+    c1hl := na(c1hl) ? low  : math.min(c1hl, low)
+
+brokeBelow = not na(p1hl) and c1hl < p1hl
+brokeAbove = not na(p1hh) and c1hh > p1hh
+
+atrFast = ta.atr(1)
+atrSlow = ta.atr(2)
+coiled  = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK
+coilPrev = coiled[1]
+velMin   = na(atrSlow) ? na : atrSlow * velK
+
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+hUTC     = math.floor(time / MS1H) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+longBan  = witchOn and witching
+
+longTrig  = not na(p1hl) and not na(velMin) and ta.crossover(close, p1hl)  and (close - p1hl) >= velMin
+shortTrig = not na(p1hh) and not na(velMin) and ta.crossunder(close, p1hh) and (p1hh - close) >= velMin
+
+// BYTE-IDENTICAL to E91's goLong/goShort -- the exact same population.
+goLong  = bullRegime and timeGate and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig
+goShort = bearRegime and timeGate and brokeAbove and coilPrev and not inMiddle and shortTrig
+
+// Same reference as E91 (prior completed 6h block's own extreme) -- unchanged.
+rewardDist = goLong ? (p6hh - close) : goShort ? (close - p6hl) : na
+
+// CHANGED FROM E91: five $100-wide bins covering the <$500 mass (20 of E91's 45 trades), plus one
+// catch-all for >=$500 (already known to total 25 from E91, not sub-divided here).
+binQty = rewardDist < 100 ? 0.01 : rewardDist < 200 ? 0.02 : rewardDist < 300 ? 0.03 : rewardDist < 400 ? 0.04 : rewardDist < 500 ? 0.05 : 0.06
+
+var int barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long, qty=binQty)
+    barsIn := 0
+
+if flat and goShort
+    strategy.entry("S", strategy.short, qty=binQty)
+    barsIn := 0
+
+if strategy.position_size != 0
+    barsIn := barsIn + 1
+
+if barsIn >= 1 and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong  ? 1 : 0, title="LongSignal")
+plot(goShort ? 1 : 0, title="ShortSignal")
+plot(rewardDist, title="RewardDistance")
