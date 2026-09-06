@@ -7165,3 +7165,114 @@ quality. A filter that lowers it is just trading less.
 - Author copy — https://mysimon.rochester.edu/novy-marx/research/ToAatTC.pdf
 - Alpha Architect, *Alpha from Short-Term Signals* — https://alphaarchitect.com/alpha-from-short-term-signals/
 - *Retaining alpha: trade size and rebalancing frequency on FX strategy returns* — https://www.sciencedirect.com/science/article/abs/pii/S1386418120300148
+
+---
+
+# ██ RE-SCREENING THE REJECTED FILTERS ON GROSS EDGE — ONE OF THEM WAS REJECTED PROCEDURALLY, NOT ON MERIT
+
+Zero credits, no backtest. Closes the previous entry's queue item 2.
+
+## METHOD, AND ITS VALIDATION
+
+Only 18 of 37 records store `commissionPaid`, so gross edge could not be read directly for most. But
+the engine's parity profile is fixed — commission 0.05% per side at 100% of equity — so a round trip
+costs a known, near-constant fraction of equity.
+
+**Validated against the 18 records that do store it:** implied commission per trade is **median
+0.0651%** of initial capital (mean 0.0667%, range 0.0241–0.1194%). That median was then used to
+reconstruct **gross edge per trade = `avgTradePct` + 0.0651%** for all 37 records.
+
+The spread (0.024–0.119%) is real and comes from equity drifting away from its starting value, so
+per-record figures carry a few basis points of error. **That is far below the differences that matter
+below.**
+
+## THE SCREEN — top of the board by gross edge per trade
+
+| Record | **Gross %/trade** | Net %/trade | Trades | PF | Status |
+|---|---|---|---|---|---|
+| v62-fvg split H1 | **+0.7299** | +0.6648 | 24 | 2.105 | passed |
+| **v62-fvg full coverage** | **+0.6545** | +0.5894 | 40 | 2.044 | passed |
+| v62-fvg split H2 | +0.5851 | +0.5200 | 16 | 1.955 | passed |
+| **v66 MA overextension** | **+0.5180** | +0.4530 | 19 | 1.921 | **rejected** |
+| **v56 source MA-stack bias** | **+0.4624** | +0.3974 | 37 | 1.621 | **rejected** |
+| v58 first-touch-only | +0.4287 | +0.3636 | 117 | 1.484 | passed |
+| v64 combined flip-rule | +0.4098 | +0.3448 | 153 | 1.558 | testing |
+| **v37 (the base)** | **+0.2571** | +0.1920 | 155 | 1.252 | passed |
+| v57 conditional bias gate | +0.1948 | +0.1297 | 125 | 1.171 | rejected |
+
+## THE THREE REJECTIONS, JUDGED ON THE RIGHT AXIS
+
+**v57 — correctly rejected.** Gross **+0.1948%** against the v37 base's **+0.2571%**. It *lowered*
+trade quality. The original rejection was right for the right reason.
+
+**v66 — correctly rejected.** Gross **+0.5180%** against its parent v62's **+0.6545%**. Also a
+quality reduction relative to what it was built on. Right call.
+
+**v56 — rejected for a procedural reason, and the screen says the filter works.**
+
+| | v37 base | **v56** |
+|---|---|---|
+| Profit factor | 1.25172059 | **1.62137752** ✅ |
+| Max drawdown | 8.72815312% | **6.18395066%** ✅ |
+| Trades | 155 | **37** ✅ (clears 30) |
+| **Gross edge / trade** | **+0.2571%** | **+0.4624% — 1.80×** |
+
+**All three RATCHET v2 clauses pass.** It was blocked by **clause 4**: the cut from 155 to 37 exceeds
+50%, so a split test is mandatory *before* keeping — and the split produced **27/10 trades**, both
+halves below the floor. The log records it as *"split unsatisfiable"*.
+
+**So v56 was never rejected on evidence that the filter is bad. It was rejected because the sample
+could not support the procedure required to accept it** — and on the axis that measures filter
+quality, it nearly doubles the base's gross edge per trade.
+
+**This is the source's own 1H/2H MA-stack bias rule** — the top line of their checklist. The log's own
+heading for it reads *"THE SOURCE'S OWN BIAS RULE. BEST NUMBERS THIS LAB HAS PRODUCED, AND IT STILL
+CANNOT BE PROMOTED."* That framing was right and this adds the reason it deserved better than a
+rejection: it is a genuine selector, not a sample-cutter.
+
+## THE FINDING THAT FOLLOWS — TWO GOOD FILTERS ON DIFFERENT AXES, NEVER COMBINED
+
+| Filter | Axis | Gross/trade | vs v37 |
+|---|---|---|---|
+| v56 | source's MA-stack **bias** | +0.4624% | **1.80×** |
+| v62 | **FVG** zone grading | +0.6545% | **2.55×** |
+
+**These are independent axes and they have never been tested together.** Both raise gross edge
+substantially over the same base.
+
+**And the reason not to rush it is arithmetic:** v56 cuts 155→37 and v62 cuts 241→40. Combined they
+would plausibly land near 10–15 trades — far below the floor, and unsplittable, which is exactly what
+blocked v56 alone. **A combination is not testable on this data**, and recording that now prevents a
+future cycle spending a credit to rediscover it.
+
+## THE CAVEAT THE RESEARCH INSISTS ON
+
+Practitioner guidance on expectancy is explicit about sample: *"Below 50 trades, expectancy is
+dominated by the randomness of a few outlier wins or losses"*, and reliable expectancy needs *"at
+least 100, ideally 200+"* trades.
+
+**Every high-gross record above is below 50 trades** — v62 at 40, v56 at 37, v66 at 19. **The champion's
+own gross edge is measured on a sample the literature calls dominated by outliers.** Only v58 (117),
+v64 (153) and v37 (155) are in the range where expectancy stabilises, and all three sit at less than
+half v62's gross edge.
+
+**That is the real tension in this lab, now stated numerically:** the high-quality filters are all
+measured on unstable samples, and the stable samples all have mediocre edge.
+
+## QUEUE
+
+1. **Correct v56's status language.** It is not "the filter failed"; it is "the filter passed clauses
+   1–3 and could not satisfy clause 4's split on this sample". Those are different, and the ledger
+   should distinguish them.
+2. **Do not combine v56 and v62.** Arithmetic above: ~10–15 trades, unsplittable. Recorded so it is
+   not attempted.
+3. **The only filters worth testing next are ones that raise gross edge while keeping trades above
+   ~100** — the range where expectancy stabilises. Nothing tried so far does both.
+4. SOL as a third instrument remains owed, and now has a sharper question: does v56's bias rule raise
+   gross edge there too, or is it BTC-specific like the FVG gate?
+
+## SOURCES
+- StratBase, *Expectancy in Trading* — https://stratbase.ai/en/blog/expectancy-trading-formula
+- CrossTrade, *Win Rate vs Expectancy* — https://crosstrade.io/learn/performance-metrics/win-rate-vs-expectancy
+- TradeZella, *Trading Expectancy* — https://www.tradezella.com/blog/trading-expectancy
+- PineConnector, *What Is the Expectancy Ratio?* — https://www.pineconnector.com/blogs/pico-blog/what-is-expectancy-ratio
