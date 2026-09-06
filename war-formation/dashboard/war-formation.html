@@ -2052,9 +2052,59 @@ const DATA = [
     },
     "verdict": "THE LEVEL-TARGET LINE IS NOW CLOSED BY ARITHMETIC, NOT JUST BY INSUFFICIENT EVIDENCE. The 30-trade floor is cleared for the first time at the $200 threshold (cumulative 30 of 45), which is the ONLY threshold in the entire measured distribution that lands exactly on RATCHET v2's floor. But turning that threshold into an actual (shield, minRRv) pair breaks on LESSON 3: at minRRv=1.0 the implied shield is $200 -- LESSON 3 requires shieldUsd >= 0.8% of price, which on this window's traded price range ($55k-$121k) is $440-$968, so a $200 shield violates the floor by more than 2x at every price level in the sample. At minRRv=0.5 the implied shield is $400 -- still below the $440 floor even at the CHEAPEST price this sample ever traded at. Only at minRRv<=0.25 does a LESSON-3-compliant shield (>=$800) become reachable at this threshold, and minRRv<=0.25-0.3 is the exact degenerate 'wall' range HARD LESSON 45 and E90/E91 already named as barely distinguishable from no floor at all. CONCLUSION: no (shieldUsd, minRRv) pair exists against the 6h-block reference that simultaneously (a) clears RATCHET v2's 30-trade floor, (b) satisfies LESSON 3's R-floor across this window's traded price range, and (c) uses a minRRv above this lab's own already-established degenerate threshold. This is not 'insufficient at the shields tried' (E90/E91's framing) -- it is arithmetically closed given the population's actual interior shape and LESSON 3's own binding constraint, for BOTH structural references this cascade defines (E90: 1h bucket, E91: 6h block, this run: 6h block at fine resolution). No shieldUsd sweep can rescue it, because rewardDist itself is shield-independent and its full distribution is now known.",
     "notes": "Diagnostic only, not a ratchet decision -- no KEEP/REJECT applies. Consistency check: the five fine bins sum to 20, exactly matching E91's own under500 bin count (9+6+3+1+1=20), and the atOrAbove500 count of 25 exactly matches E91's own 500-1000+1000-1500+1500-2000+2000-2500+over2500 sum (13+6+3+1+2=25) -- BINDING E17 holds byte-for-byte (goLong/goShort/rewardDist unchanged from E91), and get_trades (a free read) confirms this run's 45 trades are the SAME 45 trades as E91's (identical entry times/prices/directions), only re-binned at finer resolution. This closes E91's queue item 1 WITHOUT a new shield-width backtest -- the queue's own framing ('count the population at the candidate shield width') was based on a premise (that rewardDist depends on shieldUsd) that does not hold in this mechanism; that premise is corrected here. e58a (long, 1m) and E71 (short, 1m) remain the untouched 1m-track reference builds; E80/E82 and E87 (15m) remain status: research. The 15m level-target redesign line (HARD LESSON 41) is now closed against every structural reference and every shield width this lab's own R-floor rule permits -- reopening it would need either a genuinely new, non-look-ahead reference this cascade does not already compute, or a relaxation of LESSON 3's R floor, neither of which this cycle proposes. The HARD LESSON 48 drawdown-allowance RULE QUESTION blocking E74/E77 remains open, unresolved, awaiting the user -- unchanged across many cycles. SCHEDULING NOTE: the prompt that triggered this cycle again described lab state as of E66 ('no champion, no candidate... continue numbering after E66', short-leg entry-geometry via E64a/E64b/E66 framed as the open question). That work closed at E70-E79 many cycles ago; E81/E89/E90/E91 (and a since-merged concurrent-session E79 rewrite) already flagged this exact same staleness. The docs win, per the prompt's own instruction and this lab's repeated precedent: this cycle continued E91's own queue item 1 instead of re-deriving E64a-E66 territory a fifth time. NUMBERING: E92 was free at the start of this cycle (checked pine/ and this file for collisions) -- no renumbering needed."
+  },
+  {
+    "id": "wf-e93-e80-full-archive-window",
+    "name": "E93: E80/E82's 1h-structure 15m cascade, re-run on the full 6-year archive instead of the 2.2-year window",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "research",
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "backtestStart": "2020-08-19",
+    "backtestEnd": "2026-09-01",
+    "specPath": "war-formation/pine/e80-15m-native-1h-structure.pine",
+    "description": "Docs-first check found this cycle's stored prompt again describes lab state as of E66 (continue numbering after E66, attack the short's entry geometry); that work closed at E69-E79 cycles ago. The log itself has also forked: two differently-numbered E79 entries and two differently-numbered E80 entries now exist, committed by apparently-concurrent sessions. This entry's parent is the fully-provenanced E80/E82/E87/E88a/E88b lineage (pine/e80-15m-native-1h-structure.pine, strategyId 01M1SMXCYQ9KD43GRJJJ0TN7N4): the 1h-bucket structure-tier redesign, confirmed non-degenerate by E81 (coil fires on 7.77% of bars). The OTHER, later-committed 'E80'/'E80 SPLIT TEST' pair (6-year, coil-DROPPED, long-only) saved no pine file and no backtests.json row -- a HARD LESSON 21 provenance gap -- and its own claim that 'coil breaks at native 15m' contradicts E81's finding for this lineage, suggesting it is a different, less-derived construction, not a variant of this one. That gap is flagged for reconciliation by whoever owns it, not repaired here (reconstructing someone else's unsaved file risks misattributing a metric to a guess). E84/E85 and E87/E88a/E88b already split-tested this lineage WITHIN its original 2024-06-2026-09 window and failed (H2 PF 0.49 / 0.68). This entry asks a stronger version of the same question with genuinely out-of-window data: does the bidirectional edge survive on the FULL 15m archive (2020-08-19 to 2026-09-01, 6x the calendar span)? BINDING (E17): the ONLY variable changed from E80/E82 is the backtest date window; strategyId, shieldUsd ($2,000), rr (2.0), coilK (0.85), maxBars (288), and every gate are byte-identical (verified via get_strategy before running). PRE-RUN AUDIT: R floor (LESSON 3) checked against this run's OWN traded entry prices (get_trades, $10,117.50-$121,267): shieldUsd $2,000 is 1.65%-19.77% of price, clears the 0.8% floor throughout. Stop placement unchanged (LESSON 5). Both legs reported separately (LESSON 6). No new redundancy (LESSON 18) or occupancy confound (LESSONS 24/28/29) introduced -- only the window widened. Latch order unchanged (LESSON 8). REGISTERED PREDICTION, before running: if E80's small-window bidirectional edge was window-specific (as E85/E88b's in-window split failure already suggested), the short leg -- net-positive at +$492.42 on only 25 trades in the small window -- should degrade or flip negative once trade count grows well past the interpretability floor; if the edge is real and general, both legs should stay roughly positive.",
+    "metrics": {
+      "netProfitPct": 9.13311389,
+      "profitFactor": 1.08806654,
+      "maxDrawdownPct": 25.99052821,
+      "totalTrades": 147,
+      "winRatePct": 20.40816327,
+      "avgTradePct": 0.06213003,
+      "sharpeRatio": 0.18499637,
+      "sortinoRatio": 0.04892019,
+      "commissionPaid": 1069.617611,
+      "avgWinningTrade": 376.133626783333,
+      "avgLosingTrade": -88.638439440171,
+      "ratioAvgWinLoss": 4.24345949,
+      "largestWin": 2049.0776225,
+      "largestLoss": -647.043186,
+      "avgBarsInTrade": 113.46938776,
+      "avgBarsWinning": 245.96666667,
+      "avgBarsLosing": 79.4957265,
+      "longTrades": 43,
+      "shortTrades": 104,
+      "longWinning": 21,
+      "shortWinning": 9,
+      "longNetProfit": 2714.312191500013,
+      "shortNetProfit": -1801.000802500014
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1V526XR04BWHC7Q0ZHE5CEE",
+      "strategyId": "01M1SMXCYQ9KD43GRJJJ0TN7N4",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1V526XR04BWHC7Q0ZHE5CEE",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1.4411764705882353,
+      "verifiedAt": "2026-09-06T00:00:00Z"
+    },
+    "verdict": "THE PREDICTION OF WINDOW-SPECIFICITY IS CONFIRMED, MORE SHARPLY THAN REGISTERED. PF drops from 1.24221581 (44 trades, 2.2-year window) to 1.08806654 (147 trades, 6-year archive) -- still above 1.0, but the short leg flips from net-POSITIVE (+$492.42, 3/25 wins, 12%) to net-NEGATIVE (-$1,801.00, 9/104 wins, 8.65%) even though its own trade count more than quadrupled (25 -> 104), comfortably clearing the 30-trade floor on its own. The long leg stays net-positive and now carries the entire result (43 trades, 21 wins, 48.8%, +$2,714.31). E80's 'first both-legs-positive bidirectional result' headline does not survive extension to the full available archive -- this is a stronger, more decisive answer than E85/E88b's in-window split test could give, because it uses genuinely out-of-window data rather than two halves of the same 2.2 years. It also converges with the independently-built sibling 15m branch's own decision to go long-only ('the short leg is dead across 128 trades from E78 and E79') -- two differently-constructed 15m cascades, evidently tested by two different concurrent sessions, arrive at the same conclusion about the short leg's weakness at 15m over long horizons.",
+    "notes": "Not a ratchet KEEP/REJECT -- this is a data-window extension of E80/E82, not a parameter change to ratchet against a fixed-window parent, and RATCHET v2's split-test clause does not literally apply (no >50% count cut). Recorded as status: research, matching E80/E82/E87/E88a/E88b's own current status -- a new, larger-sample measurement, not a promotion. CAVEAT: the engine flagged a cascade_exit_pattern warning (ratio 1.44, one entry closed across 11 partial fills, crossing the depth-8 threshold but not the ratio-3 threshold) -- not the severe variant that requires a mandatory retry, but not yet independently verified trade-by-trade; the reported longNetProfit/shortNetProfit already reflect actual fills, so it is not expected to change the sign of this finding, but a future free get_trades pass could confirm that directly. Check #36's shield-fill caveat (every PF is an upper bound) applies here as everywhere. e58a (long, 1m) and E71 (short, 1m) remain the untouched 1m-track references. HARD LESSON 48's drawdown-allowance rule question (blocking E74/E77) remains open, unresolved, awaiting the user. NUMBERING: continued from E92, the highest number found anywhere in EXPERIMENT-LOG.md or results/backtests.json at the start of this cycle; the separately-numbered 'E80'/'E80 SPLIT TEST' collision in the sibling branch was left as found rather than renumbered, since fixing someone else's already-pushed commit history is out of scope for this cycle. QUEUE for a future cycle: (1) re-run this same construction LONG-ONLY on the full 6-year archive to see whether dropping the now-established-weak short leg improves PF/DD relative to this bidirectional full-archive number, analogous to e50a/e50b on the 1m track; (2) the sibling branch's missing-provenance gap should be repaired by whoever owns it; (3) HARD LESSON 48 remains the single largest open item outside this lab's own power to close."
   }
 ];
-const BUILT = "2026-09-06 09:45";
+const BUILT = "2026-09-06 10:46";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

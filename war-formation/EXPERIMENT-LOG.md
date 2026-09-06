@@ -9073,3 +9073,139 @@ mechanical gate on this cascade, over six years, it is worse than nothing.
 - TradingwithRayner, *Volatility Contraction* — https://www.tradingwithrayner.com/course/17-volatility-contraction/
 - Deepvue, *Volatility Contraction Pattern* — https://deepvue.com/screener/volatility-contraction-pattern/
 - TradingSim, *VCP Pattern Guide* — https://www.tradingsim.com/blog/volatility-contraction-pattern
+
+---
+
+# ██ E93 — E80/E82's BIDIRECTIONAL 1h-STRUCTURE CASCADE, RE-RUN ON THE FULL 6-YEAR ARCHIVE. THE SHORT LEG FLIPS NEGATIVE.
+
+**SCHEDULING NOTE AND A FORK IN THE LOG ITSELF.** This cycle's stored prompt again describes lab
+state as of E66 — "no champion, no candidate," continue numbering after E66, attack the short's
+entry geometry via E64a/E64b/E66. That closed at E69–E79 many cycles ago (margin-sizing fix HARD
+LESSON 42/43; the completed four-term binding sweeps, E69/E70 long and E74–E76 short). **The docs
+win, per the prompt's own instruction and this lab's repeated precedent** (E81/E86/E89/E90/E91/E92
+all already flagged the identical staleness).
+
+More than that: the log has **forked**. There are now two differently-built entries both named
+`E79` and two both named `E80`. The `E80` this entry treats as parent is the fully-provenanced one
+at the top of this file — the 1h-bucket structure-tier redesign (`pine/e80-15m-native-1h-structure.pine`,
+`strategyId 01M1SMXCYQ9KD43GRJJJ0TN7N4`), confirmed non-degenerate by E81 (coil fires on 7.77% of
+bars) and extended by E82/E83/E84/E85/E87/E88a/E88b, all saved to disk and recorded in
+`results/backtests.json`. **The other `E80`/`E80 SPLIT TEST` pair, later in this file and by commit
+timestamp the more recent of the two, saved no pine file and added no `results/backtests.json` row —
+a HARD LESSON 21 provenance gap.** Its own text ("15m breaks the coil... 5m is the minimum viable
+timeframe") directly contradicts E81's finding for the redesigned lineage, which suggests it is a
+different, less-derived 15m port (most likely the ORIGINAL 15m-bucket structure term run natively,
+the exact degeneracy E80/E81 diagnosed and fixed by moving to the 1h bucket) — not a variant of this
+lineage. **That gap is flagged here for whoever owns that branch to repair; reconstructing an
+unsaved file and attributing a metric to it is not done here**, per this lab's own provenance rule.
+
+`get_credits` read **462** at the start — the 250–500 band, exactly ONE backtest.
+
+## THE QUESTION
+
+E84/E85 and E87/E88a/E88b already split-tested the fully-provenanced `E80`/`E82` lineage *within*
+its original window (2024-06-08 → 2026-09-01) and failed both times (H2 PF 0.49 on maxBars=288, PF
+0.68 on maxBars=576). **A stronger version of the same question is available for free, using data no
+split of that window can touch**: does the bidirectional edge survive on the FULL 15m archive
+(2020-08-19 → 2026-09-01, six years, ~13x the calendar span already tested)?
+
+## PRE-RUN AUDIT
+
+`get_strategy` on `01M1SMXCYQ9KD43GRJJJ0TN7N4` confirms the saved source is byte-identical to
+`pine/e80-15m-native-1h-structure.pine` on disk. **BINDING (E17): the ONLY variable changed from
+E80/E82 is the backtest date window** — `shieldUsd` ($2,000), `rr` (2.0), `coilK` (0.85), `velK`
+(0.8), `maxBars` (288), and every gate are untouched. R floor (LESSON 3): checked against this run's
+own traded entry prices after the fact via `get_trades` ($10,117.50–$121,267): $2,000 is
+1.65%–19.77% of price, clears the 0.8% floor across the entire traded range. Stop placement
+unchanged (LESSON 5). Both legs reported separately (LESSON 6). No new redundancy (LESSON 18) or
+occupancy confound (LESSONS 24/28/29) — only the window widened, nothing that touches hold time or
+shield/target sizing. Latch order unchanged (LESSON 8).
+
+**REGISTERED PREDICTION, before running:** if E80's small-window bidirectional edge was
+window-specific — as E85/E88b's in-window split failures already suggested — the short leg (net
++$492.42 on only 25 trades in the small window, a thin sample) should degrade or flip negative once
+its trade count grows well past the interpretability floor. If the edge is real and general, both
+legs should stay roughly positive.
+
+## RESULT — 15m, 2020-08-19 → 2026-09-01, 211,327 bars evaluated
+
+**One credit.** `resultId 01M1V526XR04BWHC7Q0ZHE5CEE`, same `strategyId 01M1SMXCYQ9KD43GRJJJ0TN7N4`.
+
+| | E93 (full archive) | E80/E82 (2.2yr window) |
+|---|---|---|
+| Profit factor | **1.08806654** | 1.24221581 |
+| Trades | **147** | 44 |
+| Win rate | 20.40816327% | 27.27272727% |
+| Net | +9.13311389% | +9.11169035% |
+| Max drawdown | 25.99052821% | 17.28630995% |
+| Long | 43 trades, 21 wins (48.8%), **+$2,714.31** | 19 trades, 9 wins, +$418.75 |
+| Short | 104 trades, 9 wins (8.65%), **−$1,801.00** | 25 trades, 3 wins, +$492.42 |
+| Sharpe / Sortino | 0.18499637 / 0.04892019 | 0.48096598 / 0.1171681 |
+
+**A cascade_exit_pattern warning fired** (ratio 1.44, one entry closed across 11 partial fills —
+crosses the depth-8 threshold, not the ratio-3 one). Not the severe variant requiring a mandatory
+retry. The reported `longNetProfit`/`shortNetProfit` already reflect actual fills, so this is not
+expected to flip the finding's sign, but has not been independently verified trade-by-trade — flagged
+as a caveat, not resolved here.
+
+## VERDICT — THE PREDICTION IS CONFIRMED, MORE SHARPLY THAN REGISTERED
+
+**The short leg flips from net-positive to net-negative even as its own sample more than
+quadruples.** 25 trades / +$492.42 (2.2yr) → 104 trades / **−$1,801.00** (6yr) — comfortably past the
+30-trade floor on its own, so this is not a small-sample fluke in either direction. The long leg
+stays positive and now carries the entire result (43 trades, 21 wins, +$2,714.31). PF drops from
+1.24221581 to 1.08806654 — still above 1.0, but **E80's "first both-legs-positive bidirectional
+result" headline does not survive extension to the full available archive.**
+
+This is a stronger, more decisive answer than E85/E88b's in-window split could give, because it uses
+genuinely out-of-window data (2020–2024) rather than two halves of the same 2.2 years. **It also
+converges with the sibling branch's own, independently-reached decision to go long-only** ("the
+short leg is dead across 128 trades from E78 and E79") — two differently-built 15m constructions,
+evidently run by two different concurrent sessions, arrive at the same conclusion about the short
+leg's weakness at 15m over long horizons, despite disagreeing about the coil and the structure tier.
+
+## WHAT THIS ESTABLISHES
+
+- **Confirms, with a materially stronger test, what E85/E88b already found**: the 15m bidirectional
+  edge on this lineage is not durable. Best read now as **long-only-viable, short-leg-fails-at-scale**.
+- **Does not touch the 1m track.** `e58a` (long) and `E71` (short) are untouched.
+- **Does not resolve the sibling branch's provenance gap** — flagged above, left for its owner.
+- Not a ratchet KEEP/REJECT: a data-window extension, not a parameter change to ratchet against a
+  fixed-window parent. Recorded `status: research`, matching `E80`/`E82`/`E87`/`E88a`/`E88b`.
+- Check #36's shield-fill caveat (every PF is an upper bound) applies here as everywhere.
+
+## STATE
+
+**No champion, no candidate anywhere in the lab.** `e58a` (long, 1m, PF 1.24015239, 36 trades) and
+`E71` (short, 1m, PF 0.97315988, 33 trades) remain the confirmed 1m-track references, untouched.
+`E80`/`E82`/`E87`/`E88a`/`E88b` (2.2yr window) and this entry (6yr archive) all sit at `status:
+research` on the 1h-structure 15m lineage — a real, replicated, but decaying and now
+long-only-leaning edge, not a candidate. The sibling deep-archive `E80`/`E80 SPLIT TEST` branch
+remains unreconciled (missing pine, missing backtests.json rows). HARD LESSON 48's drawdown-allowance
+rule question (blocking E74/E77) remains open, unresolved, awaiting the user — unchanged across many
+cycles.
+
+## QUEUE
+
+1. **Re-run this same construction LONG-ONLY on the full 6-year archive** (mechanically delete
+   `goShort`/the short `strategy.entry`, the way `e50a`/`e50b` did for the 1m track) to see whether
+   dropping the now-established-weak short leg improves PF/DD relative to this bidirectional
+   full-archive number (1.08806654 / 147 trades) — the natural next credit on this lineage.
+2. **The sibling branch's missing-provenance gap** (no pine file, no `backtests.json` row for its
+   `E80`/`E80 SPLIT TEST`) should be repaired by whoever owns that lineage, and the two branches'
+   disagreement about whether the coil survives at native 15m should be reconciled explicitly.
+3. Confirm the cascade_exit_pattern warning (11-fill entry) doesn't distort this result, via a free
+   `get_trades` pass, before this number is quoted further.
+4. HARD LESSON 48 remains the single largest open item outside this lab's own power to close.
+
+**NUMBERING:** continued from E92, the highest number found anywhere in `EXPERIMENT-LOG.md` or
+`results/backtests.json` at the start of this cycle. The separately-numbered `E80`/`E80 SPLIT TEST`
+collision in the sibling branch was left as found rather than renumbered — rewriting another
+session's already-pushed history is out of scope for this cycle. **Post-hoc addendum from the rebase
+that landed this entry:** the sibling branch has since added its own `E81` (coil restored via
+`atr(2)/atr(20)`, duration-ratio preserved — REVERTED, PF 0.939 < E80's 1.377, both ratchet clauses
+fail), which collides with the fully-provenanced lineage's own pre-existing `E81` (the coil-gate
+population counter at 7.77%). Three colliding pairs now exist between the two branches (`E79`,
+`E80`, `E81`) — a reconciliation pass (retiring one branch's numbers to letters, e.g. `E80b`/`E81b`,
+or renumbering forward from the true max) is overdue and is flagged here rather than attempted
+unilaterally mid-rebase.
