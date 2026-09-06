@@ -2392,3 +2392,172 @@ cross-instrument rule inside it would be fabrication.
 - **It retunes nothing.** No threshold, gate or default was changed. v7's signal set equals v6's.
 - `US30` depth, `p`, `ρ`, the direction contradiction and the rolling-mean-target predictions are all
   unchanged and unrun.
+
+---
+
+# ██ TICK #15, 2026-09-06 — THE SESSION END WAS NEVER SOURCED, AND NOTHING IN THE FILE EVER CLOSED THE DAY
+
+**Zero credits. No backtest, no `plan_backtest_window`, no engine call of any kind.** Pure decode of
+transcripts already committed here, plus one instrumentation-only change to the deliverable (v8).
+
+**Environment note.** trader-dev tools *are* attached to this session. They were not used, and must
+not be: tick #2 FINDING 4 forbids running a Legacy Forex backtest on trader-dev because `NQ` and
+`YM` silently remap to `IONQUSDT` and `DYMUSDT`, and tick #7 closed the symbol hunt by exhaustion.
+`backtest-lab` is still absent, so the `US30`-depth item is still blocked by session capability.
+
+## ██ FINDING 25 — `sessTime = "0930-1600"` HAS BEEN IN THE DELIVERABLE SINCE v1 AND ONLY THE `0930` IS HIS
+
+Seven audit ticks have now gone through this file's numbers — the touch counter (#8), the stop pad
+(#9), the level width (#10), the volume baseline (#11), `pivLen` (#12), the holding period (#14).
+**Every one of them audited a number inside the session. Nobody audited the session.**
+
+### THE SOURCE STATES A START, FOUR TIMES, AND NEVER STATES AN END
+
+`8._SESSIONS_TO_TRADE` is 148 seconds long and is the entire session module:
+
+> [00:14] *"What session do we trade? **We only trade during one session.**"*
+> [00:44] *"**930 a.m. Eastern Standard Time**"* … [00:59] *"**6 30 a.m. Pacific**"*
+> [01:03] *"it is also very very important and very key that you are **on 20 minutes early** every
+> single day… you don't log on at 6 30 and just start trading, **you get on at 6 10**"*
+> [01:43] *"if you guys try to trade this strategy during London session or Asia session **you're
+> gonna screw yourself**"*
+
+Four separate statements fix the **open**. **There is no closing time anywhere in the module, and
+none anywhere else in the eight Mamba modules** — grepped for it. `1600` is the RTH close: a fact
+about the exchange, not a rule he gives. It has sat in the deliverable's `input.session` default
+since v1 with the same standing as the `0930` beside it, and it does not have it.
+
+### AND EVERY DAY THE CORPUS ACTUALLY RECORDS IS OVER WITHIN MINUTES OF THE OPEN
+
+Tick #14 timed the *rungs* of the ladder. It never asked when the **day** ends. The five Mamba NY
+streams answer that directly, because each one carries its own duration header and each signs off in
+day-end language rather than stream-end language:
+
+| stream | file duration | open anchored? | the sign-off |
+|---|---|---|---|
+| `video1270175432` | 494 s | **yes — [02:03]**, two independent countdowns (tick #14) | ends [08:12] → **6m09s of post-open time, total** |
+| `video1855004398` | 599 s | **yes — [02:21]** *"hiccups at fucking **6 30 am**"* | last rung [09:34] *"nice target three"*, ends [09:56] → **~7m35s post-open** |
+| `video1038794732` | 534 s | no | [08:37] *"target two for us 30 target for NASDAQ and **that is how we're gonna be ending the day**"* |
+| `video1263885792` | 427 s | no | [06:44] *"**we'll come back tomorrow**"* |
+| `video1979454677` | 1149 s | no | last rung [12:11]; [18:50] *"big money making day. **We'll come back tomorrow**"* |
+
+**No trading activity of any kind is recorded anywhere in this corpus more than ~20 minutes after
+the New York open.** The longest file is 19 minutes and its last target callout is at [12:11].
+
+I looked for counter-evidence and found none. The only lines in the streams matching *"all day"* are
+idioms — *"we'd be here all day"* (`video1855004398` [06:04], about reading out chat P&L),
+*"we take that all day"*, *"I will take a one to four all day"* — none is a statement about a
+schedule. No stream mentions an afternoon, a second session, or coming back later that day.
+
+### AND HIS OWN COURSE SAYS THE SAME THING, IN A MODULE THIS FILE HAS CITED SINCE TICK #1
+
+`5._ANALYZING_TIME_FRAMES` opens on it, and tick #14 quoted the middle of this passage without the
+two lines that bracket it:
+
+> [00:13] *"The market makers want you to be in the market **as long as you can**. They want you to
+> **sit there all day** because **the longer you're in the market the more they're going to take
+> advantage of you**."*
+> [00:27] *"that is the biggest key — **we need to get in and we need to get out**"*
+> [02:18] *"if we're shorting this right here super quick super scalpy, **that's a 15 minute trade**"*
+> [02:37] *"everyone else is on the H4 **waiting and waiting**… these three candles is **12 hours**…
+> we just made 10 grand"*
+
+**[02:18] is a first-hand Mamba statement of trade DURATION, and it corroborates FINDING 23 from a
+course module rather than from a stream.** The whole passage is a duration argument — his 15 minutes
+against their 12 hours — and thirteen ticks read *"15 minute"* only as a chart timeframe.
+
+### THE ARITHMETIC, AGAINST HIS OWN TWO TIMEFRAMES
+
+Entry is taken at a bar's close, so a window of `W` minutes from the 09:30 open admits the bars whose
+open time is at or before 09:30 + W:
+
+| | 390-minute session (what the file permits) | ~20-minute window (what the corpus shows) | ratio |
+|---|---|---|---|
+| **5m** | **78** candidate entry bars | **5** (09:30, 09:35, 09:40, 09:45, 09:50) | **~16×** |
+| **15m** | **26** candidate entry bars | **2** (09:30, 09:45) | **13×** |
+
+**The deliverable's legal entry window is 13–16× wider than the one the source demonstrates.**
+
+### THIS SHARPENS FINDING 21 RATHER THAN REPEATING IT — AND THE SHARPENING IS EXACT
+
+FINDING 21 (tick #12) measured that the code needs `2·pivLen + (pivLen+1) + 1` = **17 bars** at
+`pivLen = 5` before any structure state can exist, ~29 for a realistic four-swing sequence, and
+concluded the state is **always** inherited from pre-open bars on 15m and for *"the first fifth to
+third of the session"* on 5m. That softer half hardens, and the bound is arithmetic, not an estimate:
+
+- A defining pivot can only be **confirmed** `pivLen = 5` bars after its centre. Under a 20-minute
+  window the last legal entry is session bar **#5** on 5m, so at most **one** of the four defining
+  pivots can have both formed and confirmed inside the session — **at least 3 of 4 are pre-open.**
+- On 15m the last legal entry is session bar **#2**, so **all 4 are pre-open, necessarily.**
+
+**Under the window the corpus supports, the direction gate at every legal entry is built essentially
+entirely from bars outside the session he trades — on BOTH timeframes, not just 15m.** The
+`Struct age` row already prints *"n of 4 formed BEFORE today's open"*, so this is falsifiable on one
+chart rather than argued.
+
+## ██ FINDING 26 — NOTHING IN v1–v7 EVER CLOSED THE DAY, AND THE OVERRUN FEEDS HIS TARGET RULE
+
+`inSess` gates **entry only**. v1–v7 have exactly three exits — target, stop, and v5's volume-death
+cut — and **not one of them is time-bounded.** So a break accepted at 15:55 opens a trade that the
+simulator carries through the close, prices its stop and target against **out-of-session bars**, and
+can still be holding when `newDay` zeroes `tradesToday` beneath it.
+
+Against `5.` [00:13]–[00:27] — *"the longer you're in the market the more they're going to take
+advantage of you… we need to get in and we need to get out"* — an unbounded hold is not a small
+deviation from the method. It is the thing the method's own opening argument is against.
+
+**And it is not cosmetic.** Whatever R such a trade eventually books is pushed into the rolling
+window that sets his **target** (`10.` [02:56], a loss scoring 0). So a trade he would never have
+held rewrites tomorrow's target — the same compounding defect v2 fix 4 was introduced for, arriving
+through a different door.
+
+### ONE THING THAT IS CLEAN, RECORDED BECAUSE A CLEAN RESULT IS ALSO A RESULT
+
+`newDay = ta.change(time("1D")) != 0` was the other suspect in this block and it is **fine on both
+instrument families**. A CME daily bar rolls at the Globex open (17:00/18:00 ET) and a cash-index
+daily bar at midnight; **both sit outside 09:30–16:00**, so exactly one New York session falls inside
+each "day" on either feed, and neither the 2-trade cap nor v5's session-to-date volume accumulator
+can be split across a session. Checked, not assumed.
+
+## ██ WHAT v8 DOES ABOUT IT — MEASURES, ASSERTS NOTHING
+
+**Both new switches ship OFF, so with default inputs v8's signal set and trade record are identical
+to v7's.** This is the treatment v2 gave `flipTrades`, v4 gave `breakClears` and v5 gave the
+session-to-date baseline; v6's exception was for a rule the source *states*, and the source states
+no cutoff and no flatten time.
+
+- `entryCut` + `entryCutMins` (default 20) — bounds entries to N minutes after the open.
+- `flatEOD` — closes an open trade at the **last in-session close**. Evaluated **before** the
+  stop/target block on purpose: that close chronologically precedes the following bar's range, so
+  testing the range first would order the two exits backwards. It fires on `newDay` as well as on
+  the session actually ending, because a cash-index feed has **no** out-of-session bars at all —
+  every bar is RTH, so the session never "just ends", the next bar is simply the next day's open.
+- An **`Entry window`** dashboard row: minutes since the open, the session's own length in bars and
+  minutes, and how many entries in the chart's history fell beyond `entryCutMins` — **counted
+  whether or not the cutoff is switched on.** It shows ✖ the moment that count is non-zero.
+- A **`Hold window`** row: bars the live trade has spent out of session, and how many closed trades
+  crossed a session close. ✖ the moment the second is non-zero.
+- Seven data-window plots carrying the same quantities, and a new blocker string so a blank chart
+  can be attributed to the entry window rather than guessed at.
+
+## ██ WHAT TICK #15 DID NOT ESTABLISH
+
+- **No number came from a run.** No `runId` exists for this workstream and none was created. Every
+  figure above is a timestamp or duration header read off a committed transcript, or arithmetic on
+  the bar sizes he names.
+- **That his window IS 20 minutes.** Five broadcast days are a sample **he selected**, and selected
+  toward days that resolved fast — a day with no setup at 09:40 is exactly the day not worth
+  streaming. What the corpus supports is that **390 minutes is unevidenced and 1600 is not his
+  number**; where the true cutoff sits is unmeasured, which is why `entryCutMins` is an input with a
+  counter beside it and not a new default.
+- **That he is flat when a stream ends.** *"That is how we're gonna be ending the day"* is followed
+  by *"this might still run but…"* (`video1038794732` [08:37]) — which is evidence he is *finished
+  trading*, not evidence he is *flat*. The flatten therefore ships OFF, not ON.
+- **That he does not trade off-camera after signing off.** Nothing in the corpus rules it out. What
+  is established is that the corpus contains **no evidence at all** for the other 370 minutes the
+  file permits.
+- **How much either switch would actually bind.** That is exactly what the two new rows count, and
+  it is a chart measurement, not an argument.
+- **Whether any version compiles** — unchanged, still no Pine compiler in this environment.
+- `US30` depth, `p`, `ρ`, the direction contradiction and the rolling-mean-target predictions are all
+  unchanged and unrun.

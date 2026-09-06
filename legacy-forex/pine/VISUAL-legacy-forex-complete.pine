@@ -7,6 +7,24 @@
 //                ·  v5 2026-09-06 (tick #11, the volume gate — FINDING 20)
 //                ·  v6 2026-09-06 (tick #12, market structure / pivLen — FINDING 21)
 //                ·  v7 2026-09-06 (tick #14, trade-resolution instrumentation — FINDING 23)
+//                ·  v8 2026-09-06 (tick #15, the trading WINDOW — FINDING 25)
+//
+// ⚠ v8 ADDS NO RULE THAT IS ON BY DEFAULT. Both new switches ship OFF, so with default inputs its
+//   signal set and trade record are IDENTICAL to v7's. What it adds is the measurement of a number
+//   that has been in this file since v1 and was never sourced: the session END.
+//   `sessTime` has read "0930-1600" since v1 — 390 minutes. Module 8 states the session START four
+//   different ways ("930 a.m. Eastern", "6 30 a.m. Pacific", "be on 20 minutes early", "you don't
+//   log on at 6 30 and just start trading") and NEVER states an end. 1600 is the RTH close, which
+//   is a fact about the exchange, not a rule he gives. Meanwhile every day the corpus actually
+//   records is over within ~20 minutes of the open (FINDING 25), so the entry window this file
+//   permits is 20-40x wider than the one the source demonstrates.
+//   And there is no end-of-day flat anywhere in v1-v7: a break accepted at 15:55 opens a trade the
+//   simulator then carries through the overnight and into later sessions, with `hitT`/`hitS`
+//   evaluated on out-of-session bars and `tradesToday` resetting underneath it — on a system whose
+//   own module 5 opens with "the longer you're in the market the more they're going to take
+//   advantage of you... we need to get in and we need to get out" [00:18]/[00:27].
+//   Both are now inputs, both OFF, with a dashboard row and counters that say how much each WOULD
+//   bind. Retuning a window nobody has measured is the failure this project exists to avoid.
 //
 // ⚠ v7 ADDS NO RULE AND CHANGES NO DEFAULT. Its signal set and trade record are identical to v6's.
 //   It measures one thing the corpus says should be alarming: HOW LONG A TRADE LASTS RELATIVE TO
@@ -312,14 +330,67 @@
 //      and the gate outcome is right. `pivLen = 5` itself is UNSOURCED — he draws swings by eye —
 //      and is NOT retuned here, for the reason in item 17.
 // ═══════════════════════════════════════════════════════════════════════════════════════════════
+// v8 — THE SESSION END WAS NEVER SOURCED, AND NOTHING EVER CLOSED THE DAY (tick #15, FINDING 25)
+// ═══════════════════════════════════════════════════════════════════════════════════════════════
+//  20. THE ENTRY WINDOW IS 390 MINUTES AND THE CORPUS SUPPORTS ~20. Module 8 is the session module
+//      and it states only a start. Every one of the five NY live streams is over within minutes of
+//      that start, and each closes with day-end language, not stream-end language:
+//        video1270175432 — open anchored at [02:03] by two independent countdowns; stream ends
+//                          [08:12] → the WHOLE broadcast day is 6m09s of post-open time.
+//        video1855004398 — "hiccups at fucking 6 30 am" [02:21] anchors the open; last rung
+//                          "nice target three" [09:34], ends [09:56] → ~7m35s post-open.
+//        video1038794732 — "target two for us 30 target for NASDAQ and THAT IS HOW WE'RE GONNA BE
+//                          ENDING THE DAY" [08:37], of a 534s file.
+//        video1263885792 — "we'll come back tomorrow" [06:44], of a 427s file.
+//        video1979454677 — the longest at 1149s; its last rung is [12:11] and it signs off "big
+//                          money making day, we'll come back tomorrow" [18:50].
+//      On his two timeframes 390 minutes is 78 bars (5m) and 26 (15m). ~20 minutes is 4 and 1.
+//      `entryCut` exposes that as a switch; it is OFF because the source states no end, and the
+//      dashboard's "Entry window" row counts how many entries fall outside it either way.
+//  21. AND THIS SHARPENS FINDING 21 RATHER THAN REPEATING IT. v6 measured that the code needs ≥17
+//      bars (pivLen 5) and realistically ~29 before ANY structure state can exist, and concluded
+//      the state is always inherited from pre-open bars on 15m and for "the first fifth to third"
+//      of the session on 5m. Under a 20-minute entry window that softer half hardens: 4 bars on 5m
+//      against a 17-bar floor means the direction gate at EVERY legal entry is built ENTIRELY from
+//      bars outside the session he trades — on BOTH timeframes, not just 15m. The "Struct age" row
+//      already prints this ("n of 4 formed BEFORE today's open"); v8 only makes it inevitable
+//      rather than likely.
+//  22. NOTHING EVER CLOSED THE DAY. v1-v7 open a trade and hold it until target, stop, or the v5
+//      volume-death cut. None of those is time-bounded, and `inSess` gates ENTRY only, so an open
+//      trade survives the close, prices its stop and target against overnight bars, and can still
+//      be live when `newDay` zeroes `tradesToday` beneath it. Against module 5's opening premise
+//      that is not a small deviation, and it is not cosmetic either: whatever R such a trade
+//      eventually books is pushed into the rolling-mean window that sets his TARGET (10. 02:56),
+//      so an overnight-resolved trade he would never have held rewrites tomorrow's target.
+//      `flatEOD` closes at the last in-session close. OFF by default, and evaluated BEFORE the
+//      stop/target block because that close chronologically precedes the following bar's range.
+//  23. WHAT IS CLEAN HERE, CHECKED NOT ASSUMED. `newDay = ta.change(time("1D")) != 0` was the other
+//      suspect and it is fine on both instrument families: a CME daily bar rolls at the Globex
+//      open (17:00/18:00 ET) and a cash-index daily bar at midnight, and BOTH sit outside
+//      09:30-16:00, so exactly one New York session falls inside each "day" and neither the
+//      2-trade cap nor the v5 session-to-date volume accumulator can be split across one.
+//
+// ⚠ WHAT v8 DOES **NOT** CLAIM. Not that his window IS 20 minutes. Five broadcast days are a
+//   sample he selected, and they are selected toward days that resolved fast — a day with no setup
+//   at 09:40 is exactly the day not worth streaming. What the corpus supports is that 390 minutes
+//   is unevidenced and 1600 is not his number; where the true cutoff sits is unmeasured, which is
+//   why `entryCutMins` is an input with a counter next to it and not a new default.
+// ═══════════════════════════════════════════════════════════════════════════════════════════════
 
 indicator("Legacy Forex Trader — Complete Visualiser", overlay=true, max_lines_count=500, max_labels_count=500, max_boxes_count=500)
 
 // ── INPUTS ────────────────────────────────────────────────────────────────────────────────────
 gS = "Session"
 useSession = input.bool(true,  "New York session only",            group=gS)
-sessTime   = input.session("0930-1600", "Session (ET)",            group=gS)
+sessTime   = input.session("0930-1600", "Session (ET)",            group=gS,
+     tooltip="v8 audit (FINDING 25): the START is stated four ways in module 8 ('930 a.m. Eastern' [00:44], '6 30 a.m. Pacific' [00:59], 'be on 20 minutes early... you get on at 6 10' [01:03-01:16]). The END is stated NOWHERE in the corpus. 1600 is the RTH close — a fact about the exchange, not one of his rules — and it has been in this file unexamined since v1. It makes the legal entry window 390 minutes = 78 bars on 5m and 26 on 15m, against five recorded days that are each over within ~20 minutes of the open. Do not read 1600 as sourced.")
 sessTZ     = input.string("America/New_York", "Timezone",          group=gS)
+entryCut   = input.bool(false, "Entry cutoff: N minutes after the open", group=gS,
+     tooltip="v8, FINDING 25. OFF by default because the source states no cutoff — only that every day it records is finished within minutes of the open. Turning it ON changes the signal set, which a correction tick does not do at the same time as auditing (the treatment v2 gave flipTrades, v4 gave breakClears and v5 gave the session-to-date baseline). The 'Entry window' dashboard row counts entries beyond the cutoff whether it is on or off, so one live chart says how much it would bind.")
+entryCutMins = input.int(20, "Entry cutoff (minutes after the open)", group=gS, minval=1,
+     tooltip="UNSOURCED as a rule. 20 is the longest post-open interval any activity is recorded at in the whole corpus (video1979454677's second trade reaches target two at [12:11] of a stream whose open is un-anchored). It is a reading of five days HE selected to broadcast, biased toward days that resolved fast, and it is NOT a measured optimum.")
+flatEOD    = input.bool(false, "Flatten any open trade at the session close", group=gS,
+     tooltip="v8, FINDING 25. v1-v7 had NO time-based exit at all: a trade opened at 15:55 is carried through the overnight and into later sessions, priced against out-of-session bars, while `tradesToday` resets underneath it — and whatever R it eventually books is pushed into the rolling-mean window that sets tomorrow's TARGET (10. 02:56). Module 5 opens on the opposite premise: 'the longer you're in the market the more they're going to take advantage of you... we need to get in and we need to get out' [00:18]/[00:27]. OFF by default because it changes the trade record; the 'Hold window' row counts overnight holds either way.")
 
 gStruct = "Market structure"
 pivLen   = input.int(5,  "Swing pivot strength (bars each side)",  group=gStruct, minval=1,
@@ -411,6 +482,24 @@ maxStopPts = isYM ? maxStopYM : maxStopNQ
 inSessRaw = not na(time(timeframe.period, sessTime, sessTZ))
 inSess  = not useSession or inSessRaw
 newDay  = ta.change(time("1D")) != 0
+// v8 CHECK, RECORDED BECAUSE A CLEAN RESULT IS ALSO A RESULT (FINDING 25 item 23): `newDay` was the
+// other suspect in the session block. It is fine. A CME daily bar rolls at the Globex open
+// (17:00/18:00 ET) and a cash-index daily bar at midnight; both are outside 09:30-16:00, so exactly
+// one New York session falls inside each "day" on either instrument family, and neither the 2-trade
+// cap nor the v5 session-to-date volume accumulator can be split across a session.
+
+// ── 1b. THE TRADING WINDOW — v8, FINDING 25 ──────────────────────────────────────────────────
+// `sessTime`'s 1600 has never been sourced (module 8 states only a start), and the five NY streams
+// are each over within ~20 minutes of the open. This measures where inside the session we are, so
+// the entry window can be bounded by a switch and counted whether or not the switch is on.
+var int sessOpenTime = na
+if newDay
+    sessOpenTime := na
+if inSessRaw and na(sessOpenTime)
+    sessOpenTime := time
+minsSinceOpen = na(sessOpenTime) ? na : (time - sessOpenTime) / 60000.0
+// OFF by default: with `entryCut` false this is always true and v8's signal set equals v7's.
+inWindow = not entryCut or (not na(minsSinceOpen) and minsSinceOpen <= entryCutMins)
 
 // ── 2. MARKET STRUCTURE — higher highs / higher lows vs lower lows / lower highs ──────────────
 ph = ta.pivothigh(high, pivLen, pivLen)
@@ -688,8 +777,11 @@ bandPts   = 2 * tol                                           // full band width
 tolFitsBudget = tol <= stopBudget
 
 // ── THE SIGNAL ────────────────────────────────────────────────────────────────────────────────
-goLong  = inSess and bullStruct and brokeRes and volOK and underCap and stopOKlong
-goShort = inSess and bearStruct and brokeSup and volOK and underCap and stopOKshort
+// v8: `inWindow` is identically true unless `entryCut` is switched on, so the default signal set is
+// unchanged. It sits next to `inSess` because it is the same gate at a finer resolution — the
+// session module states where the day STARTS and never where it ends (FINDING 25).
+goLong  = inSess and inWindow and bullStruct and brokeRes and volOK and underCap and stopOKlong
+goShort = inSess and inWindow and bearStruct and brokeSup and volOK and underCap and stopOKshort
 
 // The break he would have marked on the OTHER side, which the course's structure gate forbids.
 // Drawn, never traded — see the header note on the stated-vs-observed contradiction.
@@ -743,6 +835,50 @@ var int   nBothInBarT   = 0
 barsInTrade := dir == 0 ? 0 : barsInTrade + 1
 tfMins      = timeframe.in_seconds() / 60.0
 
+// ── v8: THE TRADING WINDOW (tick #15 — SYSTEM.md FINDING 25) ──────────────────────────────────
+// Counters first, so they are live for the exit blocks below. All three are pure instrumentation
+// and are counted whether or not `entryCut`/`flatEOD` are switched on — that is the point of them.
+var int barsOOS    = 0     // bars of the LIVE trade that sat outside the New York session
+var int nHeldOOS   = 0     // closed trades that were held across at least one out-of-session bar
+var int nEntryLate = 0     // entries taken more than `entryCutMins` after the open
+var int nEODflat   = 0     // trades closed by the session-close flatten (only when flatEOD is on)
+var float lastEntryMins = na
+barsOOS := dir == 0 ? 0 : (inSessRaw ? barsOOS : barsOOS + 1)
+
+// THE SESSION-CLOSE FLATTEN. Evaluated BEFORE the stop/target block on purpose: it books at the
+// last in-session close, which chronologically PRECEDES this bar's range, so testing this bar's
+// high/low first would order the two exits backwards. `newDay` covers a cash-index feed that has
+// no out-of-session bars at all (every bar is RTH, so the session never "just ended" — the next
+// bar is simply the next day's open); the second clause covers a futures feed that does.
+// OFF by default. With `flatEOD` false nothing here fires and the trade record equals v7's.
+sessJustEnded = (not inSessRaw and inSessRaw[1]) or newDay
+if flatEOD and dir != 0 and sessJustEnded and not na(close[1]) and not na(initR) and initR != 0
+    outR = (dir == 1 ? (close[1] - entryPx) : (entryPx - close[1])) / initR
+    label.new(bar_index, dir == 1 ? low : high,
+         "EOD FLAT " + str.tostring(outR, "#.##") + "R  (5. 00:27)",
+         style = dir == 1 ? label.style_label_up : label.style_label_down,
+         color = color.new(color.orange, 20), textcolor=color.white, size=size.small)
+    if not na(lnE)
+        line.set_x2(lnE, bar_index), line.set_x2(lnS, bar_index), line.set_x2(lnT, bar_index)
+    if not na(lad1)
+        line.set_x2(lad1, bar_index), line.set_x2(lad2, bar_index), line.set_x2(lad3, bar_index)
+        line.set_x2(lad4, bar_index), line.set_x2(lad5, bar_index)
+    r8 := r7
+    r7 := r6
+    r6 := r5
+    r5 := r4
+    r4 := r3
+    r3 := r2
+    r2 := r1
+    r1 := math.max(outR, 0)          // a loss scores 0, exactly as a full stop does (10. 02:56)
+    lastTradeBars := barsInTrade
+    sumTradeBars  := sumTradeBars + barsInTrade
+    nClosedT      := nClosedT + 1
+    nEODflat      := nEODflat + 1
+    if barsOOS > 0
+        nHeldOOS := nHeldOOS + 1
+    dir := 0
+
 hitT = dir ==  1 and high >= tgtPx  or dir == -1 and low  <= tgtPx
 hitS = dir ==  1 and low  <= stopPx or dir == -1 and high >= stopPx
 
@@ -772,6 +908,8 @@ if dir != 0 and (hitT or hitS)
     lastTradeBars := barsInTrade                 // v7 instrumentation only
     sumTradeBars  := sumTradeBars + barsInTrade
     nClosedT      := nClosedT + 1
+    if barsOOS > 0                               // v8 instrumentation only
+        nHeldOOS := nHeldOOS + 1
     dir := 0
 
 // ── v5: THE VOLUME-DEATH EARLY EXIT (9. 03:22-03:38) ──────────────────────────────────────────
@@ -813,6 +951,8 @@ if volDead
     lastTradeBars := barsInTrade                 // v7 instrumentation only
     sumTradeBars  := sumTradeBars + barsInTrade
     nClosedT      := nClosedT + 1
+    if barsOOS > 0                               // v8 instrumentation only
+        nHeldOOS := nHeldOOS + 1
     dir := 0
 
 if dir == 0 and (goLong or goShort)
@@ -839,6 +979,12 @@ if dir == 0 and (goLong or goShort)
     nEntriesT  := nEntriesT  + 1
     nTgtInBarT := nTgtInBarT + (barTgt ? 1 : 0)
     nBothInBarT:= nBothInBarT + (barTgt and barStop ? 1 : 0)
+    // v8 instrumentation (tick #15, FINDING 25) — DIAGNOSTIC ONLY. Counted whether or not the
+    // cutoff is switched on, so one chart says how many of this file's entries fall outside the
+    // window the corpus actually records him trading in.
+    lastEntryMins := minsSinceOpen
+    if not na(minsSinceOpen) and minsSinceOpen > entryCutMins
+        nEntryLate := nEntryLate + 1
     if showTrade
         lnE := line.new(bar_index, entryPx, bar_index+1, entryPx, color=color.blue,  width=2)
         lnS := line.new(bar_index, stopPx,  bar_index+1, stopPx,  color=color.red,   width=2, style=line.style_dashed)
@@ -874,7 +1020,7 @@ bgcolor(inSess and bearStruct     ? color.new(color.red, 94) : na,   title="Bear
 barcolor(useVol and not volOK ? color.new(color.gray, 50) : na,      title="No volume")
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────────────────────
-var table d = table.new(position.top_right, 3, 22, border_width=1, frame_width=1, frame_color=color.gray)
+var table d = table.new(position.top_right, 3, 24, border_width=1, frame_width=1, frame_color=color.gray)
 f_row(t, r, k, ok, v) =>
     table.cell(t, 0, r, k, text_color=color.white,  text_size=size.small, bgcolor=color.new(color.black,20), text_halign=text.align_left)
     table.cell(t, 1, r, ok ? "✔" : "✖", text_color=ok ? color.lime : color.red, text_size=size.small, bgcolor=color.new(color.black,20))
@@ -969,9 +1115,29 @@ if showDash and barstate.islast
                            + str.tostring(sumTradeBars / nClosedT * tfMins, "#") + " min) over " + str.tostring(nClosedT) : "")
          + "  ·  entry bar already spans target " + str.tostring(nTgtInBarT) + "/" + str.tostring(nEntriesT)
          + ", target AND stop " + str.tostring(nBothInBarT))
+    // v8 instrumentation (tick #15, FINDING 25). The session END has never been sourced — module 8
+    // states only a start — and every day the corpus records is finished within ~20 minutes of it.
+    // "✖" means at least one entry in this chart's history was taken beyond that window, i.e. the
+    // file is signalling in a part of the day the source has no evidence he trades.
+    f_row(d, 21, "Entry window", nEntryLate == 0,
+         (na(minsSinceOpen) ? "pre-open" : str.tostring(minsSinceOpen, "#") + " min since the open")
+         + "  ·  session is " + str.tostring(sessBarsTf, "#") + " bars / "
+         + str.tostring(sessBarsTf * tfMins, "#") + " min"
+         + "  ·  " + str.tostring(nEntryLate) + " of " + str.tostring(nEntriesT) + " entries beyond "
+         + str.tostring(entryCutMins) + " min"
+         + (entryCut ? "  (cutoff ON)" : "  (cutoff OFF — 1600 is UNSOURCED)"))
+    // v8 instrumentation. v1-v7 had no time-based exit of any kind, so a trade could be carried
+    // through the close and priced against overnight bars — and its R still fed the rolling-mean
+    // target rule. "✖" means that has already happened on this chart.
+    f_row(d, 22, "Hold window", nHeldOOS == 0,
+         (dir != 0 and barsOOS > 0 ? "LIVE TRADE HELD " + str.tostring(barsOOS) + " bars out of session  ·  " : "")
+         + str.tostring(nHeldOOS) + " of " + str.tostring(nClosedT) + " closed trades crossed the close"
+         + (flatEOD ? "  ·  EOD flat ON, " + str.tostring(nEODflat) + " flattened"
+                    : "  ·  EOD flat OFF — nothing closes the day (5. 00:27)"))
 
     // name the FIRST unmet condition, in his own order, so the dashboard says what is blocking
     blocker = not inSess        ? "NO TRADE — outside New York session"
+      : not inWindow            ? "NO TRADE — past the " + str.tostring(entryCutMins) + "-minute entry window"
       : structKilled            ? "NO TRADE — structure INVALIDATED, price broke the swing it was built on (6. 03:35)"
       : consolidating           ? "NO TRADE — consolidation"
       : not (resValid or supValid) ? "WAIT — no level has " + str.tostring(minTouch) + " distinct touches yet"
@@ -985,9 +1151,9 @@ if showDash and barstate.islast
                     + (volDeadExit and not volOK ? "   [vol dead " + str.tostring(deadRun) + "/" + str.tostring(volDeadBars) + "]" : ""))
       : blocker
     vc = goLong ? color.green : goShort ? color.red : dir != 0 ? color.blue : color.new(color.gray,40)
-    table.cell(d, 0, 21, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
-    table.cell(d, 1, 21, "", bgcolor=vc)
-    table.cell(d, 2, 21, verdict, text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+    table.cell(d, 0, 23, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+    table.cell(d, 1, 23, "", bgcolor=vc)
+    table.cell(d, 2, 23, verdict, text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
 
 alertcondition(goLong,  "Legacy LONG",  "Legacy Forex: LONG — structure bullish, resistance broken, volume present")
 alertcondition(goShort, "Legacy SHORT", "Legacy Forex: SHORT — structure bearish, support broken, volume present")
@@ -1040,3 +1206,12 @@ plot(lastTradeBars,                "Bars in LAST closed trade",            displ
 plot(nClosedT > 0 ? sumTradeBars / nClosedT : na, "Mean bars per closed trade", display=display.data_window)
 plot(nTgtInBarT,                   "Entry bars already spanning target",   display=display.data_window)
 plot(nBothInBarT,                  "Entry bars spanning target AND stop",  display=display.data_window)
+// v8 instrumentation — FINDING 25. The first two say where inside the day this file is signalling;
+// the last three say how much of its trade record lives outside the window the corpus supports.
+plot(minsSinceOpen,                "Minutes since the New York open",      display=display.data_window)
+plot(lastEntryMins,                "Minutes-after-open of the LAST entry", display=display.data_window)
+plot(nEntryLate,                   "Entries beyond the cutoff",            display=display.data_window)
+plot(barsOOS,                      "Live trade: bars held out of session", display=display.data_window)
+plot(nHeldOOS,                     "Closed trades that crossed the close", display=display.data_window)
+plot(nEODflat,                     "Trades flattened at the session close",display=display.data_window)
+plot(inWindow ? 1 : 0,             "InEntryWindow",                        display=display.data_window)

@@ -1558,3 +1558,112 @@ simulate** — which makes the "ambiguous bar" tie-break the deciding rule of an
 edge case, and makes a deeper 5m history no help at all. One premise this repo had written down twice
 — *"held for hours"* — is withdrawn as never having been measured, without disturbing the pooling
 ruling that was built not to need it. Fourteen ticks, zero results recorded, still correctly.
+
+---
+
+# ██ TICK #15, 2026-09-06 — SEVEN AUDIT TICKS CHECKED EVERY NUMBER INSIDE THE SESSION AND NONE CHECKED THE SESSION
+
+**Zero credits. No backtest, no `plan_backtest_window`, no engine call of any kind.** Full detail in
+`SYSTEM.md` FINDINGS 25–26.
+
+**Environment:** trader-dev *is* attached this session and was deliberately not used — tick #2
+FINDING 4 forbids a Legacy Forex backtest there (`NQ`→`IONQUSDT`, `YM`→`DYMUSDT`, silently) and tick
+#7 closed the symbol hunt by exhaustion. `backtest-lab` is still absent, so the `US30`-depth item is
+still blocked by session capability, not stale.
+
+## THE HEADLINE — ONLY HALF OF `sessTime = "0930-1600"` COMES FROM THE SOURCE
+
+`8._SESSIONS_TO_TRADE` is the whole session module, 148 seconds, and it fixes the **open** four
+separate ways: *"930 a.m. Eastern"* [00:44], *"6 30 a.m. Pacific"* [00:59], *"be on 20 minutes early…
+you get on at 6 10"* [01:03]–[01:16], *"only trading during New York session"* [00:20]. **It never
+states a close, and neither does any other Mamba module.** `1600` is the RTH close — a fact about the
+exchange, not one of his rules — and it has carried the same standing as the `0930` beside it since
+v1.
+
+**Every day the corpus actually records is over within ~20 minutes of the open.** All five NY streams
+run 427–1149 s and each signs off in day-end language, not stream-end language: *"that is how we're
+gonna be ending the day"* (`video1038794732` [08:37]), *"we'll come back tomorrow"* (`video1263885792`
+[06:44], `video1979454677` [18:50]). Two have the open anchored internally — `video1270175432` at
+[02:03] (ends [08:12] → **6m09s of post-open time in total**) and `video1855004398` at [02:21],
+*"hiccups at fucking 6 30 am"* (last rung [09:34]). The longest file's last target callout is [12:11].
+I searched for counter-evidence: every *"all day"* in the corpus is an idiom, and no stream mentions
+an afternoon, a second session, or returning later that day.
+
+**The arithmetic against his own two timeframes:** 390 minutes admits **78** candidate entry bars on
+5m and **26** on 15m; a 20-minute window admits **5** and **2**. **The deliverable's legal entry
+window is 13–16× wider than the one the source demonstrates.**
+
+## AND IT SHARPENS FINDING 21 EXACTLY, RATHER THAN REPEATING IT
+
+Tick #12 measured that the code needs ≥17 bars at `pivLen = 5` before any structure state can exist
+and concluded the state is always pre-open on 15m and pre-open for *"the first fifth to third"* of
+the session on 5m. Under a 20-minute window that softer half becomes a bound: a pivot confirms
+`pivLen` bars after its centre, the last legal entry is session bar #5 on 5m and #2 on 15m, so **at
+least 3 of the 4 defining pivots are pre-open on 5m and all 4 are pre-open on 15m, necessarily.**
+The direction gate at every legal entry is built essentially entirely from bars outside the session
+he trades — on **both** timeframes.
+
+## THE SECOND FINDING — NOTHING IN v1–v7 EVER CLOSED THE DAY
+
+`inSess` gates **entry only**, and none of the three exits (target, stop, v5's volume cut) is
+time-bounded. A break accepted at 15:55 opens a trade the simulator carries through the close, prices
+against out-of-session bars, and may still hold when `newDay` zeroes `tradesToday` beneath it — on a
+system whose module 5 opens with *"the longer you're in the market the more they're going to take
+advantage of you… we need to get in and we need to get out"* [00:13]/[00:27]. **It is not cosmetic:**
+whatever R that trade books is pushed into the rolling window that sets his target (`10.` [02:56]), so
+a trade he would never have held rewrites tomorrow's target.
+
+**One thing checked and clean:** `newDay = ta.change(time("1D")) != 0`. A CME daily bar rolls at the
+Globex open and a cash-index daily bar at midnight; both are outside 09:30–16:00, so exactly one New
+York session falls inside each "day" and neither the 2-trade cap nor v5's session-to-date volume
+accumulator can be split across one.
+
+## v8 — INSTRUMENTED, NOT ACTED ON
+
+**Both new switches ship OFF, so with default inputs v8's signal set and trade record are identical to
+v7's** — the treatment v2 gave `flipTrades`, v4 gave `breakClears` and v5 gave the session-to-date
+baseline. v6's exception was for a rule the source *states*; the source states no cutoff and no
+flatten time. Added: `entryCut`/`entryCutMins` (default 20), `flatEOD` (books at the last in-session
+close, evaluated *before* the stop/target block so the two exits are ordered correctly, and firing on
+`newDay` too because a cash-index feed has no out-of-session bars at all), an `Entry window` row and a
+`Hold window` row that count late entries and overnight holds **whether or not the switches are on**,
+a new blocker string, and seven data-window plots.
+
+## WHAT THIS TICK DID NOT ESTABLISH
+
+- **No number came from a run.** No `runId` exists for this workstream and none was created.
+- **That his window IS 20 minutes.** Five broadcast days are a sample he selected, biased toward days
+  that resolved fast. What is established is that **390 minutes is unevidenced and 1600 is not his
+  number** — not where the real cutoff sits.
+- **That he is flat when a stream ends.** *"This might still run but…"* immediately follows the
+  day-end line in `video1038794732`. That is evidence he has stopped trading, not that he is flat,
+  which is why the flatten ships OFF.
+- **That he does not trade off-camera.** Nothing rules it out; what is established is that the corpus
+  contains no evidence for the other 370 minutes the file permits.
+- **How much either switch binds.** That is what the two new rows count — a chart measurement.
+- **Whether any version compiles.** No Pine compiler in this environment; unchanged since tick #8.
+- `US30` depth, `p`, `ρ`, the direction contradiction and the rolling-mean-target predictions are all
+  unchanged and unrun.
+
+## QUEUE
+
+1. **The first live chart now settles three things at once**, all off one dashboard: the touch counts
+   (tick #8), the `Struct age` row's "n of 4 formed pre-open" (ticks #12 and #15), and the new
+   `Entry window` / `Hold window` counters. Load v8 on NQ or YM 5m and read them.
+2. **`entryCutMins` is now a pre-registered one-dimensional test**, alongside the three already on
+   file (rolling-mean vs fixed target; window 6 vs ~20; the three trail modes). It is the only one of
+   the four whose default was never sourced in the first place.
+3. **v8 has never been compiled**, like v2–v7. Fix syntax on first load and commit the corrected file.
+4. **The symbol hunt stays closed** (tick #7). **Do not run a Legacy Forex backtest on trader-dev
+   under any circumstances** (tick #2, FINDING 4).
+5. `US30` 15m/5m depth on `backtest-lab` — still needs a session with that connector.
+6. **Forward-testing still needs no history** and is still the only honest route available today.
+
+## STATUS LINE
+
+**LEGACY FOREX: STILL BLOCKED ON THE ENGINE; THE DELIVERABLE LOST ANOTHER UNSOURCED DEFAULT.** Seven
+audit ticks checked every number inside the trading session and none had checked the session itself —
+half of it was never in the source, and the half that was is 13–16× narrower than the file's. The
+compounding consequence is exact rather than rhetorical: under the corpus-supported window, the
+structure gate at **every** legal entry is built from bars outside the session, on both timeframes.
+Zero results recorded, still correctly.
