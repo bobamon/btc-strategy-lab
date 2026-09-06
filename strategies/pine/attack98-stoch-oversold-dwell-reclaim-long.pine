@@ -1,0 +1,171 @@
+//@version=6
+// BTC ATTACK 98 - STOCHASTIC OVERSOLD-DWELL RECLAIM, LONG. A GENUINELY NEW MECHANISM PER ATTACK 96/97's
+// QUEUE (remaining untried families after 97: ta.sar, ta.stoch, ta.tsi, ta.wpr, ta.iii, ta.wvad,
+// ta.percentrank -- ta.macd consumed at 96, ta.cog at 94/95, ta.wad at 93, ta.linreg at 91/92,
+// ta.supertrend at 89/90, ta.cci UNTESTABLE-NOT-CONSUMED at 97 (n=3, dwellBars==cciLen collision)).
+// Attack 97's own queue item 1 named ta.stoch as the preferred next pick over a same-skeleton CCI retry,
+// specifically because "Stochastic's %K is a range-position ratio, not a deviation magnitude that
+// actively mean-reverts the same way" as CCI. This cycle acts on that recommendation.
+//
+// The stored scheduled prompt again asks to "build Attack 37's filter stack," describing a board state
+// more than ninety attacks stale. The docs override it, again, per the prompt's own standing instruction:
+// Attack 37 was closed on cost by Attack 41; the OBV-divergence stack (66/68/82/83) is CLOSED at three
+// terms (board's strongest both-halves candidate, PF 1.61044869/1.15365198, 88/79 trades); SuperTrend
+// (89/90), linreg-channel (91/92), Williams A/D (93), COG trough-turn (94/95, untestable at n=1/n=2),
+// MACD zero-line regime flip (96, H1 passed/H2 failed) and CCI extreme-dwell (97, untestable at n=3) are
+// all discarded, shelved, or untestable. Numbering continues after Attack 97, the last entry on the board.
+//
+// ==================== THE CLAIM UNDER TEST ====================
+// %K = 100 * (close - lowest(low, stochLen)) / (highest(high, stochLen) - lowest(low, stochLen)) is a
+// RANGE-POSITION ratio: where the close sits inside its own recent high-low box. This is qualitatively
+// different from every prior oscillator tried here. RSI (51/52)/MFI (79) are bounded rank statistics of
+// average gains/losses or signed volume flow. CCI (97) is a deviation from a moving average normalized by
+// mean absolute deviation, which is why it snaps back toward zero within a handful of bars almost by
+// construction (the same rolling window that computes the deviation also restores it) -- that construction
+// is what made a 20-bar continuous dwell below -100 on a 20-length CCI collide with its own window and
+// crash the trade count to n=3. %K has no such built-in restoring force: during a sustained downtrend where
+// price keeps printing fresh lows inside the lookback window, %K can sit pinned near 0 for as long as that
+// trend continues, because the ratio only cares where today's close falls in the CURRENT box, not how far
+// it has moved from an average. The claim: %K dwelling below 20 (the standard oversold threshold) for a
+// sustained stretch marks a persistent downtrend that has pinned price at the bottom of its own range; the
+// cross back above 20 marks the first sign the close is climbing off the floor of that box, a tradeable
+// reclaim. Distinct from RSI/MFI (bounded rank, no box-position concept) and CCI (deviation magnitude, no
+// bounded range). Long only this cycle. Pine:
+// `strategies/pine/attack98-stoch-oversold-dwell-reclaim-long.pine`.
+//
+// ==================== AVOIDING ATTACK 97'S DIAGNOSED FAILURE MODE ====================
+// Attack 97's root cause: dwellBars (20) was set EQUAL to cciLen (20), so the dwell window collided with
+// the indicator's own lookback in an indicator whose construction already actively restores it toward
+// zero -- a near-coincidence, not a demanding-but-clearable bar. Per Attack 97's own queue item 2 ("if
+// retried, separate dwellBars from [indicator] length"), this build sets stochLen=14 and dwellBars=8 --
+// deliberately UNEQUAL and less than stochLen, so the dwell is not asking the window to outlast itself.
+// Because %K lacks CCI's built-in mean-reversion pull, 8 consecutive bars below 20 is expected to be a
+// materially easier bar to clear than CCI's 20-bar full-collision requirement was.
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS ====================
+// kVal = ta.stoch(close, high, low, stochLen), the RAW (unsmoothed) %K, matching how RSI/MFI/CCI were all
+// used bare on this board (no extra smoothing-length parameter to collide with dwellBars). belowCount is a
+// `var int` plain historical tally: belowCount := kVal < kThresh ? belowCount[1] + 1 : 0 -- not a
+// separately-armed/invalidated latch, so HARD LESSON 8's arm-vs-death race does not apply: the state IS the
+// trigger's own precondition, read one bar before the cross via belowCount[1]. dwellOk = belowCount[1] >=
+// dwellBars, checked ON the crossover bar itself -- safe because dwellOk reads bars STRICTLY BEFORE the
+// current one while crossUp reads the transition INTO the current bar, so the two clauses read disjoint bar
+// ranges and can both be true together by construction (byte-identical safety argument to Attacks 96/97).
+// crossUp = ta.crossover(kVal, kThresh). armEvent = crossUp and dwellOk and flat -> immediate entry, no
+// separate arm/confirm-later-bar split. Stop: STRUCTURAL, ta.lowest(low, lb)[1], the lb-bar swing low frozen
+// the bar before entry (LESSON 5) -- never the %K value. R floor: EXCLUSION, not clamping (LESSON 3).
+// Target: STRUCTURAL LEVEL (HARD LESSON 41), ta.highest(high, targetLookback)[1], excluded unless it clears
+// a 1.0 reward:risk floor against the frozen stop -- identical geometry to Attacks 96/97 for direct
+// comparability.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - EXCLUSION via rBig on rawR = close - stopPx, never clamped to a wider stop.
+//   Stop beyond STRUCTURE (LESSON 5) - stopPx = ta.lowest(low, lb)[1], the lb-bar swing low frozen one bar
+//        before entry, never the %K value and never the entry bar's own low.
+//   Each leg separately (LESSON 6) - LONG ONLY this cycle; short (%K crossing back below 80 after a
+//        sustained dwell ABOVE 80, same structural stop/target construction mirrored to the downside) is
+//        the standing structural asymmetry, queued exactly as every prior fresh-mechanism cycle's short.
+//   BINDING (E17) - four independently-shrinking terms: crossUp (the 20-level transition itself), dwellOk
+//        (excludes flickers that did not sit below the threshold long enough), rBig (excludes
+//        stop-too-close setups), rrOk (excludes target-too-close setups against the 100-bar structural
+//        high).
+//   REDUNDANCY (E14) - kVal's magnitude reads a RANGE-POSITION domain (where close sits inside its own
+//        recent high-low box, zero dependency on any moving average or deviation calc); belowCount reads a
+//        TEMPORAL-PERSISTENCE domain (how long that position has held, independent of the position's own
+//        depth); stopPx reads a PRICE-STRUCTURE domain with zero dependency on %K; rBig reads a
+//        RISK-GEOMETRY domain; rrOk reads a REWARD-GEOMETRY domain from a longer window (targetLookback=100
+//        > lb=20). Five independent domains, no restatement of the same information twice.
+//   LATCH IN SEQUENCE (LESSON 8) - N/A BY CONSTRUCTION, explained above: no arm-now/confirm-later split, so
+//        no latch exists for a subsequent event to invalidate before the trigger reads it. dwellOk and
+//        crossUp read disjoint bar ranges ([1]-and-earlier vs. the current bar's transition), so they cannot
+//        be mutually exclusive the way a same-bar coil+thrust or zone-tap+engulf conjunction can be.
+//   OCCUPANCY (LESSONS 24/28/29) - `flat` (strategy.position_size == 0) gates entry so a live position can
+//        never re-enter on a later crossover before the current trade closes.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity, single entry id "L", no partials, no scale-outs;
+//        expect totalTrades == unique entries, cascadeRatio 1, maxCascadeDepth 1.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4): No prior attack has plotted Stochastic
+// %K on this engine. %K has no built-in restoring force toward the mid-range the way CCI does, so a
+// sustained downtrend should pin it below 20 for well more than 8 bars at a time, and requiring only 8
+// (not stochLen's 14) should be materially easier to clear than Attack 97's exact-collision 20-of-20.
+// Anchored loosely against Attack 96's post-dwell MACD count (310 on H1) but expected somewhat lower
+// because the oversold-zone-then-reclaim shape is more selective than a zero-line regime flip. Registered
+// estimate: **40-250 trades per half**, wide band and low confidence since no prior Stochastic construction
+// exists on this board to anchor against directly.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17). BARE MECHANISM, H1 ONLY (the never-tuned pre-2024 half,
+// per the kill rule; credits checked at 250-500 tier -> one run authorized this cycle):
+//   * H1 ABOVE 1.0 AND TRADES INSIDE ~40-350 -> the Stochastic oversold-dwell-reclaim thesis has a real
+//     bare edge at a workable frequency; queue an H2 run before any filter work (the standard Attack
+//     37/91/96 all required -- both halves before a stack is earned).
+//   * H1 ABOVE 1.0 BUT TRADES FAR OUTSIDE ~40-350 -> report which direction and by how much; a follow-up
+//     would retune dwellBars, not add a filter yet.
+//   * TRADES UNDER ~30 -> UNTESTABLE per LESSON 12's floor; no ratio quoted, no H2 run.
+//   * H1 BELOW 1.0 -> DISCARDED by the kill rule immediately. No H2 run, no filter rescue. ta.stoch becomes
+//     a consumed indicator family alongside ta.macd (96), ta.wad (93), ta.linreg (91/92) and ta.supertrend
+//     (89/90).
+//   * A MAJORITY WIN RATE WITH ratioAvgWinLoss WELL BELOW 1.0 -> HARD LESSON 53's inverted-payoff shape;
+//     report it as that, and compute the breakeven win rate (1/(1+payoff)) before calling it an edge.
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside net and max drawdown
+//   (LESSONS 36/39 and the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack98 Stochastic Oversold-Dwell Reclaim Long", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+stochLen       = input.int(14, "Stochastic %K length")
+kThresh        = input.float(20.0, "Oversold dwell threshold")
+dwellBars      = input.int(8, "Min consecutive bars %K must be below threshold before the cross")
+lb             = input.int(20, "Structural swing lookback (bars)")
+targetLookback = input.int(100, "Structural target lookback (bars)")
+minRpct        = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+minRR          = input.float(1.0, "Min reward:risk from the structural target (exclusion floor)")
+maxBars        = input.int(192, "Max bars in trade")
+
+kVal = ta.stoch(close, high, low, stochLen)
+
+var int belowCount = 0
+belowCount := kVal < kThresh ? belowCount[1] + 1 : 0
+
+crossUp = ta.crossover(kVal, kThresh)
+dwellOk = belowCount[1] >= dwellBars
+
+flat = strategy.position_size == 0
+
+armEvent = crossUp and dwellOk and flat
+
+stopPx = ta.lowest(low, lb)[1]
+rawR   = close - stopPx
+minR   = close * minRpct / 100
+rBig   = rawR >= minR
+
+targetPx = ta.highest(high, targetLookback)[1]
+rrOk     = (targetPx - close) >= rawR * minRR
+
+goLong = armEvent and rBig and rrOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if goLong
+    strategy.entry("L", strategy.long)
+    slPx   := stopPx
+    tpPx   := targetPx
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(kVal, title="StochK")
+plot(belowCount, title="BelowThreshDwellCount")

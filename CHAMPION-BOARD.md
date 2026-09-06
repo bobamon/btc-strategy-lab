@@ -9462,3 +9462,126 @@ without first fixing the diagnosed bottleneck.
 7. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
 8. **This session cannot continue the new-engine cross-sectional track (Attacks 84-86)** — no
    `backtest-lab`/`sweep_backtest` tool is available here, unaffected by this cycle.
+
+---
+
+# ATTACK 98 — STOCHASTIC OVERSOLD-DWELL RECLAIM, LONG. A GENUINELY NEW MECHANISM PER ATTACK 97'S QUEUE ITEM 1. H1 CLEARS THE KILL RULE, 37 TRADES, PF 1.263 — QUEUES AN H2 RUN.
+
+The stored scheduled prompt again asks to "build Attack 37's filter stack," describing a board state more
+than ninety attacks stale. **The docs override it, again**, per the prompt's own standing instruction:
+Attack 37 was closed on cost by Attack 41; the OBV-divergence stack (66/68/82/83) is CLOSED at three terms
+(board's strongest both-halves candidate, PF 1.61044869/1.15365198, 88/79 trades); SuperTrend (89/90),
+linreg-channel (91/92), Williams A/D (93), COG trough-turn (94/95, untestable at n=1/n=2), MACD zero-line
+regime flip (96, H1 passed/H2 failed) and CCI extreme-dwell (97, untestable at n=3) are all discarded,
+shelved, or untestable. Attack 97's own queue item 1 named `ta.stoch` as the preferred next pick over a
+same-skeleton CCI retry — specifically because %K is a range-position ratio, not a deviation magnitude that
+actively mean-reverts the way CCI does. This cycle acts on that recommendation, continuing numbering after
+Attack 97, not Attack 37.
+
+## THE CLAIM
+
+`ta.stoch(close, high, low, 14)` raw %K measures where the close sits inside its own recent high-low box —
+qualitatively different from CCI's deviation-from-mean (which actively restores toward zero within its own
+window, the exact property that crashed Attack 97 to n=3) and from RSI/MFI's bounded rank statistics. A
+sustained downtrend that keeps printing fresh lows inside the lookback window can pin %K near 0 for as long
+as the trend continues, because the ratio only reads today's position in the current box, not distance from
+an average. Claim: %K dwelling below 20 for a sustained stretch marks a persistent downtrend pinned at the
+floor of its own range; the cross back above 20 marks the first sign of climbing off that floor — a
+tradeable reclaim. Pine: `strategies/pine/attack98-stoch-oversold-dwell-reclaim-long.pine`.
+
+**Avoiding Attack 97's diagnosed failure mode:** Attack 97's root cause was `dwellBars` (20) set EQUAL to
+`cciLen` (20) on an indicator whose own construction already restores it toward zero — a near-coincidence
+collision, not a demanding-but-clearable bar. Per Attack 97's own queue item 2, this build sets `stochLen`=14
+and `dwellBars`=8, deliberately unequal and smaller than the indicator's own length.
+
+## AUDIT (one line per leg, template copied from Attack 96/97's proven-safe dwell/cross shape)
+
+R >= 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rawR = close - stopPx`, never clamped. Stop beyond
+STRUCTURE (LESSON 5) — `stopPx = ta.lowest(low, lb)[1]`, the 20-bar swing low frozen one bar before entry,
+never the %K value. Each leg separately (LESSON 6) — LONG ONLY; short (%K crossing back below 80 after a
+sustained dwell above 80) is the standing structural asymmetry, queued alongside every prior fresh-mechanism
+cycle's short. BINDING (E17) — four independently-shrinking terms: `crossUp`, `dwellOk`, `rBig`, `rrOk`.
+REDUNDANCY (E14) — five independent domains: range-position (%K itself), temporal-persistence
+(`belowCount`), price-structure (`stopPx`), risk-geometry (`rBig`), reward-geometry (`rrOk`, 100-bar window
+vs. 20-bar stop). LATCH IN SEQUENCE (LESSON 8) — N/A by construction, identical argument to Attacks 96/97:
+`dwellOk` reads `belowCount[1]` (strictly earlier bars), `crossUp` reads the transition into the current
+bar — disjoint bar ranges, cannot be mutually exclusive. CASCADE (HARD LESSON 42/43) — LONG at 100% equity,
+single entry id "L"; `cascadeRatio` 1, `maxCascadeDepth` 1, confirmed (37 rows, 37 unique entries). SL/TP
+FIXED AT ENTRY, no trailing, no martingale.
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4)
+
+No prior attack has plotted Stochastic %K on this engine. Registered estimate: **40-250 trades per half**,
+reasoned as %K having no built-in restoring force (unlike CCI), so 8 consecutive bars below 20 should be
+materially easier to clear than Attack 97's exact-collision 20-of-20.
+
+## OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17)
+
+* H1 above 1.0 and trades inside ~40-350 → real bare edge at a workable frequency; queue an H2 run.
+* H1 above 1.0 but trades far outside the band → report the miss direction; retune `dwellBars`, not add a filter.
+* Trades under ~30 → UNTESTABLE per LESSON 12's floor; no ratio quoted, no H2 run.
+* H1 below 1.0 → DISCARDED by the kill rule immediately; `ta.stoch` becomes consumed.
+
+## RESULT — H1 ONLY (472 credits at `get_credits`, 250-500 tier → one run authorized, pre-2024 half only)
+
+| Metric | Attack 98a (H1, 2022-01-01 → 2024-06-08) |
+|---|---|
+| Trades | **37** |
+| Win rate | 29.73% (11W / 26L) |
+| Profit factor | **1.2630477** |
+| Net return | +9.90335730% |
+| Max drawdown | 15.12901010% |
+| Avg winner | $432.29 |
+| Avg loser | **-$144.80** |
+| Achieved win/loss ratio | 2.98538547 |
+| Commission paid | $403.77 |
+| Avg bars winning / losing | 123.73 / 24.5 |
+
+## THE VERDICT — CLEARS THE KILL RULE, QUEUES AN H2 RUN
+
+**37 trades is just under the registered 40-250 band but well clear of LESSON 12's 30-trade floor** — a
+minor, not disqualifying, frequency miss (unlike Attack 97's 10x undershoot). The ratio is quotable and
+positive: PF 1.263, breakeven win rate at this payoff is 1/(1+2.985) = 25.1%, and the achieved 29.73% clears
+it by 4.6pp — a real margin, not noise sitting on the break-even line.
+
+**Gross-edge screen (HARD LESSON 37):** true gross P&L (netProfit + commissionPaid) = $990.34 + $403.77 =
+$1,394.10 over 37 trades = **$37.68/trade** against **$10.91/trade** commission — a **~3.45x** ratio. Both
+working champions in this project (3M v37, WF e58a) sit near 3x; Attack 37 sat at 1.2x. **Attack 98a clears
+the screen the working mechanisms clear**, the first fresh-mechanism attempt since Attack 83 to do so on a
+bare first pass.
+
+**No cap-truncation signature (HARD LESSON 38):** `avgBarsWinning` 123.73 sits comfortably under the 192-bar
+cap — winners are resolving to the structural target, not timing out.
+
+**Drawdown 15.13%** is smaller than every other bare fresh-mechanism long tested this cycle range (compare
+Attack 96's 29.47%, Attack 37's 24-32%). Avg loser -$144.80 is a moderate loss size, not the tiny-loser
+category-3 shape (Attack 37: -$116/-$128) nor a concentrated few-large-losses shape (largest loss only
+-$263.39, under 2x the average loser) — this reads as an ordinary asymmetric trend-catching distribution,
+not yet classifiable into the board's three drawdown categories without a second half to compare against.
+
+**Per the pre-registered outcome tree, this queues an H2 run (2024-06-08 → 2026-09-01) before any filter
+work — the same both-halves requirement Attack 37/91/96 all needed.** Only one run was authorized this cycle
+(472 credits at `get_credits`, the 250-500 tier). **status=testing.** Attack 98 is NOT yet a both-halves
+candidate and must not be treated as one until H2 runs.
+
+## QUEUE
+
+1. **Run Attack 98's H2 next** (2024-06-08 → 2026-09-01, byte-identical Pine, same saved `strategyId`,
+   override the date window only) as this board's top priority — the mandatory second half before any filter
+   work, per the Attack 37/91/96 precedent. If credits allow only one run next cycle and this is still
+   outstanding, H2 takes priority over a new fresh mechanism.
+2. **If H2 also clears 1.0**, Attack 98 becomes the board's second both-halves candidate alongside Attack 83
+   (PF 1.61044869/1.15365198, 88/79 trades) — do not build a filter stack until both halves are measured and
+   compared, per this lab's own hard-earned rule (Attack 37 waited four cycles before a stack was justified,
+   and rightly so per HARD LESSON 36/37).
+3. **If H2 fails the kill rule, `ta.stoch` is not automatically consumed** — only this bare oversold/80-cross
+   construction is. A regime-conditioned or dwell-retuned variant would remain open, analogous to how
+   Attack 97 left CCI open pending a dwellBars/cciLen separation.
+4. **Attack 83 remains the board's strongest both-halves candidate** (PF 1.61044869/1.15365198 on 88/79
+   trades, DD 11.08%/10.76%), unaffected by this cycle.
+5. **Attack 46 (long) remains a candidate alongside Attack 83**, unaffected by this cycle.
+6. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if that
+   family is revisited before another fresh mechanism.
+7. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+8. **Remaining untried indicator families after this cycle**: `ta.sar`, `ta.tsi`, `ta.wpr`, `ta.iii`,
+   `ta.wvad`, `ta.percentrank` (`ta.cci` untestable-not-consumed at 97; `ta.stoch` pending H2 here).

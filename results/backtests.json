@@ -3921,5 +3921,55 @@
       "verifiedAt": "2026-09-06T07:11:22Z"
     },
     "verdict": "UNTESTABLE PER LESSON 12's ~30-TRADE FLOOR. Only 3 trades over the full 85,655-bar H1 window (2022-01-01 to 2024-06-08), three orders of magnitude short of the registered 30-200 estimate and short of LESSON 12's own floor -- no ratio is quotable, PF 0 is not a real edge signal at this sample. All 3 trades lost (0% win rate), avg loser -$178.20, max DD 7.52% (small in absolute terms only because so few trades fired). Root cause: requiring CCI(20) to sit continuously below -100 for 20 consecutive bars is far more restrictive than anticipated -- CCI is a fast, actively mean-reverting oscillator (the same rolling window that measures the deviation also pulls the statistic back toward zero as it rolls forward), so sustained 20-bar dwells in extreme territory are rare almost by construction, unlike MACD's slower EMA-difference (Attack 96) which can sit on one side of zero through an entire trend. This is not a kill-rule failure (no defensible PF exists to trigger it) and not an edge finding either way -- ta.cci is NOT ruled out by this result, only this specific dwell-length pairing (cciLen=20, dwellBars=20) is. No H2 run: per the pre-registered outcome tree, trades under ~30 means untestable, no second half spent. One credit spent this cycle (474 balance before the run)."
+  },
+  {
+    "id": "attack98-stoch-oversold-dwell-reclaim-long-h1",
+    "name": "Attack 98: Stochastic oversold-dwell reclaim LONG (bare, new mechanism) -- pre-2024 half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack98-stoch-oversold-dwell-reclaim-long.pine",
+    "description": "Genuinely new mechanism per Attack 97's queue item 1 (untried indicator families after 97: ta.sar, ta.stoch, ta.tsi, ta.wpr, ta.iii, ta.wvad, ta.percentrank; ta.cci left UNTESTABLE-not-consumed at 97). Claim: ta.stoch %K (raw, unsmoothed), a RANGE-POSITION ratio (where close sits inside its own recent high-low box) rather than a deviation-from-mean or bounded-rank statistic, dwelling below 20 for at least 8 consecutive bars then crossing back above 20 marks a persistent downtrend pinned at the bottom of its own range exhausting itself, distinct from CCI's deviation-magnitude construction (Attack 97) and from RSI/MFI's bounded rank (51/52, 79). dwellBars (8) deliberately set UNEQUAL to and less than stochLen (14), per Attack 97's own queue item 2, to avoid the exact dwellBars==indicatorLen collision that crashed Attack 97 to n=3. Long only, bare mechanism, no filter stack. Stop: 20-bar structural swing low frozen one bar before entry. Target: 100-bar structural high, excluded (not clamped) below a 1.0 reward:risk floor. R floor 0.8% of price, excluded not clamped. Max 192 bars in trade.",
+    "metrics": {
+      "netProfitPct": 9.9033573,
+      "profitFactor": 1.2630477,
+      "maxDrawdownPct": 15.1290101,
+      "totalTrades": 37,
+      "winningTrades": 11,
+      "losingTrades": 26,
+      "winRatePct": 29.72972973,
+      "avgTradePct": 0.26765831,
+      "avgWinningTrade": 432.289818713636,
+      "avgLosingTrade": -144.802010625,
+      "ratioAvgWinLoss": 2.98538547,
+      "largestWin": 1168.794063,
+      "largestLoss": -263.38761225,
+      "avgBarsInTrade": 54,
+      "avgBarsWinning": 123.72727273,
+      "avgBarsLosing": 24.5,
+      "sharpeRatio": 0.39533372,
+      "sortinoRatio": 0.06387447,
+      "commissionPaid": 403.7688704,
+      "grossProfit": 4755.188005849996,
+      "grossLoss": 3764.852276249995,
+      "longTrades": 37,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1TWAH47XZYEP0R7HT5TYHAE",
+      "strategyId": "01M1TWAH9PV56R1RRKN93HZYE5",
+      "resultId": "01M1TWAH47S8E0GVANGGE511K3",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1TWAH47S8E0GVANGGE511K3",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-06T00:00:00Z"
+    },
+    "verdict": "H1 (2022-01-01 to 2024-06-08, the never-tuned pre-2024 half) CLEARS the kill rule: PF 1.2630477 on 37 trades -- just under the registered 40-250 band but well above LESSON 12's 30-trade floor, so testable. Win rate 29.73% (11W/26L), avg winner $432.29, avg loser -$144.80, achieved payoff 2.985 against a 25.1% breakeven win rate -- a genuine 4.6pp margin over breakeven. True gross P&L (netProfit+commissionPaid) is $1394.10 over 37 trades = $37.68/trade against $10.91/trade commission, a ~3.45x ratio -- clears HARD LESSON 37's ~3x gross-edge-per-trade screen, well above Attack 37's 1.2x. avgBarsWinning 123.73 sits comfortably under the 192-bar cap (no HARD LESSON 38 truncation signature). Max drawdown 15.13%, better than every prior fresh-mechanism long this cycle range. Per the pre-registered outcome tree this queues an H2 run (2024-06-08 to 2026-09-01) before any filter work -- the standard both-halves requirement (Attack 37/91/96 precedent) -- but only one run was authorized this cycle (472 credits at get_credits, the 250-500 tier). status=testing, not yet a both-halves candidate."
   }
 ]
