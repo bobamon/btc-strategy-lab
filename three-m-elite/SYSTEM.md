@@ -6829,3 +6829,80 @@ question was already pushed to the user once (check #1, 2026-09-04).
 1.95534435 H2, DD 4.50890824%, 40 trades). **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61(short)** —
 unchanged (PF 1.88616546 on 2022-01-01 window, `passed`; PF 1.01300244 on full coverage, `testing`).
 **THIS CYCLE: no change.** v67 (rejected) still stands as the most recent real result on file.
+
+---
+
+# ██ v62-fvg ON A SECOND INSTRUMENT — THE FIRST GENERALISATION TEST THIS LAB HAS EVER RUN, AND THE CHAMPION DOES NOT TRAVEL
+
+One credit. `resultId 01M1V13R5N7B5ADJ2SF71PRDMC`. **v62 unchanged** — not a ratchet change, so RATCHET
+v2 does not apply. A different question: does the construction work on anything other than BTC?
+
+## WHY THIS INSTEAD OF AN EIGHTH FILTER
+
+The obvious next tick was the higher-timeframe bias gate — the second grading lever the research names,
+and literally the top line of the source's own checklist. **It was not run, and the reason is
+arithmetic.**
+
+Seven consecutive filter additions have now failed the same way: v63/v64 (bias axis), v65 (FVG on the
+short), v66 (MA overextension), v67 (its short mirror), and the earlier v54/v56/v57. The cloud's own
+entries record HARD LESSON 45 firing a **sixth** and then a **seventh** time.
+
+**v62 has 40 trades. The floor is 30. So any filter removing more than 25% of setups fails clause 3
+automatically, regardless of how good it is.** v66 cut 40 → 19. An eighth filter would be the eighth
+instance of a failure that is predictable before it runs — and the research agrees from the other
+side: *"every additional parameter is a new opportunity to curve-fit to noise"*, and *"avoid juggling
+more than three timeframes"* (this build already spans 4H zones, 48m validation and 15m entry).
+
+**The binding constraint is the base sample, exactly as HARD LESSON 45 says. The way to grow it
+without touching the strategy is a second instrument.**
+
+## THE RESULT — ETHUSDT 15m, 2021-03-15 → 2026-09-01, 191,530 bars
+
+| | BTC (champion record) | **ETH (this run)** |
+|---|---|---|
+| Profit factor | **2.04354108** | **0.97825349** |
+| Trades | 40 | **49** |
+| Win rate | — | 32.65306122% |
+| Net | +25.61599544% | **-0.8260768%** |
+| Max drawdown | 4.50890824% | 8.49043491% |
+| Avg win / loss | — | $232.25 / -$115.11 |
+| Commission | $446.84 | $495.04 |
+| Cascade | 1.0 clean | 1.0 clean (49/49, depth 1) |
+
+**Frequency: pre-registered 25–50, actual 49** — inside the band.
+
+## VERDICT ON THE PRE-REGISTERED CRITERION
+
+The criterion, stated before the run: *PF > 1.0 on ≥30 trades means the construction generalises.*
+
+**0.97825349 on 49 trades. It does not generalise.** ETH is breakeven to within a fifth of a percent,
+on a sample **larger** than the one BTC's championship rests on.
+
+## WHAT THIS DOES TO THE CHAMPION
+
+**v62-fvg was promoted on BTCUSDT alone**, as has every 3M result since this lab began — the universe
+has been one instrument for the project's entire life. This is the first time any 3M build has been
+pointed at a second market, and it returns essentially nothing.
+
+Pooling the two trade populations (a pooled figure over 89 trades, not a portfolio return):
+gross profit **$8,732.37** against gross loss **$6,253.38** → **PF ≈ 1.3964 on 89 trades**.
+
+Above 1.0 and comfortably clear of the floor — **but the dispersion is the story, not the pooled
+number.** 2.04 against 0.98 across two of the most correlated assets in crypto is not a small spread.
+**BTC carries the entire result.**
+
+**This does not demote v62.** Its BTC numbers are real, its split test passed, and generalisation was
+never a promotion criterion in this lab. What it does is bound the claim: **v62 is a BTCUSDT result,
+not a demonstrated method**, and the record should say so wherever it is cited.
+
+## QUEUE
+
+1. **Stop adding filters to a 40-trade base.** Eight attempts, one arithmetic reason. Any further
+   filter needs the base sample grown first, and that means more instruments, not more terms.
+2. **Run v62 on a third and fourth instrument** (SOL, BNB) before any further work on the long leg.
+   Three points would distinguish "BTC-specific" from "BTC and ETH happen to differ".
+3. **Re-examine whether the FVG term itself is BTC-specific.** v62's whole advantage over v37 is the
+   FVG gate; if ETH is breakeven, the gate may be selecting a BTC-only regularity. The clean test is
+   v37 (ungraded) on ETH — if it is *also* ~0.98, the instrument is the problem; if it is worse, the
+   FVG gate is still adding something on ETH too.
+4. The short leg (v60/v61) has never been tested off BTC either.
