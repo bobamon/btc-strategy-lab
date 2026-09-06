@@ -1,0 +1,206 @@
+//@version=6
+// BTC ATTACK 102 - NY SESSION OPENING-RANGE BREAKOUT, LONG. A GENUINELY NEW AXIS: SESSION-CLOCK PRICE
+// STRUCTURE, NOT ANOTHER ta.* INDICATOR.
+//
+// NUMBERING: continues after Attack 101, the last numbered entry on the board (BTC lab, checked at
+// commit 62e2531). The stored scheduled prompt describes a board state ("build Attack 37's filter
+// stack," "continue numbering after 37") more than sixty attacks stale. THE DOCS OVERRIDE IT, again,
+// per the prompt's own standing instruction: Attack 37 was CLOSED ON COST by Attack 41 after four
+// consecutive single-term rejections (38/39/40/41) -- it is not a live development target and this
+// cycle does not reopen it.
+//
+// ==================== WHY THIS AXIS, NOT ANOTHER OSCILLATOR ====================
+// Attacks 89-100 exhausted a run of single-indicator dwell/flip/cross constructions (SuperTrend,
+// linreg-channel, WAD, COG, MACD, CCI, Stochastic, WVAD, price/volume correlation) -- nine trials of
+// the same underlying template (an oscillator/indicator reaches an extreme or crosses a threshold,
+// then a structural stop/target is bolted on). The board's own statistical audit ("Counting Families
+// Instead Of Trials") flagged that piling a tenth variant onto that cluster adds almost no independent
+// information -- correlated trials collapse toward one effective trial. Its own queue said the
+// cheapest way to add real evidence is "a genuinely unrelated mechanism," and Attack 101's queue named
+// the concrete alternative: "a structurally different axis (session/calendar...) against another
+// single-indicator bare test." This is that axis, and it uses ZERO ta.* oscillator/indicator calls --
+// only price, volume-free, and time().
+//
+// ==================== THE CLAIM UNDER TEST ====================
+// The first hour of the New York session (9:30-10:30 ET) concentrates the day's freshest institutional
+// order flow -- the range it prints (session high/low) reveals whether that flow is net buying or net
+// selling before the rest of the world has reacted. A close breaking back ABOVE that opening range
+// later the same day marks continuation of the revealed buying pressure for the remainder of the
+// session, rather than a random intraday wiggle. This is a claim about WHEN in the day information is
+// freshest, not about any derived statistic of price or volume -- a domain no prior attack on this
+// board has tested as the PRIMARY mechanism (the VWM family's witching-hour ban and this file's own
+// time arithmetic use clock time only as a FILTER on top of a different signal; here the clock window
+// IS the signal generator).
+//
+// ==================== WHY THIS IS NOT ATTACK 34/42 IN DISGUISE ====================
+// Attack 34 (weekly break-and-hold) and Attack 42 (daily break-and-hold, CLOSED by Attack 41's screen)
+// anchor on a FULL PRIOR CALENDAR PERIOD's high/low (a week or a day of accumulated positioning) and
+// hold for weeks/a week. This mechanism anchors on a single ONE-HOUR CLOCK WINDOW WITHIN THE SAME DAY
+// as the trade, and caps the hold at 48 bars (12 hours) -- same-day/next-morning resolution. The
+// economic claim is different (early-session order-flow revelation vs. multi-period positioning
+// breaking a known level) and the timeframe of both anchor and hold is roughly 20-30x shorter. Recorded
+// here explicitly because the family-counting audit would otherwise have to guess.
+//
+// ==================== NO SESSION-CALENDAR BUILT-INS, BY DESIGN ====================
+// mcprule.txt forbids "session calendars as core fill logic" (Pine session-string / session.* built-ins
+// simulating exchange calendars). This build uses NONE of those. The NY-open window is computed with
+// the exact raw arithmetic on `time` this board's own witching-hour filter already uses and has already
+// had KEPT on this board (vwm-base-current.pine: hUTC = floor(time/3600000) % 24, hET = (hUTC +
+// etOffset + 24) % 24) -- plain integer math on a built-in series, not a session construct. BTCUSDT
+// trades 24/7, so "session" here means only "a fixed UTC-derived clock window," nothing more.
+// KNOWN SIMPLIFICATION, stated plainly: etOffset is a FIXED -4 (EDT) year-round, so the window drifts
+// one hour relative to true ET during EST months -- the same simplification the witching-hour filter
+// already carries on this board. Not corrected here because it is a study of clock-window order flow
+// in general, not of the exact NYSE bell.
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS ====================
+// rangeHi/rangeLo are `var float` accumulators reset once per UTC day (newDay = dayId != dayId[1]) and
+// updated ONLY on bars where inWindow is true (hET==9 and mUTC>=30, or hET==10 and mUTC<30 -- exactly
+// the four 15m bars covering 9:30-10:30 ET). Every other bar of the day reads haveRange (windowSeen and
+// not inWindow) and treats rangeHi/rangeLo as FROZEN CONSTANTS. inWindow and haveRange are exact
+// logical complements on trading bars, so the "compute the range" and "check the breakout" code paths
+// never execute on the same bar -- LATCH IN SEQUENCE (LESSON 8) holds by construction, not by a
+// same-bar arm/confirm split that could race. A further, cheaper safety argument: rangeHi at the close
+// of the LAST window bar already includes that bar's own high, which is >= that bar's own close, so
+// close[1] (the last window bar's close) can never itself exceed rangeHi -- ta.crossover(close, rangeHi)
+// on the first post-window bar cannot fire from a stale same-window value.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - EXCLUSION via rBig on rawR = close - (rangeLo - buf), never clamped.
+//   Stop beyond STRUCTURE (LESSON 5) - stopPx = rangeLo - atr*bufK, the session's OWN low (genuine
+//        structure on the far side of the broken level), frozen before the entry bar as described above,
+//        never a function of any oscillator.
+//   Each leg separately (LESSON 6) - LONG ONLY this cycle. Short (an opening-range BREAKDOWN below
+//        rangeLo, same structural stop/target mirrored to the downside) is the standing asymmetry,
+//        queued exactly as every prior fresh-mechanism cycle's short.
+//   BINDING (E17) - five independently-shrinking terms: crossUp (the breakout transition itself),
+//        haveRange (excludes days where the window never printed, e.g. at the very start of history),
+//        rBig (excludes narrow-range days), rrOk (excludes projections that fail the 1.0 RR floor),
+//        canTrade (excludes a second signal on a day that already fired).
+//   REDUNDANCY (E14) - zero ta.* oscillator/indicator dependency (only ta.atr for the stop buffer, the
+//        same role it plays in vwm-base). rangeHi/rangeLo read a SESSION-CLOCK PRICE-STRUCTURE domain
+//        with zero overlap with any cumulative-volume family (obv/wad/nvi/wvad), any deviation-from-mean
+//        or range-position oscillator (cci/rsi/mfi/stoch/tsi/macd/cog/correlation), or the two prior
+//        calendar-anchor families (weekly/daily break-and-hold, distinguished above by anchor length and
+//        hold horizon). rBig reads a RISK-GEOMETRY domain; rrOk reads a REWARD-GEOMETRY domain deriving
+//        from the range's own height, not from any external lookback.
+//   LATCH IN SEQUENCE (LESSON 8) - proven above: inWindow/haveRange are exact complements, so range
+//        construction and breakout evaluation cannot share a bar.
+//   OCCUPANCY (LESSONS 24/28/29) - `flat` gates entry; `canTrade`/`fired` (reset once per UTC day) caps
+//        this mechanism at ONE trade attempt per day even after an earlier same-day stop-out, which is
+//        deliberate: the session's information is spent once it has produced a signal.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity, single entry id "L", no partials, no scale-outs;
+//        expect totalTrades == unique entries, cascadeRatio 1, maxCascadeDepth 1.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4): at most one signal per calendar day.
+// H1 (2022-01-01 to 2024-06-08) spans ~890 days. Not every day clears rBig and rrOk (narrow-range
+// opening hours, or a range too small to project a 1.0 RR target), so registered estimate: **150-400
+// trades**, anchored on "most days form a range but only a minority produce a qualifying breakout,"
+// wide because no prior clock-window construction exists on this board to anchor against more tightly.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17). BARE MECHANISM, H1 ONLY (the never-tuned pre-2024
+// half, per the kill rule; credits checked at 452 -> the 250-500 tier -> one run authorized this cycle):
+//   * H1 ABOVE 1.0 AND TRADES INSIDE ~60-350 (the board's own settled workable band) -> the session
+//     opening-range thesis has a real bare edge at a workable frequency; queue an H2 run before any
+//     filter work (the standard Attack 37/91/96/98/100 precedent -- both halves before a stack is
+//     earned).
+//   * H1 ABOVE 1.0 BUT TRADES FAR OUTSIDE ~60-350 -> report direction and magnitude; a follow-up would
+//     retune the window length or moveMult, not add a filter yet.
+//   * TRADES UNDER ~30 -> UNTESTABLE per LESSON 12's floor; no ratio quoted, no H2 run.
+//   * H1 BELOW 1.0 -> DISCARDED by the kill rule immediately. No H2 run, no filter rescue. The
+//     session-clock axis becomes a consumed mechanism family.
+//   * A MAJORITY WIN RATE WITH ratioAvgWinLoss WELL BELOW 1.0 -> HARD LESSON 53's inverted-payoff
+//     shape; report it as that and compute the breakeven win rate (1/(1+payoff)) before calling it an
+//     edge.
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside net and max drawdown
+//   (LESSONS 36/39 and the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack102 NY Session Opening-Range Breakout Long", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+etOffset    = input.int(-4,   "ET offset from UTC (fixed, EDT convention)")
+winStartHET = input.int(9,    "Opening-range window start hour (ET)")
+winStartMET = input.int(30,   "Opening-range window start minute (ET)")
+winEndHET   = input.int(10,   "Opening-range window end hour (ET)")
+winEndMET   = input.int(30,   "Opening-range window end minute (ET)")
+bufK        = input.float(0.25, "Stop buffer beyond the session low, x ATR")
+atrLen      = input.int(14,  "ATR length for the stop buffer")
+moveMult    = input.float(1.5, "Target = rangeHigh + moveMult x range height")
+minRpct     = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+minRR       = input.float(1.0,  "Min reward:risk from the measured-move target (exclusion floor)")
+maxBars     = input.int(48,  "Max bars in trade -- 12 hours on 15m")
+
+MS1D  = 86400000
+dayId = math.floor(time / MS1D)
+newDay = dayId != dayId[1]
+
+hUTC = math.floor(time / 3600000) % 24
+mUTC = math.floor(time / 60000) % 60
+hET  = (hUTC + etOffset + 24) % 24
+
+inWindow = (hET == winStartHET and mUTC >= winStartMET) or (hET == winEndHET and mUTC < winEndMET)
+
+var float rangeHi    = na
+var float rangeLo    = na
+var bool  windowSeen = false
+var bool  fired      = false
+
+if newDay
+    rangeHi    := na
+    rangeLo    := na
+    windowSeen := false
+    fired      := false
+
+if inWindow
+    rangeHi    := na(rangeHi) ? high : math.max(rangeHi, high)
+    rangeLo    := na(rangeLo) ? low  : math.min(rangeLo, low)
+    windowSeen := true
+
+atrS = ta.atr(atrLen)
+buf  = na(atrS) ? 0.0 : atrS * bufK
+
+haveRange = windowSeen and not inWindow and not na(rangeHi) and not na(rangeLo)
+
+crossUp = haveRange and ta.crossover(close, rangeHi)
+
+stopPx = rangeLo - buf
+rawR   = close - stopPx
+minR   = close * minRpct / 100
+rBig   = haveRange and rawR >= minR
+
+rangeHeight = rangeHi - rangeLo
+targetPx    = rangeHi + rangeHeight * moveMult
+rrOk        = haveRange and (targetPx - close) >= rawR * minRR
+
+flat     = strategy.position_size == 0
+canTrade = not fired
+
+goLong = crossUp and rBig and rrOk and flat and canTrade
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if goLong
+    strategy.entry("L", strategy.long)
+    slPx   := stopPx
+    tpPx   := targetPx
+    barsIn := 0
+    fired  := true
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(rangeHi,        title="SessionRangeHigh")
+plot(rangeLo,         title="SessionRangeLow")

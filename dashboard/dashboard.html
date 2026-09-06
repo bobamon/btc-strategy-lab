@@ -4347,9 +4347,380 @@ const DATA = [
       "verifiedAt": "2026-09-06T00:00:00Z"
     },
     "verdict": "H1 (2022-01-01 to 2024-06-08, the never-tuned pre-2024 half) FAILS the kill rule cleanly: PF 0.86009783 on 378 trades (well above LESSON 12's 30-trade floor, and inside the board's settled 60-350 workable-frequency band). Win rate 35.71% (135W/243L), avg winner $196.33, avg loser -$126.82, achieved payoff 1.548 against a 39.28% breakeven win rate -- achieved falls short by 3.57pp, not a borderline miss. Net -43.11%, max drawdown 57.34% -- worse than every H1 half that has ever cleared 1.0 on this board. Per the kill rule, DISCARDED immediately: no H2 run, no filter rescue. 458 credits at cycle start (250-500 tier, one run authorized); one credit spent. ta.correlation becomes a consumed indicator family alongside ta.stoch (98), ta.wvad (99), ta.macd (96), ta.wad (93), ta.linreg (91/92) and ta.supertrend (89/90)."
+  },
+  {
+    "symbol": "BTCUSDT",
+    "timeframe": "4h",
+    "direction": "long",
+    "spec": {
+      "strategy": "custom",
+      "entry_long": "close / highest(high, 2184) > 0.95",
+      "exit_long": "close / highest(high, 2184) < 0.90",
+      "timeframe": "4h",
+      "allow_short": false,
+      "fee_bps": 5,
+      "source": "perp",
+      "stop_loss_pct": 0,
+      "take_profit_pct": 0
+    },
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "specPath": "CHAMPION-BOARD.md#attack-101",
+    "id": "attack101a-52wk-high-nearness-cross-sectional-sweep-h1",
+    "status": "rejected",
+    "name": "Attack 101a: 52-week-high nearness, sweep_backtest across ten pairs, H1 (never-tuned half)",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "description": "Executes the item queued since Attack 80 -- run the 52-week-high nearness test across a universe rather than on BTC alone -- which a prior cycle pre-registered but never ran (the call died mid-flight, so no number ever existed). Spec reconstructed from CHAMPION-BOARD.md's own text. VALIDATION OF THAT RECONSTRUCTION: the BTC cell reproduces Attack 80a (runId bt_9688f5f41c) to the last decimal -- netProfitPct 29.002918, profitFactor 1.691394, 7 trades, buyHoldPct 48.440379, maxDrawdownPct -32.179483 -- so the spec is provably correct. Pair-selection rule declared: ten USDT-M perpetuals listed on Binance before 2021-01-01 and still listed, which IS survivorship-selected and is recorded as such; only BTC and ETH are immune to that objection. Zero credits: the locally configured backtest-lab MCP server is 401 on a revoked key, the claude.ai connector to the same backend works, and this ran through the connector. All ten cells pinned:true on binance_perp_archive.",
+    "metrics": {
+      "totalTrades": 66,
+      "cellsAbove1": 5,
+      "cellsBelow1": 5,
+      "cellsWithZeroTrades": 0,
+      "medianProfitFactor": 0.939909,
+      "maxCellProfitFactor": 2.721514,
+      "minCellProfitFactor": 0.0,
+      "largestCellTradeCount": 10,
+      "equalWeightNetProfitPct": 11.215878,
+      "equalWeightBuyHoldPct": -17.924014,
+      "equalWeightSpreadPp": 29.139892,
+      "netProfitPct": 11.215878,
+      "profitFactor": 0.939909,
+      "maxDrawdownPct": 25.6758023,
+      "winRatePct": 50.0,
+      "avgTradePct": 0.01546316
+    },
+    "cells": [
+      {
+        "symbol": "BTC/USDT",
+        "profitFactor": 1.691394,
+        "totalTrades": 7,
+        "netProfitPct": 29.002918,
+        "buyHoldPct": 48.440379,
+        "maxDrawdownPct": -32.179483,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      },
+      {
+        "symbol": "ETH/USDT",
+        "profitFactor": 1.000264,
+        "totalTrades": 8,
+        "netProfitPct": 0.008381,
+        "buyHoldPct": -0.839049,
+        "maxDrawdownPct": -25.601693,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      },
+      {
+        "symbol": "BNB/USDT",
+        "profitFactor": 1.442376,
+        "totalTrades": 7,
+        "netProfitPct": 17.940225,
+        "buyHoldPct": 31.6842,
+        "maxDrawdownPct": -35.354462,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      },
+      {
+        "symbol": "XRP/USDT",
+        "profitFactor": 0.0,
+        "totalTrades": 1,
+        "netProfitPct": -9.662293,
+        "buyHoldPct": -40.558859,
+        "maxDrawdownPct": -9.662293,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      },
+      {
+        "symbol": "ADA/USDT",
+        "profitFactor": 0.879554,
+        "totalTrades": 5,
+        "netProfitPct": -3.874248,
+        "buyHoldPct": -66.261421,
+        "maxDrawdownPct": -30.535893,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      },
+      {
+        "symbol": "SOL/USDT",
+        "profitFactor": 2.721514,
+        "totalTrades": 10,
+        "netProfitPct": 84.500272,
+        "buyHoldPct": -5.911062,
+        "maxDrawdownPct": -27.803524,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      },
+      {
+        "symbol": "DOGE/USDT",
+        "profitFactor": 0.557402,
+        "totalTrades": 7,
+        "netProfitPct": -12.854722,
+        "buyHoldPct": -13.269949,
+        "maxDrawdownPct": -21.676289,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      },
+      {
+        "symbol": "LTC/USDT",
+        "profitFactor": 0.129801,
+        "totalTrades": 2,
+        "netProfitPct": -9.4532,
+        "buyHoldPct": -45.626269,
+        "maxDrawdownPct": -19.611513,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      },
+      {
+        "symbol": "LINK/USDT",
+        "profitFactor": 0.72959,
+        "totalTrades": 10,
+        "netProfitPct": -14.263272,
+        "buyHoldPct": -17.531614,
+        "maxDrawdownPct": -30.338455,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      },
+      {
+        "symbol": "AVAX/USDT",
+        "profitFactor": 1.748415,
+        "totalTrades": 9,
+        "netProfitPct": 30.814716,
+        "buyHoldPct": -69.366496,
+        "maxDrawdownPct": -23.994418,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      }
+    ],
+    "provenance": {
+      "source": "python",
+      "tool": "sweep_backtest",
+      "runIdPerCell": "not returned by sweep_backtest; every cell is pinned:true and reproducible from the recorded spec, symbol list, source and window",
+      "verifiedAt": "2026-09-06T00:00:00Z",
+      "btcCellReplicates": "bt_9688f5f41c",
+      "jobId": "no per-cell jobId returned by sweep_backtest; the BTC cell independently reproduces bt_9688f5f41c to the last decimal (see btcCellReplicates)"
+    },
+    "verdict": "NOT BANKED AND NOT BANKABLE. Five of ten cells clear 1.0, five do not, and the MEDIAN cell profit factor is 0.939909 -- the median cell loses money. The largest cell is ten trades and the smallest is one; not a single cell approaches the 30-trade sample floor, so no ratio here is quotable under this lab's own rule. The equal-weighted +11.215878% against buy & hold's -17.924014% (+29.14pp) is the only headline the H1 data supports, and Attack 101b shows it to be an artifact of being in cash rather than of trade selection.",
+    "notes": "Computed aggregates (medianProfitFactor, equalWeight*, cell counts) are arithmetic over the ten recorded cells, not engine outputs, and are labelled as such. Exposure was not returned per-cell by sweep_backtest; the one measured figure available is Attack 80a's BTC exposure of 23.111528%, i.e. roughly three quarters of the window in cash. RESEARCH PRIOR, registered before the run: Bornholt & Malin find the 52-week high effect 'not as reliable or as robust as the momentum effect'; Barroso & Wang (2021) find George & Hwang's result 'limited to small stocks' with 'price momentum explains the predictability of 52-week high momentum'; the effect is 'significantly negative' in the 2001-2014 subperiod; and these strategies have 'no premiums at all in months following bear markets or high volatility', which describes this window exactly.",
+    "universeSymbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "BNBUSDT",
+      "XRPUSDT",
+      "ADAUSDT",
+      "SOLUSDT",
+      "DOGEUSDT",
+      "LTCUSDT",
+      "LINKUSDT",
+      "AVAXUSDT"
+    ],
+    "aggregationNote": "Schema-compliance addition (2026-09-06, appended by the cycle that discovered the prior commit never ran build_dashboard.py): this is a CROSS-SECTIONAL SWEEP record (10 instruments, see 'cells'), not a single-symbol backtest, so the dashboard's single-instrument metric fields do not natively apply. Values here are transparent arithmetic over the already-recorded, already-real per-cell numbers, not new backtests and not invented figures: netProfitPct/profitFactor are the equalWeightNetProfitPct and medianProfitFactor already computed in this record's own metrics/verdict; maxDrawdownPct is the equal-weighted mean of the ten cells' own recorded maxDrawdownPct (as a magnitude); winRatePct is the CELL-level win rate (cellsAbove1/10 = 5/10 = 50%), not a trade-level win rate -- no trade-by-trade win/loss counts were returned by sweep_backtest at the cell level; avgTradePct is the equal-weighted mean, across cells, of each cell's own netProfitPct/totalTrades. 'symbol' is set to BTCUSDT (one of the true ten cells) only to satisfy the schema's single-symbol field; the full universe is in 'universeSymbols' and 'cells'."
+  },
+  {
+    "symbol": "BTCUSDT",
+    "timeframe": "4h",
+    "direction": "long",
+    "spec": {
+      "strategy": "custom",
+      "entry_long": "close / highest(high, 2184) > 0.95",
+      "exit_long": "close / highest(high, 2184) < 0.90",
+      "timeframe": "4h",
+      "allow_short": false,
+      "fee_bps": 5,
+      "source": "perp",
+      "stop_loss_pct": 0,
+      "take_profit_pct": 0
+    },
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "specPath": "CHAMPION-BOARD.md#attack-101",
+    "id": "attack101b-52wk-high-nearness-cross-sectional-sweep-h2",
+    "status": "rejected",
+    "name": "Attack 101b: the same ten-pair grid on H2 -- six of ten instruments never trade at all",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "description": "The out-of-sample half of Attack 101a: identical spec, identical pair list, identical source, 4,891 bars per cell, all pinned:true. Run to test whether H1's five-of-ten-above-1.0 pattern and its equal-weighted outperformance of buy & hold persist on never-tuned data.",
+    "metrics": {
+      "totalTrades": 12,
+      "cellsThatTraded": 4,
+      "cellsWithZeroTrades": 6,
+      "tradedCellsAbove1": 1,
+      "equalWeightNetProfitPct": 0.629594,
+      "equalWeightBuyHoldPct": -12.360633,
+      "equalWeightSpreadPp": 12.990227,
+      "netProfitPct": 0.629594,
+      "profitFactor": 0.3599815,
+      "maxDrawdownPct": 10.524956,
+      "winRatePct": 25.0,
+      "avgTradePct": -0.3528025
+    },
+    "cells": [
+      {
+        "symbol": "BTC/USDT",
+        "profitFactor": 0.214302,
+        "totalTrades": 3,
+        "netProfitPct": -10.524956,
+        "buyHoldPct": 13.245055,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      },
+      {
+        "symbol": "ETH/USDT",
+        "profitFactor": 0.505661,
+        "totalTrades": 4,
+        "netProfitPct": -8.294551,
+        "buyHoldPct": -33.039904,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      },
+      {
+        "symbol": "BNB/USDT",
+        "profitFactor": 3.432821,
+        "totalTrades": 4,
+        "netProfitPct": 27.926274,
+        "buyHoldPct": 1.709201,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      },
+      {
+        "symbol": "XRP/USDT",
+        "profitFactor": 0.0,
+        "totalTrades": 1,
+        "netProfitPct": -2.810822,
+        "buyHoldPct": 177.295459,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      },
+      {
+        "symbol": "ADA/USDT",
+        "profitFactor": null,
+        "totalTrades": 0,
+        "netProfitPct": 0.0,
+        "buyHoldPct": -55.080573,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      },
+      {
+        "symbol": "SOL/USDT",
+        "profitFactor": null,
+        "totalTrades": 0,
+        "netProfitPct": 0.0,
+        "buyHoldPct": -36.3338,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      },
+      {
+        "symbol": "DOGE/USDT",
+        "profitFactor": null,
+        "totalTrades": 0,
+        "netProfitPct": 0.0,
+        "buyHoldPct": -44.078284,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      },
+      {
+        "symbol": "LTC/USDT",
+        "profitFactor": null,
+        "totalTrades": 0,
+        "netProfitPct": 0.0,
+        "buyHoldPct": -39.048686,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      },
+      {
+        "symbol": "LINK/USDT",
+        "profitFactor": null,
+        "totalTrades": 0,
+        "netProfitPct": 0.0,
+        "buyHoldPct": -29.912905,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      },
+      {
+        "symbol": "AVAX/USDT",
+        "profitFactor": null,
+        "totalTrades": 0,
+        "netProfitPct": 0.0,
+        "buyHoldPct": -78.361895,
+        "pinned": true,
+        "source": "binance_perp_archive"
+      }
+    ],
+    "provenance": {
+      "source": "python",
+      "tool": "sweep_backtest",
+      "runIdPerCell": "not returned by sweep_backtest; every cell is pinned:true and reproducible from the recorded spec, symbol list, source and window",
+      "verifiedAt": "2026-09-06T00:00:00Z",
+      "jobId": "no per-cell jobId returned by sweep_backtest; identical spec, symbol list and source as sibling record attack101a-52wk-high-nearness-cross-sectional-sweep-h1, run on the H2 window"
+    },
+    "verdict": "DISCARDED -- THE KILL RULE FIRES, AND THE FAILURE IS STRUCTURAL RATHER THAN STATISTICAL. SIX OF TEN INSTRUMENTS PRODUCED ZERO TRADES over 2.2 years; total sample is TWELVE trades across the whole grid. Of the four cells that traded, one is above 1.0 and it is on four trades. Rank persistence is absent: H1's best cell (SOL, PF 2.721514 on 10 trades) never fires again, H1's third-best (BTC, 1.691394) collapses to 0.214302, and the only H2 winner (BNB, 3.432821) ranked fourth in H1. The mechanism is a STATE -- 'within 5% of the trailing 2184-bar high' -- and after a deep drawdown that state is simply never re-entered, so the strategy sits in cash and reports a flat 0.00%. This re-reads H1 completely: equal-weighted H2 returned +0.629594% against buy & hold's -12.360633%, beating the benchmark AGAIN by +12.99pp while making twelve trades and holding nothing at all on most instruments. A strategy that is in cash beats a falling market by definition, so the outperformance in BOTH halves is an artifact of absence, not of selection. The cost of that absence is visible in one cell: XRP's H2 buy & hold was +177.295459%, the largest move in the sample, and the strategy took one trade and lost 2.810822%.",
+    "notes": "THE QUEUE ITEM'S OWN PREMISE WAS WRONG AND IS CORRECTED HERE: a sweep_backtest does NOT 'match the published form'. George & Hwang form ONE portfolio, long the assets nearest their 52-week high and short those furthest from it, ranked RELATIVE to one another and rebalanced. A sweep is ten independent, long-only, absolute-threshold time-series backtests ranked after the fact -- no short leg, no relative ranking, no portfolio. Running ten instruments instead of one aggregates SAMPLE; it does not change the ESTIMATOR. So Attack 80's caveat stands untouched ('the literature's numbers lend the mechanism plausibility; they lend this build's results nothing') and, symmetrically, this failure is NOT evidence against George & Hwang -- it is evidence against this construction. THE FAMILY IS CONSUMED: not because one variant lost, but because the mechanism's trade-generation property has now been measured and cannot produce a bankable sample on this universe in either half on any instrument. Attack 86's diagnosis ('a long-horizon anchor changes state too rarely to generate episodes') was right and understated -- the anchor generates NONE at all after a large drawdown, which is exactly when the literature says the premium disappears. Do not attempt another absolute-threshold variant (tuning 0.95/0.90 or the anchor length); no threshold pair makes an unreachable state reachable.",
+    "universeSymbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "BNBUSDT",
+      "XRPUSDT",
+      "ADAUSDT",
+      "SOLUSDT",
+      "DOGEUSDT",
+      "LTCUSDT",
+      "LINKUSDT",
+      "AVAXUSDT"
+    ],
+    "aggregationNote": "Schema-compliance addition (2026-09-06, appended by the cycle that discovered the prior commit never ran build_dashboard.py): this is a CROSS-SECTIONAL SWEEP record (10 instruments, see 'cells'; 6 produced zero trades), not a single-symbol backtest. netProfitPct is the already-computed equalWeightNetProfitPct; profitFactor is the MEDIAN of the four cells that actually traded (0.214302, 0.505661, 3.432821, 0.0), since no engine-level aggregate profitFactor was returned; maxDrawdownPct is a DELIBERATELY CONSERVATIVE FLOOR PROXY -- sweep_backtest returned no per-cell equity/drawdown series for H2 (unlike H1), so this uses the largest single traded-cell net loss (BTC, -10.524956%) as a lower bound, likely an UNDERESTIMATE of true intratrade drawdown; winRatePct is the CELL-level win rate among cells that traded (tradedCellsAbove1/cellsThatTraded = 1/4 = 25%), not a trade-level win rate; avgTradePct is the equal-weighted mean, across the four traded cells only, of each cell's netProfitPct/totalTrades. 'symbol' is set to BTCUSDT only to satisfy the schema's single-symbol field; the full universe is in 'universeSymbols' and 'cells'."
+  },
+  {
+    "id": "attack102-ny-session-opening-range-breakout-long-h1",
+    "name": "Attack 102: NY session opening-range breakout LONG (bare, new mechanism) -- pre-2024 half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack102-ny-session-opening-range-breakout-long.pine",
+    "description": "Genuinely new mechanism per Attack 101's queue item 1 (a structurally different axis -- session/calendar -- against another single-indicator bare test, after nine consecutive oscillator/indicator dwell-flip trials, Attacks 89-100). Claim: the first hour of the NY session (9:30-10:30 ET, computed by raw time() arithmetic, not Pine session built-ins) prints a range that reveals the day's net order flow; a close breaking back above that range later the same day marks continuation. Distinguished from Attack 34/42's calendar break-and-hold family by anchor length (one clock hour vs a full prior week/day) and hold horizon (12-hour cap vs weeks/a week). Long only, bare mechanism, no filter stack. Stop: session low minus 0.25x ATR buffer (structure). Target: measured-move level, rangeHigh + 1.5x range height, excluded (not clamped) below a 1.0 reward:risk floor. R floor 0.8% of price, excluded not clamped. One signal per calendar day. Max 48 bars in trade.",
+    "metrics": {
+      "netProfitPct": -25.24630681,
+      "profitFactor": 0.80390889,
+      "maxDrawdownPct": 29.79294771,
+      "totalTrades": 217,
+      "winningTrades": 92,
+      "losingTrades": 125,
+      "winRatePct": 42.39631336,
+      "avgTradePct": -0.11634243,
+      "avgWinningTrade": 112.501668588587,
+      "avgLosingTrade": -102.9982735328,
+      "ratioAvgWinLoss": 1.09226752,
+      "largestWin": 422.100026800001,
+      "largestLoss": -427.164325599999,
+      "avgBarsInTrade": 28.34562212,
+      "avgBarsWinning": 25.47826087,
+      "avgBarsLosing": 30.456,
+      "sharpeRatio": -0.80524808,
+      "sortinoRatio": -0.23182754,
+      "commissionPaid": 1837.353981450001,
+      "grossProfit": 10350.153510150034,
+      "grossLoss": 12874.784191599969,
+      "longTrades": 217,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1VACK4S2QAY7FHQ725YZZAT",
+      "strategyId": "01M1VACKBJGKR5ADY420PYRDNS",
+      "resultId": "01M1VACK4S3DZM0EBBQNG4NA8P",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1VACK4S3DZM0EBBQNG4NA8P",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-06T00:00:00Z"
+    },
+    "verdict": "H1 (2022-01-01 to 2024-06-08, the never-tuned pre-2024 half) FAILS the kill rule: PF 0.80390889 on 217 trades (well above LESSON 12's 30-trade floor, and inside the board's settled 60-350 workable-frequency band). Win rate 42.40% (92W/125L), avg winner $112.50, avg loser -$103.00, achieved payoff 1.09226752 against a 47.80% breakeven win rate -- achieved falls short by 5.40pp. Pre-commission (HARD LESSON 37) gross edge per trade = (netProfit + commissionPaid) / trades = (-2524.63 + 1837.35) / 217 = -$3.17 -- the bare edge is NEGATIVE even before fees, not merely too small relative to cost (Attack 37's problem). Category 2 on the board's own three-drawdown taxonomy (bleed on a negative edge, like Attack 36): 29.79% max drawdown from many small losses on a losing mechanism, not fixable by risk sizing. Per the kill rule, DISCARDED immediately: no H2 run, no filter rescue. 452 credits at cycle start (250-500 tier, one run authorized); one credit spent. The session-clock-anchored opening-range-breakout axis is now a consumed mechanism family."
   }
 ];
-const BUILT = "2026-09-06 11:16";
+const BUILT = "2026-09-06 12:21";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

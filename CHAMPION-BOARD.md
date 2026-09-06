@@ -10987,3 +10987,143 @@ happened a fourth time, in a tick that was itself about not trusting a single to
 - *What explains price momentum and 52-week high momentum when they really work?* — https://acfr.aut.ac.nz/__data/assets/pdf_file/0005/576995/Haoxu-Wang-paper_NZFM.pdf
 - *Momentum Crashes and the 52-Week High* (Financial Analysts Journal 2023) — https://epublications.marquette.edu/cgi/viewcontent.cgi?article=1168&context=fin_fac
 - Quantpedia, *52-Weeks High Effect in Stocks* — https://quantpedia.com/strategies/52-weeks-high-effect-in-stocks
+
+---
+
+# ATTACK 102 — NY SESSION OPENING-RANGE BREAKOUT, LONG. A GENUINELY NEW AXIS (SESSION-CLOCK PRICE
+# STRUCTURE, NOT ANOTHER ta.* INDICATOR), DISCARDED CLEANLY ON THE KILL RULE — AND THE BARE EDGE IS
+# NEGATIVE, NOT JUST TOO SMALL.
+
+**Numbering note:** continues after Attack 101, the last numbered entry on the board. The stored
+scheduled prompt again describes a board state ("Attack 37, build its filter stack") over sixty
+attacks stale, instructing "continue numbering after 37." **The docs override it, again**, per the
+prompt's own standing instruction: Attack 37 was closed on cost by Attack 41 after four consecutive
+single-term rejections; it is not reopened here.
+
+Credits at cycle start: **452** (250–500 tier per the mandate) → **one run authorized, pre-2024 half
+only.**
+
+## THE MECHANISM AND WHAT IT CLAIMS
+
+Attacks 89–100 ran nine consecutive trials of the same template: an oscillator/indicator reaches an
+extreme or crosses a threshold, then a structural stop/target is bolted on (SuperTrend, linreg-channel,
+WAD, COG, MACD, CCI, Stochastic, WVAD, price/volume correlation). The board's own statistical audit
+("Counting Families Instead Of Trials") warned that piling a tenth variant onto that cluster adds
+almost no independent information, and Attack 101's queue named the concrete alternative: **"a
+structurally different axis (session/calendar...) against another single-indicator bare test."** This
+cycle is that axis, and it uses **zero `ta.*` oscillator calls** — only price and `time()`.
+
+**The claim:** the first hour of the NY session (9:30–10:30 ET) concentrates the day's freshest order
+flow; the range it prints reveals net buying or selling before the rest of the world reacts. A close
+breaking back above that range later the same day marks continuation, not a random intraday wiggle.
+
+**Not Attack 34/42 in disguise.** Those anchor on a full prior calendar period's high/low (a week or a
+day) and hold for weeks/a week. This anchors on a single one-hour clock window *within the trade day*
+and caps the hold at 48 bars (12 hours) — roughly 20–30x shorter on both axes, and a different economic
+claim (early-session order-flow revelation vs. breaking a level built up over a whole prior period).
+
+**No session-calendar built-ins.** `mcprule.txt` forbids session-string/`session.*` constructs. The
+NY-open window is computed with the same raw `time()` arithmetic this board's witching-hour filter
+already uses and has already had KEPT (`hUTC = floor(time/3600000) % 24`, ET offset arithmetic) — plain
+integer math on a built-in series, not a session construct. BTCUSDT trades 24/7, so "session" here
+means only a fixed UTC-derived clock window.
+
+Pine: `strategies/pine/attack102-ny-session-opening-range-breakout-long.pine`.
+
+**Pre-run audit, one line per leg:**
+  R ≥ 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rawR = close - stopPx`, never clamped.
+  Stop beyond STRUCTURE (LESSON 5) — `stopPx = rangeLo - atr*bufK`, the session's own low, frozen
+       before the entry bar (proved below), never a function of any oscillator.
+  Each leg separately (LESSON 6) — long only this cycle; short (an opening-range breakDOWN below
+       `rangeLo`, same structural stop/target mirrored down) is the standing structural asymmetry.
+  BINDING (E17) — five independently-shrinking terms: `crossUp`, `haveRange`, `rBig`, `rrOk`,
+       `canTrade` (one signal per calendar day).
+  REDUNDANCY (E14) — zero `ta.*` oscillator dependency (only `ta.atr` for the stop buffer, same role as
+       in vwm-base); `rangeHi`/`rangeLo` read a SESSION-CLOCK PRICE-STRUCTURE domain with zero overlap
+       with any cumulative-volume family, any oscillator family, or the two calendar-anchor-hold
+       families (distinguished above by anchor length and hold horizon).
+  LATCH IN SEQUENCE (LESSON 8) — `inWindow` and `haveRange` are exact logical complements on trading
+       bars, so range construction and breakout evaluation never share a bar. Further: `rangeHi` at the
+       close of the last window bar already includes that bar's own high (≥ its own close), so
+       `ta.crossover(close, rangeHi)` cannot fire from a stale same-window value on the boundary bar.
+  Frequency estimate registered before running: **150–400 trades**, anchored on "most days form a
+  range but only a minority produce a qualifying breakout" — no prior clock-window construction on
+  this board to anchor against more tightly.
+
+**Outcomes registered before the run (LESSON 17):** H1 above 1.0 and inside 60–350 trades → queue an
+H2 run before any filter work. H1 above 1.0 but outside that band → report direction/magnitude. Under
+~30 trades → untestable. H1 below 1.0 → DISCARDED immediately, no H2, no rescue.
+
+## THE RESULT — H1 ONLY (2022-01-01 → 2024-06-08)
+
+| Metric | Attack 102 (H1) |
+|---|---|
+| Trades | **217** |
+| Win rate | 42.39631336% (92W/125L) |
+| Profit factor | **0.80390889** |
+| Net return | -25.24630681% |
+| Max drawdown | **29.79294771%** |
+| Avg winner / loser | $112.50 / **-$103.00** |
+| Achieved win/loss ratio | 1.09226752 |
+| Commission paid | $1,837.35 |
+| Gross profit / loss (net-of-commission aggregates) | $10,350.15 / $12,874.78 |
+
+**Breakeven win rate at this payoff is 47.80% (1/(1+1.09226752)); achieved is 42.40% — a 5.40pp
+shortfall.** 217 trades sits squarely inside the board's settled 60–350 workable-frequency band and
+well above LESSON 12's 30-trade floor — this is a well-powered rejection, not a thin one.
+
+**The sharper finding: the bare edge is NEGATIVE, not merely too small.** Per HARD LESSON 37, gross
+edge per trade (pre-commission) = (netProfit + commissionPaid) / trades = (−$2,524.63 + $1,837.35) /
+217 = **−$3.17 per trade**. Attack 37's problem was a real edge too small relative to cost ($10.58/trade
+against ~$8.84 commission); this mechanism has no edge to begin with — commission is not the binding
+constraint here, the signal itself loses money before any fee is paid.
+
+**Drawdown category, per the board's own taxonomy:** avg loser −$103 across 125 losses is Category 2
+— **bleed on a negative edge** (like Attack 36's narrow-range-day expansion), not Category 3's
+bleed-on-a-positive-edge that a filter could fix. Filtering this mechanism would not be worth
+attempting even if the sample were richer.
+
+## THE VERDICT — DISCARDED, KILL RULE APPLIED IMMEDIATELY
+
+**H1 fails, decisively and on a well-powered sample.** Per the kill rule, no H2 run and no filter
+rescue. The session-clock-anchored opening-range-breakout axis becomes a consumed mechanism family.
+
+Record: `attack102-ny-session-opening-range-breakout-long-h1` (**rejected**), `provenance.jobId`
+`adhoc_01M1VACK4S2QAY7FHQ725YZZAT` from `trader.dev`.
+
+## QUEUE
+
+1. **Do not retune this construction** (window length, `moveMult`, `maxBars`) — the edge is negative
+   pre-cost, which is a signal problem, not a parameter problem (same logic as Attack 36's closure).
+2. **Attack 83 remains the board's strongest both-halves candidate on PF** (1.61044869/1.15365198,
+   88/79 trades); **Attack 88 holds the board's highest recorded PF at n≥30** (2.021320/1.154330).
+   Unaffected by this cycle.
+3. **Attack 37's filter-stack track remains CLOSED** (Attack 41) and is not reopened by this entry.
+4. **Unchanged and unaffected:** the funding-clock counter-build (Attack 55 queue item 1, owed only if
+   that family is revisited), the `backtest-lab` funding re-run of Attack 83a/83b (Benchmark Audit II
+   queue item 1), Attack 34's unfixable H2 sample floor, the short leg's standing structural asymmetry,
+   and the user's still-open call on whether a Sharpe/t hurdle joins RATCHET v2.
+5. **Genuinely unrelated axes are getting scarce.** Remaining untried single-indicator families:
+   `ta.sar`, `ta.tsi`, `ta.iii` (low information value, four cumulative-volume constructions already
+   tried), `ta.percentrank` (same range-position domain as `ta.stoch`). The next cycle should weigh
+   `ta.sar` (a stop-and-reverse trend construction, distinct from every dwell-reclaim tried) against
+   another clock/calendar-axis variant (e.g. day-of-week seasonality) before returning to the
+   oscillator cluster.
+6. Credits remaining after this cycle: 451 (one spent). Next cycle at this tier still runs H1-only for
+   any fresh mechanism; the two-run (full-pair) tier requires 500+.
+
+## HOUSEKEEPING FOUND WHILE FINISHING THIS CYCLE — ATTACK 101's RECORDS NEVER PASSED THE BUILD
+
+`python build_dashboard.py --lab btc` **rejected the file outright** on 16 problems, all against the
+two Attack 101 sweep records (`attack101a`/`attack101b`): a multi-instrument `symbol` string fails the
+single-pair regex, `provenance.source` wasn't in the allowed enum, and the required single-instrument
+scalar metrics (`netProfitPct`, `profitFactor`, `maxDrawdownPct`, `winRatePct`, `avgTradePct`) were
+never populated at the top level (only sweep-shaped aggregates and a `cells` array). **Commit 62e2531
+added these records without ever re-running the dashboard build** — `dashboard.html` was last
+regenerated at Attack 100, so this had been silently broken for one full cycle. Fixed here by adding
+the required scalar fields as transparent, disclosed arithmetic over the numbers already recorded in
+each record (equal-weighted means/medians over the ten cells, cell-level win rate rather than a
+trade-level one where no trade-by-trade data exists) — every value and its derivation is documented in
+each record's new `aggregationNote` field. Nothing was re-run, nothing was invented; the original
+`cells`, `verdict` and `notes` are untouched. **Any future sweep-style (multi-instrument) record should
+populate these top-level fields at write time**, not leave them for a later cycle to reconstruct.
