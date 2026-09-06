@@ -943,3 +943,91 @@ External blockers unchanged. What changed internally: the stop-width gate had 6�
 impossible outright at NQ 40,000, and its NQ cap rejected the worked example the source is built around.
 None of it had been looked for in nine ticks, and it would have been misattributed to tick #8's headline
 correction the first time anyone loaded the chart. Zero results recorded, still correctly.
+
+---
+
+# ██ TICK #10, 2026-09-06 — THE LEVEL IS 2–3× WIDER THAN THE STOP THAT MUST SIT OUTSIDE IT
+
+**Zero credits. No backtest, no `plan_backtest_window`, no engine call of any kind.** Full detail in
+`SYSTEM.md` FINDING 19.
+
+## WHAT THIS TICK DID
+
+Tick #9's queue item 4 named the next suspect exactly: *"`touchTol` (0.10% of price) is the obvious
+next suspect and has never been examined."* It was, and it is a bigger instance of the same defect
+class — a percentage quantity colliding with a points quantity — than the one tick #9 found.
+
+## THE HEADLINE — TWO GATES WHOSE ACCEPTANCE REGIONS DO NOT OVERLAP
+
+`touchTol = 0.10` % of price, against caps and pads measured in index points:
+
+| | price (his own screen) | tol = 0.10% | band (±tol) | cap | band as % of cap |
+|---|---|---|---|---|---|
+| **NQ** | 24,954.50 (`4.` 03:06) | **24.95 pts** | 49.9 | 25 | **200%** |
+| **YM** | 46,942 (`4.` 07:23) | **46.94 pts** | 93.9 | 30 | **313%** |
+
+The stop-width gate accepts a break only within `cap − pad` of the level — **24.75 pts on NQ, 29.0 on
+YM.** The tolerance exceeds that on both (**−0.20** and **−17.94**). So **every break this system can
+trade sits inside the band its own level definition still calls "touching"** — *"price can't break it,
+it's stuck"* (`7.` 00:47). One gate scores the bar a touch, the other scores the same bar on the same
+level a break.
+
+And against tick #9's own result: v3 settled the pad at **one tick** (0.25 pts NQ, 1 pt YM). The
+tolerance is **100× the pad on NQ, 47× on YM.** The file was padding the stop by a quarter-point
+beyond a level whose own identity was fuzzy to twenty-five.
+
+## WHAT v4 CHANGED
+
+1. **Tolerance is now a fraction of the live max-stop cap** (0.20 → ±5 pts NQ, ±6 YM). The source says
+   the level *is* a zone (*"support zones"* 01:21, *"you make this little thicker"* 04:35) and never
+   how wide, so any number is an interpretation — but **commensurability is not**: a level's width must
+   be smaller than the stop that sits outside it. % mode retained for reproducing v1–v3.
+   **ATR was ruled out on corpus grounds** — ATR stops are Coach Luca's (FINDING 6).
+2. **`breakClears`** — the break may be required to clear the band. **OFF by default**; under v1–v3
+   tolerance it was not merely off but *unsatisfiable* (−0.2 pts of budget on NQ).
+3. **A "Level width" dashboard row + four data-window plots.** The dashboard now shows all three
+   zero-signal causes together: touch counter (#8), stop budget (#9), level width (#10).
+4. **`minTouch = 3` audited and CLEARED** — it is the one level-gate number the source supports
+   (*"one two three is resistance"*, `7.` 04:31). A clean gate is also a result.
+
+## WHAT THIS TICK DID NOT ESTABLISH
+
+- **No number came from a run.** No `runId` exists for this workstream and none was created.
+- **The direction of the bias is not even signed.** A wide band makes each bar easier to score as a
+  touch *and* makes distinct visits harder to separate (price must leave the band entirely). The two
+  push opposite ways; which dominates is a chart measurement. This tick instruments it rather than
+  asserting it — and that is the one thing three consecutive audit ticks have in common.
+- **Whether 0.20 of the cap is right** — a labelled interpretation satisfying one arithmetic
+  constraint, nothing more.
+- **Whether any version compiles — queue item 2 is still open**, still blocked by the egress proxy.
+- **The literature could not be read.** `WebSearch` works; **every** `WebFetch` was refused by the
+  proxy (`arxiv.org`, `mdpi.com`, `vecviz.com`, `investopedia.com` all tried). Four URLs are recorded
+  in SYSTEM.md as leads, explicitly **not** as citations; nothing in this tick rests on them.
+- `US30` depth, `p`, `ρ`, the direction contradiction and the rolling-mean-target predictions are all
+  unchanged and unrun.
+
+## QUEUE
+
+1. **The first live chart now settles THREE questions and can tell them apart** — touch counts (#8),
+   Stop budget (#9), Level width (#10). If signals are zero, the dashboard names the gate.
+2. **v2/v3/v4 have never been compiled** — unchanged, blocked by egress here.
+3. **Pre-registered one-dimensional tests now number five:** tolerance (0.20 of cap vs 0.10% of price),
+   `breakClears` on/off, pad (1 tick vs 0.05%), the three trail modes, rolling-mean vs fixed target,
+   window 6 vs ~20.
+4. **The gate audit is now three-for-three and should continue.** Ticks #8, #9 and #10 each found a
+   gate whose *units or counting basis* were wrong rather than whose threshold was mistuned — and none
+   of the three would have been visible in a backtest result. Remaining un-audited: `volMult = 1.0`
+   against tick-volume-vs-contract-volume on index CFDs, and `pivLen = 5` (the only structure number,
+   and the source states none).
+5. **The symbol hunt stays closed** (tick #7). **Do not run a Legacy Forex backtest on trader-dev under
+   any circumstances** (tick #2, FINDING 4).
+6. `US30` 15m/5m depth on `backtest-lab` — still needs a session with that connector.
+7. **Forward-testing still needs no history** and is still the only honest route available today.
+
+## STATUS LINE
+
+**LEGACY FOREX: STILL BLOCKED ON THE ENGINE — AND THE DELIVERABLE'S THIRD SILENT GATE IS NOW VISIBLE.**
+External blockers unchanged. What changed internally: the object the whole system trades — the level —
+was defined 2–3× wider than the stop that has to sit outside it, so its two gates disagreed about
+whether a given bar was a touch or a break, and the tolerance was 100× the pad that tick #9 spent a
+whole tick getting right. Ten ticks, zero results recorded, still correctly.

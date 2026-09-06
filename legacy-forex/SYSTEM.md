@@ -1460,3 +1460,154 @@ ever pass"** state, so the two causes are separable on the first chart rather th
 - **No past conclusion changes.** This workstream has still never banked a result. As in tick #8, that is
   luck rather than process: had a run been banked off v2, this gate would have shaped its trade count
   invisibly, and the resulting sample would have been blamed on the touch counter.
+
+---
+
+# ██ TICK #10, 2026-09-06 — THE LEVEL'S OWN WIDTH IS 2–3× WIDER THAN THE STOP THAT HAS TO SIT OUTSIDE IT
+
+**Zero credits. No backtest, no `plan_backtest_window`, no engine call of any kind.** Tick #9's queue
+item 4 asked for exactly this: *"audit the remaining gates for the same class of defect… `touchTol`
+(0.10% of price) is the obvious next suspect and has never been examined."* It is the suspect, and it
+is worse than the one tick #9 found.
+
+## ██ FINDING 19 — THE TOUCH TOLERANCE AND THE STOP BUDGET ARE IN DIFFERENT UNITS, AND THEIR ACCEPTANCE REGIONS DO NOT OVERLAP
+
+### THE DEFECT
+
+`touchTol = 0.10` is a **percent of price**. Everything it has to be commensurable with — the max-stop
+cap (`maxStopNQ = 25`, `maxStopYM = 30`), the pad (v3: one tick), the projected stop width — is in
+**absolute index points**. This is FINDING 18's defect exactly, in a different gate, one order of
+magnitude larger, and untouched since v1.
+
+### THE ARITHMETIC, ON HIS OWN SCREEN PRICES
+
+Both prices are read off his own charts in the committed transcripts (`4.` 03:06 and 07:23), the same
+two used in FINDING 18 so the two findings are directly comparable.
+
+| | price | tol = 0.10% | band (±tol) | cap | tol as % of cap | band as % of cap |
+|---|---|---|---|---|---|---|
+| **NQ** | 24,954.50 | **24.95 pts** | 49.91 pts | 25 | **99.8%** | **199.6%** |
+| **YM** | 46,942 | **46.94 pts** | 93.88 pts | 30 | **156.5%** | **312.9%** |
+
+### THE PART THAT IS NOT MERELY A BAD DEFAULT — TWO GATES WHOSE ACCEPTANCE REGIONS ARE DISJOINT
+
+The stop-width gate accepts a break only if the entry sits within `stopBudget = cap − pad` of the
+level. The touch counter calls any bar within `tol` of the level a **touch** — *"price can't break it,
+it's stuck"* (`7.` 00:47).
+
+| | stop budget = cap − pad (v3) | touch tolerance | budget − tol |
+|---|---|---|---|
+| **NQ** | 25 − 0.25 = **24.75 pts** | 24.95 pts | **−0.20** |
+| **YM** | 30 − 1 = **29.00 pts** | 46.94 pts | **−17.94** |
+
+**`tol > budget` on both instruments.** So **every break this system is capable of trading lies inside
+the band its own level definition still calls "touching."** One gate scores the bar as a touch of the
+level; the other scores the same bar, on the same level, as a break of it. That is not a mistuned
+threshold — it is two halves of the file disagreeing about what a level is.
+
+The comparison with FINDING 18 makes the point sharper still. v3 spent a full tick moving the pad into
+the cap's units and settling on **one tick — 0.25 pts on NQ, 1 pt on YM.** The tolerance is **100× the
+pad on NQ and 47× on YM.** The file was padding the stop by a quarter of a point beyond a level whose
+own identity was fuzzy to twenty-five.
+
+### THE PRICE-SCALING PROPERTY, AND WHERE IT DIFFERS FROM FINDING 18
+
+`tol` scales with price; the cap does not. At **NQ 40,000** the band is 80 pts = **320%** of the cap;
+at **YM 60,000**, 120 pts = **400%**. **This is a degradation, not an expiry** — unlike the pad, `tol`
+does not enter the stop budget, so it can never make the gate mathematically unsatisfiable the way
+FINDING 18's pad could. Stated precisely so the two are not conflated: the pad had a hard failure date,
+the tolerance just gets steadily more wrong.
+
+### WHY THE SOURCE CANNOT SETTLE THE NUMBER, AND WHAT CAN
+
+He is explicit that a level **is a zone** and never once says how wide:
+
+- *"seven touches with those wicks to this support **zone**"* (`7.` 00:47)
+- *"I like to call support **zones**"* (`7.` 01:21)
+- *"You make this little **thicker** because it's the whole thing"* (`7.` 04:35)
+- *"if we were to **drag this to where we think** it support is"* (`7.` 01:37) — explicitly subjective
+
+So any number is an interpretation, exactly as the pad was. The one constraint that is **not** an
+interpretation is **commensurability: a level's own width must be smaller than the stop that has to sit
+outside it**, or *"just below that support"* (`11.` 00:15) is undefined. v4 therefore anchors the
+tolerance to the live max-stop cap — `tolFrac = 0.20` → **±5 pts on NQ, ±6 on YM** — which satisfies
+that constraint by construction and removes the price-scaling drift for free. **0.20 is a labelled
+interpretation exposed as an input, pre-registered as a one-dimensional test. It is not a measured
+optimum and must not be quoted as one.**
+
+**Why not ATR, the obvious volatility-relative fix.** ATR stops are **Coach Luca's**, and FINDING 6
+established that nothing from Luca belongs in this indicator. The corpus split, decided five ticks ago
+for a different reason, rules out the fix a generic S/R build would reach for first.
+
+### WHAT THE DIRECTION OF THE BIAS IS — AND IT IS NOT DETERMINED
+
+An over-wide band pushes the touch count **both ways at once**:
+
+- **Up:** a bar 24 points from the level scores as a touch of it.
+- **Down:** with v2's distinct-visit counting, a visit only ends when price leaves the band entirely,
+  so price must travel more than 25 NQ points away *and come back* before a second visit can be
+  counted. A wider band **merges** visits.
+
+Which dominates is a property of the bar-range distribution, not of arithmetic, and **this tick does
+not claim to know it.** That is precisely why v4 instruments it rather than asserting it.
+
+### A THIRD, MINOR DEFECT IN THE SAME LINE
+
+`tol = close * touchTol / 100` sizes the band off the **current bar's close**, not off the level being
+tested, and recomputes it every bar. A fixed level's touch count can therefore change on a bar where
+nothing happened anywhere near that level, purely because price drifted elsewhere — and since
+`resValid` gates `brokeResRaw`, a level's *tradeability* can flip with it. The magnitude is small
+(a 1% drift moves the NQ band by 0.25 pts) but the count is not stationary, which it should be.
+**v4's default mode removes this by construction** (the band no longer depends on price at all);
+% mode keeps it, deliberately, so that mode still reproduces v1–v3 exactly for diffing.
+
+### ONE GATE THE AUDIT CLEARS — RECORDED BECAUSE A CLEAN RESULT IS ALSO A RESULT
+
+`minTouch = 3` is the one level-gate number the source **does** support: *"We have all these touches
+one two three is resistance"* (`7.` 04:31). It is the smallest count he ever labels a level with,
+against 7 (`7.` 00:47), 4 (01:04) and 8 (01:41) elsewhere. It is a floor he **demonstrates**, not a
+threshold he **states**, and it is not retuned here — but unlike the tolerance it is not invented.
+
+## ██ WHAT v4 CHANGED
+
+1. **Tolerance is a fraction of the live max-stop cap** (default 0.20), not a % of price. % mode
+   retained for reproducing v1–v3, including its close-anchoring defect, exactly as `touchMode` retains
+   v1's counting and `padMode` retains v1/v2's padding.
+2. **`breakClears` — the break may be required to clear the band.** **OFF by default**: turning it on
+   changes the signal set, and a correction tick does not audit and alter what fires in the same pass
+   (v2's precedent with `flipTrades`). Worth recording that under v1–v3 tolerance this option was not
+   merely off but **unsatisfiable** — clearing a 24.95-pt band leaves **−0.2 pts** of stop budget on NQ.
+   At v4's tolerance it leaves 19.75, so it becomes a real pre-registered test for the first time.
+3. **Instrument resolution moved above the level block**, since the tolerance now depends on the cap.
+   Reads inputs and `syminfo` only; no behaviour change.
+4. **Instrumentation** — a **Level width** dashboard row (tol in points, band width, % of cap, and an
+   explicit **"TOL > BUDGET — every tradeable break is still inside the touch band"** state) plus four
+   data-window plots. The dashboard now carries all three zero-signal causes side by side: the touch
+   counter (tick #8), the stop budget (tick #9), and the level width (this tick).
+
+## ██ WHAT FINDING 19 DOES NOT ESTABLISH
+
+- **No number here came from a run.** No `runId` exists for this workstream and none was created. Every
+  figure above is arithmetic on the file's own defaults and two transcript-quoted prices.
+- **How much the tolerance actually changed the touch count** — unmeasured, and per the section above
+  not even signed. It needs a chart.
+- **Whether 0.20 of the cap is right.** It is a labelled interpretation satisfying one arithmetic
+  constraint (tol ≤ budget). Nothing more.
+- **Whether v2, v3 or v4 compiles.** Still unknown, still no Pine compiler here, and `tradingview.com`
+  is still blocked by this environment's egress proxy (tick #9). **No compile-error claim is made.**
+  v4 adds no new built-ins; it reuses constructs already in the file.
+- **The literature was searched and could not be read.** `WebSearch` returns results; **every**
+  `WebFetch` in this session was refused by the egress proxy — `arxiv.org`, `mdpi.com`, `vecviz.com`
+  and `investopedia.com` were each tried and blocked. The following are therefore recorded as **leads
+  for a session with fetch access, not as citations, and nothing in this tick rests on them**:
+  Osler, *Support for Resistance: Technical Analysis and Intraday Exchange Rates*
+  (https://papers.ssrn.com/sol3/papers.cfm?abstract_id=888805); *Evidence and Behaviour of Support and
+  Resistance Levels in Financial Time Series* (https://arxiv.org/abs/2101.07410);
+  https://www.mdpi.com/2227-7390/10/20/3888; and
+  https://www.tandfonline.com/doi/abs/10.1080/09603107.2012.663469 (identifying horizontal S/R levels
+  empirically). The one claim the search summary makes that bears on this tick — that S/R zone width is
+  conventionally an **arbitrary interval**, and that S/R levels can predict trend interruptions while
+  still failing to beat buy-and-hold — is **unverified against any source** and is written down here
+  only so a later session knows what to check.
+- **No past conclusion changes.** This workstream has still never banked a result, and that remains the
+  correct state.

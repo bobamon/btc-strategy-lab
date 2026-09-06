@@ -1,7 +1,12 @@
 //@version=6
 // ═══════════════════════════════════════════════════════════════════════════════════════════════
 // LEGACY FOREX TRADER — COMPLETE VISUALISER
-// v1 2026-09-05  ·  v2 2026-09-06 (tick #8 code audit — see SYSTEM.md FINDING 17)
+// v1 2026-09-05  ·  v2 2026-09-06 (tick #8 code audit — SYSTEM.md FINDING 17)
+//                ·  v3 2026-09-06 (tick #9, the stop-width gate — FINDING 18)
+//                ·  v4 2026-09-06 (tick #10, the touch tolerance — FINDING 19)
+//
+// NOT ONE NUMBER IN THIS FILE HAS EVER COME FROM A RUN. This workstream has no runId. Every
+// default here is either a source quote or a labelled interpretation; nothing is a measurement.
 //
 // A faithful, mechanical rendering of MAMBA's system — the New York / NQ+YM trader.
 // See legacy-forex/SYSTEM.md for every rule with its verbatim quote and timestamp.
@@ -135,6 +140,52 @@
 //  8. THE PAD FORMULA WAS WRITTEN TWICE. The projection used `padNow` and the trade-open block
 //     recomputed the same expression inline, so any change to one silently diverged from the
 //     other. One definition now.
+//
+// ── WHAT v4 CHANGED, AND WHY (tick #10 — SYSTEM.md FINDING 19) ────────────────────────────────
+// v3 spent a whole tick getting the stop PADDING into the cap's units. It never asked what units
+// the TOUCH TOLERANCE was in. Same defect class, one order of magnitude larger, and it had been
+// sitting in the file since v1:
+//
+//   NQ 24,954.50 (4. 03:06)   tol 0.10% = 24.95 pts  → band 49.9 pts = 200% of the 25-pt cap
+//   YM 46,942    (4. 07:23)   tol 0.10% = 46.94 pts  → band 93.9 pts = 313% of the 30-pt cap
+//
+// THE CONSEQUENCE, AND IT IS AN OUTRIGHT CONTRADICTION BETWEEN TWO GATES:
+//   stop budget = cap − pad = 24.75 pts (NQ) / 29.0 pts (YM) — the most a break may sit beyond
+//   the level and still be accepted by the stop-width gate. The touch tolerance is 24.95 / 46.94.
+//   tol > budget on BOTH instruments. So EVERY break this system is capable of trading lies
+//   inside the band its own level definition still calls "touching" — "price can't break it,
+//   it's stuck" (7. 00:47). One gate calls the bar a touch; the other calls it a break; they are
+//   describing the same bar and the same level. The tolerance is also 100× the pad on NQ and 47×
+//   on YM: v3 tuned the level's padding to a quarter of a point while the level's own identity
+//   was fuzzy to twenty-five.
+//
+//   9. TOLERANCE IS NOW A FRACTION OF THE LIVE MAX STOP, NOT A % OF PRICE. The source states no
+//      width. It states that the level IS a zone — "support zones" (7. 01:21), "you make this
+//      little thicker because it's the whole thing" (7. 04:35) — and never how thick. So the
+//      number is an interpretation either way, and the only defensible constraint available is
+//      COMMENSURABILITY: a level's own width must be smaller than the stop that has to sit
+//      outside it, or "just below that support" (11. 00:15) is undefined. Anchoring tolerance to
+//      the cap enforces that by construction and removes the price-scaling drift for free. The
+//      default 0.20 (5 pts NQ, 6 pts YM) is an INTERPRETATION, exposed as an input and
+//      pre-registered as a one-dimensional test — it is NOT a measured optimum.
+//      Why not ATR, the obvious volatility-relative fix: ATR stops are COACH LUCA's, and nothing
+//      from Luca belongs in this indicator (see the corpus warning at the top).
+//      % mode is retained and reproduces v1-v3 EXACTLY, including its own minor defect — it sizes
+//      the band off the CURRENT bar's `close` rather than off the level, so a fixed level's touch
+//      count can change on a bar where nothing happened near it. Kept for diffing, not for use.
+//  10. THE BREAK MAY NOW BE REQUIRED TO CLEAR THE BAND. OFF by default: turning it on changes the
+//      signal set, and a correction tick does not audit and alter what fires at the same time
+//      (v2's precedent with `flipTrades`). Under v1-v3 tolerance this option was not merely off,
+//      it was UNSATISFIABLE — clearing a 24.95-pt band leaves −0.2 pts of stop budget on NQ. At
+//      v4's tolerance it leaves 19.75, so it becomes a real pre-registered test for the first time.
+//  11. INSTRUMENT RESOLUTION MOVED ABOVE THE LEVEL BLOCK, because the tolerance now depends on it.
+//      No behaviour change: it reads only inputs and `syminfo`.
+//
+// ⚠ WHAT v4 DOES **NOT** CLAIM: the DIRECTION of the bias on the touch count. A too-wide band
+//   makes each bar easier to score as a touch, and simultaneously makes distinct VISITS harder to
+//   separate — price must leave a 50-pt band entirely before a new visit can begin. The two push
+//   opposite ways and no arithmetic settles which dominates. That is a chart measurement, and the
+//   dashboard row + data-window plots added here exist so it can be made instead of argued.
 // ═══════════════════════════════════════════════════════════════════════════════════════════════
 
 indicator("Legacy Forex Trader — Complete Visualiser", overlay=true, max_lines_count=500, max_labels_count=500, max_boxes_count=500)
@@ -149,9 +200,16 @@ gStruct = "Market structure"
 pivLen   = input.int(5,  "Swing pivot strength (bars each side)",  group=gStruct, minval=1)
 
 gLvl = "Support / resistance"
-touchTol = input.float(0.10, "Touch tolerance, % of price",        group=gLvl)
+tolMode  = input.string("Fraction of the live max stop (v4 default)", "Touch tolerance unit", options=["Fraction of the live max stop (v4 default)","% of price (v1-v3 behaviour)"], group=gLvl,
+     tooltip="v4: the source never states a zone width, only that a level IS a zone (7. 01:21 / 04:35). In % mode the band was ±24.95 pts on NQ and ±46.94 on YM — wider than the entire stop budget, so every tradeable break was still inside the band the counter calls a touch. Anchoring to the cap makes the two commensurable by construction. % mode reproduces v1-v3 exactly (including its close-anchoring defect) and is here for diffing, not for use.")
+tolFrac  = input.float(0.20, "Touch tolerance, fraction of the live max stop", group=gLvl, minval=0.01, maxval=1.0,
+     tooltip="0.20 → ±5 pts on NQ (cap 25), ±6 on YM (cap 30). This is an INTERPRETATION — the source gives no width — exposed as an input and pre-registered as a one-dimensional test. It is NOT a measured optimum and must not be quoted as one. The only thing arithmetic pins is the ceiling: tolerance must stay below the stop budget (cap − pad).")
+touchTol = input.float(0.10, "Touch tolerance, % of price (v1-v3 behaviour only)", group=gLvl,
+     tooltip="Legacy. 0.10% of price = 24.95 pts at NQ 24,954.50 and 46.94 at YM 46,942 — see SYSTEM.md FINDING 19.")
+breakClears = input.bool(false, "Break must clear the tolerance band", group=gLvl,
+     tooltip="OFF by default on purpose. v1-v4 score a break on a close one tick past the pivot, while the counter still calls that bar a touch of the same level — the two gates contradict each other. Turning this on resolves it in the source's favour ('price can't break it', 7. 00:47) but CHANGES THE SIGNAL SET, so it is a pre-registered test, not a fix applied here. Under v1-v3 tolerance it was unsatisfiable outright.")
 minTouch = input.int(3,      "Touches to validate a level",        group=gLvl, minval=2,
-     tooltip="v2: this now gates on DISTINCT visits, not bars-in-band. It is a much stricter test than v1's. NOT retuned — the correct value is a measurement nobody has made yet.")
+     tooltip="v2: this now gates on DISTINCT visits, not bars-in-band. It is a much stricter test than v1's. NOT retuned — the correct value is a measurement nobody has made yet. v4 audit: 3 is the one level-gate number the source DOES support — 'we have all these touches one two three is resistance' (7. 04:31), against 7 (00:47), 4 (01:04) and 8 (01:41) elsewhere. It is a floor he shows, not a threshold he states.")
 touchMode= input.string("Distinct visits (v2, his definition)", "Touch counting", options=["Distinct visits (v2, his definition)","Bars in band (v1 behaviour)"], group=gLvl,
      tooltip="Kept switchable so v1's behaviour is reproducible and the two can be compared on one chart. 'Bars in band' is known wrong; it is here for diffing, not for use.")
 showFlip = input.bool(true,  "Draw flipped levels (broken support -> resistance)", group=gLvl)
@@ -192,6 +250,18 @@ showStruct=input.bool(true, "Structure labels", group=gV)
 showTrade= input.bool(true, "Trade levels",     group=gV)
 showLadder=input.bool(true, "Target ladder 1R-5R (his 'target one..five')", group=gV)
 showBrkt = input.bool(true, "Counter-structure bracket (what the streams show)", group=gV)
+
+// ── 0. INSTRUMENT ─────────────────────────────────────────────────────────────────────────────
+// v4 moved this block up from the risk section: the touch tolerance now resolves against the live
+// max-stop cap, so the instrument must be known before the level block runs. Reads inputs and
+// `syminfo` only — no behaviour change from v3.
+// v2: resolved per instrument. 30 pts is ~0.14% of NQ and ~0.07% of YM — one number cannot serve
+// both, and v1 applied 30 to whatever chart it was on.
+tkr   = str.upper(syminfo.ticker)
+autoYM= str.contains(tkr, "YM") or str.contains(tkr, "US30") or str.contains(tkr, "DJI") or str.contains(tkr, "DOW")
+isYM  = instMode == "YM / US30" or (instMode == "Auto from ticker" and autoYM)
+instNm= isYM ? "YM / US30" : "NQ / NAS100"
+maxStopPts = isYM ? maxStopYM : maxStopNQ
 
 // ── 1. SESSION ────────────────────────────────────────────────────────────────────────────────
 inSess  = not useSession or not na(time(timeframe.period, sessTime, sessTZ))
@@ -237,7 +307,11 @@ if showStruct and not na(pl)
 // (7. 00:47) and "one touch two touch three touch four touch almost another touch" (7. 01:04).
 // A visit = an entry into the band from outside it. Both counts are returned so the correction's
 // magnitude is visible rather than asserted.
-tol = close * touchTol / 100
+// v4: the band is now in the cap's units. In % mode it was 24.95 pts on NQ and 46.94 on YM at his
+// own screen prices — wider than the stop budget those same levels have to carry, so the counter
+// and the stop-width gate were describing the same level with numbers 2-3× apart. See FINDING 19.
+// % mode is left byte-for-byte as v1-v3, close-anchoring defect included, so the diff is clean.
+tol = tolMode == "% of price (v1-v3 behaviour)" ? close * touchTol / 100 : tolFrac * maxStopPts
 
 f_touches(lvl, lvlBar) =>
     int nRaw  = 0
@@ -278,8 +352,13 @@ plot(showLvls and supValid ? supLvl : na, "Support",    color=color.new(color.gr
 // "Resistance now support... a break and a retest of support into resistance" (7. 07:14)
 // A flipped level stays live until price closes back through it (the reclaim invalidates it).
 var float flipRes = na, var float flipSup = na
-brokeResRaw = resValid and ta.crossover(close,  resLvl)
-brokeSupRaw = supValid and ta.crossunder(close, supLvl)
+// v4: `breakClears` (OFF by default) requires the close to clear the tolerance band, not merely
+// the pivot price. With it off — the default, unchanged from v1-v3 — a close one tick past the
+// pivot is a break on a bar the counter simultaneously scores as a touch of that same level.
+resBrkPx = na(resLvl) ? na : resLvl + (breakClears ? tol : 0.0)
+supBrkPx = na(supLvl) ? na : supLvl - (breakClears ? tol : 0.0)
+brokeResRaw = resValid and ta.crossover(close,  resBrkPx)
+brokeSupRaw = supValid and ta.crossunder(close, supBrkPx)
 if brokeSupRaw
     flipRes := supLvl        // a broken floor becomes a ceiling
 if brokeResRaw
@@ -294,8 +373,8 @@ plot(showFlip and not na(flipSup) ? flipSup : na, "Flipped support (was resistan
 
 // ── 4. BREAK ──────────────────────────────────────────────────────────────────────────────────
 // Optional: a flipped level may also carry a break. OFF by default — see the input tooltip.
-brokeFlipL = flipTrades and not na(flipSup) and ta.crossover(close,  flipSup)
-brokeFlipS = flipTrades and not na(flipRes) and ta.crossunder(close, flipRes)
+brokeFlipL = flipTrades and not na(flipSup) and ta.crossover(close,  flipSup + (breakClears ? tol : 0.0))
+brokeFlipS = flipTrades and not na(flipRes) and ta.crossunder(close, flipRes - (breakClears ? tol : 0.0))
 brokeRes = brokeResRaw or brokeFlipL
 brokeSup = brokeSupRaw or brokeFlipS
 // the level a long/short would actually be stopped behind
@@ -342,14 +421,9 @@ rTargetUse = useAdaptR and windowFull and not na(avgAchR) ? math.max(1.0, math.r
 // ── THE STOP-WIDTH GATE — a setup whose structure sits too far away is REJECTED, not re-stopped ─
 // "That's a 25 point stop loss, which is solid." (11. 00:07)
 // "64 points. No, my account's gone if I do that." (11. 01:26)
-// v2: resolved per instrument. 30 pts is ~0.14% of NQ and ~0.07% of YM — one number cannot serve
-// both, and v1 applied 30 to whatever chart it was on.
-tkr   = str.upper(syminfo.ticker)
-autoYM= str.contains(tkr, "YM") or str.contains(tkr, "US30") or str.contains(tkr, "DJI") or str.contains(tkr, "DOW")
-isYM  = instMode == "YM / US30" or (instMode == "Auto from ticker" and autoYM)
-instNm= isYM ? "YM / US30" : "NQ / NAS100"
-maxStopPts = isYM ? maxStopYM : maxStopNQ
-
+// The instrument and its cap are resolved in section 0 — v4 moved that block above the level
+// block because the touch tolerance now depends on the cap.
+//
 // v3: ONE definition of the pad, in the cap's own units by default. v2 wrote this expression
 // twice — here and inline in the trade-open block — so the two could silently diverge.
 // In % mode the pad is 12.48 pts at NQ 24,954.50 and 23.47 pts at YM 46,942 (both read off his
@@ -364,6 +438,14 @@ projRlong   = na(projStopL) ? na : math.abs(close - projStopL)
 projRshort  = na(projStopS) ? na : math.abs(close - projStopS)
 stopOKlong  = not useMaxStop or (not na(projRlong)  and projRlong  <= maxStopPts)
 stopOKshort = not useMaxStop or (not na(projRshort) and projRshort <= maxStopPts)
+
+// v4 instrumentation — the commensurability test between the two gates. `tol` is the level's own
+// positional uncertainty; `stopBudget` is the most a break may sit beyond that level and still be
+// accepted. If tol > stopBudget then every tradeable break lies inside the band the counter still
+// calls a touch, which is what v1-v3 shipped on both instruments (−0.20 pts NQ, −17.94 pts YM).
+tolPct    = maxStopPts <= 0 ? na : 100 * tol / maxStopPts     // half-band as a share of the cap
+bandPts   = 2 * tol                                           // full band width
+tolFitsBudget = tol <= stopBudget
 
 // ── THE SIGNAL ────────────────────────────────────────────────────────────────────────────────
 goLong  = inSess and bullStruct and brokeRes and volOK and underCap and stopOKlong
@@ -476,7 +558,7 @@ bgcolor(inSess and bearStruct     ? color.new(color.red, 94) : na,   title="Bear
 barcolor(useVol and not volOK ? color.new(color.gray, 50) : na,      title="No volume")
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────────────────────
-var table d = table.new(position.top_right, 3, 16, border_width=1, frame_width=1, frame_color=color.gray)
+var table d = table.new(position.top_right, 3, 17, border_width=1, frame_width=1, frame_color=color.gray)
 f_row(t, r, k, ok, v) =>
     table.cell(t, 0, r, k, text_color=color.white,  text_size=size.small, bgcolor=color.new(color.black,20), text_halign=text.align_left)
     table.cell(t, 1, r, ok ? "✔" : "✖", text_color=ok ? color.lime : color.red, text_size=size.small, bgcolor=color.new(color.black,20))
@@ -515,11 +597,19 @@ if showDash and barstate.islast
          str.tostring(padNow, "#.##") + " pts pad (" + str.tostring(padPct, "#") + "% of cap)  →  "
          + (stopBudget > 0 ? str.tostring(stopBudget, "#.#") + " pts left for entry-to-level"
                            : "PAD ≥ CAP — no setup can ever pass"))
-    f_row(d, 12, "Target",    true,      (useAdaptR ? (windowFull ? "1:" + str.tostring(rTargetUse, "#") + "  from mean " + str.tostring(avgAchR, "#.##") + "R of last " + str.tostring(cntR) + " (10._USING_DATA)"
+    // v4 instrumentation: the touch tolerance was a % of price while everything it has to be
+    // commensurable with is in index points. This row is the third and last zero-signal cause on
+    // the dashboard, so a blank chart can now be attributed rather than guessed at.
+    f_row(d, 12, "Level width", tolFitsBudget,
+         "±" + str.tostring(tol, "#.##") + " pts  (band " + str.tostring(bandPts, "#.#") + ", "
+         + str.tostring(tolPct, "#") + "% of cap)  →  "
+         + (tolFitsBudget ? "fits inside the " + str.tostring(stopBudget, "#.#") + "-pt stop budget"
+                          : "TOL > BUDGET — every tradeable break is still inside the touch band"))
+    f_row(d, 13, "Target",    true,      (useAdaptR ? (windowFull ? "1:" + str.tostring(rTargetUse, "#") + "  from mean " + str.tostring(avgAchR, "#.##") + "R of last " + str.tostring(cntR) + " (10._USING_DATA)"
                                                                   : "1:" + str.tostring(rTargetUse, "#") + "  FALLBACK — window " + str.tostring(cntR) + "/" + str.tostring(rrWindow) + " trades")
                                                     : "1:" + str.tostring(rTargetUse, "#") + "  fixed (adaptive rule off)"))
-    f_row(d, 13, "Trail rule", true,      trailMode + "   (source is ambiguous — see header)")
-    f_row(d, 14, "Trades today", underCap, str.tostring(tradesToday) + " / " + str.tostring(maxTrades) + "  (cap counts across NQ+YM)")
+    f_row(d, 14, "Trail rule", true,      trailMode + "   (source is ambiguous — see header)")
+    f_row(d, 15, "Trades today", underCap, str.tostring(tradesToday) + " / " + str.tostring(maxTrades) + "  (cap counts across NQ+YM)")
 
     // name the FIRST unmet condition, in his own order, so the dashboard says what is blocking
     blocker = not inSess        ? "NO TRADE — outside New York session"
@@ -532,9 +622,9 @@ if showDash and barstate.islast
       : "WAIT"
     verdict = goLong ? "▲ LONG NOW" : goShort ? "▼ SHORT NOW" : dir != 0 ? ("HOLDING  " + (na(curR)?"":str.tostring(curR,"#.##") + "R  → 1:" + str.tostring(tgtR,"#"))) : blocker
     vc = goLong ? color.green : goShort ? color.red : dir != 0 ? color.blue : color.new(color.gray,40)
-    table.cell(d, 0, 15, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
-    table.cell(d, 1, 15, "", bgcolor=vc)
-    table.cell(d, 2, 15, verdict, text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+    table.cell(d, 0, 16, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+    table.cell(d, 1, 16, "", bgcolor=vc)
+    table.cell(d, 2, 16, verdict, text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
 
 alertcondition(goLong,  "Legacy LONG",  "Legacy Forex: LONG — structure bullish, resistance broken, volume present")
 alertcondition(goShort, "Legacy SHORT", "Legacy Forex: SHORT — structure bearish, support broken, volume present")
@@ -554,3 +644,8 @@ plot(supRaw,        "SupTouches bars-in-band (v1)", display=display.data_window)
 plot(padNow,        "Pad (pts)",              display=display.data_window)
 plot(padPct,        "Pad as % of max stop",   display=display.data_window)
 plot(stopBudget,    "Stop budget left (pts)", display=display.data_window)
+// v4 instrumentation — the level's own width, in the same units as everything it must fit inside
+plot(tol,           "Touch tolerance (pts, half-band)", display=display.data_window)
+plot(bandPts,       "Touch band width (pts)",           display=display.data_window)
+plot(tolPct,        "Tolerance as % of max stop",       display=display.data_window)
+plot(tolFitsBudget ? 1 : 0, "TolFitsStopBudget",        display=display.data_window)

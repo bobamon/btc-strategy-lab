@@ -2906,3 +2906,47 @@ nobody having tried the arithmetic. **Before recording a question as blocked on 
 whether the verdict is invariant across the measurement's whole plausible range** — a sensitivity
 sweep over an unmeasured parameter is free, it is available in every session including the ones with
 no engine at all, and it resolves more questions than it has any right to.
+
+---
+
+## ██ HARD LESSON 58 — A GATE'S **UNITS** FAIL SILENTLY AND A BACKTEST CANNOT SEE THEM. AUDIT EVERY GATE FOR UNIT COMMENSURABILITY BEFORE TUNING ANY THRESHOLD. (LEGACY FOREX TICKS #8–#10, 2026-09-06)
+
+**Earned:** three consecutive audit ticks on one Pine deliverable, each of which found a gate whose
+*units or counting basis* were wrong rather than whose *threshold* was mistuned.
+
+| Tick | Gate | The defect | Magnitude on his own screen prices |
+|---|---|---|---|
+| #8 | touch counter | counted **bars in a band**, over a window containing the level's own pivot | a level could validate the instant it formed, with **zero** revisits |
+| #9 | stop-width gate | **pad in % of price**, **cap in index points** | pad ate **62%** (NQ) / **78%** (YM) of the entire risk budget; unsatisfiable outright at NQ 40,000 |
+| #10 | touch tolerance | **tolerance in % of price**, everything it constrains in **index points** | band **200%** (NQ) / **313%** (YM) of the cap; **100× the pad** it is measured against |
+
+**Why this class is uniquely dangerous, and it is the whole lesson:** none of the three would have
+produced an error, a warning, or an obviously wrong chart. Each would have produced *a plausible trade
+count*, and every downstream conclusion — the sample size, the profit factor, the ratchet verdict —
+would have been shaped by it invisibly. HARD LESSON 4 says measure trade frequency rather than estimate
+it; this says the **measured** frequency can be an artifact of a unit mismatch and still look healthy.
+Tick #10's instance is the sharpest: the touch tolerance (24.95 pts) exceeded the stop budget
+(24.75 pts), so **every break the system could trade lay inside the band its own level definition
+called "still touching"** — two gates in the same file disagreeing about what a level is, with no
+symptom other than a trade count nobody would have questioned.
+
+**How to apply, in order:**
+1. **List every gate with its unit.** Percent-of-price, index points, ticks, ATR multiples, bars,
+   counts. Do this before tuning anything.
+2. **Any two quantities that constrain the same physical object must be in the same unit.** A level's
+   width, the pad beyond it, and the cap on the distance to it are all statements about one object.
+   If one is a percentage and another is absolute, they are already inconsistent — the only question
+   is by how much.
+3. **Check the ratio at a real price, taken from the source, not at a round number.** All three
+   defects above are invisible in the abstract and glaring at 24,954.50.
+4. **Percentage-of-price quantities have a shelf life.** They drift against every absolute quantity in
+   the system as price rises. Ask what the gate does at 1.5× today's price before shipping it.
+5. **A gate that is arithmetically clean is a result worth recording too.** Tick #10 cleared
+   `minTouch = 3` against the source in one line; saying so stops the next tick re-auditing it.
+
+**And the meta-point, which is why this sits in the shared ledger rather than one workstream's file:**
+these three findings came from a workstream that has **never banked a single result** and had no engine
+access on any of the three ticks. A static audit of a deliverable's own arithmetic found three defects
+that a credit-spending run would have absorbed into its trade count without comment. **When there is no
+engine, auditing units is the highest-yield work available — and when there is one, it is the work that
+should happen first.**
