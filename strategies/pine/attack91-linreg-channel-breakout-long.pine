@@ -1,0 +1,142 @@
+//@version=6
+// BTC ATTACK 91 - LINEAR REGRESSION CHANNEL BREAKOUT LONG. A GENUINELY NEW MECHANISM, PER ATTACK 90's
+// QUEUE ITEM 4 (untried indicator families: ta.sar, ta.cci, ta.stoch, ta.macd, ta.cog, ta.tsi, ta.wpr,
+// ta.iii, ta.wad, ta.wvad, ta.linreg, ta.percentrank).
+//
+// The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") more
+// than 90 attacks stale, instructing "continue numbering after 37." The docs override it, again, per the
+// prompt's own instruction: Attack 37 closed on cost at Attack 41; the OBV-divergence filter stack on
+// Attack 66/68/82/83 is CLOSED at three terms (Attack 83 remains the board's strongest both-halves
+// candidate, PF 1.61044869/1.15365198 on 88/79 trades); Attack 89/90's SuperTrend-flip family is now
+// discarded on two parameterizations with PF moving opposite directions as frequency fell, and Attack 90's
+// own queue said do not retry a third point on that axis without a new argument. Queue item 4 named the
+// untried indicator families above as the source for the next genuinely-new-mechanism cycle. This is that
+// cycle. Numbering continues after Attack 90, the last entry on the board.
+//
+// ==================== THE CLAIM UNDER TEST ====================
+// ta.linreg(close, lrLen, 0) fits a least-squares trend line over the trailing lrLen bars; ta.stdev of the
+// residual (close - linreg value) over the same window measures how tightly price has actually clustered
+// around that fitted line. When close crosses decisively above linregVal + devMult*residualStdev, price has
+// broken out of its own recent statistical containment band -- a regime break from mean-reverting-around-a-
+// trend to trending-away-from-it, distinct from a swing-high structural breakout (Attack 42/59, price-only)
+// and from a moving-average/band cross (Attack 58 EMA, Attack 77 Bollinger-width, both already tried). No
+// prior BTC attack in this lab has used a fitted-regression residual band as the entry trigger. Pine:
+// `strategies/pine/attack91-linreg-channel-breakout-long.pine`.
+//
+// Stop and target reuse the lab's proven structural construction (confirmed swing low / measured-move
+// amplitude, same as Attacks 66/68/82/83/89/90) so the experiment isolates the one new element -- the entry
+// trigger -- rather than confounding it with an untested risk construction.
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS ====================
+// lrVal = ta.linreg(close, lrLen, 0). resid = close - lrVal. devVal = ta.stdev(resid, lrLen).
+// upperBand = lrVal + devMult*devVal. breakout = ta.crossover(close, upperBand): a single, unambiguous,
+// non-repainting trigger, fires only when close moves from at-or-below the band to above it. Stop: the most
+// recent CONFIRMED swing low (ta.pivotlow, LESSON 5 -- structure, not the regression line, which this lab's
+// fixed-SL/TP-at-entry rule forbids using as a trailing exit). Target: entry plus the amplitude of the most
+// recent confirmed swing (pivot high minus pivot low), a level derived from the swing's own geometry (HARD
+// LESSON 41), independent of R (E14).
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - EXCLUSION via rBig on rLong = close - lastPivLow, never clamped.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = lastPivLow, the confirmed swing low, never the regression
+//        band.
+//   Each leg separately (LESSON 6) - LONG ONLY; short remains the standing asymmetry (Attack 64).
+//   BINDING (E17) - breakout AND rBig AND swingOk all necessarily bind: the raw channel breakout fires
+//        regardless of stop distance or swing validity, so each added term independently removes breakouts
+//        the trigger alone would take.
+//   REDUNDANCY (E14) - three independent quantities across three domains: statistical price deviation from
+//        a fitted regression line (the trigger), price distance to the confirmed swing low (the stop), and
+//        confirmed swing amplitude (the target). None derives from another.
+//   LATCH IN SEQUENCE (LESSON 8) - lastPivLow/lastPivHigh are var float scalars updated only on their own
+//        confirmed pivot bars; breakout is read on a later, separate bar via crossover, never the same bar
+//        a pivot confirms by construction.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1, flat check gates every entry.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity; single TP+SL, no partials; expect cascadeRatio 1 /
+//        maxCascadeDepth 1, to be confirmed against totalTrades == unique entries.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4): a 200-bar (50-hour) regression window
+// with a 2.0 residual-stdev band on 15m BTC is a moderately tight containment threshold -- tighter than the
+// board's OBV-divergence pivot-pair construction (137/142 trades) but the crossover can re-fire on almost
+// any sustained push, so expected frequency is qualitative only: most likely ABOVE the ~60-350 workable
+// band on a raw trigger (channel bands react fast), to be confirmed against the actual count and reported
+// against the band explicitly rather than assumed.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17). BARE MECHANISM, H1 ONLY (credits band 250-500, the
+// never-tuned pre-2024 half, per the kill rule):
+//   * H1 ABOVE 1.0 AND TRADES INSIDE ~60-350 -> the mechanism has a real bare edge at a workable frequency;
+//     queue an H2 run before any filter work.
+//   * H1 ABOVE 1.0 BUT TRADES OUTSIDE ~60-350 -> report which direction and by how much; a follow-up would
+//     retune lrLen/devMult toward the band, not add a filter yet.
+//   * H1 BELOW 1.0 -> DISCARDED by the kill rule immediately. No H2 run, no filter rescue.
+//   * A MAJORITY WIN RATE WITH ratioAvgWinLoss WELL BELOW 1.0 -> HARD LESSON 53's inverted-payoff shape,
+//     report it as that.
+//   REPORT GROSS, COMMISSION AND ACHIEVED RATIO alongside net, avg loser and win rate (LESSONS 36/39 and
+//     the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack91 LinReg Channel Breakout Long", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+lrLen      = input.int(200, "Linear regression length")
+devMult    = input.float(2.0, "Residual stdev multiplier for upper band")
+pivotLeft  = input.int(5, "Pivot confirmation bars, left")
+pivotRight = input.int(5, "Pivot confirmation bars, right")
+minRpct    = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+maxBars    = input.int(192, "Max bars in trade")
+
+lrVal  = ta.linreg(close, lrLen, 0)
+resid  = close - lrVal
+devVal = ta.stdev(resid, lrLen)
+upperBand = lrVal + devMult * devVal
+
+breakout = ta.crossover(close, upperBand)
+
+pl = ta.pivotlow(low, pivotLeft, pivotRight)
+ph = ta.pivothigh(high, pivotLeft, pivotRight)
+
+var float lastPivLow  = na
+var float lastPivHigh = na
+
+if not na(pl)
+    lastPivLow := pl
+
+if not na(ph)
+    lastPivHigh := ph
+
+rLong = not na(lastPivLow) ? close - lastPivLow : na
+minR  = close * minRpct / 100
+rBig  = not na(rLong) and rLong >= minR
+
+swingAmp = not na(lastPivHigh) and not na(lastPivLow) ? lastPivHigh - lastPivLow : na
+swingOk  = not na(swingAmp) and swingAmp > 0
+
+goLong = breakout and rBig and swingOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := lastPivLow
+    tpPx   := close + swingAmp
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(upperBand, title="UpperBand")
+plot(lastPivLow, title="LastPivotLow")
+plot(lastPivHigh, title="LastPivotHigh")

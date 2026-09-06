@@ -8657,3 +8657,123 @@ retried a third time on the same axis.
 6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
 7. **This session cannot continue the new-engine cross-sectional track (Attacks 84-86)** — no
    `backtest-lab`/`sweep_backtest` tool is available here, unaffected by this cycle.
+
+---
+
+# ATTACK 91 — LINEAR REGRESSION CHANNEL BREAKOUT LONG. A GENUINELY NEW MECHANISM PER ATTACK 90'S QUEUE ITEM 4. H1 CLEARS THE KILL RULE, INSIDE THE WORKABLE BAND — H2 QUEUED, NOT YET RUN.
+
+The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") more than
+90 attacks stale, instructing "continue numbering after 37." **The docs override it, again**, per the
+prompt's own instruction: Attack 37 closed on cost at Attack 41; the OBV-divergence filter stack on Attack
+66/68/82/83 is CLOSED at three terms (Attack 83 remains the board's strongest both-halves candidate, PF
+1.61044869/1.15365198 on 88/79 trades, unaffected by this cycle); the SuperTrend flip family (Attacks
+89/90) is discarded on two parameterizations, PF moving in opposite directions as frequency fell, and
+Attack 90's own queue said do not retry a third point on that axis without a new argument. Queue item 4
+named the untried indicator families (`ta.sar`, `ta.cci`, `ta.stoch`, `ta.macd`, `ta.cog`, `ta.tsi`,
+`ta.wpr`, `ta.iii`, `ta.wad`, `ta.wvad`, `ta.linreg`, `ta.percentrank`) as the source for the next
+genuinely-new-mechanism cycle. This is that cycle. Numbering continues after Attack 90, the last entry on
+the board.
+
+## THE CLAIM UNDER TEST
+
+`ta.linreg(close, 200, 0)` fits a least-squares trend line over the trailing 200 bars (50 hours on 15m);
+`ta.stdev` of the residual (`close - linregVal`) over the same window measures how tightly price has
+actually clustered around that fitted line. When close crosses above `linregVal + 2.0*residualStdev`,
+price has broken out of its own recent statistical containment band — a regime break from mean-reverting-
+around-a-trend to trending-away-from-it, distinct from a swing-high structural breakout (Attack 42/59,
+price-only) and from a moving-average/band cross (Attack 58 EMA, Attack 77 Bollinger-width). No prior BTC
+attack on this board has used a fitted-regression residual band as the entry trigger. Stop and target reuse
+the lab's proven structural construction (confirmed swing low / measured-move amplitude, same as Attacks
+66/68/82/83/89/90) so the experiment isolates the one new element — the entry trigger — rather than
+confounding it with an untested risk construction. Pine: `strategies/pine/attack91-linreg-channel-breakout-long.pine`.
+
+## AUDIT (one line per leg)
+
+R ≥ 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rLong = close - lastPivLow`, never clamped. Stop beyond
+STRUCTURE (LESSON 5) — `slPx = lastPivLow`, the confirmed swing low, never the regression band. Each leg
+separately (LESSON 6) — LONG ONLY; short remains the standing asymmetry (Attack 64). BINDING (E17) —
+`breakout` AND `rBig` AND `swingOk` all necessarily bind: the raw channel breakout fires regardless of stop
+distance or swing validity, so each added term independently removes breakouts the trigger alone would
+take. REDUNDANCY (E14) — three independent quantities across three domains: statistical price deviation
+from a fitted regression line (the trigger), price distance to the confirmed swing low (the stop), and
+confirmed swing amplitude (the target). LATCH IN SEQUENCE (LESSON 8) — `lastPivLow`/`lastPivHigh` are
+`var float` scalars updated only on their own confirmed pivot bars; `breakout` reads a later, separate bar
+via crossover, never the same bar a pivot confirms by construction. CASCADE (HARD LESSON 42/43) — LONG at
+100% equity; `cascadeRatio` 1, `maxCascadeDepth` 1, 327 total rows, 327 unique entries, confirmed. SL/TP
+FIXED AT ENTRY, no trailing, no martingale.
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4)
+
+A 200-bar regression window with a 2.0 residual-stdev band on 15m BTC was expected, qualitatively, to fire
+ABOVE the ~60-350 workable band on a raw trigger (channel bands react fast to any sustained push) — to be
+confirmed against the actual count rather than assumed.
+
+## RESULT — H1 ONLY (2022-01-01 → 2024-06-08, never-tuned; credits band 489, 250-500 tier)
+
+| Metric | Attack 91a (H1) |
+|---|---|
+| Profit factor | **1.19555356** |
+| Trades | 327 |
+| Win rate | 68.19571865% (a MAJORITY) |
+| Achieved win/loss ratio | 0.55756758 |
+| Avg winner | $144.16 |
+| Avg loser | -$258.55 |
+| Max drawdown | 27.43093746% |
+| Net return | +52.58181202% |
+| Commission paid | $3,705.87 |
+| Largest loss | -$956.38 |
+
+## THE VERDICT — H1 CLEARS. NOT HARD LESSON 53's SHAPE, DESPITE THE SAME SURFACE PATTERN.
+
+**The frequency estimate missed direction**: 327 sits at the *upper edge* of the workable band, not above
+it as pre-registered — closer to Attack 37's 322 than to Attack 89's 526. **PF clears decisively** at
+1.19555356, the best bare-mechanism H1 result since Attack 66 (1.36461764) among genuinely new mechanisms,
+and well clear of the 1.01–1.02 margins Attack 37 and Attack 89 cleared by.
+
+A 68.2% win rate with a 0.558 achieved payoff looks, on the surface, exactly like HARD LESSON 53's four
+prior failures (Attacks 50/51/59/63: majority win rate, payoff below 1.0, net loss). **It is not that
+shape.** The breakeven win rate at a 0.55756758 payoff is `1/(1+0.55756758)` ≈ **64.21%** — the achieved
+68.20% clears it by a real **~4pp margin**, the same relationship that let Attack 66 clear (60.6%/56.3%
+win rate against 0.888/0.782 payoff) where Attacks 50/51/59/63 fell short. HARD LESSON 53 is about a
+majority win rate that still **loses**; this one wins.
+
+**Drawdown is the honest weak point.** 27.43% is the highest of any both-halves-candidate class member on
+this board — worse than Attack 66/68/83's 11–15% and Attack 46's 23.45%/13.61%, though in the same range
+as Attack 37's 31.64%/24.31% (the family this board's mandate explicitly separated into drawdown category
+3). Largest loss (-$956.38) is ~3.7x the average loser (-$258.55) — the same non-concentrated ratio Attack
+66 showed (3.3x/2.2x) — so this is **category 3, bleed on a positive edge**, not category 1's concentrated-
+loss signature, and category 3 is the one this board's mandate says is worth filtering.
+
+## WHY NO H2 RUN
+
+Per the pre-registered outcome tree (LESSON 17): H1 above 1.0 AND trades inside ~60-350 means queue an H2
+run before any filter work — it does not license running H2 this cycle. The credits band (489, the
+250-500 tier) authorizes only the pre-2024 half regardless of outcome, and only one run was spent this
+cycle (never more than two per the standing instruction).
+
+## WHAT THIS SETTLES
+
+**Attack 91 is a genuinely new mechanism that clears the kill rule on its first (and only tested) half,
+inside the workable frequency band, with a defensible (not merely nominal) PF margin.** It is `status:
+testing`, not a champion claim — H2 is unrun, and RATCHET v2's clause 3 sample floor plus a split test are
+both still owed before any promotion. Its drawdown profile is worse than the OBV-divergence family's, so
+even a clean H2 pass would put it below Attack 83 on risk, not above it.
+
+## QUEUE
+
+1. **Run H2 (2024-06-08 → 2026-09-01) on the byte-identical bare mechanism next cycle**, credits
+   permitting. Pre-registered outcomes: H2 above 1.0 with trades inside the workable band → advances to a
+   both-halves candidate at PF/DD/trades comparable to Attack 37's risk profile, weaker on drawdown than
+   Attack 66/68/83; H2 below 1.0 → the mechanism is a single-half result and joins the discarded list
+   alongside every other one-half-only pass on this board.
+2. **Do not build a filter stack on Attack 91 before H2 runs** — the same discipline the mandate applied
+   to Attack 37 and Attack 66 (both halves required before a stack is earned).
+3. **Attack 83 remains the board's strongest both-halves candidate** (PF 1.61044869/1.15365198 on 88/79
+   trades, DD 11.08%/10.76%), unaffected by this cycle — Attack 91's drawdown, even if H2 clears, would not
+   displace it.
+4. **Attack 46 (long) remains a candidate alongside Attack 83**, unaffected by this cycle.
+5. **Remaining untried indicator families** (`ta.sar`, `ta.cci`, `ta.stoch`, `ta.macd`, `ta.cog`, `ta.tsi`,
+   `ta.wpr`, `ta.iii`, `ta.wad`, `ta.wvad`, `ta.percentrank`) stay available if Attack 91 fails H2.
+6. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if that
+   family is revisited before another fresh mechanism.
+7. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
