@@ -6906,3 +6906,89 @@ not a demonstrated method**, and the record should say so wherever it is cited.
    v37 (ungraded) on ETH — if it is *also* ~0.98, the instrument is the problem; if it is worse, the
    FVG gate is still adding something on ETH too.
 4. The short leg (v60/v61) has never been tested off BTC either.
+
+---
+
+# ██ THE FVG GATE ISOLATED — IT IS BTC-SPECIFIC, IT HURTS ON ETH, AND THE BASE MECHANISM IS NOISE ON BOTH
+
+One credit. `resultId 01M1V2EAP7MJE74YX2DYXBQ1WK`. Executes the previous entry's queue item 3.
+
+## THE DESIGN
+
+The previous tick found v62 (FVG-graded) at PF 0.97825349 on ETH against 2.04354108 on BTC, and left
+two explanations open. This separates them with one run: **v37, ungraded, on ETH.** Three outcomes were
+named in advance — ≈0.98 means the instrument is the problem; below 0.98 means the gate helps on ETH
+too; **above 1.0 means the gate actively hurts there.**
+
+## THE RESULT — ETHUSDT 15m, 2021-03-15 → 2026-09-01, 191,530 bars
+
+| | v37 ungraded | v62 FVG-graded |
+|---|---|---|
+| Profit factor | **1.02872954** | 0.97825349 |
+| Trades | **316** | 49 |
+| Net | +7.98609566% | -0.8260768% |
+| Max drawdown | 27.31398997% | 8.49043491% |
+| Win rate | 39.87341772% | 32.65306122% |
+| Sharpe | 0.17047977 | — |
+
+**Outcome 3. The FVG gate makes ETH worse.**
+
+## THE FVG GATE, MEASURED ON BOTH INSTRUMENTS
+
+| Instrument | ungraded | FVG-graded | effect |
+|---|---|---|---|
+| **BTC** | 1.0534251 (241 trades) | **2.04354108** (40) | **+0.9901** |
+| **ETH** | 1.02872954 (316 trades) | **0.97825349** (49) | **-0.0505** |
+
+**The single term that produced this lab's champion adds nearly a full point of profit factor on BTC
+and slightly negative value on ETH.** It is not a general zone-quality filter. It selects something
+specific to BTCUSDT, and the previous tick's "v62 is a BTCUSDT result, not a demonstrated method" is
+now shown to be about the *gate*, not the instrument.
+
+## THE FINDING UNDERNEATH IT, WHICH IS LARGER
+
+**Ungraded, the base 3M mechanism is almost identical on both instruments and almost identical to
+nothing:**
+
+| | PF | Trades | Sharpe | implied t |
+|---|---|---|---|---|
+| BTC v37 | 1.0534251 | 241 | 0.1792928 | **0.44** |
+| ETH v37 | 1.02872954 | 316 | 0.17047977 | **0.40** |
+
+Two instruments, 557 trades between them, eleven combined years — and **implied t-statistics of 0.44
+and 0.40.** Against a conventional 2.0, let alone the 3.0 that multiple testing requires, that is not
+a weak edge; it is **statistically indistinguishable from zero.**
+
+The consistency is the tell. A PF of ~1.03–1.05 on 240–320 trades is what a mechanism with no edge
+looks like once commission is paid: BTC paid $2,219 and ETH $3,701 in fees, against net profits of
+$887 and $799. **Fees are three to four times the entire net result on both instruments.**
+
+## WHAT THIS MEANS FOR THE CHAMPION
+
+v62's BTC record — PF 2.04354108 on 40 trades, split test passed — is a **strong number produced by a
+single term, on one instrument, from a base with no demonstrable edge.** Sullivan, Timmermann & White
+(1999) describe exactly this: the best rule survived in-sample after data-snooping adjustment, then
+failed out-of-sample **and failed to generalise to a second asset.**
+
+**This does not retract v62's numbers, which are real and were honestly split-tested.** It places
+them: the champion rests on a 40-trade sample, from a base measured at t ≈ 0.44, via a term that is
+negative on the only other instrument tried.
+
+**I am not demoting it — promotion and demotion in this lab are the user's call and RATCHET v2 says
+nothing about generalisation.** But the record should not carry "champion" without carrying this.
+
+## QUEUE
+
+1. **Test the FVG gate on a third instrument (SOL).** Two points cannot distinguish "BTC-specific"
+   from "ETH is unusual". Three can.
+2. **Do not stack further terms on this base.** A base at t ≈ 0.4 cannot support them, and eight
+   consecutive filter rejections already said so from the sample side.
+3. **The fee observation deserves its own check**: if commission is 3–4× net profit on both
+   instruments, the mechanism's gross edge may be real but entirely consumed by cost — which is a
+   different problem from having no edge, and points at trade frequency rather than signal quality.
+   HARD LESSON 36/37 is the framework; the numbers are free from these two runs.
+
+## SOURCES
+- Sullivan, Timmermann & White, *Data-Snooping, Technical Trading Rule Performance, and the Bootstrap* (J. Finance 1999) — https://eprints.lse.ac.uk/119144/1/dp303.pdf
+- SSRN listing — https://papers.ssrn.com/sol3/papers.cfm?abstract_id=65140
+- *Re-Examining the Profitability of Technical Analysis with White's Reality Check* — https://homepage.ntu.edu.tw/~ckuan/pdf/snoop01.pdf
