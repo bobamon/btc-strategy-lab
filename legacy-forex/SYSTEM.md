@@ -1959,3 +1959,233 @@ That is a deliberate difference from 21.1, where the source *does* state the rul
 - **No past conclusion changes.** This workstream has still never banked a result. As in ticks
   #8–#11, a run banked off v5 would have had its long signals shaped by a stale direction gate
   invisibly — luck, not process.
+
+---
+
+## ██ FINDING 22 — THE ONLY QUANTITATIVE EVIDENCE THAT S/R LEVELS ARE REAL IS EVIDENCE ABOUT THE SIDE OF THE LEVEL HE REFUSES TO TRADE
+
+**Tick #13, 2026-09-06. Zero credits. No backtest, no `plan_backtest_window`, no engine call of any
+kind. No `runId` created.** This tick spent no engine resource at all; its whole cost was web search.
+
+Tick #12's queue item 5 said the next honest work here *"is no longer a code audit"* and that a
+thirteenth tick re-reading the same Pine file *"would be motion, not progress."* This tick takes the
+one prescribed no-backtest category that has never been aimed at the **entry mechanism itself**:
+research on whether the mechanism is **known to fail**. Ticks #5 and #6 did web research, but on the
+*target rule* and on *NQ/YM correlation* — never on the break-of-level entry that the whole system is.
+
+### 22.0 FIRST, THE STANDING FETCH BLOCK IS A FIXED POLICY, NOT A TRANSIENT FAILURE — CLOSE THE "LATER SESSION" ITEM
+
+Tick #10 recorded four literature leads it could not read and filed them as *"leads for a session with
+fetch access."* Every future cloud tick will keep re-attempting that. Settling it now:
+
+| probe | result |
+|---|---|
+| `WebFetch` papers.ssrn.com (Osler) | `EGRESS_BLOCKED` |
+| `WebFetch` arxiv.org (2101.07410) | `EGRESS_BLOCKED` |
+| `WebFetch` en.wikipedia.org | `EGRESS_BLOCKED` |
+| `WebFetch` newyorkfed.org (the Osler PDF itself) | `EGRESS_BLOCKED` |
+| `WebSearch` | **works** — returns links plus a generated summary |
+
+Four distinct domains this tick, on top of tick #10's four (`arxiv`, `mdpi`, `vecviz`,
+`investopedia`) — **eight domains, two sessions, no successes, including a plain Wikipedia article.**
+The proxy's own status endpoint (`$HTTPS_PROXY/__agentproxy/status`) shows `enabled: true` with a
+`noProxy` list covering only package registries and Anthropic APIs. **This is the environment's
+network policy, not a flaky link.**
+
+**Consequence, and it binds every citation below:** nothing in this finding was read at source. Every
+number is a **search-engine-generated summary of a paper**, which is a weaker evidence class than a
+quotation and is labelled as such at each use. **A later session with real fetch access should verify
+every figure here before any of it is leaned on.** That is not boilerplate — it is the same class of
+error as HARD LESSON 11 (declaring a caveat is not bounding it), so the figures below are used only
+to *frame a question*, never to settle one.
+
+### 22.1 THE HEADLINE — HIS OBSERVATION HAS ACADEMIC SUPPORT AND HIS PRESCRIPTION TRADES ITS COMPLEMENT
+
+The canonical study of intraday support/resistance is **Osler (2000), "Support for Resistance:
+Technical Analysis and Intraday Exchange Rates," FRBNY *Economic Policy Review* 6(2):53–68**
+([abstract](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=888805),
+[FRBNY](https://www.newyorkfed.org/research/epr/00v06n2/0007osle.html),
+[PDF](https://www.newyorkfed.org/medialibrary/media/research/epr/00v06n2/0007osle.pdf)). It tests
+levels published daily by six trading firms, Jan 1996 – Mar 1998, on DEM/JPY/GBP vs USD, against
+**10,000 sets of arbitrarily chosen levels**.
+
+Its measured quantity is **bounce frequency: how often price reaching the level INTERRUPTS the
+trend.** Per search summary:
+
+| level type | bounce frequency |
+|---|---|
+| published S/R levels | **60.8%** |
+| arbitrarily chosen levels | **56.2%** |
+
+with the best single firm reported as ~**9.2% better than arbitrary**, and the effect persisting
+**≥5 business days** after publication.
+
+**Now put that against what this system does.** `SYSTEM.md`'s own decode, from `7.` [05:35]:
+
+> *"We could wait for price to come up, come back down and retest... **But we don't have to do that**
+> because we already know it's a bullish market structure and we're breaking out of our resistance.
+> **As we start to break out we can take our long position.**"*
+
+**He explicitly declines the bounce and takes the break.** So the single strongest piece of
+quantitative evidence that his levels are real is a measurement of **the event he is betting
+against**. The literature's headline number is the frequency of the *other side of his trade*.
+
+**This is HARD LESSON 14 landing exactly on its stated seam, for the third independent source.**
+His **descriptive** claim — levels are real, price reacts at them — is the one with support
+(60.8% > 56.2%). His **prescriptive** claim — skip the retest, enter on the break — is the one the
+evidence does not address in his favour. The lesson predicted this split; it holds again here.
+
+### 22.2 THE ARITHMETIC — AND IT DOES **NOT** CONDEMN THE SYSTEM. STATING THAT PLAINLY.
+
+It would be easy, and wrong, to stop at 22.1 and call the mechanism refuted. **Frequency is not
+expectancy**, and this lab has the scar for the inverse error already (003: *"a good payoff ratio does
+not rescue a bad signal"*). His stated target is **1:3 to 1:5 R** (`9.` [05:53]).
+
+Arithmetic on the cited numbers — **arithmetic, not a result, and no `runId` stands behind it**:
+
+| quantity | value |
+|---|---|
+| break-even win rate at a 3R target | 1/(1+3) = **25.0%** |
+| break-even win rate at a 5R target | 1/(1+5) = **16.7%** |
+| complement of bounce at a *published* level (the branch he trades) | 100 − 60.8 = **39.2%** |
+| complement of bounce at an *arbitrary* level | 100 − 56.2 = **43.8%** |
+
+**Both complements clear both hurdles with room to spare.** So Osler's numbers, taken at face value,
+are *compatible* with his break entry being profitable. The frequency argument is not a kill.
+
+**But it relocates the entire question, and that is this finding's real output.** Osler's
+"not interrupted" means *the trend was not interrupted at that level* — it says nothing about the
+trade running **3–5R**. So the system's viability rests entirely on a quantity neither the source, nor
+this repo, nor any surfaced study measures: **the distribution of run length conditional on the level
+breaking.** Every number in this workstream to date has been a budget or a bound; this names the one
+missing distribution that would decide it.
+
+### 22.3 THE UNCOMFORTABLE COROLLARY — HIS LEVEL-QUALITY FILTER SELECTS AGAINST HIS OWN ENTRY
+
+He validates a level by **repeated touches** (`7.` [00:41], *"seven touches... Price can't break it"*),
+and the deliverable enforces `minTouch = 3`. The stated purpose of that gate is to select **better**
+levels.
+
+On Osler's numbers, touch-validation moves the branch he trades **from 43.8% to 39.2% — it costs him
+~4.6 percentage points of the outcome he needs.** A more-validated level is, by the only measurement
+available, a level that is *more* likely to hold and therefore *less* likely to deliver the break he
+enters on.
+
+**The defence available to the gate is real but unmeasured:** a break of a level that held seven times
+may be rarer *and* carry a longer run when it does — better payoff bought with worse frequency. That
+is a coherent hypothesis. It is also **exactly the run-length distribution 22.2 just showed nobody has
+measured**, so the gate's justification and the system's central unknown turn out to be the same
+missing number. **Recorded as a tension to measure, not as a defect to fix** — `minTouch = 3` is the
+one level-gate number the source demonstrates (FINDING 19), and it is **not** retuned here.
+
+### 22.4 THE PRACTITIONER LITERATURE ON THIS EXACT MECHANISM IS FOLKLORE — RECORDED AS EVIDENCE ABOUT THE EVIDENCE
+
+Searching directly for breakout failure rates returns **no primary source at all**. What it returns:
+
+- *"80% of all breakouts fail"* — a [Medium post](https://medium.com/coinmonks/traders-80-per-cent-of-all-breakouts-fail-heres-why-af0e786a8ecc)
+  and a [Forex Factory thread](https://www.forexfactory.com/thread/1352683-why-do-they-say-that-80-of-breakouts)
+  whose title is literally *"Why do they say that 80% of breakouts fail?"* — i.e. the community's own
+  record of the number is a question about where it came from.
+- An unattributed vendor breakdown: failure **60–80% on 1m/5m**, **40–55% on 1h**, **25–35% on daily**
+  ([fortraders.com](https://fortraders.com/blog/false-breakouts-why-they-happen-how-to-trade),
+  [luxalgo.com](https://www.luxalgo.com/blog/5-false-breakout-strategies-for-traders/)). No methodology,
+  no sample, no instrument.
+- A claim that **fading** breakouts beats trading them — 62% vs 54% — same source class, same absence
+  of method.
+
+**None of this is usable as evidence and none of it is treated as such here.** It is recorded for one
+reason: **if the mechanism this workstream is building were known to fail, this is where that would
+show up, and it does not — because nothing here is measured well enough to know either way.** The
+honest verdict is *"unestablished,"* not *"known to fail"* and not *"known to work."*
+
+**One thing in it does bear on us, if only directionally.** Every folklore breakdown puts the *worst*
+failure rates on the **lowest timeframes**, and this system trades **5m and 15m only** — the bottom of
+every such list. Unsourced, so it cannot be believed; but it is the third independent reason in this
+file to expect the 5m/15m constraint to be the expensive one, and it is signed the same way as the
+other two.
+
+### 22.5 THE VOLUME FILTER — THE ONLY QUANTIFIED EVIDENCE FOR IT FAILS THIS LAB'S OWN SAMPLE FLOOR, AND SAYS SO ITSELF
+
+His go/no-go is volume (`9.` [07:51], *"If there's no volume, there's no trading"*). The one
+quantified breakout-volume result surfaced anywhere
+([luxalgo.com](https://www.luxalgo.com/blog/how-volume-confirms-breakouts-in-trading/)), reported as
+that source's own claim:
+
+| filter | win rate | profit factor | signals |
+|---|---|---|---|
+| none | 37% | **0.92** | — |
+| volume ≥ 1.5× | 61% | 1.58 | — |
+| volume ≥ 2.0× | 72% | 1.84 | **18, across three years** |
+
+**Three separate reasons this cannot be banked, by this project's own standing rules:**
+
+1. **SAMPLE FLOOR.** n = 18 < ~30. *"A ratio on fewer than ~30 trades is NOT quoted as a result."*
+   The source quotes it as one.
+2. **The shape is the overfitting signature.** Win rate and PF both rise **monotonically** as the
+   sample **shrinks toward nothing**. That is what tightening a filter on a fixed history produces
+   whether or not the filter carries information.
+3. **The unfiltered baseline is below the KILL RULE.** PF 0.92 < 1.0. The source's own control arm is
+   a strategy this lab would discard outright.
+
+**This does not show the volume gate is worthless** — FINDING 20 already established that the gate as
+coded measures a quantity the source never uses, so a fair test of *his* rule has never been run
+anywhere, here or elsewhere. It shows something narrower and worth writing down: **the external
+evidence a future tick might be tempted to lean on is weaker than this lab's own minimum standard for
+its own results.** Do not import it.
+
+### 22.6 A CORRECTION TO TICK #10's OWN RECORDED LEAD — IT CONFLATED TWO DIFFERENT LITERATURES
+
+Tick #10 wrote that the one search claim bearing on it was *"that S/R levels can predict trend
+interruptions while still failing to beat buy-and-hold,"* filed as one unverified claim. **It is two
+claims from two different literatures, and only the first belongs to Osler:**
+
+- **"Predicts trend interruptions"** — Osler's actual result, corroborated across three independent
+  search summaries this tick, with a specific number attached (60.8% vs 56.2%). **Stands, at
+  search-summary strength.**
+- **"Fails to beat buy-and-hold"** — **not Osler's finding, because Osler never tested profitability
+  at all.** Per search summary of the literature reviewing it: Osler *"found significant evidence of
+  power to predict intraday trend reversals, but did not investigate whether it is possible to trade
+  profitably on the basis of the signals net of transaction costs"*
+  ([JIMF 22(2003):223–237](https://sci2s.ugr.es/keel/pdf/specific/articulo/science2_13.pdf)). The
+  no-profit result is a **separate** finding — that paper reports that once *"reasonable transaction
+  costs are taken into account and trading is restricted to periods of high market activity, there is
+  no evidence of profitable trading opportunities"* (its round-number bounce excess is ~**3.4pp**,
+  a differently-scoped number from Osler's 4.6pp and not interchangeable with it).
+
+**Attaching an unprofitability result to the paper that reports the predictability result would have
+made the S/R literature look self-refuting when it is not.** The accurate reading is harder on this
+system, not easier: **predictability at levels is measured and real; net-of-cost tradeability was
+never demonstrated by the paper that established the predictability**, and where it *has* been tested
+it did not survive costs. Supporting context: Lo, Mamaysky & Wang (2000), *J. Finance*
+55:1705–1765, find several technical indicators carry incremental information over 1962–1996 while
+profitability *"depends on costs and implementation"*
+([NBER w7613](https://www.nber.org/papers/w7613)); and Sullivan/Timmermann/White-style data-snooping
+work finds the best in-sample rule typically does not profit in following years.
+
+**This is directly on-point for us:** the fixed cost this lab already treats as decisive
+(HARD LESSONS 1 and 3 — R must be ≥ ~8× round-trip cost) is the same axis on which the S/R literature
+loses its edge. It is not a new worry. It is an external confirmation of the worry this repo already
+runs on.
+
+### ██ WHAT FINDING 22 DOES NOT ESTABLISH
+
+- **No number here came from a run.** No `runId` exists for this workstream and none was created.
+  Nothing in this finding is a result of this system.
+- **Nothing here was read at source.** Every figure is a **search-engine summary**, not a quotation
+  from a paper (22.0). The 60.8/56.2 pair in particular is the load-bearing number of 22.1–22.3 and
+  **has not been verified against Osler's own text.** If it is wrong, 22.3's 4.6pp corollary is wrong
+  with it.
+- **It does not show the mechanism fails.** 22.2 is explicit: the frequencies clear the break-even
+  hurdles for his stated targets. The claim is that the question **moves** to run-length, not that the
+  answer is known.
+- **It does not transfer cleanly to NQ/YM.** Osler is **1996–1998 FX**, on **levels published by
+  dealers**, not intraday structural pivots on index futures. Under HARD LESSON 9 and this repo's five
+  recorded cross-inheritance failures, that is a **hypothesis for this instrument, never an
+  inheritance** — the same standard this file applied to EURUSD in tick #2's FINDING 3.
+- **It does not measure the run-length distribution** it names as the deciding quantity. That needs
+  data this environment does not have.
+- **It does not retune anything.** `minTouch`, `pivLen`, the volume threshold and the targets are all
+  untouched this tick. No Pine file was modified.
+- **It does not reopen the symbol hunt** (closed by exhaustion, tick #7) and it does not license a
+  Legacy Forex backtest on trader-dev (forbidden, tick #2 FINDING 4).
+- **No past *result* changes**, because there are none. One past *lead* is corrected (22.6).

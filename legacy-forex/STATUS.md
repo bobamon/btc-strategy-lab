@@ -1260,3 +1260,137 @@ rule of its own, so it kept permitting longs for at least 75 minutes on 15m afte
 structure, in a system whose stated purpose is to get in and get out. The number the tick set out to
 audit, `pivLen = 5`, turned out to be the sound part; the rule that should have surrounded it was
 absent. Twelve ticks, zero results recorded, still correctly.
+
+---
+
+# ██ TICK #13, 2026-09-06 — THE EVIDENCE THAT HIS LEVELS ARE REAL IS EVIDENCE ABOUT THE SIDE OF THEM HE REFUSES TO TRADE
+
+**Zero credits. No backtest, no `plan_backtest_window`, no engine call of any kind. No Pine file
+touched.** Full detail in `SYSTEM.md` FINDING 22.
+
+## WHAT THIS TICK DID
+
+Tick #12 closed the gate audit five-for-five and its queue item 5 said plainly that the next honest
+work here *"is no longer a code audit"* — that a thirteenth tick re-reading the same file *"would be
+motion, not progress."* This tick took that at its word and used the one prescribed no-backtest
+category never aimed at the **entry mechanism itself**: research on whether it is **known to fail**.
+Ticks #5 and #6 did web research, but on the *target rule* and on *NQ/YM correlation* — never on the
+break-of-level entry the whole system is.
+
+## THE HEADLINE — HARD LESSON 14's SEAM, THIRD INDEPENDENT SOURCE
+
+**Osler (2000), FRBNY *Economic Policy Review* 6(2):53–68** is the canonical study of intraday
+support/resistance. Its measured quantity is **bounce frequency — how often price reaching a level
+INTERRUPTS the trend**: **60.8%** at published levels vs **56.2%** at 10,000 sets of arbitrary ones.
+
+**He explicitly declines the bounce and takes the break** (`7.` [05:35]: *"we don't have to do that...
+As we start to break out we can take our long position"*). So the strongest quantitative evidence that
+his levels are real measures **the event he bets against**.
+
+That is **HARD LESSON 14 landing exactly on its stated seam** for a third independent source: his
+*descriptive* claim (levels are real, price reacts there) is the supported one; his *prescriptive*
+claim (skip the retest, enter on the break) is the one the evidence does not speak for.
+
+## AND THE PART THAT KEEPS THIS HONEST — IT DOES **NOT** REFUTE THE SYSTEM
+
+Stopping at the headline would have been the inverse of this lab's 003 scar. At his stated **1:3–1:5R**
+targets the break-even win rates are **25.0%** and **16.7%**; the complement of Osler's bounce
+frequency is **39.2%**. **The branch he trades clears both hurdles with room.** Frequency is not
+expectancy, and the frequency argument is not a kill.
+
+**What it does is relocate the question.** Osler's "not interrupted" says nothing about a trade running
+**3–5R**. The system's viability therefore rests on **the distribution of run length given the level
+breaks** — a quantity neither the source, nor this repo, nor any surfaced study measures. Twelve ticks
+of budgets and bounds; this one names the missing distribution that would actually decide it.
+
+## THE COROLLARY THAT BITES — HIS LEVEL-QUALITY FILTER SELECTS AGAINST HIS OWN ENTRY
+
+Touch-validation is supposed to select *better* levels. On Osler's numbers it moves the branch he needs
+from **43.8% → 39.2%: it costs ~4.6pp of the outcome he trades.** A more-validated level is more likely
+to hold and so less likely to give him his break. The available defence — that rarer breaks run further
+— is coherent and is **the same unmeasured run-length distribution as above**. Recorded as a tension;
+`minTouch = 3` is **not** retuned.
+
+## THREE SMALLER RESULTS
+
+1. **The fetch block is a fixed policy, so stop budgeting ticks against it.** Four more domains probed
+   this tick (`ssrn`, `arxiv`, `wikipedia`, `newyorkfed` — including the Osler PDF itself), all
+   `EGRESS_BLOCKED`, on top of tick #10's four. **Eight domains, two sessions, zero successes**, and
+   the proxy's own status endpoint shows a `noProxy` list covering only package registries and
+   Anthropic APIs. Tick #10's *"leads for a session with fetch access"* item is closed as
+   **unreachable from a cloud run under this environment policy** — it needs a local session or a
+   wider network policy, not another attempt. **`WebSearch` works; `WebFetch` does not.**
+2. **The practitioner literature on this exact mechanism is folklore.** *"80% of breakouts fail"* has
+   no primary source — the community's own best record of it is a Forex Factory thread titled *"Why do
+   they say that 80% of breakouts fail?"*. Recorded as **evidence about the evidence**: if this
+   mechanism were known to fail, this is where it would show, and it does not — because nothing there
+   is measured well enough to know either way. Verdict: **unestablished**, not *known to fail*. One
+   directional note: every folklore breakdown puts the worst failure rates on the **lowest**
+   timeframes, and this system trades **5m/15m only**.
+3. **The only quantified volume-filter evidence fails this lab's own sample floor and says so.** The
+   one such result found reports PF 1.84 at a 2.0× volume filter **on 18 signals across three years** —
+   n < 30, so *not banked*; win rate and PF rising monotonically as the sample shrinks is the
+   overfitting signature; and its unfiltered control arm is PF **0.92**, below the KILL RULE. **The
+   external evidence a future tick might lean on is weaker than this lab's minimum standard for its
+   own results. Do not import it.**
+
+## THE CORRECTION THIS TICK MAKES
+
+Tick #10 filed one search claim — *"S/R levels can predict trend interruptions while still failing to
+beat buy-and-hold"* — as a single unverified lead. **It is two claims from two literatures.** The
+predictability half is Osler's real result. The unprofitability half is **not Osler**, who *never
+tested profitability at all*; it belongs to separate work finding that once realistic transaction costs
+are applied the edge does not survive. Conflating them would have made the S/R literature look
+self-refuting when it is not — and the accurate reading is **harder** on this system: predictability at
+levels is real, net-of-cost tradeability was never demonstrated by the paper that established it, and
+where it has been tested it did not survive costs. That is the same axis HARD LESSONS 1 and 3 already
+make decisive here.
+
+## WHAT THIS TICK DID NOT ESTABLISH
+
+- **No number came from a run.** No `runId` exists for this workstream and none was created. Nothing
+  above is a result of this system.
+- **Nothing was read at source.** Every external figure is a **search-engine summary**, not a quotation
+  from a paper. The 60.8/56.2 pair is load-bearing for the headline and the 4.6pp corollary and **has
+  not been verified against Osler's text.** A session with fetch access must check it.
+- **That the mechanism fails.** Explicitly not claimed — the arithmetic above says the opposite is
+  still open.
+- **That Osler transfers to NQ/YM.** 1996–1998 FX, dealer-published levels, not index-futures pivots.
+  A hypothesis for this instrument, never an inheritance (HARD LESSON 9).
+- **The run-length distribution** it names as the deciding quantity. Needs data this environment lacks.
+- **Whether any Pine version compiles** — queue item unchanged, still blocked by the same egress policy.
+- `US30` depth, `p`, `ρ`, the direction contradiction and the rolling-mean-target predictions are all
+  unchanged and unrun.
+
+## QUEUE
+
+1. **NEW, and it is now the most informative single measurement this workstream could make:** the
+   **run-length distribution conditional on a level breaking** — how far price travels in R after a
+   validated break, not merely whether it continues. FINDING 22 shows both the system's viability
+   (22.2) and the `minTouch` gate's justification (22.3) reduce to this one unmeasured quantity. It
+   needs no strategy, no entry logic and no optimisation — only bars and levels — so it is the cheapest
+   high-value run available the moment a data path exists.
+2. **NEW, pre-registered one-dimensional test — count is now nine:** **retest-entry vs break-entry.**
+   The source calls the retest optional (`7.` [05:35]); Osler's number is *about* the retest side. The
+   deliverable already carries the concept. This is the first pre-registered test in this workstream
+   with an **externally-sourced directional prior**, and the prior favours the variant he rejects.
+3. **Verify Osler at source** — the 60.8/56.2 pair and its definition of "bounce". Needs fetch access;
+   see item 5.
+4. **The gate audit stays closed** (tick #12). There is no next gate.
+5. **Tick #10's "session with fetch access" item is CLOSED as unreachable here.** It requires a local
+   session or a wider network policy. Cloud ticks should not re-probe: eight domains, zero successes.
+6. **The symbol hunt stays closed** (tick #7). **Do not run a Legacy Forex backtest on trader-dev under
+   any circumstances** (tick #2, FINDING 4).
+7. `US30` 15m/5m depth on `backtest-lab` — still needs a session with that connector.
+8. **Forward-testing still needs no history** and is still the only honest route available today.
+
+## STATUS LINE
+
+**LEGACY FOREX: STILL BLOCKED ON THE ENGINE — AND THE SYSTEM'S CENTRAL UNKNOWN NOW HAS A NAME.**
+External blockers unchanged and outside this project's control. What changed internally: for twelve
+ticks this workstream audited the code that implements his rules; this one asked whether the rule
+itself is known to fail, and found that the only quantitative evidence for his levels measures the side
+of them he declines to trade — while also showing, against the temptation, that this does **not** refute
+him, because his own targets clear the implied hurdle. The question is no longer "do levels work" but
+"how far does price run when one breaks", and nothing in this repo or the surfaced literature measures
+that. Thirteen ticks, zero results recorded, still correctly.

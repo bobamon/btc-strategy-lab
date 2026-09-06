@@ -280,6 +280,26 @@ without moving PF.
   **1m only covers 2025-12-16 → 2026-05-03**. A 5m or 1m run is a shorter window than a 15m one, so
   never compare their returns without saying so.
 
+### ██ WEB ACCESS IN A CLOUD RUN: `WebSearch` WORKS, `WebFetch` DOES NOT — measured 2026-09-06 (Legacy Forex tick #13)
+Binds every lab, because all four workstreams list web research as no-backtest work.
+
+**Eight distinct domains, two independent sessions, zero successes.** Legacy Forex tick #10 tried
+`arxiv.org`, `mdpi.com`, `vecviz.com`, `investopedia.com`; tick #13 tried `papers.ssrn.com`,
+`arxiv.org`, `en.wikipedia.org` and `newyorkfed.org`. Every one returned `EGRESS_BLOCKED`. The
+proxy's own status endpoint (`$HTTPS_PROXY/__agentproxy/status`) reports `enabled: true` with a
+`noProxy` list covering **only package registries and Anthropic APIs**.
+
+**This is the environment's network policy, not a transient failure or a bad link.** Two consequences:
+
+1. **Do not spend tick effort re-probing it**, and do not file work as "for a later session with fetch
+   access" without saying that such a session must be **local, or on an environment with a wider
+   network policy** — a future *cloud* run will land in exactly the same place.
+2. **`WebSearch` results are a weaker evidence class than a quotation**, because what comes back is a
+   search-engine-generated *summary of* a paper, not the paper. Cite them as such, name the number
+   that is load-bearing, and mark it unverified — tick #13's Osler figures are recorded that way. A
+   summarised number that later turns out wrong takes every conclusion built on it with it, which is
+   HARD LESSON 11 (declaring a caveat is not bounding it) in a new place.
+
 ### ██ VERIFIED COVERAGE GRID — measured 2026-09-05 (War Formation cycle check #38, no backtest)
 All eight timeframes probed with `plan_backtest_window`; nothing generalised from a subset. Applies to
 every lab on this engine.
