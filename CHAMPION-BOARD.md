@@ -9973,3 +9973,94 @@ failed at the out-of-sample level after being fixed at the full-window level.
 - *Anomalies across the globe: Once public, no longer existent?* — https://www.sciencedirect.com/science/article/abs/pii/S0304405X19301618
 - *What Drives Anomaly Decay?* (AEA) — https://www.aeaweb.org/conference/2024/program/paper/SNQSBFkB
 - Micro Alphas, *Factor Decay* — https://microalphas.com/factor-decay/
+
+---
+
+# ██ ATTACK 86 — THE 1h PORT. THE OUT-OF-SAMPLE FLOOR IS FINALLY CLEARED ON ONE CELL, AND A PROPER STATISTICAL HURDLE SAYS IT STILL IS NOT ENOUGH.
+
+Executes queue item 2. Zero credits (connector). Per HARD LESSON 40 the anchor was re-derived as a
+**duration, not multiplied**: 360 bars of 4h is 60 days, so the 1h equivalent is **1,440 bars** — the
+same 60 days at four times the resolution. Nothing else changed. `source="deep"`, split at the
+engine's own 2022-02-25 midpoint.
+
+## THE RESULT
+
+| | BTC in-sample | BTC out-of-sample | ETH in-sample | **ETH out-of-sample** |
+|---|---|---|---|---|
+| Profit factor | 2.687407 | 1.813511 | 2.021462 | **1.840069** |
+| Trades | 37 | **26** | 59 | **30** ✅ |
+| Net | +1057.33% | +131.36% | +479.10% | **+149.81%** |
+| Buy & hold | +813.80% | +101.80% | +803.71% | **-8.19%** |
+| Sharpe | 1.625835 | 0.818728 | 1.113382 | 0.834364 |
+| Max drawdown | 36.078127% | 39.855608% | 42.975335% | 36.526877% |
+| Decay | — | 88% | — | **69%** |
+
+Full-window: BTC PF 2.024794 on **64 trades**, ETH PF 1.905945 on **90 trades** — the largest samples
+this mechanism has produced.
+
+## THE MILESTONE, AND IT IS A REAL ONE
+
+**ETH's out-of-sample half is the first Attack 86 result to clear the 30-trade floor out of sample.**
+Thirty trades exactly, and the engine raised **no `small_sample` warning** on it — the only cell in
+this entire investigation for which it has stayed silent.
+
+On that cell: **PF 1.840069, +149.81% against buy and hold's -8.19%** — a 158-point margin over
+holding, out of sample, on a sample that clears this project's own floor. ETH's decay is also the
+mildest yet at 69% against BTC's 88%.
+
+BTC's out-of-sample half remains **26 trades**, four short. The 1h port fixed ETH and did not fix BTC.
+
+## THE HURDLE, WHICH IS WHY IT IS STILL NOT PROMOTED
+
+**Harvey, Liu and Zhu (2016)**, cataloguing 316 proposed factors across 313 papers, conclude that
+given the extent of data mining *"it does not make any economic or statistical sense to use the usual
+significance criteria… a t-ratio greater than 2.0"* — **a newly discovered factor needs t > 3.0.**
+
+**Roughly forty statistical looks have now been taken at this one mechanism**: ten cells across two
+windows, a matched SMA control on both halves, a ten-cell deep sweep, and four split tests. That is
+precisely the data-mining regime their hurdle exists for.
+
+Converting Sharpe to an implied t-statistic (`t ≈ Sharpe × √years`, 4.51 years out of sample):
+
+| Cell | Sharpe | implied t |
+|---|---|---|
+| BTC out-of-sample | 0.818728 | **1.74** |
+| ETH out-of-sample | 0.834364 | **1.77** |
+
+**Both fall below the conventional 2.0 threshold, and far below the 3.0 that multiple testing
+requires.** The full-window figures reach t ≈ 3.80 (BTC) and 2.97 (ETH) over 9.04 years — but those
+are in-sample-inclusive and are exactly the numbers Harvey/Liu/Zhu say are inflated by mining.
+
+**So the honest position: the out-of-sample evidence, on the one cell that finally clears the sample
+floor, is statistically indistinguishable from noise at the hurdle its own literature demands.**
+
+## WHAT THIS INVESTIGATION HAS ESTABLISHED
+
+| Objection | Status |
+|---|---|
+| Per-cell sample floor (full window) | ✅ answered — 51–97 trades, now 64 and 90 at 1h |
+| Ranking tracks buy and hold (HL54) | ✅ answered — decisively not |
+| It is just a trend filter | ✅ answered — beat a matched SMA control on both halves |
+| Survivorship | ✅ immune cells tested; both survive |
+| Out-of-sample survival | ⚠️ survives, weak, 69–88% decay |
+| Out-of-sample sample floor | ✅ **cleared on ETH 1h — 30 trades, no warning** |
+| **Multiple-testing hurdle** | ❌ **fails — implied t ≈ 1.74 / 1.77 against a required 3.0** |
+
+**Every objection this project knew how to raise has now been answered except the one it had never
+raised.** That is what this tick produced: not a new number, the right bar.
+
+## QUEUE
+
+1. **Stop testing this mechanism.** Forty looks is already deep in the regime Harvey/Liu/Zhu describe,
+   and each further test raises the hurdle rather than the evidence. More sweeps make the case weaker.
+2. **The t > 3.0 hurdle should become a standing gate**, alongside RATCHET v2 and the sample floor.
+   Every "PF > 1.0 on 30+ trades" verdict on this board was decided at a bar the literature says is
+   far too low. **That is a ledger-level change and belongs to a deliberate decision, not a tick.**
+3. If this is ever revisited, the only evidence that would move it is **forward** — signals recorded
+   going forward carry no mining penalty, because the looks happen after the hypothesis is fixed.
+
+## SOURCES
+- Harvey, Liu and Zhu, *…and the Cross-Section of Expected Returns* (NBER w20592 / RFS 2016) — https://www.nber.org/system/files/working_papers/w20592/w20592.pdf
+- SSRN listing — https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2249314
+- *Do t-Statistic Hurdles Need to be Raised?* — https://arxiv.org/pdf/2204.10275
+- *Publication Bias in Asset Pricing Research* — https://arxiv.org/pdf/2209.13623
