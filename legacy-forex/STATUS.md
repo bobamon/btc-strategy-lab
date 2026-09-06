@@ -1667,3 +1667,159 @@ half of it was never in the source, and the half that was is 13–16× narrower 
 compounding consequence is exact rather than rhetorical: under the corpus-supported window, the
 structure gate at **every** legal entry is built from bars outside the session, on both timeframes.
 Zero results recorded, still correctly.
+
+---
+
+# ██ TICK #16, 2026-09-06 — THE TARGET RULE COULD ONLY EVER FALL, AND 1R IS A TRAP IT CANNOT LEAVE
+
+**Zero credits. No backtest, no `plan_backtest_window`, no engine call of any kind.** Full detail in
+`SYSTEM.md` FINDING 27. Deliverable: `pine/VISUAL-legacy-forex-complete.pine` **v9**.
+
+**Environment:** trader-dev *is* attached and was deliberately not used — tick #2 FINDING 4 forbids a
+Legacy Forex backtest there and tick #7 closed the symbol hunt by exhaustion. `backtest-lab` is still
+absent, so the `US30`-depth item is blocked by session capability, not stale.
+
+## WHAT THIS TICK DID
+
+Tick #12 closed the gate audit five-for-five and said the next work here is not a code audit. Ticks
+#13, #14 and #15 took that to web research, to trade duration, and to the session boundary. **What none
+of the fifteen ticks had ever audited is the layer *underneath* the gates: the trade accounting that
+turns a closed trade into a number and feeds it back into the next trade's target.** That layer is
+where this workstream's **#1 pre-registered test** lives — *rolling-mean vs fixed target*, on file
+since tick #4.
+
+## THE HEADLINE — IT IS A THEOREM, NOT AN ESTIMATE
+
+Every closed trade's recorded R is bounded above by the target it was opened against. A win exits **at**
+`tgtR` and books exactly `tgtR`; the stop, the trail, v8's EOD flatten and v5's volume cut all book
+less. So `mean ≤ tgtR`, so `round(mean) ≤ tgtR`, so:
+
+> **the adaptive target is a monotonically non-increasing integer sequence, floored at 1. It can never
+> rise, on any data, under any input combination.**
+
+And **1R is strictly absorbing**: at a 1R target a win books 1, the mean cannot exceed 1, and climbing
+back to 2 needs 1.5. There is no path out. A second corollary: the fallback `rTarget` (3.0) is a
+permanent ceiling, so **the "adaptive" rule's initial value is its maximum.**
+
+**What it costs.** Holding target `T` needs `mean ≥ T − 0.5`, i.e. a win rate `p ≥ 1 − 0.5/T`:
+
+| target | needed to HOLD it | needed to break even at it | gap |
+|---|---|---|---|
+| 1:2 | **75.0%** | 33.3% | 41.7pp |
+| 1:3 | **83.3%** | 25.0% | 58.3pp |
+| 1:5 | **90.0%** | 16.7% | 73.3pp |
+
+A configuration at 40% wins and 1:3 — **+0.6R per trade** — recomputes to `round(1.2) = 1` and lands on
+the absorbing 1R, where 40% is **−0.2R per trade.** *The rule as implemented turns a winning
+configuration into a losing one.* **Stated before any run, so it cannot be rationalised after one.**
+
+## AND IT IS THE FILE'S DEFECT, NOT HIS RULE'S — HIS CLIMBS
+
+> [05:43] *"**One to five gets hit, three days in a row. Okay, the average is now one to four.**"*
+
+Arithmetically impossible if a winner books its own target. His worked example proves it independently:
+`{3, 0, 2.5, 5, 5, 3}` → mean 3.08 → *"we are going for one, two, threes"* — **while two of those six
+trades recorded a 5.** The quantity is named in the module: *"the risk to a war [reward] **that I was
+able to capture**"* [00:52] — the furthest **ladder rung**, not the level a single unit exited at.
+
+**And it cannot be fixed by changing what is fed to the estimator.** This tick added `maxRtrade` — the
+furthest R a trade reaches, on bar extremes, the most generous reading available — and it is capped at
+the target too, because the trade *closes* there. **Any simulator that exits at the target has a shut
+loop, whatever it records.**
+
+## THE CORRECTION — TICK #8 FILED THIS AS COSMETIC
+
+Tick #8 recorded the single-piece exit as *"a limitation rather than fixed… nothing in the source
+states the scale-out weights."* **The refusal to invent weights was right and stands. The
+classification was wrong.** It is not a gap between the drawing and the trade — it is the mechanism
+that converts a self-correcting estimator into a one-way ratchet. Eight ticks have carried
+"rolling-mean vs fixed target" as this workstream's top pre-registered test while the adaptive arm was
+structurally incapable of reproducing the rule. It also **sharpens FINDING 7's third defect**, which
+called the bias "structural downward" — directionally right and quantitatively silent. It is monotone,
+it has an absorbing state, and the win rate that would arrest it is 3–5× the one the same target needs
+to be profitable.
+
+## THE SECOND FINDING — THE MODULE GIVES TWO ESTIMATORS AND THIS FILE IMPLEMENTS THE OTHER ONE
+
+**DESCRIBED** [00:40]: *"the last two weeks of trades"* — rolling. **DEMONSTRATED** [05:11]: 18.5 + 2 =
+20.5 *"divided by now **seven** trades"* — he adds the trade and increments the denominator, dropping
+nothing. **He never states a drop rule at all**, so v1–v8's drop-oldest register is an interpretation,
+in the same class as the trail mode (#8) and the stop pad (#9) — and by this file's own
+**demonstrated-over-described** precedent it is the *less* supported reading. v9 makes both selectable,
+**default unchanged**. Critically: **the theorem holds under both**, which is why it is offered rather
+than switched. The estimator changes how fast the target falls, not whether.
+
+## TWO SMALLER RESULTS, ONE OF WHICH IS CLEAN
+
+- **He coarsens inputs before averaging and the file does not** — *"a one to three point two six. We'll
+  just call it a one to three. We don't have to be very, very specific with it"* [01:57], while `2.5`
+  in the same set survives as `2.5`. Ad hoc by his own admission. **Recorded, deliberately not
+  implemented:** there is no rule to implement and inventing a quantisation would put a fabricated
+  number into the target rule.
+- **CLEAN:** `math.max(outR, 0)` collapsing a break-even, a small trailed loss and a full stop to `0`
+  is exactly *"zero for a loss"* [02:56], with no size distinction anywhere in the module.
+
+## AND ONE ARITHMETIC CONSEQUENCE FOR THE TEST ITSELF
+
+The adaptive rule does not engage until **6 closed trades** exist. Against FINDING 11's ~13–17 trades
+over the ~43 sessions of 15m coverage reachable here, **those 6 are 35–46% of the entire obtainable
+sample** — so even setting the ratchet aside, the pre-registered test would compare a fixed-3R arm
+against an arm that is also fixed-3R for ~40% of its trades. **Diluted by construction on the only data
+reachable.**
+
+## WHAT WENT INTO THE SHARED LEDGER
+
+The failure shape is not specific to this trader: **a rule that sets a parameter from realised outcomes,
+where that parameter itself caps those outcomes, is a one-way ratchet, not a feedback loop.** Written up
+as **HARD LESSON 61** in `STRATEGY-LEDGER.md`, with the check run against this repo's other labs first —
+**no banked result anywhere is withdrawn by it**, because no other lab has an outcome-adaptive parameter.
+It is prospective, and 3M Elite's trailing rule and the BTC lab's ratchet-on-a-tuned-parameter pattern
+are the two places it would bite next.
+
+## WHAT THIS TICK DID NOT ESTABLISH
+
+- **No number came from a run.** No `runId` exists for this workstream and none was created. The
+  headline is a proof about code; the table is arithmetic on that proof. **Neither is a measurement.**
+- **How fast the ratchet would bite, or what win rate this system runs at.** The 40% figure is an
+  illustration, not an estimate of this system.
+- **That his real journal climbs as often as it falls.** The corpus shows it climbing **once**, in a
+  teaching example. What is established is that his rule *can* and this file's *cannot*.
+- **What the correct capture rule is.** The finding says what breaks the loop, not what he holds
+  through the ladder — the source does not say.
+- **Whether any version compiles** — unchanged since tick #8, still no Pine compiler and still blocked
+  by egress. **v9 adds no new built-in.**
+- **No past conclusion is withdrawn** — this workstream has never banked a result. What is reclassified
+  is tick #8's *judgement*, not a number.
+- `US30` depth, `p`, `ρ`, the direction contradiction and the entry-window questions are unchanged and
+  unrun.
+
+## QUEUE
+
+1. **The "rolling-mean vs fixed target" test is BROKEN AS SPECIFIED and must not be run as written.**
+   Its adaptive arm cannot reproduce the rule it is meant to test. Any future run of it must either
+   repair the capture ceiling first or be labelled a test of the ratchet, never of his rule.
+2. **NEW, and it is the repair this needs:** decide, from the source or from the user, whether he holds
+   **one unit through the ladder** or **scales out of several**. That single fact is what unblocks a
+   faithful target rule, and nothing in the 18 committed transcripts settles it. **A question for the
+   user, not a thing to invent.**
+3. **The first live chart now settles SEVEN questions and can tell them apart** — touch counts (#8),
+   Stop budget (#9), Level width (#10), Vol baseline (#11), Struct guard + age (#12/#15), Trade
+   resolution (#14), Entry/Hold window (#15), and now **Target ratchet + Capture ceiling (#16)**.
+4. **`rEstimator` is a tenth pre-registered one-dimensional test** — but read FINDING 27.5 first: it
+   does not escape the ratchet and must not be reached for as a fix.
+5. **v2–v9 have never been compiled** — unchanged, blocked by egress here.
+6. **The gate audit stays closed** (#12) and **the symbol hunt stays closed** (#7). **Do not run a
+   Legacy Forex backtest on trader-dev under any circumstances** (#2, FINDING 4).
+7. `US30` 15m/5m depth on `backtest-lab` — still needs a session with that connector.
+8. **Forward-testing still needs no history** and is still the only honest route available today.
+
+## STATUS LINE
+
+**LEGACY FOREX: STILL BLOCKED ON THE ENGINE — AND ITS TOP PRE-REGISTERED TEST WAS UNRUNNABLE AS
+SPECIFIED.** External blockers unchanged and outside this project's control. What changed internally:
+fifteen ticks audited the gates that decide whether a trade happens, and none audited the accounting
+that decides what a trade is *worth* — where the adaptive target turns out to be a monotone ratchet with
+an absorbing barrier at 1R, needing an 83% win rate to hold the 1:3 that only needs 25% to be
+profitable. The rule itself is fine; his own journal climbs. **The single-piece exit that tick #8 filed
+as a cosmetic limitation is what breaks it**, and the repair needs one fact about his execution that no
+committed transcript states. Sixteen ticks, zero results recorded, still correctly.

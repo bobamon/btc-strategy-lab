@@ -3118,3 +3118,72 @@ happened to be in position. That is an estimate, and an estimate is not a result
 the instrument. War Formation and 3M Elite have **no benchmark column at all**, so they do not have this
 bug yet — they have the gap that produced it. When either adds one, it adds both columns and the
 time-in-market row with it.
+
+---
+
+## ██ HARD LESSON 61 — A PARAMETER SET FROM REALISED OUTCOMES THAT ITSELF CAPS THOSE OUTCOMES IS A ONE-WAY RATCHET, NOT A FEEDBACK LOOP (LEGACY FOREX TICK #16, 2026-09-06)
+
+**Earned:** the Legacy Forex deliverable's rendering of `10._USING_DATA`'s target rule. Full derivation
+in `legacy-forex/SYSTEM.md` FINDING 27. **No number here came from a run**; this is a proof about code.
+
+The trader's rule sets tomorrow's target to the rounded mean of the achieved R of his last ~6 trades,
+a loss scoring 0. The Pine rendered it faithfully in every respect but one: **the simulator exits the
+whole position when the target is touched.** That single choice makes every winner book *exactly* the
+target it was opened against and every other exit book less, so:
+
+> `recordedR ≤ target` for every trade ⟹ `mean ≤ target` ⟹ `round(mean) ≤ target`
+> ⟹ **the target is a monotonically non-increasing integer sequence, floored at 1.**
+
+It can never rise, on any data, under any inputs. **1R is strictly absorbing** — a 1R win books 1, so
+the mean cannot reach the 1.5 needed to climb back. And the pre-window fallback value is a permanent
+ceiling, so the "adaptive" parameter's initial value is its maximum.
+
+**The cost is not a tilt, it is a cliff.** Holding target `T` needs `mean ≥ T − 0.5`, i.e. a win rate
+`p ≥ 1 − 0.5/T`, against a break-even win rate of `1/(1+T)`:
+
+| target | win rate to HOLD it | win rate to break even at it |
+|---|---|---|
+| 1:2 | 75.0% | 33.3% |
+| 1:3 | 83.3% | 25.0% |
+| 1:5 | 90.0% | 16.7% |
+
+A configuration at 40% wins and 1:3 — **+0.6R per trade** — recomputes to `round(1.2) = 1` and lands on
+the absorbing 1R, where the same 40% is **−0.2R per trade.** *The adaptive rule converts a winning
+configuration into a losing one, and does it faster the better the original target was.*
+
+**The rule was not the defect; the simulator was.** The source's own rule climbs — *"One to five gets
+hit, three days in a row. Okay, the average is now one to four"* — and his journal set `{3,0,2.5,5,5,3}`
+averages 3.08 while containing two 5s, because he records what he **captured** along a target ladder,
+which can exceed the target he was going for. **A feedback loop only closes if an outcome can exceed the
+parameter that produced it.** Cap that, and you have a ratchet wearing a feedback loop's clothes.
+
+**How to apply:**
+- **Whenever a parameter is computed from realised results, write down the inequality between the two
+  before running anything.** If the parameter bounds the results that feed it, the loop is one-way and
+  the direction is decided before any data arrives. This is one line of algebra and it settles the
+  question completely — no credit, no sample, no window.
+- **Look for the absorbing state, not just the bias direction.** "Structurally biased downward" was
+  already recorded for this rule (FINDING 7) and it is *true but useless* — it does not say the
+  sequence is monotone, that it has a floor it can never leave, or that the win rate arresting it is
+  3–5× the win rate the same target needs to be profitable. **A named bias with no bound is HARD LESSON
+  11 again.**
+- **Changing what you feed the estimator does not open a shut loop.** This tick added the most generous
+  capture measure the file can produce (furthest R reached, on bar extremes) and it is capped too,
+  because the trade *closes* at the target. The repair has to be to the exit, not the accounting.
+- **Audit the accounting layer, not only the gates.** Fifteen consecutive ticks audited the conditions
+  that decide *whether a trade happens* and none audited the code that decides *what a trade is worth*
+  and feeds it back. The second layer is where a defect is invisible in a signal count and decisive in
+  a result.
+- **A test whose treatment arm cannot express the thing being tested is not a test.** "Rolling-mean vs
+  fixed target" sat at the top of that workstream's pre-registered list for eight ticks while its
+  adaptive arm was structurally incapable of doing what the rule does. Before running a pre-registered
+  comparison, check that the arm *can* produce the behaviour it is supposed to demonstrate.
+
+**Where this binds in this repo, checked rather than assumed.** Every other Pine source in this project
+was grepped for outcome-derived parameters. The only hits are `qtyUse = strategy.equity * eqFrac /
+close` — position **sizing** off equity, in the BTC lab, War Formation and 3M Elite alike. **That is not
+this failure and must not be confused with it:** equity feeding size is *multiplicative and uncapped*,
+so it compounds; it does not bound the outcomes that update it. **No banked result anywhere in this repo
+is withdrawn by this lesson.** It is prospective, and it bites the moment any lab makes a target, a stop
+multiple, a hold cap or a risk fraction adaptive to its own realised trades — which the ratchet mandate
+makes a natural thing to reach for.

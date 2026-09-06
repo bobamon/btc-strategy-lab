@@ -2561,3 +2561,187 @@ no cutoff and no flatten time.
 - **Whether any version compiles** — unchanged, still no Pine compiler in this environment.
 - `US30` depth, `p`, `ρ`, the direction contradiction and the rolling-mean-target predictions are all
   unchanged and unrun.
+
+---
+
+# ██ TICK #16, 2026-09-06 — THE TARGET RULE IS A ONE-WAY RATCHET IN THIS FILE, AND IT IS THIS FILE'S FAULT
+
+## ██ FINDING 27 — THE ADAPTIVE TARGET CAN ONLY FALL, AND 1R IS ABSORBING
+
+**Zero credits. No backtest, no `plan_backtest_window`, no engine call of any kind.** Everything below
+is arithmetic on the deliverable's own code and on `10._USING_DATA`, which is committed in this repo.
+
+### 27.1 — THE THEOREM
+
+The file computes its target as `rTargetUse = max(1, round(mean of recorded achieved R))`, and the
+recorded achieved R of a trade comes from exactly three exit blocks:
+
+| exit | recorded R | bound |
+|---|---|---|
+| target touched | `outR = tgtR` | **= the target in force** |
+| stop / trail touched | `(stopPx − entryPx)/initR`, floored at 0 by `math.max(outR,0)` | **< the target** |
+| v8 EOD flatten | `(close[1] − entryPx)/initR` | **< the target** — a `close[1]` at or beyond `tgtPx` implies `high[1] ≥ tgtPx`, which would already have closed the trade |
+| v5 volume-death cut | `curR`, and the cut only fires while `curR < volDeadR` (default 0) | **< the target** |
+
+So **every** closed trade satisfies `recordedR ≤ tgtR`. Therefore `mean ≤ tgtR`, therefore
+`round(mean) ≤ tgtR`, therefore
+
+> **`rTargetUse` is a monotonically non-increasing integer sequence, floored at 1.**
+
+It is integer-valued and bounded below, so it converges and is eventually constant. **It can never
+rise, on any data, under any input combination.** Two corollaries fall straight out:
+
+1. **1R is strictly absorbing.** At a 1R target a win books exactly 1 and a loss books 0, so the mean
+   is at most 1. Climbing back to 2 needs a mean of 1.5. **Unreachable at any win rate, forever.**
+2. **The fallback is a permanent ceiling.** Until the window fills, `rTargetUse = rTarget` (default
+   3.0). Those first trades therefore record ≤ 3, so the adaptive target can never exceed 3 either.
+   **The "adaptive" rule's initial value is its maximum.**
+
+### 27.2 — WHAT IT COSTS, AS A TABLE
+
+Holding a target `T` through the next recomputation needs `round(mean) = T`, i.e. `mean ≥ T − 0.5`.
+Since every win books `T` and every loss books `0`, that is a win-rate condition: **`p ≥ 1 − 0.5/T`**.
+Against the break-even win rate at the same target, `1/(1+T)`:
+
+| target | win rate needed to HOLD it here | win rate needed to break even at it | gap |
+|---|---|---|---|
+| 1:2 | **75.0%** | 33.3% | 41.7pp |
+| 1:3 | **83.3%** | 25.0% | 58.3pp |
+| 1:4 | **87.5%** | 20.0% | 67.5pp |
+| 1:5 | **90.0%** | 16.7% | 73.3pp |
+
+**The two columns are not close, and they diverge as the target rises.** A configuration running a
+perfectly healthy 40% win rate at 1:3 — expectancy **+0.6R per trade** — recomputes to
+`round(0.4 × 3) = round(1.2) = 1` and lands on the absorbing 1R, where the same 40% win rate is
+**−0.2R per trade.** *The rule as implemented takes a winning configuration and makes it a losing one.*
+
+**This is a prediction about a run that has not happened, not a result.** No `runId` exists here. It is
+stated in advance precisely so it cannot be discovered afterwards and rationalised.
+
+### 27.3 — IT IS THE FILE'S DEFECT, NOT HIS RULE'S. THE SOURCE CLIMBS.
+
+> [05:43] *"**One to five gets hit, three days in a row. Okay, the average is now one to four.** We're
+> going to now do a one to four on our trades. We're gonna adjust that, and we're gonna go for more
+> gains."*
+
+**His rule goes UP.** That is arithmetically impossible if a trade's recorded R equals the target it
+was going for. And his own worked example proves it independently: the set is `{3, 0, 2.5, 5, 5, 3}`,
+mean **3.08**, which he acts on as *"we are going for one, two, threes"* [03:53] — **while two of the
+six trades in it recorded a 5.** Those trades captured more R than the target in force.
+
+The mechanism is in the word he uses for the quantity:
+
+> [00:52] *"figure out the median of where I either got stopped out or **the risk to a war** [reward]
+> **that I was able to capture** overall."*
+
+**Captured, not targeted.** It is the furthest rung the ladder reached — the *"target one… target
+four"* callouts of the live streams (FINDING 23) — not the level a single unit exited at. **The
+feedback loop only closes because a winner can exceed the target.**
+
+**And it is not fixable by changing what is fed to the estimator.** This tick added `maxRtrade`, the
+furthest R a trade reaches using bar extremes — the most generous reading of "captured" the file can
+produce. It is *also* capped at the target, because the trade **closes** when the target is touched.
+**Any simulator that exits at the target has a shut loop, whatever it records.** The only repair is to
+stop exiting there.
+
+### 27.4 — THE CORRECTION THIS MAKES TO THIS REPO
+
+Tick #8 (FINDING 17) recorded the single-piece exit as a **limitation rather than a defect**:
+
+> *"A seventh item is recorded as a limitation rather than fixed: the simulator exits in one piece
+> while drawing the ladder he scales out along, because nothing in the source states the scale-out
+> weights and inventing them would push a fabricated number into the rolling-mean target."*
+
+**The reasoning for not inventing weights was right and stands. The classification was wrong.** It is
+not a cosmetic gap between the drawing and the trade — **it is the thing that converts a
+self-correcting estimator into a one-way ratchet with an absorbing barrier.** Eight ticks have listed
+"rolling-mean vs fixed target" as this workstream's #1 pre-registered test while the adaptive arm was
+structurally incapable of doing what the rule does.
+
+It also **sharpens FINDING 7's third defect** rather than repeating it. FINDING 7 said the estimator is
+*"structurally biased downward"* because a winner's R is capped by its target while a loss drags the
+mean to 0. That is directionally right and quantitatively silent. The bias is not a tilt — **it is
+monotone, it has an absorbing state, and the win rate that would arrest it is 3–5× the win rate the
+same target needs to be profitable.**
+
+### 27.5 — AND IT IS NOT FIXED BY THE WINDOW SHAPE, WHICH IS THE SECOND THING THIS TICK FOUND
+
+`10._USING_DATA` gives **two different estimators, four minutes apart**, and this file has only ever
+implemented one:
+
+- **DESCRIBED** [00:40]: *"I like to go over **the last two weeks of trades**"* — a rolling window.
+- **DEMONSTRATED** [04:58]–[05:14]: *"if we had 18.5 originally… we just hit a two. So we add plus two.
+  That equals 20.5. We would then divide that by now **seven** trades and see we're down to 2.9."*
+  — he adds the trade and **increments the denominator. Nothing is dropped.**
+
+**He never states a drop rule anywhere in the module.** v1–v8's drop-oldest-at-`rrWindow` shift
+register is therefore an interpretation of the *"two weeks"* phrasing, in the same class as the trail
+mode (tick #8) and the stop pad (tick #9) — and by this file's own **demonstrated-over-described**
+precedent it is the reading the source supports *less*. v9 makes both selectable (`rEstimator`),
+**default unchanged**, so with default inputs v9's signal set and trade record are identical to v8's.
+
+**The theorem in 27.1 holds under both**, and that is the reason for offering the choice rather than
+switching it: every recorded R is capped at the target under either estimator, so `mean ≤ T` and the
+target is non-increasing either way. **The estimator changes how fast the target falls, not whether.**
+Anyone reaching for the expanding window as a fix should read this paragraph first.
+
+### 27.6 — A THIRD THING, SMALLER, AND A FOURTH THAT IS CLEAN
+
+3. **He coarsens the inputs before averaging and the file does not.** *"Here we go, we have a one to
+   three point two six. We'll just call it a one to three. **We don't have to be very, very specific
+   with it**"* [01:57]–[02:02] — while `2.5` in the same set is kept as `2.5`. The rounding is ad hoc
+   and he says so. The file stores raw `outR`. **Recorded, deliberately not implemented:** there is no
+   stated rule to implement, and inventing a quantisation would be a fabricated number entering the
+   target rule — the same reason tick #8 refused the scale-out weights.
+4. **CLEAN, checked not assumed.** `math.max(outR, 0)` maps a break-even exit, a small trailed loss
+   and a full stop all to `0`. That is exactly what he does: *"We take the three, **zero for a loss**,
+   two point five, five, five and a three"* [02:56], with no size distinction anywhere in the module.
+   **A clean gate is also a result** (tick #10's precedent).
+
+### 27.7 — AND ONE ARITHMETIC CONSEQUENCE FOR THE PRE-REGISTERED TEST ITSELF
+
+`rTargetUse` falls back to the fixed `rTarget` until `cntR ≥ rrWindow` — **six closed trades**. Against
+FINDING 11's corrected expectation of **~13–17 trades** for a single instrument over the ~43 sessions
+of 15m coverage this workstream can reach, **the first 6 trades are 35–46% of the entire obtainable
+sample.** So even setting the ratchet aside, the "rolling-mean vs fixed target" test would compare a
+fixed-3R arm against an arm that is *also* fixed-3R for roughly 40% of its trades. **The contrast is
+diluted by construction on the only data reachable**, and that is arithmetic on two numbers already in
+this repo, not a new estimate.
+
+### WHAT v9 CHANGED
+
+1. **`rEstimator`** — rolling (default, v1–v8) vs expanding (demonstrated, 10. 05:11). Default
+   unchanged; trade record identical to v8's.
+2. **A `Target ratchet` dashboard row** — the mean needed to hold the current target, that condition as
+   a win rate, the break-even win rate beside it, the observed win rate, a count of how many times the
+   target has stepped down, and an explicit **`ABSORBED AT 1R`** state.
+3. **A `Capture ceiling` row** — `maxRtrade`/`lastMaxR`/`capGap`, the gap between the target and the
+   furthest R the trade actually reached. **A gap of ~0 on every trade IS the ceiling**; it is the
+   expected reading, not a healthy one.
+4. **Eleven data-window plots** so all of it is readable off one forward chart.
+5. **Row 17 now reports the estimator in use and its own count**, which was hard-coded to `cntR`.
+
+**Not changed, deliberately:** the single-piece exit. The only source-expressible repair is to stop
+closing at the target and let a runner go on the trail, and the source never says whether he holds one
+unit or scales out of several. Inventing either would push a fabricated number into the target rule —
+which is the exact failure this finding is about.
+
+## WHAT THIS TICK DID NOT ESTABLISH
+
+- **No number came from a run.** No `runId` exists for this workstream and none was created. §27.1 is a
+  proof about code; §27.2 is arithmetic on that proof; **neither is a measurement of anything.**
+- **How fast the ratchet would actually bite**, or at what win rate this system runs. Both need a run.
+  §27.2's "40% win rate" is an illustration, not an estimate of this system's win rate.
+- **That his real journal climbs as often as it falls.** The corpus shows the rule climbing **once**,
+  in a teaching example, on days he chose to broadcast. What is established is that his rule *can*
+  climb and this file's *cannot*.
+- **What the correct capture rule is.** §27.3 says what breaks the loop; it does not say what he
+  actually holds through the ladder, because the source does not.
+- **Whether quantising recorded R the way he does changes anything.** Recorded, unimplemented, unrun.
+- **Whether any version compiles** — unchanged since tick #8, still no Pine compiler and still blocked
+  by this environment's egress policy. v9 adds no new built-in; it reuses `math.max`, `math.round` and
+  `str.tostring`, all already in the file.
+- **No past conclusion of this workstream is withdrawn** — it has never banked a result. What is
+  reclassified is tick #8's *judgement* that the single-piece exit was cosmetic.
+- `US30` depth, `p`, `ρ`, the direction contradiction and the entry-window questions are all unchanged
+  and unrun.

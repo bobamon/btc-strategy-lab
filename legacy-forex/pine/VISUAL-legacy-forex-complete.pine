@@ -8,6 +8,46 @@
 //                ·  v6 2026-09-06 (tick #12, market structure / pivLen — FINDING 21)
 //                ·  v7 2026-09-06 (tick #14, trade-resolution instrumentation — FINDING 23)
 //                ·  v8 2026-09-06 (tick #15, the trading WINDOW — FINDING 25)
+//                ·  v9 2026-09-06 (tick #16, the TARGET RULE's feedback loop — FINDING 27)
+//
+// ⚠ v9 ADDS NO RULE THAT IS ON BY DEFAULT. Its one new input defaults to the v1-v8 behaviour, so
+//   with default inputs its signal set and trade record are IDENTICAL to v8's. What it adds is the
+//   measurement of a defect that is a THEOREM about this file, not an estimate:
+//
+//     Every closed trade's recorded R is bounded above by the target it was opened against.
+//     A win exits AT `tgtR` and books exactly `tgtR`; a stop, a trail exit and v8's EOD flatten all
+//     book LESS. So `mean(window) <= tgtR`, so `round(mean) <= tgtR`, so the adaptive target is a
+//     MONOTONICALLY NON-INCREASING integer sequence floored at 1. It can never rise. And 1R is
+//     strictly absorbing: at a 1R target a win books 1, the mean cannot exceed 1, and 1.5 — the
+//     mean needed to round back up to 2 — is unreachable at any win rate.
+//
+//   Holding a target T therefore needs mean >= T - 0.5, i.e. a win rate of at least 1 - 0.5/T:
+//   75% to hold 1:2, 83.3% to hold 1:3, 90% to hold 1:5. The BREAK-EVEN win rates at those targets
+//   are 33.3%, 25% and 16.7%. A configuration that is comfortably profitable at 1:3 on a 40% win
+//   rate ratchets to 1:1 within two windows, where 40% is a LOSS. The rule as implemented converts
+//   a winning system into a losing one, and the pre-registered "rolling-mean vs fixed target" test
+//   would measure that ratchet rather than his rule.
+//
+//   IT IS THIS FILE'S DEFECT, NOT HIS. His rule climbs — "One to five gets hit, three days in a
+//   row. Okay, the average is now one to four" (10. 05:43) — and his journal set {3, 0, 2.5, 5, 5, 3}
+//   averages 3.08 while containing two 5s, so a trade CAPTURED more R than the target in force. He
+//   records "the risk to reward that I was able to CAPTURE" (10. 00:58), which is the furthest rung
+//   the ladder reached, not the level he exited a single unit at. A simulator that closes the whole
+//   position AT the target cannot represent that, whatever it feeds the estimator — capping capture
+//   at the target is what breaks the loop, not the choice of window. Tick #8 filed the missing
+//   scale-out as a cosmetic limitation ("the ladder is drawn, not traded"). It is not cosmetic; it
+//   is the thing that turns a self-correcting estimator into a one-way ratchet. NOT FIXED HERE: the
+//   only source-expressible repair is to stop exiting at the target and let a runner go on the
+//   trail, and the source never says whether he holds one unit or scales out of several — inventing
+//   weights would push a fabricated number into the target rule itself. Instrumented and named.
+//
+//   The one new input is the OTHER thing this tick found in the same module: `rEstimator`. He
+//   DESCRIBES a rolling window ("the last two weeks of trades", 10. 00:40) and DEMONSTRATES an
+//   expanding one — 18.5 + 2 = 20.5 "divided by now SEVEN trades" (10. 05:11), adding the new trade
+//   without dropping the oldest. v1-v8 implement the described estimator with a drop-oldest rule the
+//   source never states. Both are now available; the default is unchanged. Note the theorem above
+//   holds under EITHER, which is the point of offering it — the ratchet is caused by the capped
+//   capture, not by the window shape.
 //
 // ⚠ v8 ADDS NO RULE THAT IS ON BY DEFAULT. Both new switches ship OFF, so with default inputs its
 //   signal set and trade record are IDENTICAL to v7's. What it adds is the measurement of a number
@@ -453,6 +493,8 @@ maxTrades = input.int(2,      "Max trades per day (counts across NQ+YM)", group=
 gTgt = "Target — 10._USING_DATA"
 useAdaptR = input.bool(true, "Target = rolling mean achieved R (his actual rule)", group=gTgt)
 rrWindow  = input.int(6, "Trades in the window", group=gTgt, minval=1, maxval=8, tooltip="'the last two weeks of trades, which is typically anywhere from six to eight trades' (10. 00:38). His worked example uses 6.")
+rEstimator= input.string("Rolling last N trades (described, 10. 00:40)", "Achieved-R estimator", options=["Rolling last N trades (described, 10. 00:40)","Expanding mean from the first trade (demonstrated, 10. 05:11)"], group=gTgt,
+     tooltip="v9, FINDING 27. The module gives TWO estimators four minutes apart and this file has only ever implemented one. DESCRIBED: 'I like to go over the last two weeks of trades' (00:40) — a rolling window. DEMONSTRATED: having computed 18.5/6 = 3.08, the next day's trade is folded in as 18.5 + 2 = 20.5 'divided by now SEVEN trades' (05:11) — the oldest trade is NOT dropped. He never states a drop rule at all, so v1-v8's drop-oldest-at-N is an interpretation, exactly as the trail mode and the stop pad were. Default is unchanged so the trade record still matches v8's. NOTE: this does NOT escape the ratchet in the header — every recorded R is capped at the target in force under both estimators, so the target is non-increasing either way. Switching it changes how FAST the target falls, not whether.")
 rTarget   = input.float(3.0, "Fallback / fixed target, R", group=gTgt, tooltip="Used until the window has filled, or if the adaptive rule is switched off.")
 
 gV = "Display"
@@ -741,11 +783,44 @@ cntR = (rrWindow >= 1 and not na(r1) ? 1 : 0) + (rrWindow >= 2 and not na(r2) ? 
        (rrWindow >= 5 and not na(r5) ? 1 : 0) + (rrWindow >= 6 and not na(r6) ? 1 : 0) +
        (rrWindow >= 7 and not na(r7) ? 1 : 0) + (rrWindow >= 8 and not na(r8) ? 1 : 0)
 
-avgAchR   = cntR > 0 ? sumR / cntR : na
-windowFull= cntR >= rrWindow
+// ── v9: THE EXPANDING ESTIMATOR HE ACTUALLY DEMONSTRATES (FINDING 27) ─────────────────────────
+// "if we had 18.5 originally... we just hit a two. So we add plus two... That equals 20.5. We would
+// then divide that by now SEVEN trades and see we're down to 2.9." (10. 04:58-05:14)
+// He adds the new trade and increments the denominator. Nothing is dropped, and no drop rule is
+// stated anywhere in the module. v1-v8's drop-oldest-at-`rrWindow` is therefore an interpretation
+// of the "last two weeks" phrasing, not a rule from the source. Both are now selectable.
+var float cumSumR = 0.0
+var int   cumCntR = 0
+useExpand = rEstimator == "Expanding mean from the first trade (demonstrated, 10. 05:11)"
+
+avgAchRoll = cntR > 0 ? sumR / cntR : na
+avgAchExp  = cumCntR > 0 ? cumSumR / cumCntR : na
+avgAchR    = useExpand ? avgAchExp : avgAchRoll
+nInEst     = useExpand ? cumCntR : cntR
+windowFull = useExpand ? cumCntR >= rrWindow : cntR >= rrWindow
 // "we are averaging a one, two, three... we are going to go for one, two, threes" — rounded to a
 // whole R, floored at 1 so a bad window cannot produce a sub-1R target he never trades.
 rTargetUse = useAdaptR and windowFull and not na(avgAchR) ? math.max(1.0, math.round(avgAchR)) : rTarget
+
+// ── v9 INSTRUMENTATION — THE RATCHET (FINDING 27). Drives nothing. ────────────────────────────
+// The theorem in the header, made readable on one chart. `holdMean` is the mean the estimator must
+// keep to hold the CURRENT target through the next recomputation (round(x) = T needs x >= T-0.5);
+// `holdWR` is the same condition expressed as the win rate it implies if every win books the full
+// target and every loss books 0 — which is exactly what this simulator produces. `beWR` is the win
+// rate at which the same target merely breaks even in money. The gap between them is the finding.
+var int   nWinT    = 0        // closed trades whose recorded R was > 0
+var int   nLossT   = 0        // closed trades that scored 0 in the window (stop, break-even, cut)
+var int   nRatchet = 0        // times the adaptive target has stepped DOWN on this chart
+var float maxRtrade = na      // furthest R this trade has reached (capped at tgtR by the exit)
+var float lastMaxR  = na      // and the same for the last CLOSED trade, for the ceiling row
+var float capGap    = na      // (target it was opened against) − (furthest R it reached), last trade
+holdMean = rTargetUse - 0.5
+holdWR   = rTargetUse <= 0 ? na : 100 * (1 - 0.5 / rTargetUse)
+beWR     = 100 / (1 + rTargetUse)
+obsWR    = (nWinT + nLossT) > 0 ? 100.0 * nWinT / (nWinT + nLossT) : na
+if useAdaptR and not na(rTargetUse[1]) and rTargetUse < rTargetUse[1]
+    nRatchet := nRatchet + 1
+absorbed = useAdaptR and windowFull and rTargetUse <= 1.0
 
 // ── THE STOP-WIDTH GATE — a setup whose structure sits too far away is REJECTED, not re-stopped ─
 // "That's a 25 point stop loss, which is solid." (11. 00:07)
@@ -800,6 +875,16 @@ curR = dir == 0 or na(initR) or initR == 0 ? na : (dir == 1 ? (close - entryPx) 
 // v2 fix: manage on the PREVIOUS bar's R. v1 moved the stop using this bar's close and then
 // tested this bar's low against it, booking exits on lows that preceded the move that caused them.
 curRprev = dir == 0 or na(initR) or initR == 0 ? na : (dir == 1 ? (close[1] - entryPx) : (entryPx - close[1])) / initR
+
+// v9 instrumentation (FINDING 27). The furthest R this trade has reached, using the bar EXTREME
+// rather than the close, so it is the most generous reading of "the risk to reward I was able to
+// capture" (10. 00:58) this file can produce. It is recorded to demonstrate the ceiling, not to
+// escape it: the trade closes when the target is touched, so this quantity is itself capped at
+// `tgtR` (plus at most one bar's overshoot) and CANNOT lift the estimator above the target. That is
+// the point — no choice of what to feed the window escapes a simulator that exits at the target.
+if dir != 0 and not na(initR) and initR != 0
+    float exc = (dir == 1 ? (high - entryPx) : (entryPx - low)) / initR
+    maxRtrade := na(maxRtrade) ? exc : math.max(maxRtrade, exc)
 
 // manage the stop — see the TRAIL note in the header; the mode is an input because the source
 // genuinely supports three readings and only the break-even floor is stated as non-negotiable.
@@ -871,6 +956,13 @@ if flatEOD and dir != 0 and sessJustEnded and not na(close[1]) and not na(initR)
     r3 := r2
     r2 := r1
     r1 := math.max(outR, 0)          // a loss scores 0, exactly as a full stop does (10. 02:56)
+    cumSumR   := cumSumR + math.max(outR, 0)     // v9: the expanding estimator (10. 05:11)
+    cumCntR   := cumCntR + 1
+    nWinT     := nWinT  + (outR > 0.001 ? 1 : 0) // v9 instrumentation only
+    nLossT    := nLossT + (outR > 0.001 ? 0 : 1)
+    capGap    := (na(maxRtrade) or na(tgtR)) ? na : tgtR - maxRtrade
+    lastMaxR  := maxRtrade
+    maxRtrade := na
     lastTradeBars := barsInTrade
     sumTradeBars  := sumTradeBars + barsInTrade
     nClosedT      := nClosedT + 1
@@ -905,6 +997,13 @@ if dir != 0 and (hitT or hitS)
     r3 := r2
     r2 := r1
     r1 := math.max(outR, 0)
+    cumSumR   := cumSumR + math.max(outR, 0)     // v9: the expanding estimator (10. 05:11)
+    cumCntR   := cumCntR + 1
+    nWinT     := nWinT  + (outR > 0.001 ? 1 : 0) // v9 instrumentation only
+    nLossT    := nLossT + (outR > 0.001 ? 0 : 1)
+    capGap    := (na(maxRtrade) or na(tgtR)) ? na : tgtR - maxRtrade
+    lastMaxR  := maxRtrade
+    maxRtrade := na
     lastTradeBars := barsInTrade                 // v7 instrumentation only
     sumTradeBars  := sumTradeBars + barsInTrade
     nClosedT      := nClosedT + 1
@@ -948,6 +1047,13 @@ if volDead
     r3 := r2
     r2 := r1
     r1 := math.max(outR, 0)          // a loss scores 0, exactly as a full stop does (10. 02:56)
+    cumSumR   := cumSumR + math.max(outR, 0)     // v9: the expanding estimator (10. 05:11)
+    cumCntR   := cumCntR + 1
+    nWinT     := nWinT  + (outR > 0.001 ? 1 : 0) // v9 instrumentation only
+    nLossT    := nLossT + (outR > 0.001 ? 0 : 1)
+    capGap    := (na(maxRtrade) or na(tgtR)) ? na : tgtR - maxRtrade
+    lastMaxR  := maxRtrade
+    maxRtrade := na
     lastTradeBars := barsInTrade                 // v7 instrumentation only
     sumTradeBars  := sumTradeBars + barsInTrade
     nClosedT      := nClosedT + 1
@@ -1020,7 +1126,7 @@ bgcolor(inSess and bearStruct     ? color.new(color.red, 94) : na,   title="Bear
 barcolor(useVol and not volOK ? color.new(color.gray, 50) : na,      title="No volume")
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────────────────────
-var table d = table.new(position.top_right, 3, 24, border_width=1, frame_width=1, frame_color=color.gray)
+var table d = table.new(position.top_right, 3, 26, border_width=1, frame_width=1, frame_color=color.gray)
 f_row(t, r, k, ok, v) =>
     table.cell(t, 0, r, k, text_color=color.white,  text_size=size.small, bgcolor=color.new(color.black,20), text_halign=text.align_left)
     table.cell(t, 1, r, ok ? "✔" : "✖", text_color=ok ? color.lime : color.red, text_size=size.small, bgcolor=color.new(color.black,20))
@@ -1100,8 +1206,10 @@ if showDash and barstate.islast
          + str.tostring(tolPct, "#") + "% of cap)  →  "
          + (tolFitsBudget ? "fits inside the " + str.tostring(stopBudget, "#.#") + "-pt stop budget"
                           : "TOL > BUDGET — every tradeable break is still inside the touch band"))
-    f_row(d, 17, "Target",    true,      (useAdaptR ? (windowFull ? "1:" + str.tostring(rTargetUse, "#") + "  from mean " + str.tostring(avgAchR, "#.##") + "R of last " + str.tostring(cntR) + " (10._USING_DATA)"
-                                                                  : "1:" + str.tostring(rTargetUse, "#") + "  FALLBACK — window " + str.tostring(cntR) + "/" + str.tostring(rrWindow) + " trades")
+    // v9: `cntR` was hard-coded here; with the expanding estimator the count and the mean come from
+    // a different accumulator, so both now read from `nInEst`/`avgAchR` and the estimator is named.
+    f_row(d, 17, "Target",    true,      (useAdaptR ? (windowFull ? "1:" + str.tostring(rTargetUse, "#") + "  from mean " + str.tostring(avgAchR, "#.##") + "R of " + str.tostring(nInEst) + " trades  (" + (useExpand ? "EXPANDING, 10. 05:11" : "rolling, 10. 00:40") + ")"
+                                                                  : "1:" + str.tostring(rTargetUse, "#") + "  FALLBACK — window " + str.tostring(nInEst) + "/" + str.tostring(rrWindow) + " trades")
                                                     : "1:" + str.tostring(rTargetUse, "#") + "  fixed (adaptive rule off)"))
     f_row(d, 18, "Trail rule", true,      trailMode + "   (source is ambiguous — see header)")
     f_row(d, 19, "Trades today", underCap, str.tostring(tradesToday) + " / " + str.tostring(maxTrades) + "  (cap counts across NQ+YM)")
@@ -1134,6 +1242,28 @@ if showDash and barstate.islast
          + str.tostring(nHeldOOS) + " of " + str.tostring(nClosedT) + " closed trades crossed the close"
          + (flatEOD ? "  ·  EOD flat ON, " + str.tostring(nEODflat) + " flattened"
                     : "  ·  EOD flat OFF — nothing closes the day (5. 00:27)"))
+    // v9 instrumentation (tick #16, FINDING 27). THE RATCHET. "✖" means the adaptive target has
+    // already stepped down on this chart, or has reached the absorbing 1R it can never leave.
+    // `holdWR` is the win rate needed to HOLD the current target when every win books exactly the
+    // target and every loss books 0 — which is what this simulator produces by construction; `beWR`
+    // is the win rate at which that same target merely breaks even in money. The gap between the two
+    // is the defect, and it widens as the target rises.
+    f_row(d, 23, "Target ratchet", useAdaptR and nRatchet == 0 and not absorbed,
+         not useAdaptR ? "adaptive rule OFF — fixed 1:" + str.tostring(rTarget, "#") + ", no feedback loop"
+           : (absorbed ? "ABSORBED AT 1R — a 1R win books 1, so the mean can never reach the 1.5 needed to climb back"
+                       : "holding 1:" + str.tostring(rTargetUse, "#") + " needs mean ≥ " + str.tostring(holdMean, "#.#")
+                         + "R  (= " + str.tostring(holdWR, "#") + "% wins; break-even is " + str.tostring(beWR, "#") + "%)")
+           + "  ·  observed " + (na(obsWR) ? "—" : str.tostring(obsWR, "#") + "% of " + str.tostring(nWinT + nLossT))
+           + "  ·  stepped down " + str.tostring(nRatchet) + "×")
+    // v9 instrumentation. WHY the ratchet is unescapable in this simulator: the trade closes AT the
+    // target, so the furthest R it ever reaches is the target (plus at most one bar's overshoot).
+    // His journal records what he CAPTURED (10. 00:58) and contains a 5 while he was going for a 3,
+    // which is how his own rule climbs (10. 05:43). This row is that gap, measured. A `capGap` of
+    // ~0 on every trade IS the ceiling — it is the expected reading, not a healthy one.
+    f_row(d, 24, "Capture ceiling", false,
+         "recorded R is capped at the target by construction — the ladder is DRAWN, not traded"
+         + (na(lastMaxR) ? "" : "  ·  last closed trade reached " + str.tostring(lastMaxR, "#.##")
+                                + "R, target minus that = " + str.tostring(capGap, "#.##") + "R"))
 
     // name the FIRST unmet condition, in his own order, so the dashboard says what is blocking
     blocker = not inSess        ? "NO TRADE — outside New York session"
@@ -1151,9 +1281,9 @@ if showDash and barstate.islast
                     + (volDeadExit and not volOK ? "   [vol dead " + str.tostring(deadRun) + "/" + str.tostring(volDeadBars) + "]" : ""))
       : blocker
     vc = goLong ? color.green : goShort ? color.red : dir != 0 ? color.blue : color.new(color.gray,40)
-    table.cell(d, 0, 23, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
-    table.cell(d, 1, 23, "", bgcolor=vc)
-    table.cell(d, 2, 23, verdict, text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+    table.cell(d, 0, 25, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+    table.cell(d, 1, 25, "", bgcolor=vc)
+    table.cell(d, 2, 25, verdict, text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
 
 alertcondition(goLong,  "Legacy LONG",  "Legacy Forex: LONG — structure bullish, resistance broken, volume present")
 alertcondition(goShort, "Legacy SHORT", "Legacy Forex: SHORT — structure bearish, support broken, volume present")
@@ -1215,3 +1345,18 @@ plot(barsOOS,                      "Live trade: bars held out of session", displ
 plot(nHeldOOS,                     "Closed trades that crossed the close", display=display.data_window)
 plot(nEODflat,                     "Trades flattened at the session close",display=display.data_window)
 plot(inWindow ? 1 : 0,             "InEntryWindow",                        display=display.data_window)
+// v9 instrumentation — FINDING 27. The first three settle the theorem on one chart: the target in
+// use, the mean feeding it, and the mean it must keep to hold. The next three say how the two
+// estimators differ on the same trade record. The last three are the capture ceiling — if
+// `CapGapLastTrade` is ~0 on every closed trade, the recorded R is the target and the loop is shut.
+plot(holdMean,                     "Mean needed to HOLD the target",       display=display.data_window)
+plot(holdWR,                       "Win rate needed to hold target (%)",   display=display.data_window)
+plot(beWR,                         "Break-even win rate at target (%)",    display=display.data_window)
+plot(obsWR,                        "Observed win rate (%)",                display=display.data_window)
+plot(nRatchet,                     "Times the target stepped DOWN",        display=display.data_window)
+plot(avgAchRoll,                   "MeanAchievedR rolling (10. 00:40)",    display=display.data_window)
+plot(avgAchExp,                    "MeanAchievedR expanding (10. 05:11)",  display=display.data_window)
+plot(cumCntR,                      "Closed trades in the expanding mean",  display=display.data_window)
+plot(maxRtrade,                    "Live trade: furthest R reached",       display=display.data_window)
+plot(lastMaxR,                     "Last closed trade: furthest R reached",display=display.data_window)
+plot(capGap,                       "CapGapLastTrade (target − furthest R)",display=display.data_window)
