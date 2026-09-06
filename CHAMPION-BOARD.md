@@ -10602,3 +10602,111 @@ establish, which is less than this board has been recording as established.
 - Bailey & López de Prado, *The Sharpe Ratio Efficient Frontier* — https://www.davidhbailey.com/dhbpapers/sharpe-frontier.pdf
 - Portfolio Optimizer, *The Probabilistic Sharpe Ratio: Bias-Adjustment, Confidence Intervals, Hypothesis Testing and Minimum Track Record Length* — https://portfoliooptimizer.io/blog/the-probabilistic-sharpe-ratio-bias-adjustment-confidence-intervals-hypothesis-testing-and-minimum-track-record-length/
 - Marti, *How to detect false strategies? The Deflated Sharpe Ratio* — https://marti.ai/qfin/2018/05/30/deflated-sharpe-ratio.html
+
+---
+
+# ██ COUNTING FAMILIES INSTEAD OF TRIALS — THE CORRELATION ADJUSTMENT HALVES THE SHORTFALL, AND A QUARTER OF THIS BOARD IS ONE IDEA
+
+Zero credits, no backtest. Closes the board audit's queue item 3, which said the OBV-divergence family
+should count as one trial rather than eight. It turns out to be **twenty**, not eight.
+
+## WHY THIS CORRECTION IS OWED
+
+The Deflated Sharpe entry earlier today used **N = 80 raw trials**. That is the wrong input if the
+trials are correlated, and the literature is explicit: *"correlation… effectively reduces the number of
+independent tests"*, and multiple-testing corrections that ignore it *"may be somewhat too severe."*
+
+Harvey, Liu & Zhu's own method *"allows for correlation among the tests"* precisely for this reason.
+**Using 80 where the effective figure is lower overstates the hurdle, and that cuts against the results
+unfairly.** This tick fixes that.
+
+## THE FAMILY COUNT
+
+Collapsing every record whose mechanism differs only by a filter, threshold or leg into a single family:
+
+**80 raw trials → 44 independent families.**
+
+| Family | Records |
+|---|---|
+| **obv-divergence** | **20** |
+| liquidity-sweep | 8 |
+| level-target | 5 |
+| orderflow-absorption-reclaim | 2 |
+| acf-persistence-breakout | 2 |
+| weekend-vacuum-breakout | 2 |
+| linreg-channel | 2 |
+| macd-zeroline-regime-flip | 2 |
+| stoch-oversold-dwell-reclaim | 2 |
+| 35 others | 1 each |
+
+**A quarter of this entire board — 20 of 80 records — is one mechanism.** OBV divergence has been
+re-specified with a magnitude floor, a breakout margin, a swing-quality floor, a 1.2% swing-quality
+floor, a pivot-spacing floor, a volume-climax exclusion, and three regime-conditioned variants of
+those. **That is one idea tested twenty times, and the best of the twenty then read as the board's
+leading candidate** — which is the selection mechanism the DSR literature describes, at a scale I had
+underestimated by more than double.
+
+## THE HURDLE, RECOMPUTED
+
+| | E[max SR], empirical σ | shortfall | E[max SR], theoretical σ | **shortfall** |
+|---|---|---|---|---|
+| **N = 80 raw trials** | 3.2911 | −1.9969 | 1.5711 | **−0.2769** |
+| **N = 44 families** | 2.9661 | −1.6719 | 1.4274 | **−0.1332** |
+
+**The correlation adjustment halves the shortfall.** Under the conservative (theoretical σ) null — the
+fairer of the two — the gap narrows from **−0.28 to −0.13**.
+
+**It does not close it.** The best observed Sharpe of 1.294170 clears the expected maximum **only if the
+effective independent trial count is below 27**:
+
+| effective N | E[max SR] | shortfall |
+|---|---|---|
+| 20 | 1.2193 | **+0.0749** ✅ |
+| **27** | — | **breakeven** |
+| 30 | 1.3301 | −0.0359 |
+| **44 (measured)** | **1.4286** | **−0.1344** |
+| 80 (raw) | 1.5724 | −0.2782 |
+
+## THIS CORRECTS THIS MORNING'S DSR ENTRY
+
+That entry concluded the conservative null *"still misses by 0.28"* and summarised that nothing here is
+*"distinguishable from the best of eighty coin flips."* **With the correlation adjustment the miss is
+0.13, not 0.28, and the relevant count is forty-four families, not eighty flips.**
+
+**The conclusion survives — the best result still fails — but it fails narrowly, not by a wide margin,
+and the earlier framing was too strong.** Getting the direction of an error right matters less than
+getting its size right, and I overstated this one by a factor of two.
+
+The research anticipated exactly this: corrections ignoring correlation *"may be somewhat too severe,
+though the overall conclusion that the standard threshold is too low remains robust."* Both halves of
+that sentence apply here.
+
+## WHERE THAT LEAVES THINGS, HONESTLY
+
+**The best result on this board is marginal, not dead.** It fails a properly-specified hurdle by 0.13
+Sharpe units, and would pass if the effective family count were 27 rather than 44. My grouping was
+already generous — collapsing twenty OBV variants into one — so 44 is a defensible floor, not a
+conservative ceiling. A stricter grouping that also merged, say, all breakout-flavoured families could
+plausibly reach the high twenties.
+
+**So the honest statement is: whether the board's best result clears depends on a judgement call about
+how to count families, and it sits close enough to the line that the judgement matters.** That is a
+materially different position from "indistinguishable from noise", and it is the correct one.
+
+## QUEUE
+
+1. **The user's decision is unchanged but better specified.** If a hurdle joins RATCHET v2, it should
+   be computed on **families, not records**, and the family map should live in the ledger so the count
+   is not re-litigated each time.
+2. **Stop adding OBV-divergence variants.** Twenty is already a quarter of the board and each new one
+   raises the hurdle for all the others while adding almost no independent information.
+3. **The cheapest way to strengthen any candidate is now a genuinely unrelated mechanism**, because it
+   raises N by one while the twenty-first OBV variant raises it by one for no new information.
+4. Per-trade returns still need storing for candidates so the full DSR's skew/kurtosis terms can be
+   computed rather than omitted.
+
+## SOURCES
+- Harvey, Liu & Zhu, *…and the Cross-Section of Expected Returns* — https://www.nber.org/system/files/working_papers/w20592/w20592.pdf
+- Harvey & Liu, *False (and Missed) Discoveries in Financial Economics* (J. Finance 2020) — https://people.duke.edu/~charvey/Research/Published_Papers/P143_False_and_missed.pdf
+- Harvey, *Backtesting* (CME) — https://www.cmegroup.com/education/files/backtesting.pdf
+- *An Evaluation of Alternative Multiple Testing Methods for Finance Applications* — https://www.fdpinstitute.org/resources/FDP%203.0/2024-Q2/Topics%20in%20Financial%20Data%20Science/9.3%20An%20Evaluation%20of%20Alternative%20Multiple%20Testing%20Methods.pdf
