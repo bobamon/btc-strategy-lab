@@ -1329,3 +1329,134 @@ now stated in the code rather than silently true.
   engine deadlock broken earlier and a run been banked off v1, four of these six defects
   (17.1, 17.3, 17.4, 17.6) would have silently shaped its numbers.
 - `US30` depth, `p`, `ρ`, and the direction contradiction are all untouched and unchanged.
+
+---
+
+## ██ FINDING 18 — THE PADDING AND THE CAP ARE IN DIFFERENT UNITS, AND THE PADDING WAS EATING 62–78% OF THE ENTIRE RISK BUDGET
+
+**Tick #9, 2026-09-06. Zero credits, no backtest, no engine call.** This is a second defect report
+against the implementation, found by carrying tick #8's own audit one step further: FINDING 17.5 fixed
+the max-stop **cap** per instrument and never asked what units the **padding** was in.
+
+### THE DEFECT
+
+v2 computes the two halves of the stop-width gate in incompatible units:
+
+```
+padNow      = close * stopPad / 100        // stopPad = 0.05  -> a PERCENTAGE of price
+maxStopPts  = isYM ? maxStopYM : maxStopNQ  // 20 / 30         -> ABSOLUTE index points
+projRlong   = (close - brkLvlLong) + padNow
+stopOKlong  = projRlong <= maxStopPts
+```
+
+The gate therefore has only `maxStopPts - padNow` points of room for the thing it is supposed to be
+measuring — the distance from the entry close to the level it just broke.
+
+### THE ARITHMETIC, ON HIS OWN SCREEN PRICES
+
+Both price levels below are **read off his own charts in the committed transcripts**, not assumed:
+
+> `[03:06]` "you see **24, 9, 5, 4.5**. This 0.5 and stuff is once again still the ticks."  (`4.` NQ)
+>
+> `[07:23]` "It's **$46,942**. It's not 42.25.5.5. All this type of stuff. No, it is whole numbers."  (`4.` YM)
+
+| | price (source) | pad @ 0.05% | cap (v2) | pad as % of cap | pts left for entry→level |
+|---|---|---|---|---|---|
+| **NQ** | 24,954.50 | **12.48 pts** | 20 | **62.4%** | **7.52** |
+| **YM** | 46,942 | **23.47 pts** | 30 | **78.2%** | **6.53** |
+
+**`useMaxStop` is ON by default.** So v2 was silently rejecting every break whose close sat more than
+about seven points beyond the level it had just broken — on a system whose entire published stop is
+20–25 points.
+
+### THE PART THAT MAKES IT WORSE THAN A BAD DEFAULT — THE GATE HAS AN EXPIRY DATE
+
+The pad scales with price; the cap does not. When `padNow >= maxStopPts` the gate is
+**unsatisfiable at any distance** — `projR >= padNow >= cap`, so no setup can pass even if the close
+sits exactly on the level. That threshold is:
+
+| | pad ≥ cap at price | where the index was in the source |
+|---|---|---|
+| NQ, cap 20 | **40,000** | 24,954.50 — already 62% of the way there |
+| NQ, cap 25 | 50,000 | |
+| YM, cap 30 | **60,000** | 46,942 — already 78% of the way there |
+
+A percentage pad measured against a fixed point cap is a gate that tightens every year the index
+rises, with no mechanism anywhere in the file to notice it happening.
+
+### WHY THE PAD SHOULD NEVER HAVE BEEN A PERCENTAGE
+
+**Nothing in the source states a padding distance at all.** What it states is a *position*:
+
+> `[05:43]` "We can have our stop loss below / `[05:46]` Where it would come back to retest"  (`7.`)
+>
+> `[00:15]` "our stop loss just needs to simply **start just below** that support" / `[00:20]` "That's a
+> 25 point stop loss, which is solid."  (`11.`)
+
+The pad is the word **"just"** — and in v2 that word was worth 12.5 points on NQ, i.e. **half of the
+entire 25-point stop the very same sentence describes**. The one padding quantity the source actually
+defines is the tick:
+
+> `[02:06]` "A tick when we're talking about Nasdaq is a **0.25 increment**. There [are] four ticks in
+> one point."  ·  `[07:07]` "there's no decimal places on YM... **one tick equals one point** on YM"  (`4.`)
+
+**v3 makes the pad an input in ticks, defaulting to one tick** (0.25 pts on NQ = 1.0% of the cap;
+1 pt on YM = 3.3%). This is labelled in the code as the **minimal source-expressible reading of "just
+below", an interpretation and not a stated rule** — the same treatment FINDING 17.6 gave the trail
+rule. The % mode is retained so v1/v2 behaviour stays reproducible for diffing, exactly as `touchMode`
+retains v1's counting.
+
+### A SECOND, INDEPENDENT DEFECT IN THE SAME GATE — THE NQ CAP CAME FROM THE WEAKER SOURCE
+
+`maxStopNQ = 20` traces to module 4 `[04:09]` — **Luca describing** what Mamba uses, and this file's own
+header already flags module 4 as the single Luca-sourced exception it draws on. Module 11 is **Mamba
+demonstrating**:
+
+> `[00:20]` "That's a **25 point stop loss, which is solid**." / `[00:23]` "That's actually a really good
+> number." · `[01:43]` "And we have a **25 point stop**." · `[06:50]` "Yeah, we had a **20 point stop**."
+> · `[01:36-01:37]` "**64 points.** No, my account's gone if I do that."  (`11.`)
+
+**A 20-point cap rejects the exact worked example module 11 is built around.** v2's trail-mode fix
+already set this file's precedent for a source that supports several readings — *default to the one he
+demonstrates rather than the one he describes* — so **v3 moves the NQ cap default 20 → 25**. The source
+brackets the acceptable stop at **20–25 and refuses 64**; it does not pin a single number, and the input
+is where that ambiguity belongs. **YM's 30 is unchanged** and is now flagged in its tooltip as
+single-sourced and Luca-relayed: module 11 contains no YM worked example, so there is no demonstrated
+number to prefer over it.
+
+### A THIRD, MINOR ONE — THE PAD FORMULA WAS WRITTEN TWICE
+
+The projection used `padNow`; the trade-open block recomputed `close * stopPad / 100` inline. Two copies
+of one rule that any future edit could silently desynchronise. v3 has one definition.
+
+### THE CONSEQUENCE FOR TICK #8's QUEUED MEASUREMENT — IT WOULD HAVE BEEN UNINTERPRETABLE
+
+Tick #8 queued a live-chart observation as queue item 1, warning that the corrected touch counter
+**may take the signal count to zero** (HARD LESSON 8's tell) and instrumenting both touch counts so the
+chart would settle it.
+
+**That measurement was not yet decisive, and this finding is why.** v2 carried *two* independent gates
+capable of producing zero signals — the corrected touch counter and a stop-width gate with 6–8 points
+of room — and only one of them was instrumented. A zero-signal chart could not have been attributed to
+either. v3 therefore adds a **Stop budget** dashboard row and three data-window plots (`Pad (pts)`,
+`Pad as % of max stop`, `Stop budget left (pts)`), including an explicit **"PAD ≥ CAP — no setup can
+ever pass"** state, so the two causes are separable on the first chart rather than confounded on it.
+
+### WHAT FINDING 18 DOES NOT ESTABLISH
+
+- **No number here came from a run.** No `runId` exists for this workstream and none was created. The
+  table above is arithmetic on the file's own defaults and two prices quoted in the transcripts — it is
+  not a measurement of how many signals the gate actually removed.
+- **How often the gate actually binds is still unmeasured**, because that needs the distribution of
+  (entry close − broken level) on a real chart. What is established is the *budget*, not the *hit rate*.
+- **Whether one tick is the right pad.** It is the minimal source-expressible reading, offered as an
+  input precisely because the source does not state one. It is not a measured optimum and must not be
+  quoted as one.
+- **Whether v2 or v3 compiles.** Still unknown, still no Pine compiler in this session — and this tick
+  **could not close tick #8's queue item 2** for a reason worth recording: `tradingview.com` is blocked
+  by this environment's network egress proxy, so the Pine v6 language reference could not be reached and
+  a syntax audit would have been memory against memory. **No compile-error claim is made here.** v3 adds
+  one new built-in, `syminfo.mintick`, and otherwise reuses constructs already in the file.
+- **No past conclusion changes.** This workstream has still never banked a result. As in tick #8, that is
+  luck rather than process: had a run been banked off v2, this gate would have shaped its trade count
+  invisibly, and the resulting sample would have been blamed on the touch counter.

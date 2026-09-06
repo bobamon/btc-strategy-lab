@@ -834,3 +834,112 @@ inventing them would push a fabricated number into the rolling-mean target.
 external blockers are unchanged and outside this project's control. What changed is internal: the one
 artefact this workstream can actually ship had six defects, one of which inverted the meaning of its level
 gate, and none had been looked for in eight ticks. Zero results recorded, still correctly.
+
+---
+
+# ██ TICK #9, 2026-09-06 — THE STOP-WIDTH GATE HAD 7 POINTS OF ROOM, AND WOULD HAVE BEEN BLAMED ON THE TOUCH COUNTER
+
+**Zero credits. No backtest, no `plan_backtest_window`, no engine call of any kind.** Full detail in
+`SYSTEM.md` FINDING 18.
+
+## WHAT THIS TICK SET OUT TO DO, AND WHY IT DID SOMETHING ELSE
+
+Queue item 2 from tick #8 was **"v2 has never been compiled."** The honest version of that with no Pine
+compiler present is a static language-conformance audit — but only if the claims can be checked against
+the Pine v6 reference rather than recalled. **`tradingview.com` is blocked by this environment's network
+egress proxy**, so that audit would have been memory arguing with memory. It was abandoned rather than
+faked, and **queue item 2 remains open**. No compile-error claim appears anywhere in this tick.
+
+What was done instead is checkable without any external resource: arithmetic on the file's own defaults,
+against two prices quoted in the committed transcripts.
+
+## THE HEADLINE — THE PAD IS A PERCENTAGE, THE CAP IS POINTS, AND THE PAD WAS WINNING
+
+Tick #8's FINDING 17.5 fixed the max-stop **cap** per instrument. Nobody asked what units the **padding**
+was in. They do not match:
+
+| | price, from his own screen | pad @ 0.05% | cap (v2) | pad as % of cap | left for entry→level |
+|---|---|---|---|---|---|
+| **NQ** | 24,954.50 (`4.` 03:06) | **12.48 pts** | 20 | **62.4%** | **7.5 pts** |
+| **YM** | 46,942 (`4.` 07:23) | **23.47 pts** | 30 | **78.2%** | **6.5 pts** |
+
+`useMaxStop` is **ON by default**, so v2 silently rejected any break whose close sat more than ~7 points
+past the level it had just broken — inside a system whose entire published stop is 20–25 points. The pad
+is the word *"just"* in *"just below that support"* (`11.` 00:15), and on NQ it was consuming **half of
+the 25-point stop that same sentence describes**.
+
+**And it gets tighter every year.** The pad scales with price, the cap does not, so at **NQ 40,000** and
+**YM 60,000** the pad alone equals the cap and the gate becomes unsatisfiable at any distance. The
+indicator had a built-in expiry date and nothing in it would have noticed.
+
+## THE SECOND DEFECT IN THE SAME GATE — THE NQ CAP REJECTED HIS OWN WORKED EXAMPLE
+
+`maxStopNQ = 20` comes from module 4 [04:09], which is **Luca describing** Mamba. Module 11 is **Mamba
+demonstrating**: *"That's a 25 point stop loss, which is solid. That's actually a really good number"*
+[00:20-00:23], *"we have a 25 point stop"* [01:43], a 20-pt stop at [06:50], and 64 refused [01:36].
+A 20-pt cap **rejects the exact setup module 11 teaches**. v2's own trail-mode fix set this file's
+precedent — default to what he *demonstrates*, not what he *describes* — so **v3 moves the NQ default
+20 → 25**, with the 20–25 bracket recorded in the tooltip. **YM's 30 is unchanged** and now flagged as
+single-sourced and Luca-relayed; module 11 has no YM example, so there is nothing to prefer over it.
+
+## THE CONSEQUENCE THAT MATTERS MOST — TICK #8's QUEUED MEASUREMENT WAS NOT YET DECISIVE
+
+Tick #8 warned that its corrected touch counter **may take the signal count to zero** and instrumented
+both touch counts so one live chart would settle it. **v2 carried two independent gates capable of
+producing zero signals, and only one was instrumented.** A zero-signal chart could not have been
+attributed to either — and the touch counter, being the tick's headline, would have taken the blame.
+
+v3 closes that by instrumenting the other one: a **Stop budget** dashboard row (pad in points, pad as a
+% of the cap, points remaining, and an explicit **"PAD ≥ CAP — no setup can ever pass"** state) plus
+three data-window plots. The two causes are now separable on the first chart instead of confounded on it.
+
+## WHAT v3 CHANGED
+
+1. **Padding is now an input in ticks**, defaulting to one tick — 0.25 pts on NQ, 1 pt on YM (`4.` 02:06 /
+   07:07), the only padding quantity the source actually defines. Labelled in code as the *minimal
+   source-expressible reading of "just below" — an interpretation, not a stated rule*. % mode retained for
+   reproducing v1/v2, exactly as `touchMode` retains v1's counting.
+2. **NQ cap default 20 → 25**, on the demonstrated-over-described precedent. YM unchanged, now flagged.
+3. **One definition of the pad.** v2 wrote the formula twice — once as `padNow`, once inline in the
+   trade-open block — so the two could silently diverge.
+4. **Stop-budget instrumentation** on the dashboard and in the data window.
+
+## WHAT THIS TICK DID NOT ESTABLISH
+
+- **No number came from a run.** No `runId` exists for this workstream and none was created. The table
+  above is arithmetic on the file's own defaults and two transcript-quoted prices — **the budget, not the
+  hit rate.** How often the gate actually binds needs a real chart and is unmeasured.
+- **Whether one tick is the right pad.** It is the minimal source-expressible reading, exposed as an input
+  precisely because the source states none. It is not a measured optimum and must not be quoted as one.
+- **Whether v2 or v3 compiles — queue item 2 is still open**, now with a recorded reason (egress block).
+  v3 adds one new built-in, `syminfo.mintick`; everything else reuses constructs already in the file.
+- **No past conclusion changes.** This workstream has still never banked a result. As in tick #8 that is
+  luck, not process: a run banked off v2 would have had its trade count shaped by this gate invisibly.
+- `US30` depth, `p`, `ρ`, the direction contradiction and the rolling-mean-target predictions are all
+  unchanged and unrun.
+
+## QUEUE
+
+1. **The first live chart now settles TWO questions, not one, and can tell them apart.** Read the touch
+   counts (tick #8) and the Stop budget row (this tick) off the same dashboard. If signals are zero, the
+   dashboard now says which gate did it.
+2. **v2/v3 have never been compiled** — unchanged, and blocked here by egress, not just by the absence of a
+   compiler. A session with TradingView access, or one that can reach the Pine v6 reference, closes it.
+3. **The pad is now a pre-registered one-dimensional test** (1 tick vs the old 0.05%), alongside the three
+   trail modes, rolling-mean vs fixed target, and window 6 vs ~20.
+4. **Audit the remaining gates for the same class of defect.** Two ticks have now each found a gate whose
+   *units or counting basis* were wrong rather than whose threshold was mistuned. `touchTol` (0.10% of
+   price = 25 pts on NQ, 47 on YM) is the obvious next suspect and has never been examined.
+5. **The symbol hunt stays closed** (tick #7). **Do not run a Legacy Forex backtest on trader-dev under any
+   circumstances** (tick #2, FINDING 4).
+6. `US30` 15m/5m depth on `backtest-lab` — still needs a session with that connector.
+7. **Forward-testing still needs no history** and is still the only honest route available today.
+
+## STATUS LINE
+
+**LEGACY FOREX: STILL BLOCKED ON THE ENGINE — AND THE DELIVERABLE'S SECOND SILENT GATE IS NOW VISIBLE.**
+External blockers unchanged. What changed internally: the stop-width gate had 6–8 points of room on a
+20–25 point system because its padding and its cap were in different units, it would have become
+impossible outright at NQ 40,000, and its NQ cap rejected the worked example the source is built around.
+None of it had been looked for in nine ticks, and it would have been misattributed to tick #8's headline
+correction the first time anyone loaded the chart. Zero results recorded, still correctly.

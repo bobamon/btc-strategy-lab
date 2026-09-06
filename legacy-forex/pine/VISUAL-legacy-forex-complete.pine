@@ -99,6 +99,42 @@
 //  5. ONE MAX-STOP FOR TWO INSTRUMENTS. "Mamba uses 20 points on NASDAQ, let's say 30 points on
 //     YM" (4. 04:09 — Luca quoting Mamba). 30 points is ~0.14% of NQ and ~0.07% of YM: the same
 //     number is a materially different gate. v2 resolves per instrument and shows which is live.
+//
+// ── WHAT v3 CHANGED, AND WHY (tick #9 — SYSTEM.md FINDING 18) ─────────────────────────────────
+// v2 fixed the max-stop CAP per instrument and left the PADDING in different units from the cap.
+// The padding is a percentage of price; the cap is absolute index points. At the price levels he
+// is actually trading — both of which are read off his own screen in the committed transcripts —
+// the padding alone eats most of the entire risk budget before any structural distance counts:
+//
+//   NQ 24,954.50 (4. 03:06)   pad 0.05% = 12.48 pts = 62.4% of the 20-pt cap  -> 7.5 pts left
+//   YM 46,942    (4. 07:23)   pad 0.05% = 23.47 pts = 78.2% of the 30-pt cap  -> 6.5 pts left
+//
+// So `useMaxStop` (ON by default) was rejecting any break whose close sat more than ~7 points
+// beyond the level it had just broken. And because the pad SCALES WITH PRICE while the cap does
+// not, the gate becomes mathematically unsatisfiable — pad alone >= cap, so no setup can pass at
+// any distance — at NQ 40,000 and YM 60,000. The indicator had a built-in expiry date.
+//
+//  6. PADDING IS NOW IN HIS UNITS, NOT PERCENT. Nothing in the source states a padding distance:
+//     "our stop loss is below where it would come back to retest" (7. 05:43), "just needs to
+//     simply start just below that support" (11. 00:15). The pad is the word "just", and at NQ it
+//     was consuming half of the 25-point stop that whole sentence describes. The one padding
+//     quantity the source DOES define is the tick — 0.25 pts on NQ, 1 pt on YM (4. 02:06 / 07:07)
+//     — so the default is now one tick (1.0% and 3.3% of the respective caps). This is the
+//     minimal source-expressible reading of "just below", labelled as an interpretation, not a
+//     stated rule. The % mode is retained so v1/v2 behaviour stays reproducible for diffing,
+//     exactly as `touchMode` retains v1's counting.
+//  7. THE NQ CAP DEFAULT FOLLOWED THE WEAKER SOURCE. 20 pts comes from module 4 [04:09], which is
+//     LUCA DESCRIBING what Mamba uses. Module 11 is Mamba DEMONSTRATING: "That's a 25 point stop
+//     loss, which is solid. That's actually a really good number" [00:20-00:23], "we have a 25
+//     point stop" [01:43] — and a 20-pt stop at [06:50]. A 20-pt cap therefore REJECTS the exact
+//     worked example module 11 teaches. This file already set a precedent for this exact kind of
+//     ambiguity in v2's trail-mode fix — default to the one he DEMONSTRATES rather than describes
+//     — so the NQ cap default moves 20 -> 25. The source brackets it at 20-25 and refuses 64
+//     ("my account's gone", 11. 01:26); it does not pin it, and the input is where that lives.
+//     YM's 30 is unchanged and remains SINGLE-SOURCED from Luca — module 11 has no YM example.
+//  8. THE PAD FORMULA WAS WRITTEN TWICE. The projection used `padNow` and the trade-open block
+//     recomputed the same expression inline, so any change to one silently diverged from the
+//     other. One definition now.
 // ═══════════════════════════════════════════════════════════════════════════════════════════════
 
 indicator("Legacy Forex Trader — Complete Visualiser", overlay=true, max_lines_count=500, max_labels_count=500, max_boxes_count=500)
@@ -128,12 +164,16 @@ volLen   = input.int(20,    "Volume average length",               group=gVol)
 volMult  = input.float(1.0, "Volume must exceed avg ×",            group=gVol)
 
 gRisk = "Risk"
-stopPad   = input.float(0.05, "Stop padding beyond level, % of price", group=gRisk)
+padMode   = input.string("Ticks beyond the level (v3 default)", "Stop padding unit", options=["Ticks beyond the level (v3 default)","% of price (v1/v2 behaviour)"], group=gRisk,
+     tooltip="v3: the source never states a padding distance — it says the stop goes 'just below that support' (11. 00:15). The pad is the word 'just'. In % mode it was 12.5 pts on NQ and 23.5 pts on YM, i.e. most of the whole max-stop budget. The tick is the one padding quantity module 4 actually defines, so ticks is the default. % mode is kept for reproducing v1/v2, not for use.")
+padTicks  = input.float(1.0,  "Padding, ticks beyond the level", group=gRisk, minval=0,
+     tooltip="1 tick = 0.25 pts on NQ, 1 pt on YM (4. 02:06 / 07:07). This is an INTERPRETATION of 'just below', not a stated rule — vary it in a forward test.")
+stopPad   = input.float(0.05, "Padding, % of price (v1/v2 behaviour only)", group=gRisk)
 useMaxStop= input.bool(true,  "Reject setup if stop too wide (11. 01:26)", group=gRisk)
 instMode  = input.string("Auto from ticker", "Instrument", options=["Auto from ticker","NQ / NAS100","YM / US30"], group=gRisk,
      tooltip="Auto matches the ticker string. Per SYSTEM.md FINDING 15 a ticker string is never trusted silently, so the resolved instrument is printed on the dashboard — check it by eye.")
-maxStopNQ = input.float(20.0, "Max stop, NQ / NAS100 (index points)", group=gRisk, tooltip="'Mamba uses 20 points on NASDAQ' (4. 04:09). His own module-11 charts show 25 pts ('solid', 00:20) and 20 pts (06:50), and he refuses 64 ('my account's gone', 01:26).")
-maxStopYM = input.float(30.0, "Max stop, YM / US30 (index points)", group=gRisk, tooltip="'let's say 30 points on YM' (4. 04:09).")
+maxStopNQ = input.float(25.0, "Max stop, NQ / NAS100 (index points)", group=gRisk, tooltip="v3: 20 -> 25. 20 is Luca DESCRIBING Mamba (4. 04:09); module 11 is Mamba DEMONSTRATING — 'a 25 point stop loss, which is solid... actually a really good number' (00:20-00:23), 'we have a 25 point stop' (01:43), and 20 pts at (06:50). A 20-pt cap rejects his own worked example. Same demonstrated-over-described precedent as v2's trail-mode fix. The source brackets 20-25 and refuses 64 (01:26); it does not pin it.")
+maxStopYM = input.float(30.0, "Max stop, YM / US30 (index points)", group=gRisk, tooltip="'let's say 30 points on YM' (4. 04:09). SINGLE-SOURCED and Luca-relayed — module 11 has no YM worked example, so unlike NQ there is no demonstrated number to prefer. Unchanged in v3.")
 beAtR     = input.float(1.0,  "Move to break-even at R",               group=gRisk, tooltip="'at worst, at the least, please put your stops to break even at a one to one point five at the worst' (11. 08:02). 1.0 is the stated trigger; 1.5 is the stated latest.")
 lockAtR   = input.float(2.0,  "Start locking profit at R",             group=gRisk)
 trailMode = input.string("Freeze at +1R (what he demonstrates)", "Trail rule above break-even", options=["Break-even only (11. 09:01)","Freeze at +1R (what he demonstrates)","Step every +1R (11. 02:13)"], group=gRisk,
@@ -310,7 +350,14 @@ isYM  = instMode == "YM / US30" or (instMode == "Auto from ticker" and autoYM)
 instNm= isYM ? "YM / US30" : "NQ / NAS100"
 maxStopPts = isYM ? maxStopYM : maxStopNQ
 
-padNow      = close * stopPad / 100
+// v3: ONE definition of the pad, in the cap's own units by default. v2 wrote this expression
+// twice — here and inline in the trade-open block — so the two could silently diverge.
+// In % mode the pad is 12.48 pts at NQ 24,954.50 and 23.47 pts at YM 46,942 (both read off his
+// own screen, 4. 03:06 / 07:23), i.e. 62% and 78% of the entire max-stop budget before any
+// structural distance is counted, rising with price until pad >= cap makes the gate impossible.
+padNow      = padMode == "% of price (v1/v2 behaviour)" ? close * stopPad / 100 : padTicks * syminfo.mintick
+padPct      = maxStopPts <= 0 ? na : 100 * padNow / maxStopPts   // share of the cap the pad eats
+stopBudget  = maxStopPts - padNow                                // pts left for (entry - level)
 projStopL   = na(brkLvlLong)  ? na : brkLvlLong  - padNow   // long stops below the broken level
 projStopS   = na(brkLvlShort) ? na : brkLvlShort + padNow   // short stops above the broken level
 projRlong   = na(projStopL) ? na : math.abs(close - projStopL)
@@ -386,7 +433,7 @@ if dir == 0 and (goLong or goShort)
     dir     := goLong ? 1 : -1
     entryPx := close
     lvl      = goLong ? brkLvlLong : brkLvlShort
-    pad      = close * stopPad / 100
+    pad      = padNow                             // v3: one definition, not a second copy of the formula
     stopPx  := goLong ? lvl - pad : lvl + pad     // "our stop loss is below where it would come
                                                   //  back to retest" (7. 05:43) — the broken level,
                                                   //  never the far one
@@ -429,7 +476,7 @@ bgcolor(inSess and bearStruct     ? color.new(color.red, 94) : na,   title="Bear
 barcolor(useVol and not volOK ? color.new(color.gray, 50) : na,      title="No volume")
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────────────────────
-var table d = table.new(position.top_right, 3, 15, border_width=1, frame_width=1, frame_color=color.gray)
+var table d = table.new(position.top_right, 3, 16, border_width=1, frame_width=1, frame_color=color.gray)
 f_row(t, r, k, ok, v) =>
     table.cell(t, 0, r, k, text_color=color.white,  text_size=size.small, bgcolor=color.new(color.black,20), text_halign=text.align_left)
     table.cell(t, 1, r, ok ? "✔" : "✖", text_color=ok ? color.lime : color.red, text_size=size.small, bgcolor=color.new(color.black,20))
@@ -461,11 +508,18 @@ if showDash and barstate.islast
     projR    = bullStruct ? projRlong : bearStruct ? projRshort : na
     stopOKnow= bullStruct ? stopOKlong : bearStruct ? stopOKshort : true
     f_row(d, 10, "Stop width", stopOKnow, na(projR) ? "—" : str.tostring(projR, "#.#") + " pts  (max " + str.tostring(maxStopPts, "#") + " — he refused 64)")
-    f_row(d, 11, "Target",    true,      (useAdaptR ? (windowFull ? "1:" + str.tostring(rTargetUse, "#") + "  from mean " + str.tostring(avgAchR, "#.##") + "R of last " + str.tostring(cntR) + " (10._USING_DATA)"
+    // v3 instrumentation: the pad and the cap were in different units, and the pad was eating most
+    // of the budget. This row makes that visible so a zero-signal chart can be attributed to the
+    // right gate instead of being confused with v2's touch-counting correction.
+    f_row(d, 11, "Stop budget", stopBudget > 0,
+         str.tostring(padNow, "#.##") + " pts pad (" + str.tostring(padPct, "#") + "% of cap)  →  "
+         + (stopBudget > 0 ? str.tostring(stopBudget, "#.#") + " pts left for entry-to-level"
+                           : "PAD ≥ CAP — no setup can ever pass"))
+    f_row(d, 12, "Target",    true,      (useAdaptR ? (windowFull ? "1:" + str.tostring(rTargetUse, "#") + "  from mean " + str.tostring(avgAchR, "#.##") + "R of last " + str.tostring(cntR) + " (10._USING_DATA)"
                                                                   : "1:" + str.tostring(rTargetUse, "#") + "  FALLBACK — window " + str.tostring(cntR) + "/" + str.tostring(rrWindow) + " trades")
                                                     : "1:" + str.tostring(rTargetUse, "#") + "  fixed (adaptive rule off)"))
-    f_row(d, 12, "Trail rule", true,      trailMode + "   (source is ambiguous — see header)")
-    f_row(d, 13, "Trades today", underCap, str.tostring(tradesToday) + " / " + str.tostring(maxTrades) + "  (cap counts across NQ+YM)")
+    f_row(d, 13, "Trail rule", true,      trailMode + "   (source is ambiguous — see header)")
+    f_row(d, 14, "Trades today", underCap, str.tostring(tradesToday) + " / " + str.tostring(maxTrades) + "  (cap counts across NQ+YM)")
 
     // name the FIRST unmet condition, in his own order, so the dashboard says what is blocking
     blocker = not inSess        ? "NO TRADE — outside New York session"
@@ -478,9 +532,9 @@ if showDash and barstate.islast
       : "WAIT"
     verdict = goLong ? "▲ LONG NOW" : goShort ? "▼ SHORT NOW" : dir != 0 ? ("HOLDING  " + (na(curR)?"":str.tostring(curR,"#.##") + "R  → 1:" + str.tostring(tgtR,"#"))) : blocker
     vc = goLong ? color.green : goShort ? color.red : dir != 0 ? color.blue : color.new(color.gray,40)
-    table.cell(d, 0, 14, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
-    table.cell(d, 1, 14, "", bgcolor=vc)
-    table.cell(d, 2, 14, verdict, text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+    table.cell(d, 0, 15, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+    table.cell(d, 1, 15, "", bgcolor=vc)
+    table.cell(d, 2, 15, verdict, text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
 
 alertcondition(goLong,  "Legacy LONG",  "Legacy Forex: LONG — structure bullish, resistance broken, volume present")
 alertcondition(goShort, "Legacy SHORT", "Legacy Forex: SHORT — structure bearish, support broken, volume present")
@@ -496,3 +550,7 @@ plot(resDist,       "ResTouches distinct", display=display.data_window)
 plot(resRaw,        "ResTouches bars-in-band (v1)", display=display.data_window)
 plot(supDist,       "SupTouches distinct", display=display.data_window)
 plot(supRaw,        "SupTouches bars-in-band (v1)", display=display.data_window)
+// v3 instrumentation — separates the stop-width gate from the touch gate as a zero-signal cause
+plot(padNow,        "Pad (pts)",              display=display.data_window)
+plot(padPct,        "Pad as % of max stop",   display=display.data_window)
+plot(stopBudget,    "Stop budget left (pts)", display=display.data_window)
