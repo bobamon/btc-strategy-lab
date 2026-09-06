@@ -3947,9 +3947,59 @@ const DATA = [
       "verifiedAt": "2026-09-06T03:13:59Z"
     },
     "verdict": "UNTESTABLE AT THE SAMPLE FLOOR, not a kill-rule failure. 1 trade over the full 2022-01-01 to 2024-06-08 window (85,655 bars) -- three orders of magnitude below the ~60-350 workable band and far under LESSON 12's ~30-trade floor for quoting any ratio. profitFactor is mathematically infinite (zero losing trades) and unquotable, not evidence of an edge. Diagnosed cause: the structural reward:risk floor (100-bar-high target must sit at least as far above entry as the 20-bar-low stop sits below it) is starved by construction -- a fresh 20-bar breakout is usually already close to its own 100-bar high in a sustained uptrend, so remaining upside room is small almost every time the entry itself fires, while the risk distance (open the whole prior 20 bars) is comparatively large. The two-part COG arm condition (trough-zone AND turn-up) was not the bottleneck. ta.cog itself is not ruled out by this result; the specific reward-geometry floor is. No H2 run: only one credit was authorized this cycle (250-500 band) and it is spent."
+  },
+  {
+    "id": "attack95-cog-trough-turn-widetarget-h1",
+    "name": "Attack 95: COG trough-turn breakout LONG, wide target retry (bare, new mechanism) -- pre-2024 half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack95-cog-trough-turn-breakout-long-widetarget.pine",
+    "description": "Queue item 1 on Attack 94 (COG trough-turn breakout long, untestable at n=1): retry with the reward-geometry floor fixed, before concluding anything about ta.cog. Byte-identical to Attack 94 except targetLookback: 100 -> 300 bars. Attack 94 diagnosed that its structural reward:risk floor (a 100-bar-high target must sit at least as far above entry as the 20-bar-low stop sits below it) was starved by construction -- a fresh 20-bar breakout is often already close to its own 100-bar high in a sustained uptrend. ta.highest(high, N)[1] is monotonically non-decreasing in N, so widening targetLookback to 300 can only raise or hold the target level, never lower it, and never excludes a trade that already passed at 100 -- it only ever admits trades that a wider, still-unbroken older high newly qualifies.",
+    "metrics": {
+      "netProfitPct": 5.07463128,
+      "profitFactor": Infinity,
+      "maxDrawdownPct": 2.06659368,
+      "totalTrades": 2,
+      "winningTrades": 2,
+      "losingTrades": 0,
+      "winRatePct": 100.0,
+      "avgTradePct": 2.53731564,
+      "avgWinningTrade": 253.731564,
+      "avgLosingTrade": 0,
+      "ratioAvgWinLoss": 0,
+      "largestWin": 456.816893249999,
+      "largestLoss": 0,
+      "avgBarsInTrade": 193,
+      "avgBarsWinning": 193,
+      "avgBarsLosing": 0,
+      "sharpeRatio": 0.73700646,
+      "sortinoRatio": 0.04895268,
+      "commissionPaid": 20.279872,
+      "grossProfit": 507.463128,
+      "grossLoss": 0,
+      "longTrades": 2,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1TEM3R3Z8NJTEYXBZR1TSXY",
+      "strategyId": "01M1TEM3Y2RTPH0MGAHYHH5FCT",
+      "resultId": "01M1TEM3R30M2EH5G846EZDMEN",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1TEM3R30M2EH5G846EZDMEN",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-06T04:11:31Z"
+    },
+    "verdict": "STILL UNTESTABLE AT THE SAMPLE FLOOR, per the pre-registered outcome tree. Widening targetLookback 100->300 moved the trade count from 1 to 2 (both winners) over the same 85,655-bar H1 window -- the reward-geometry fix added exactly one trade and profit factor remains mathematically undefined (zero losers), unquotable under LESSON 12's ~30-trade floor by three orders of magnitude. This settles the diagnosis question Attack 94 could not: the rrOk reward floor was NOT the dominant bottleneck -- fixing it all but proved so (a monotonic, can-only-help change) and the count barely moved. The binding constraint is the armEvent/priceBreak population itself (troughZone AND cogTurnUp AND priceBreak-within-armBars), which is simply very rare on BTC 15m. No H2 run: one credit was authorized this cycle (250-500 band) and it is spent; running H2 on a 2-trade H1 would add no information per the standing kill-rule discipline."
   }
 ];
-const BUILT = "2026-09-06 03:14";
+const BUILT = "2026-09-06 04:13";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

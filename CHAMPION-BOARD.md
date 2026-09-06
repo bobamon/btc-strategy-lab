@@ -9081,3 +9081,122 @@ is now consumed, alongside `ta.linreg` (91/92) and `ta.supertrend` (89/90).
 5. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
 6. **This session cannot continue the new-engine cross-sectional track (Attacks 84-86)** — no
    `backtest-lab`/`sweep_backtest` tool is available here, unaffected by this cycle.
+
+---
+
+# ATTACK 95 — QUEUE ITEM 1 ON ATTACK 94: COG RETRY WITH THE REWARD-GEOMETRY FLOOR FIXED. STILL UNTESTABLE — THE FIX BARELY MOVED THE COUNT, WHICH IS ITSELF THE FINDING.
+
+The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") nearly 60
+attacks stale, instructing "continue numbering after 37." **The docs override it, again**, per the
+prompt's own instruction: Attack 37 closed on cost at Attack 41; the OBV-divergence stack (66/68/82/83) is
+CLOSED at three terms; SuperTrend (89/90), linreg-channel (91/92) and Williams A/D (93) are all discarded.
+Attack 94 (COG trough-turn breakout long) came back UNTESTABLE at n=1 with an explicit queue item 1: retry
+with the reward-geometry floor fixed before concluding anything about `ta.cog`. This cycle is that retry.
+Numbering continues after Attack 94 (git log confirms 94 postdates 93 despite file ordering from a
+parallel-history merge).
+
+## THE FIX
+
+Byte-identical to Attack 94 except `targetLookback`: 100 → 300 bars. `ta.highest(high, N)[1]` is
+monotonically non-decreasing in N — a wider window is a superset of bars, so its max can only be >= a
+narrower window's max. Widening the target lookback can therefore only raise or hold the target level,
+never lower it, and can never exclude a trade that already passed `rrOk` at 100. This was the queue's own
+"first thing to try," chosen over lowering `minRR` (a genuine loosening of selectivity, not a construction
+fix) and over dropping the structural target for a plain R-multiple (which would abandon HARD LESSON 41's
+"target a level, not a multiple" discipline this build was designed to satisfy from the start). Pine:
+`strategies/pine/attack95-cog-trough-turn-breakout-long-widetarget.pine`.
+
+## AUDIT (one line per leg, identical to Attack 94 except the one parameter changed)
+
+R >= 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rawR = close - armedLow`, never clamped. Stop beyond
+STRUCTURE (LESSON 5) — `slPx = armedLow`, the 20-bar swing low frozen at arm time. Each leg separately
+(LESSON 6) — LONG ONLY; short is the standing structural asymmetry, queued alongside Attack 91's, 93's and
+94's shorts. BINDING (E17) — four necessarily-binding terms: `armEvent` (troughZone AND cogTurnUp),
+`priceBreak`-within-`armBars`, `rBig`, `rrOk`. REDUNDANCY (E14) — five independent domains (momentum-state,
+transition-timing, price-structure, risk-geometry, reward-geometry at a 300-bar window versus a 20-bar
+stop), unchanged from Attack 94's decomposition. LATCH IN SEQUENCE (LESSON 8) — `armed`/`armedBar`/
+`armedLow`/`structHigh` set only on the arm bar; `priceBreak` reads a strictly later bar
+(`bar_index > armedBar` enforced); `armBars`=10 plus the sub-`armedLow` invalidation both bound the latch's
+life. CASCADE (HARD LESSON 42/43) — LONG at 100% equity, single entry id "L"; `cascadeRatio` 1,
+`maxCascadeDepth` 1, 2 total rows, 2 unique entries, confirmed. SL/TP FIXED AT ENTRY, no trailing, no
+martingale.
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4)
+
+Attack 94 fired 1 trade at `targetLookback`=100 out of an undecomposed arm+trigger population — the size of
+that population was never itself measured, only that `rrOk` excluded almost everything from it. Since
+`ta.highest(.,300)` is provably >= `ta.highest(.,100)` on every bar, this change could only ADD trades
+relative to Attack 94's 1, never remove it. Registered estimate: still likely UNDER the ~60-350 workable
+band, possibly by a wide margin, possibly still single-digit, because a 300-bar (75-hour) unbroken high is
+a demanding structural bar for BTC's 2022-2024 trend character.
+
+## OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17)
+
+* Trades still under ~30 (LESSON 12's floor) → still UNTESTABLE; the reward-geometry floor is not (or not
+  only) the bottleneck — the armEvent population itself is the binding constraint, and the next retry must
+  loosen `armBars`/`lb` or drop `minRR`, not touch `targetLookback` further.
+* Trades inside ~30-350 and PF above 1.0 → real bare edge at a workable frequency; queue an H2 run.
+* Trades inside ~30-350 and PF at or below 1.0 → DISCARDED by the kill rule; `ta.cog` becomes consumed.
+* A majority win rate with `ratioAvgWinLoss` well below 1.0 → HARD LESSON 53's inverted-payoff shape.
+
+## RESULT — H1 ONLY (credits 480 at `get_credits`, 250-500 tier → one run, pre-2024 half only)
+
+| Metric | Attack 94a (targetLookback=100) | **Attack 95a (targetLookback=300)** |
+|---|---|---|
+| Trades | 1 | **2** |
+| Win rate | 100% (1W/0L) | **100% (2W/0L)** |
+| Net return | +0.50646235% | **+5.07463128%** |
+| Profit factor | undefined (infinite) | **undefined (infinite)** — still zero losers |
+| Max drawdown | 2.06659368% | **2.06659368%** — identical to the cent |
+| Commission paid | $10.02 | **$20.28** |
+| Avg bars in trade | 193 | **193** |
+
+## THE VERDICT — STILL UNTESTABLE, AND THE NON-RESULT IS THE FINDING
+
+**The count moved from 1 to 2.** A monotonic, can-only-help change to the exact term diagnosed as the
+bottleneck added exactly one trade over the same 85,655-bar window. That settles the diagnostic question
+Attack 94 could not answer without a second credit: **the reward-geometry floor (`rrOk`) was not the
+dominant constraint.** Fixing it — provably, since widening the lookback can never remove a trade that
+already qualified — barely moved the needle. The binding constraint is further upstream: the
+`armEvent`/`priceBreak` population itself (`troughZone AND cogTurnUp`, then a same-direction structural
+breakout within 10 bars) is simply very rare on BTC 15m, independent of what the reward floor does with
+whatever few candidates survive it.
+
+**Max drawdown matching to the cent (2.06659368% both runs) confirms this precisely** — the same HARD
+LESSON 31 diagnostic logic (an identical statistic across two runs that changed only one axis pins the
+effect to that axis and nowhere else) here shows the *original* single trade is untouched and the *new*
+trade is small enough, or arrives late enough, not to move the peak-to-trough figure at all. The change
+added one marginal trade at the margin of what `rrOk` was excluding; it did not reach into a larger pool
+of previously-arm-but-unconfirmed setups.
+
+**Two trades is three orders of magnitude short of LESSON 12's ~30-trade floor**, let alone the ~60-350
+workable band. No ratio is quotable. This is not a kill-rule failure (no PF below 1.0 exists to trigger
+it) — it is the same "untestable at the sample floor" verdict as Attack 94 and Attack 86 before it, now
+confirmed to be a frequency problem rather than a reward-geometry problem.
+
+## WHAT THIS SETTLES
+
+**The COG trough-turn construction's bottleneck is the arm+trigger population, not the reward floor.**
+Per Attack 94's own pre-registered tree, the next retry (if COG is pursued further) must loosen `armBars`
+or `lb`, or drop `minRR` outright, rather than touch `targetLookback` again — widening it further from 300
+cannot add much once it already spans a multi-week structural swing. **`ta.cog` is still not ruled out**
+by either result; both untestable outcomes are about this specific arming construction's frequency, not
+about whether COG-trough-turns predict anything.
+
+## QUEUE
+
+1. **A third COG retry is not automatically warranted.** Two consecutive untestable results on the same
+   arm/trigger skeleton is a signal to either (a) loosen the arm/trigger population directly — widen `lb`
+   from 20 toward e.g. 50, or drop `cogMaLen`'s implicit strictness by using a shorter/faster comparison —
+   or (b) spend the fresh-mechanism slot on an untried family instead and leave COG queued at low priority.
+   Recommend (b) given two credits are already sunk on this construction with no edge signal either way.
+2. **Remaining untried indicator families**: `ta.sar`, `ta.cci`, `ta.stoch`, `ta.macd`, `ta.tsi`, `ta.wpr`,
+   `ta.iii`, `ta.wvad`, `ta.percentrank`.
+3. **Attack 83 remains the board's strongest both-halves candidate** (PF 1.61044869/1.15365198 on 88/79
+   trades, DD 11.08%/10.76%), unaffected by this cycle.
+4. **Attack 46 (long) remains a candidate alongside Attack 83**, unaffected by this cycle.
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if that
+   family is revisited before another fresh mechanism.
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+7. **This session cannot continue the new-engine cross-sectional track (Attacks 84-86)** — no
+   `backtest-lab`/`sweep_backtest` tool is available here, unaffected by this cycle.

@@ -1,0 +1,177 @@
+//@version=6
+// BTC ATTACK 95 - QUEUE ITEM 1 ON ATTACK 94: COG TROUGH-TURN RETRY WITH THE REWARD-GEOMETRY FLOOR
+// FIXED. Byte-identical to Attack 94 except targetLookback: 100 -> 300.
+//
+// The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack")
+// nearly 60 attacks stale, instructing "continue numbering after 37." The docs override it, again, per
+// the prompt's own instruction: Attack 37 closed on cost at Attack 41; the OBV-divergence stack
+// (66/68/82/83) is CLOSED at three terms; SuperTrend (89/90), linreg-channel (91/92) and Williams A/D
+// (93) are all discarded. Attack 94 (COG trough-turn breakout long) came back UNTESTABLE at n=1, not
+// discarded, with an explicit queue item 1: retry with the reward-geometry floor fixed, before
+// concluding anything about ta.cog. Numbering continues after Attack 94, the last entry on the board
+// (git log confirms 94 postdates 93 despite file ordering).
+//
+// ==================== WHAT CHANGED, AND WHY IT IS THE FIRST THING TO TRY ====================
+// Attack 94 diagnosed its own failure without spending a second credit: the reward floor (rrOk, a
+// STRUCTURAL TARGET at least as far above entry as the stop is below it) was starved by construction.
+// A fresh 20-bar breakout (structHigh, the entry trigger) is very often ALSO close to or equal to the
+// 100-bar high in a sustained uptrend, because in a genuine uptrend the most recent local high is
+// frequently the highest point of the last several hundred bars too -- leaving near-zero room between
+// entry and a 100-bar-lookback target. ta.highest(high, N)[1] is monotonically non-decreasing in N (a
+// wider window is a superset of bars, so its max can only be >= a narrower window's max) -- so widening
+// targetLookback from 100 to 300 can only raise or hold the target level, NEVER lower it, and NEVER
+// hurts a trade that already passed rrOk at 100. It only ever admits trades that were excluded purely
+// because the 100-bar window hadn't yet surfaced an older, still-unbroken high that the 300-bar window
+// does. This is the queue's own "first thing to try" (CHAMPION-BOARD.md, Attack 94's queue item 1),
+// chosen over lowering minRR (a genuine loosening of selectivity, not a construction fix) and over
+// dropping the structural target for a plain R-multiple (which would abandon HARD LESSON 41's "target a
+// level, not a multiple" discipline this build was designed to satisfy from the start).
+//
+// EVERYTHING ELSE IS BYTE-IDENTICAL TO ATTACK 94: cogLen, cogMaLen, lb, armBars, minRpct, minRR,
+// maxBars, the arm/invalidate/expire latch, the entry/exit wiring. Only targetLookback changed. This
+// isolates the one variable the diagnosis named, per this board's own one-change-at-a-time discipline.
+//
+// ==================== THE CLAIM UNDER TEST (unchanged from Attack 94) ====================
+// ta.cog (Ehlers' Center of Gravity) is a WEIGHTED-AVERAGE-RECIPROCAL construction over a fixed rolling
+// window -- unlike ta.wad/ta.obv (unbounded cumulative sums, Attack 93's failure mode) it carries no
+// memory beyond its own window. COG turning up (ta.crossover(cog, cog[1])) while reading below its own
+// rolling average (a self-relative "trough" state, avoiding a non-stationary absolute threshold) marks
+// a low-lag momentum inflection. Price must separately confirm with its own structural breakout.
+//
+// AUDIT, one line per leg (identical structure to Attack 94, target lookback value changed):
+//   R >= 0.8% (LESSON 3) - EXCLUSION via rBig on rawR = close - armedLow, never clamped.
+//   Stop beyond STRUCTURE (LESSON 5) - slPx = armedLow, the lb-bar swing low frozen at arm time.
+//   Each leg separately (LESSON 6) - LONG ONLY this cycle; short is the standing structural asymmetry,
+//        queued exactly as Attack 91's, 93's and 94's shorts were queued before it.
+//   BINDING (E17) - four necessarily-binding terms: armEvent (troughZone AND cogTurnUp), priceBreak-
+//        within-armBars, rBig, rrOk. Each independently shrinks the raw armEvent count.
+//   REDUNDANCY (E14) - troughZone (COG level vs its own MA, momentum-STATE), cogTurnUp (COG slope,
+//        transition-TIMING), priceBreak (raw price vs a frozen structural high, PRICE domain), rBig
+//        (stop distance, RISK-GEOMETRY), rrOk (a 300-bar structural target vs that stop, REWARD-
+//        GEOMETRY, independent because targetLookback=300 >> lb=20 pulls from a much wider window).
+//        Five independent domains, no restatement.
+//   LATCH IN SEQUENCE (LESSON 8) - armed/armedBar/armedLow/structHigh are var state set only on the
+//        armEvent bar; priceBreak reads a STRICTLY LATER bar (bar_index > armedBar enforced); armBars=10
+//        plus the sub-armedLow invalidation both bound the latch's life, named explicitly.
+//   OCCUPANCY (LESSONS 24/28/29) - `flat` gates both the arm event and the entry.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity, single entry id "L", no partials; expect
+//        totalTrades == unique entries, cascadeRatio 1, maxCascadeDepth 1.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4): Attack 94 fired only 1 trade at
+// targetLookback=100 out of an unknown (undecomposed) armEvent count -- the arm+trigger population size
+// is not itself known to be small, only that rrOk excluded almost everything. Since ta.highest(.,300) is
+// provably >= ta.highest(.,100) on every bar, this change can only ADD trades relative to Attack 94's 1,
+// never remove the one that already passed. Best estimate: still likely UNDER the ~60-350 workable band
+// -- possibly by a wide margin, possibly still single-digit -- because a 300-bar (75-hour) unbroken high
+// is a demanding structural bar for BTC's actual 2022-2024 trend character. To be confirmed against the
+// actual count and reported against the band explicitly, per HARD LESSON 4's discipline of scoring the
+// estimate rather than assuming it.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17). BARE MECHANISM, H1 ONLY (credits band 250-500 at
+// get_credits, the never-tuned pre-2024 half, per the kill rule):
+//   * TRADES STILL UNDER ~30 (LESSON 12's floor) -> still UNTESTABLE; the reward-geometry floor is not
+//     the (or not the only) bottleneck -- the armEvent population itself (troughZone AND cogTurnUp AND
+//     priceBreak) is the binding constraint, and the next retry must loosen armBars/lb or drop minRR,
+//     not touch targetLookback further (widening it more cannot add much once 300 bars already covers
+//     most of a multi-week structural swing).
+//   * TRADES INSIDE ~30-350 AND PF ABOVE 1.0 -> the COG-trough-turn thesis has a real bare edge at a
+//     workable frequency; queue an H2 run before any filter work.
+//   * TRADES INSIDE ~30-350 AND PF AT OR BELOW 1.0 -> DISCARDED by the kill rule. ta.cog becomes a
+//     consumed indicator family alongside ta.linreg (91/92), ta.supertrend (89/90) and ta.wad (93).
+//   * A MAJORITY WIN RATE WITH ratioAvgWinLoss WELL BELOW 1.0 -> HARD LESSON 53's inverted-payoff shape;
+//     report it as that, computing the breakeven win rate (1/(1+payoff)) before calling it an edge.
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside net and max drawdown
+//   (LESSONS 36/39 and the board's own three-drawdown-category taxonomy), sample size permitting.
+
+strategy("BTC Attack95 COG Trough-Turn Breakout Long WideTarget", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+cogLen        = input.int(10, "COG length")
+cogMaLen      = input.int(20, "COG self-relative average length")
+lb            = input.int(20, "Structural swing lookback (bars)")
+armBars       = input.int(10, "Bars the trough-turn latch stays armed")
+targetLookback = input.int(300, "Structural target lookback (bars)")
+minRpct       = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+minRR         = input.float(1.0, "Min reward:risk from the structural target (exclusion floor)")
+maxBars       = input.int(192, "Max bars in trade")
+
+cog   = ta.cog(close, cogLen)
+cogMa = ta.sma(cog, cogMaLen)
+
+troughZone = cog < cogMa
+cogTurnUp  = ta.crossover(cog, cog[1])
+
+armEvent = troughZone and cogTurnUp
+
+var bool  armed     = false
+var int   armedBar  = na
+var float armedLow  = na
+var float structHigh = na
+
+flat = strategy.position_size == 0
+
+// Invalidate the latch first: a new low below the frozen structural low contradicts the trough thesis.
+if armed and low < armedLow
+    armed      := false
+    armedBar   := na
+    armedLow   := na
+    structHigh := na
+
+// Expire the latch if the confirm window has elapsed.
+if armed and not na(armedBar) and (bar_index - armedBar) > armBars
+    armed      := false
+    armedBar   := na
+    armedLow   := na
+    structHigh := na
+
+// Arm on a fresh COG trough-turn (LATCH IN SEQUENCE: set state here, read it on a later bar below).
+if armEvent and not armed and flat
+    armed      := true
+    armedBar   := bar_index
+    armedLow   := ta.lowest(low, lb)[1]
+    structHigh := ta.highest(high, lb)[1]
+
+priceBreak  = armed and not na(armedBar) and bar_index > armedBar and close > structHigh
+longTrigger = priceBreak and flat
+
+stopPx = armedLow
+rawR   = close - stopPx
+minR   = close * minRpct / 100
+rBig   = rawR >= minR
+
+targetPx = ta.highest(high, targetLookback)[1]
+rrOk     = (targetPx - close) >= rawR * minRR
+
+goLong = longTrigger and rBig and rrOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if goLong
+    strategy.entry("L", strategy.long)
+    slPx       := stopPx
+    tpPx       := targetPx
+    barsIn     := 0
+    armed      := false
+    armedBar   := na
+    armedLow   := na
+    structHigh := na
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(armed ? 1 : 0, title="ArmedLatch")
+plot(cog, title="COG")
+plot(cogMa, title="COG_MA")
