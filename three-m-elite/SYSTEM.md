@@ -7069,3 +7069,99 @@ nothing about generalisation.** But the record should not carry "champion" witho
 - Sullivan, Timmermann & White, *Data-Snooping, Technical Trading Rule Performance, and the Bootstrap* (J. Finance 1999) — https://eprints.lse.ac.uk/119144/1/dp303.pdf
 - SSRN listing — https://papers.ssrn.com/sol3/papers.cfm?abstract_id=65140
 - *Re-Examining the Profitability of Technical Analysis with White's Reality Check* — https://homepage.ntu.edu.tw/~ckuan/pdf/snoop01.pdf
+
+---
+
+# ██ THE GROSS-EDGE SCREEN — THE BASE MECHANISM IS NOT EDGELESS. IT IS EDGE-POSITIVE AND COST-CRUSHED. AND THIS RE-EXPLAINS THE FVG GATE.
+
+Zero credits, no backtest. Every figure is arithmetic on four runs already recorded. Executes the
+previous entry's queue item 3, which noted commission was 3–4× net profit and asked whether the
+mechanism has a real gross edge consumed by cost — HARD LESSON 36's "expensive" branch — rather than
+no edge at all.
+
+**It does. And I called it the wrong way last tick by reading only the net figures.**
+
+## THE SCREEN (HARD LESSON 37) — gross edge per trade = (net + commission) ÷ trades
+
+| Run | Trades | Net | Commission | **Gross** | **Gross / trade** | Comm / trade | Comm as % of gross |
+|---|---|---|---|---|---|---|---|
+| BTC v37 ungraded | 241 | $887.30 | $2,219.48 | $3,106.78 | **$12.89** | $9.21 | **71.4%** |
+| ETH v37 ungraded | 316 | $798.61 | $3,700.91 | $4,499.52 | **$14.24** | $11.71 | **82.3%** |
+| BTC v62 FVG | 40 | $2,561.60 | $446.84 | $3,008.44 | **$75.21** | $11.17 | **14.9%** |
+| ETH v62 FVG | 49 | -$82.61 | $495.04 | $412.44 | **$8.42** | $10.10 | **120.0%** |
+
+## FINDING 1 — THE BASE MECHANISM HAS A REAL, CONSISTENT GROSS EDGE
+
+**$12.89 per trade on BTC and $14.24 on ETH** — two instruments, 557 trades, and the gross edge agrees
+to within 10%. That consistency is not what an edgeless mechanism looks like; it is what a genuine but
+small edge looks like.
+
+**Commission then eats 71.4% of it on BTC and 82.3% on ETH.** What survives is the PF 1.05 / 1.03 and
+the t ≈ 0.4 recorded last tick.
+
+**This corrects the previous entry.** I wrote that the base mechanism is "statistically
+indistinguishable from zero." That is true of its **net** returns and remains true. It is **not** true
+of the mechanism: the signal is there, it is consistent across instruments, and **cost is what kills
+it.** Those need opposite fixes, and HARD LESSON 36 exists precisely because confusing them wastes
+cycles — which is what I did by reading net alone.
+
+The research is blunt about how common this is: short-term signals average **gross alpha above 6% a
+year**, but at over 1,000% turnover realistic costs turn that into **net alpha below −2%**. Novy-Marx's
+taxonomy makes the same point — before-cost inference systematically favours high-turnover factors
+because the cost of trading is wrongly accrued as a gain.
+
+## FINDING 2 — THE FVG GATE IS A TRADE-QUALITY SELECTOR, AND NOW IT IS MEASURED AS ONE
+
+The previous entry established the gate is BTC-specific. The gross screen says *what it actually does*:
+
+| | gross edge / trade, ungraded | graded | change |
+|---|---|---|---|
+| **BTC** | $12.89 | **$75.21** | **×5.83** |
+| **ETH** | $14.24 | **$8.42** | **×0.59** |
+
+**On BTC the gate selects trades with 5.8× the gross edge.** Commission's share collapses from 71.4%
+to 14.9%, and that — not luck, not cost arithmetic alone — is why PF went 1.05 → 2.04.
+
+**On ETH the gate selects trades with 0.59× the gross edge.** Commission rises to **120% of gross** —
+the selected trades do not generate enough before costs to pay for themselves. The gate is an
+*anti*-selector there.
+
+**So this is a signal effect, not a cost effect.** A pure cost effect would have improved both
+instruments, since both cut trade count by ~85%. It improved one five-fold and degraded the other.
+
+## WHAT THIS CHANGES ABOUT THE WORKSTREAM'S DIRECTION
+
+The eight rejected filters (v63–v67, v54, v56, v57) were all judged on **net** profit factor against a
+40-trade floor. **None was ever screened on gross edge per trade**, which is free and would have said
+in advance whether a filter selects better trades or merely fewer.
+
+**That screen is the cheap pre-check this lab has been missing**, and it is computable from any
+completed run: `(netProfit + commissionPaid) / totalTrades`. A filter that raises it is selecting
+quality. A filter that lowers it is just trading less.
+
+## WHAT THIS DOES NOT CHANGE
+
+- **v62's champion status is unaffected** — its BTC numbers are real and its split passed.
+- **The t ≈ 0.4 net finding stands.** A gross edge that cost destroys is not a tradable edge; it is a
+  reason to attack cost, not a result.
+- **The gate is still BTC-specific.** Knowing *why* does not make it general.
+- These are totals-based figures. Commission at 100% equity scales with account size, so per-trade
+  averages are exact in aggregate but not uniform trade by trade.
+
+## QUEUE
+
+1. **Screen every future 3M filter on gross edge per trade before spending a credit on it.** Free,
+   and it separates "selects better trades" from "trades less" in advance.
+2. **Re-screen the eight rejected filters from their recorded runs.** If any raised gross edge per
+   trade while failing on net sample count, it was rejected for the wrong reason and the ledger should
+   say so. All the data is already on disk.
+3. **The real target on ETH is a gate that raises gross edge per trade.** FVG lowers it. Nothing else
+   has been tried against that specific criterion.
+4. Third instrument (SOL) still owed, and now it has a sharper question: does the gate raise or lower
+   gross edge there?
+
+## SOURCES
+- Novy-Marx & Velikov, *A Taxonomy of Anomalies and their Trading Costs* (NBER w20721) — https://www.nber.org/system/files/working_papers/w20721/w20721.pdf
+- Author copy — https://mysimon.rochester.edu/novy-marx/research/ToAatTC.pdf
+- Alpha Architect, *Alpha from Short-Term Signals* — https://alphaarchitect.com/alpha-from-short-term-signals/
+- *Retaining alpha: trade size and rebalancing frequency on FX strategy returns* — https://www.sciencedirect.com/science/article/abs/pii/S1386418120300148
