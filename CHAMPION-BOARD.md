@@ -9800,3 +9800,85 @@ engine that charges funding on both sides runs both, the verdict stays where thi
    verdict is column-independent, and unfavourable. Time in market 2.33% (37 × 54 ÷ 85,655). This does not
    bear on its kill-rule status (PF 1.2630477 clears 1.0) and it does not pre-empt its queued H2 run — but
    **when that H2 lands, report both columns with it.**
+
+---
+
+# ATTACK 98 — H2 LANDS, FAILS THE KILL RULE, DISCARDED
+
+Executes Benchmark Audit II's queue item 8 and Attack 98a's own queue item 1: the mandatory second half
+before any filter work. Engine: `trader-dev` (`run_backtest`), byte-identical Pine source, same saved
+`strategyId` `01M1TWAH9PV56R1RRKN93HZYE5`, only the date window overridden (2024-06-08 → 2026-09-01). This
+cycle had 470 credits at `get_credits` (250-500 tier), and the board's own top-priority queue item — H2 for
+an H1-only candidate — outranked the stored prompt's stale "build Attack 37's filter stack" instruction, per
+the standing "docs win" rule. Attack 37's own filter-stack track is untouched by this cycle; it is still
+queued, not built, exactly as Benchmark Audit II left it.
+
+## OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17, carried over from Attack 98a)
+
+* H2 above 1.0 → Attack 98 becomes the board's second both-halves candidate; no filter stack until compared
+  against Attack 83.
+* H2 below 1.0 → kill rule fails, Attack 98 discarded as a candidate; `ta.stoch` itself not automatically
+  consumed, only this bare 8-bar-dwell/20-cross construction.
+
+## RESULT — BOTH HALVES, SIDE BY SIDE
+
+| Metric | Attack 98a (H1, 2022-01-01 → 2024-06-08) | Attack 98b (H2, 2024-06-08 → 2026-09-01) |
+|---|---|---|
+| Trades | 37 | **36** |
+| Win rate | 29.73% (11W/26L) | **19.44% (7W/29L)** |
+| Profit factor | **1.2630477** | **0.73153238** |
+| Net return | +9.90335730% | **-9.03563762%** |
+| Max drawdown | 15.12901010% | 14.51055340% |
+| Avg winner | $432.29 | $351.72 |
+| Avg loser | -$144.80 | -$116.06 |
+| Achieved win/loss ratio | 2.98538547 | 3.03063415 |
+| Commission paid | $403.77 | $353.02 |
+
+Payoff held up between halves (2.99 → 3.03) but win rate collapsed by more than 10pp (29.73% → 19.44%),
+which is what moved the ratio from comfortably above breakeven (25.1%, +4.6pp margin) to comfortably below it
+(24.8% breakeven at this payoff, 19.44% achieved, **-5.4pp margin — the mirror image of H1's miss**). This is
+not a borderline result in either direction.
+
+**No cascade or truncation artefact:** `cascadeRatio` 1 (36 rows, 36 unique entries), no
+`cascade_exit_pattern_severe` warning; `avgBarsWinning` 155.71 sits well under the 192-bar cap.
+
+**Benchmark, both recorded columns (HARD LESSON 60):** H2 buy & hold was +13.461286% raw / -1.777913%
+perp-executed (Benchmark Audit II's table). Attack 98b's -9.04% net loses to holding on **both** columns in
+H2 (-22.50pp raw, -7.26pp perp) — column-independent, and unfavourable, same as H1's -39.82pp/-21.24pp.
+Time in market ~2.78% (36 × 60.69 ÷ 78,567), close to H1's 2.33%.
+
+## THE VERDICT — KILL RULE FAILS ON H2, ATTACK 98 DISCARDED AS A CANDIDATE
+
+**Per the both-halves requirement (Attack 37/91/96 precedent), Attack 98 does not become a candidate.** H1
+clearing 1.0 alone was never sufficient — Attack 96 cleared H1 at 1.0586 and still died on H2 at 0.9844.
+Attack 98a died harder on the other side: PF 0.7315, a clean miss, not a rounding-distance one.
+
+**`ta.stoch` is not consumed.** Per Attack 98a's own registered queue item 3, only this bare
+8-consecutive-bar-dwell-below-20-then-cross-above-20 construction is discarded. A regime-conditioned variant
+(the family's only recurring rescue pattern on this board — Attack 83, 87, 88 all regime-conditioned an
+otherwise-failing base) or a retuned `dwellBars` remain open for a future cycle, same disposition as
+Attack 97 left CCI.
+
+Records: `attack98a-stoch-oversold-dwell-reclaim-long-h1` (status updated testing → **rejected**),
+`attack98b-stoch-oversold-dwell-reclaim-long-h2` (new, **rejected**). Both carry `provenance.jobId` from
+`trader-dev`.
+
+## QUEUE
+
+1. **Attack 37's filter stack is still the standing queue item from before Benchmark Audit II** — one term
+   at a time, re-split on every addition, RATCHET v2, per the original mandate. Untouched by this cycle;
+   next in line once a fresh-mechanism slot isn't pre-empted by a mandatory second half again.
+2. **Attack 83 remains the board's strongest both-halves candidate on PF** (1.61044869/1.15365198, 88/79
+   trades); **Attack 88 holds the board's highest recorded PF at n≥30** (2.021320/1.154330), per Benchmark
+   Audit II Finding 4 — both unaffected by this cycle.
+3. **If a regime-conditioned Stochastic variant is attempted**, it inherits the family's own precedent: cheap
+   to try (one added condition), and every prior instance of this rescue pattern that worked (83, 87, 88) did
+   so on a base that failed only ONE half, not both — Attack 98a/98b failed in opposite directions on
+   opposite halves, which a single regime condition may not be able to fix simultaneously. Flag this before
+   spending credits on it.
+4. **Remaining untried indicator families**: `ta.sar`, `ta.tsi`, `ta.wpr`, `ta.iii`, `ta.wvad`,
+   `ta.percentrank` (`ta.cci` untestable-not-consumed at 97; `ta.stoch` bare-form discarded here).
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed.**
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+7. **Benchmark Audit II's queue item 1** (re-run Attack 83a/83b on a funding-aware engine) **remains queued
+   for a local session with `backtest-lab`**, not available here.
