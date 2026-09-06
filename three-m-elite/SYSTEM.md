@@ -6397,3 +6397,103 @@ pull.
 1.95534435 H2, DD 4.50890824%, 40 trades). **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61(short)** —
 unchanged. **THIS CYCLE: v66 recorded `status: rejected`** — a genuinely new decoded term, cleanly
 tested in isolation, cleanly rejected on two independent grounds.
+
+---
+
+# ██ v67 — THE MA OVEREXTENSION GUARD, SHORT-SIDE MIRROR: v66's OWN QUEUE ITEM 1, CLOSED, AND HARD LESSON 45 FIRES A SEVENTH TIME (2026-09-06)
+
+**A note on the scheduled prompt, once more.** This cycle's stored prompt is still the identical
+v37/v53 snapshot addressed at every check since #1: it names two top-priority items (implement the
+12H/24H bias gate; resolve the cascade signature) as the reason "most recent runs produced nothing."
+Both were closed long ago — the bias gate was built and measured on both legs at v54/v55 (HARD LESSON
+45), the cascade signature was traced to the pre-bias-gate v51/v53 supply-mirror construction
+specifically and confirmed absent (ratio 1.0) from every bias-gated or declared-deviation short build
+on file since (HARD LESSON 42/50/52, and the two full-coverage re-baselines and v66 immediately above
+this entry). Per "THE DOCS WIN over this prompt," neither is repeated. `git pull --rebase origin main`
+at cycle start was a clean fast-forward — no concurrent 3M work landed beyond v66.
+
+**The queue taken:** v66's own entry left exactly one concrete, well-specified, unspent item — the
+short-side mirror of the MA overextension guard, "given the pattern above, the registered prediction
+is another sub-floor trade count, but it has not been measured and should not be assumed." That
+prediction is now measured, not assumed.
+
+Re-checked the source before mirroring rather than assuming symmetry by default: re-reading
+`transcripts/2026-08-09 09-49-18.txt` [12:55]-[15:16] shows the author explicitly flags ONE rule in
+this segment as direction-inverted for shorts — the MA-stack ordering bias rule immediately before it
+("everything is just inverted when we're talking about shorts" [13:11]-[13:13]), already mirrored at
+v56/v57. The overextension rule that follows ([13:26]-[15:16]) is stated as a single, direction-
+agnostic "we will not take any trades" — a dimensionless comparison of two MA gaps, with no
+bullish/bearish framing and nothing to invert in the formula. So the short-side mirror is the SAME
+guard formula as v66 (`abs(sma50-sma200) <= abs(sma20-sma50)`), added to the short leg's entry
+conjunction unchanged.
+
+## THE BUILD: `pine/3m-elite-v67-ma-overextension-guard-short.pine`
+
+One isolated addition to `pine/3m-elite-v60-short-declared-deviation.pine` — the short leg's best
+full-coverage-native reference (PF 1.01300244, 64 trades, 2020-08-19 → 2026-09-01), **not** v65 (the
+FVG-graded short mirror, already rejected at 4 trades — see the v65 entry above). `maNotOverextended`
+reuses the sma20/sma50/sma200 series v60 already computes for `stackBear`, ANDed into `shortCond`
+alongside everything else, unchanged. Full pre-run audit and pre-registered outcomes are in the Pine
+header (R floor by exclusion unchanged, stop still `szTop`, BINDING/REDUNDANCY reasoned through in
+advance, cascade sizing — 25%-equity declared deviation, HARD LESSON 42 — carried unchanged from v60).
+One credit spent (483 on hand after, within the 250–500 → one-backtest budget).
+
+## THE RESULT
+
+Full 15m coverage 2020-08-19 → 2026-09-01, resultId `01M1T6V913QC1A9HGRWN5ZVF67`, cascade ratio 1.0
+(6/6, depth 1 — clean, a further confirmation of HARD LESSON 42's fix):
+
+| | v60 short baseline (full coverage) | **v67 (+ MA overextension guard)** |
+|---|---|---|
+| Profit factor | 1.01300244 | **0.57821551** |
+| Max drawdown | — | 2.10982475% |
+| Net return | — | -0.63743861% |
+| Trades | 64 | **6** |
+| Win rate | — | 33.33333333% |
+| Sharpe | — | -0.19418418 |
+
+## THE VERDICT: REJECTED, DECISIVELY, ON TWO INDEPENDENT RATCHET v2 GROUNDS
+
+**Trade count collapsed 64 → 6 (−90.6%)** — the most severe cut this lab has measured on this
+mechanism yet (the prior worst was v56's 155→37, −76%), nowhere near the ~30-trade quoting floor and
+too thin to split. **Profit factor fell hard and crossed 1.0** (1.01300244 → 0.57821551), reversing the
+baseline from barely-profitable to a clear loser — clause 1 fails outright, no exception applies. No
+split test owed or possible: 6 trades cannot be split under any convention this lab uses.
+
+**This is HARD LESSON 45's pattern for a SEVENTH time**, and it closes v66's own registered
+Outcome-B prediction with a real measurement rather than an assumption. Combined with v65's earlier
+rejection (FVG grading on the short), this exhausts every well-specified single-term lever this lab
+has identified for the short leg — bias, FVG-grading, cascade/sizing, and now MA-overextension are all
+closed axes, unchanged from the conclusion the last several cycles already reached.
+
+## WHAT THIS SETTLES AND WHAT IT DOES NOT
+
+**Settles:** the source's MA-overextension rule does not help the short leg either, closing v66's
+queue item 1 with a measurement. The short leg's every mechanically-defined lever from the ten
+captured transcripts has now been tried. **Does not settle:** whether some OTHER short construction
+this lab has not yet conceived could work — per v50's finding, the referenced "last week's cluster
+lesson" video that might contain further short-specific material was never captured in this project's
+transcripts. Does not touch the long champion (v62-fvg, unchanged) or the short reference (v60/v61
+(short), unchanged on its own window).
+
+## CREDIT ACCOUNTING
+
+One backtest, one credit spent (of exactly one allowed this cycle, 484 credits on hand at cycle start,
+250–500 bracket). No `get_trades` pull needed — the cascade block returned with the result (ratio 1.0)
+was sufficient, and the rejection is unambiguous without a per-trade read.
+
+## QUEUE
+
+1. **No further single-term short-side mechanism lever is currently queued** (unchanged, now with one
+   more closed axis) — bias, FVG-grading, cascade/sizing, and MA-overextension are all closed. The
+   next short-side idea needs new source material this lab does not currently have.
+2. VOCABULARY.md's "STILL MISSING" table (Type 1/the 3M candle's anatomy, the swing rule) remains the
+   only genuinely undecoded material left in the ten captured transcripts.
+3. v64's combined long+short flip-rule finding and the short leg's paused status are unaffected by
+   this cycle.
+
+**CHAMPION OF RECORD (LONG): v62-fvg** — unchanged (PF 2.04354108 full coverage / 2.10461082 H1 /
+1.95534435 H2, DD 4.50890824%, 40 trades). **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61(short)** —
+unchanged (PF 1.88616546 on 2022-01-01 window, `passed`; PF 1.01300244 on full coverage, `testing`).
+**THIS CYCLE: v67 recorded `status: rejected`** — v66's own queued short-side mirror, cleanly measured,
+cleanly rejected, closing the short leg's MA-overextension axis.

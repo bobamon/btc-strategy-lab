@@ -1,0 +1,172 @@
+//@version=6
+// 3M ELITE v67 -- THE MA OVEREXTENSION GUARD, SHORT-SIDE MIRROR (v66's own queue item 1).
+//
+// SOURCE: transcripts/2026-08-09 09-49-18.txt [13:26]-[15:16], the same segment v66 built the long
+// version from. The rule immediately preceding it in the transcript ([12:55]-[13:19], the MA-stack
+// bias rule already mirrored at v56/v57) is the one the author explicitly says inverts for shorts
+// ("everything is just inverted when we're talking about shorts" [13:11]-[13:13]). The overextension
+// rule that follows it ([13:26]-[15:16]) is stated as a single, direction-agnostic "we will not take
+// any trades" -- a dimensionless comparison of two MA gaps, not a bullish/bearish-stack condition, so
+// there is nothing to invert in the formula itself: the SAME guard applies to both directions.
+//
+//   [13:33] "we will not take any trades when the twenty or fifty MA ... are overextended from the
+//            two hundred"
+//   [14:21] "if the gap between twenty and the fifty MA is smaller, if the gap between the fifty and
+//            the two hundred MA is bigger than this gap, then these MAs are overextended ... we do
+//            not take any trades until they come meet again"
+//
+// MECHANICAL READING (unchanged from v66): overextended <=> abs(sma50-sma200) > abs(sma20-sma50).
+// Guard = NOT overextended = abs(sma50-sma200) <= abs(sma20-sma50). SMA on the 15m working chart,
+// matching v56/v57/v66's own convention.
+//
+// BASE: `pine/3m-elite-v60-short-declared-deviation.pine`, the short leg's best full-coverage-native
+// reference (v60-short-baseline-full-coverage: PF 1.01300244, 64 trades, 2020-08-19 -> 2026-09-01 --
+// SYSTEM.md v65/naive-short-baseline entries). v65's FVG-graded short mirror was tried and rejected
+// (4 trades) so v60 remains the correct short baseline to mirror this guard onto, not v65. Everything
+// else byte-identical to v60: 4H reconstruction from 15m bars, bearEngulf-creates-zone by body
+// containment, zone = [open, high] of the engulf, mitigation on a body close with the two-close rule,
+// maxAge=6, szAge>=1, one entry per zone, stop = szTop, R floor 0.8% by exclusion, 2R target,
+// maxBars=96, the source's own 20/50/200 SMA bear-stack gate (stackBear), 25%-equity declared-
+// deviation sizing (HARD LESSON 42). sma20/sma50/sma200 are the SAME series v60 already computes for
+// stackBear -- reused here, not redeclared, per the REDUNDANCY audit line below.
+//
+// PRE-RUN AUDIT (short leg only, per LESSON 6 as scoped by HARD LESSON 31 -- this mirrors a rule the
+// SOURCE states is direction-agnostic, not a lab-invented short geometry):
+//   R >= 0.8% (LESSON 3) - unchanged from v60, by EXCLUSION via rBig, never clamped.
+//   Stop beyond STRUCTURE (LESSON 5) - unchanged, slPx = szTop (supply zone high).
+//   BINDING (E17) - this run's own trade count vs. v60's 64 is the binding check.
+//   REDUNDANCY (E14) - maNotOverextended reads sma20/sma50/sma200, already computed for stackBear,
+//     but measures a DIFFERENT relationship (gap comparison vs. stack ORDER) -- not the same term
+//     twice. No other existing term measures a gap magnitude.
+//   LATCH IN SEQUENCE (LESSON 8) - not a latch, a continuous state check evaluated at signal time,
+//     same pattern as stackBear/rBig which it joins.
+//   CASCADE (HARD LESSONS 35/42) - v60's declared-deviation sizing (25% equity) is carried unchanged;
+//     VERIFY WITH get_trades AFTER RUNNING that cascadeRatio stays at 1.0.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale, no arrays, no
+//   request.security, no user-defined functions, pyramiding=1.
+//
+// PRE-REGISTERED OUTCOMES (LESSON 17), stated before running, against v60's full-coverage 1.01300244
+// / 64 trades:
+//   OUTCOME A: trade count cut is modest (stays meaningfully above the ~30-trade floor) and PF rises
+//     -> a genuine additional term on the short leg, worth carrying forward as the new short
+//     reference (still not a co-champion vs. the long -- HARD LESSON 45's promotion-policy question
+//     stays open and undecided).
+//   OUTCOME B: trade count collapses toward or below the ~30-trade floor, continuing HARD LESSON 45's
+//     pattern for a seventh time (now measured rather than merely predicted, closing v66's queue item
+//     1) -- given the short leg's full-coverage sample is already thinner than the long champion's,
+//     the registered expectation is that even a moderate absolute cut pushes this under the floor,
+//     but it has not been measured and should not be assumed.
+strategy("3M ELITE v67 MA overextension guard short", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rTarget  = input.float(2.0, "Target, x R -- held at v37/v53/v57/v60")
+maxBars  = input.int(96,    "Max bars in trade -- held")
+maxAge   = input.int(6,     "Zone freshness cap, 4H candles -- held")
+minRpct  = input.float(0.80,"Min stop distance as % of price (LESSON 3)")
+maFast   = input.int(20,    "THE SOURCE'S STACK: fast MA")
+maMid    = input.int(50,    "THE SOURCE'S STACK: middle MA")
+maSlow   = input.int(200,   "THE SOURCE'S STACK: slow MA -- his higher-timeframe read")
+eqFrac   = input.float(0.25,"DECLARED DEVIATION: fraction of equity per position -- HARD LESSON 42")
+
+sma20  = ta.sma(close, maFast)
+sma50  = ta.sma(close, maMid)
+sma200 = ta.sma(close, maSlow)
+stackBear = not na(sma200) and sma20 < sma50 and sma50 < sma200
+
+// ---------- the decoded MA overextension guard (v66's long-side formula, unchanged) ----------
+gap2050  = math.abs(sma20 - sma50)
+gap50200 = math.abs(sma50 - sma200)
+maNotOverextended = not na(sma200) and gap50200 <= gap2050
+
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+var float o4 = na
+var float h4 = na
+var float l4 = na
+
+var float pO  = na
+var float pH  = na
+var float pL  = na
+var float pC  = na
+var float ppO = na
+var float ppC = na
+
+if new4h and not na(o4)
+    ppO := pO
+    ppC := pC
+    pO  := o4
+    pH  := h4
+    pL  := l4
+    pC  := close[1]
+
+if new4h
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+bearEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC > ppO and pC < pO and pC < ppO
+
+var float szTop   = na
+var float szBot   = na
+var bool  szLive  = false
+var int   szTouch = 0
+var int   szAge   = 0
+var bool  szTraded = false
+
+if new4h
+    if szLive and not na(pC) and pC >= szBot
+        szTouch := szTouch + 1
+        if szTouch >= 2
+            szLive := false
+    if szLive
+        szAge := szAge + 1
+    if bearEngulf
+        szTop   := pH
+        szBot   := pO
+        szLive  := true
+        szTouch := 0
+        szAge   := 0
+        szTraded := false
+
+minR     = close * minRpct / 100
+rBig     = not na(szTop) and (szTop - close) >= minR
+
+shortCond = rBig and szLive and not szTraded and szAge >= 1 and szTouch < 2 and high >= szBot and close < szTop and szAge <= maxAge and stackBear and maNotOverextended
+
+flat = strategy.position_size == 0
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+qtyUse = strategy.equity * eqFrac / close
+
+if flat and shortCond and not na(szTop) and close < szTop
+    r = szTop - close
+    if r > 0
+        strategy.entry("S", strategy.short, qty = qtyUse)
+        szTraded := true
+        slPx   := szTop
+        tpPx   := close - r * rTarget
+        barsIn := 0
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(szLive ? 1 : 0,     title="SupplyZoneLive")
+plot(stackBear ? 1 : 0,  title="StackBear")
+plot(maNotOverextended ? 1 : 0, title="MANotOverextended")

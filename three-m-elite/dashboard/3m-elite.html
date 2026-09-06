@@ -1641,9 +1641,53 @@ const DATA = [
     },
     "verdict": "REJECTED under RATCHET v2 on two independent grounds: profit factor fell (2.04354108 -> 1.92075105, clause 1 fails outright, no exception applies since PF did not improve) and trade count collapsed 40 -> 19 (-52.5%), below the ~30-trade quoting floor. No split test owed -- clause 1 already fails on its own.",
     "notes": "HARD LESSON 45's pattern for a sixth time: every MA/trend-state filter tried on this mechanism (lab's own 12H/24H proxy v54 155->48; source's full 20/50/200 stack ordering v56 155->37, unsatisfiable split; now this dimensionless overextension guard v66 40->19) cuts the sample hard enough to be unusable regardless of headline PF. Cascade ratio 1.0 (19/19, depth 1), clean. Does not touch champion v62-fvg (unchanged) or reopen the stack-ordering axis (closed, v56/v57). Short-side mirror of this same rule (source states it inverts symmetrically) is queued, not run this cycle -- LESSON 6 applied by scoping, not skipping: the credit budget this cycle (487, one-backtest bracket) allowed exactly one leg."
+  },
+  {
+    "id": "3m-elite-v67-ma-overextension-guard-short",
+    "name": "3M Elite v67: MA overextension guard, short-side mirror of v66, added to the short-leg full-coverage baseline (v60)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "short",
+    "status": "rejected",
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "backtestStart": "2020-08-19",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/pine/3m-elite-v67-ma-overextension-guard-short.pine",
+    "pineSource": "three-m-elite/pine/3m-elite-v67-ma-overextension-guard-short.pine",
+    "description": "Closes v66's own queue item 1: the short-side mirror of the MA overextension guard decoded at v66 from transcripts/2026-08-09 09-49-18.txt [13:26]-[15:16]. The transcript states the STACK-ORDER bias rule inverts for shorts (\"everything is just inverted when we're talking about shorts\" [13:11]-[13:13]) but states the overextension rule itself as a single, direction-agnostic \"we will not take any trades\" -- a dimensionless comparison of two MA gaps with nothing to invert in the formula, so the guard (abs(sma50-sma200) <= abs(sma20-sma50), permit trading) is unchanged from v66's long-side formula. Added as one isolated term to pine/3m-elite-v60-short-declared-deviation.pine, the short leg's best full-coverage-native reference (v65's FVG-graded short mirror was tried and rejected at 4 trades, so v60 -- not v65 -- is the correct base to mirror this guard onto). Everything else byte-identical to v60: 4H reconstruction from 15m bars, bearEngulf-creates-zone by body containment, zone=[open,high] of the engulf, mitigation on a body close with the two-close rule, maxAge=6, szAge>=1, one entry per zone, stop=szTop, R floor 0.8% by exclusion, 2R target, maxBars=96, the source's own 20/50/200 SMA bear-stack gate (stackBear), 25%-equity declared-deviation sizing (HARD LESSON 42).",
+    "metrics": {
+      "profitFactor": 0.57821551,
+      "maxDrawdownPct": 2.10982475,
+      "netProfitPct": -0.63743861,
+      "totalTrades": 6,
+      "winningTrades": 2,
+      "losingTrades": 4,
+      "winRatePct": 33.33333333,
+      "sharpeRatio": -0.19418418,
+      "avgTradePct": -0.10623977,
+      "ratioAvgWinLoss": 1.15643102,
+      "longTrades": 0,
+      "shortTrades": 6
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "resultId": "01M1T6V913QC1A9HGRWN5ZVF67",
+      "jobId": "adhoc_01M1T6V913TA3ZPE83E088AA9W",
+      "strategyId": "01M1T6V9AFK6VW69BZBNQJ23EE",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1T6V913QC1A9HGRWN5ZVF67",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "uniqueEntries": 6,
+      "totalRows": 6,
+      "maxCascadeDepth": 1,
+      "verifiedAt": "2026-09-06T00:00:00Z"
+    },
+    "verdict": "REJECTED under RATCHET v2, decisively: trade count collapsed 64 -> 6 (-90.6%), far below the ~30-trade quoting floor, and profit factor fell hard (1.01300244 -> 0.57821551, reversing the baseline from barely-profitable to a clear loser). No split test owed or possible -- 6 trades cannot be split.",
+    "notes": "HARD LESSON 45's pattern for a SEVENTH time, and the most severe cut measured yet on this mechanism (previous worst was v56's 155->37, -76%; this is -90.6%). Confirms v66's registered prediction (Outcome B) rather than merely assuming it. Cascade ratio 1.0 (6/6, depth 1), clean -- HARD LESSON 42's fix continues to hold on every bias-gated or declared-deviation short construction tried. This closes v66's queue item 1 and, combined with v65's earlier rejection, exhausts every well-specified single-term lever this lab has identified for the short leg without new source material (unchanged conclusion from the entries immediately preceding this one). Does not touch the long champion (v62-fvg, unchanged) or the short reference (v60/v61(short), unchanged: PF 1.88616546 on its original 2022-01-01 window / PF 1.01300244 on full coverage)."
   }
 ];
-const BUILT = "2026-09-06 01:00";
+const BUILT = "2026-09-06 01:56";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
