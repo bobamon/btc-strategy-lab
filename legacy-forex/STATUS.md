@@ -2076,3 +2076,141 @@ produced even if the others were solved.**
 - *Where to Get Reliable Historical Stock Market Data (When Yahoo Finance Isn't Enough)* — https://medium.com/predict/where-to-get-reliable-historical-stock-market-data-when-yahoo-finance-isnt-enough-ddf59a66b18b
 - PyQuant News, *Insider's Guide to Clean Financial Market Data with Python and Yahoo Finance* — https://www.pyquantnews.com/free-python-resources/insiders-guide-to-clean-financial-market-data-with-python-and-yahoo-finance
 - *Why yfinance Keeps Getting Blocked, and What to Use Instead* — https://medium.com/@trading.dude/why-yfinance-keeps-getting-blocked-and-what-to-use-instead-92d84bb2cc01
+
+---
+
+# ██ TICK #21, 2026-09-06 — THE INSTRUMENT BLOCKER, MEASURED ON THE OTHER ENGINE: BOTH HIS TICKERS SILENTLY BECOME CRYPTO, AND THE MECHANISM IS NOW PROVEN
+
+Zero credits. Executes tick #19's queue item 3 ("if a data source is ever added, the order of checks
+is now known: verify symbol resolution FIRST") against the engine that was never checked — and it
+turns out one already had been added, by removal.
+
+**`backtest-lab` (backtester24) failed to connect this session: HTTP 401,** *"That API key is not
+valid. It may have been revoked by a regenerate."* Every prior Legacy finding — the 5m/15m execution
+map, the 937-bar retention, the Yahoo data-quality blocker — was measured on **that** engine. It is
+unreachable right now. **So the only engine currently available to this project is `trader-dev`, and
+this workstream had never established what `trader-dev` does with his instruments.**
+
+## THE MEASUREMENT — FOUR SYMBOLS, ONE ENGINE, ALL FREE
+
+| Requested | `trader-dev` result | Bars offered at 5m |
+|---|---|---|
+| **`NQ`** | **silently becomes `IONQUSDT`** (IonQ perp) | 14,554 |
+| **`YM`** | **silently becomes `DYMUSDT`** (Dymension perp) | **235,630** |
+| `NAS100` | **hard error** — *"not in the Bybit USDT perp catalog (639 instruments)"* | — |
+| `US30` | **hard error** — same | — |
+
+**Both of the instruments his method actually names remap silently. Both of the cash proxies fail
+loudly.** That is exactly the wrong way round: the symbols that error are the ones this project would
+never have quoted anyway, and the symbols that succeed are the ones it would have.
+
+**The `YM` case is the dangerous one, and it is worse than the founding `NQ` case.** `YM` →
+`DYMUSDT` returned **235,630 bars of 5m data, no clamping, and an empty `parityAdjustments` array** —
+a completely clean plan. A backtest on "YM" would run over years of data and produce a fully
+plausible, well-sampled result **about Dymension.** No warning fires anywhere.
+
+## THE MECHANISM, NOW PROVEN RATHER THAN INFERRED
+
+`search_perps` shows what the resolver is doing:
+
+| Query | Match | Why |
+|---|---|---|
+| `"ym"` | `DYMUSDT` | **D-YM**-USDT |
+| `"nas"` | `BANANAS31USDT` | BANA-**NAS**-31USDT |
+| (`NQ`) | `IONQUSDT` | IO-**NQ**-USDT |
+
+**It is a substring match on the base coin, anywhere in the string.** Not a prefix match, not a
+fuzzy-distance match. **Any two- or three-character ticker will almost certainly hit something in a
+639-instrument catalog**, and futures tickers are all two characters. This is not a bug that happened
+to catch `NQ`; it is a resolver whose behaviour makes short tickers systematically unsafe.
+
+## THE PART THAT GENERALISES, AND IT IS A TRAP WORTH NAMING
+
+**The response's own `requested` field is not your request.** Asking for `NQ` returns:
+
+```
+"requested": { "symbol": "IONQUSDT", ... }
+```
+
+The rewrite happens **before** the planner echoes the request back, so **the payload contains no
+record of what was actually asked for.** Comparing `requested` against `applied` — the obvious
+sanity check, and the one a careful reader would reach for — **cannot detect this.** They always
+agree.
+
+**The only valid guard is to compare the response's symbol against the string you typed**, held
+outside the payload. Recorded here as a property of the tool, in this workstream's own file. It is
+stated as a general engine behaviour, not imported into any other lab's findings.
+
+## THE INTRA-BAR BLOCKER — RESEARCH SHARPENS IT FROM ASSERTION TO BOUNDARY CONDITION
+
+Tick #17 called intra-bar resolution "structural" and left it there. The practitioner literature is
+more precise, and it cuts both ways:
+
+> When both the profit target and stop loss occur on the same bar, *"it is unclear whether the profit
+> target or the stop loss occurred first"*, because with historical data *"only the Open, High, Low,
+> and Close are available."*
+
+> **Against the blocker mattering:** *"for strategies using longer timeframes with market entries and
+> wider stops/targets, the probability of both being hit within the same bar is extremely low, and
+> over thousands of trades, the OHLC assumption washes out — sometimes it helps you, sometimes it
+> hurts you, and the net effect approaches zero."*
+
+> **For the blocker mattering:** for strategies on *"1-minute bars with tight limit entries and
+> stops, the intra-bar fill sequence matters enormously."*
+
+**So the blocker is conditional, not universal — and this method falls on the wrong side of the
+condition.** Tick #14 measured that his trades resolve in **12 to 190 seconds**. A 5-minute bar is
+300 seconds. **Most of his trades begin and end inside a single bar**, which is the case the
+literature says matters enormously, not the case where it washes out.
+
+**This is a strengthening of the blocker, not a weakening**, and it is the first time it has been
+stated with a criterion attached rather than as a claim. It also means the blocker is *falsifiable*:
+if a future measurement showed his trades typically spanning many bars, this objection would have to
+be withdrawn.
+
+The literature also names the standard remedy — *"enable Intra-Bar-Backtesting (or Bar Magnifier) and
+set the resolution to Minute, Second, or Tick"*, with *"tick-by-tick replay"* the most precise.
+**Neither engine here exposes anything of the kind through MCP**, and per this project's own rule a
+resolution test is not an edge test, so re-running at a finer bar size is not a substitute.
+
+## WHERE THIS WORKSTREAM STANDS — THE BLOCKER TABLE, UPDATED
+
+| Blocker | Status after this tick |
+|---|---|
+| **Instrument** | **Worse, and now measured on both engines.** `backtest-lab` gave cash proxies; `trader-dev` gives crypto perps under his exact tickers, silently. |
+| **Intra-bar resolution** | **Unchanged and now better argued** — conditional in general, and this method sits squarely in the condition. |
+| Execution (15m) | Unchanged, and **currently untestable** — the engine that showed it is 401. |
+| Data source | Unchanged, and **currently unreachable** for the same reason. |
+| **Engine availability** | **NEW.** `backtest-lab` is 401 as of this session. |
+
+**Every route to a backtest of this method is closed right now, and one of them is closed in a way
+that produces confident-looking numbers if you do not check.** That is the finding.
+
+## WHAT WAS NOT DONE, AND WHY
+
+**No backtest was run and no credit was spent.** A `trader-dev` run under `NQ` or `YM` would execute
+cleanly and return a well-sampled result about IonQ or Dymension. **Producing that number and filing
+it in this workstream is the single most likely way this project could publish a false finding**, and
+it is available in one tool call. It was not made.
+
+## QUEUE
+
+1. **Never submit a short ticker to `trader-dev` without checking the returned symbol against the
+   string you typed.** `requested` vs `applied` does not detect the rewrite. This is the concrete,
+   generalised form of tick #19's queue item 3.
+2. **`backtest-lab`'s key needs regenerating** before any of the 5m/15m/retention findings can be
+   re-verified or extended. That is a user action; nothing here can do it.
+3. **Forward testing remains the only honest route**, unchanged across five ticks, and this tick
+   strengthens the case: three of the five blockers are now engine-state problems that a live feed
+   does not have, and the fourth is confirmed to bind on this method specifically.
+4. The forward-test protocol's **`IntraBarAmbiguity`** field is now the direct empirical test of the
+   boundary condition quoted above — it measures what fraction of his real signals fall in the
+   "matters enormously" case. That is the number this workstream most needs and cannot get any other
+   way.
+
+## SOURCES
+- MultiCharts, *Bar Magnifier* — https://multicharts.com/trading-software/index.php/Bar_Magnifier
+- NinjaTrader forum, *Handling of Stop Loss and Take Profit Levels in Backtesting* — https://forum.ninjatrader.com/forum/ninjatrader-8/strategy-development/1262218-handling-of-stop-loss-and-take-profit-levels-in-backtesting
+- NinjaTrader forum, *Entry and exit in the same bar when backtesting* — https://forum.ninjatrader.com/forum/ninjatrader-8/strategy-development/1155719-entry-and-exit-in-the-same-bar-when-backtesting
+- TradingView, *Backtest more accurately with the Bar Magnifier* — https://www.tradingview.com/blog/en/accurate-backtesting-with-bar-magnifier-31746
+- QuantInsti, *Common mistakes to avoid while Backtesting* — https://blog.quantinsti.com/common-mistakes-backtesting/
