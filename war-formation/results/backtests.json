@@ -1639,9 +1639,30 @@
       "longTrades": 20,
       "shortTrades": 25,
       "barsEvaluated": 78567,
-      "rewardDistBinsAll": {"under500": 42, "500to1000": 2, "1000to1500": 1, "1500to2000": 0, "2000to2500": 0, "over2500": 0},
-      "rewardDistBinsLong": {"under500": 19, "500to1000": 1, "1000to1500": 0, "1500to2000": 0, "2000to2500": 0, "over2500": 0},
-      "rewardDistBinsShort": {"under500": 23, "500to1000": 1, "1000to1500": 1, "1500to2000": 0, "2000to2500": 0, "over2500": 0},
+      "rewardDistBinsAll": {
+        "under500": 42,
+        "500to1000": 2,
+        "1000to1500": 1,
+        "1500to2000": 0,
+        "2000to2500": 0,
+        "over2500": 0
+      },
+      "rewardDistBinsLong": {
+        "under500": 19,
+        "500to1000": 1,
+        "1000to1500": 0,
+        "1500to2000": 0,
+        "2000to2500": 0,
+        "over2500": 0
+      },
+      "rewardDistBinsShort": {
+        "under500": 23,
+        "500to1000": 1,
+        "1000to1500": 1,
+        "1500to2000": 0,
+        "2000to2500": 0,
+        "over2500": 0
+      },
       "under500Pct": 93.33333333
     },
     "provenance": {
@@ -1655,5 +1676,79 @@
     },
     "verdict": "THE p1hh/p1hl REFERENCE IS DEAD FOR A LEVEL TARGET AGAINST A $2,000 SHIELD, NOT MERELY MIS-CALIBRATED. 93.3% of the population (42/45 trades, both legs) has a reward distance under $500 -- one quarter of the shield -- and ZERO trades in either direction reach even the $1,500-2,000 bin, let alone the $2,000-2,500 or >=2,500 bins that would put the reward anywhere near the shield. To clear RATCHET v2's 30-trade floor at all requires admitting bins 1-2 (44 of 45 trades), i.e. minRRv at or below 0.5, and most of even that population sits under $500 (minRRv ~0.25) -- a floor that low does not filter for setups worth the risk, it accepts almost everything. This closes E89's own queue item 2 ('re-attempt with a properly sized minRRv') by refuting its premise: no minRRv computed against this reference and this shield can both admit a workable sample and mean anything as a risk floor. Mechanically: the reclaim trigger fires the instant price re-crosses the level, so at entry close sits only velMin (tens to low hundreds of dollars) past p1hl/p1hh, making the reward distance to the OPPOSITE extreme of the same already-swept bucket inherently tiny relative to a $2,000 fixed-dollar shield.",
     "notes": "Diagnostic only, not a ratchet decision -- no KEEP/REJECT applies. direction='both' is a schema descriptor for a bidirectional counter (unlike E81's single-direction coil counter): both legs use their own strategy.long/strategy.short entries here, not a placeholder. Closes E89's queue item 2 (re-tuning minRRv against this same reference) as refuted rather than open, and leaves E89's other named alternative -- a WIDER reference, specifically the current 6h block's own running high/low (already computed for bullRegime/bearRegime, HARD LESSON 18 redundancy-clean) -- as the one live thread for a level-target redesign on the 15m track. e58a (long, 1m) and E71 (short, 1m) remain the untouched 1m-track reference builds; E80/E82 and E87 (15m) remain status: research. The HARD LESSON 48 drawdown-allowance RULE QUESTION blocking E74/E77 remains open, unresolved, awaiting the user. SCHEDULING NOTE: the prompt that triggered this cycle was stale -- it described the lab's state as of E66 ('no champion, no candidate... continue numbering after E66', short-leg framed as three failed constructions to attack on entry geometry) and asked for shield/entry-geometry work already completed and superseded by E67-E89 (the margin-sizing fix, the completed four-term binding sweeps on both legs, E80's bidirectional 15m result, and E89's own level-target attempt). This cycle followed the actual current state in EXPERIMENT-LOG.md/STRATEGY-LEDGER.md over the stale prompt, per this lab's own standing rule and HARD LESSON 26's precedent, and worked E89's real open queue item 1 instead of re-deriving E64a-E66 territory."
+  },
+  {
+    "id": "wf-e91-6hblock-reward-distance-population",
+    "name": "E91: 6h-block-extreme reward-distance population counter (E90 queue item 1)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "research",
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "war-formation/pine/e91-e90-6hblock-reward-distance-population.pine",
+    "description": "NOT a strategy candidate -- a population counter build (this lab's established HARD LESSON 10 pattern, same convention as wf-e81/wf-e90). Answers E90's own queue item 1: what is the reward distance to the PRIOR COMPLETED 6h block's own high/low extreme (p6hh - close for longs, close - p6hl for shorts) -- a strictly wider, non-look-ahead reference than E90's prior-1h-bucket extreme -- at the moment E82's gate stack (byte-identical goLong/goShort) fires, against a $2,000 shield? Same 1-bar-hold counter method as E90: every qualifying bar opens a trade whose qty field encodes which of six $500-wide bins the reward distance falls into (qty = binNumber/100), so get_trades (a free read after this one paid run) recovers the full binned distribution and long/short split from a single credit.",
+    "metrics": {
+      "netProfitPct": -0.10286423,
+      "profitFactor": 0.48943073,
+      "maxDrawdownPct": 0.11362998,
+      "totalTrades": 45,
+      "winRatePct": 31.11111111,
+      "avgTradePct": -0.00228587,
+      "sharpeRatio": -0.93801493,
+      "sortinoRatio": -0.04588782,
+      "commissionPaid": 82.4151165,
+      "avgWinningTrade": 3.521623428571,
+      "avgLosingTrade": -3.249511112903,
+      "ratioAvgWinLoss": 1.08373946,
+      "largestWin": 21.517383,
+      "largestLoss": -14.758175,
+      "avgBarsInTrade": 2,
+      "avgBarsWinning": 2,
+      "avgBarsLosing": 2,
+      "longTrades": 20,
+      "shortTrades": 25,
+      "barsEvaluated": 78567,
+      "rewardDistBinsAll": {
+        "under500": 20,
+        "500to1000": 13,
+        "1000to1500": 6,
+        "1500to2000": 3,
+        "2000to2500": 1,
+        "over2500": 2
+      },
+      "rewardDistBinsLong": {
+        "under500": 9,
+        "500to1000": 6,
+        "1000to1500": 3,
+        "1500to2000": 2,
+        "2000to2500": 0,
+        "over2500": 0
+      },
+      "rewardDistBinsShort": {
+        "under500": 11,
+        "500to1000": 7,
+        "1000to1500": 3,
+        "1500to2000": 1,
+        "2000to2500": 1,
+        "over2500": 2
+      },
+      "under500Pct": 44.44444444,
+      "atOrAbove1500Pct": 13.33333333,
+      "atOrAbove2000Pct": 6.66666667
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1TY1JJKRXZVBS5BFH1S2ZC3",
+      "strategyId": "01M1TY1JQ84AGXRKJVC4S2Y9N8",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1TY1JJKRXZVBS5BFH1S2ZC3",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-06T00:00:00Z"
+    },
+    "verdict": "THE 6h-BLOCK REFERENCE IS MEASURABLY WIDER THAN E90's 1h REFERENCE, BUT STILL CANNOT SUPPORT A LEVEL-TARGET DESIGN AGAINST A $2,000 SHIELD AT ANY MINRRV THAT BOTH MEANS SOMETHING AND CLEARS RATCHET V2's 30-TRADE FLOOR. The share of trades under $500 falls from E90's 93.3% to 44.4%, and for the first time trades reach the $1,500-2,000 (3 trades), $2,000-2,500 (1) and >=2,500 (2) bins -- 6 of 45 (13.3%) trades clear $1,500, 3 of 45 (6.7%) clear $2,000. This confirms the registered prediction that a 6x-wider bucket produces a materially wider distribution. But the practical conclusion does not follow: to clear the 30-trade RATCHET floor requires admitting at least bins 1-3 (31 of 45 trades), i.e. minRRv at or below roughly 0.25-0.5 (reward distance $500-1000 against a $2,000 shield) -- and even minRRv=0.5 (reward >= $1,000, bins 3-6 only) admits just 12 of 45 trades, far short of 30. A minRRv that actually screens for a reward proportionate to the shield (>=1.0, i.e. reward >= $2,000) admits only 3 trades. There is no minRRv on this reference, this gate stack and this shield width that is simultaneously a meaningful risk floor and a RATCHET-viable sample -- the same structural conclusion as E90, reached at a materially better (but still insufficient) distribution.",
+    "notes": "Diagnostic only, not a ratchet decision -- no KEEP/REJECT applies. Closes E90's queue item 1: the 6h block's own extreme was the one remaining wider reference this lab's structural cascade already computes (no HTF fetch needed, no new look-ahead), and it has now been measured and found insufficient too. This appears to close the level-target redesign line on the 15m track entirely for a $2,000 shield -- no further widening is available within the cascade's own already-built tiers (6h is the widest block the cascade defines). A materially WIDER shield (opening more headroom below any minRRv) or a smaller shield (lowering the bar the reward distance must clear) would shift this arithmetic, but shieldUsd sweeps on this 15m track are outside this cycle's one-credit budget and are not what E90's queue asked for. e58a (long, 1m) and E71 (short, 1m) remain the untouched 1m-track reference builds; E80/E82 and E87 (15m) remain status: research. The HARD LESSON 48 drawdown-allowance RULE QUESTION blocking E74/E77 remains open, unresolved, awaiting the user. HARD LESSON 18 correction (documented in the pine file's own header): E90's queue text described the 6h block's own high/low as 'already computed for bullRegime/bearRegime, no new state' -- this was imprecise. bullRegime/bearRegime read grnPrev/cntPrev, a green-candle COUNT, not a price extreme; no 6h high/low tracker existed in this lab's 15m pine before this file. The new state (c6hh/c6hl/p6hh/p6hl) follows the exact bucket-transition pattern already proven correct for c1hh/c1hl/p1hh/p1hl (LESSON 8 latch ordering preserved: p6hh/p6hl captured in the same `if new6` block, before grnCur/cntCur reset and before c6hh/c6hl reseed). SCHEDULING NOTE: the prompt that triggered this cycle was stale -- it again described lab state as of E66 ('no champion, no candidate... continue numbering after E66', short-leg entry-geometry framed as the open question) and asked for shield/entry-geometry work already completed and superseded by E67-E90 (the margin-sizing fix, the completed four-term binding sweeps on both legs, E80's bidirectional 15m result, and E89/E90's level-target population work). Per this lab's own repeated precedent (E81, E89, E90 all flagged the same staleness), the docs won: this cycle followed EXPERIMENT-LOG.md's actual current state and worked E90's real open queue item 1 instead of re-deriving E64a-E66 territory a fourth time."
   }
 ]
