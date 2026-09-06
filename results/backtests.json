@@ -4071,5 +4071,55 @@
       "verifiedAt": "2026-09-06T00:00:00Z"
     },
     "verdict": "H1 (2022-01-01 to 2024-06-08) only, one run authorized at the 250-500 credit tier. PF 1.01561201 nominally clears the kill rule but by a razor-thin margin (breakeven win rate at this payoff is 39.80%, achieved 40.17% -- a 0.37pp margin). Trade count 463 is 32% over the board's own settled 60-350 workable-frequency band and repeats Attack 33/89's cost-death signature: gross edge per trade is $11.26 (netProfit + commissionPaid, over 463 trades) with commission eating 87.5% of gross (worse than Attack 37's 83.5%). Max drawdown 39.74% is worse than every other candidate that ever cleared H1 on this board. DISCARDED without spending the second credit on H2, per Attack 89's own precedent (a nominal PF>1.0 clear at a cost-signature trade count is not run further)."
+  },
+  {
+    "id": "attack100-price-volume-correlation-dwell-reclaim-long-h1",
+    "name": "Attack 100: Price/volume correlation dwell-reclaim LONG (bare, new mechanism) -- pre-2024 half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack100-price-volume-correlation-dwell-reclaim-long.pine",
+    "description": "Genuinely new mechanism per Attack 99's queue item 1 (remaining untried families after 99: ta.sar, ta.tsi, ta.wpr [flagged near-redundant with ta.stoch, skipped], ta.iii [same cumulative-volume domain as ta.obv/ta.wad/ta.nvi/ta.wvad, already four-deep], ta.percentrank [same range-position domain as ta.stoch]). Claim: ta.correlation(close, volume, corrLen), a rolling Pearson correlation between the CLOSE and VOLUME series -- a bounded [-1,+1] co-movement statistic never used on this board and structurally unrelated to every prior volume construction (all of which read volume alone, weighted or cumulative) or oscillator (all of which read price alone, as a deviation-from-mean or range-position ratio) -- dwelling below zero for at least 10 consecutive bars (a confirmed price/volume divergence regime) then crossing back above zero marks a shift to price/volume alignment, a tradeable reclaim. Long only, bare mechanism, no filter stack. Stop: 20-bar structural swing low frozen one bar before entry. Target: 100-bar structural high, excluded (not clamped) below a 1.0 reward:risk floor. R floor 0.8% of price, excluded not clamped. Max 192 bars in trade.",
+    "metrics": {
+      "netProfitPct": -43.1127413,
+      "profitFactor": 0.86009783,
+      "maxDrawdownPct": 57.33555434,
+      "totalTrades": 378,
+      "winningTrades": 135,
+      "losingTrades": 243,
+      "winRatePct": 35.71428571,
+      "avgTradePct": -0.11405487,
+      "avgWinningTrade": 196.333887792593,
+      "avgLosingTrade": -126.816250953704,
+      "ratioAvgWinLoss": 1.54817609,
+      "largestWin": 1180.1631465,
+      "largestLoss": -611.845038,
+      "avgBarsInTrade": 64.81481481,
+      "avgBarsWinning": 99.83703704,
+      "avgBarsLosing": 45.35802469,
+      "sharpeRatio": -0.68853605,
+      "sortinoRatio": -0.37400728,
+      "commissionPaid": 3132.805229750001,
+      "grossProfit": 26505.074851999987,
+      "grossLoss": 30816.34898174998,
+      "longTrades": 378,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1V6VNXQARWV2FQSY0FFRYNP",
+      "strategyId": "01M1V6VP4NPHG5X4RRPKNP2V0T",
+      "resultId": "01M1V6VNXPKA661TMSH883KTPD",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1V6VNXPKA661TMSH883KTPD",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-06T00:00:00Z"
+    },
+    "verdict": "H1 (2022-01-01 to 2024-06-08, the never-tuned pre-2024 half) FAILS the kill rule cleanly: PF 0.86009783 on 378 trades (well above LESSON 12's 30-trade floor, and inside the board's settled 60-350 workable-frequency band). Win rate 35.71% (135W/243L), avg winner $196.33, avg loser -$126.82, achieved payoff 1.548 against a 39.28% breakeven win rate -- achieved falls short by 3.57pp, not a borderline miss. Net -43.11%, max drawdown 57.34% -- worse than every H1 half that has ever cleared 1.0 on this board. Per the kill rule, DISCARDED immediately: no H2 run, no filter rescue. 458 credits at cycle start (250-500 tier, one run authorized); one credit spent. ta.correlation becomes a consumed indicator family alongside ta.stoch (98), ta.wvad (99), ta.macd (96), ta.wad (93), ta.linreg (91/92) and ta.supertrend (89/90)."
   }
 ]

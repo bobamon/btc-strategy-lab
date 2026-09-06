@@ -10710,3 +10710,110 @@ materially different position from "indistinguishable from noise", and it is the
 - Harvey & Liu, *False (and Missed) Discoveries in Financial Economics* (J. Finance 2020) — https://people.duke.edu/~charvey/Research/Published_Papers/P143_False_and_missed.pdf
 - Harvey, *Backtesting* (CME) — https://www.cmegroup.com/education/files/backtesting.pdf
 - *An Evaluation of Alternative Multiple Testing Methods for Finance Applications* — https://www.fdpinstitute.org/resources/FDP%203.0/2024-Q2/Topics%20in%20Financial%20Data%20Science/9.3%20An%20Evaluation%20of%20Alternative%20Multiple%20Testing%20Methods.pdf
+
+# ATTACK 100 — PRICE/VOLUME CORRELATION REGIME DWELL-RECLAIM, LONG. A GENUINELY NEW MECHANISM, DISCARDED CLEANLY ON THE KILL RULE.
+
+**Numbering note:** continues after Attack 99, the last numbered entry on the board. The stored scheduled
+prompt again describes a board state ("Attack 37, build its filter stack") over ninety-nine attacks
+stale, instructing "continue numbering after 37." The docs override it, again, per the prompt's own
+standing instruction: Attack 37 was closed on cost by Attack 41; the OBV-divergence stack (66/68/82/83)
+is CLOSED at three terms; SuperTrend (89/90), linreg-channel (91/92), Williams A/D (93), COG trough-turn
+(94/95), MACD zero-line flip (96), CCI extreme-dwell (97), Stochastic oversold-dwell (98) and WVAD
+accumulation-dwell (99) are all discarded, shelved, untestable or closed.
+
+**This cycle also read the board's most recent entry ("Counting Families Instead Of Trials"), which
+supersedes the statistical audit's earlier "stop generating new mechanisms" framing.** That correction
+concluded the board's best result is "marginal, not dead" and its own queue explicitly names "a genuinely
+unrelated mechanism" as the cheapest way to add real information, while warning only against piling more
+variants onto an already-saturated family (twenty OBV-divergence variants). This cycle is exactly that:
+one new, structurally unrelated indicator, one bare test — not a resumption of OBV tuning.
+
+Credits at cycle start: 458 (250-500 tier per the mandate) → **one run authorized, pre-2024 half only.**
+
+## THE MECHANISM AND WHAT IT CLAIMS
+
+`ta.correlation(close, volume, corrLen)` is a rolling Pearson correlation coefficient between the CLOSE
+and VOLUME series, bounded [-1, +1]. Per Attack 99's own queue item 1, the remaining untried indicator
+families were `ta.sar`, `ta.tsi`, `ta.wpr` (flagged near-redundant with `ta.stoch`, skipped), `ta.iii`
+(same cumulative-volume domain as `ta.obv`/`ta.wad`/`ta.nvi`/`ta.wvad`, already four-deep) and
+`ta.percentrank` (same range-position domain as `ta.stoch`). None of those is a clean new domain.
+`ta.correlation` is: no prior attack on this board has tested a claim about the SIGN OF A RELATIONSHIP
+BETWEEN TWO SERIES — every volume construction so far reads volume alone (weighted or cumulative), every
+oscillator reads price alone (deviation-from-mean or range-position). This reads whether price movement
+currently agrees or disagrees with volume movement.
+
+**The claim under test:** `corr` dwelling below zero for at least 10 consecutive bars (a confirmed
+price/volume divergence — price and volume disagreeing, the signature of a distribution phase), then
+crossing back above zero (price and volume realigning), marks a tradeable reclaim. Long only. Stop:
+20-bar structural swing low frozen one bar before entry (LESSON 5). Target: 100-bar structural high,
+excluded below a 1.0 reward:risk floor (HARD LESSON 41). R floor 0.8% of price, excluded not clamped
+(LESSON 3). Max 192 bars in trade. `dwellBars` (10) kept deliberately unequal to and less than `corrLen`
+(20), per Attack 97's collision lesson. Pine:
+`strategies/pine/attack100-price-volume-correlation-dwell-reclaim-long.pine` (full audit header inline,
+mirroring Attacks 96-99's construction for direct comparability).
+
+**Pre-run audit, one line per leg:**
+  R ≥ 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rawR = close - stopPx`, never clamped.
+  Stop beyond STRUCTURE (LESSON 5) — `ta.lowest(low, 20)[1]`, never a function of `corr`.
+  Each leg separately (LESSON 6) — long only this cycle; short (`corr` crossing back below zero after a
+       sustained dwell above zero, same structural stop/target mirrored to the downside) is the standing
+       structural asymmetry, queued exactly as every prior fresh-mechanism cycle's short.
+  BINDING (E17) — four independently-shrinking terms: `crossUp`, `dwellOk`, `rBig`, `rrOk`.
+  REDUNDANCY (E14) — `corr` reads a PRICE-VOLUME CO-MOVEMENT domain, zero dependency on cumulative volume
+       totals (`ta.obv`/`ta.wad`/`ta.nvi`/`ta.wvad`) or a deviation/range-position ratio
+       (`ta.cci`/`ta.rsi`/`ta.mfi`/`ta.stoch`); `belowCount` (temporal persistence), `stopPx` (price
+       structure), `rBig`/`rrOk` (risk/reward geometry) are four further independent domains.
+  LATCH IN SEQUENCE (LESSON 8) — N/A by construction: `dwellOk` reads bars strictly before the current
+       one, `crossUp` reads the transition into the current bar; disjoint ranges, no arm/confirm split.
+  Frequency estimate registered before running: **30-400 trades per half**, wide band anchored loosely
+  between Attack 98's Stochastic (37, too thin) and Attack 99's WVAD (463, too frequent) — no prior
+  correlation construction on this board to anchor against more tightly.
+
+**Outcomes registered before the run (LESSON 17):** H1 above 1.0 and inside 60-350 trades → queue an H2
+run before any filter work. H1 above 1.0 but outside that band → report direction and magnitude, apply
+Attack 89/99's cost-signature precedent if warranted. Under ~30 trades → untestable, no ratio quoted. H1
+below 1.0 → DISCARDED immediately, no H2, no rescue.
+
+## THE RESULT — H1 ONLY (2022-01-01 → 2024-06-08)
+
+| Metric | Attack 100a (H1) |
+|---|---|
+| Trades | **378** |
+| Win rate | 35.71428571% (135W/243L) |
+| Profit factor | **0.86009783** |
+| Net return | -43.1127413% |
+| Max drawdown | **57.33555434%** |
+| Avg winner / loser | $196.33 / **-$126.82** |
+| Achieved win/loss ratio | 1.54817609 |
+| Commission paid | $3,132.81 |
+| Gross profit / loss | $26,505.07 / $30,816.35 |
+
+**Breakeven win rate at this payoff is 39.28% (1/(1+1.54817609)); achieved is 35.71% — a 3.57pp shortfall,
+not a borderline miss.** Max drawdown (57.34%) is the worst H1 half this board has ever recorded on a
+freshly-tried mechanism — worse than Attack 99's 39.74% and every candidate that ever cleared 1.0.
+
+## THE VERDICT — DISCARDED, KILL RULE APPLIED IMMEDIATELY
+
+**H1 fails cleanly.** Per the kill rule, no H2 run and no filter rescue. `ta.correlation` becomes a
+consumed indicator family alongside `ta.stoch` (98), `ta.wvad` (99), `ta.macd` (96), `ta.wad` (93),
+`ta.linreg` (91/92) and `ta.supertrend` (89/90).
+
+Record: `attack100-price-volume-correlation-dwell-reclaim-long-h1` (**rejected**), `provenance.jobId`
+`adhoc_01M1V6VNXQARWV2FQSY0FFRYNP` from `trader.dev`.
+
+## QUEUE
+
+1. **Remaining untried indicator families**: `ta.sar`, `ta.tsi`, `ta.iii` (volume-only, low information
+   value per the family-count logic — four volume constructions already tried), `ta.percentrank`
+   (range-position domain already tried via Stochastic). Genuinely unrelated ground is getting scarce;
+   the next cycle should weigh a structurally different axis (session/calendar, or a filter-stack
+   revisit on an already-both-halves-positive candidate) against another single-indicator bare test.
+2. **Attack 83 remains the board's strongest both-halves candidate on PF** (1.61044869/1.15365198,
+   88/79 trades); **Attack 88 holds the board's highest recorded PF at n≥30** (2.021320/1.154330).
+   Unaffected by this cycle.
+3. **Attack 37's filter-stack track remains CLOSED** (Attack 41) and is not reopened by this entry.
+4. **Per the family-counting entry two sections above, this new mechanism adds one family, not one
+   record among many** — the board's healthiest way to spend a credit right now, per its own stated
+   logic, and this cycle followed it rather than a fourth OBV-adjacent variant.
+5. Credits remaining after this cycle: 457 (one spent). Next cycle at this tier still runs H1-only for
+   any fresh mechanism; the two-run (full-pair) tier requires 500+.

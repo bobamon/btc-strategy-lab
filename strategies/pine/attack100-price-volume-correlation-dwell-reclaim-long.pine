@@ -1,0 +1,180 @@
+//@version=6
+// BTC ATTACK 100 - PRICE/VOLUME CORRELATION REGIME DWELL-RECLAIM, LONG. A GENUINELY NEW MECHANISM PER
+// ATTACK 99's QUEUE (remaining untried families after 99: ta.sar, ta.tsi, ta.wpr [flagged near-redundant
+// with ta.stoch, skipped], ta.iii [same cumulative-volume domain as ta.obv/ta.wad/ta.nvi/ta.wvad, already
+// four-deep], ta.percentrank [same range-position domain as ta.stoch, already tried at 98]). None of those
+// is a clean new domain. `ta.correlation` is a Pine v6 built-in never used anywhere on this board and is
+// mathematically unrelated to every indicator family tried so far: it is a bounded [-1,+1] Pearson
+// correlation coefficient between two SERIES over a rolling window, not a cumulative running total
+// (ta.obv/ta.wad/ta.nvi/ta.wvad), not a deviation-from-mean ratio (ta.cci/ta.rsi/ta.mfi), not a
+// high-low range-position ratio (ta.stoch), and not a smoothed-momentum difference (ta.macd/ta.tsi).
+//
+// The stored scheduled prompt again asks to "build Attack 37's filter stack," describing a board state
+// more than ninety-nine attacks stale. The docs override it, again, per the prompt's own standing
+// instruction: Attack 37 was closed on cost by Attack 41; the OBV-divergence stack (66/68/82/83) is
+// CLOSED at three terms (board's strongest both-halves candidate, PF 1.61044869/1.15365198, 88/79
+// trades); SuperTrend (89/90), linreg-channel (91/92), Williams A/D (93), COG trough-turn (94/95), MACD
+// zero-line flip (96), CCI extreme-dwell (97, untestable), Stochastic oversold-dwell (98, split) and WVAD
+// accumulation-dwell (99, discarded on cost) are all discarded, shelved, untestable or closed. The
+// board's own latest entry ("Counting Families Instead Of Trials") does NOT direct a stop on new
+// mechanisms -- it explicitly names "a genuinely unrelated mechanism" as the cheapest way to add real
+// information, while warning against piling more variants onto an already-saturated family (OBV, 20
+// variants). This build is exactly that: one new, structurally unrelated indicator, one bare test.
+// Numbering continues after Attack 99, the last numbered entry on the board.
+//
+// ==================== THE CLAIM UNDER TEST ====================
+// corr = ta.correlation(close, volume, corrLen), a rolling Pearson correlation between the CLOSE series
+// and the VOLUME series over a short window. In a distribution phase, price tends to fall while volume
+// rises on the down bars (a negative price/volume correlation -- selling pressure confirmed by
+// participation). In a healthy reclaim, price and volume start moving together again (rising price on
+// rising volume, or falling volume as price stabilises) -- the correlation crosses back toward and
+// through zero. The claim: corr dwelling below zero for a sustained stretch (confirmed negative
+// price/volume relationship, i.e. a real distribution regime, not a one-bar wobble) then crossing back
+// above zero marks a shift from price-volume divergence to price-volume alignment -- a tradeable reclaim.
+// This is a claim about the SIGN OF A RELATIONSHIP BETWEEN TWO SERIES, a domain no prior attack on this
+// board has tested (every volume construction so far reads volume alone, weighted or cumulative; this
+// reads how volume co-moves with price). Long only this cycle. Pine:
+// `strategies/pine/attack100-price-volume-correlation-dwell-reclaim-long.pine`.
+//
+// ==================== AVOIDING ATTACK 97's DIAGNOSED FAILURE MODE ====================
+// Attack 97's root cause: dwellBars was set EQUAL to the indicator's own lookback length, colliding with
+// a construction that already actively restores itself toward zero within that same window, crashing the
+// trade count to n=3. Per that lesson (reused at 98/99), this build keeps `corrLen` (the correlation
+// window, 20) and `dwellBars` (the minimum consecutive bars corr must stay below zero before the cross,
+// 10) deliberately UNEQUAL and dwellBars < corrLen, so the dwell is not asking the window to outlast
+// itself.
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS ====================
+// corr = ta.correlation(close, volume, corrLen) -- a single built-in call, not a UDF, not an array.
+// belowCount is a `var int` plain historical tally: belowCount := corr < 0 ? belowCount[1] + 1 : 0 -- not
+// a separately-armed/invalidated latch, so HARD LESSON 8's arm-vs-death race does not apply: the state IS
+// the trigger's own precondition, read one bar before the cross via belowCount[1]. dwellOk =
+// belowCount[1] >= dwellBars, checked ON the crossover bar itself -- safe because dwellOk reads bars
+// STRICTLY BEFORE the current one while crossUp reads the transition INTO the current bar, so the two
+// clauses read disjoint bar ranges and can both be true together by construction (byte-identical safety
+// argument to Attacks 96/97/98/99). crossUp = ta.crossover(corr, 0). armEvent = crossUp and dwellOk and
+// flat -> immediate entry, no separate arm/confirm-later-bar split. Stop: STRUCTURAL, ta.lowest(low,
+// lb)[1], the lb-bar swing low frozen the bar before entry (LESSON 5) -- never the corr value. R floor:
+// EXCLUSION, not clamping (LESSON 3). Target: STRUCTURAL LEVEL (HARD LESSON 41), ta.highest(high,
+// targetLookback)[1], excluded unless it clears a 1.0 reward:risk floor against the frozen stop --
+// identical geometry to Attacks 96/97/98/99 for direct comparability.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - EXCLUSION via rBig on rawR = close - stopPx, never clamped to a wider stop.
+//   Stop beyond STRUCTURE (LESSON 5) - stopPx = ta.lowest(low, lb)[1], the lb-bar swing low frozen one bar
+//        before entry, never a function of corr and never the entry bar's own low.
+//   Each leg separately (LESSON 6) - LONG ONLY this cycle; short (corr crossing back below zero after a
+//        sustained dwell ABOVE zero, same structural stop/target construction mirrored to the downside) is
+//        the standing structural asymmetry, queued exactly as every prior fresh-mechanism cycle's short.
+//   BINDING (E17) - four independently-shrinking terms: crossUp (the zero-line transition itself), dwellOk
+//        (excludes flickers that did not sit below zero long enough), rBig (excludes stop-too-close
+//        setups), rrOk (excludes target-too-close setups against the 100-bar structural high).
+//   REDUNDANCY (E14) - corr reads a PRICE-VOLUME CO-MOVEMENT domain: a bounded correlation coefficient
+//        with zero dependency on cumulative volume totals (unlike ta.obv/ta.wad/ta.nvi/ta.wvad, all of
+//        which read volume alone, weighted or summed), zero dependency on a deviation-from-mean or
+//        range-position ratio (unlike CCI/RSI/MFI/Stochastic), and zero dependency on a moving-average
+//        difference (unlike MACD/TSI/SuperTrend/EMA crossover). It answers a different question entirely
+//        -- not "how much/where is volume" or "how far has price moved from its mean" but "does price
+//        movement currently AGREE OR DISAGREE with volume movement." belowCount reads a
+//        TEMPORAL-PERSISTENCE domain; stopPx reads a PRICE-STRUCTURE domain with zero dependency on corr;
+//        rBig reads a RISK-GEOMETRY domain; rrOk reads a REWARD-GEOMETRY domain from a longer window
+//        (targetLookback 100 > lb 20 > corrLen 20). Independent domains, no restatement of the same
+//        information twice.
+//   LATCH IN SEQUENCE (LESSON 8) - N/A BY CONSTRUCTION, explained above: no arm-now/confirm-later split,
+//        so no latch exists for a subsequent event to invalidate before the trigger reads it. dwellOk and
+//        crossUp read disjoint bar ranges ([1]-and-earlier vs. the current bar's transition), so they
+//        cannot be mutually exclusive the way a same-bar coil+thrust or zone-tap+engulf conjunction can be.
+//   OCCUPANCY (LESSONS 24/28/29) - `flat` (strategy.position_size == 0) gates entry so a live position can
+//        never re-enter on a later crossover before the current trade closes.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity, single entry id "L", no partials, no scale-outs;
+//        expect totalTrades == unique entries, cascadeRatio 1, maxCascadeDepth 1.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4): No prior attack has computed a rolling
+// price/volume correlation on this engine. A 20-bar Pearson correlation between two noisy series
+// oscillates readily and has no strong restoring pull toward its own extremes (unlike CCI, which is
+// explicitly a deviation-from-mean measure with a soft pull back to zero) -- structurally it could run
+// either much thinner (if 10-bar sustained-negative dwells are rare because corr flips sign often) or much
+// thicker (if it flips less than expected and every flip clears the dwell) than prior fresh mechanisms.
+// Anchored as a wide bracket against this cycle's two most recent comparables: Attack 98's Stochastic
+// (37, too thin to advance) and Attack 99's WVAD (463, too frequent to advance). Registered estimate:
+// **30-400 trades per half**, wide band, low confidence -- no prior correlation construction on this
+// board to anchor against more tightly.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17). BARE MECHANISM, H1 ONLY (the never-tuned pre-2024 half,
+// per the kill rule; credits checked at 458 -> the 250-500 tier -> one run authorized this cycle):
+//   * H1 ABOVE 1.0 AND TRADES INSIDE ~60-350 (the board's own settled workable band) -> the price/volume
+//     correlation dwell-reclaim thesis has a real bare edge at a workable frequency; queue an H2 run
+//     before any filter work (the standard Attack 37/91/96/98 precedent -- both halves before a stack is
+//     earned).
+//   * H1 ABOVE 1.0 BUT TRADES FAR OUTSIDE ~60-350 -> report which direction and by how much; a follow-up
+//     would retune corrLen/dwellBars, not add a filter yet. If the count repeats Attack 33/89/99's
+//     cost-signature shape (nominal PF clear, cost eating most of gross), apply Attack 89/99's own
+//     precedent and discard without spending the second credit.
+//   * TRADES UNDER ~30 -> UNTESTABLE per LESSON 12's floor; no ratio quoted, no H2 run.
+//   * H1 BELOW 1.0 -> DISCARDED by the kill rule immediately. No H2 run, no filter rescue. ta.correlation
+//     becomes a consumed indicator family alongside ta.stoch (98), ta.wvad (99), ta.macd (96), ta.wad
+//     (93), ta.linreg (91/92) and ta.supertrend (89/90).
+//   * A MAJORITY WIN RATE WITH ratioAvgWinLoss WELL BELOW 1.0 -> HARD LESSON 53's inverted-payoff shape;
+//     report it as that, and compute the breakeven win rate (1/(1+payoff)) before calling it an edge.
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside net and max drawdown
+//   (LESSONS 36/39 and the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack100 Price-Volume Correlation Dwell-Reclaim Long", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+corrLen        = input.int(20, "Price/volume correlation window")
+dwellBars      = input.int(10, "Min consecutive bars corr must be below zero before the cross")
+lb             = input.int(20, "Structural swing lookback (bars)")
+targetLookback = input.int(100, "Structural target lookback (bars)")
+minRpct        = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+minRR          = input.float(1.0, "Min reward:risk from the structural target (exclusion floor)")
+maxBars        = input.int(192, "Max bars in trade")
+
+corr = ta.correlation(close, volume, corrLen)
+
+var int belowCount = 0
+belowCount := corr < 0 ? belowCount[1] + 1 : 0
+
+crossUp = ta.crossover(corr, 0)
+dwellOk = belowCount[1] >= dwellBars
+
+flat = strategy.position_size == 0
+
+armEvent = crossUp and dwellOk and flat
+
+stopPx = ta.lowest(low, lb)[1]
+rawR   = close - stopPx
+minR   = close * minRpct / 100
+rBig   = rawR >= minR
+
+targetPx = ta.highest(high, targetLookback)[1]
+rrOk     = (targetPx - close) >= rawR * minRR
+
+goLong = armEvent and rBig and rrOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if goLong
+    strategy.entry("L", strategy.long)
+    slPx   := stopPx
+    tpPx   := targetPx
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(corr, title="PriceVolCorr")
+plot(belowCount, title="BelowZeroDwellCount")
