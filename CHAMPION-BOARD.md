@@ -8777,3 +8777,79 @@ even a clean H2 pass would put it below Attack 83 on risk, not above it.
 6. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if that
    family is revisited before another fresh mechanism.
 7. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+
+---
+
+# ATTACK 92 — QUEUE ITEM 1 ON ATTACK 91: H2 RUN. DISCARDED — H2 FAILS, JOINS THE ONE-HALF-ONLY LIST.
+
+The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") more than
+90 attacks stale, instructing "continue numbering after 37." **The docs override it, again**, per the
+prompt's own instruction: Attack 37 closed on cost at Attack 41; the OBV-divergence filter stack on Attack
+66/68/82/83 is CLOSED at three terms; the SuperTrend flip family (Attacks 89/90) is discarded; Attack 91's
+own queue item 1 said to run H2 on the byte-identical bare mechanism next cycle, credits permitting, before
+any filter work. This cycle is that H2 run. Numbering continues after Attack 91, the last entry on the
+board.
+
+## CREDITS AND WHICH RUN THIS CYCLE SPENT
+
+Balance at `get_credits`: 486 (the 250-500 tier → one run authorized). Attack 91's H1 already cleared the
+kill rule in a prior cycle, so re-running H1 this cycle would add no information; the single authorized run
+was spent on the outstanding measurement — H2 (2024-06-08 → 2026-09-01), byte-identical pine source, no
+parameters changed. One run spent, never more than two.
+
+## RESULT — H1 vs H2, SIDE BY SIDE
+
+| Metric | Attack 91a (H1, never-tuned) | **Attack 91b (H2, out-of-period)** |
+|---|---|---|
+| Profit factor | 1.19555356 | **0.83455321** |
+| Trades | 327 | 316 |
+| Win rate | 68.19571865% | 62.02531646% |
+| Achieved win/loss ratio | 0.55756758 | **0.51095095** |
+| Avg winner | $144.16 | $88.02 |
+| Avg loser | -$258.55 | -$172.27 |
+| Max drawdown | 27.43093746% | **43.98374415%** |
+| Net return | +52.58181202% | **-34.20198679%** |
+| Commission paid | $3,705.87 | $2,795.37 |
+| Largest loss | -$956.38 | -$758.93 |
+
+## THE VERDICT — DISCARDED, PER ATTACK 91's OWN PRE-REGISTERED OUTCOME TREE
+
+**H2 is below 1.0.** Per LESSON 17's outcomes registered before Attack 91's H1 run: "H2 below 1.0 → the
+mechanism is a single-half result and joins the discarded list alongside every other one-half-only pass on
+this board." That is the outcome that happened. The H1/H2 spread is the finding, reported not vetoed per
+the mandate: PF 1.196 → 0.835, drawdown 27.43% → 43.98% (+16.55pp, nearly double), achieved payoff 0.558 →
+0.511.
+
+**The failure mode flips category.** On H1, win rate (68.2%) cleared its breakeven threshold (~64.2% at
+that payoff) by a real ~4pp margin — a genuine edge, not HARD LESSON 53's shape. On H2, win rate (62.0%)
+falls SHORT of its own breakeven threshold (~66.2% at the H2 payoff) by ~4pp — the mechanism inverted into
+exactly the failure shape it had avoided on H1. A regression-channel breakout that worked on the trending,
+lower-volatility 2022-2024 half degraded on the higher-volatility, choppier 2024-2026 half; the trigger
+itself (a statistical-containment break) is not regime-stable across this board's two halves.
+
+Trade count held steady (327 → 316, essentially frequency-neutral), so this is not a sample-size artifact —
+the same rough frequency produced an opposite-sign result. Drawdown nearly doubled while the payoff ratio
+fell further, so this does not fit drawdown category 3 (bleed on a positive edge, the category the mandate
+says is worth filtering) on H2 — the edge itself flipped sign, which no filter stack rescues (LESSON 49 /
+the kill-rule discipline the mandate already applies to a failing pre-2024 half).
+
+## WHAT THIS SETTLES
+
+**Attack 91 (linear-regression channel breakout, long) is DISCARDED.** No filter stack is warranted — the
+mandate reserves that for a mechanism that clears both halves (Attack 37's own standard, applied to itself
+at Attack 41), and this one does not. `ta.linreg` is now a consumed indicator family on this board, alongside
+OBV-divergence (66/68/82/83, closed) and SuperTrend (89/90, discarded).
+
+## QUEUE
+
+1. **The next cycle proposes ONE genuinely new mechanism** from the remaining untried indicator families:
+   `ta.sar`, `ta.cci`, `ta.stoch`, `ta.macd`, `ta.cog`, `ta.tsi`, `ta.wpr`, `ta.iii`, `ta.wad`, `ta.wvad`,
+   `ta.percentrank` (linreg now consumed, per this cycle).
+2. **Attack 83 remains the board's strongest both-halves candidate** (PF 1.61044869/1.15365198 on 88/79
+   trades, DD 11.08%/10.76%), unaffected by this cycle.
+3. **Attack 46 (long) remains a candidate alongside Attack 83**, unaffected by this cycle.
+4. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if that
+   family is revisited before another fresh mechanism.
+5. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+6. **This session cannot continue the new-engine cross-sectional track (Attacks 84-86)** — no
+   `backtest-lab`/`sweep_backtest` tool is available here, unaffected by this cycle.
