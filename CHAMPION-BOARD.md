@@ -9882,3 +9882,94 @@ Records: `attack98a-stoch-oversold-dwell-reclaim-long-h1` (status updated testin
 6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
 7. **Benchmark Audit II's queue item 1** (re-run Attack 83a/83b on a funding-aware engine) **remains queued
    for a local session with `backtest-lab`**, not available here.
+
+---
+
+# ██ ATTACK 86 — THE SURVIVORSHIP-IMMUNE CELLS, SPLIT-TESTED. BOTH SURVIVE, BOTH "WEAK", AND THE DECAY MATCHES THE LITERATURE.
+
+Executes queue item 2: split-test **only** BTC and ETH — the two cells no plausible 2017 selection rule
+excludes, and therefore the only two the survivorship objection cannot touch. Zero credits (connector
+route; the local `backtest-lab` server is down on a revoked key). Split at 2022-02-24, the engine's own
+midpoint.
+
+## THE RESEARCH PRIOR, REGISTERED BEFORE READING THE RESULT
+
+**McLean & Pontiff (2016)**, 97 return predictors: anomaly returns are **26% lower out-of-sample and
+58% lower post-publication** — the gap between the two bounding data-mining bias below and arbitrage
+crowding above. The 52-week-high effect was published by George & Hwang in **2004**; this window runs
+2017–2026, entirely post-publication. **The prior says expect substantial decay.**
+
+## THE RESULT
+
+| | BTC in-sample | BTC out-of-sample | ETH in-sample | ETH out-of-sample |
+|---|---|---|---|---|
+| Profit factor | 2.984192 | **1.923141** | 2.470999 | **1.686478** |
+| Trades | 32 | **24** | 43 | **29** |
+| Net | +1175.93% | +132.65% | +868.05% | +121.47% |
+| Buy & hold | +714.77% | +119.04% | +677.54% | **+0.70%** |
+| Win rate | 46.875% | 37.5% | 53.488372% | 44.827586% |
+| Max drawdown | 31.371167% | 42.680689% | 40.176151% | 38.8145% |
+
+**Engine verdict on both: `weak`** — *"Survives, but 89% of the return decayed out of sample… Treat the
+in-sample figure as an upper bound you will not see again."* (86% for ETH.)
+
+## WHAT SURVIVES AND WHAT DOES NOT
+
+**Survives:** both cells stay above PF 1.0 out of sample — 1.923141 and 1.686478 — and both still beat
+buy & hold there. Neither collapses, which is what a fitted result does.
+
+**Does not survive:** the magnitude. An 86–89% return decay is worse than McLean & Pontiff's 58%
+post-publication figure, and the in-sample profit factors should be treated as unrepeatable.
+
+**Neither out-of-sample half clears the 30-trade floor** — 24 and 29. So both out-of-sample profit
+factors are recorded and **not banked**, exactly as the full-sample cells were before the deep window
+fixed them. The floor keeps biting at every level of this analysis.
+
+## THE READING THAT CHANGES THE PICTURE, AND IT CUTS BOTH WAYS
+
+An "89% decay" sounds fatal until the benchmark is decayed alongside it:
+
+| Out-of-sample | strategy | buy & hold |
+|---|---|---|
+| BTC | +132.65% | +119.04% — **beats by 13.6 pp** |
+| ETH | +121.47% | **+0.70%** — **beats by 120.8 pp** |
+
+**Buy & hold decayed as hard or harder than the strategy did** — BTC's fell 714.77% → 119.04% (-83%),
+ETH's fell 677.54% → 0.70% (**-99.9%**). Most of the strategy's decay is the market's decay, not the
+mechanism's.
+
+**But that cuts against it too:** BTC's out-of-sample margin over holding is **13.6 points across 4.5
+years on 24 trades** — thin enough that it is not distinguishable from noise at this sample size. Only
+ETH's margin is large, and ETH's is flattered by a benchmark that returned essentially zero.
+
+## VERDICT — STILL NOT PROMOTED, AND THE OBJECTIONS ARE NOW ENUMERATED RATHER THAN OPEN
+
+| Objection | Status |
+|---|---|
+| Per-cell sample floor (full window) | ✅ **answered** — 51–97 trades per cell |
+| Ranking tracks buy & hold (HL54) | ✅ **answered** — decisively not |
+| It is just a trend filter | ✅ **answered** — beat a matched SMA control on both halves |
+| Out-of-sample survival | ⚠️ **survives, weak** — PF 1.92 / 1.69, heavy decay |
+| Survivorship bias | ⚠️ **unfixable on 8 cells; BTC and ETH are immune and both survive** |
+| Out-of-sample sample floor | ❌ **fails** — 24 and 29 trades |
+
+**This is the most thoroughly tested mechanism this project has produced, and it still does not clear
+promotion.** Every individual objection has been answered except the sample floor, which has now
+failed at the out-of-sample level after being fixed at the full-window level.
+
+## QUEUE
+
+1. **Do not tune anything to lift the out-of-sample sample count.** The window is already the full
+   archive; there is no more data on this engine.
+2. **A 4h → 1h port would multiply the sample** and is the only remaining honest route to an
+   out-of-sample half that clears 30. Per HARD LESSON 40 the 360-bar anchor must be re-derived as a
+   *duration*, not multiplied by four — 360 4h bars is 60 days, so the 1h equivalent is 1,440 bars.
+3. **Report exposure.** Still unread, still free, and it bounds how much of the buy & hold margin is
+   just time spent in cash.
+4. The eight survivor cells remain unusable as evidence and should not be re-run for reassurance.
+
+## SOURCES
+- McLean & Pontiff, *Does Academic Research Destroy Stock Return Predictability?* — https://www.fmg.ac.uk/sites/default/files/2020-08/Jeffrey-Pontiff.pdf
+- *Anomalies across the globe: Once public, no longer existent?* — https://www.sciencedirect.com/science/article/abs/pii/S0304405X19301618
+- *What Drives Anomaly Decay?* (AEA) — https://www.aeaweb.org/conference/2024/program/paper/SNQSBFkB
+- Micro Alphas, *Factor Decay* — https://microalphas.com/factor-decay/
