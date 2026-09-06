@@ -5,6 +5,13 @@
 //                ·  v3 2026-09-06 (tick #9, the stop-width gate — FINDING 18)
 //                ·  v4 2026-09-06 (tick #10, the touch tolerance — FINDING 19)
 //                ·  v5 2026-09-06 (tick #11, the volume gate — FINDING 20)
+//                ·  v6 2026-09-06 (tick #12, market structure / pivLen — FINDING 21)
+//
+// ⚠ v6 IS THE FIRST VERSION SINCE v2 WHOSE DEFAULT SIGNAL SET DIFFERS FROM ITS PREDECESSOR'S.
+//   v3, v4 and v5 all shipped their corrections behind switches that default to the old behaviour.
+//   v6's structure-invalidation rule ships ON, because it is a rule the source STATES rather than
+//   an interpretation of one it leaves open — the same treatment v2 gave the touch counter. Set
+//   "Structure invalidation" to "Confirmed pivots only (v1-v5)" to reproduce v5 exactly.
 //
 // NOT ONE NUMBER IN THIS FILE HAS EVER COME FROM A RUN. This workstream has no runId. Every
 // default here is either a source quote or a labelled interpretation; nothing is a measurement.
@@ -253,6 +260,47 @@
 //   figure in this corpus alongside module 11's 25 and 20; the instrument is not identified in
 //   that passage and the trade is one he is holding up as a mistake, so the caps are NOT retuned
 //   on it. It is recorded in FINDING 20 as an observation.
+//
+// ═══════════════════════════════════════════════════════════════════════════════════════════════
+// v6 — `pivLen` WAS THE LAST UN-AUDITED NUMBER, AND THE DEFECT IS NOT IN THE NUMBER (FINDING 21)
+// ═══════════════════════════════════════════════════════════════════════════════════════════════
+//  16. STRUCTURE INVALIDATION IS A PRICE EVENT IN THE SOURCE AND A CONFIRMED-PIVOT EVENT IN THE
+//      CODE. He kills a structure the instant price trades through the swing it is built on:
+//      "You see this level here. We did not break past the previous spot. So that previous higher
+//      high and higher low we didn't break past that" (6. 03:30-03:35); "now if price would have
+//      came down here and started to push down in this way BOOM that is now a lower low" (6.
+//      03:41). v1-v5 had no invalidation rule of their own — `bullStruct` simply stayed true until
+//      a NEW pivot confirmed and changed one of the four comparisons. `ta.pivotlow(low, 5, 5)`
+//      cannot confirm until pivLen bars after the swing low, so the gate stayed bullish for AT
+//      LEAST pivLen bars past the break — 25 min on 5m, 75 min on 15m — plus the entire length of
+//      the down leg, and permitted longs the whole way. v6 adds the price rule as the default,
+//      with "Confirmed pivots only" retained to reproduce v1-v5. IT MAY TAKE THE SIGNAL SET TO
+//      ZERO in chop; that is written down here BEFORE any chart is loaded, and the "Struct guard"
+//      dashboard row names it as the blocker if it does. HARD LESSON 8's check was run first: the
+//      arming event (a confirmed pivot low) guarantees the confirming bar's close sits ABOVE that
+//      low, so the latch cannot be killed by the price action that arms it.
+//  17. `pivLen` IS NOT A ONE-DIMENSIONAL KNOB, AND THE PRE-REGISTERED TEST LIST SAID IT WAS. It
+//      appears in three places: the structure gate (ta.pivothigh/low), the TRADED LEVELS themselves
+//      (`resLvl = lastPH`), and the ±pivLen exclusion window inside the touch counter. Changing it
+//      moves the direction gate, the price of every level, and the level-validation test at once.
+//      Any sweep of it is a three-parameter change and must be reported as one.
+//  18. THE CODE CANNOT BUILD A STRUCTURE STATE INSIDE A 15m NEW YORK SESSION. It needs two pivot
+//      highs AND two pivot lows. Two same-side pivots must sit at least pivLen+1 bars apart, and
+//      the outer two each need pivLen bars of confirmation, so the floor is
+//      pivLen + (pivLen+1) + pivLen + 1 = 17 bars at pivLen 5; a realistic alternating H-L-H-L
+//      sequence with half-swings of pivLen+1 is ~29. The NY session is 390 min = 26 bars on 15m
+//      and 78 on 5m. So on 15m the state is ALWAYS inherited from bars before 09:30, and on 5m it
+//      is for the first fifth to third of the session. Whether that is wrong is not resolvable
+//      from the source — he reads structure off a chart that shows overnight bars — so v6
+//      INSTRUMENTS it ("Struct age": the age of the oldest defining pivot and how many of the four
+//      formed pre-open) and asserts nothing. There is no recency bound on those pivots anywhere in
+//      the file, and the source states none either.
+//  19. WHAT IS CLEAN, RECORDED BECAUSE A CLEAN GATE IS ALSO A RESULT. `bullStruct = hh AND hl` is
+//      exactly "higher highs followed by higher lows" (6. 01:53). `consolidating` as the residual
+//      lumps a broadening range (higher high + lower low) in with the sideways one he actually
+//      describes (6. 06:04), but both are correctly excluded from trading, so the label is loose
+//      and the gate outcome is right. `pivLen = 5` itself is UNSOURCED — he draws swings by eye —
+//      and is NOT retuned here, for the reason in item 17.
 // ═══════════════════════════════════════════════════════════════════════════════════════════════
 
 indicator("Legacy Forex Trader — Complete Visualiser", overlay=true, max_lines_count=500, max_labels_count=500, max_boxes_count=500)
@@ -264,7 +312,11 @@ sessTime   = input.session("0930-1600", "Session (ET)",            group=gS)
 sessTZ     = input.string("America/New_York", "Timezone",          group=gS)
 
 gStruct = "Market structure"
-pivLen   = input.int(5,  "Swing pivot strength (bars each side)",  group=gStruct, minval=1)
+pivLen   = input.int(5,  "Swing pivot strength (bars each side)",  group=gStruct, minval=1,
+     tooltip="UNSOURCED — he draws swings by eye and states no bar count. v6 audit (FINDING 21): this is NOT a one-dimensional knob. pivLen sets (a) the structure gate, (b) the traded levels themselves (resLvl = the last pivot high), and (c) the ±pivLen exclusion window in the touch counter. Sweeping it moves all three at once, so it must not be pre-registered as a single-parameter test. Arithmetic that binds it: the code needs at least 2*pivLen + (pivLen+1) + 1 bars before ANY structure state can exist — 17 bars at pivLen 5, ~29 for a realistic four-swing sequence — against a 26-bar 15m New York session. Read the 'Struct age' dashboard row before changing it.")
+structInval = input.string("Price breaks the defining swing (6. 03:35)", "Structure invalidation",
+     options=["Price breaks the defining swing (6. 03:35)","Confirmed pivots only (v1-v5)"], group=gStruct,
+     tooltip="v6, FINDING 21 — the headline defect. The source kills a structure on a PRICE event: 'that previous higher high and higher low we didn't break past that... now if price would have came down here and started to push down in this way boom that is now a lower low' (6. 03:35-03:41). v1-v5 killed it on a CONFIRMED PIVOT event, which ta.pivotlow cannot deliver until pivLen bars AFTER the swing low — 25 min on 5m, 75 min on 15m, plus the length of the down leg. In that gap the direction gate still permitted trades in the direction price had already broken. This mode closes it: bullish structure dies the moment a close prints below the higher low it is built on, and re-arms only on a fresh confirmed pivot low. IT MAY TAKE THE SIGNAL SET TO ZERO in chop — that is written down BEFORE anyone runs it, and the 'Struct guard' dashboard row names it as the blocker if it does. 'Confirmed pivots only' reproduces v1-v5 exactly, for diffing.")
 
 gLvl = "Support / resistance"
 tolMode  = input.string("Fraction of the live max stop (v4 default)", "Touch tolerance unit", options=["Fraction of the live max stop (v4 default)","% of price (v1-v3 behaviour)"], group=gLvl,
@@ -357,13 +409,16 @@ pl = ta.pivotlow(low,   pivLen, pivLen)
 var float lastPH = na, var float prevPH = na
 var float lastPL = na, var float prevPL = na
 var int   lastPHbar = na, var int lastPLbar = na       // v2: needed to exclude a level's own pivot window
+var int   prevPHbar = na, var int prevPLbar = na       // v6: age instrumentation for FINDING 21
 
 if not na(ph)
     prevPH := lastPH
+    prevPHbar := lastPHbar
     lastPH := ph
     lastPHbar := bar_index - pivLen
 if not na(pl)
     prevPL := lastPL
+    prevPLbar := lastPLbar
     lastPL := pl
     lastPLbar := bar_index - pivLen
 
@@ -372,9 +427,62 @@ lh = not na(lastPH) and not na(prevPH) and lastPH < prevPH
 hl = not na(lastPL) and not na(prevPL) and lastPL > prevPL
 ll = not na(lastPL) and not na(prevPL) and lastPL < prevPL
 
-bullStruct = hh and hl          // "higher highs followed by higher lows"
-bearStruct = ll and lh          // "lower low, lower high"
+bullRaw = hh and hl             // "higher highs followed by higher lows"
+bearRaw = ll and lh             // "lower low, lower high"
+
+// ── 2b. STRUCTURE INVALIDATION — v6, FINDING 21 ───────────────────────────────────────────────
+// v1-v5 had no invalidation rule of their own: a structure state simply persisted until the NEXT
+// confirmed pivot changed one of the four comparisons. ta.pivotlow cannot confirm until pivLen
+// bars after the swing low, so between the moment price broke the higher low and the moment the
+// state changed there were AT LEAST pivLen bars — 25 min on 5m, 75 min on 15m — plus the whole
+// length of the down leg, during which `bullStruct` was still true and the direction gate still
+// permitted longs into a structure that had already broken.
+//
+// The source states the invalidation as a price event and never waits for a swing to complete:
+//   "You see this level here. We did not break past the previous spot. So that previous higher
+//    high and higher low we didn't break past that" (6. 03:30-03:35)
+//   "now if price would have came down here and started to push down in this way BOOM that is now
+//    a lower low" (6. 03:41)
+//
+// HARD LESSON 8 check, done before writing the latch: the arming event is a fresh confirmed pivot
+// low, and ta.pivotlow guarantees the pivLen bars after that low all have HIGHER lows, so the
+// confirming bar's close is necessarily above lastPL. The latch therefore cannot be killed by the
+// same price action that arms it — the failure mode v16/v17 of 3M Elite died on.
+var bool bullDead = false
+var bool bearDead = false
+if not na(pl)
+    bullDead := false                       // a fresh higher/lower low re-arms the bull reading
+if not na(ph)
+    bearDead := false
+if not na(lastPL) and close < lastPL
+    bullDead := true                        // price broke the higher low the bull count sits on
+if not na(lastPH) and close > lastPH
+    bearDead := true                        // price broke the lower high the bear count sits on
+
+useInval   = structInval == "Price breaks the defining swing (6. 03:35)"
+bullStruct = bullRaw and not (useInval and bullDead)
+bearStruct = bearRaw and not (useInval and bearDead)
+structKilled = useInval and ((bullRaw and bullDead) or (bearRaw and bearDead))
 consolidating = not bullStruct and not bearStruct   // "the gray zone... we don't trade it"
+
+// v6 instrumentation — the two arithmetic claims of FINDING 21, measured on the chart instead of
+// argued. (a) how old the four pivots that define the state actually are, and (b) how many of them
+// formed before today's New York open. On 15m the state CANNOT be built from inside the session:
+// the minimum is 2*pivLen + (pivLen+1) + 1 = 17 bars and a realistic four-swing sequence is ~29,
+// against 390/15 = 26 session bars. This row says whether that is happening, it does not assume it.
+var int sessStartBar = na
+if inSessRaw and not nz(inSessRaw[1], false)
+    sessStartBar := bar_index
+f_preSess(b) => na(b) or na(sessStartBar) ? 0 : (b < sessStartBar ? 1 : 0)
+structDefined = not na(lastPH) and not na(prevPH) and not na(lastPL) and not na(prevPL)
+float ageOldest = structDefined ? math.max(math.max(bar_index - lastPHbar, bar_index - prevPHbar),
+                                           math.max(bar_index - lastPLbar, bar_index - prevPLbar)) : na
+ageOldMins= na(ageOldest) ? na : ageOldest * timeframe.in_seconds() / 60.0
+nPreSess  = f_preSess(lastPHbar) + f_preSess(prevPHbar) + f_preSess(lastPLbar) + f_preSess(prevPLbar)
+minStructBars = 2 * pivLen + (pivLen + 1) + 1
+sessBarsTf    = math.round(390.0 / (timeframe.in_seconds() / 60.0))
+invalPx   = bullRaw ? lastPL : bearRaw ? lastPH : na
+invalDist = na(invalPx) ? na : math.abs(close - invalPx)
 
 if showStruct and not na(ph)
     label.new(bar_index - pivLen, ph, hh ? "HH" : lh ? "LH" : "H", style=label.style_label_down,
@@ -723,7 +831,7 @@ bgcolor(inSess and bearStruct     ? color.new(color.red, 94) : na,   title="Bear
 barcolor(useVol and not volOK ? color.new(color.gray, 50) : na,      title="No volume")
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────────────────────
-var table d = table.new(position.top_right, 3, 19, border_width=1, frame_width=1, frame_color=color.gray)
+var table d = table.new(position.top_right, 3, 21, border_width=1, frame_width=1, frame_color=color.gray)
 f_row(t, r, k, ok, v) =>
     table.cell(t, 0, r, k, text_color=color.white,  text_size=size.small, bgcolor=color.new(color.black,20), text_halign=text.align_left)
     table.cell(t, 1, r, ok ? "✔" : "✖", text_color=ok ? color.lime : color.red, text_size=size.small, bgcolor=color.new(color.black,20))
@@ -743,55 +851,75 @@ if showDash and barstate.islast
     f_row(d, 2, "Timeframe",  tfOK,         timeframe.period + "m" + (tfOK ? "" : "  ← he trades 5m/15m ONLY"))
     f_row(d, 3, "Instrument", true,         syminfo.ticker + "  → read as " + instNm + ", max stop " + str.tostring(maxStopPts, "#") + " pts")
     f_row(d, 4, "Structure",  not consolidating, st)
-    f_row(d, 5, "Resistance", resValid,     f_tch(resLvl, resDist, resRaw))
-    f_row(d, 6, "Support",    supValid,     f_tch(supLvl, supDist, supRaw))
-    f_row(d, 7, "Flipped",    not na(flipRes) or not na(flipSup),
+    // v6 instrumentation — FINDING 21's headline. v1-v5 could only kill a structure when the NEXT
+    // pivot confirmed, i.e. never sooner than pivLen bars after the swing that broke it. This row
+    // is the fifth zero-signal cause the dashboard can name, and it is the one most likely to be
+    // the cause in chop, which is exactly why it is instrumented rather than assumed.
+    f_row(d, 5, "Struct guard", not structKilled,
+         not useInval ? "v1-v5 mode — no price invalidation (structure dies only on a new pivot)"
+           : structKilled ? "INVALIDATED — price broke the " + (bullRaw ? "higher low" : "lower high")
+                            + " at " + str.tostring(invalPx, format.mintick) + "; waits for a fresh pivot"
+           : na(invalPx) ? "no structure to guard"
+           : "alive — dies on a close " + (bullRaw ? "below " : "above ") + str.tostring(invalPx, format.mintick)
+             + "  (" + str.tostring(invalDist, "#.#") + " pts away)")
+    // v6 instrumentation — the arithmetic claim, measured. At pivLen 5 the code needs >= 17 bars
+    // before any structure state can exist and ~29 for a realistic four-swing sequence, against 26
+    // bars in a 15m New York session. If that is right, this row reads "4 of 4 formed pre-open".
+    f_row(d, 6, "Struct age", structDefined and nPreSess == 0,
+         not structDefined ? "not yet defined — needs 2 highs AND 2 lows"
+           : "oldest defining pivot " + str.tostring(ageOldest, "#") + " bars / " + str.tostring(ageOldMins, "#")
+             + " min ago  ·  " + str.tostring(nPreSess) + " of 4 formed BEFORE today's open"
+             + "  ·  needs ≥" + str.tostring(minStructBars) + " bars, session is " + str.tostring(sessBarsTf, "#"))
+    f_row(d, 7, "Resistance", resValid,     f_tch(resLvl, resDist, resRaw))
+    f_row(d, 8, "Support",    supValid,     f_tch(supLvl, supDist, supRaw))
+    f_row(d, 9, "Flipped",    not na(flipRes) or not na(flipSup),
          (na(flipRes) ? "" : "res " + str.tostring(flipRes, format.mintick) + "  ") +
          (na(flipSup) ? "" : "sup " + str.tostring(flipSup, format.mintick) + "  ") +
          (na(flipRes) and na(flipSup) ? "none live" : (flipTrades ? "(can fire)" : "(drawn only)")))
-    f_row(d, 8, "Break",      brokeRes or brokeSup, brokeRes ? "broke RESISTANCE ✓" : brokeSup ? "broke SUPPORT ✓" : "waiting for a break")
-    f_row(d, 9, "Volume",     volOK,        na(volRat) ? "—" : str.tostring(volRat, "#.##") + "× baseline  (need > " + str.tostring(volMult, "#.##") + ")")
+    f_row(d, 10, "Break",     brokeRes or brokeSup, brokeRes ? "broke RESISTANCE ✓" : brokeSup ? "broke SUPPORT ✓" : "waiting for a break")
+    f_row(d, 11, "Volume",    volOK,        na(volRat) ? "—" : str.tostring(volRat, "#.##") + "× baseline  (need > " + str.tostring(volMult, "#.##") + ")")
     // v5 instrumentation — the baseline's own composition. 20 bars is 100 min on 5m and 300 on
     // 15m against a 390-min session, so at the open this row reads "20 of 20 outside the session"
     // on 15m. It is the fourth zero/near-inert-signal cause the dashboard can now name, and the
     // only one whose bias direction is signed: overnight volume is structurally lower, so a
     // contaminated baseline makes the gate LOOSER, not tighter.
-    f_row(d, 10, "Vol baseline", sessBaseLive or volOutBars == 0,
+    f_row(d, 12, "Vol baseline", sessBaseLive or volOutBars == 0,
          sessBaseLive ? "session-to-date, " + str.tostring(sessVolCnt) + " bars today  (v5 option)"
             : str.tostring(volLen) + " bars = " + str.tostring(volBaseMins, "#") + " min  →  "
               + str.tostring(volOutBars, "#") + " of them OUTSIDE the session"
               + (volOutBars > 0 ? "  ← partly overnight, gate is looser" : "  ← all in-session"))
     // v5: a stated three-state rule (9. 09:45-09:58) that v1-v4 rendered nowhere. Display only —
     // the threshold is printed because it is UNSOURCED and must read as a knob, not a finding.
-    f_row(d, 11, "Conviction", volOK,
+    f_row(d, 13, "Conviction", volOK,
          convTxt + (na(volRat) ? "" : "   (full ≥ " + str.tostring(volGoodMult, "#.##") + "× — UNSOURCED, display only)"))
     // which side's stop width is the live question depends on which side structure permits
     projR    = bullStruct ? projRlong : bearStruct ? projRshort : na
     stopOKnow= bullStruct ? stopOKlong : bearStruct ? stopOKshort : true
-    f_row(d, 12, "Stop width", stopOKnow, na(projR) ? "—" : str.tostring(projR, "#.#") + " pts  (max " + str.tostring(maxStopPts, "#") + " — he refused 64)")
+    f_row(d, 14, "Stop width", stopOKnow, na(projR) ? "—" : str.tostring(projR, "#.#") + " pts  (max " + str.tostring(maxStopPts, "#") + " — he refused 64)")
     // v3 instrumentation: the pad and the cap were in different units, and the pad was eating most
     // of the budget. This row makes that visible so a zero-signal chart can be attributed to the
     // right gate instead of being confused with v2's touch-counting correction.
-    f_row(d, 13, "Stop budget", stopBudget > 0,
+    f_row(d, 15, "Stop budget", stopBudget > 0,
          str.tostring(padNow, "#.##") + " pts pad (" + str.tostring(padPct, "#") + "% of cap)  →  "
          + (stopBudget > 0 ? str.tostring(stopBudget, "#.#") + " pts left for entry-to-level"
                            : "PAD ≥ CAP — no setup can ever pass"))
     // v4 instrumentation: the touch tolerance was a % of price while everything it has to be
     // commensurable with is in index points. This row is the third and last zero-signal cause on
     // the dashboard, so a blank chart can now be attributed rather than guessed at.
-    f_row(d, 14, "Level width", tolFitsBudget,
+    f_row(d, 16, "Level width", tolFitsBudget,
          "±" + str.tostring(tol, "#.##") + " pts  (band " + str.tostring(bandPts, "#.#") + ", "
          + str.tostring(tolPct, "#") + "% of cap)  →  "
          + (tolFitsBudget ? "fits inside the " + str.tostring(stopBudget, "#.#") + "-pt stop budget"
                           : "TOL > BUDGET — every tradeable break is still inside the touch band"))
-    f_row(d, 15, "Target",    true,      (useAdaptR ? (windowFull ? "1:" + str.tostring(rTargetUse, "#") + "  from mean " + str.tostring(avgAchR, "#.##") + "R of last " + str.tostring(cntR) + " (10._USING_DATA)"
+    f_row(d, 17, "Target",    true,      (useAdaptR ? (windowFull ? "1:" + str.tostring(rTargetUse, "#") + "  from mean " + str.tostring(avgAchR, "#.##") + "R of last " + str.tostring(cntR) + " (10._USING_DATA)"
                                                                   : "1:" + str.tostring(rTargetUse, "#") + "  FALLBACK — window " + str.tostring(cntR) + "/" + str.tostring(rrWindow) + " trades")
                                                     : "1:" + str.tostring(rTargetUse, "#") + "  fixed (adaptive rule off)"))
-    f_row(d, 16, "Trail rule", true,      trailMode + "   (source is ambiguous — see header)")
-    f_row(d, 17, "Trades today", underCap, str.tostring(tradesToday) + " / " + str.tostring(maxTrades) + "  (cap counts across NQ+YM)")
+    f_row(d, 18, "Trail rule", true,      trailMode + "   (source is ambiguous — see header)")
+    f_row(d, 19, "Trades today", underCap, str.tostring(tradesToday) + " / " + str.tostring(maxTrades) + "  (cap counts across NQ+YM)")
 
     // name the FIRST unmet condition, in his own order, so the dashboard says what is blocking
     blocker = not inSess        ? "NO TRADE — outside New York session"
+      : structKilled            ? "NO TRADE — structure INVALIDATED, price broke the swing it was built on (6. 03:35)"
       : consolidating           ? "NO TRADE — consolidation"
       : not (resValid or supValid) ? "WAIT — no level has " + str.tostring(minTouch) + " distinct touches yet"
       : not (brokeRes or brokeSup) ? "WAIT — no break of a validated level"
@@ -804,9 +932,9 @@ if showDash and barstate.islast
                     + (volDeadExit and not volOK ? "   [vol dead " + str.tostring(deadRun) + "/" + str.tostring(volDeadBars) + "]" : ""))
       : blocker
     vc = goLong ? color.green : goShort ? color.red : dir != 0 ? color.blue : color.new(color.gray,40)
-    table.cell(d, 0, 18, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
-    table.cell(d, 1, 18, "", bgcolor=vc)
-    table.cell(d, 2, 18, verdict, text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+    table.cell(d, 0, 20, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+    table.cell(d, 1, 20, "", bgcolor=vc)
+    table.cell(d, 2, 20, verdict, text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
 
 alertcondition(goLong,  "Legacy LONG",  "Legacy Forex: LONG — structure bullish, resistance broken, volume present")
 alertcondition(goShort, "Legacy SHORT", "Legacy Forex: SHORT — structure bearish, support broken, volume present")
@@ -839,3 +967,15 @@ plot(volRat,        "Volume vs baseline (×)",                display=display.da
 plot(volOK ? 1 : 0, "VolGatePass",                           display=display.data_window)
 plot(sessBaseLive ? 1 : 0, "SessionBaselineLive",            display=display.data_window)
 plot(deadRun,       "Consecutive no-volume bars in trade",   display=display.data_window)
+// v6 instrumentation — FINDING 21. The first two settle the headline (how often the price-based
+// invalidation fires, and how much of the time it is what is blocking a trade); the last three
+// settle the arithmetic claim about pivLen against the session length, on the same chart.
+plot(bullDead ? 1 : 0,     "BullStructInvalidated (v6)",          display=display.data_window)
+plot(bearDead ? 1 : 0,     "BearStructInvalidated (v6)",          display=display.data_window)
+plot(structKilled ? 1 : 0, "StructKilledThisBar (v6)",            display=display.data_window)
+plot(invalDist,            "Points to structure invalidation",    display=display.data_window)
+plot(ageOldest,            "Oldest defining pivot (bars ago)",    display=display.data_window)
+plot(ageOldMins,           "Oldest defining pivot (minutes ago)", display=display.data_window)
+plot(nPreSess,             "Defining pivots formed pre-open (0-4)", display=display.data_window)
+plot(bullRaw ? 1 : 0,      "BullStruct before invalidation (v1-v5)", display=display.data_window)
+plot(bearRaw ? 1 : 0,      "BearStruct before invalidation (v1-v5)", display=display.data_window)

@@ -1819,3 +1819,143 @@ diff, not a measurement.
 - **No past conclusion changes.** This workstream has still never banked a result, and that remains the
   correct state. As in ticks #8–#10, a run banked off v4 would have had its trade count shaped by this
   gate invisibly — luck, not process.
+
+---
+
+## ██ FINDING 21 — `pivLen = 5` WAS THE LAST UN-AUDITED NUMBER, AND THE DEFECT IS NOT IN THE NUMBER: THE STRUCTURE GATE KILLS A BROKEN STRUCTURE AT LEAST `pivLen` BARS LATE
+
+**Tick #12, 2026-09-06. Zero credits. No backtest, no `plan_backtest_window`, no engine call of any
+kind.** Source: `6._PRICE_ACTION_AND_MARKET_STRUCTURE` and `5._ANALYZING_TIME_FRAMES`, both Mamba
+(FINDING 6 checked first, per the standing first rule of this workstream), plus arithmetic on the
+Pine file's own constructs. Deliverable: `pine/VISUAL-legacy-forex-complete.pine` **v6**.
+
+Tick #11's queue item 4 named this as the last un-audited number. It was audited, and — as in tick
+#11, and against the pattern ticks #8/#9/#10 had established — **the number itself is not what is
+wrong with it.**
+
+### 21.1 THE HEADLINE — INVALIDATION IS A PRICE EVENT IN THE SOURCE AND A CONFIRMED-PIVOT EVENT IN THE CODE
+
+He kills a market structure the instant price trades through the swing that defines it, and he says
+so twice in nine seconds:
+
+> [03:30] *"You see this level here. We did not break past the previous spot"*
+> [03:35] *"So that previous higher high and higher low we didn't break past that now if price would have"*
+> [03:41] *"Came down here and started to push down in this way **boom that is now a lower low**"*
+> [03:47] *"Back up lower high back down lower low meaning we are now in a bearish market structure and prices no longer bullish"*
+> — `6._PRICE_ACTION_AND_MARKET_STRUCTURE`
+
+*"Boom that is now a lower low"* is a call made **as price pushes down**, not one made after a swing
+has completed and been confirmed from both sides.
+
+**v1–v5 had no invalidation rule of their own.** `bullStruct = hh and hl` compares the two most
+recent confirmed pivot highs and the two most recent confirmed pivot lows, and it stays true until
+a *new pivot confirms* and changes one of those comparisons. `ta.pivotlow(low, pivLen, pivLen)`
+cannot return a value until **pivLen bars after the swing low itself**. So:
+
+| | lag before a broken bullish structure can turn the gate off |
+|---|---|
+| **5m** | ≥ 5 bars = **≥ 25 minutes**, plus the length of the down leg |
+| **15m** | ≥ 5 bars = **≥ 75 minutes**, plus the length of the down leg |
+
+Against a 390-minute session and a trader whose stated purpose is *"we need to get in and we need
+to get out"* (`5.` [00:27]), **75 minutes is 19% of the entire trading day.** Throughout that
+window the direction gate still read BULLISH and `goLong` was still permitted into a structure that
+had already broken. The bias direction is signed and it is the harmful one: **the stale state always
+permits the direction price has just left.**
+
+**v6 fixes it, ON by default.** `bullStruct` now dies the moment a close prints below `lastPL` — the
+higher low it is built on — and re-arms only on a fresh confirmed pivot low; `bearStruct` mirrors it
+on `lastPH`. `"Confirmed pivots only (v1-v5)"` reproduces the old behaviour for diffing.
+
+**Two things are recorded before anyone loads a chart.**
+
+1. **This may take the signal set to zero in chop** — HARD LESSON 8's exact tell. It is instrumented
+   (a `Struct guard` dashboard row that names it as the blocker, plus three data-window plots),
+   not tuned. No threshold was invented to soften it.
+2. **HARD LESSON 8's generalised check was run first, and it passes.** The arming event is a
+   confirmed pivot low; `ta.pivotlow` guarantees the `pivLen` bars following that low all have
+   *higher* lows, so the confirming bar's close necessarily sits **above** `lastPL`. The latch
+   therefore cannot be killed by the same price action that arms it — the failure that killed 3M
+   Elite v16 and v17.
+
+**This is also the first version since v2 whose default signal set differs from its predecessor's.**
+v3, v4 and v5 each shipped their correction behind a switch defaulting to the old behaviour, because
+each was replacing an interpretation with another interpretation. This one replaces *no rule* with
+**a rule the source states outright**, which is the treatment v2 gave the touch counter. The
+distinction is deliberate and is the reason the default moved.
+
+### 21.2 `pivLen` IS NOT A ONE-DIMENSIONAL KNOB, AND THE PRE-REGISTERED TEST LIST IMPLIED IT WAS
+
+`pivLen` appears in **three** places in the file:
+
+| where | what it controls |
+|---|---|
+| `ta.pivothigh/ta.pivotlow(…, pivLen, pivLen)` | the structure gate's direction reading |
+| `resLvl = lastPH`, `supLvl = lastPL` | **the traded levels themselves** — every entry, stop and target price |
+| `math.abs(bi - lvlBar) <= pivLen` in `f_touches` | the exclusion window of the touch counter (tick #8's fix) |
+
+Sweeping it moves the direction gate, the price of every level, and the level-validation test **at
+once**. Any future test of `pivLen` is a three-parameter change and must be reported as one. It is
+struck from the workstream's list of one-dimensional pre-registered tests.
+
+### 21.3 THE CODE CANNOT BUILD A STRUCTURE STATE FROM INSIDE A 15m NEW YORK SESSION
+
+A state needs `prevPH`, `lastPH`, `prevPL` and `lastPL` — two pivot highs **and** two pivot lows.
+Two same-side pivots must sit at least `pivLen + 1` bars apart, and the outermost two each need
+`pivLen` bars of confirmation, so the floor is
+
+`pivLen + (pivLen + 1) + pivLen + 1` = **17 bars at pivLen 5**,
+
+and a realistic alternating H–L–H–L sequence with half-swings of `pivLen + 1` is **~29 bars**.
+Against the session he trades (`8.` [00:36]/[00:44]: 09:30–16:00 ET = 390 min):
+
+| tf | session bars | floor (17) | realistic (~29) |
+|---|---|---|---|
+| **5m** | 78 | 22% of the session | 37% of the session |
+| **15m** | **26** | **65% of the session** | **exceeds the whole session** |
+
+**So on 15m the structure state is always inherited from bars that formed before 09:30**, and on 5m
+it is for the first fifth to third of the day. There is also **no recency bound anywhere in the
+file** on the pivots that define the state and the levels — `lastPH` can be days old while `lastPL`
+is minutes old, and nothing notices.
+
+**Whether that is wrong is not resolvable from the source.** He reads structure off a chart that
+shows overnight bars, and he never says structure resets at the open. So this is **instrumented, not
+corrected**: a `Struct age` dashboard row reports the age of the oldest defining pivot in bars and
+minutes, how many of the four formed before today's open, and the two numbers above for comparison.
+That is a deliberate difference from 21.1, where the source *does* state the rule.
+
+### 21.4 WHAT IS CLEAN — RECORDED, BECAUSE A CLEARED GATE IS ALSO A RESULT
+
+- **`bullStruct = hh AND hl` is faithful.** *"higher highs followed by higher lows"* (`6.` [01:53]),
+  and the bearish mirror *"lower low, back up lower high"* ([03:47]). The conjunction is his.
+- **The `consolidating` residual reaches the right verdict on a loose label.** `hh`/`lh` and
+  `hl`/`ll` are mutually exclusive, so the residual holds two shapes: a broadening range (higher
+  high + lower low) and the sideways one he actually describes (*"prices moving sideways… up down up
+  down"*, `6.` [06:04]). Only the second is his "consolidation", but **both are correctly excluded
+  from trading**, so the gate outcome is right and only the label is loose. Not changed.
+- **`pivLen = 5` itself is UNSOURCED and was NOT retuned.** He draws swings by eye and states no bar
+  count anywhere in the corpus. Retuning it would have been a three-parameter change (21.2) made
+  against no measurement — the failure this project exists to avoid.
+
+### WHAT FINDING 21 DOES NOT ESTABLISH
+
+- **No number here came from a run.** No `runId` exists for this workstream and none was created.
+  The tables above are arithmetic on Pine semantics, on the file's own defaults, and on the session
+  length the source states — **budgets and bounds, never hit rates.**
+- **How often the new invalidation actually fires**, and therefore whether it thins the signal set
+  slightly or to zero. Instrumented on the dashboard and in the data window; not asserted.
+- **Whether inheriting structure from before the open is a defect or is simply how he reads a
+  chart.** The source does not say. 21.3 measures it and stops there.
+- **Whether `pivLen = 5` is a good value.** Unaudited by construction — 21.2 says a test of it is not
+  a one-parameter test, and no such test has been designed.
+- **Whether any version compiles — queue item 2 is still open**, still blocked by this environment's
+  egress proxy (`tradingview.com` unreachable), still no Pine compiler here. **No compile-error claim
+  is made.** v6 adds `nz()` on a bool and one new user function; everything else reuses constructs
+  already in the file. Expect to fix syntax, not logic.
+- **With default inputs v6's signal set is NOT identical to v5's** — unlike v3, v4 and v5, which each
+  preserved theirs. This is stated as a property of the diff, not as a result, and 21.1 gives the
+  reason the default was moved.
+- **No past conclusion changes.** This workstream has still never banked a result. As in ticks
+  #8–#11, a run banked off v5 would have had its long signals shaped by a stale direction gate
+  invisibly — luck, not process.

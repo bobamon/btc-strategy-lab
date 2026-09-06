@@ -1139,3 +1139,124 @@ never uses, at a point in the trade where he never uses it, against a baseline t
 77% of the 15m session — and the two volume behaviours he *does* state had been sitting in this file's
 own spec table, unimplemented, for eleven ticks. The threshold, the only part a tuning pass would have
 touched, is fine. Eleven ticks, zero results recorded, still correctly.
+
+---
+
+# ██ TICK #12, 2026-09-06 — THE DIRECTION GATE KEPT PERMITTING LONGS FOR 75 MINUTES AFTER THE STRUCTURE BROKE
+
+**Zero credits. No backtest, no `plan_backtest_window`, no engine call of any kind.** Full detail in
+`SYSTEM.md` FINDING 21. Deliverable: `pine/VISUAL-legacy-forex-complete.pine` **v6**.
+
+## WHAT THIS TICK DID
+
+Tick #11's queue item 4: *"`pivLen = 5` is the last un-audited number. Four ticks of gate auditing
+have found four defects; the run should finish rather than stop one short."* It was audited, against
+`6._PRICE_ACTION_AND_MARKET_STRUCTURE` and `5._ANALYZING_TIME_FRAMES` (both confirmed as Mamba's per
+FINDING 6, which is this workstream's standing first rule before quoting anything).
+
+**The number is fine. The rule around it was missing.** That is the second tick in a row where the
+threshold turned out to be the sound part — and this time the search was not for units, which is what
+ticks #8, #9 and #10 each found.
+
+## THE HEADLINE — HE INVALIDATES ON PRICE, THE CODE INVALIDATED ON A CONFIRMED PIVOT
+
+> [03:35] *"So that previous higher high and higher low we didn't break past that now if price would have"*
+> [03:41] *"Came down here and started to push down in this way **boom that is now a lower low**"*
+
+That call is made **as price pushes through**. v1–v5 had no invalidation rule at all: `bullStruct`
+stayed true until a *new* pivot confirmed, and `ta.pivotlow(low, 5, 5)` cannot confirm until **five
+bars after the swing low** — plus however long the down leg runs.
+
+| tf | minimum staleness after the break | as a share of his 390-min session |
+|---|---|---|
+| 5m | **≥ 25 min** | 6% |
+| 15m | **≥ 75 min** | **19%** |
+
+**The bias is signed and it is the harmful direction: the stale state always permits the side price
+has just left.** v6 kills a bullish structure on the first close below the higher low it is built on,
+and re-arms only on a fresh confirmed pivot low.
+
+**It ships ON by default — the first version since v2 whose default signal set differs from its
+predecessor's.** v3, v4 and v5 each shipped behind a switch defaulting to the old behaviour because
+each swapped one interpretation for another. This one replaces *no rule* with **a rule the source
+states outright**. And it **may take the signal set to zero in chop** — written down here before any
+chart is loaded, instrumented as a named blocker, and not softened by an invented threshold.
+HARD LESSON 8's generalised check was run first and passes: a confirmed pivot low guarantees the
+confirming bar closes *above* it, so the latch cannot be killed by the event that arms it.
+
+## THE SECOND FINDING — `pivLen` IS NOT A ONE-DIMENSIONAL KNOB, AND THE TEST LIST SAID IT WAS
+
+It sets three things at once: the structure gate, **the traded levels themselves** (`resLvl` *is* the
+last pivot high, so every entry, stop and target price moves with it), and the ±`pivLen` exclusion
+window inside tick #8's touch counter. Any sweep of it is a three-parameter change. It is struck from
+this workstream's list of one-dimensional pre-registered tests.
+
+## THE THIRD — A 15m STRUCTURE STATE CANNOT BE BUILT INSIDE THE SESSION HE TRADES
+
+Two pivot highs *and* two pivot lows, with same-side pivots ≥ `pivLen+1` apart and the outer two each
+needing `pivLen` bars of confirmation, floors the requirement at **17 bars** (≈29 for a realistic
+four-swing sequence). The NY session is **26 bars on 15m** and 78 on 5m.
+
+**So on 15m the state is always inherited from before 09:30**, and there is no recency bound anywhere
+in the file on the pivots that define both the state and the levels. Unlike the headline, **the source
+does not settle whether that is wrong** — he reads structure off a chart that shows overnight bars — so
+v6 **instruments it and asserts nothing**: a `Struct age` row giving the oldest defining pivot's age
+and how many of the four formed pre-open.
+
+## AND ONE GATE CLEARED
+
+`hh AND hl` is exactly *"higher highs followed by higher lows"* ([01:53]). The `consolidating`
+residual labels a broadening range as "consolidation" alongside the sideways one he describes, but
+**both are correctly excluded from trading**, so the label is loose and the verdict is right.
+`pivLen = 5` is UNSOURCED and was **not retuned** — that would have been a three-parameter change made
+against no measurement.
+
+## WHAT THIS TICK DID NOT ESTABLISH
+
+- **No number came from a run.** No `runId` exists for this workstream and none was created. Every
+  figure above is arithmetic on Pine semantics, the file's own defaults, and the session length the
+  source states — **budgets and bounds, never hit rates.**
+- **How often the new invalidation fires**, and so whether it thins the signal set slightly or to
+  zero. Instrumented, not asserted.
+- **Whether inheriting structure from before the open is a defect at all.** Measured; not judged.
+- **Whether `pivLen = 5` is a good value** — unaudited by construction, since no one-parameter test
+  of it exists.
+- **Whether any version compiles — queue item 2 still open**, still blocked by the egress proxy.
+- **With default inputs v6's signal set is NOT identical to v5's**, unlike v3/v4/v5. A property of
+  the diff, stated as one.
+- `US30` depth, `p`, `ρ`, the direction contradiction and the rolling-mean-target predictions are all
+  unchanged and unrun.
+
+## QUEUE
+
+1. **The gate audit is COMPLETE — every number in the file has now been audited.** Ticks #8–#12 found
+   defects in five of five gates: the touch counter, the stop pad/cap, the touch tolerance, the volume
+   baseline, and now the structure invalidation. **This queue item closes and should not be reopened
+   as "audit the next gate"; there is no next gate.**
+2. **The first live chart now settles FIVE questions and can tell them apart** — touch counts (#8),
+   Stop budget (#9), Level width (#10), Vol baseline (#11), Struct guard + Struct age (#12). Load on
+   **15m first**: that is where both the volume-baseline defect and the structure-staleness defect are
+   largest.
+3. **v2–v6 have never been compiled** — unchanged, blocked by egress here.
+4. **Pre-registered one-dimensional tests, corrected count: eight.** Structure invalidation on/off
+   (new), session-to-date vs trailing volume baseline, the volume-gate ablation, the early exit
+   on/off, tolerance, `breakClears`, pad, the three trail modes, rolling-mean vs fixed target,
+   window 6 vs ~20. **`pivLen` is NOT among them** — see the second finding above.
+5. **The next honest work in this workstream is no longer a code audit.** The remaining open items are
+   all external: an engine that can run the method (deadlock, tick #3), a data source with real
+   intraday depth (tick #6), or a forward test. A twelfth tick spent re-reading a file that has now
+   been read five times would be motion, not progress.
+6. **The symbol hunt stays closed** (tick #7). **Do not run a Legacy Forex backtest on trader-dev under
+   any circumstances** (tick #2, FINDING 4).
+7. `US30` 15m/5m depth on `backtest-lab` — still needs a session with that connector.
+8. **Forward-testing still needs no history** and is still the only honest route available today.
+
+## STATUS LINE
+
+**LEGACY FOREX: STILL BLOCKED ON THE ENGINE — AND THE GATE AUDIT IS NOW FINISHED, FIVE FOR FIVE.**
+External blockers unchanged and outside this project's control. What changed internally: the direction
+gate — the first condition in the signal and the one the whole method is built on — had no invalidation
+rule of its own, so it kept permitting longs for at least 75 minutes on 15m after price had broken the
+structure, in a system whose stated purpose is to get in and get out. The number the tick set out to
+audit, `pivLen = 5`, turned out to be the sound part; the rule that should have surrounded it was
+absent. Twelve ticks, zero results recorded, still correctly.
