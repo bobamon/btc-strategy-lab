@@ -8531,3 +8531,91 @@ improvements, blocked on the HARD LESSON 48 drawdown-allowance rule question, aw
    E74/E77) remain open, unresolved, awaiting the user -- unchanged across many cycles.
 3. Do not port `minRRv`/level-target logic back to the 1m or 5m tracks without its own population
    check there first (HARD LESSON 40, carried over from E89/E90's own queue).
+
+---
+
+# ██ E79, 2026-09-06 — THE ATR DEVIATION WAS REAL BUT NOT THE CAUSE. AND E78/E79 WERE NEVER COMPARABLE TO `e58a` IN THE FIRST PLACE.
+
+One credit. `resultId 01M1V0R1HKVR8SPYFFQXBWDNCF`.
+
+## THE TEST, AND THE RULE SET BEFORE RUNNING IT
+
+E78 ported the 1m build to 5m and failed at PF 0.78597499, but with one declared deviation: `atr(3)`
+and `atr(30)` on 5m measure **15 and 150 minutes**, where the 1m build measures **3 and 30**. Since
+both the coil and the velocity floor read `atr`, that deviation could have caused the failure by
+itself.
+
+E79 duration-matches as closely as 5m bars allow: **`atr(6)` = exactly 30 minutes**, matching the 1m
+build's slow leg to the minute, and `atr(1)` = 5 minutes against the 1m build's 3.
+
+**Pre-registered decision rule:** if PF rises materially toward or above 1.0, the deviation was
+load-bearing and E78's failure was an artefact. If PF stays near 0.79 or falls, the deviation was not
+the cause.
+
+## RESULT — 5m, 2024-06-08 → 2026-09-01, 234,663 bars
+
+| | E78 (atr 3/30 → 15/150 min) | **E79 (atr 1/6 → 5/30 min)** |
+|---|---|---|
+| Profit factor | 0.78597499 | **0.86373954** |
+| Trades | 115 | 114 |
+| Win rate | 21.73913043% | 21.92982456% |
+| Net | -18.26452824% | **-11.62327653%** |
+| Max drawdown | 30.19142159% | **21.07275805%** |
+| Long leg | 50 trades, 21 wins, -$1,258.54 | **51 trades, 21 wins, -$313.43** |
+| Short leg | 65 trades, 4 wins, -$567.91 | **63 trades, 4 wins, -$848.90** |
+
+**Frequency: pre-registered 100–400, actual 114** — inside the band.
+
+## VERDICT ON THE PRE-REGISTERED RULE
+
+**The deviation was real but partial.** Correcting it moved PF 0.786 → 0.864, cut drawdown by 9
+points, and cut the long leg's loss by 75%. That is a material improvement and it vindicates HARD
+LESSON 40 — bar-count geometry genuinely does not transfer, and the correction mattered.
+
+**But it does not reach 1.0, so by the rule stated before the run, the deviation is not the cause of
+the failure.** The kill rule applies again. Discarded.
+
+## THE THING I SHOULD HAVE CAUGHT BEFORE SPENDING E78's CREDIT
+
+**`e58a` is LONG-ONLY. E78 and E79 run BOTH LEGS.** Every comparison drawn between them — including
+E78's own "two readings" framing — was measuring a different strategy against `e58a`, with a short leg
+attached that `e58a` never had.
+
+The result already contains the corrected comparison, at no extra cost:
+
+- **Long leg alone: 51 trades, 21 wins (41.2%), net -$313.43.** Negative. Profit factor below 1.0.
+- **Short leg alone: 63 trades, 4 wins (6.3%), net -$848.90.** The short leg is 73% of the total loss.
+
+**So the long leg — the like-for-like comparison to `e58a` — also fails, on 51 trades.** No further
+backtest was needed to establish that; it is in the `longNetProfit` field of a run already paid for.
+
+## WHAT THIS SETTLES, AND WHAT IT DOES NOT
+
+**Settles:** two independent 5m configurations, one of them properly duration-matched, both fail. The
+long leg fails in both, on 51 and 50 trades — samples that clear the 30-trade floor where `e58a`'s 36
+barely reaches it. **E78's "reading 2" is now the supported one: `e58a`'s PF 1.24015239 on 36 trades
+is most likely noise.**
+
+**Does not settle:** this is still 5m, not 1m, and the fast ATR leg is 5 minutes against the original
+3. A 1m-native falsification is impossible — the 1m archive is 4.5 months and caps the sample near 36,
+which is the whole problem. **The mechanism cannot be cleanly falsified on the timeframe it was built
+for, and that is a permanent property of this data.**
+
+## THE SHORT LEG — THIRD BANKABLE CONFIRMATION
+
+**4 winners in 63 trades (6.3%), and it is now 73% of the total loss.** E78 recorded 4 of 65. Two
+independent configurations, 128 short trades between them, **8 winners total**. HARD LESSON 34
+diagnosed the short-side collapse; this is the first evidence above the sample floor, and it is
+emphatic. **The short leg should be treated as dead, not unproven.**
+
+## QUEUE
+
+1. **Do not run a long-only 5m variant to "check" the long leg.** It is already measured: -$313.43 on
+   51 trades, from `longNetProfit` in this run. Spending a credit to re-derive a number already on file
+   is the waste HARD LESSON 21/25 exists to prevent.
+2. **Every future War Formation comparison must state which legs are active.** E78's entire analysis
+   compared a two-leg build to a one-leg reference without noticing.
+3. **The 15m and 1h archives are far deeper than 5m** — 15m reaches 2020-08-19 (211,711 bars) and 1h
+   reaches 2020-03-25 (56,482 bars, 6.4 years). If the cascade is to be tested on a large sample, 1h
+   is the deepest option, though it is furthest from the source's stated 3-minute drill-down.
+4. Check #36's shield-fill caveat still stands and makes 0.86373954 an upper bound.
