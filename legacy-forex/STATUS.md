@@ -1983,3 +1983,96 @@ one.
 - Intrinio, *Historical Tick Data for Backtesting* — https://intrinio.com/blog/historical-tick-data-for-backtesting-powering-performance
 - AlgoBulls, *Why Backtesting Environments Differ from Live Markets* — https://algobulls.com/blog/algo-trading/backtesting-technical-factor
 - ClearEdge, *Backtesting Automated Futures Strategies* — https://clearedge.trading/post/backtesting-automated-futures-strategies-guide
+
+---
+
+# ██ TICK #19, 2026-09-06 — 5m EXECUTES, 15m DOES NOT, AND A FOURTH BLOCKER APPEARS: THE DATA SOURCE ITSELF
+
+Zero credits. Closes tick #18's queue item 1 and adds a blocker nobody had looked for.
+
+## THE ENGINE MAP, NOW COMPLETE FOR NAS100
+
+Tick #18 established that `plan_backtest_window` promises availability `run_backtest` does not deliver,
+and queued verifying 5m specifically. Done:
+
+| Timeframe | `plan_backtest_window` | **`run_backtest`** |
+|---|---|---|
+| **5m** | ✅ 937 bars | ✅ **RUNS — 937 bars, 46 trades, clean** |
+| **15m** | ✅ 1,119 bars | ❌ **errors** (twice: custom expression, then plain `ema_cross`) |
+| 1h | ✅ 1,730 bars | ✅ runs |
+| 1d | ✅ 1,169 bars | ✅ runs |
+
+**The hole is at 15m specifically, and it is not a general intraday limit** — the finer timeframe works
+and the coarser ones work. One of his two permitted timeframes executes; the other does not.
+
+**Tick #18's correction is therefore itself corrected, in the direction of the original claim:** 15m is
+unusable here, which is what `SYSTEM.md` said before tick #3 revised it upward on planner output.
+Three revisions of one figure, and the final state is nearest the first.
+
+## THE SAMPLE ARITHMETIC ON 5m, WHICH STILL BLOCKS
+
+937 bars ≈ **11 New York sessions**. At his 2-trade daily cap that is **~22 trades maximum**, before
+his no-trade-day rules remove any. **Below the 30-trade floor with no way to extend** — Yahoo caps 5m
+retention at roughly this window.
+
+So 5m executes and still cannot produce a quotable sample.
+
+## THE FOURTH BLOCKER — THE DATA SOURCE
+
+The three recorded blockers were the instrument, intra-bar resolution, and execution. Research on the
+source itself adds a fourth that had never been examined:
+
+> Yahoo Finance "was never designed to be a reliable data source for programmatic or long-term use…
+> it's a website first, not a data infrastructure." Common issues: **missing dates, inconsistent
+> adjusted prices, sudden access limits, or datasets that quietly change without explanation.**
+
+> "Intraday stock data from Yahoo Finance may be **patchy** outside major US stocks or recent ranges."
+
+> "Gaps force you to patch data manually, and those **small gaps quietly distort returns, averages,
+> and backtests.**"
+
+**This matters specifically because the failure is silent.** Every other blocker here announces itself
+— a hard error, a remapped symbol, a sample count. A quietly gapped bar series produces a plausible
+result that is wrong in an unknowable direction, which is the same failure class as the `NQ`→`IONQUSDT`
+remap this workstream was founded on.
+
+## A FREE COST CALIBRATION, FROM THE DIAGNOSTIC RUN
+
+The `ema_cross` control is not his strategy and its result is not a finding about his method. But its
+**cost** figures are a property of trading NAS100 at 5m, and they are worth recording:
+
+**46 trades over 11 sessions cost $431.17 in commission on $10,000 — 4.3% of capital in sixteen days.**
+
+His method caps at 2 trades/day, so roughly 22 trades in the same window — call it **~2% of capital in
+fees over sixteen days**, or very roughly 45% annualised at that turnover. Against a method targeting
+1:3–1:5 R on ~25-point stops, **cost is not a rounding error; it is the dominant term.** That is the
+same diagnosis the 3M workstream reached independently today by a different route.
+
+## WHERE THIS WORKSTREAM STANDS — FOUR BLOCKERS
+
+| Blocker | Nature |
+|---|---|
+| Instrument — NQ/YM remapped or absent | contingent; better data fixes it |
+| **Intra-bar resolution** | **structural; his trades resolve inside one bar** |
+| Execution — 15m does not run | hard, engine-specific |
+| **Data source — Yahoo intraday is patchy and silently gapped** | **structural for any result quoted from it** |
+
+**The middle two cannot be lifted by anything reachable here, and the fourth would taint any number
+produced even if the others were solved.**
+
+## QUEUE
+
+1. **Do not produce a Legacy Forex backtest from Yahoo intraday data even where it executes.** 5m runs,
+   but on a source described as patchy and silently gap-prone, for a method whose trades resolve
+   inside a single bar. Two independent reasons the number would be untrustworthy.
+2. **Forward-testing remains the only honest route** and is unaffected by all four blockers — live
+   fills have real sequence, real data and no retention limit.
+3. If a data source is ever added, the order of checks is now known: verify symbol resolution, verify
+   `run_backtest` executes (not just `plan`), verify intraday retention, and only then discuss samples.
+4. The cost calibration above should be carried into any future Legacy work: **~2% of capital in fees
+   per fortnight at his trade cap** is the hurdle any edge must clear first.
+
+## SOURCES
+- *Where to Get Reliable Historical Stock Market Data (When Yahoo Finance Isn't Enough)* — https://medium.com/predict/where-to-get-reliable-historical-stock-market-data-when-yahoo-finance-isnt-enough-ddf59a66b18b
+- PyQuant News, *Insider's Guide to Clean Financial Market Data with Python and Yahoo Finance* — https://www.pyquantnews.com/free-python-resources/insiders-guide-to-clean-financial-market-data-with-python-and-yahoo-finance
+- *Why yfinance Keeps Getting Blocked, and What to Use Instead* — https://medium.com/@trading.dude/why-yfinance-keeps-getting-blocked-and-what-to-use-instead-92d84bb2cc01
