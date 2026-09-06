@@ -6285,3 +6285,115 @@ unchanged (PF 1.88616546 on 2022-01-01 window, `passed`; PF 1.01300244 on full c
 **THIS CYCLE: 25%-equity naive short baseline recorded `status: research`** — not a strategy candidate,
 a market-fact reference point that recontextualises v60's full-coverage PF as real, if modest,
 selectivity rather than a number floating near an undefined breakeven.
+
+---
+
+# ██ v66 — THE MA OVEREXTENSION GUARD: A GENUINELY NEW DECODE FROM ALREADY-MINED SOURCE MATERIAL, AND HARD LESSON 45 FIRES A SIXTH TIME (2026-09-06)
+
+**A note on the scheduled prompt, once more.** This cycle's stored prompt is still the identical
+v37/v53 snapshot addressed at every check since #1: it names two top-priority items (implement the
+12H/24H bias gate; resolve the cascade signature) as the reason "most recent runs produced nothing."
+Both were closed long ago — the bias gate was built and measured on both legs at v54/v55 (HARD LESSON
+45), the cascade signature was traced to the pre-bias-gate v51/v53 supply-mirror construction
+specifically and confirmed absent (ratio 1.0) from every bias-gated or declared-deviation short build
+on file since (HARD LESSON 42/50/52, and the two full-coverage re-baselines immediately above this
+entry). Per "THE DOCS WIN over this prompt," neither is repeated. `git pull --rebase origin main` at
+cycle start was a clean fast-forward — no concurrent 3M work landed beyond the naive-short-baseline
+entry immediately above.
+
+**Checked the real queue left by the entry above before doing anything else.** Its own queue said no
+further single-term short-side lever is available without new source material, and that every
+mechanically-defined idea from the transcripts had been tried. Re-read VOCABULARY.md's "STILL MISSING"
+table (Type 1/the 3M candle's anatomy, and the swing rule — both still genuinely undecoded) and then,
+rather than accept "exhausted" on faith, re-read `transcripts/2026-08-09 09-49-18.txt` end to end
+myself — the video v56/v57 already mined for the 20/50/200 SMA stack-ordering bias rule. **That mining
+stopped at the stack-order paragraph** [04:20]-[04:59]. The very next segment of the same video,
+[13:26]-[15:16], states a second, separate, exactly-specified rule that was never carried into
+VOCABULARY.md or any Pine build:
+
+> [13:33] "we will not take any trades when the twenty or fifty MA... are overextended from the two
+> hundred"
+> [14:21] "if the gap between twenty and the fifty MA is smaller, if the gap between the fifty and the
+> two hundred MA is bigger than this gap, then these MAs are overextended... we do not take any trades
+> until they come meet again"
+
+**This is not the lab's old, discarded `maSpreadOk`.** v1's `maSpreadOk` (SYSTEM.md's original table,
+"Overextended from 20MA") was an invented, arbitrary 5%-of-ma200 distance threshold, correctly thrown
+out at v7 as "never part of the system under test." The rule quoted above is different and dimensionless
+— a straight comparison of two gaps, `abs(sma50-sma200)` vs `abs(sma20-sma50)`, with no threshold
+invented by this lab at all. It directly answers the original checklist's own "20 & 50 MA not
+overextended from the 200" line (SYSTEM.md line 30), which had sat undefined since v1.
+
+## THE BUILD: `pine/3m-elite-v66-ma-overextension-guard.pine`
+
+One isolated addition to the LONG champion v62-fvg (PF 2.04354108, DD 4.50890824%, 40 trades, full
+coverage 2020-08-19 → 2026-09-01): `maNotOverextended = abs(sma50-sma200) <= abs(sma20-sma50)` on the
+15m working chart (SMA, matching v56/v57's own convention from this same video), ANDed into the entry
+conjunction alongside everything else, unchanged. Full pre-run audit and pre-registered outcomes are in
+the Pine header (R floor by exclusion unchanged, stop still `dzBot`, BINDING/REDUNDANCY reasoned through
+in advance, LONG only this cycle — the source states this mirrors symmetrically to shorts, queued next,
+not skipped). One credit spent (486 on hand after, within the 250–500 → one-backtest budget).
+
+## THE RESULT
+
+Full 15m coverage, resultId `01M1T3KWZH9R6VSW69WMAMMR6J`, cascade ratio 1.0 (19/19, depth 1 — clean):
+
+| | v62-fvg champion | **v66 (+ MA overextension guard)** |
+|---|---|---|
+| Profit factor | 2.04354108 | **1.92075105** |
+| Max drawdown | 4.50890824% | **3.64241724%** |
+| Trades | 40 | **19** |
+| Win rate | — | 52.63157895% |
+| Sharpe | — | 0.51200177 |
+
+## THE VERDICT: REJECTED, CLEANLY, ON TWO INDEPENDENT RATCHET v2 GROUNDS
+
+**Profit factor fell** (2.04 → 1.92) — clause 1 fails outright, no exception clause applies (PF did not
+improve, so the drawdown-tradeoff allowance is moot). **Trade count collapsed 40 → 19** (−52.5%), both
+below the ~30-trade quoting floor on its own and, since the parent sample was already thin, an even
+harder floor to justify a split test against. Neither ambiguity nor a close call: this rejects on the
+primary criterion alone, with the count collapse as a second, independent reason. No split test run —
+none is owed when clause 1 fails by itself (matching this lab's own precedent: v54, v56, v57 for the
+long leg's other rejected bias-axis attempts did not get further backtests spent chasing a result that
+already failed the headline gate).
+
+**This is HARD LESSON 45's pattern for a sixth time**, now on a genuinely different, previously
+untested single term: every MA/trend-state filter this lab has added to this mechanism — the lab's own
+12H/24H proxy (v54, 155→48), the source's full stack ordering (v56, 155→37, unsatisfiable split), and
+now this dimensionless overextension guard (v66, 40→19) — cuts the sample hard enough to be unusable,
+regardless of whether the headline PF looks attractive in isolation. The binding constraint continues
+to be the data (how rarely BTC's 15m chart sits in ANY of these MA-defined "clean trend" states at the
+exact moment a demand zone is tapped), not any one gate's specific formula.
+
+## WHAT THIS SETTLES AND WHAT IT DOES NOT
+
+**Settles:** the source's MA-overextension rule, read exactly as stated with no invented threshold, does
+not help this mechanism on this data — closing a genuinely new decode, not re-testing an old one.
+**Does not settle:** the short-side mirror of this same rule (queued, not run — the source states it
+inverts symmetrically, "everything is just inverted when we're talking about shorts"), though given the
+long leg's result and the short leg's already-thin full-coverage sample (64 trades, PF ~1.01), a similar
+cut would likely push it well under the quoting floor too — a prediction, not yet a measurement. Does
+not touch the champion (v62-fvg, unchanged) or reopen the stack-ordering axis (still closed, v56/v57).
+
+## CREDIT ACCOUNTING
+
+One backtest, one credit spent (of exactly one allowed this cycle, 487 credits on hand at cycle start,
+250–500 bracket). `get_trades` was not needed — the cascade block returned with the result was
+sufficient to confirm cleanliness (ratio 1.0), and the rejection is unambiguous without a per-trade
+pull.
+
+## QUEUE
+
+1. **The short-side mirror of the MA overextension guard** — well-specified, source-symmetric, not run
+   this cycle. Given the pattern above, the registered prediction is another sub-floor trade count, but
+   it has not been measured and should not be assumed.
+2. VOCABULARY.md's "STILL MISSING" table (Type 1/the 3M candle's anatomy, the swing rule) remains the
+   only genuinely undecoded material left in the ten captured transcripts — re-confirmed by this cycle's
+   full re-read of 09-49-18, which found one new rule but nothing bearing on either of those two terms.
+3. v64's combined long+short flip-rule finding and the short leg's paused status are unaffected by this
+   cycle.
+
+**CHAMPION OF RECORD (LONG): v62-fvg** — unchanged (PF 2.04354108 full coverage / 2.10461082 H1 /
+1.95534435 H2, DD 4.50890824%, 40 trades). **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61(short)** —
+unchanged. **THIS CYCLE: v66 recorded `status: rejected`** — a genuinely new decoded term, cleanly
+tested in isolation, cleanly rejected on two independent grounds.

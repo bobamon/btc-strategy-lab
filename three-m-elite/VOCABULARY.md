@@ -547,3 +547,28 @@ was the bull market, not the zone mechanism alone. The short leg improved (drawd
 but stayed unprofitable (PF 0.722) and needs a split test before any keep decision. Type 1 (the 3M
 candle's anatomy) and the swing rule remain undefined and still do not block the working engulf-based
 entry.
+
+## ✅ NEW TERM DECODED, 2026-09-06 (v66) — THE MA OVEREXTENSION GUARD (20/50/200 GAP COMPARISON)
+
+`transcripts/2026-08-09 09-49-18.txt` — the same video already mined for the 20/50/200 SMA
+stack-ordering bias rule (v56/v57, above) — was re-read in full rather than assumed exhausted. The
+stack-order mining stopped at [04:20]-[04:59]; the very next segment, [13:26]-[15:16], states a second,
+separate, exactly-specified rule this project had never carried forward:
+
+> [13:33] "we will not take any trades when the twenty or fifty MA... are overextended from the two
+> hundred"
+> [14:21] "if the gap between twenty and the fifty MA is smaller, if the gap between the fifty and the
+> two hundred MA is bigger than this gap, then these MAs are overextended... we do not take any trades
+> until they come meet again"
+
+**Mechanical reading:** overextended ⟺ `abs(sma50 - sma200) > abs(sma20 - sma50)`; the guard (permit
+trading) is the negation. Dimensionless, no invented threshold. **This directly answers the original
+checklist's own "20 & 50 MA not overextended from the 200" line**, undefined since v1 — v1's
+`maSpreadOk` (an arbitrary 5%-of-ma200 distance test) was a lab invention discarded at v7, not this
+rule. Built and tested in isolation against champion v62-fvg (SYSTEM.md's v66 entry has the full
+numbers): trade count 40 → 19, PF 2.04354108 → 1.92075105 — rejected on two independent RATCHET v2
+grounds (PF fell; count collapsed below the quoting floor), the same shape as every other MA/trend-state
+filter this lab has tried on this mechanism (HARD LESSON 45, now a sixth confirmation). The short-side
+mirror (source: "everything is just inverted when we're talking about shorts") is queued, not yet run.
+Type 1 (the 3M candle's anatomy) and the swing rule remain the only genuinely undecoded terms left in
+the ten captured transcripts.

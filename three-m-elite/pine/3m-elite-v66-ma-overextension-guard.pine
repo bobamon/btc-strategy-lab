@@ -1,0 +1,177 @@
+//@version=6
+// 3M ELITE v66 -- THE MA OVEREXTENSION GUARD, DECODED VERBATIM AND NEVER PREVIOUSLY IMPLEMENTED.
+//
+// SOURCE: transcripts/2026-08-09 09-49-18.txt [13:26]-[15:16]. This is the SAME video v56/v57
+// already mined for the 20/50/200 SMA stack-ordering bias rule -- but that mining stopped at the
+// stack-order paragraph and never captured the very next rule the author states, which answers
+// the original checklist's own "20 & 50 MA not overextended from the 200" line (SYSTEM.md line 30)
+// left as a lab-invented approximation (v1's `maSpreadOk`, an arbitrary 5%-of-ma200 threshold,
+// correctly discarded at v7 as "never part of the system being tested" -- see SYSTEM.md v6/v7).
+// This is not that invented gate. It is the source's own, exact, dimensionless comparison:
+//
+//   [13:33] "we will not take any trades when the twenty or fifty MA ... are overextended from the
+//            two hundred"
+//   [14:21] "if the gap between twenty and the fifty MA is smaller, if the gap between the fifty
+//            and the two hundred MA is bigger than this gap, then these MAs are overextended and
+//            most likely what's gonna happen is price will make a pullback so that they can come
+//            together again ... we do not take any trades until they come meet again"
+//
+// MECHANICAL READING: overextended <=> gap(50,200) > gap(20,50), i.e. abs(sma50-sma200) >
+// abs(sma20-sma50). No arbitrary percentage threshold -- the comparison is between the two gaps
+// themselves, exactly as stated. Guard = NOT overextended = abs(sma50-sma200) <= abs(sma20-sma50).
+// SMA on the 15m working chart, matching v56/v57's own convention for the companion stack rule
+// from this same video (SYSTEM.md's v56 entry: "a 20/50/200 SMA stack on the 15m working chart").
+//
+// This is a single, isolated addition to the current LONG champion v62-fvg
+// (pine/3m-elite-v62-fvg-graded-full-coverage.pine, PF 2.04354108 / DD 4.50890824% / 40 trades,
+// full coverage 2020-08-19 -> 2026-09-01) -- everything else byte-identical: 4H reconstruction from
+// 15m bars, engulf-creates-zone by body containment, FVG-graded zone (three-candle gap confirmed
+// one 4H candle later), zone = [low, open] of the engulf, mitigation on a body close with the
+// two-close rule, maxAge=6, dzAge>=1, one entry per zone, stop = dzBot, R floor 0.8% by exclusion,
+// 2R target, maxBars=96. This is the ONE change from champion, per this lab's own one-term-at-a-
+// time discipline (LESSON 8).
+//
+// PRE-RUN AUDIT (stated before running, LESSON 17):
+//   - R floor: unchanged, still 0.8% of price BY EXCLUSION (rBig gates entry, never clamps a
+//     tighter stop) -- LESSON 3.
+//   - Stop beyond structure: unchanged, stop = dzBot, the zone's own structural bottom -- LESSON 5.
+//   - Each leg separately (LESSON 6, as scoped -- this mirrors a rule the SOURCE prescribes for
+//     both directions, not a lab-invented short mirror): this run is LONG ONLY. The short mirror
+//     (blocking shorts when the SAME MAs are overextended, source: "everything is just inverted
+//     when we're talking about shorts") is a genuinely symmetric, well-specified follow-up, not
+//     run this cycle -- the short leg's every other axis (bias, FVG-grading, cascade/sizing) is
+//     already closed and its full-coverage PF sits near breakeven (1.013), so this is queued next,
+//     not skipped on principle.
+//   - BINDING (E17): this run's own result (trade count vs. 40) is the binding check.
+//   - REDUNDANCY (E14): this is not implied by any existing term. dzAge, freshness (maxAge),
+//     R-floor and FVG-grading all measure the ZONE; this measures the WORKING-CHART TREND STATE
+//     independently of any zone property, so it is not measuring the same thing twice.
+//   - Latch in sequence (LESSON 8): not a latch, a continuous state check evaluated at signal time,
+//     same pattern as the existing `dzLive`/`rBig` terms it joins.
+//
+// PRE-REGISTERED OUTCOMES (LESSON 17, stated before running):
+//   OUTCOME A: trade count cut is modest (say <50% of 40, i.e. stays >= ~20) and PF holds or
+//     improves over 2.04354108 -- a genuine additional term, worth a split test next cycle.
+//   OUTCOME B: trade count collapses below the ~30-trade quoting floor the way every other MA/bias
+//     filter this lab has tried has (v54 155->48, v55/v57 gated shorts, v56 155->37 unsatisfiable
+//     split) -- HARD LESSON 45's pattern recurring a fifth time, on a champion that already starts
+//     thin at 40 trades. Given the champion's OWN sample is already only 40, even a moderate absolute
+//     cut could push it under the 30-trade floor outright.
+
+strategy("3M ELITE v66 MA overextension guard", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+rTarget  = input.float(2.0, "Target, x R")
+maxBars  = input.int(96,    "Max bars in trade")
+maxAge   = input.int(6,     "Zone freshness cap")
+minRpct  = input.float(0.80,"Min stop distance as % of price")
+
+// ---------- the decoded MA overextension guard, 15m working chart, SMA ----------
+sma20  = ta.sma(close, 20)
+sma50  = ta.sma(close, 50)
+sma200 = ta.sma(close, 200)
+gap2050  = math.abs(sma20 - sma50)
+gap50200 = math.abs(sma50 - sma200)
+maNotOverextended = not na(sma200) and gap50200 <= gap2050
+
+MS4H = 14400000
+b4h  = math.floor(time / MS4H)
+new4h = b4h != b4h[1]
+
+var float o4 = na
+var float h4 = na
+var float l4 = na
+var float pO   = na
+var float pH   = na
+var float pL   = na
+var float pC   = na
+var float ppO  = na
+var float ppC  = na
+var float ppH  = na
+
+var bool  pendActive = false
+var float pendTop = na
+var float pendBot = na
+var float pendAH  = na
+
+var float dzTop   = na
+var float dzBot   = na
+var bool  dzLive  = false
+var int   dzTouch = 0
+var int   dzAge   = 0
+var bool  dzTraded = false
+
+if new4h and not na(o4)
+    ppO  := pO
+    ppC  := pC
+    ppH  := pH
+    pO   := o4
+    pH   := h4
+    pL   := l4
+    pC   := close[1]
+
+if new4h
+    bullEngulf = not na(ppO) and not na(ppC) and not na(pO) and not na(pC) and ppC < ppO and pC > pO and pC > ppO
+
+    if dzLive and not na(pC) and pC <= dzTop
+        dzTouch := dzTouch + 1
+        if dzTouch >= 2
+            dzLive := false
+    if dzLive
+        dzAge := dzAge + 1
+
+    if pendActive and not na(pL) and not na(pendAH)
+        if pL > pendAH
+            dzTop   := pendTop
+            dzBot   := pendBot
+            dzLive  := true
+            dzTouch := 0
+            dzAge   := 0
+            dzTraded := false
+        pendActive := false
+
+    if bullEngulf
+        pendActive := true
+        pendTop := pO
+        pendBot := pL
+        pendAH  := ppH
+
+    o4 := open
+    h4 := high
+    l4 := low
+else
+    h4 := na(h4) ? high : math.max(h4, high)
+    l4 := na(l4) ? low  : math.min(l4, low)
+
+minR    = close * minRpct / 100
+rBig    = not na(dzBot) and (close - dzBot) >= minR
+longCond = rBig and dzLive and not dzTraded and dzAge >= 1 and dzTouch < 2 and low <= dzTop and close > dzBot and dzAge <= maxAge and maNotOverextended
+flat = strategy.position_size == 0
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if flat and longCond and not na(dzBot) and close > dzBot
+    r = close - dzBot
+    if r > 0
+        strategy.entry("L", strategy.long)
+        dzTraded := true
+        slPx   := dzBot
+        tpPx   := close + r * rTarget
+        barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(dzLive ? 1 : 0, title="DemandZoneLive")
+plot(maNotOverextended ? 1 : 0, title="MANotOverextended")

@@ -1597,9 +1597,53 @@ const DATA = [
     },
     "verdict": "N/A -- diagnostic, not a strategy candidate. Outcome A (deeply negative) registered before running, and it fired.",
     "notes": "At 25%-equity sizing the position survives far longer than the 100%-equity sibling (13,015 bars / ~135 days vs 1 bar) but is still margin-called out well before the window ends: get_trades (resultId 01M1SZXR0G4RX9Y5A9SKND0A8V) shows entry at bar 0, 2020-08-19, price 11864.50, qty 0.21 BTC (=0.25*10000/11864.50), and exit at bar 13014, 2021-01-02, price 29789 -- the first leg of the 2020-2021 bull run, roughly +151% against the short. Net P&L -$3768.52 (-37.69% of initial capital), PF 0, maxDD 40.13%, cascadeRatio 1 (clean, single entry, no forced-partial-close artifact per HARD LESSON 50). PRE-REGISTERED OUTCOME A FIRED: this is a market fact, not a strategy result -- 'sell BTC and hold' at this sizing convention is a near-total loss inside the first 5 months of a 6-year window, well before reaching the 2022 bear year where a short would actually have profited. THIS IS THE REFERENCE POINT v60 and v65 needed: v60's full-coverage PF 1.01300244 (64 trades, near-breakeven, 'barely above 1.0') now reads as REAL, if weak, positive selectivity -- the same 25%-equity sizing convention applied to a naive, always-in short produces a catastrophic single-trade loss, not a market-neutral baseline near breakeven. The gap between this (-37.69%, PF 0) and v60 (near-breakeven, PF 1.01) is the actual size of the zone/bias-gate mechanism's contribution on the short side, and it is larger than v60's own headline PF suggested when read against zero. Does not change any promotion status: the long champion (v62-fvg) and validated short (v60/v61) are unaffected. Closes the last open item from the naive-short-baseline diagnostic chain; no further single-term short-side lever is currently queued (unchanged from v65/v60-full-coverage's own entries) -- the next short-side idea needs new source material, not another baseline variant."
+  },
+  {
+    "id": "3m-elite-v66-ma-overextension-guard",
+    "name": "3M Elite v66: MA overextension guard (20/50/200 gap comparison), a newly-decoded source term added in isolation to champion v62-fvg",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "backtestStart": "2020-08-19",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/pine/3m-elite-v66-ma-overextension-guard.pine",
+    "pineSource": "three-m-elite/pine/3m-elite-v66-ma-overextension-guard.pine",
+    "description": "Champion v62-fvg (FVG-graded demand-zone lineage) plus one isolated new term: a guard against the source's own MA-overextension rule, decoded for the first time this cycle from transcripts/2026-08-09 09-49-18.txt [13:26]-[15:16] (the same video already mined for the 20/50/200 SMA stack-ordering bias rule at v56/v57, whose mining stopped one paragraph short of this rule). Mechanical reading: overextended iff abs(sma50-sma200) > abs(sma20-sma50) on the 15m working chart; trading permitted only when NOT overextended. This is dimensionless and source-exact, distinct from v1's discarded invented maSpreadOk (an arbitrary 5%-of-ma200 threshold). Everything else byte-identical to v62-fvg: 4H reconstruction from 15m bars, engulf-creates-zone by body containment, FVG-graded zone confirmed one 4H candle later, zone=[low,open] of the engulf, mitigation on a body close with the two-close rule, maxAge=6, dzAge>=1, one entry per zone, stop=dzBot, R floor 0.8% by exclusion, 2R target, maxBars=96.",
+    "metrics": {
+      "profitFactor": 1.92075105,
+      "maxDrawdownPct": 3.64241724,
+      "netProfitPct": 8.60647662,
+      "totalTrades": 19,
+      "winningTrades": 10,
+      "losingTrades": 9,
+      "winRatePct": 52.63157895,
+      "sharpeRatio": 0.51200177,
+      "avgTradePct": 0.45297245,
+      "ratioAvgWinLoss": 1.72867594,
+      "longTrades": 19,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "resultId": "01M1T3KWZH9R6VSW69WMAMMR6J",
+      "jobId": "01M1T3KWZH9R6VSW69WMAMMR6J",
+      "strategyId": "01M1T3KEDX5XGX86XX32SWBYGS",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1T3KWZH9R6VSW69WMAMMR6J",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "uniqueEntries": 19,
+      "totalRows": 19,
+      "maxCascadeDepth": 1,
+      "verifiedAt": "2026-09-06T00:00:00Z"
+    },
+    "verdict": "REJECTED under RATCHET v2 on two independent grounds: profit factor fell (2.04354108 -> 1.92075105, clause 1 fails outright, no exception applies since PF did not improve) and trade count collapsed 40 -> 19 (-52.5%), below the ~30-trade quoting floor. No split test owed -- clause 1 already fails on its own.",
+    "notes": "HARD LESSON 45's pattern for a sixth time: every MA/trend-state filter tried on this mechanism (lab's own 12H/24H proxy v54 155->48; source's full 20/50/200 stack ordering v56 155->37, unsatisfiable split; now this dimensionless overextension guard v66 40->19) cuts the sample hard enough to be unusable regardless of headline PF. Cascade ratio 1.0 (19/19, depth 1), clean. Does not touch champion v62-fvg (unchanged) or reopen the stack-ordering axis (closed, v56/v57). Short-side mirror of this same rule (source states it inverts symmetrically) is queued, not run this cycle -- LESSON 6 applied by scoping, not skipping: the credit budget this cycle (487, one-backtest bracket) allowed exactly one leg."
   }
 ];
-const BUILT = "2026-09-05 23:56";
+const BUILT = "2026-09-06 01:00";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
