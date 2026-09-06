@@ -1891,3 +1891,95 @@ session-window correction are all left exactly as they were.
    that would need to lift for the workstream to become testable.
 3. Do not run a Legacy backtest on any engine while `IntraBarAmbiguity` would fire on most trades. The
    number produced would be about the fill convention.
+
+---
+
+# ██ TICK #18, 2026-09-06 — THE INTRA-BAR BLOCKER IS CONFIRMED BY THE LITERATURE. THE ATTEMPT TO QUANTIFY IT FAILED, AND THE FAILURE CORRECTS TICK #3.
+
+Zero credits. Four `run_backtest` calls on `backtest-lab`, three of which errored — and the pattern of
+which ones errored is the finding.
+
+## PART 1 — THE BLOCKER IS NOT MY INFERENCE. IT IS THE STANDARD POSITION.
+
+Tick #17 argued that his trades resolving inside a single bar makes the system unbacktestable on OHLC.
+Searched specifically for whether practitioners agree, and they are blunter than I was:
+
+> "Bar data alone is insufficient for reliable scalping strategy backtests."
+
+> "A scalping bot tested on 1-minute bars may appear profitable because it **doesn't account for
+> intra-bar price fluctuations or slippage**."
+
+> "If your platform is synthesising ticks from 1-minute OHLC, your limit order fills and stop triggers
+> are being **estimated, not replicated**. For scalping or high-frequency logic, **that distinction
+> destroys the validity of the entire test.**"
+
+> Scalping "requires tick-by-tick precision to accurately model slippage and execution timing."
+
+**"Destroys the validity of the entire test" is the literature's phrase, not mine.** Tick #17's
+conclusion stands and is, if anything, understated.
+
+## PART 2 — THE MEASUREMENT I TRIED TO MAKE, AND COULD NOT
+
+The blocker had never been quantified. His stop is ~25 points and his targets 1:3–1:5, so the
+stop-to-target span is roughly 100–150 points. **What fraction of NAS100 15m bars are wide enough to
+contain that?** That is a property of bar ranges — it does not run his strategy, does not substitute an
+instrument for his method, and would have put a number on the blocker.
+
+**It could not be run.** `run_backtest` on `NAS100 15m` errored — first with the range expression, then
+with a plain `ema_cross`, so it is not my expression.
+
+## PART 3 — THE DIAGNOSTIC, AND IT CORRECTS TICK #3
+
+| Call | Result |
+|---|---|
+| `plan_backtest_window` NAS100 **15m** 2026-07-08 → 2026-09-05 | ✅ **1,119 bars, "Full requested window is available"** |
+| `run_backtest` NAS100 **15m**, custom range expression | ❌ error |
+| `run_backtest` NAS100 **15m**, plain `ema_cross` | ❌ error |
+| `run_backtest` NAS100 **1h**, plain `ema_cross` | ✅ **1,730 bars, 55 trades, runs clean** |
+
+**`plan_backtest_window` reports 15m availability that `run_backtest` cannot deliver.** Same symbol,
+same engine, same session — 1h executes, 15m does not.
+
+### THIS MAKES TICK #3 WRONG IN THE OTHER DIRECTION
+
+Tick #3 corrected `SYSTEM.md`'s blocker, arguing I had *understated* 15m availability: 1,119 bars and
+~41 sessions rather than 573 and ~21. **That correction was based on `plan_backtest_window` output
+alone, and planning availability is not execution availability.**
+
+So the ledger of this one number now reads:
+1. Original claim: 15m gives ~21 sessions — understated, from an under-requested window.
+2. Tick #3: no, ~41 sessions — **overstated, from a planner that promises more than the runner delivers.**
+3. Now: **15m cannot be executed at all on this symbol.** Whatever the planner says, no 15m backtest of
+   any kind has ever run here.
+
+**I made the same class of error twice in opposite directions on the same figure — trusting one tool's
+answer as a property of the engine.** That is the recurring failure in this project, and this is the
+third instance today.
+
+## WHERE THE WORKSTREAM STANDS
+
+| Blocker | Status |
+|---|---|
+| Instrument (NQ/YM silently remapped or absent) | contingent — better data fixes it |
+| **Intra-bar resolution** | **structural — confirmed by the literature, unfixable without tick data** |
+| **15m execution on this engine** | **hard — plans but does not run** |
+| 5m execution | untested for `run_backtest`; only ever planned |
+
+**Three independent blockers, and the middle one cannot be lifted by any data source this project can
+reach.** No Legacy Forex backtest exists, and after this tick there is less reason than ever to expect
+one.
+
+## QUEUE
+
+1. **Test whether `run_backtest` works on NAS100 5m** before any figure about 5m is trusted. Tick #3's
+   5m claim rests on the same planner output now shown to be unreliable.
+2. **Never quote a `plan_backtest_window` figure as evidence a backtest is possible.** Plan, then run
+   a throwaway to confirm execution, then record. This belongs in the ledger.
+3. Forward-testing remains the only route, and tick #17's `IntraBarAmbiguity` flag makes it
+   self-documenting.
+
+## SOURCES
+- Finage, *Comparing 1-Minute vs Tick Data in Strategy Testing* — https://finage.co.uk/blog/comparing-1minute-vs-tick-data-in-strategy-testing--68ee93c7fc0bf5c39a117a16
+- Intrinio, *Historical Tick Data for Backtesting* — https://intrinio.com/blog/historical-tick-data-for-backtesting-powering-performance
+- AlgoBulls, *Why Backtesting Environments Differ from Live Markets* — https://algobulls.com/blog/algo-trading/backtesting-technical-factor
+- ClearEdge, *Backtesting Automated Futures Strategies* — https://clearedge.trading/post/backtesting-automated-futures-strategies-guide
