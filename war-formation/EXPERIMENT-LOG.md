@@ -81,6 +81,19 @@ every entry term on both legs is now measured, the shield/rr axes are closed (E5
 LESSON 13), position sizing is closed (HARD LESSON 29/42/44), and the 1m window remains 4.5 months of
 one regime that cannot support a split (LESSON 22).
 
+**UPDATE, superseding the above through E85 (2026-09-06):** the 1m track above is unchanged (`e58a`
+long, `E71` short, still this lab's only 1m references). A separate 15m track opened at E80 with the
+structure tier re-derived to the 1h bucket, producing this lab's first-ever both-legs-positive
+bidirectional result (PF 1.24221581, 44 trades). E81 confirmed its coil gate is non-degenerate;
+E82/E83 resolved its one internal redundancy question (`brokeBelow`/`brokeAbove` load-bearing,
+`h1Bull`/`h1Bear` droppable). E84/E85 then ran the split-window replication E80 itself flagged as
+the necessary next step before becoming a reference construction — **and it failed**: first half PF
+2.77443947 (20 trades) against second half PF 0.49464093 (24 trades, net -11.40%), with the
+profitable leg inverting completely between halves (long-driven in H1, short-driven in H2). **The
+15m track is now closed as a diagnostic result** (`status: research`, downgraded from `testing`) —
+not a champion, not a candidate, and not worth further re-sweeping of E80's specific gate set. A new
+structural hypothesis, not a variant of E80's, would be needed to reopen the 15m track.
+
 *(The paragraph below describes v6, kept for history — it is DEMOTED, not current.)*
 **v6 — HA cascade, LONG ONLY, structural stop (pre-A.L.C.M., WRONG EXIT MODEL).** BTCUSDT 1m,
 2025-12-16 → 2026-05-03. `+7.8% · PF 1.69 · win rate 56.3% · Sharpe 2.19 · max DD 3.10% · 32 trades`.
@@ -7486,3 +7499,105 @@ RULE QUESTION, awaiting the user.
    own note.
 5. Queue item 5 from E83 (formally promoting E82's build as "the E80 simplification," zero-credit)
    remains open and can be done in the same cycle as item 1 above, or in a zero-credit cycle.
+
+---
+
+# ██ E85 -- E84's QUEUE ITEM 1: THE SECOND HALF LANDS, AND THE SPLIT TEST FAILS
+
+**SCHEDULING NOTE.** This cycle's stored prompt once again described a stale lab state (attack the
+short's entry geometry via E64a/E64b/E66 on 1m/5m, "continue numbering after E66") -- the same stale
+snapshot E83 and E84 each already flagged and worked past. **The docs win**, per the prompt's own
+instruction and HARD LESSON 26's precedent: this cycle continues from E84's own real, still-open
+queue item 1 -- run the second half of the split-window replication of E80/E82 -- rather than
+re-deriving E64a-E66 territory this lab closed out weeks ago.
+
+**`get_credits` read 485 at the start** -- the 250-500 band, exactly ONE backtest.
+
+**METHOD.** Identical strategyId to E82/E84 (`01M1SVRDYWR37N753D99B18DKR`, confirmed via
+`get_strategy` to be byte-identical to `e84-e80-split-window-h1.pine`'s source), only the date
+window overridden: 2025-07-20 to 2026-09-01, the second half E84 queued and did not have budget to
+run.
+
+**PRE-RUN AUDIT.** R = shieldUsd $2,000 against this half's BTC price range (~$100k-$125k, the
+highest sub-range this lab's data covers): 1.6%-2.0%, clears the 0.8% floor (HARD LESSON 3) though
+closer to it than any prior window -- consistent with this cycle's own note that a $1,000-scale
+shield falls below the floor above ~$125k; $2,000 still clears here. Stop is risk-defined per the
+ALCM spec (HARD LESSON 5), unchanged. Both legs reported separately (HARD LESSON 6). BINDING (E17):
+only the date window differs from E84 -- every gate, threshold and the h1Bull/h1Bear removal are
+byte-identical. Latch order unchanged (HARD LESSON 8). No new occupancy confound: shieldUsd/rr/
+maxBars unchanged from E80/E82/E84 (LESSONS 24/28/29). `pine/e85-e80-split-window-h1-second-half.pine`.
+
+**REGISTERED PREDICTION (LESSON 17), carried over unchanged from E84 since this is the second half
+of the same check:** "reproduces" = PF clears 1.0 on an adequate sample in BOTH halves, neither leg
+collapsing net-negative in both. "Does not reproduce" = one half carries the entire edge while the
+other is flat or negative. E84's own arithmetic already flagged this half as very likely sub-1.0 on
+the blend, though not provably so from the first half alone -- this run settles it directly.
+
+## RESULT -- 15m, 2025-07-20 -> 2026-09-01 (second half only), 39,534 bars
+
+**One credit.** `resultId 01M1T5VGDT8GK09VNJVMPSZ2EM` (E82's saved strategy, re-run with an
+overridden date window -- no source change).
+
+| | E80/E82 (full window) | E84 (first half) | **E85 (second half)** |
+|---|---|---|---|
+| Profit factor | 1.24221581 | 2.77443947 | **0.49464093** |
+| Trades | 44 | 20 | **24** |
+| Win rate | 27.27272727% | 40% | **16.66666667%** |
+| Net | +9.11169035% | +21.37016025% | **-11.3981864%** |
+| Max drawdown | 17.28630995% | 7.64852641% | **17.12770556%** |
+| Long | 19 trades, 9 wins, +$418.75 | 9 trades, 7 wins, +$2,196.29 | 10 trades, **2 wins**, **-$1,436.35** |
+| Short | 25 trades, 3 wins, +$492.42 | 11 trades, 1 win, -$59.27 | 14 trades, **2 wins**, **+$296.53** |
+
+**Internal consistency check:** 20 (H1) + 24 (H2) = 44 trades, exactly E80's full-window total; the
+long/short split (9+10=19 long, 11+14=25 short) also matches E80's full-window leg counts exactly.
+The split boundary introduces no gap, overlap or double-count.
+
+## VERDICT
+
+**THE SPLIT TEST FAILS. E80/E82 does not replicate out-of-sample.** PF 0.49464093 in the second
+half is not merely weaker than the first half's 2.77443947 -- it is below 1.0, net-negative
+(-11.40%), and the leg dominance **inverts** rather than just fading: H1's profit was almost
+entirely the long leg (+$2,196.29) with the short flat-to-negative; H2's only profitable leg is the
+short (+$296.53) while the long is deeply negative (-$1,436.35). This is exactly the
+single-period-driven-result pattern HARD LESSON 22 and E84's registered prediction were watching
+for, now confirmed directly rather than inferred from arithmetic.
+
+**E80/E82 is downgraded from an unreplicated candidate line to a diagnostic result.** It is not
+formally REJECTED under RATCHET v2's letter (neither half clears the 30-trade floor, so this is not
+a clause-3 split test in the strict sense) -- but the magnitude of the failure (PF collapse below
+1.0, complete leg-dominance inversion) makes the informality immaterial to the conclusion. E80's own
+entry in `results/backtests.json` is updated: status `testing` -> `research`.
+
+## WHAT THIS DOES NOT ESTABLISH
+
+- **Does not touch the 1m track.** `e58a` (long) and `E71` (short) are untouched, unaffected 1m-data
+  reference builds; this result concerns the 15m port only and does not port back (unchanged from
+  E80/E84's own notes -- do not port E80's win, and now do not port its failure either, back to 1m
+  or 5m without its own test).
+- **Does not explain WHY the edge concentrated in H1** -- regime, volatility, or an artifact of the
+  particular window boundary are all still open questions, not investigated here.
+- **Does not touch the HARD LESSON 48 drawdown-allowance RULE QUESTION** (blocking E74) -- open,
+  unresolved, awaiting the user.
+- Check #36's shield-fill caveat (every recorded PF is an upper bound) applies here as everywhere.
+
+## STATE
+
+**No champion, no candidate.** `e58a` (long, 1m) and `E71` (short, 1m) remain the reference builds
+for the 1m track, untouched. `E80`/`E82` (15m, both-legs-positive on the full window) is now a
+closed diagnostic line, `status: research` -- its internal redundancy question was resolved by
+E82/E83, and its out-of-sample question is now resolved by E84/E85, unfavourably. `E74` remains
+blocked on the HARD LESSON 48 drawdown-allowance RULE QUESTION, awaiting the user. The 15m track
+has no open candidate; the next 15m work, if any, needs a genuinely new hypothesis rather than a
+variant of E80's gates, since E80's own construction is now the one that failed to replicate.
+
+## QUEUE
+
+1. **A new 15m hypothesis, not a variant of E80's gate set** -- E80/E82's specific four-gate
+   construction has now been tested for internal redundancy (E81-E83) and out-of-sample stability
+   (E84-E85) and failed the second. Re-sweeping its existing terms further is not a productive next
+   step; a materially different structural idea is needed if the 15m track continues.
+2. Check #36's shield-fill caveat and the HARD LESSON 48 drawdown-allowance RULE QUESTION (blocking
+   E74) remain open, unresolved by this run, awaiting the user.
+3. Queue item 5 from E83 (formally promoting E82's build as "the E80 simplification") is now MOOT --
+   there is no value in formally promoting a construction whose out-of-sample replication just
+   failed. Withdrawn, not carried forward.

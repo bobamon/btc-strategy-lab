@@ -1164,9 +1164,9 @@
     "symbol": "BTCUSDT",
     "timeframe": "15m",
     "direction": "both",
-    "status": "testing",
+    "status": "research",
     "createdDate": "2026-09-05",
-    "lastTestedDate": "2026-09-05",
+    "lastTestedDate": "2026-09-06",
     "backtestStart": "2024-06-08",
     "backtestEnd": "2026-09-01",
     "specPath": "war-formation/pine/e80-15m-native-1h-structure.pine",
@@ -1206,7 +1206,7 @@
       "verifiedAt": "2026-09-05T00:00:00Z"
     },
     "verdict": "FIRST BOTH-LEGS-POSITIVE BIDIRECTIONAL RESULT IN THIS LAB'S HISTORY. PF 1.24221581 on 44 trades (well clear of the 30-trade floor), long +$418.75 (9/19 wins, 47.4%), short +$492.42 (3/25 wins, 12% but a large enough payoff ratio to net-profit outright). Every prior short construction in this project was either rejected or, at best, kept alive as an unprofitable-but-improving leg gated behind an unresolved rule question -- this is the first time a short leg has been net-profit-positive at all, let alone simultaneously with a profitable long leg under one symmetric cascade. The structure-tier redesign (15m-bucket reference -> 1h-bucket reference) confirmed the registered prediction: a coherent, non-degenerate signal on a sensible trade population, not a trivial one-bar artifact.",
-    "notes": "NOT a ratchet KEEP, NOT a champion: this is this lab's first-ever 15m run, so there is no same-timeframe parent to ratchet against, and it cannot directly replace e58a/E71 (1m, different data). Recorded as testing: new, promising, unreplicated. No parameter here was tuned on 15m -- every input is carried unchanged from the 1m/5m builds, which cuts both ways (not curve-fit to 15m, but not stress-tested on it either). Two things not yet checked: (1) whether the coil gate (atrFast/atrSlow only 2 bars apart at this resolution) is near-degenerate, flagged in advance as the first diagnostic if needed; (2) whether h1Bull/h1Bear and the redesigned brokeBelow/brokeAbove, which now both derive from the same 1h bucket, are redundant (HARD LESSON 48's method: remove one term at a time, per leg) -- this run cannot distinguish 'the redesign does real work' from 'the redesign happens to correlate usefully with h1Bull on this window.' A split-window replication (e.g. 2024-06-2025-07 vs 2025-07-2026-09) is the natural next step before this becomes anyone's reference construction. Check #36's shield-fill caveat (every PF is an upper bound) applies here as everywhere. The HARD LESSON 48 drawdown-allowance RULE QUESTION blocking E74 remains open and untouched by this run."
+    "notes": "NOT a ratchet KEEP, NOT a champion: this is this lab's first-ever 15m run, so there is no same-timeframe parent to ratchet against, and it cannot directly replace e58a/E71 (1m, different data). Recorded as testing: new, promising, unreplicated. No parameter here was tuned on 15m -- every input is carried unchanged from the 1m/5m builds, which cuts both ways (not curve-fit to 15m, but not stress-tested on it either). Two things not yet checked: (1) whether the coil gate (atrFast/atrSlow only 2 bars apart at this resolution) is near-degenerate, flagged in advance as the first diagnostic if needed; (2) whether h1Bull/h1Bear and the redesigned brokeBelow/brokeAbove, which now both derive from the same 1h bucket, are redundant (HARD LESSON 48's method: remove one term at a time, per leg) -- this run cannot distinguish 'the redesign does real work' from 'the redesign happens to correlate usefully with h1Bull on this window.' A split-window replication (e.g. 2024-06-2025-07 vs 2025-07-2026-09) is the natural next step before this becomes anyone's reference construction. Check #36's shield-fill caveat (every PF is an upper bound) applies here as everywhere. The HARD LESSON 48 drawdown-allowance RULE QUESTION blocking E74 remains open and untouched by this run. UPDATE (E85, 2026-09-06): the split-window replication flagged above as \"the natural next step before this becomes anyone's reference construction\" is now complete (E84 first half, E85 second half) and DOES NOT REPLICATE -- second half PF 0.49464093 vs first half's 2.77443947, both legs inverting sign between halves. Status downgraded from testing to research: this is now a diagnostic result on a single-period-driven pattern, not an active candidate line. See wf-e85-e80-split-window-h1-second-half for the full finding."
   },
   {
     "id": "wf-e81-coil-gate-population",
@@ -1404,5 +1404,55 @@
     },
     "verdict": "FIRST HALF ONLY, NOT A COMPLETE SPLIT TEST. PF 2.77443947 on 20 trades (9 long/7 win, 11 short/1 win), net +21.37%, max drawdown 7.65% -- markedly STRONGER than the full-window E80/E82 result (PF 1.24221581, 44 trades, net +9.11%, DD 17.29%). Long leg carries almost all of it (+,196.29 of +,137.02 total net, since short net is -9.27 on this half). Because the full window's aggregate PF (1.24) sits well below this half's (2.77), the second half necessarily carries a materially weaker (very likely sub-1.0 on the blend, though the exact figure cannot be derived from these two runs alone -- position sizing is percent-of-equity and the two runs use independent 0,000 starting bases, so full-window minus first-half totals do not equal second-half totals). This is the single-period-driven-result pattern HARD LESSON 22 warns a split test is meant to catch. NOT YET A VERDICT ON E80/E82: the second half must be run before concluding whether the edge reproduces or was concentrated in one sub-period.",
     "notes": "ANSWERS HALF OF E83's QUEUE ITEM 2. The second half (2025-07-20 to 2026-09-01) is NOT run this cycle -- credit budget (488, the 250-500 band) permits exactly one backtest -- and is the single highest-priority item for the next cycle with budget. Trade count splits 20 (this half) + 24 (implied remainder, by simple subtraction of E80's 44 total; not independently verified since the second half has not been run) -- both sub-30, so neither half alone clears RATCHET v2's 30-trade floor; only the combined 44-trade full window does. This means even a completed split test here will be informal (a directional check per E83's queue, not a formal RATCHET v2 clause-3 split, which only strictly applies to a >50% trade-count cut from a term-removal, not to this holdout check). Recorded as status: research, not a candidate and no ratchet decision applies -- this is a replication diagnostic on E80/E82's existing population, exactly like E81's coil-gate check. E80 (15m, testing, both-legs-positive) remains this lab's newest candidate line, its own status unchanged by this run. e58a (long, 1m) and E71 (short, 1m) remain the 1m-track reference builds, both untouched. Check #36's shield-fill caveat (every PF is an upper bound) applies here as everywhere. HARD LESSON 48 drawdown-allowance RULE QUESTION (blocking E74) remains open, unresolved, awaiting the user."
+  },
+  {
+    "id": "wf-e85-e80-split-window-h1-second-half",
+    "name": "E85: split-window replication of E80/E82, second half (2025-07 to 2026-09)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "rejected",
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "backtestStart": "2025-07-20",
+    "backtestEnd": "2026-09-01",
+    "specPath": "war-formation/pine/e85-e80-split-window-h1-second-half.pine",
+    "description": "E84's queue item 1: the second half of the split-window replication of E80 (the 15m both-legs-positive result), completing the two-run split test E83 named the most important open item before E80/E82 becomes anyone's reference construction. Byte-identical strategy body to e84-e80-split-window-h1.pine and e82-e80-no-h1bull-h1bear.pine; only the backtest window changed, at the same split point already used for the 5m E63a/E63b split and for E84's first half (2024-06-08 to 2025-07-20 / 2025-07-20 to 2026-09-01). Credit budget this cycle (485, the 250-500 band) permitted exactly ONE backtest, spent here to complete the split test E84 began.",
+    "metrics": {
+      "netProfitPct": -11.3981864,
+      "profitFactor": 0.49464093,
+      "maxDrawdownPct": 17.12770556,
+      "totalTrades": 24,
+      "winRatePct": 16.66666667,
+      "avgTradePct": -0.47492443,
+      "sharpeRatio": -1.19939049,
+      "sortinoRatio": -0.28401881,
+      "commissionPaid": 209.76173985,
+      "avgWinningTrade": 278.9110734375,
+      "avgLosingTrade": -112.77314668,
+      "ratioAvgWinLoss": 2.47320467,
+      "largestWin": 503.9008768,
+      "largestLoss": -288.644706,
+      "avgBarsInTrade": 92.04166667,
+      "avgBarsWinning": 262,
+      "avgBarsLosing": 58.05,
+      "longTrades": 10,
+      "shortTrades": 14,
+      "longWinning": 2,
+      "shortWinning": 2,
+      "longNetProfit": -1436.347455649996,
+      "shortNetProfit": 296.528815799996
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1T5VGDTQ25WSZTDENH5Q54H",
+      "strategyId": "01M1SVRDYWR37N753D99B18DKR",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1T5VGDT8GK09VNJVMPSZ2EM",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1.0434782608695652,
+      "verifiedAt": "2026-09-06T00:00:00Z"
+    },
+    "verdict": "THE SPLIT TEST FAILS -- E80/E82 DOES NOT REPLICATE OUT-OF-SAMPLE. PF 0.49464093 on 24 trades (10 long/2 win, 14 short/2 win), net -11.40%, max drawdown 17.13%. This is a collapse relative to BOTH the full window (PF 1.24221581) and, far more sharply, E84's first half (PF 2.77443947): the edge that looked strong in H1 is not present in H2, exactly the single-period-driven-result pattern HARD LESSON 22 and E84's own registered prediction were watching for. The leg dominance INVERTS between halves rather than merely weakening: H1 had the long leg carrying nearly all the profit (+$2,196.29) with the short flat-to-negative (-$59.27); H2 has the long leg deeply negative (-$1,436.35) while the short is the only leg in the black (+$296.53). Internal consistency check: 20 (H1) + 24 (H2) = 44 trades exactly matches E80's full-window total, and the long/short split (9+10=19 long, 11+14=25 short) also matches E80's full-window leg counts exactly, confirming the split boundary introduces no gap or overlap.",
+    "notes": "COMPLETES E83/E84's QUEUE ITEM 2. Neither half individually clears RATCHET v2's 30-trade floor (20 and 24), so this remains an informal directional replication check rather than a formal RATCHET v2 clause-3 split test (which by its letter only strictly applies to a >50% trade-count cut from a term removal) -- but the direction and magnitude of the failure (PF collapsing below 1.0, both legs flipping sign from their H1 roles) is large enough that the informality does not weaken the conclusion. E80/E82 is downgraded from 'testing' (unreplicated candidate line) to 'research' (diagnostic result, not a candidate) -- see the corresponding status update on wf-e80-15m-native-1h-structure. e58a (long, 1m) and E71 (short, 1m) remain the untouched 1m-track reference builds; the lab still has no champion and no candidate. Check #36's shield-fill caveat (every PF is an upper bound) applies here as everywhere. HARD LESSON 48 drawdown-allowance RULE QUESTION (blocking E74) remains open, unresolved, awaiting the user."
   }
 ]
