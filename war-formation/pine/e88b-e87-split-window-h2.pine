@@ -1,0 +1,185 @@
+//@version=6
+// WAR FORMATION E88b -- E87's QUEUE ITEM 1, COMPLETED: SPLIT-WINDOW REPLICATION OF E87 (maxBars=576), SECOND HALF.
+//
+// E87 doubled the 15m hold-cap (maxBars 288 -> 576) on top of E82's four-gate build and found a
+// full-window improvement (PF 1.24221581 -> 1.31945407, DD 17.29% -> 15.08%, trades unchanged 44).
+// E87 sits on the EXACT SAME PARENT LINE (E80/E82) that already failed an out-of-sample split test
+// at E84/E85 (PF 2.77 first half -> 0.49 second half, edge inverting between halves). E88a ran the
+// first half of this same split test on the maxBars=576 build (PF 2.4301693, near-identical to E84's
+// 2.77443947 sibling on the same half) and queued the second half as the single most important
+// remaining item on the 15m track.
+//
+// SOURCE: byte-identical to e88a-e87-split-window-h1.pine and e87-e82-maxbars576.pine. Nothing in the
+// strategy body changed. ONLY the backtest window changed (BINDING, HARD LESSON 16/E17).
+//
+// SPLIT POINTS: 2024-06-08 to 2025-07-20 (E88a, first half, already run) and 2025-07-20 to 2026-09-01
+// (THIS FILE, second half). Identical split points to E84/E85 (and the 5m E63a/E63b split).
+//
+// CREDIT CONSTRAINT: this cycle's balance (477) is in the 250-500 band, ONE backtest only -- spent
+// here to complete the two-half split test E87/E88a queued, mirroring this lab's own established
+// pattern (E84 then E85) of finishing a split test across cycles.
+//
+// REGISTERED PREDICTION (HARD LESSON 17), BEFORE RUNNING: this is the half where the maxBars=288
+// sibling (E85) inverted to PF 0.49 with the profitable leg flipping from long-driven to short-driven.
+// E86's diagnostic explains why: H2 has far fewer exact-target hits (2/24 vs H1's 6/20) and more
+// exact-shield hits (7 vs 2) -- i.e. H2 is precisely the half where trades reach the boundary more
+// often, so it is also the half where widening maxBars 288->576 has the most room to change the
+// outcome. Two genuinely different outcomes are both plausible and are stated before running:
+//   (a) REPRODUCES: PF clears 1.0 on an adequate sample, neither leg net-negative in both halves --
+//       would mean the wider cap gives more of H2's boundary-reaching trades room to complete a full
+//       2R run rather than being timed out early, fixing (not just moving) E85's failure mode.
+//   (b) DOES NOT REPRODUCE: PF stays near or below E85's 0.49, or a leg stays net-negative in both
+//       halves -- would mean H2's problem is adverse price direction (a real losing regime for this
+//       construction), not premature timeout, and widening the hold cap only gives losers more room
+//       to reach the shield. Given E86's own framing (H2 is where the cap has the MOST room to act
+//       either way), this half is the more informative of the two, not merely the confirmatory one.
+//
+// PRE-RUN AUDIT:
+//   R = shieldUsd $2,000 against this half's BTC price range (~$60k-$126k): clears the 0.8% floor
+//     (HARD LESSON 3) throughout; note the live tension named in this lab's standing caveats -- $2,000
+//     falls toward the lower edge of that floor above ~$250k, not reached in this window.
+//   Stop is risk-defined per the ALCM spec (HARD LESSON 5), unchanged from E80/E82/E87/E88a.
+//   Both legs reported separately (HARD LESSON 6).
+//   BINDING (E17): only the date window changed from E88a/E87; every gate, threshold, shieldUsd, rr
+//     and maxBars (576) is byte-identical.
+//   REDUNDANCY (HARD LESSON 18): n/a, no term added or removed.
+//   Latch order unchanged (HARD LESSON 8). OCCUPANCY CONFOUND (HARD LESSON 24/28/29): none newly
+//     introduced relative to E88a -- shieldUsd/rr/maxBars unchanged; a different window changes which
+//     trades exist to occupy, not a new mechanism.
+//   RATCHET v2's >50% trade-count-cut split-test clause does not literally apply (holdout check on an
+//     existing result, not a term removal) -- run in its spirit anyway, completing E84/E85/E87/E88a's
+//     established split-test pattern.
+//
+// RESULT and the completed split-test verdict are recorded in EXPERIMENT-LOG.md and
+// results/backtests.json after this run, per the lab's provenance rule (never hand-write a metric).
+strategy("War Formation E88b split-window h2 (E87 maxBars576 build)", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+greenBull = input.int(4,     "Green 1h candles for BULL")
+greenBear = input.int(2,     "Green 1h candles at or below for BEAR")
+skipOpen  = input.int(60,    "Skip first N minutes of 6h block")
+skipClose = input.int(60,    "Skip last N minutes of 6h block")
+coilK     = input.float(0.85,"Coil: atrFast < atrSlow * K")
+velK      = input.float(0.8, "Velocity: min reclaim as multiple of atrSlow")
+midLo     = input.float(400, "Whole-number middles low")
+midHi     = input.float(600, "Whole-number middles high")
+etOffset  = input.int(-4,    "ET offset from UTC")
+witchOn   = input.bool(true, "Ban longs in witching hour 1-4am ET")
+shieldUsd = input.float(2000,"THE SHIELD: fixed dollar gap to liquidation")
+rr        = input.float(2.0, "Reward:risk")
+maxBars   = input.int(576,   "Max bars in trade -- six days of 15m (E87: doubled from E82's 288)")
+
+MS6H = 21600000
+MS1H = 3600000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+
+var float h1o     = na
+var int   grnCur  = 0
+var int   cntCur  = 0
+var int   grnPrev = 0
+var int   cntPrev = 0
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    grnCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(h1o)
+        cntCur := cntCur + 1
+        if close[1] > h1o
+            grnCur := grnCur + 1
+    h1o := open
+
+regimeReady = cntPrev >= 5
+bullRegime  = regimeReady and grnPrev >= greenBull
+bearRegime  = regimeReady and grnPrev <= greenBear
+
+minsIn    = (time - b6 * MS6H) / 60000
+timeGate  = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+// h1Bull/h1Bear REMOVED from this build's gates (still computed/plotted for audit, not gated on) --
+// unchanged from E82/E83/E87's established finding that they are fully redundant given brokeBelow/
+// brokeAbove and cannot substitute for it.
+h1Bull = not na(h1o) and close > h1o
+h1Bear = not na(h1o) and close < h1o
+
+var float c1hh = na
+var float c1hl = na
+var float p1hh = na
+var float p1hl = na
+
+if new1h
+    p1hh := c1hh
+    p1hl := c1hl
+    c1hh := high
+    c1hl := low
+else
+    c1hh := na(c1hh) ? high : math.max(c1hh, high)
+    c1hl := na(c1hl) ? low  : math.min(c1hl, low)
+
+brokeBelow = not na(p1hl) and c1hl < p1hl
+brokeAbove = not na(p1hh) and c1hh > p1hh
+
+atrFast = ta.atr(1)
+atrSlow = ta.atr(2)
+coiled  = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK
+coilPrev = coiled[1]
+velMin   = na(atrSlow) ? na : atrSlow * velK
+
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+hUTC     = math.floor(time / MS1H) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+longBan  = witchOn and witching
+
+longTrig  = not na(p1hl) and not na(velMin) and ta.crossover(close, p1hl)  and (close - p1hl) >= velMin
+shortTrig = not na(p1hh) and not na(velMin) and ta.crossunder(close, p1hh) and (p1hh - close) >= velMin
+
+goLong  = bullRegime and timeGate and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig
+goShort = bearRegime and timeGate and brokeAbove and coilPrev and not inMiddle and shortTrig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := close - shieldUsd
+    tpPx   := close + shieldUsd * rr
+    barsIn := 0
+
+if flat and goShort
+    strategy.entry("S", strategy.short)
+    slPx   := close + shieldUsd
+    tpPx   := close - shieldUsd * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong  ? 1 : 0, title="LongSignal")
+plot(goShort ? 1 : 0, title="ShortSignal")

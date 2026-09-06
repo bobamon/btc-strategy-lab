@@ -1687,7 +1687,7 @@ const DATA = [
     "symbol": "BTCUSDT",
     "timeframe": "15m",
     "direction": "both",
-    "status": "testing",
+    "status": "research",
     "createdDate": "2026-09-06",
     "lastTestedDate": "2026-09-06",
     "backtestStart": "2024-06-08",
@@ -1729,7 +1729,7 @@ const DATA = [
       "verifiedAt": "2026-09-06T00:00:00Z"
     },
     "verdict": "BY RATCHET V2'S LETTER, A CLEAN PASS ON THE FULL WINDOW -- BUT NOT TRUSTED WITHOUT A SPLIT TEST, BECAUSE THE PARENT LINE ALREADY FAILED ONE. PF improves 1.24221581 -> 1.31945407 (+0.077, above the 0.02 threshold), max drawdown improves 17.28630995% -> 15.08292137% (no give-back needed), trade count unchanged at 44 (>= 30-trade floor, not a >50% cut). Total trade count and the long/short split (19/25) are identical to E82 -- a narrower occupancy shift than expected, consistent with HARD LESSON 28's observation that this cap rarely binds. The visible change is concentrated in the long leg: one fewer nominal winner (9 -> 8) but long net profit nearly doubles (+$418.75 -> +$833.21), directionally consistent with E86's diagnosis that the cap was forcing in-progress winners flat before completion. HOWEVER: this result sits on the exact same parent lineage (E80/E82, 15m, four-gate build) that already failed an out-of-sample split test at E84/E85 (PF 2.77 first half -> 0.49 second half). Treating a full-window improvement on that same lineage as a keep or new candidate without first splitting IT would repeat the precise mistake the E84/E85 split test exists to catch. NOT recorded as a keep or promoted candidate -- status: testing, one split test away from being trusted either way.",
-    "notes": "ANSWERS E86's queue item 1 (a materially different 15m hypothesis, constrained to not be a gate variant and not touch the shield). E80/E82 (maxBars=288) remains status: research, its own split-test failure unchanged by this run. e58a (long, 1m) and E71 (short, 1m) remain the untouched 1m-track reference builds. HARD LESSON 48 drawdown-allowance RULE QUESTION (blocking E74/E77) remains open, unresolved, awaiting the user. QUEUE: (1) split-test E87 the same way E84/E85 split E82, the single most important next item on the 15m track; (2) a free, no-credit E86-style exact-target/exact-shield/timeout reclassification of E87's own 44 trades (trade list already fetched via get_trades against resultId 01M1TCZDFJJMKRVATDZBBJNV9N) to confirm the improvement mechanism; (3) do not port this maxBars change back to 1m/5m without its own test there (HARD LESSON 40)."
+    "notes": "ANSWERS E86's queue item 1 (a materially different 15m hypothesis, constrained to not be a gate variant and not touch the shield). E80/E82 (maxBars=288) remains status: research, its own split-test failure unchanged by this run. e58a (long, 1m) and E71 (short, 1m) remain the untouched 1m-track reference builds. HARD LESSON 48 drawdown-allowance RULE QUESTION (blocking E74/E77) remains open, unresolved, awaiting the user. QUEUE: (1) split-test E87 the same way E84/E85 split E82, the single most important next item on the 15m track; (2) a free, no-credit E86-style exact-target/exact-shield/timeout reclassification of E87's own 44 trades (trade list already fetched via get_trades against resultId 01M1TCZDFJJMKRVATDZBBJNV9N) to confirm the improvement mechanism; (3) do not port this maxBars change back to 1m/5m without its own test there (HARD LESSON 40). UPDATE 2026-09-06 (E88b): the split test this entry's queue named as the top item is now complete -- H1 (E88a) PF 2.4301693, H2 (E88b) PF 0.67760637. It does not replicate out-of-sample (same failure pattern as the maxBars=288 parent, E80/E82/E84/E85). Status downgraded from testing to research accordingly; see wf-e88b-e87-split-window-h2 for the full verdict."
   },
   {
     "id": "wf-e88a-e87-split-window-h1",
@@ -1780,9 +1780,59 @@ const DATA = [
     },
     "verdict": "NOT a keep, not a candidate -- one half of a two-half split test, second half pending. Against E84's maxBars=288 sibling on the IDENTICAL first-half window: PF 2.77443947 -> 2.4301693 (lower), DD unchanged at 7.64852641%, trade count identical at 20 (9 long/11 short), long net profit nearly identical (+196.29 -> +186.47), one fewer long winner (7->6). The maxBars widening barely changed this half at all -- consistent with HARD LESSON 28's own observation that the cap rarely binds. This near-identity between the 288-cap and 576-cap builds on the SAME first-half window is itself informative: if the two constructions behave almost identically on data where they should differ only when a trade actually reaches the cap, the second half (where E84/E85 previously found the parent line's edge inverted) is not obviously more likely to behave differently under the wider cap either. That is an expectation, not a result -- the second-half run is what will actually settle it.",
     "notes": "Completes half of E87's own queue item 1. Second half (2025-07-20 to 2026-09-01) queued for the next cycle with budget, using the SAME e88a-e87-split-window-h1.pine source with the date window changed (mirrors E84->E85). e58a (long, 1m) and E71 (short, 1m) remain the untouched 1m-track reference builds. E80/E82 (maxBars=288) remains status: research, its split-test failure unchanged by this run. E87 (maxBars=576, full window) remains status: testing, unreplicated until this split test completes. HARD LESSON 48 drawdown-allowance RULE QUESTION (blocking E74/E77) remains open, unresolved, awaiting the user."
+  },
+  {
+    "id": "wf-e88b-e87-split-window-h2",
+    "name": "E88b: second-half split test of E87 (maxBars=576 build), 2025-07-20 to 2026-09-01",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "research",
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "backtestStart": "2025-07-20",
+    "backtestEnd": "2026-09-01",
+    "specPath": "war-formation/pine/e88b-e87-split-window-h2.pine",
+    "description": "Completes the two-half split test of E87 (maxBars 288->576 on top of E82's four-gate build) that E88a began. E88a ran the first half (2024-06-08 to 2025-07-20) and found the wider cap nearly identical to E84's maxBars=288 sibling on that half (PF 2.4301693 vs 2.77443947, DD identical, trade count identical). This entry runs the second half, the window where E84/E85's maxBars=288 sibling inverted to PF 0.49464093 with the profitable leg flipping from long-driven to short-driven. E86's diagnostic explained why: H2 has far fewer exact-target hits (2/24 vs H1's 6/20) and more exact-shield hits (7 vs 2), so H2 is the half where widening maxBars has the most room to change the outcome, in either direction. BINDING (E17): byte-identical to e88a-e87-split-window-h1.pine and e87-e82-maxbars576.pine; only the backtest window changed, to the same second-half split point used for E84/E85 (2025-07-20 to 2026-09-01).",
+    "metrics": {
+      "netProfitPct": -7.65434142,
+      "profitFactor": 0.67760637,
+      "maxDrawdownPct": 15.04348871,
+      "totalTrades": 24,
+      "winRatePct": 16.66666667,
+      "avgTradePct": -0.31893089,
+      "sharpeRatio": -0.71037536,
+      "sortinoRatio": -0.1836578,
+      "commissionPaid": 211.325742,
+      "avgWinningTrade": 402.1970278,
+      "avgLosingTrade": -118.71111266,
+      "ratioAvgWinLoss": 3.38803183,
+      "largestWin": 511.774328,
+      "largestLoss": -296.8916976,
+      "avgBarsInTrade": 107.04166667,
+      "avgBarsWinning": 354.25,
+      "avgBarsLosing": 57.6,
+      "longTrades": 10,
+      "shortTrades": 14,
+      "longWinning": 2,
+      "shortWinning": 2,
+      "longNetProfit": -1091.592979599996,
+      "shortNetProfit": 326.158837599997
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1TKP0N88GVF5A0RK831VHP3",
+      "strategyId": "01M1TKP0ST24VFPV6W4XAPA2VN",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1TKP0N828FRKYEEKH7W847A",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1.0434782608695652,
+      "verifiedAt": "2026-09-06T00:00:00Z"
+    },
+    "verdict": "THE SPLIT TEST OF E87 IS NOW COMPLETE, AND IT FAILS -- E87's full-window improvement does not reproduce out-of-sample. H1 (E88a) PF 2.4301693, H2 (this entry) PF 0.67760637: the same single-period-driven-result pattern E84/E85 already found on the maxBars=288 parent line, one lineage width later. Against E85 (the maxBars=288 sibling on this identical second-half window): PF improves 0.49464093 -> 0.67760637 (+0.183), net loss shrinks -11.3981864% -> -7.65434142%, trade count and long/short split are IDENTICAL (24 total, 10 long/14 short, 2 winners each leg) -- long net loss shrinks (-$1,436.35 -> -$1,091.59) and short net profit is essentially unchanged (+$296.53 -> +$326.16). So widening the hold cap DOES measurably soften H2's loss, consistent with E86's diagnosis that some admitted trades were being timed out before completing a move -- but it does not fix it: PF stays well below 1.0 and the long leg stays deeply net-negative in both maxBars widths. This matches registered prediction (b), not (a): H2's problem is substantially adverse price direction against open longs, not merely insufficient time, and giving losers more room to run only partially offsets that (it also gives them more room to reach the shield, which HARD LESSON 28/29 flagged as the competing risk before this ran). E87 (full-window, maxBars=576) is downgraded from status 'testing' to 'research', the same disposition E80/E82 received after its own split-test failure -- not formally REJECTED under RATCHET v2's letter (H1's 20 trades and H2's 24 trades both sit under the 30-trade floor, so this is not a strict clause-3 split), but the magnitude and consistency of the failure (PF collapse to a number matching its own parent's H2 collapse, long leg net-negative in H1 too via E88a's own 1-fewer-winner note) make the informality immaterial to the conclusion.",
+    "notes": "Completes E87/E88a's queue item 1. NO CHAMPION, NO CANDIDATE CHANGE: e58a (long, 1m) and E71 (short, 1m) remain the untouched 1m-track reference builds. E80/E82 (maxBars=288, 15m) remains status: research. E87 (maxBars=576, 15m, full window) is updated from status: testing to status: research in this same update -- see its entry. HARD LESSON 48 drawdown-allowance RULE QUESTION (blocking E74/E77) remains open, unresolved, awaiting the user. QUEUE: (1) the 15m track needs a materially different structural idea per E85/E86's own queue -- E80/E82's four-gate construction and its maxBars variant have now both failed out-of-sample; (2) do not port maxBars=576 (or the softening-but-not-fixing pattern found here) back to the 1m or 5m tracks without its own test there (HARD LESSON 40)."
   }
 ];
-const BUILT = "2026-09-06 04:41";
+const BUILT = "2026-09-06 05:41";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

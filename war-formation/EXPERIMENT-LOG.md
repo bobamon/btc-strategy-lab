@@ -7996,3 +7996,137 @@ improvements, blocked on the HARD LESSON 48 drawdown-allowance rule question, aw
    E74/E77) remain open, unresolved by this run, awaiting the user -- unchanged across many cycles.
 3. Do not port this maxBars change back to the 1m or 5m tracks without its own test there (HARD LESSON
    40), and do not treat E88a alone (first half only) as grounds to promote or reject E87.
+
+---
+
+# ██ E88b -- E87's SPLIT TEST COMPLETED: THE SECOND HALF LANDS, AND IT FAILS AGAIN
+
+**SCHEDULING NOTE.** This cycle's stored prompt again described a stale lab state (1m-only data
+window, "attack the short's entry geometry via E64a/E64b/E66," "continue numbering after E66"). All
+of that is long closed -- the entry-term binding sweeps finished at E70/E76/E77, the short's geometry
+work moved through E71-E79, and the 15m track has since run E80-E88a, none of which the stored prompt
+mentions. **The docs win**, per the prompt's own instruction and HARD LESSON 26's precedent: this
+cycle completes E88a/E87's own queue item 1 -- run the second half of the split test -- rather than
+re-deriving E64a-E66 territory this lab closed out weeks ago. STATE block for the record: parent for
+the 1m track is `e58a` (long, PF 1.24015239, DD 9.82519609%, 36 trades, confirmed reproducible); no
+champion, no candidate anywhere in the lab.
+
+**`get_credits` read 477 at the start** -- the 250-500 band, exactly ONE backtest.
+
+**THE QUESTION.** E88a ran the first half of E87's split test (maxBars=576 on E82's four-gate build)
+and found it nearly identical to E84's maxBars=288 sibling on that half (PF 2.4301693 vs 2.77443947,
+identical drawdown and trade count). That near-identity was informative but not conclusive: E86's own
+diagnostic named H2 -- not H1 -- as the half where the wider cap has the most room to matter, because
+H2 is where far more admitted trades actually reach a boundary (2/24 exact-target hits vs H1's 6/20,
+exact-shield hits 7 vs 2). This entry runs that second half.
+
+**BINDING (E17):** byte-identical to `e88a-e87-split-window-h1.pine` and `e87-e82-maxbars576.pine`.
+The only variable changed is the backtest window: 2025-07-20 to 2026-09-01, the same second-half split
+point already used for E84/E85 and the 5m E63a/E63b split. `pine/e88b-e87-split-window-h2.pine`.
+
+**PRE-RUN AUDIT.** R = shieldUsd $2,000 against this half's BTC range (~$60k-$126k): clears the 0.8%
+floor (HARD LESSON 3) throughout this window; noting the live tension this lab's standing caveats
+name -- a $2,000 shield is comfortably above the floor here but would approach it above ~$250k, not
+reached in this window. Stop is risk-defined per the ALCM spec (HARD LESSON 5), unchanged. Both legs
+reported separately (HARD LESSON 6). REDUNDANCY (HARD LESSON 18): n/a, no term added or removed.
+Latch order unchanged (HARD LESSON 8). OCCUPANCY CONFOUND (HARD LESSON 24/28/29): none newly
+introduced relative to E88a -- shieldUsd/rr/maxBars unchanged; a different window changes which trades
+exist to occupy, not a new mechanism.
+
+**REGISTERED PREDICTION (HARD LESSON 17), stated before running, two genuinely open outcomes:**
+(a) REPRODUCES -- PF clears 1.0 on an adequate sample, neither leg net-negative in both halves, which
+would mean the wider cap gives H2's boundary-reaching trades room to complete a full 2R run rather
+than being timed out early, fixing (not just moving) E85's failure mode; or (b) DOES NOT REPRODUCE --
+PF stays near or below E85's 0.49, or a leg stays net-negative in both halves, which would mean H2's
+problem is adverse price direction, not premature timeout, and widening the hold cap only gives losers
+more room to reach the shield.
+
+## RESULT -- 15m, 2025-07-20 -> 2026-09-01 (second half), 39,534 bars
+
+**One credit.** `resultId 01M1TKP0N828FRKYEEKH7W847A`, `strategyId 01M1TKP0ST24VFPV6W4XAPA2VN`.
+
+| | E85 (maxBars 288, H2) | **E88b (maxBars 576, H2)** |
+|---|---|---|
+| Profit factor | 0.49464093 | **0.67760637** |
+| Trades | 24 | **24** |
+| Win rate | 16.66666667% | **16.66666667%** |
+| Net | -11.3981864% | **-7.65434142%** |
+| Max drawdown | 17.12770556% | **15.04348871%** |
+| Long | 10 trades, 2 wins, -$1,436.35 | 10 trades, **2 wins**, **-$1,091.59** |
+| Short | 14 trades, 2 wins, +$296.53 | 14 trades, **2 wins**, **+$326.16** |
+| Sharpe / Sortino | -- | -0.71037536 / -0.1836578 |
+
+**Trade count and the long/short split (10/14) are IDENTICAL to E85**, and so are the winner counts
+per leg (2/2) -- the same narrow-occupancy-shift pattern E87 showed on the full window and E88a showed
+on H1. The visible change is a softer long-side loss (-$1,436.35 -> -$1,091.59, about $345 recovered)
+and an essentially flat short leg (+$296.53 -> +$326.16). Combined with E88a's H1 finding (PF 2.4301693
+vs E84's 2.77443947, one fewer long winner), this is now the **third** half-window comparison in this
+lineage where the wider cap changes almost nothing about which trades are admitted and only nudges a
+handful of exit prices.
+
+## VERDICT -- THE SPLIT TEST OF E87 IS NOW COMPLETE, AND IT FAILS
+
+**H1 (E88a) PF 2.4301693, H2 (this entry) PF 0.67760637.** This is the identical single-period-driven-
+result shape E84/E85 already found on the maxBars=288 parent line (H1 2.77 / H2 0.49) -- widening the
+hold cap moved both halves' numbers a little, but did not close the gap between them, and H2 stays
+firmly below 1.0. **Registered prediction (b) is what happened, with a real nuance prediction (b) did
+not anticipate in this exact form:** the wider cap does measurably soften H2's loss (PF +0.183, net
+loss shrinks by about 3.7 points of equity) -- some of E86's diagnosed premature-timeout damage is
+real and partially recoverable -- but it does not convert the half into a working construction. The
+long leg stays deeply net-negative on both maxBars widths in H2, which is the signature HARD LESSON
+28/29 warned to watch for: giving a trade more time to run also gives an adverse move more room to
+reach the shield, and in H2 that competing effect dominates enough that PF cannot cross 1.0.
+
+**E87 (maxBars=576, full window) is downgraded from `status: testing` to `status: research`** -- the
+same disposition E80/E82 received when its own split test failed. Not a formal RATCHET v2 clause-3
+REJECT (neither half's 20 or 24 trades clears the 30-trade floor, so this is not a strict clause-3
+split in the letter of the rule), but the magnitude and consistency of the failure make the informality
+immaterial: this is the second construction on the E80/E82 lineage, at two different `maxBars` widths,
+to show a strong first half and a sub-1.0 second half with an inverted leg-dominance pattern.
+
+**No champion, no candidate change anywhere in the lab.** `e58a` (long, 1m) and `E71` (short, 1m)
+remain untouched. `E80`/`E82` and now `E87` both sit at `status: research` on the 15m track --
+diagnostic lines that explained something real (E86's exact-target/timeout mechanism) without
+producing a construction that survives its own out-of-sample test.
+
+## WHAT THIS DOES NOT ESTABLISH
+
+- **Does not identify a working 15m construction.** Both the original E80/E82 gate set and its
+  maxBars=576 variant have now failed the identical out-of-sample split. The 15m track needs a
+  materially different structural idea, not a further variant of this lineage's terms -- unchanged
+  from E85's own queue item 1, now doubly confirmed.
+- **Does not touch the 1m track.** `e58a` (long) and `E71` (short) are untouched; this result concerns
+  the 15m port only, per HARD LESSON 40 (redesign per timeframe, not carry-over).
+- **Does not fully explain why H2's long leg loses on both cap widths** -- whether that is a genuine
+  regime property of this window (a choppier or more adverse period for this specific reclaim geometry)
+  or an artifact of the particular split boundary is not distinguished here. Not investigated this
+  cycle.
+- **Does not touch the HARD LESSON 48 drawdown-allowance RULE QUESTION** (blocking E74/E77) -- open,
+  unresolved, awaiting the user.
+- Check #36's shield-fill caveat (every recorded PF is an upper bound) applies here as everywhere.
+
+## STATE
+
+**No champion, no candidate.** `e58a` (long, 1m, PF 1.24015239, DD 9.82519609%, 36 trades, confirmed
+reproducible) and `E71` (short, 1m) remain the reference builds for the 1m track, untouched throughout
+the entire 15m excursion (E78-E88b). `E80`/`E82` and `E87` (both 15m, maxBars 288 and 576 respectively)
+are now both `status: research` -- closed diagnostic lines whose full-window numbers looked like edges
+and whose split tests both failed the same way. `E74`/`E77` remain the 1m track's only live
+improvements, blocked on the HARD LESSON 48 drawdown-allowance rule question, awaiting the user.
+
+## QUEUE
+
+1. **A materially different structural idea for the 15m track**, now constrained by two failed
+   lineages rather than one: not a variant of E80/E82's four gates, and not a hold-cap change on top
+   of them. E85's own queue item 1 stands, doubly confirmed.
+2. Check #36's shield-fill caveat and the HARD LESSON 48 drawdown-allowance RULE QUESTION (blocking
+   E74/E77) remain open, unresolved by this run, awaiting the user -- unchanged across many cycles now
+   and the single largest thing outside this lab's own power to close.
+3. Do not port maxBars=576, or the "softens but does not fix" pattern found here, back to the 1m or 5m
+   tracks without its own test there (HARD LESSON 40).
+4. **Per the QUEUE ITEM 1 / QUEUE ITEM 2 language in this lab's stored scheduled prompt** (the short's
+   entry geometry and the remaining ENTRY terms brokeBelow/h1Bull/timeGate/inMiddle): both are already
+   closed on the 1m track (E64a/E64b/E66 and the E70/E76/E77 binding sweeps) and do not apply to the
+   15m track, which uses a structurally different four-gate build. The stored prompt should be updated
+   to reflect the lab's actual current queue (item 1 above) rather than continuing to describe 1m-track
+   work finished many cycles ago.
