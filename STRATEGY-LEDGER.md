@@ -3064,3 +3064,57 @@ Both were already rejected on other grounds and both are far below the sample fl
 = 0 means the bucket is empty, not that winners resolved instantly** — read `winningTrades` before
 reading the average, or this lesson's own diagnostic becomes the next HARD LESSON 58 (a plausible
 number produced by a mechanism other than the one you think you are measuring).
+
+---
+
+## ██ HARD LESSON 60 — A BENCHMARK IS TWO CHOICES, AND RECORDING BOTH IS NOT THE SAME AS USING BOTH
+
+**Earned:** BTC Benchmark Audit II, 2026-09-06. Zero runs, zero credits — the whole finding was already
+sitting in `results/backtests.json` and in the board's own prior entry.
+
+The Attack 79 benchmark audit recorded its `buy_hold` baselines with **two** columns — raw buy & hold and
+perp-executed net (raw minus funding and execution) — then computed **every** gap against the raw column
+and published: *"Attack 68, the board's designated strongest both-halves candidate, loses to buy & hold in
+both halves."* Ten cycles reasoned from that sentence.
+
+Against the other column of the same two pinned baseline runs, **Attack 68 beats holding in both halves**
+(+4.33pp H1, +8.55pp H2), and so do Attacks 66, 82, 83, 87 and 88. **The two columns disagree by 18.58
+percentage points (H1) and 15.24 (H2)** — the funding-plus-execution cost of actually holding the perp —
+which is larger than most of the gaps the audit reported. One table, two answers, opposite signs.
+
+**Why it happens, and why it is not a definitional quibble.** Neither column is like-for-like, and the two
+errors point opposite ways:
+
+- The **raw** column charges *neither* side a holding cost, handing buy & hold a free perp position.
+- The **perp** column charges the *baseline* everything and the *strategy* nothing, because this engine
+  reports no `fundingPaid` on a strategy run at all.
+
+So the honest answer is *bracketed* by the two columns, and **where it sits inside that bracket is decided
+by exposure, which is measurable from fields already recorded**: `totalTrades` × `avgBarsInTrade` ÷ window
+bars. Attack 83 holds a position **5.25% / 5.53%** of its windows. Buy & hold holds one 100% of the time.
+A side with one-twentieth of the exposure cannot owe a full-exposure funding bill, which puts the truth far
+nearer the perp column — **but "nearer" is not a number, and this lesson does not permit one.** Scaling a
+baseline's funding by an exposure share assumes a uniform funding rate over exactly the hours a strategy
+happened to be in position. That is an estimate, and an estimate is not a result.
+
+**How to apply:**
+- **State which baseline column a gap was computed against, every time.** A benchmark gap without its
+  column named is not a result; it is half of one.
+- **When two recorded columns disagree in sign, report both and call the verdict unresolved.** Picking the
+  one that reads cleanly, or the one listed first, is a choice being made silently.
+- **Before comparing any strategy to a hold, compute both sides' time in market.** It is free — the fields
+  are already in every recorded run — and it tells you which direction each column's bias runs and roughly
+  how big it is. A strategy in the market 5% of the time and one in it 25% of the time (Attack 96) are not
+  comparable to a baseline on the same terms.
+- **Recording a caveat is not applying it.** The Attack 79 audit recorded the perp column, recorded that no
+  trader.dev run reports funding, and recorded a cross-source caveat — and then computed every gap one way
+  anyway. This is HARD LESSON 11 (declaring a caveat is not bounding it) in a new place: the correction was
+  present in the same document as the error, unread, for ten cycles.
+- **A "settled" claim that no cycle has re-derived is a claim, not a fact.** This one was load-bearing in
+  ten consecutive queues and cost one file read to overturn. Audit the claims the lab leans on hardest,
+  because those are exactly the ones nobody re-checks.
+
+**Where this binds beyond the lab that earned it.** Any workstream that ever compares a result to holding
+the instrument. War Formation and 3M Elite have **no benchmark column at all**, so they do not have this
+bug yet — they have the gap that produced it. When either adds one, it adds both columns and the
+time-in-market row with it.

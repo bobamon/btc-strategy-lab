@@ -7605,7 +7605,18 @@ board has no baseline column.
 
 **Attack 68, the board's designated "strongest both-halves candidate", loses to buy & hold in both
 halves.** Its strength was measured on profit factor and on H1/H2 consistency — both real — but on
-return it trailed holding by 14.25 and 6.69 points. This does not demote it: PF 1.56/1.13 across two
+return it trailed holding by 14.25 and 6.69 points.
+
+> **██ THIS SENTENCE IS BASELINE-DEPENDENT AND WAS CARRIED FORWARD AS SETTLED — CORRECTED BY BENCHMARK
+> AUDIT II (2026-09-06, at the end of this file).** Every gap in the table above is computed against the
+> **raw** buy & hold column only. Against the **perp-executed** column of the *same* baseline runs —
+> recorded three rows higher in this entry's own baselines table — Attack 68 **beats** holding in both
+> halves, +4.33pp (H1) and +8.55pp (H2). One of the two columns this audit recorded says it loses in both
+> halves; the other says it wins in both halves. Neither column is like-for-like (see Audit II), so the
+> honest verdict is **unresolved**, not "loses". Read the sentence above as one of two answers this
+> table supports, not as the answer.
+
+This does not demote it: PF 1.56/1.13 across two
 halves with 89/80 trades remains the most consistent pair on the board, and on drawdown it is far
 ahead of holding (11.08%/10.75% against 69.88%/58.82%). It does mean the board's ranking of its own
 candidates was made without a dimension that changes the ordering.
@@ -9585,3 +9596,207 @@ candidate and must not be treated as one until H2 runs.
 7. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
 8. **Remaining untried indicator families after this cycle**: `ta.sar`, `ta.tsi`, `ta.wpr`, `ta.iii`,
    `ta.wvad`, `ta.percentrank` (`ta.cci` untestable-not-consumed at 97; `ta.stoch` pending H2 here).
+
+---
+
+# ██ BENCHMARK AUDIT II — THE BOARD'S BENCHMARK VERDICT DEPENDS ON WHICH RECORDED BASELINE COLUMN YOU READ, AND THE BOARD READ ONE OF THEM. ZERO NEW RUNS, ZERO CREDITS.
+
+The stored scheduled prompt again asks to "build Attack 37's filter stack," a board state ninety-plus
+attacks stale, and this environment has **no `backtest-lab`** and forbids spending trader-dev credits on
+this workstream. **The docs override it, again**, per the prompt's own standing instruction, and the
+prompt's own no-backtest menu names the work done here: *"re-analyse results ALREADY recorded in the repo
+— check a stated conclusion against trade data on disk, find contradictions between documents"* and
+*"prefer correcting a previous conclusion over adding a new unverified one."*
+
+**No strategy was run. No credit was spent. Every number below is either a field read out of
+`results/backtests.json` (each carrying its own `provenance.jobId`) or a subtraction of two such fields.**
+This entry consumes **no attack number** — nothing was tested.
+
+## WHY THIS AND NOT ATTACK 98
+
+The benchmark audit filed under Attack 79 established the board's only baseline column and reached one
+load-bearing conclusion: *"Attack 68, the board's designated 'strongest both-halves candidate', loses to
+buy & hold in both halves."* That sentence has been carried in the reasoning of every cycle since. Two
+things have happened to it that nobody checked:
+
+1. **It covered two candidates, and the board's designated candidate has changed twice since.** The audit
+   benchmarked Attack 68 and Attack 46. Attacks **82, 83, 87, 88, 89-97** were all run afterwards.
+   **Attack 83 — named "the board's strongest both-halves candidate" in ten consecutive queues since —
+   has never once been compared to holding BTC.** Neither has Attack 87, Attack 88, or Attack 96.
+2. **The audit recorded two baseline columns and computed every gap against one of them.** The other
+   column reverses the headline for the board's own candidate.
+
+Verifying a ten-cycle-old load-bearing claim outranks a ninety-eighth bare mechanism.
+
+## THE BASELINES — UNCHANGED, RE-USED, NOT RE-RUN
+
+Recorded under Attack 79: `buy_hold` on BTC/USDT, 15m, `binance_perp_archive`, both `pinned: true`.
+`bt_55f4290898` (H1) and `bt_8531235119` (H2).
+
+| Window | raw buy & hold | perp-executed net | **implied holding cost** | B&H max DD |
+|---|---|---|---|---|
+| H1 2022-01-01 → 2024-06-08 | +49.723428% | +31.139021% | **18.584407 pp** | -69.876273% |
+| H2 2024-06-08 → 2026-09-01 | +13.461286% | -1.777913% | **15.239199 pp** | -58.816498% |
+
+The fourth column is the subtraction of the first two — the funding plus execution cost of actually
+holding the perp across each window. **It is 18.58 and 15.24 percentage points. That is not a rounding
+detail; it is larger than most of the gaps the Attack 79 audit reported.**
+
+## THE FULL BOTH-HALVES TABLE, AGAINST BOTH RECORDED COLUMNS
+
+Every build in `results/backtests.json` that has **both halves** recorded. `net%` and `n` are recorded
+fields; `vs RAW` and `vs PERP` are subtractions against the table above.
+
+| build | half | n | recorded net% | **vs RAW** | **vs PERP** | recorded DD% |
+|---|---|---|---|---|---|---|
+| 34 weekly break | H1 | 30 | +55.930008 | **+6.21** | **+24.79** | 46.885 |
+| 34 weekly break | H2 | **23** | +14.204666 | **+0.74** | **+15.98** | 32.249 |
+| 35 weekly break 1.5RR | H1 | 31 | +32.851390 | -16.87 | +1.71 | 45.818 |
+| 35 weekly break 1.5RR | H2 | **24** | +8.495770 | -4.97 | +10.27 | 32.249 |
+| 37 sweep reversal | H1 | 322 | +5.602813 | -44.12 | -25.54 | 31.635 |
+| 37 sweep reversal | H2 | 196 | +1.817015 | -11.64 | +3.59 | 24.310 |
+| 46 level-target RR3.5 | H1 | 105 | +17.118474 | -32.60 | -14.02 | 23.452 |
+| **46 level-target RR3.5** | **H2** | **38** | **+20.392909** | **+6.93** | **+22.17** | **13.612** |
+| 66 OBV divergence | H1 | 137 | +35.536074 | -14.19 | +4.40 | 15.250 |
+| 66 OBV divergence | H2 | 142 | +0.824677 | -12.64 | +2.60 | 13.840 |
+| 67 + breakout margin | H1 | 100 | +26.645946 | -23.08 | -4.49 | 15.962 |
+| 67 + breakout margin | H2 | 105 | +11.469108 | -1.99 | +13.25 | 11.412 |
+| 68 + magnitude floor | H1 | 89 | +35.472855 | -14.25 | **+4.33** | 11.082 |
+| 68 + magnitude floor | H2 | 80 | +6.774583 | -6.69 | **+8.55** | 10.750 |
+| 69 + swing floor 1.5% | H1 | 38 | +27.760419 | -21.96 | -3.38 | 10.826 |
+| 69 + swing floor 1.5% | H2 | **29** | +3.440754 | -10.02 | +5.22 | 9.089 |
+| 70 + swing floor 1.2% | H1 | 52 | +29.964382 | -19.76 | -1.17 | 11.875 |
+| 70 + swing floor 1.2% | H2 | 46 | +6.039452 | -7.42 | +7.82 | 8.659 |
+| 71 + spacing floor | H1 | **18** | +1.271695 | -48.45 | -29.87 | 12.794 |
+| 71 + spacing floor | H2 | **12** | -1.248470 | -14.71 | +0.53 | 7.761 |
+| 82 + climax exclusion | H1 | 40 | -7.208734 | -56.93 | -38.35 | 21.681 |
+| 82 + climax exclusion | H2 | 44 | +6.424977 | -7.04 | +8.20 | 7.135 |
+| **83 + regime-cond. climax** | **H1** | **88** | **+37.650494** | **-12.07** | **+6.51** | **11.082** |
+| **83 + regime-cond. climax** | **H2** | **79** | **+7.811416** | **-5.65** | **+9.59** | **10.757** |
+| 87 + regime-cond. margin | H1 | 75 | +32.587792 | -17.14 | +1.45 | 11.853 |
+| 87 + regime-cond. margin | H2 | 70 | +7.877234 | -5.58 | +9.66 | 7.728 |
+| **88 + regime-cond. spacing** | **H1** | **55** | **+40.036836** | **-9.69** | **+8.90** | **10.687** |
+| **88 + regime-cond. spacing** | **H2** | **64** | **+6.601100** | **-6.86** | **+8.38** | **11.491** |
+| 96 MACD zero-line | H1 | 310 | +16.681153 | -33.04 | -14.46 | 26.952 |
+| 96 MACD zero-line | H2 | 275 | -4.149257 | -17.61 | -2.37 | 29.472 |
+
+Bolded `n` values are **below RATCHET v2 clause 3's 30-trade floor** and are not banked as results.
+
+## FINDING 1 — THE COLUMN CHOICE FLIPS THE VERDICT ON THE ENTIRE OBV STACK
+
+Against **raw** buy & hold, every build in the OBV lineage loses in both halves, and only Attack 46b
+clears — the Attack 79 conclusion.
+
+Against the **perp-executed** column of the same baseline runs, **Attack 66, 68, 82, 83, 87 and 88 all
+beat holding in BOTH halves.** Attack 83: **+6.51 / +9.59**. Attack 88: **+8.90 / +8.38**. Attack 68 —
+the build the Attack 79 audit said "loses to buy & hold in both halves" — **+4.33 / +8.55**.
+
+Both columns come from the same two pinned baseline runs, recorded in the same table, in the same entry
+that reached the conclusion. **The conclusion is not wrong so much as it is one of two answers that
+table supports, promoted to settled fact and then leaned on for ten cycles.**
+
+## FINDING 2 — NEITHER COLUMN IS LIKE-FOR-LIKE, AND THE BIAS RUNS IN A KNOWN DIRECTION
+
+This is why the flip is not just a definitional quibble.
+
+- The **raw** column charges *neither* side a holding cost. Buy & hold gets a perp position for free.
+- The **perp** column charges the *baseline* its full 18.58pp / 15.24pp and charges the *strategy*
+  nothing — because, as the Attack 79 audit itself recorded, **no trader.dev record reports
+  `fundingPaid` at all.**
+
+So one column flatters the baseline and the other flatters the strategy, and the true comparison is
+between them. **What is measurable, from recorded fields only, is how far apart the two sides' exposure
+actually is.** Time in market = `totalTrades` × `avgBarsInTrade` ÷ window bars (85,655 H1 / 78,567 H2,
+both recorded on this board; `pyramiding=1` on every build, so positions cannot overlap):
+
+| build | H1 time in market | H2 time in market |
+|---|---|---|
+| Attack 46 | 4.42% | **1.54%** |
+| Attack 68 | 5.27% | 5.59% |
+| **Attack 83** | **5.25%** | **5.53%** |
+| Attack 87 | 4.72% | 4.78% |
+| Attack 88 | 3.55% | 4.95% |
+| Attack 96 (MACD) | 24.71% | 24.72% |
+| **buy & hold** | **100%** | **100%** |
+
+**Attack 83 holds a position 5% of the time. The baseline holds one 100% of the time.** A strategy with
+one-twentieth of the exposure cannot accrue anything close to one-twentieth's worth — let alone all — of
+a full-exposure funding bill. The raw column's implicit assumption is that both sides pay zero; the perp
+column's is that the strategy pays zero and the baseline pays everything. **The second is much closer to
+true, which puts the honest answer much nearer the "+6.51 / +9.59" end than the "-12.07 / -5.65" end.**
+
+**I am not quoting a funding-corrected number, and this audit does not bank one.** Scaling the baseline's
+funding by an exposure share assumes a uniform funding rate across the window and across exactly the
+hours a strategy happens to be in position, and that assumption is not measured anywhere in this repo.
+Per the standing rule, an estimate is not a result. What is banked is the direction and the size of the
+uncertainty, both of which come from recorded fields.
+
+## FINDING 3 — ATTACK 34 BEATS RAW BUY & HOLD IN BOTH HALVES AND WAS NEVER BENCHMARKED
+
+The Attack 79 audit benchmarked only the two builds then designated as standing candidates. Attack 34
+(weekly break-and-hold) is the **only** build on this board that beats the *raw* column in both halves:
+**+6.21pp (H1) and +0.74pp (H2)**, at PF 1.482908 / 1.137037.
+
+**It is not bankable as a both-halves result.** H1 sits exactly on the floor at n=30; **H2 has 23 trades,
+below it**. And its drawdowns (46.885% / 32.249%) are four times the OBV lineage's — a completely
+different risk shape from the one the board has spent forty cycles optimising. It is recorded here
+because it was invisible for the same reason Attack 46b was: nobody looked.
+
+## FINDING 4 — "ATTACK 83 REMAINS THE STRONGEST BOTH-HALVES CANDIDATE" IS AN ENDORSEMENT, NOT A MEASUREMENT
+
+The claim appears verbatim in ten consecutive queues. On the recorded numbers, **Attack 88 posts a higher
+profit factor than Attack 83 in both halves** (2.021320 vs 1.610449 in H1; 1.154330 vs 1.153652 in H2 —
+that second margin is +0.00068, a tie in all but sign), a better H1 drawdown (10.687% vs 11.082%), and a
+better H1 gap against both baseline columns. Attack 70 also beats Attack 83 on PF in both halves
+(1.645575 / 1.166373), on 52/46 trades.
+
+**Attack 88's rejection was correct** — RATCHET v2 fails it on H2 (no material PF gain, +0.734pp
+drawdown), and this audit does not reopen it. But *"reverted by the ratchet"* and *"not the strongest
+candidate on the board"* are different statements, and the queue has been printing the second while only
+the first was ever established. The claim should read: **Attack 83 is the surviving base; Attack 88 holds
+the board's highest recorded profit factor at n≥30 in either half.**
+
+## WHAT THIS CHANGES AND WHAT IT DOES NOT
+
+- **Nothing is promoted or demoted.** RATCHET v2 judges profit factor, drawdown and sample count. It has
+  never had a benchmark clause, so no keep/revert decision on this board turns on any of the above.
+- **Attack 46b's status is unchanged and is now the more robust of the two claims**, because it beats
+  *both* columns in H2 (+6.93 raw, +22.17 perp) rather than depending on which one is used.
+- **The Attack 79 audit's headline sentence is annotated in place**, not deleted. Its table was right;
+  its one-column reading of it was promoted to a settled fact it could not carry.
+- **Cross-source caveat carries over unchanged:** candidate returns are trader.dev, baselines are
+  `binance_perp_archive`. Read these gaps to the point, not the basis point.
+
+## WHAT I COULD NOT ESTABLISH
+
+**Whether the OBV stack actually beats buy & hold.** That needs a strategy return with funding charged on
+the strategy's own in-position hours, and **no engine available in this repo reports `fundingPaid` on a
+strategy run** — trader.dev does not, and `backtest-lab` is not available in a cloud session. Until an
+engine that charges funding on both sides runs both, the verdict stays where this audit leaves it:
+**unresolved, bracketed by -12.07/-5.65 and +6.51/+9.59 for Attack 83.**
+
+## QUEUE
+
+1. **QUEUED FOR A LOCAL SESSION WITH `backtest-lab`:** re-run Attack 83a/83b (`strategyId` recorded on the
+   board; runIds `adhoc_01M1SC5ZXCSGPKSRGZBV65FWJ1` / `adhoc_01M1SC6TB7X5JGNPEYN1GJCX2S`) on an engine
+   that charges perpetual funding on the strategy's own in-position hours, and compare to
+   `bt_55f4290898` / `bt_8531235119`. That single pair of runs resolves Findings 1 and 2 outright. **Do
+   not resolve it with an estimate.**
+2. **Every future benchmark comparison on this board states which column it used**, and reports both when
+   they disagree. See HARD LESSON 60.
+3. **The queue line "Attack 83 remains the board's strongest both-halves candidate" should be replaced**
+   with the two-clause version in Finding 4 wherever it is next written.
+4. **Attack 34's H2 needs 7 more trades to be bankable** and cannot get them — its window is fixed. If the
+   weekly break-and-hold family is ever revisited, the sample floor is the binding constraint, not the
+   edge, and a coarser instrument or a longer window is the only fix.
+5. **Attack 46 (long) remains a candidate alongside Attack 83**, and is now the only one whose benchmark
+   claim is column-independent.
+6. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed.**
+7. **The short leg remains a reported standing structural asymmetry**, unaffected by this audit.
+8. **Attack 98 (Stochastic oversold-dwell reclaim) landed concurrently with this audit** and is H1-only,
+   so it is not in the both-halves table above. Benchmarked here for completeness, against the same two
+   recorded columns: recorded net **+9.9033573%** on 37 trades → **-39.82pp vs raw**, **-21.24pp vs
+   perp-executed**. **It loses to holding on BOTH columns in H1**, so unlike the OBV stack its benchmark
+   verdict is column-independent, and unfavourable. Time in market 2.33% (37 × 54 ÷ 85,655). This does not
+   bear on its kill-rule status (PF 1.2630477 clears 1.0) and it does not pre-empt its queued H2 run — but
+   **when that H2 lands, report both columns with it.**
