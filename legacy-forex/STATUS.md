@@ -1823,3 +1823,71 @@ an absorbing barrier at 1R, needing an 83% win rate to hold the 1:3 that only ne
 profitable. The rule itself is fine; his own journal climbs. **The single-piece exit that tick #8 filed
 as a cosmetic limitation is what breaks it**, and the repair needs one fact about his execution that no
 committed transcript states. Sixteen ticks, zero results recorded, still correctly.
+
+---
+
+# ██ TICK #17, 2026-09-06 — THE DECISIVE BLOCKER IS INTRA-BAR RESOLUTION, NOT THE INSTRUMENT
+
+Zero credits, no backtest. Builds directly on tick #14's own measurement rather than repeating it.
+
+## WHAT TICK #14 MEASURED, AND WHAT IT IMPLIES THAT WAS NOT YET DRAWN OUT
+
+Tick #14 timed his trades from his own screen recordings: **1R→4R in 3m08s**, **entry→T2 in 12s**, a
+complete two-target sequence in **23s**, another in **2m26s**. It concluded, correctly, that *"the
+trade lives inside a single 5m bar."*
+
+**The consequence was not followed through: that makes the system unbacktestable on OHLC data at the
+only timeframes he permits, independent of every other blocker this file records.**
+
+## THE MECHANISM, CONFIRMED AGAINST PLATFORM DOCUMENTATION
+
+A backtester has four prices per bar and no ordering among them. When a stop and a target both fall
+inside one bar it cannot know which was touched first. Platform documentation is explicit:
+
+> "Fills are determined based on 4 data points — OHLC of a bar — since that is the only information
+> known during a backtest and there will be no intra-bar data."
+
+> "If the bar's range was wide enough to touch both levels, the analyzer has to guess which one got
+> hit first." The default convention assumes Open→High→Low→Close.
+
+Resolving it requires feeding a finer series — a tick series, or TradingView's Bar Magnifier — to
+replace the assumption with the real intra-bar sequence.
+
+## WHY THIS OUTRANKS THE INSTRUMENT PROBLEM
+
+The instrument blocker says: *the engines cannot give us NQ/YM correctly.* That is contingent — a
+better data source fixes it.
+
+**This one is not contingent.** His trades complete in 12 to 190 seconds. On his fastest permitted
+timeframe a bar is 300 seconds. So entry, stop and every target rung sit inside one bar, and **the
+fill convention decides every trade rather than some of them.** A backtest would measure the
+convention, not the method — and would look entirely legitimate while doing it.
+
+**Even given correct NQ/YM symbols and unlimited history, his own trade durations put the outcome
+below the resolution of the data.** Neither engine here has tick or 1-second data for those contracts.
+
+**This is why no Legacy Forex backtest exists in this repo, and why one must not be manufactured.**
+
+## WHAT WAS BUILT
+
+`legacy-forex/pine/VISUAL-legacy-forex-complete.pine`, +33 lines:
+
+1. **A warning block at the top of the file** stating the blocker, the measured durations, the OHLC
+   mechanism and the fact that it outranks the instrument problem — so nobody opening the deliverable
+   can miss it.
+2. **A live `IntraBarAmbiguity` plot** that reads 1 whenever the current bar's own range is wide
+   enough to contain both the stop and the active target — i.e. whenever a backtest of that bar would
+   be guessing. It turns an abstract caveat into something visible per bar while forward-testing.
+
+Nothing else in the file was touched; the cloud's adaptive-target absorption logic, flip detection and
+session-window correction are all left exactly as they were.
+
+## QUEUE
+
+1. **Forward-testing is now the only honest route, and the flag above makes it self-documenting.**
+   Run the visualiser live on NQ/YM 5m during New York session and record signals as they occur; live
+   fills have real sequence and no ambiguity.
+2. **If a tick or 1-second NQ/YM source is ever added, this blocker lifts** — and it is the only one
+   that would need to lift for the workstream to become testable.
+3. Do not run a Legacy backtest on any engine while `IntraBarAmbiguity` would fire on most trades. The
+   number produced would be about the fill convention.

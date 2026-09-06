@@ -417,6 +417,33 @@
 //   why `entryCutMins` is an input with a counter next to it and not a new default.
 // ═══════════════════════════════════════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════════════════════════════════════
+// ⚠️ THE DECISIVE BLOCKER, ADDED 2026-09-06 — HIS TRADES RESOLVE INSIDE A SINGLE BAR, WHICH MAKES
+// THIS SYSTEM UNBACKTESTABLE ON OHLC DATA AT THE ONLY TIMEFRAMES HE PERMITS.
+//
+// Measured from his own screen recordings (SYSTEM.md FINDING 23 / tick #14): a full 1R→4R traversal
+// in 3m08s; entry→T2 in 12s; a complete two-target sequence in 23s; another in 2m26s. On a 5-minute
+// chart — the FASTEST timeframe he allows — entry, stop and every target rung fall inside ONE bar.
+//
+// A backtester has four prices per bar and NO ordering between them. When stop and target both sit
+// inside a single bar it cannot know which was touched first; the universal convention is to assume
+// Open→High→Low→Close and fill accordingly. Platform documentation is explicit that "fills are
+// determined based on 4 data points — OHLC of a bar — since that is the only information known during
+// a backtest", and that resolving it requires feeding a finer series (tick, or TradingView's Bar
+// Magnifier) to replace the assumption with actual intra-bar sequence.
+//
+// FOR THIS SYSTEM THAT ASSUMPTION DECIDES EVERY TRADE, NOT SOME OF THEM. A backtest would therefore
+// measure the fill convention rather than the method, and would do so while looking entirely
+// legitimate. Neither engine in this project has tick or 1-second data for NQ/YM.
+//
+// THIS IS A STRONGER BLOCKER THAN THE INSTRUMENT PROBLEM. Even given correct NQ/YM symbols and
+// unlimited history, his own trade durations put the outcome below the resolution of the data.
+// It is why no Legacy Forex backtest exists in this repo, and why one should not be manufactured.
+//
+// The `IntraBarAmbiguity` plot at the foot of this file flags, live, whenever the current bar's range
+// spans both the stop and the active target — i.e. whenever a backtest of this bar would be guessing.
+// ═══════════════════════════════════════════════════════════════════════════════════════════════
+
 indicator("Legacy Forex Trader — Complete Visualiser", overlay=true, max_lines_count=500, max_labels_count=500, max_boxes_count=500)
 
 // ── INPUTS ────────────────────────────────────────────────────────────────────────────────────
@@ -1360,3 +1387,9 @@ plot(cumCntR,                      "Closed trades in the expanding mean",  displ
 plot(maxRtrade,                    "Live trade: furthest R reached",       display=display.data_window)
 plot(lastMaxR,                     "Last closed trade: furthest R reached",display=display.data_window)
 plot(capGap,                       "CapGapLastTrade (target − furthest R)",display=display.data_window)
+
+// ── INTRA-BAR AMBIGUITY FLAG — see the warning block at the top of this file ──────────────────
+// 1 whenever this bar's own range is wide enough to contain both the stop and the live target, so a
+// backtest filling from OHLC alone would have to guess the order and the trade's outcome with it.
+spanBoth = dir != 0 and not na(initR) and not na(tgtR) and (high - low) >= initR * (1.0 + tgtR)
+plot(spanBoth ? 1 : 0,             "IntraBarAmbiguity (1 = outcome is a guess)", display=display.data_window)
