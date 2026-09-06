@@ -9718,3 +9718,61 @@ t 0.6856. **All three are 2020-carried.** HARD LESSON 48 remains open and awaiti
 - Polec, *Stop-Loss, Take-Profit, Triple-Barrier & Time-Exit* — https://medium.com/@jpolec_72972/stop-loss-take-profit-triple-barrier-time-exit-advanced-strategies-for-backtesting-8b51836ec5a2
 - KJ Trading Systems, *What 567,000 Backtests Taught Me About Algo Trading Exits* — https://kjtradingsystems.com/algo-trading-exits.html
 - Tradeciety, *The Ultimate Guide to Backtesting* — https://tradeciety.com/the-ultimate-guide-to-backtesting
+
+---
+
+# ██ E95b — AN INDEPENDENT REPLICATION OF E95, RUN BY A CONCURRENT SESSION THAT DID NOT KNOW E95 EXISTED. IDENTICAL TO THE CENT. A SECOND DUPLICATED CREDIT.
+
+**READ E95 FIRST — IT IS THE PRIMARY RECORD.** This entry deliberately does not restate it: the
+Oracle-fidelity framing, the research-prior citations, the survivorship caveat, the phase
+decomposition, the 2020-dependence/significance analysis, or the "lineage is finished, do not fund
+further work on it" verdict. None of that is repeated here.
+
+## WHAT HAPPENED
+
+Two concurrent sessions both identified E94's queue item 3 (remove the `maxBars=288` timeout
+entirely) as the one live, non-blocked, credit-worthy item on the whole board — this cycle's own
+stored prompt ("attack the short's entry geometry" / "finish the remaining entry terms" on the 1m
+ALCM track) was independently re-confirmed closed by both, per the roughly dozen prior CYCLE CHECK
+entries above. Both ran the concurrency guard E94b itself queued (`git fetch origin main`) before
+spending and found no collision at that point — the other session's push landed after this
+session's fetch but before this session's own push, which fetch-before-spend cannot catch, since
+the race is between two simultaneous spends, not a stale read. This is the second time this exact
+failure mode has hit this lab (the first was E94/E94b); no further process fix is proposed beyond
+what E94b already queued.
+
+This branch renumbers itself to **E95b**; the first-committed entry keeps the number, per the
+E94/E94b precedent.
+
+## THE REPLICATION IS EXACT
+
+Two independently authored Pine files (`pine/e95-e94-no-hold-cap.pine` for the primary record,
+`pine/e95-e94-no-timeout.pine` here — both delete the same `maxBars` close-out block and are
+otherwise byte-identical to E94), two distinct `resultId`/`strategyId` pairs, identical numbers to
+the last decimal: profit factor **1.21092925**, **37** trades, **40.90896772%** max drawdown,
+**+28.27165669%** net, win rate **37.83783784%**, `commissionPaid` **$462.8343315**, `cascadeRatio`
+**1.0** (37/37, depth 1). **This is the second time in this lab that HARD LESSON 8's remedy —
+independent reconstruction from committed Pine plus a one-line deletion specified in writing
+produces an exact, not approximate, replication — has been demonstrated** (the first was E94/E94b).
+
+## THIS SESSION'S OWN TRADE-LEVEL CHECK
+
+Before either session's write-up existed to compare against, this session's own `get_trades` pass
+(`resultId 01M1V8EGS6925S42JM0517W9EA`) independently confirmed every one of the 37 exits lands at
+**exactly +4000 or exactly −2000 price points** from entry (the 2R target and 1R shield) — 14
+wins / 23 losses, matching the reported win rate exactly. That is the same population the primary
+record's survivorship and phase analysis is built on, reached independently.
+
+## VERDICT
+
+**Identical to the primary record's**: RATCHET v2 fails at clause 1 (PF 1.45289788 → 1.21092925)
+and independently at clause 2 (maxDrawdown 17.28465524% → 40.90896772%, +23.62pp). **NOT KEPT. E94
+remains the reference build.** Nothing here changes E95's KEEP/REJECT decision or its "this lineage
+is finished" recommendation — both stand as the primary record states them.
+
+## QUEUE
+
+Not duplicated — see E95's own queue (do not sweep the cap, do not fund further work on this
+lineage, the `STRATEGY-LEDGER.md` symptom-index remains the highest-leverage free item, the
+`E79`/`E80`/`E81` numbering collisions remain unreconciled, and the two 1m-track rule questions
+for the user remain open). Nothing in this entry adds a new item to it.

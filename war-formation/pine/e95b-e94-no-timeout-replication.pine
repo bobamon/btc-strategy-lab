@@ -1,0 +1,190 @@
+//@version=6
+// WAR FORMATION E95b -- INDEPENDENT REPLICATION OF E95 (THE HOLD CAP REMOVED ENTIRELY, PER
+// E94's OWN QUEUE ITEM 3), RUN BY A CONCURRENT SESSION THAT DID NOT KNOW E95 EXISTED.
+// See EXPERIMENT-LOG.md's E95 (primary record) and E95b (this run) entries. Renumbered E95b
+// on rebase per the E94/E94b precedent -- the first-committed entry keeps the number.
+//
+// PARENT: pine/e94-e93-long-only.pine (E94: E93's 15m 1h-structure cascade, short leg
+// mechanically deleted, full 6-year archive). BYTE-IDENTICAL except ONE change: the
+// maxBars=288 ("three days") timeout close-out is DELETED, not widened. Everything else
+// -- direction gates, structure tier, coil, velocity trigger, whole-number band, witching
+// hour ban, shieldUsd/rr -- is untouched.
+//
+// WHY THIS IS THE RIGHT NEXT QUESTION (not a new sweep):
+// ORACLE-RULES.md's own specification correction states the ALCM exit in full: "No
+// protective stop. The position ends at target or at liquidation." It names exactly two
+// exit events -- shield and target -- and no third, time-based one. The maxBars hold cap
+// is not part of the stated ALCM model; it was carried into this construction as an
+// engineering convenience (HARD LESSON 1's "trades timing out" failure mode, guarded
+// against). E94 found that 22 of its 43 exits (51.16%) hit that cap rather than resolving
+// at the shield or the target, and that those 22 capped trades carry PF 3.074932 while the
+// 21 that actually resolved score only PF 1.172450 -- i.e. the majority of this build's
+// measured edge runs through a mechanism the ALCM spec does not contain. E94's own queue
+// named this the one remaining item worth a credit. This run is the direct test: what does
+// the construction look like when it is held, exactly as the source specifies, in every
+// trade to target or liquidation with no third exit route.
+//
+// PRE-RUN AUDIT:
+//   R = shieldUsd $2,000 against this window's price range, unchanged from E94 (audited
+//     there at 1.7%-3.3%, clears the 0.8% floor, HARD LESSON 3).
+//   Stop is risk-defined per the ALCM spec (HARD LESSON 5), unchanged.
+//   Long leg only (matches E94; short entry mechanically absent, same as parent).
+//   BINDING (E17): ONE variable changed from E94 -- the timeout close-out mechanism is
+//     deleted outright, not widened to a larger bar count. No entry gate, no shield/rr
+//     value, no structure tier touched.
+//   REDUNDANCY (HARD LESSON 18): none introduced -- no new term added, one removed.
+//   OCCUPANCY CONFOUND, FLAGGED IN ADVANCE (HARD LESSONS 24/28/29, and this is the
+//     central risk of this run): under pyramiding=1, a position that no longer times out
+//     stays open until it hits the shield or the target, however long that takes. Every
+//     one of E94's 22 previously-capped trades will now run longer, and while they occupy
+//     the book NO new entry can be admitted. This is expected to REDUCE total trade count
+//     relative to E94's 43, not hold it flat -- an occupancy effect, not a selectivity
+//     change, and it must not be read as the gate stack becoming pickier.
+//   Latch order unchanged from e58a/E78/E79/E94 (HARD LESSON 8).
+//
+// REGISTERED PREDICTION (HARD LESSON 17), BEFORE RUNNING:
+//   1. Trade count falls from 43 -- occupancy from longer-held positions blocks some later
+//      entries that E94's cap would have freed up sooner. Not predicting a specific number;
+//      predicting only the direction and flagging that a large drop risks the 30-trade floor
+//      (LESSON 12) given E94 already sat at the sample edge.
+//   2. The 22 trades E94 force-closed at the cap did not have their sign predetermined: each
+//      now runs to whichever of shield/target it reaches first. Because those 22 trades were
+//      collectively profitable under the cap (PF 3.07), the base rate favours more of them
+//      resolving at the 2R target than at the shield, but this is not guaranteed per-trade --
+//      a position sitting on an unrealized gain when capped can still reverse into the
+//      shield before it ever reaches target. Net PF direction is NOT predicted with
+//      confidence; both an improvement (more trades reach full target) and a decline (some
+//      reverse hard before target) are consistent with what E94 showed.
+//   3. Whatever the trade count and PF, EVERY exit in this run resolves at exactly +2R (shieldUsd*rr
+//      points) or exactly -1R (shieldUsd points) from entry -- this is now the FIRST 15m
+//      1h-structure result whose exits are entirely the two events the ALCM spec names, with
+//      no third route. That is the fact this run exists to establish, independent of whether
+//      PF improves.
+//
+// RATCHET NOTE: this is a structural exit-model test against E94 (its true single-variable
+// parent), not a parameter sweep on E94's current shape -- HARD LESSONS 45/49's sweep
+// prohibition (E94's gross edge per trade is -$8.16 since 2024) does not bar it, since
+// nothing here is being swept past that finding; the finding itself is being tested for
+// whether it survives a more faithful exit model. If trade count drops below 30 the result
+// is a DIRECTION per LESSON 12, not a bankable number, and RATCHET v2 clause 3 fails outright
+// regardless of PF.
+//
+// RESULT, VERDICT and KEEP/REJECT are recorded in EXPERIMENT-LOG.md and results/backtests.json
+// after this run completes, per the lab's provenance rule (never hand-write a metric).
+strategy("War Formation E95 15m 1h-structure LONG-ONLY no-timeout", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+greenBull = input.int(4,     "Green 1h candles for BULL")
+greenBear = input.int(2,     "Green 1h candles at or below for BEAR")
+skipOpen  = input.int(60,    "Skip first N minutes of 6h block")
+skipClose = input.int(60,    "Skip last N minutes of 6h block")
+coilK     = input.float(0.85,"Coil: atrFast < atrSlow * K")
+velK      = input.float(0.8, "Velocity: min reclaim as multiple of atrSlow")
+midLo     = input.float(400, "Whole-number middles low")
+midHi     = input.float(600, "Whole-number middles high")
+etOffset  = input.int(-4,    "ET offset from UTC")
+witchOn   = input.bool(true, "Ban longs in witching hour 1-4am ET")
+shieldUsd = input.float(2000,"THE SHIELD: fixed dollar gap to liquidation")
+rr        = input.float(2.0, "Reward:risk")
+
+MS6H = 21600000
+MS1H = 3600000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+
+var float h1o     = na
+var int   grnCur  = 0
+var int   cntCur  = 0
+var int   grnPrev = 0
+var int   cntPrev = 0
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    grnCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(h1o)
+        cntCur := cntCur + 1
+        if close[1] > h1o
+            grnCur := grnCur + 1
+    h1o := open
+
+regimeReady = cntPrev >= 5
+bullRegime  = regimeReady and grnPrev >= greenBull
+bearRegime  = regimeReady and grnPrev <= greenBear
+
+minsIn    = (time - b6 * MS6H) / 60000
+timeGate  = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+h1Bull = not na(h1o) and close > h1o
+h1Bear = not na(h1o) and close < h1o
+
+var float c1hh = na
+var float c1hl = na
+var float p1hh = na
+var float p1hl = na
+
+if new1h
+    p1hh := c1hh
+    p1hl := c1hl
+    c1hh := high
+    c1hl := low
+else
+    c1hh := na(c1hh) ? high : math.max(c1hh, high)
+    c1hl := na(c1hl) ? low  : math.min(c1hl, low)
+
+brokeBelow = not na(p1hl) and c1hl < p1hl
+brokeAbove = not na(p1hh) and c1hh > p1hh
+
+atrFast = ta.atr(1)
+atrSlow = ta.atr(2)
+coiled  = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK
+coilPrev = coiled[1]
+velMin   = na(atrSlow) ? na : atrSlow * velK
+
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+hUTC     = math.floor(time / MS1H) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+longBan  = witchOn and witching
+
+longTrig  = not na(p1hl) and not na(velMin) and ta.crossover(close, p1hl)  and (close - p1hl) >= velMin
+shortTrig = not na(p1hh) and not na(velMin) and ta.crossunder(close, p1hh) and (p1hh - close) >= velMin
+
+goLong  = bullRegime and timeGate and h1Bull and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig
+goShort = bearRegime and timeGate and h1Bear and brokeAbove and coilPrev and not inMiddle and shortTrig
+
+var float slPx = na
+var float tpPx = na
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx := close - shieldUsd
+    tpPx := close + shieldUsd * rr
+
+// E95: maxBars timeout DELETED outright (was 288 bars / 3 days in E94). Every position
+// now runs to strategy.exit's stop or limit only -- the two events the ALCM spec names,
+// and no third one. No close_all-on-bar-count block exists in this file.
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+
+plot(goLong  ? 1 : 0, title="LongSignal")
+plot(goShort ? 1 : 0, title="ShortSignal")
