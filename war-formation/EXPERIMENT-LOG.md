@@ -8966,3 +8966,110 @@ source's own mechanic. It remains a finding about the cascade, not about War For
 - LuxAlgo, *Walk-forward Analysis* — https://www.luxalgo.com/library/concept/walk-forward-analysis/
 - QuantInsti, *Walk-Forward Optimization: How It Works, Its Limitations* — https://blog.quantinsti.com/walk-forward-optimization-introduction/
 - StratBase, *Walk-Forward Analysis: Strategy Validation Guide* — https://stratbase.ai/en/blog/walk-forward-analysis-guide
+
+---
+
+# ██ E81, 2026-09-06 — THE ORACLE'S OWN COIL, TESTED ABOVE THE SAMPLE FLOOR FOR THE FIRST TIME. IT MAKES THE CASCADE STRICTLY WORSE.
+
+One credit. `resultId 01M1V4VHJW9306J06MK0WCF6A5`. Executes E80's queue item 2.
+
+E80's queue item 1 — walk-forward — **is not reachable**: trader-dev exposes no `walk_forward`, and the
+engine that does is off-limits for this workstream. Recorded so the item is closed rather than left
+looking undone.
+
+## THE CONSTRUCTION, AND WHY THIS ONE IS FAIR
+
+E80 dropped the coil because it cannot be duration-matched at 15m: the coil compares ~3-minute against
+~30-minute volatility and 15m bars have no 3-minute leg. E81 restores it by **preserving the duration
+*ratio* rather than the bar counts** — the 1m build's 3:30 is 1:10, so 15m uses `atr(2)` against
+`atr(20)`, which is 30 minutes against 5 hours. Per HARD LESSON 40 that is the honest re-derivation:
+the structural relationship survives, the absolute durations do not, and the deviation is declared.
+
+The gate is `coilPrev`, the *previous* bar's coil state, preserving HARD LESSON 8's latch discipline —
+setup and trigger never on the same bar. Everything else is E80 unchanged.
+
+**The research says this is a fair use of the mechanic.** Volatility contraction *"predicts expansion,
+not direction"*, and *"detecting volatility contraction is a way to improve your awareness of structure
+— not a direct trading signal."* Here the cascade already supplies direction, so the coil is only being
+asked for selectivity. It is not being asked to do the thing it is known not to do.
+
+## THE RESULT — 15m, 2020-08-19 → 2026-09-01, 211,423 bars
+
+| | **E80** (no coil) | **E81** (coil) |
+|---|---|---|
+| **Profit factor** | **1.37693021** | **0.93911324** |
+| Trades | 209 | **72** |
+| Win rate | 49.76076555% | 44.44444444% |
+| Net | **+197.90076797%** | **-6.82153439%** |
+| **Max drawdown** | **31.10515979%** | **40.70969261%** |
+| Sharpe | 0.92019787 | -0.03219122 |
+| Avg win / loss | $695.13 / -$500.03 | $328.80 / -$280.09 |
+
+**Frequency: pre-registered 60–160, actual 72** — inside the band.
+
+## RATCHET v2, SCORED AGAINST THE PRE-REGISTERED CRITERIA
+
+| Clause | Result |
+|---|---|
+| 1. Profit factor improves | ❌ **1.37693021 → 0.93911324** |
+| 2. Max drawdown does not worsen | ❌ **31.10515979% → 40.70969261%** |
+| 3. Trades ≥ 30 | ✅ 72 |
+
+**Fails clauses 1 and 2 independently. REVERTED.** No split test is owed — clause 4 attaches only to
+kept changes, and this is not close enough for the question to arise.
+
+## THE GROSS-EDGE SCREEN MAKES IT UNAMBIGUOUS
+
+Applying the screen developed in the 3M workstream today — the *method* travels between labs even
+though the strategies must not:
+
+| | Trades | Net | Commission | Gross | **Gross per trade** |
+|---|---|---|---|---|---|
+| E80 no coil | 209 | $19,790.08 | $4,194.64 | $23,984.72 | **$114.76** |
+| E81 coil | 72 | -$682.15 | $672.28 | -$9.88 | **-$0.14** |
+
+**The coil removed 137 of 209 trades — 65.6% — and the 72 it kept have essentially zero gross edge
+before costs, against $114.76 for the unfiltered set.**
+
+It is not trading less and keeping quality. **It is selecting the wrong trades**, and doing so before
+commission is even considered. That distinction is only visible on the gross screen, and it is the
+sharpest form this finding can take.
+
+## WHY THIS MATTERS MORE THAN THE USUAL REJECTION
+
+**This is the first time the Oracle's own stated mechanic has been tested on a sample that clears the
+30-trade floor.** Every prior coil test lived on the 1m archive, where the family caps near 20–36
+trades — E42's coil-off/coil-on comparison ran at 68, 39 and 28 trades and none of it was quotable.
+
+`ORACLE-RULES.md` records his queue at **1 of 5**: only the 3m cycle-position gate ever helped, and it
+was the item that was *diagnostic* rather than *prescriptive*. **E81 adds a sixth stated rule to the
+failed column, and it is the first one whose failure is above the floor.**
+
+That is consistent with HARD LESSON 14 — *traders see accurately and prescribe badly; mine the
+observations, not the prescriptions.* The coil is a real observation about how moves die. As a
+mechanical gate on this cascade, over six years, it is worse than nothing.
+
+## WHAT THIS DOES NOT SAY
+
+- **Not that the coil is worthless in his hands.** He reads it with judgement on a 3-minute chart; this
+  is one mechanisation at one ratio on 15m bars.
+- **Not that a different coil expression fails.** `atr(2)/atr(20)` is one specification. A tighter or
+  looser K, or a different fast/slow pairing, might differ — **but per HARD LESSON 45 that is a sweep
+  past a diagnosed negative edge, and the gross screen says the edge is negative, not marginal.**
+- **Not that E80 is validated.** E80 still fails the multiple-testing hurdle at t = 2.1983 against
+  ~2.96. This removes a candidate improvement; it does not promote the base.
+
+## QUEUE
+
+1. **Do not sweep the coil's K or its fast/slow pairing.** Gross edge per trade is **−$0.14**. That is
+   a diagnosed negative edge, and HARD LESSONS 45/49 forbid sweeping past one.
+2. **Screen future War Formation terms on gross edge per trade before spending a credit.** It cost
+   nothing here and it converted an ambiguous rejection into an unambiguous one.
+3. **The coil is now the sixth of the Oracle's stated rules to fail on test**, and the first above the
+   floor. `ORACLE-RULES.md`'s "1 of 5" line should read 1 of 6.
+4. Check #36's shield-fill caveat still applies to both numbers.
+
+## SOURCES
+- TradingwithRayner, *Volatility Contraction* — https://www.tradingwithrayner.com/course/17-volatility-contraction/
+- Deepvue, *Volatility Contraction Pattern* — https://deepvue.com/screener/volatility-contraction-pattern/
+- TradingSim, *VCP Pattern Guide* — https://www.tradingsim.com/blog/volatility-contraction-pattern
