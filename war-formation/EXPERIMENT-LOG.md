@@ -8779,3 +8779,91 @@ HARD LESSON 48 drawdown-allowance rule question, awaiting the user.
    E74/E77) remain open, unresolved, awaiting the user — unchanged across many cycles.
 4. Do not port `minRRv`/level-target logic back to the 1m or 5m tracks without its own population check
    there first (HARD LESSON 40, carried over from E89/E90/E91's own queue).
+
+---
+
+# ██ E80, 2026-09-06 — THE FIRST WAR FORMATION RESULT EVER TO CLEAR PF 1.0 ON A BANKABLE SAMPLE. AND IT IS NOT THE ORACLE'S SYSTEM.
+
+One credit. `resultId 01M1V29SJ9N4AD9F7GAT0BDXZ1`.
+
+## WHY 15m, AND WHY THE COIL HAD TO GO
+
+E79's queue asked for the deeper archives. Checking whether the strategy can *exist* there came first:
+
+- **1h is impossible.** The cascade tracks a prior **15m** high/low. On 1h bars that level cannot be
+  reconstructed — the bar is larger than the structure it is meant to resolve. The cascade collapses.
+- **15m breaks the coil.** The coil compares ~3-minute against ~30-minute volatility. On 15m bars the
+  *finest available resolution is 15 minutes*, so the fast leg cannot exist at any lookback.
+
+**So 5m is this strategy's minimum viable timeframe, and E79's 2.2 years is the largest sample the
+full construction can ever have.** That is a permanent ceiling, established rather than assumed.
+
+That leaves one honest deep test: run the cascade on 15m with the **coil dropped and declared**, over
+six years. Long-only, since the short leg is established dead across 128 trades (E78 + E79).
+
+## RESULT — 15m, 2020-08-19 → 2026-09-01, 211,423 bars
+
+| | E80 | E79 (5m, both legs) | `e58a` (1m, long) |
+|---|---|---|---|
+| **Profit factor** | **1.37693021** | 0.86373954 | 1.24015239 |
+| **Trades** | **209** | 114 | 36 |
+| Win rate | **49.76076555%** | 21.92982456% | 41.67% |
+| Net | **+197.90076797%** | -11.62327653% | +7.47495942% |
+| Max drawdown | 31.10515979% | 21.07275805% | 9.82519609% |
+| Sharpe | 0.92019787 | -0.34969409 | — |
+| Avg win / loss | $695.13 / -$500.03 | $294.71 / -$95.84 | — |
+| Commission | $4,194.64 | $1,116.45 | — |
+
+**Frequency: pre-registered 60–300, actual 209** — inside the band.
+
+## THE PRE-REGISTERED RULE, SCORED
+
+The rule, stated before running: *PF ≥ 1.0 on ≥30 trades means the cascade has edge and the coil was
+the problem; PF < 1.0 means the cascade itself has none.*
+
+**PF 1.37693021 on 209 trades. The cascade has edge, and it clears the kill rule and the sample floor
+simultaneously — the first time any War Formation build has done both.** Every prior result was
+either below 1.0 or above it on a sample too small to quote.
+
+## ⚠️ THREE CAVEATS, AND THE FIRST ONE IS DECISIVE
+
+**1. THIS IS NOT THE ORACLE'S SYSTEM.** The coil is his own stated mechanic — *"candles get smaller,
+the move gets weaker"* — and it is removed here. What survives is the **cascade plus shield**: 6h
+green-count regime, 1h colour agreement, prior-15m break, velocity reclaim, whole-number ban, witching
+ban. **E42 already tested coil-off on 1m and got PF 0.64544502 on 68 trades.** So coil-off fails at 1m
+and works at 15m — that is a **timeframe effect**, not a vindication of dropping the coil, and
+certainly not a validation of his method. **It should be recorded as a finding about the cascade, not
+about War Formation.**
+
+**2. THE TIME CAP IS DOING THE WORK, NOT THE SHIELD.** Average hold is **209.3 bars against a 288-bar
+cap — 72.7% of the way to the limit** (winners 249.4, losers 169.5). Average win $695 and average loss
+$500 are nowhere near the $2,000 shield or the $4,000 target. **The A.L.C.M. specification is "ends at
+target or liquidation, nothing else"; in this build most trades end because three days elapsed.** The
+spec's defining exit is largely not the operative one.
+
+**3. THE MULTIPLE-TESTING HURDLE.** Implied t = Sharpe × √years = 0.92019787 × √6.04 = **2.26**. Above
+the conventional 2.0, **below the 3.0 Harvey/Liu/Zhu require** given mining — and this lab has run
+eighty-plus experiments on this family. Same gate that failed Attack 86, and it fails here too, though
+by a narrower margin.
+
+## WHAT THIS ACTUALLY ESTABLISHES
+
+**Positive and real:** the 6h/1h/15m cascade with a fixed-dollar shield, long-only, has a measurable
+edge on six years of 15m data — PF 1.377 on 209 trades, +197.9%, 49.8% win rate. That is the strongest
+sample-backed number this workstream has ever produced, by a wide margin.
+
+**But it is a different object from the thing being researched.** The source's coil is gone, the
+source's timeframe is gone, and the source's exit is mostly not firing. **The honest label is "the
+cascade has edge", not "War Formation works".**
+
+## QUEUE
+
+1. **Split-test E80 before anything else.** 209 trades splits to ~105 per half — the first War
+   Formation result that could survive a split with both halves above the floor. This is the single
+   highest-value item this workstream has ever had.
+2. **Re-introduce the coil at 15m in whatever form is expressible** and measure whether it helps or
+   hurts. If it hurts, that is a real finding about the source's own mechanic on a bankable sample.
+3. **Measure the exit distribution.** If most exits are the time cap, test whether the shield and
+   target are load-bearing at all — `get_trades` gives exit reasons for free.
+4. **Do not call this a War Formation champion.** Caveat 1 is not a technicality.
+5. Check #36's shield-fill caveat still stands: 1.37693021 is an upper bound.
