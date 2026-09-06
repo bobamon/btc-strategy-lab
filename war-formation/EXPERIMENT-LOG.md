@@ -94,6 +94,16 @@ profitable leg inverting completely between halves (long-driven in H1, short-dri
 not a champion, not a candidate, and not worth further re-sweeping of E80's specific gate set. A new
 structural hypothesis, not a variant of E80's, would be needed to reopen the 15m track.
 
+**UPDATE, E86 (2026-09-06, no credit spent):** trade-level forensics on E84/E85 explain *why* the
+split failed, without implicating the location/structure gates. Exact 2R target hits fell 6-of-20
+(H1) to 2-of-24 (H2) while exact full-shield hits rose 2 to 7; the handful of trades that ran the
+whole $4,000 to target carry the entire result in both halves (+$3,150 of H1's +$2,137 net; +$867 of
+H2's -$1,140 net). Read as a property of the ALCM's fixed-dollar exit interacting with each window's
+realized trendiness, not a defect in the entry logic — and, per ORACLE-RULES.md, the shield is
+specified as a fixed dollar amount, so scaling it with volatility to fix this would replace the
+mechanism rather than tweak it. No new structural hypothesis is proposed yet; this narrows what one
+must explain (trade completion rate, not entry population) before the next credit is spent on it.
+
 *(The paragraph below describes v6, kept for history — it is DEMOTED, not current.)*
 **v6 — HA cascade, LONG ONLY, structural stop (pre-A.L.C.M., WRONG EXIT MODEL).** BTCUSDT 1m,
 2025-12-16 → 2026-05-03. `+7.8% · PF 1.69 · win rate 56.3% · Sharpe 2.19 · max DD 3.10% · 32 trades`.
@@ -7601,3 +7611,124 @@ variant of E80's gates, since E80's own construction is now the one that failed 
 3. Queue item 5 from E83 (formally promoting E82's build as "the E80 simplification") is now MOOT --
    there is no value in formally promoting a construction whose out-of-sample replication just
    failed. Withdrawn, not carried forward.
+
+---
+
+# ██ E86 / NO-CREDIT DIAGNOSTIC -- WHY E85 FAILED: A SMALL COUNT OF EXACT-TARGET TRADES CARRIES THE WHOLE RESULT, AND THAT COUNT HALVED BETWEEN HALVES
+
+**SCHEDULING NOTE.** This cycle's stored prompt again describes a stale lab state (1m-only data
+window, "continue numbering after E66," attack the short's entry geometry via E64a/E64b/E66). All
+of that is closed -- the entry-term binding sweeps finished at E70/E76/E77, the short's geometry
+work moved on to E71-E79, and the lab now has an active 15m track (E78-E85) the stored prompt does
+not mention. **The docs win**, per the prompt's own instruction and HARD LESSON 26's precedent:
+this cycle continues from E85's own open queue -- item 1 (a new 15m hypothesis) and item 2 (the
+HARD LESSON 48 rule question, blocked on the user) -- rather than re-deriving closed territory.
+
+**`get_credits` read 482 at the start -- the 250-500 band, exactly ONE backtest.** No backtest was
+run this cycle. Queue item 1 asks for "a materially different structural idea," and E85 itself left
+open *why* the edge concentrated in H1 in the first place -- that question is answerable for free
+from data already on disk (`get_trades` against E84's and E85's existing `resultId`s costs no
+credit), and per this lab's own standing practice (E78's "resolved... as analysis before spending a
+credit," E83/E85's own docs-first checks), diagnosing a failure before spending a credit on its
+successor is the disciplined order, not an optional nicety. Spending the one available credit on a
+new 15m gate invented without that diagnosis would repeat the exact mistake HARD LESSON 16/17 exist
+to prevent -- a hypothesis not grounded in what actually happened. **No backtest was run. No new
+row is added to `results/backtests.json` -- there is no new metric to record, only a re-reading of
+two metrics that are already there.**
+
+## METHOD
+
+Pulled the full trade list for E84 (`01M1T2G2QRXF7YVJ1SNMVGHMPP`, H1, 20 trades) and E85
+(`01M1T5VGDT8GK09VNJVMPSZ2EM`, H2, 24 trades) via `get_trades` and classified each trade by
+comparing its `grossProfit` against the two amounts the ALCM exit can mechanically produce for that
+trade's quantity: an exact target hit (`grossProfit == qty * shieldUsd * rr` = `qty * 4000`) or an
+exact shield hit (`grossProfit == -qty * shieldUsd` = `-qty * 2000`). Both are exact-match checks
+(not approximate), since `shieldUsd`/`rr` are fixed and the fill price at either boundary is fully
+determined by quantity.
+
+## RESULT
+
+| | H1 (E84, 20 trades) | H2 (E85, 24 trades) |
+|---|---|---|
+| **Exact full-target (2R) hits** | **6** (5 long, 1 short) | **2** (both short) |
+| **Exact full-shield (-1R) hits** | 2 | 7 |
+| Everything else (early exit / maxBars timeout, neither exact) | 12 | 15 |
+| Net P&L from the exact-target trades alone | **+$3,150.36** | **+$867.24** |
+| Net P&L from everything else | **-$1,013.34** | **-$2,007.06** |
+| Reported net (matches E84/E85 exactly) | +$2,137.02 | -$1,139.82 |
+
+**In H1, 6 of 20 trades (30%) are exact 2R target hits and their combined profit exceeds the
+window's entire net result -- the other 14 trades net to a loss on their own.** In H2, only 2 of 24
+(8.3%) are exact target hits, less than a third the rate, while exact full-shield hits nearly
+quadrupled (2 -> 7): trades in H2 were far more likely to run the complete $2,000 adverse distance
+before any recovery than trades in H1.
+
+## VERDICT
+
+**E85's split-test failure is explained without needing any defect in the location/structure gates
+(`brokeBelow`/`brokeAbove`, `coilPrev`, `velMin`, the 1h regime count).** Those gates still produced
+a population of comparable size in both halves (20 vs 24) and the SAME entry logic byte-for-byte
+(E84/E85 share E82's strategyId). What changed between halves is not which setups the gates admitted
+but **how often a admitted trade went on to travel the full $4,000 to target versus the full $2,000
+to the shield** -- a fact about how far price actually ran after entry, not about where entry
+happened. H1's clean secular uptrend (BTC roughly $60k -> $122k across the window, visible directly
+in the trade log: five of the six exact-target hits are long, each capturing a multi-day directional
+run) gave six admitted setups room to complete; H2's rougher, more two-sided price path gave only two,
+while sending seven others the full distance the other way.
+
+**This is a property of the ALCM's fixed-dollar exit interacting with the realized volatility/
+trendiness of the specific sub-period, not a bug in this lab's implementation of the cascade.**
+ORACLE-RULES.md is explicit that the shield is a **fixed dollar gap**, not a volatility-scaled one
+("$3,000; $4,000 is safer" -- a number, not a formula) -- the spec itself, not this lab's
+mechanisation of it, is what makes the exit's hit-rate regime-sensitive. Re-engineering the shield to
+scale with volatility would fix this at the cost of replacing the mechanism the user specified, which
+the mandate forbids. **The correct reading is not "the gates are broken" but "a fixed-dollar-exit
+strategy's edge is concentrated in a minority of trades that catch a large enough directional run
+inside `maxBars`, and that minority's size is a property of the window, not of the entry logic."**
+This also reframes E80's own "first both-legs-positive" headline: on the full window it looked like a
+genuinely bidirectional edge; trade-level, it was six long-side trend-runs (H1) plus (from the E85
+breakdown) the same 2-of-24 short-side trend-runs, netted together -- concentration the aggregate
+number does not show on its own.
+
+## WHAT THIS DOES NOT ESTABLISH
+
+- **Does not itself constitute "a materially different structural idea"** -- queue item 1 from E85
+  is still open. What this adds is a constraint on what a good next idea has to explain: it should
+  not be another location/structure gate variant (E82/E83 already showed those move the entry
+  population, and this diagnostic shows the population was never the problem), but something that
+  addresses how many admitted trades get the room to complete a full 2R run -- and per the paragraph
+  above, changing the shield's width or basis is out of scope (it would be a mechanism change, not a
+  tweak). No such idea is proposed here as ready to test; inventing one under this cycle's remaining
+  effort budget risks exactly the ungrounded-hypothesis mistake this diagnostic was run to avoid.
+- **Does not touch the 1m track** (`e58a` long, `E71` short, both untouched, both already fully
+  measured per the top-of-file state block) or the HARD LESSON 48 drawdown-allowance rule question
+  blocking E74/E77 -- still open, still awaiting the user, unresolved by this entry.
+- **Not a re-classification of the "everything else" trades.** Several of them (e.g. E84 seq18/19,
+  E85 seq18/21/23) exit via the `maxBars` timeout at a partial gain or loss rather than either exact
+  boundary; this diagnostic does not further decompose that timeout population, only separates it
+  from the two exact, mechanically unambiguous outcomes.
+- Check #36's shield-fill caveat (every recorded PF is an upper bound) applies here as everywhere,
+  and is now sharpened by this entry: the "upper bound" is being earned by a small subset of trades,
+  not distributed across the population.
+
+## STATE
+
+**Unchanged: no champion, no candidate.** `e58a` (long, 1m) and `E71` (short, 1m) remain the
+reference builds for the 1m track. `E80`/`E82` (15m) remains `status: research`, a closed diagnostic
+line -- this entry explains its split-test failure without reopening it. `E74`/`E77` remain the 1m
+track's only live improvements, blocked on the HARD LESSON 48 drawdown-allowance rule question,
+awaiting the user.
+
+## QUEUE
+
+1. **Queue item 1 from E85 is still open and still the honest next step for the 15m track**: a
+   materially different structural idea, now additionally constrained by this entry not to be a
+   further location/structure gate variant and not to touch the shield's width or basis. No specific
+   proposal is ready; the next cycle with budget should spend its analysis time on this before its
+   credit, exactly as this cycle did.
+2. Check #36's shield-fill caveat and the HARD LESSON 48 drawdown-allowance RULE QUESTION (blocking
+   E74/E77) remain open, unresolved by this run, awaiting the user -- unchanged across many cycles
+   now and the single largest thing outside this lab's own power to close.
+3. Do not port this diagnostic's framing back to the 1m track as a reason to re-open closed
+   questions there -- `e58a`/`E71` were reached by a different, already fully-swept gate history
+   (E56-E77) and this entry does not re-examine their trade-level composition.
