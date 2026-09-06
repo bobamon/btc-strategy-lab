@@ -10492,3 +10492,113 @@ the correction, per the standing rule to record the delta rather than quietly ov
 
 *(The Bonferroni row for "98 numbered attacks" should now read 99: z = 3.478 at α = 0.05, against 3.475.
 The bar moves in the third decimal. The point is the direction, not the digit.)*
+
+---
+
+# ██ THE DEFLATED SHARPE RATIO, DONE PROPERLY — AND IT FAILS UNDER BOTH A GENEROUS AND A CONSERVATIVE NULL
+
+Zero credits, no backtest. Closes the board audit's queue item 2, which said the crude √(2 ln N)
+approximation should be replaced by the real thing, using the trial-Sharpe variance
+`results/backtests.json` already contains.
+
+## THE FORMULA, AS SPECIFIED
+
+Bailey & López de Prado's expected maximum Sharpe after N independent trials:
+
+> **E[max SR] ≈ E[SR] + √V[SR] · ( (1−γ)·Z⁻¹[1 − 1/N] + γ·Z⁻¹[1 − 1/(N·e)] )**
+
+with **γ = 0.5772156649** (Euler–Mascheroni) and Z the standard normal CDF. For the board's **N = 80**
+scored trials the bracket evaluates to **2.4511**.
+
+## THE INPUTS FROM THIS PROJECT'S OWN RECORD
+
+| | value |
+|---|---|
+| Trials with a Sharpe | **80** |
+| **Mean trial Sharpe** | **−0.262303** |
+| Std dev of trial Sharpes | 1.449739 |
+| **Best observed Sharpe** | **1.294170** (attack88a) |
+| Median window | 2.43 years |
+
+**The mean recorded Sharpe across eighty backtests is negative.** The average experiment in this lab
+loses money — which is unremarkable for honest research, and is worth stating because it is the input
+that makes everything below work.
+
+## THE TEST, UNDER TWO NULLS
+
+The formula needs √V[SR] — the dispersion of trial Sharpes *under the null of no skill*. There are two
+defensible ways to specify it, and they bracket the answer:
+
+**A — Empirical dispersion (generous to the null, harsh on the result).** Use the observed
+cross-sectional spread of the 80 trial Sharpes, σ = 1.4497:
+
+> E[max SR] = **3.2911**  ·  best observed 1.2942  ·  **shortfall −1.9969**
+
+**This overstates the null**, and I will not lean on it: σ here mixes *estimation noise* with *real
+differences between strategies*. Many of these eighty are genuinely bad — losing short legs, rejected
+filters — so part of that 1.45 is true heterogeneity, not sampling error.
+
+**B — Theoretical dispersion (conservative, and the fairer test).** For a zero-skill strategy observed
+over T years the Sharpe estimate's standard error is approximately √(1/T). At the median window of 2.43
+years, σ = 0.6410, with mean 0 under the null:
+
+> E[max SR] = **1.5711**  ·  best observed 1.2942  ·  **shortfall −0.2769**
+
+## THE RESULT
+
+**Under both specifications the board's best Sharpe falls below what eighty pure-noise trials would be
+expected to produce.** The generous null misses by 2.00 Sharpe units; **the conservative, fairer null
+still misses by 0.28.**
+
+This is a stronger and better-founded version of the board audit's earlier finding, and it survives the
+main objection to that one. The earlier √(2 ln N) argument assumed unit-variance trials; this uses the
+project's own dispersion, and specifying that dispersion the way *most favourable to the results* still
+does not rescue them.
+
+## WHAT WOULD CHANGE IT
+
+To clear the conservative benchmark, the best result would need a Sharpe of **1.571** rather than
+1.294 — or the effective independent trial count would have to fall to roughly a quarter of eighty.
+The board audit already showed why the latter is hard to argue: **seven of the top ten records are OBV-
+divergence variants**, which collapses trials in the wrong direction for the argument, not the right one
+— fewer independent families means the *best* of them is being cherry-picked from a smaller pool, but
+it also means eight of the eighty were one idea tested eight times.
+
+## CAVEATS, STATED
+
+1. **The engine's Sharpe convention is not independently verified** — annualisation matters here and it
+   was taken as given, uniformly, across all eighty records.
+2. **√(1/T) is an approximation** to the Sharpe standard error; the fuller form is √((1+SR²/2)/T),
+   which for SR near 1 raises σ slightly and would make version B *harsher*, not kinder.
+3. **The full DSR also adjusts for skewness and kurtosis** of the return series. That needs per-trade
+   returns for every record, which are not stored — only for runs where `get_trades` is re-fetched.
+   Trading returns are negatively skewed and fat-tailed, and both corrections push the DSR **down**.
+4. **This measures the board, not any single strategy's validity.** A result can be real and still be
+   unprovable from eighty trials.
+
+## THE HONEST SUMMARY
+
+**Nothing in this lab's eighty recorded experiments is distinguishable from the best of eighty coin
+flips, under the standard correction for having run eighty of them, specified in the way most
+favourable to the results.**
+
+That is not a claim that the work was wasted — the mechanisms, the corrections, the discipline and the
+negative results are all real. It is a claim about what eighty backtests on one instrument can
+establish, which is less than this board has been recording as established.
+
+## QUEUE
+
+1. **The decision this puts to the user is unchanged and still theirs**: whether a Sharpe/t hurdle
+   joins RATCHET v2. This entry replaces the approximation with the proper statistic so the decision
+   is made on the right number.
+2. **If a hurdle is adopted, E[max SR] should be recomputed as N grows** — it rises with every new
+   experiment, so the bar moves against each additional trial. That property is the point.
+3. **Store per-trade returns for records intended as candidates**, so the skew/kurtosis terms of the
+   full DSR can be computed rather than omitted.
+4. **Do not run an eighty-first mechanism at the old bar.** It raises E[max SR] and adds nothing.
+
+## SOURCES
+- Bailey & López de Prado, *The Deflated Sharpe Ratio* — https://www.davidhbailey.com/dhbpapers/deflated-sharpe.pdf
+- Bailey & López de Prado, *The Sharpe Ratio Efficient Frontier* — https://www.davidhbailey.com/dhbpapers/sharpe-frontier.pdf
+- Portfolio Optimizer, *The Probabilistic Sharpe Ratio: Bias-Adjustment, Confidence Intervals, Hypothesis Testing and Minimum Track Record Length* — https://portfoliooptimizer.io/blog/the-probabilistic-sharpe-ratio-bias-adjustment-confidence-intervals-hypothesis-testing-and-minimum-track-record-length/
+- Marti, *How to detect false strategies? The Deflated Sharpe Ratio* — https://marti.ai/qfin/2018/05/30/deflated-sharpe-ratio.html
