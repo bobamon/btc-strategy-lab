@@ -1,0 +1,240 @@
+//@version=6
+// WAR FORMATION E89 -- A MATERIALLY DIFFERENT STRUCTURAL IDEA FOR THE 15m TRACK: THE TARGET BECOMES
+// THE LEVEL PRICE JUST SWEPT, NOT A MULTIPLE OF THE SHIELD.
+//
+// SCHEDULING NOTE. This cycle's stored prompt again describes lab state that is long closed (1m-only
+// data window, "attack the short's entry geometry via E64a/E64b/E66," "continue numbering after
+// E66"). That family finished at E70/E76/E77 (entry-term binding) and E71/E74-E79 (short geometry)
+// many cycles ago. The docs win, per the prompt's own instruction and this lab's own precedent at
+// E80/E88a/E88b: this cycle continues E88b's own queue item 1 -- "a materially different structural
+// idea for the 15m track... not a variant of E80/E82's four gates, and not a hold-cap change on top
+// of them" -- which is the only open, credit-worthy item on the live queue.
+//
+// STATE FOR THE RECORD: no champion, no candidate anywhere in the lab. e58a (long, 1m, PF 1.24015239,
+// DD 9.82519609%, 36 trades) and E71 (short, 1m) are the confirmed-reproducible 1m-track reference
+// builds, untouched throughout the entire 15m excursion (E78-E88b). E80/E82 (15m, maxBars=288) and
+// E87 (15m, maxBars=576) both sit at status: research -- both looked like edges on the full window
+// and both failed an out-of-sample split test the same way (strong H1, sub-1.0 H2). E86's no-credit
+// trade-level diagnostic explained why: on E84/E85 (the maxBars=288 split), the entire H1 edge rode
+// on a small minority of trades reaching the exact 2R target (6/20, 30%) before timing out, and that
+// share HALVED in H2 (2/24, 8.3%) while exact-shield hits nearly quadrupled (2->7). E87/E88a/E88b then
+// showed widening the hold cap barely changes which trades are admitted or how they resolve, because
+// most trades already resolve at the exact target or the exact shield well inside either cap width --
+// there was little room on this axis to begin with.
+//
+// THE STRUCTURAL IDEA THIS ENTRY TESTS, GROUNDED IN A LESSON ALREADY EARNED IN A SIBLING LAB (HARD
+// LESSON 41, STRATEGY-LEDGER.md): "a target defined as a multiple of the stop is a distance the market
+// has no particular reason to travel... target a level instead." Every 15m build to date (E80-E88b)
+// set tpPx as `close +/- shieldUsd * rr` -- a fixed dollar distance with no relationship to any price
+// level. E86's diagnosis is a direct restatement of HARD LESSON 39/41's own finding from the BTC lab's
+// Attack 37-43 family: the achieved reward consistently falls short of the nominal multiple because
+// nothing in the market is aiming at that distance. Attack 44 (BTC lab) tested the fix there --
+// target the level price just traded at, rather than a multiple of the stop -- and it worked
+// (achieved ratio 2.41 against a nominal-multiple family that never cleared ~1.5). THIS ENTRY IS THE
+// FIRST TIME THAT FIX IS TESTED ON THE WAR FORMATION 15m TRACK, and it targets the level this build
+// ALREADY computes and already uses for entry: p1hh/p1hl, the completed prior 1h bucket's own high/low
+// -- the SAME bucket whose extreme brokeBelow/brokeAbove requires price to have just violated and
+// longTrig/shortTrig requires price to have just reclaimed. For a long: entry is a reclaim of p1hl
+// after the current bucket broke below it; the target is p1hh, the top of that identical bucket --
+// a level price traded at within the current or immediately preceding hour, not a fabricated distance.
+// Mirrored for the short: target is p1hl, the bottom of the bucket whose high (p1hh) was just broken
+// and is now being rejected from above.
+//
+// THIS IS NOT A HOLD-CAP CHANGE (maxBars stays 288, E82's own value, untouched) AND NOT A VARIANT OF
+// E80/E82's FOUR GATES (bullRegime/bearRegime, timeGate, brokeBelow/brokeAbove, coilPrev, inMiddle,
+// longBan, longTrig/shortTrig are ALL unchanged). It changes exactly one mechanism: how the exit
+// target is defined. The shield (stop) is unchanged and remains the ALCM liquidation-gap model --
+// this is an exit-TARGET redesign, not a reintroduction of a protective stop, and it does not touch
+// the "no stop loss, position ends at target or liquidation" spec at all.
+//
+// THE ONE COMPANION TERM THIS REDESIGN NECESSARILY CARRIES (per Attack44's own precedent, not a
+// second independent hypothesis): a level target is not guaranteed to sit far enough from entry to be
+// worth the risk -- unlike a multiple-of-shield target, which is always exactly rr shields away by
+// construction, p1hh/p1hl is wherever the prior hour's range put it, and could in principle sit close
+// to or even behind the current price. Per HARD LESSON 5/41's method (Attack44: "a tap that is too
+// shallow to clear the floor is SKIPPED rather than having its stop widened"), a setup whose level
+// target does not clear a minimum reward:risk is SKIPPED, not clamped or rescued. minRRv is set to
+// 1.5, reused verbatim from Attack44 rather than tuned fresh on this data (the same "mechanical
+// choice, not a free parameter" method this lab has used for every unit conversion since E78).
+//
+// SINGLE HYPOTHESIS, ISOLATED (HARD LESSON 16/E17): does replacing the fixed rr-multiple target with
+// the already-swept structural level (p1hh/p1hl) raise the share of trades that travel their full
+// intended distance and, with it, PF -- directly attacking the mechanism E86 diagnosed -- without
+// requiring any change to the entry gates, the shield, or the hold cap.
+//
+// PRE-RUN AUDIT:
+//   R = shieldUsd $2,000, same window as E80/E82/E87 (~$60k-$126k BTC range): clears the 0.8% floor
+//     (HARD LESSON 3) throughout, with the same live tension already logged for this window (the
+//     floor is approached, not breached, only well above $250k).
+//   Stop is risk-defined per the ALCM spec (HARD LESSON 5), UNCHANGED -- slPx = close -/+ shieldUsd,
+//     still the fixed-dollar liquidation gap, not a structural stop. Only the TARGET moves to
+//     structure; ALCM's "no protective stop, ends at target or liquidation" frame is untouched.
+//   Each leg reported separately (HARD LESSON 6); per HARD LESSON 48, a location-derived term's sign
+//     is not assumed to be the same on both legs, so longRRok/shortRRok are two separate gates.
+//   BINDING (E17): exactly one mechanism changed from e82-e80-no-h1bull-h1bear.pine -- the TP
+//     definition, plus its necessarily-attached validity floor (minRRv, a skip not a clamp, per
+//     Attack44's own precedent for this exact class of redesign). Every other gate, threshold, atr
+//     period, shieldUsd and maxBars value is byte-identical to E82. `rr` is REMOVED as an input: it no
+//     longer defines anything, since reward is now an output of the geometry rather than an imposed
+//     multiple (Attack44's own framing, reused verbatim).
+//   REDUNDANCY (HARD LESSON 18): none newly introduced -- longRRok/shortRRok read the SAME p1hh/p1hl
+//     and shieldUsd already computed for brokeBelow/brokeAbove and the stop, no new state.
+//   Latch order unchanged (LESSON 8): p1hh/p1hl are strictly the PRIOR completed 1h bucket, latched
+//     at the same `if new1h` boundary as every other 15m build in this lineage; the target reads a
+//     value fixed before the entry bar, never the entry bar's own extreme.
+//   OCCUPANCY CONFOUND, NAMED IN ADVANCE (HARD LESSON 24/28/29): this changes BOTH which trades are
+//     admitted (longRRok/shortRRok can now reject a setup that E82 would have taken) AND how long an
+//     admitted trade is expected to run (a variable-distance level target instead of a fixed 2R
+//     multiple) -- so this is not comparable to E82 trade-for-trade, only in aggregate PF/DD/count,
+//     exactly the same caveat E87 stated for its own maxBars change and for the identical reason.
+//
+// REGISTERED PREDICTION (HARD LESSON 17), BEFORE RUNNING, stated as a genuine two-sided prediction:
+//   (a) IF HARD LESSON 41's mechanism generalizes to this cascade: the level target is closer to
+//       entry on average than the fixed 2 shields (p1hh/p1hl is wherever the prior hour's range put
+//       it, frequently nearer than a fixed rr=2.0 multiple would place it), so more trades should
+//       reach it before reversing or timing out, raising the exact-target-hit share E86 flagged as
+//       the load-bearing statistic, and PF should clear 1.0 on a sample that clears the 30-trade
+//       floor.
+//   (b) IF THE PROBLEM IS DIRECTIONAL RATHER THAN A DISTANCE ARTIFACT (E88b's own reading of H2: the
+//       long leg lost on BOTH maxBars widths because price moved against it, not because the target
+//       was too far away): a nearer target will be reached MORE often in both directions, including
+//       by adverse continuation past entry before the reversal that would have hit the old, farther
+//       target -- so trade count could fall sharply (minRRv rejecting many setups whose 1h range was
+//       too tight) or PF could stay below 1.0 despite more trades resolving cleanly, because a nearer
+//       target also caps the winners' size without necessarily improving the loss side.
+//   Both outcomes are informative; this is a genuine test of HARD LESSON 41's generalization, not a
+//   one-sided hope.
+//
+// RESULT, VERDICT and KEEP/REJECT are recorded in EXPERIMENT-LOG.md and results/backtests.json after
+// this run completes, per the lab's provenance rule (never hand-write a metric).
+strategy("War Formation E89 level target", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+greenBull = input.int(4,     "Green 1h candles for BULL")
+greenBear = input.int(2,     "Green 1h candles at or below for BEAR")
+skipOpen  = input.int(60,    "Skip first N minutes of 6h block")
+skipClose = input.int(60,    "Skip last N minutes of 6h block")
+coilK     = input.float(0.85,"Coil: atrFast < atrSlow * K")
+velK      = input.float(0.8, "Velocity: min reclaim as multiple of atrSlow")
+midLo     = input.float(400, "Whole-number middles low")
+midHi     = input.float(600, "Whole-number middles high")
+etOffset  = input.int(-4,    "ET offset from UTC")
+witchOn   = input.bool(true, "Ban longs in witching hour 1-4am ET")
+shieldUsd = input.float(2000,"THE SHIELD: fixed dollar gap to liquidation")
+minRRv    = input.float(1.5, "Minimum reward:risk the LEVEL TARGET must offer, else skip (Attack44 value, reused)")
+maxBars   = input.int(288,   "Max bars in trade -- three days of 15m, unchanged from E82")
+
+MS6H = 21600000
+MS1H = 3600000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+
+var float h1o     = na
+var int   grnCur  = 0
+var int   cntCur  = 0
+var int   grnPrev = 0
+var int   cntPrev = 0
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    grnCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(h1o)
+        cntCur := cntCur + 1
+        if close[1] > h1o
+            grnCur := grnCur + 1
+    h1o := open
+
+regimeReady = cntPrev >= 5
+bullRegime  = regimeReady and grnPrev >= greenBull
+bearRegime  = regimeReady and grnPrev <= greenBear
+
+minsIn    = (time - b6 * MS6H) / 60000
+timeGate  = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+var float c1hh = na
+var float c1hl = na
+var float p1hh = na
+var float p1hl = na
+
+if new1h
+    p1hh := c1hh
+    p1hl := c1hl
+    c1hh := high
+    c1hl := low
+else
+    c1hh := na(c1hh) ? high : math.max(c1hh, high)
+    c1hl := na(c1hl) ? low  : math.min(c1hl, low)
+
+brokeBelow = not na(p1hl) and c1hl < p1hl
+brokeAbove = not na(p1hh) and c1hh > p1hh
+
+atrFast = ta.atr(1)
+atrSlow = ta.atr(2)
+coiled  = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK
+coilPrev = coiled[1]
+velMin   = na(atrSlow) ? na : atrSlow * velK
+
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+hUTC     = math.floor(time / MS1H) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+longBan  = witchOn and witching
+
+longTrig  = not na(p1hl) and not na(velMin) and ta.crossover(close, p1hl)  and (close - p1hl) >= velMin
+shortTrig = not na(p1hh) and not na(velMin) and ta.crossunder(close, p1hh) and (p1hh - close) >= velMin
+
+// THE NEW TERM. Target is the ALREADY-SWEPT prior bucket's opposite extreme, not a multiple of the
+// shield. minRRv is a SKIP floor (Attack44's method), never a clamp: a setup whose level geometry is
+// too shallow to clear it is not taken, its stop is not widened and its target is not moved.
+longRRok  = not na(p1hh) and (p1hh - close) >= shieldUsd * minRRv
+shortRRok = not na(p1hl) and (close - p1hl) >= shieldUsd * minRRv
+
+goLong  = bullRegime and timeGate and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig and longRRok
+goShort = bearRegime and timeGate and brokeAbove and coilPrev and not inMiddle and shortTrig and shortRRok
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := close - shieldUsd
+    tpPx   := p1hh
+    barsIn := 0
+
+if flat and goShort
+    strategy.entry("S", strategy.short)
+    slPx   := close + shieldUsd
+    tpPx   := p1hl
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong  ? 1 : 0, title="LongSignal")
+plot(goShort ? 1 : 0, title="ShortSignal")

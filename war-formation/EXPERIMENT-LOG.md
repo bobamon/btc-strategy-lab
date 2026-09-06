@@ -8130,3 +8130,135 @@ improvements, blocked on the HARD LESSON 48 drawdown-allowance rule question, aw
    15m track, which uses a structurally different four-gate build. The stored prompt should be updated
    to reflect the lab's actual current queue (item 1 above) rather than continuing to describe 1m-track
    work finished many cycles ago.
+
+---
+
+# ██ E89 -- THE MATERIALLY DIFFERENT STRUCTURAL IDEA, TRIED: A LEVEL TARGET INSTEAD OF A MULTIPLE. ZERO TRADES -- A POPULATION FAILURE, NOT A DIRECTIONAL ONE.
+
+**SCHEDULING NOTE.** This cycle's stored prompt again describes lab state that is long closed (1m-only
+data window, "attack the short's entry geometry via E64a/E64b/E66," "continue numbering after E66").
+That family finished at E70/E76/E77 (entry-term binding) and E71/E74-E79 (short geometry) many cycles
+ago. **The docs win**, per the prompt's own instruction and this lab's own precedent at E80/E88a/E88b:
+this cycle continues E88b's own queue item 1 -- "a materially different structural idea for the 15m
+track... not a variant of E80/E82's four gates, and not a hold-cap change on top of them" -- the only
+open, credit-worthy item on the live queue. `get_credits` read **475** at the start -- the 250-500
+band, exactly ONE backtest.
+
+**STATE FOR THE RECORD:** no champion, no candidate anywhere in the lab. `e58a` (long, 1m, PF
+1.24015239, DD 9.82519609%, 36 trades, confirmed reproducible) and `E71` (short, 1m) remain the
+reference builds for the 1m track, untouched throughout the entire 15m excursion. `E80`/`E82` (15m,
+maxBars=288) and `E87` (15m, maxBars=576) both sit at `status: research` -- both looked like edges on
+the full window and both failed an out-of-sample split test the same way.
+
+**THE HYPOTHESIS.** HARD LESSON 41 (STRATEGY-LEDGER.md, earned in the sibling BTC lab): "a target
+defined as a multiple of the stop is a distance the market has no particular reason to travel... target
+a level instead." Every 15m build to date (E80-E88b) set `tpPx` as `close +/- shieldUsd * rr` -- exactly
+the pattern HARD LESSON 41 diagnosed, and a direct structural match to what E86 found: the whole E80/E82
+edge rode on a minority of trades reaching the exact 2R target (6/20 in H1, only 2/24 in H2). This entry
+replaced the target with `p1hh`/`p1hl` -- the already-completed prior 1h bucket's own opposite extreme,
+a level price was just at, exactly the fix Attack44 used successfully in the BTC lab (achieved ratio
+2.41 against a nominal-multiple family that never cleared ~1.5). Every other gate (regime, timeGate,
+brokeBelow/brokeAbove, coilPrev, inMiddle, longBan, longTrig/shortTrig, the shield itself) held
+byte-identical to `e82-e80-no-h1bull-h1bear.pine`; `maxBars` stayed at 288, E82's own value.
+
+**THE ONE COMPANION TERM (not a second hypothesis, Attack44's own precedent):** a level target is not
+guaranteed to sit far enough from entry to be worth the risk, so a setup whose level geometry falls
+short of `minRRv` (set to 1.5, reused verbatim from Attack44, not tuned on this data) is SKIPPED, never
+clamped or rescued -- `longRRok = (p1hh - close) >= shieldUsd * minRRv`, mirrored for shorts.
+
+**BINDING (E17):** byte-identical to `e82-e80-no-h1bull-h1bear.pine` except the TP definition and its
+attached validity floor; `rr` removed as an input since it no longer defines anything.
+`pine/e89-e82-level-target.pine`.
+
+**PRE-RUN AUDIT.** R = shieldUsd $2,000 against this window's BTC range (~$60k-$126k): clears the 0.8%
+floor (HARD LESSON 3). Stop unchanged, still the ALCM fixed-dollar liquidation gap (HARD LESSON 5) --
+only the TARGET moves to structure, the "no protective stop, ends at target or liquidation" frame is
+untouched. Both legs gated separately per HARD LESSON 48 (`longRRok`/`shortRRok` are two independent
+terms). REDUNDANCY (HARD LESSON 18): none new -- reads state already computed for brokeBelow/brokeAbove.
+Latch order unchanged (LESSON 8). OCCUPANCY CONFOUND (HARD LESSON 24/28/29), named in advance: this
+changes both which trades are admitted and how far an admitted trade must travel, so it is not
+comparable to E82 trade-for-trade, aggregate only -- same caveat E87 stated for its own change.
+
+**REGISTERED PREDICTION (HARD LESSON 17), stated before running, genuinely two-sided:** (a) if HARD
+LESSON 41 generalizes here, a nearer, structurally real target should be reached more often, raising the
+exact-target-hit share E86 flagged, and PF should clear 1.0 on an adequate sample; (b) if the H2 failure
+is directional rather than a distance artifact, trade count could collapse (minRRv rejecting narrow-range
+setups) or PF could stay sub-1.0 despite cleaner resolutions, because a nearer target also caps winners
+without necessarily helping the loss side.
+
+## RESULT -- 15m, 2024-06-08 -> 2026-09-01, 78,567 bars
+
+**One credit.** `resultId 01M1TQ91N1D3B3CA92B5HAEKXY`, `strategyId 01M1TQ91XNNHEQY4F1D8NGQ4GA`.
+
+**totalTrades = 0.** Every metric is zero -- `goLong`/`goShort` never fired once across 78,567 bars.
+
+## WHAT ACTUALLY HAPPENED, AND WHY THIS IS NOT WHAT WAS PREDICTED
+
+**Neither registered outcome anticipated this.** Both (a) and (b) presumed the strategy would trade at
+least somewhere near its usual population (E80/E82/E87 all produced 44 trades on this identical window).
+Zero trades means `longRRok`/`shortRRok` rejected essentially every setup that would otherwise have
+passed E82's own four gates -- **a population failure, not a directional one, and this is a process
+error to own plainly: HARD LESSON 10 says count the population before spending a credit, and this run
+should have been preceded by a no-credit counter build measuring the typical `p1hh - p1hl` range (the
+prior 1h bucket's own span) against `shieldUsd * minRRv = $3,000` before it was ever spent.** The
+mechanism is now inferable after the fact rather than measured in advance: entries only fire after
+`brokeBelow` (current bucket's low undercuts the prior bucket's low) and the reclaim trigger requires
+`close` to already be back near `p1hl` -- so at entry, `close` sits close to `p1hl`, and the level-target
+distance `p1hh - close` is approximately the prior bucket's own high-low range plus a small margin. A
+single **1-hour** BTC candle's own range on most of this window is very unlikely to exceed $3,000 (a
+0.85%-tier hourly range against BTC in the $60k-$126k band would need to be roughly 2.5-5% in one hour to
+clear it) -- so `minRRv=1.5` against a $2,000 shield asks the SAME single hourly candle that was just
+broken to also have already covered nearly the strategy's entire risk distance one and a half times over,
+which HARD LESSON 45's "~77% wall" pattern says is exactly the kind of condition that goes to zero rather
+than merely thinning out.
+
+**NOT recorded to `results/backtests.json` and NOT added to the dashboard.** `build_dashboard.py`'s own
+validation gate rejects any record with `totalTrades <= 0` ("a run with no trades is not a backtest") --
+correctly, since a zero-trade run is not a measurement of the hypothesis, it is a degenerate gate. This
+result is recorded here, with full provenance, as a negative finding: HARD LESSON 41's mechanism (target
+a level, not a multiple) does NOT transplant into this cascade with `minRRv` set to Attack44's value
+against `p1hh`/`p1hl` as the reference range -- the reference range is simply too narrow at 15m/1h scale
+for that floor to admit any trades at all. **This does not refute HARD LESSON 41's target-a-level
+principle** -- it refutes this specific implementation of it (this pairing of reference range and
+minRRv), the same way E80's first naive 15m port failed on a degenerate bucket-tier choice before the
+1h-tier redesign fixed it.
+
+## WHAT THIS DOES AND DOES NOT ESTABLISH
+
+- **Does not settle whether a level target can work on the 15m track.** It establishes that THIS
+  pairing -- the immediately prior 1h bucket's own range as the reference, gated at 1.5x the shield --
+  is unsatisfiable, not that no level-target construction can work.
+- **A cheap, informative next step now exists and should be run BEFORE another credit is spent**: a
+  no-credit counter build (this lab's established HARD LESSON 10 method) measuring the distribution of
+  `p1hh - p1hl` across the window, to learn what `minRRv` (if any, against a $2,000 shield) the data can
+  actually support, and/or whether a WIDER reference (e.g. the current, still-forming bucket's eventual
+  range, or the 6h block's extreme rather than the 1h's) is needed for a level-target redesign to have
+  any population to test at all.
+- **Does not touch the 1m track.** `e58a` (long) and `E71` (short) are untouched.
+- **Does not touch the HARD LESSON 48 drawdown-allowance RULE QUESTION** (blocking E74/E77) -- open,
+  unresolved, awaiting the user.
+- Check #36's shield-fill caveat is moot here (no trades filled at all).
+
+## STATE
+
+**No champion, no candidate.** `e58a` (long, 1m) and `E71` (short, 1m) remain the reference builds for
+the 1m track, untouched. `E80`/`E82` and `E87` (15m) remain `status: research`. **`E89`'s level-target
+redesign is not recorded as a dashboard row** (zero trades fails the build's own validation gate) and is
+not a keep, candidate, or reference build of any kind -- a documented negative population finding only.
+`E74`/`E77` remain the 1m track's only live improvements, blocked on the HARD LESSON 48 drawdown-
+allowance rule question, awaiting the user.
+
+## QUEUE
+
+1. **Run a no-credit population counter** (HARD LESSON 10 method) on the `p1hh - p1hl` distribution
+   across the 15m window before spending another credit on any level-target variant -- this is now the
+   top item, and it is free.
+2. **If the population supports it**, re-attempt the level-target redesign with a `minRRv` (or reference
+   range) actually sized to what this data offers, rather than reusing Attack44's value unexamined --
+   the value was reused as "a mechanical choice, not a free parameter" per this lab's own stated method,
+   but that method presumes the borrowed value is at least *satisfiable* on the new data, which was not
+   checked here and should have been.
+3. Check #36's shield-fill caveat and the HARD LESSON 48 drawdown-allowance RULE QUESTION (blocking
+   E74/E77) remain open, unresolved, awaiting the user -- unchanged across many cycles.
+4. Do not port `minRRv`/level-target logic back to the 1m or 5m tracks without its own population check
+   there first (HARD LESSON 40 plus this entry's own lesson).
