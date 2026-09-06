@@ -8857,6 +8857,131 @@ OBV-divergence (66/68/82/83, closed) and SuperTrend (89/90, discarded).
 
 ---
 
+# ATTACK 94 — CENTER-OF-GRAVITY TROUGH-TURN BREAKOUT LONG. A GENUINELY NEW MECHANISM PER ATTACK 93'S QUEUE ITEM 1. UNTESTABLE AT THE SAMPLE FLOOR — 1 TRADE, NOT A KILL-RULE FAILURE.
+
+The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") more than
+90 attacks stale, instructing "continue numbering after 37." **The docs override it, again**, per the
+prompt's own instruction: Attack 37 closed on cost at Attack 41; the OBV-divergence stack (66/68/82/83) is
+CLOSED at three terms; SuperTrend (89/90), linreg-channel (91/92) and Williams A/D (93) are all discarded.
+Numbering continues after Attack 93, the last entry on the board.
+
+## THE CLAIM UNDER TEST
+
+`ta.cog` (Ehlers' Center of Gravity) is a weighted-average-reciprocal construction over a fixed rolling
+window — unlike `ta.wad`/`ta.obv` (unbounded cumulative running sums, the exact failure mode that sank
+Attack 93 at 683 trades) it carries no memory beyond its own window. Ehlers designed COG specifically to
+turn with less lag than a lagging moving average or a single-smoothed oscillator (RSI/MFI/Stochastic,
+already tried at 51/52/79). The claim: COG turning up (crossing its own immediately-prior value) while
+reading below its own rolling average — a self-relative "trough" state that avoids the non-stationarity
+problem of an absolute oversold threshold — marks a low-lag momentum inflection. Requiring price to
+separately confirm with its own structural breakout tests whether that early inflection predicts anything.
+Distinct from every prior oscillator build: RSI/MFI/Stochastic are single-smoothed and bounded 0-100;
+OBV/WAD are unbounded cumulative sums; ADX/DMI and Bollinger squeeze read volatility/trend strength, not a
+turning point; COG is a zero-lag-by-design level construction reset every bar by its own window. The
+target was also built to HARD LESSON 41/44/46/47's standard from the start — a structural level (the prior
+100-bar high), not an R-multiple — with a 1:1 reward:risk floor applied by exclusion, since that lesson
+was earned three cycles ago and there is no reason for a fresh mechanism to ignore it. Pine:
+`strategies/pine/attack94-cog-trough-turn-breakout-long.pine`.
+
+## AUDIT (LONG ONLY, one line per leg)
+
+R >= 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rawR = close - armedLow`, never clamped. Stop beyond
+STRUCTURE (LESSON 5) — `slPx = armedLow`, the 20-bar swing low frozen at arm time. Each leg separately
+(LESSON 6) — LONG ONLY; short (COG turning down while ABOVE its own rolling average, price confirms with
+its own 20-bar low) is the standing structural asymmetry, queued alongside Attack 91's and Attack 93's.
+BINDING (E17) — four terms: `armEvent` (troughZone AND cogTurnUp), `priceBreak`-within-`armBars`, `rBig`,
+`rrOk`; with only 1 total trade the binding count per term could not be usefully decomposed this cycle —
+see the verdict. REDUNDANCY (E14) — troughZone (COG level vs. its own MA, a momentum-STATE domain),
+cogTurnUp (COG slope via one-bar self-comparison, a TIMING domain), priceBreak (raw price vs. a frozen
+structural high, a PRICE domain independent of COG), rBig (stop-distance, a RISK-GEOMETRY domain), rrOk
+(a longer-horizon target vs. that same stop, a REWARD-GEOMETRY domain) — five independent domains, no
+restatement. LATCH IN SEQUENCE (LESSON 8) — `armed`/`armedBar`/`armedLow`/`structHigh` are var state set
+only on the arm bar; `priceBreak` reads a strictly later bar (`bar_index > armedBar` enforced) against
+levels fixed at arm time; `armBars`=10 plus the sub-`armedLow` invalidation both bound the latch's life and
+are named explicitly. CASCADE (HARD LESSON 42/43) — LONG at 100% equity, single entry id "L"; cascadeRatio
+1 / maxCascadeDepth 1, confirmed (1 total row, 1 unique entry — trivially true at n=1).
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4)
+
+Two independently-binding oscillator terms (troughZone AND cogTurnUp) stacked ahead of a structural
+price-breakout confirm was estimated as narrower than Attack 91's single-term breakout (327 H1 trades) but
+easier than Attack 93's cumulative-series WAD-lead (683, missed 2x HIGH). Registered estimate: **inside
+the ~60-350 band, likely its middle third.**
+
+## OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17)
+
+* H1 above 1.0 and trades inside ~60-350 → real bare edge at a workable frequency, queue H2.
+* H1 above 1.0 but trades outside the band → report the direction and magnitude of the miss; retune `lb`/
+  `armBars` toward the band, not a filter.
+* H1 below 1.0 → DISCARDED by the kill rule immediately, `ta.cog` becomes consumed.
+* A majority win rate with `ratioAvgWinLoss` well below 1.0 → HARD LESSON 53's inverted-payoff shape.
+
+**None of these fired.** The actual outcome — 1 trade in 85,655 bars — was not on the registered tree at
+all, which is itself the finding: the frequency estimate missed LOW by roughly two orders of magnitude,
+the opposite direction and a far larger miss than Attack 93's 2x-HIGH miss the cycle before it.
+
+## RESULT — H1 ONLY (credits 482 at `get_credits`, 250-500 tier → one run, pre-2024 half only)
+
+| Metric | Attack 94a (H1) |
+|---|---|
+| Trades | **1** |
+| Win rate | 100% (1W / 0L) |
+| Net return | +0.50646235% |
+| Profit factor | **undefined (infinite)** — zero losing trades, unquotable at n=1 |
+| Max drawdown | 2.06659368% |
+| Commission paid | $10.02 |
+| Avg bars in trade | 193 |
+
+## THE VERDICT — UNTESTABLE AT THE SAMPLE FLOOR (Attack 86's precedent), NOT A KILL-RULE DISCARD
+
+LESSON 12 refuses to quote a ratio below ~30 trades; at n=1 there is no ratio to refuse — profit factor is
+mathematically infinite because the single trade had no loser to divide against. This is not evidence of
+an edge, and it is not a kill-rule failure either (the kill rule needs a PF number below 1.0; none exists
+here). It sits with Attack 86: the kill rule did not fire because there is nothing for it to evaluate.
+
+**Root cause, diagnosed without spending a second credit.** The reward-geometry floor (`rrOk`: the 100-bar
+structural target must sit at least as far above entry as the 20-bar stop sits below it) is starved by
+construction. A fresh 20-bar breakout in a sustained uptrend is usually already close to its own 100-bar
+high — remaining upside room is small at almost the exact moment the entry itself fires — while the risk
+distance (the low over the whole prior 20 bars) is comparatively large. The two-part COG arm condition
+(trough-zone AND turn-up) was very likely not the bottleneck; the reward floor was. This is the reverse of
+Attack 46/47's finding that a *fixed* structural target lets a *selection* floor raise the achieved ratio
+for free — here the fixed target and the entry's own structural lookback are too close together in the
+prevailing regime for the floor to pass almost ever.
+
+**`ta.cog` is NOT ruled out by this result.** The oscillator mechanism was never tested at a workable
+frequency; the specific reward-geometry pairing (100-bar target against a 20-bar entry breakout, both
+measured from the same recent uptrend) is what starved it. A future attempt should either separate the
+target lookback further from the entry lookback, lower `minRR` well below 1.0, or drop the fixed-level
+target for this specific construction and let the exit be a plain trailing/2R stop instead (Attack 94b, if
+this cycle is revisited) before concluding anything about COG itself.
+
+## WHAT THIS SETTLES
+
+**Attack 94 (COG trough-turn breakout, long) is UNTESTABLE AS BUILT, not discarded and not ta.cog
+consumed.** No credits remain this cycle (one run authorized at the 250-500 band, one run spent). The next
+cycle inherits an explicit choice: retry `ta.cog` with the reward-floor fix above, or spend the fresh
+mechanism slot on a different untried family and leave the COG retry queued.
+
+## QUEUE
+
+1. **Retry the COG trough-turn construction with the reward-geometry floor fixed** — separate
+   `targetLookback` further from `lb` (e.g. 300 vs. 20), or drop `minRR` toward 0.3-0.5, or replace the
+   fixed-level target with a plain 2R stop for this construction specifically — before concluding anything
+   about `ta.cog`'s bare mechanism. This is the first thing to try, ahead of a wholly new indicator family.
+2. **If the COG retry is skipped, the next fresh mechanism** comes from the remaining untried families:
+   `ta.sar`, `ta.cci`, `ta.stoch`, `ta.macd`, `ta.tsi`, `ta.wpr`, `ta.iii`, `ta.wvad`, `ta.percentrank`.
+3. **Attack 83 remains the board's strongest both-halves candidate** (PF 1.61044869/1.15365198 on 88/79
+   trades, DD 11.08%/10.76%), unaffected by this cycle.
+4. **Attack 46 (long) remains a candidate alongside Attack 83**, unaffected by this cycle.
+5. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if that
+   family is revisited before another fresh mechanism.
+6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+7. **This session cannot continue the new-engine cross-sectional track (Attacks 84-86)** — no
+   `backtest-lab`/`sweep_backtest` tool is available here, unaffected by this cycle.
+
+---
+
 # ATTACK 93 — WILLIAMS A/D ACCUMULATION-LEADS-BREAKOUT LONG. A GENUINELY NEW MECHANISM PER ATTACK 92'S QUEUE ITEM 1. H1 FAILS THE KILL RULE — DISCARDED, WORST DRAWDOWN ON THE BOARD.
 
 The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") more than
