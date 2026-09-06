@@ -9209,3 +9209,204 @@ population counter at 7.77%). Three colliding pairs now exist between the two br
 `E80`, `E81`) — a reconciliation pass (retiring one branch's numbers to letters, e.g. `E80b`/`E81b`,
 or renumbering forward from the true max) is overdue and is flagged here rather than attempted
 unilaterally mid-rebase.
+
+---
+
+# ██ E94 — E93's QUEUE, BOTH ITEMS: THE CASCADE WARNING IS HARMLESS TO PF BUT NOT TO E93's WIN RATE, AND THE LONG-ONLY BUILD IS A 2020 ARTIFACT
+
+One credit, `resultId 01M1V6H407ST3XEWGRC8H2KC53`, `strategyId 01M1V6GFEE8G0TTCTZWCW8JNW9`.
+Executes E93's queue item 1 (long-only on the full archive) and closes queue item 3 (verify the
+cascade warning) — item 3 **first**, free, because item 1 could not be interpreted without it.
+
+**RESEARCH FIRST, INCLUDING THE EVIDENCE AGAINST.** The move being tested — delete a leg that lost
+in-sample and keep the one that won — is one the literature names as a *bias*, not a repair:
+*"modifying a strategy structure (like removing the short leg) based on in-sample performance is
+itself a form of data mining bias that can severely compromise out-of-sample performance"*, and
+*"selecting a smaller set of strategies based on out-of-sample performance would cause data-snooping
+bias."* The corollary is just as pointed: over a window where the asset has *"significantly positive
+cumulative returns"*, a short-only book is *"almost certainly a losing investment strategy"* — which
+means the long-only survivor of such a split inherits beta rather than skill, and must be judged
+against buy & hold, never against zero. The practitioner side adds the regime version: *"a strategy
+optimized only on bull-market data will almost always fail the first time the market turns"*, and
+strategies *"work well in some regimes and poorly in others"* with swings of tens of points in
+average return driven only by whether the market trends up, down or ranges. **All of that argues for
+running the test with a pre-registered phase decomposition attached, which is what was done.**
+
+## ITEM 3 FIRST — WHAT E93's CASCADE WARNING ACTUALLY DID
+
+Free `get_trades` on E93 (`01M1V526XR04BWHC7Q0ZHE5CEE`), grouped by `(entryBar, entryPrice,
+direction)`, per HARD LESSON 31's recompute procedure:
+
+| | E93 as reported | E93 recomputed per entry |
+|---|---|---|
+| Rows / entries | 147 | **102** (`cascadeRatio` 1.4412; depth histogram 1×82, 2×10, 3×2, 4×7, **11×1**) |
+| Profit factor | 1.08806654 | **1.08822414** |
+| Long leg | 43 trades, 21 wins, 48.84% | **43 entries, 21 wins, 48.84% — clean, every fill depth 1** |
+| **Short leg** | **104 trades, 9 wins, 8.65%** | **59 entries, 9 wins, 15.25%** |
+
+**The PF is safe to two decimal places and the sign of every leg's P&L is unchanged** — the net
+figures sum identically. **The short leg's trade count and win rate as printed are not.** E93 quoted
+"104 trades, 9 wins (8.65%)"; there were **59 positions** and the win rate is **15.25%**. This is
+exactly HARD LESSON 31's list — profit factor and gross P&L are safe as printed on a cascaded leg,
+win rate and counts are not — and it is the third time in this repository that rule has caught a
+quoted number. The short leg still clears the 30-trade floor at 59, so **E93's conclusion survives
+the correction; two of its printed statistics do not.**
+
+## ITEM 1 — WHAT THE FREE LOG PREDICTED BEFORE THE CREDIT WAS SPENT
+
+Short positions occupied **4,997 of 211,327 bars = 2.3646%** of the archive. Under `pyramiding=1`
+that bounds how many long entries the short leg could have been blocking, and the bound is small.
+**Pre-registered, before running:**
+
+1. **43–48 entries** (the free subset holds 43; occupancy allows only a handful more).
+2. **PF near 1.492**, the free subset's figure.
+3. **Not bankable**: 147 → ~43 is a >50% cut, so clause 4 mandates a split, and the split lands at
+   **20/23**, both below the floor — the same unsatisfiability that blocked 3M Elite's v56.
+
+## RESULT — 15m, 2020-08-19 → 2026-09-01, 211,423 bars
+
+| | **E94 long-only** | E93 parent (bidirectional) |
+|---|---|---|
+| Profit factor | **1.45289788** | 1.08806654 |
+| Trades | **43** | 147 rows / 102 entries |
+| Win rate | 48.8372093% | 20.40816327% (row) / 29.41% (entry) |
+| Net | **+30.35060484%** | +9.13311389% |
+| Max drawdown | **17.28465524%** | 25.99052821% |
+| Sharpe / Sortino | 0.53361831 / 0.1136451 | 0.18499637 / 0.04892019 |
+| `commissionPaid` | $556.4137161 | $1,069.617611 |
+| `cascadeRatio` | **1.0, all 43 entries depth 1** | 1.4412 |
+
+**Buy & hold:** the engine's payload returns no buy-and-hold figure, so none is claimed for the exact
+window. From **this run's own recorded prices**, BTC ran $10,715.50 at the first entry (2020-09-25)
+to $64,506.50 at the last exit (2026-04-19) — **a +501.99% price move against this build's
++30.35%.** **Funding:** the payload has no `fundingPaid` field; none is reported rather than invented.
+
+## THE PRE-REGISTRATION SCORED — ONE HALF EXACT, THE OTHER HALF WRONG, AND THE MISS GENERALISES
+
+**Entry count: predicted 43–48, delivered 43.** Removing the short leg unblocked **zero** long
+entries; the 2.3646% occupancy bound was right. The win/loss split is identical to the free
+reconstruction (21/22), and every entry is the same entry.
+
+**P&L: predicted PF 1.492, delivered 1.45289788; predicted +$2,714.31, delivered +$3,035.06.** Same
+43 trades, different money — because `percent_of_equity` sizing compounds each long on a different
+equity path once the short leg's losses are no longer draining the account.
+
+**That is a reusable result, and it cuts both ways.** A bidirectional run's free trade log
+reproduces a single-leg build's **trade population exactly** and its **P&L not at all**. So the free
+log can settle *which trades* and therefore every count-based question — sample floor, split
+feasibility, phase attribution — **without a credit**; it cannot settle profit factor, drawdown or
+net. Half of this credit bought a number the log already had.
+
+## RATCHET v2 — CLAUSES 1–3 PASS, CLAUSE 4 CANNOT BE SATISFIED, AND WOULD HAVE FAILED
+
+| Clause | Test | Verdict |
+|---|---|---|
+| 1 — PF improves | 1.08806654 → **1.45289788** | ✅ |
+| 2 — drawdown not worse | 25.99052821% → **17.28465524%** | ✅ |
+| 3 — ≥30 trades | **43** | ✅ |
+| 4 — >50% cut needs a split *first* | 147→43 = **70.75%**; 102→43 = **57.84%** | ⛔ **unsatisfiable** |
+
+Both halves land below the floor (20/23 by calendar midpoint, 21/22 by trade order). **NOT BANKED.**
+
+**And the split was computed anyway, free, which turns "unsatisfiable" into something worse:**
+
+| Partition | H1 | H2 |
+|---|---|---|
+| Calendar midpoint (2023-08-25) | n=20, **PF 2.565003**, +$3,622.55 | n=23, **PF 0.866075**, −$587.49 |
+| Trade order | n=21, **PF 2.454991**, +$3,518.82 | n=22, **PF 0.887049**, −$483.76 |
+
+**The recent half is a loser on both partitions.** Clause 4 would not merely have been unmeasurable —
+it would have been failed.
+
+## THE PHASE DECOMPOSITION, WHICH IS THE REAL FINDING
+
+Computed from this run's own 43 trades, which reconcile to the engine's net to the cent
+(+$3,035.060484):
+
+| Phase | n | PF | Net | **Gross edge / trade** |
+|---|---|---|---|---|
+| BULL 2020-21 | 12 | 1.9846 | +$2,169.84 | +$192.13 |
+| BEAR 2022 | 2 | 4.5262 | +$391.42 | +$207.92 |
+| RECOVERY 22-24 | 7 | 10.2317 | +$957.57 | +$149.95 |
+| **2024-26** | **22** | **0.8870** | **−$483.76** | **−$8.16** |
+
+By year: **2020 n=7, PF 9.0044, +$2,689.65 — 88.6% of the entire six-year net from seven trades in
+four months.** And **2026 n=7, PF 0.2274, −$1,303.09 — the worst year in the archive, and the most
+recent one.**
+
+**So the headline PF of 1.45 is a 2020 artifact.** On the largest phase sample the build has (22
+trades, 2024-26) it is **gross-negative before costs at −$8.16 per trade** — which is the pre-spend
+screen this lab adopted after E81, and it rejects further work on this build outright. HARD LESSONS
+45/49 forbid sweeping past a diagnosed negative gross edge, and this is one.
+
+## AND IT OVERTURNS E93's HEADLINE RECOMMENDATION
+
+E93 concluded the lineage is **"long-only-viable, short-leg-fails-at-scale."** Decomposing E93's own
+trade log by phase — the step E93 did not take — says the opposite about the half that matters:
+
+| Phase | LONG | SHORT |
+|---|---|---|
+| BULL 2020-21 | n=12, PF 1.9935 | n=9, PF 0.1886, −$1,226.05 |
+| BEAR 2022 | n=2, PF 4.5142 | n=12, **PF 0.0000**, −$1,350.69 |
+| RECOVERY 22-24 | n=7, PF 10.5222 | n=14, PF 0.6870, −$280.81 |
+| **2024-26** | **n=22, PF 0.8928, −$355.29** | **n=24, PF 1.9789, +$1,056.55** |
+
+**In the most recent phase the short leg is the profitable one and the long leg is the loser.** The
+short's whole-window loss is concentrated in 2020–2022, where it went 0-for-12 in the bear. E93's
+recommendation is a whole-window artifact of exactly the kind the standing rule warns about, and
+**this tick's own credit was spent executing a queue item that the decomposition says was pointing
+the wrong way.** That is the cost of not decomposing before queueing.
+
+**What this does NOT license** is building a short-only or modern-window-only variant. Twenty-four
+trades is below the floor, and selecting the phase where a leg worked and then testing it there is
+the textbook version of the mining the research above describes. **Both legs are now closed at 15m
+on this lineage, for opposite reasons.**
+
+## THE EXIT MODEL IS NOT THE ONE BEING TESTED
+
+**22 of 43 exits (51.16%) hit the `maxBars=288` hold cap** rather than the shield or the target — and
+those are the trades carrying the edge:
+
+| Exit route | n | PF | Net |
+|---|---|---|---|
+| **Timeout at the hold cap** | 22 (51.16%) | **3.074932** | **+$2,049.76** |
+| Resolved at target or shield | 21 (48.84%) | 1.172450 | +$985.30 |
+
+**Most of this build's measured profit comes from the three-day hold cap, not from the ALCM
+shield/target model it is nominally testing.** That is HARD LESSON 1's failure mode — trades timing
+out instead of resolving — appearing here as the dominant, and profitable, path. A build whose edge
+lives in its timeout is not evidence about the Oracle's exit rule either way.
+
+## WHAT IS RECORDED
+
+- **E93 queue item 3: CLOSED.** PF unaffected (1.08806654 vs 1.08822414); short-leg count and win
+  rate corrected from 104/8.65% to **59 entries / 15.25%**; E93's conclusion survives.
+- **E93 queue item 1: EXECUTED and the answer is no.** Long-only improves every whole-window
+  statistic and is still not bankable, still phase-degenerate, and still gross-negative since 2024.
+- **E93's headline recommendation: OVERTURNED** by phase decomposition of its own free trade log.
+- **`ORACLE-RULES.md` corrected**, closing E81's queue item 3: the Oracle's stated-rule queue reads
+  **1 of 6**, not 1 of 5 — E81 added the coil as the sixth stated rule to fail, and the first to
+  fail on a sample above the 30-trade floor.
+
+## STATE
+
+**No champion, no candidate.** `e58a` (long, 1m, PF 1.24015239, 36 trades) and `E71` (short, 1m,
+PF 0.97315988, 33 trades) remain the untouched 1m-track references. The 15m 1h-structure lineage is
+now, on the full archive: bidirectional PF 1.088 (E93), long-only PF 1.453 (E94), **and both are
+2020-carried with a losing recent half.** HARD LESSON 48's drawdown-allowance question remains open
+and awaiting the user, unchanged across many cycles. Credits: **459 before this run.**
+
+## QUEUE
+
+1. **Do not build a modern-window or short-only variant of this lineage.** Phase-selected leg
+   testing is the mining the research names, and every candidate sub-sample is below the floor.
+2. **Do not sweep anything on this build.** Gross edge per trade since 2024 is **−$8.16**; HARD
+   LESSONS 45/49 apply.
+3. **The hold cap is the one term here worth a future credit, and only as a population question
+   first**: what does this build look like with the timeout removed entirely, given that 51.16% of
+   its exits and 68% of its profit run through it? Count before spending, per HARD LESSON 10.
+4. **Use the free-trade-log technique deliberately from now on.** It settles trade population, split
+   feasibility and phase attribution for any single-leg subset of an existing bidirectional run at
+   zero cost; it settles no P&L question. Half of this tick's credit was avoidable.
+5. The sibling branch's `E80`/`E81` provenance gap and the three colliding number-pairs remain
+   unreconciled, and remain that branch's to repair.

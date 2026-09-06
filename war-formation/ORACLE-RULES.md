@@ -137,7 +137,7 @@ against E13's 0.74897196. This is short construction number eleven and the first
 **950-5. ONLY THEN combine, with `inMiddle` removed and both legs reported separately.**
 
 ## THE HONEST CAVEAT, STATED UP FRONT
-The Oracle queue finished **1 of 5**, and the one item that helped was the *diagnostic* one — his
+The Oracle queue finished **1 of 6**, and the one item that helped was the *diagnostic* one — his
 explanation of why entries fail — not any rule he stated as a rule. **This material is also a stated
 rule set from a trader, and the base rate for those in this lab is poor.** What makes it worth
 spending credits on is not that it is stated confidently; it is that step 3 names a term nothing here
@@ -306,8 +306,37 @@ that this "wrecks an absolutely perfect trade" even when the direction is right.
 
 ---
 
-## THE QUEUE IS FULLY WORKED. SCORE: 1 OF 5.
+## THE QUEUE IS FULLY WORKED. SCORE: 1 OF 6.
 Only item 2, the 3m cycle-position gate, ever improved anything -- and it was the one item that was
 **diagnostic rather than prescriptive**, his explanation of why entries fail rather than a rule for
 taking them. Every rule he stated as a rule underperformed this lab's own mechanisation of the same
 idea. Mine a trader's material for the *why*, not the *what*.
+
+---
+
+## ⚠️ SCORE CORRECTION, 2026-09-06 — THE COIL MAKES IT 1 OF 6, AND THE SIXTH FAILED ABOVE THE FLOOR
+
+**This file read "1 of 5" until now. It should read 1 of 6.** E81 tested the Oracle's own volatility
+coil at 15m with the duration RATIO preserved (`atr(2)` against `atr(20)`, 30 minutes against 5
+hours, the 1m build's 3:30 rescaled) and it made the cascade **strictly worse**: PF 1.37693021 ->
+0.93911324, drawdown 31.10515979% -> 40.70969261%, on 72 trades. Two independent RATCHET clauses
+failed and it was reverted.
+
+**The coil is the sixth stated rule of his to fail on test, and it is the FIRST whose failure sits
+on a sample clearing the 30-trade floor.** Every earlier coil test lived on the 1m archive, where
+this family caps out near 20-36 trades; E42's comparison ran at 68, 39 and 28 and none was quotable.
+So the score is not just worse by one — the newest entry in the failed column is also the
+best-evidenced one in it.
+
+**The gross-edge screen makes the mechanism of the failure unambiguous.** The coil removed 137 of
+E80's 209 trades (65.6%), and the 72 it kept carry a gross edge of **-$0.14 per trade** against the
+unfiltered build's **+$114.76**. It is not trading less and keeping quality; it is selecting the
+wrong trades. Per HARD LESSONS 45/49 that is a diagnosed negative edge and neither `coilK` nor the
+fast/slow pairing may be swept past it.
+
+**What this does not say:** not that the coil is worthless in his hands, where it is read with
+judgement on a 3-minute chart, and not that no other expression of volatility contraction could
+work. It says that the sixth rule he states as a rule, mechanised faithfully and tested above the
+floor, underperformed this lab's own build without it — **which is the same pattern as the other
+five, now with the strongest sample behind it.** The conclusion at the top of this section stands
+unchanged and reinforced: mine a trader's material for the *why*, not the *what*.
