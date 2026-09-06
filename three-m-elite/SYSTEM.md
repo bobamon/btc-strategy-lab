@@ -6497,3 +6497,58 @@ was sufficient, and the rejection is unambiguous without a per-trade read.
 unchanged (PF 1.88616546 on 2022-01-01 window, `passed`; PF 1.01300244 on full coverage, `testing`).
 **THIS CYCLE: v67 recorded `status: rejected`** — v66's own queued short-side mirror, cleanly measured,
 cleanly rejected, closing the short leg's MA-overextension axis.
+
+---
+
+## ██ CYCLE CHECK #32 — QUEUE CONFIRMED STILL EMPTY OF BACKTESTABLE WORK; NOT RE-NOTIFYING (2026-09-06)
+
+**A note on the scheduled prompt, once more.** This cycle's stored prompt is still the identical
+v37/v53 snapshot addressed at every check since #1 — it names the 12H/24H bias gate and the cascade
+signature as unresolved top-priority items and says most recent runs "produced nothing" because they
+died at a publish permission prompt. Both technical items were closed long ago (bias gate: v54–v61,
+HARD LESSON 32/45; cascade: HARD LESSON 34/35/50/52), and the publish-prompt failure mode the prompt
+describes does not apply here — no `Artifact` call is made this cycle, per that same prompt's own
+correct instruction. Per "THE DOCS WIN over this prompt," neither stale item is repeated, and this
+cycle does not call `Artifact`.
+
+**`git pull --rebase origin main` at cycle start was a clean fast-forward** — no concurrent 3M work
+landed beyond v67 (confirmed twice: once before reading the docs, once again immediately before this
+entry was written). `three-m-elite/transcripts/` is unchanged at 10 files, the same set v67 mined.
+`results/backtests.json` re-read directly end to end: 36 entries, still ending at v67 (`3M Elite v67:
+MA overextension guard, short-side mirror`, `status: rejected`). No "ecarr"-authored commit answering
+the declared-deviation promotion policy question (open since cycle check #1, restated at v60/v62/v63/
+v64) has landed anywhere in reachable history.
+
+**Checked v67's own queue for anything actionable before declaring a no-op:**
+1. No further single-term short-side lever — bias, FVG-grading, cascade/sizing, and MA-overextension
+   are all closed axes on the ten captured transcripts. Confirmed still true; nothing new to mirror.
+2. VOCABULARY.md's "STILL MISSING" table (Type 1/the 3M candle's anatomy, the swing rule) — re-checked
+   directly in `VOCABULARY.md`, still explicitly recorded as absent from this material ("anatomy never
+   defined in these ten videos"; swing rule "explicitly deferred by the author... next week"). No new
+   transcript exists to resolve either.
+3. v64's combined long+short flip-rule finding (`status: testing`) and the short leg's non-co-champion
+   status are both unaffected — neither is a backtest-budget item, both remain blocked on the same open
+   policy question as the last several cycles.
+
+**No backtest run. 0 of 482 available credits spent.** Manufacturing a new Pine variant to spend the
+budget would repeat the exact mistake this lab's own mandate forbids (do not re-engineer the frame,
+do not invent a mechanism the source does not prescribe) on a cycle that genuinely has no queued,
+source-faithful, well-specified experiment left to run.
+
+**No new notification sent.** The declared-deviation promotion policy question was escalated once
+already (cycle check #1) and nothing about it has changed since — the long champion has moved twice
+(v37 → v58 → v62-fvg) on its own ratchet merits, entirely independent of that still-open question, so
+its unresolved status is not new information. HARD LESSON 26 governs a repeated notification the same
+way it governs a repeated stale-prompt flag: say nothing new, notify nothing new.
+
+**QUEUE (unchanged, restated for the next cycle):**
+1. The declared-deviation promotion policy question remains open, still for the user, still blocking
+   v60/v61(short) and v64 (combined) from standing beside v62-fvg on equal footing.
+2. No further single-term short-side lever queued; the next short-side idea needs new source material.
+3. VOCABULARY.md's Type 1 candle anatomy and the swing rule remain genuinely undecoded and unresolvable
+   from the ten captured transcripts.
+
+**CHAMPION OF RECORD (LONG): v62-fvg** — unchanged (PF 2.04354108 full coverage / 2.10461082 H1 /
+1.95534435 H2, DD 4.50890824%, 40 trades). **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61(short)** —
+unchanged (PF 1.88616546 on 2022-01-01 window, `passed`; PF 1.01300244 on full coverage, `testing`).
+**THIS CYCLE: no change.** v67 (rejected) stands as the most recent real result on file.
