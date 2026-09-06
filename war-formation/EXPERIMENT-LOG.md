@@ -8867,3 +8867,102 @@ cascade has edge", not "War Formation works".**
    target are load-bearing at all — `get_trades` gives exit reasons for free.
 4. **Do not call this a War Formation champion.** Caveat 1 is not a technicality.
 5. Check #36's shield-fill caveat still stands: 1.37693021 is an upper bound.
+
+---
+
+# ██ E80 SPLIT TEST — THE CLEANEST SPLIT THIS PROJECT HAS EVER PRODUCED, AND IT STILL DOES NOT CLEAR THE HURDLE
+
+**Zero credits.** E80's queue item 1 said to split-test it, which would normally cost two backtests.
+It cost none: `get_trades` on the existing `resultId 01M1V29SJ9N4AD9F7GAT0BDXZ1` returns all 209
+trades with exit timestamps and per-trade P&L, so the split is computed from a run already paid for.
+Recording that because two credits were about to be spent re-deriving data already on disk — the exact
+waste HARD LESSON 21/25 exists to prevent, avoided this time.
+
+## THE SPLIT — calendar midpoint 2023-08-26
+
+| | Trades | Wins | Win rate | **Profit factor** | Net | Gross profit / loss |
+|---|---|---|---|---|---|---|
+| **H1** 2020-08 → 2023-08 | **101** | 52 | 51.5% | **1.373060** | $9,330.65 | $34,341.74 / $25,011.10 |
+| **H2** 2023-08 → 2026-09 | **108** | 52 | 48.1% | **1.380451** | $10,459.43 | $37,951.63 / $27,492.19 |
+| **FULL** | 209 | 104 | 49.8% | 1.376930 | $19,790.08 | $72,293.37 / $52,503.29 |
+
+**Both halves clear the 30-trade floor — 101 and 108 — and the two profit factors differ by 0.007.**
+
+This is the first War Formation result where both halves independently clear the sample floor, and the
+stability is the striking part: **1.373060 against 1.380451**. Attack 86's equivalent split decayed
+69–88%. This one decays by nothing measurable.
+
+## THE STATISTICAL TEST, BY THE SAME STANDARD THE BOARD AUDIT APPLIED
+
+A t-test on the per-trade return series — a direct test on the actual trade population, rather than the
+Sharpe × √years approximation used in the board audit:
+
+| | n | mean per trade | sd | **t** |
+|---|---|---|---|---|
+| FULL | 209 | **+0.6001%** | 3.9466 | **2.1983** |
+| H1 | 101 | +0.7634% | 4.7278 | 1.6228 |
+| H2 | 108 | +0.4474% | 3.0560 | 1.5215 |
+
+**t = 2.1983 is the highest any result in this project has reached** — above the board's previous best
+of 2.019, above the conventional 2.0 threshold.
+
+**And it is still below the noise threshold.** This lab has run roughly eighty experiments (E1–E80), so
+its own √(2 ln N) is ≈ 2.96 — essentially the same as the BTC board's 2.973 and Harvey/Liu/Zhu's 3.0.
+**E80 does not clear it.**
+
+## THE TWO RESULTS ARE ANSWERING DIFFERENT QUESTIONS, AND THAT MATTERS
+
+**The split asks: is the effect stable across time?** E80 answers **yes, emphatically** — two
+independent three-year windows, 101 and 108 trades, profit factors agreeing to within 0.007. Nothing
+else in this project comes close to that.
+
+**The t-test asks: is the mean distinguishable from zero given the variance?** E80 answers **not at the
+bar its own trial count demands.** Mean +0.60% per trade against a standard deviation of 3.95% is a
+real but noisy edge; 209 trades is not enough to resolve it against 80 prior attempts.
+
+**A result can be stable and still too small to prove.** That is E80's exact position, and it is a more
+interesting failure than the usual one.
+
+## THE CAVEAT ON THE SPLIT ITSELF
+
+Practitioner guidance is explicit that a single split is weak evidence: *"a single train-test split is
+better than no split at all, but it has **low statistical power**"*, and *"one favorable regime being
+enough to create confidence that the market won't honor later."* Walk-forward analysis — repeated
+non-overlapping out-of-sample windows — *"answers a subtly stronger question."*
+
+**The near-identity of the two halves is stronger than a bare pass**, because a fragile system flattered
+by one regime would not reproduce its profit factor to three decimal places across a different one. But
+it remains one split, and this project has `walk_forward` available on the other engine and none here.
+
+## WHERE THIS LEAVES E80
+
+| Gate | Result |
+|---|---|
+| Kill rule (PF > 1.0 on never-tuned data) | ✅ passes, both halves |
+| Sample floor, full window | ✅ 209 trades |
+| **Sample floor, both halves independently** | ✅ **101 and 108 — a project first** |
+| Split stability | ✅ **1.373060 vs 1.380451** |
+| Conventional t ≥ 2.0 | ✅ **2.1983** |
+| Multiple-testing hurdle t ≥ ~2.96 | ❌ **fails** |
+
+**Still not promoted**, and the reason is now the same single reason that disqualifies everything else
+in the project. But E80 is the first result to fail on *only* that.
+
+**And the standing caveat has not gone away:** this is the cascade **without the coil**, which is the
+source's own mechanic. It remains a finding about the cascade, not about War Formation.
+
+## QUEUE
+
+1. **Walk-forward E80** if the capability can be reached — repeated out-of-sample windows would answer
+   the question a single split cannot, and E80 is the only result in the project worth spending it on.
+2. **Re-introduce the coil at 15m** in whatever form is expressible and measure the delta. If the coil
+   hurts on 209 trades, that is a real finding about the source's own stated mechanic on a bankable
+   sample — the first this lab could make.
+3. **Do not tune E80.** It has never been tuned, which is a large part of why the split is clean, and
+   the multiple-testing arithmetic means any tuning pass makes the hurdle worse, not the result better.
+4. Check #36's shield-fill caveat still stands: 1.376930 is an upper bound.
+
+## SOURCES
+- LuxAlgo, *Walk-forward Analysis* — https://www.luxalgo.com/library/concept/walk-forward-analysis/
+- QuantInsti, *Walk-Forward Optimization: How It Works, Its Limitations* — https://blog.quantinsti.com/walk-forward-optimization-introduction/
+- StratBase, *Walk-Forward Analysis: Strategy Validation Guide* — https://stratbase.ai/en/blog/walk-forward-analysis-guide
