@@ -7543,3 +7543,156 @@ change this cycle.** v70 is a diagnostic on a non-champion instrument, `status: 
 - Excavo, *Moving Average Trading Strategies: Complete TradingView Guide for 2026* — https://excavo.com/blog/moving-average-trading-strategies-guide
 - WalletFinder, *Crypto Moving Average Strategy* — https://www.walletfinder.ai/blog/moving-average-strategy
 - TradeFundrr, *Bias From Higher Timeframe* — https://tradefundrr.com/bias-from-higher-timeframe/
+
+---
+
+# ██ v71 — THE MISSING CONTROL. THE BASE MECHANISM IS WHAT FAILS ON SOL, AND v69's HEADLINE WAS MIS-ATTRIBUTED (2026-09-06)
+
+One credit, `resultId 01M1V8M8M4WEMP30PTTXEKE8TZ`. Closes v70's queue item 2, which was named there as
+*"the single most informative unspent credit in this lab."* It was.
+
+**The reason it mattered:** every cross-instrument result in this lab has compared a **filtered** build
+on SOL to nothing. Without an ungraded SOL baseline, *"the gate is gross-negative on SOL"* cannot be
+distinguished from *"the whole mechanism is gross-negative on SOL."* That ambiguity has been sitting
+under two entries.
+
+## RESEARCH FIRST, INCLUDING THE EVIDENCE AGAINST
+
+The practitioner literature says supply/demand logic is portable *in principle* — *"the logic of supply
+and demand liquidity zones applies across BTC, ETH, and other currency pairs"* — and then immediately
+qualifies it by liquidity:
+
+- *"In fast-moving markets like Bitcoin or Ethereum, supply-demand zones are powerful because they
+  reflect collective behavior."*
+- For altcoins, traders must *"account for slippage in low-liquidity altcoins"*, and in
+  lower-liquidity names *"breakout trading and trend-following strategies are more suitable"* —
+  **implying supply-demand zones alone may not be sufficient there.**
+- The named failure case is exactly this window's shape: *"a demand zone in a strong downtrend may
+  fail."*
+- And the general warning: edge *"comes from discipline, liquidity awareness, and a trading strategy
+  matched to the trader rather than from a single magic indicator"* — **the edge does not
+  automatically transfer.**
+
+**So the prior favoured the base failing off BTC/ETH, and it was registered before the run.**
+
+## THE RUN — SAME SAVED STRATEGY OBJECT, THIRD SYMBOL
+
+`strategyId 01M1V2860AQGM5J5TT4XP1VZV0` is the v37 source used for the ETH control (v68), re-run with
+only the symbol changed. **BTC, ETH and SOL now share one source object across three symbols**, which
+is the strongest provenance available for a three-instrument comparison. Window matched to the
+v62-fvg SOL run exactly (SOL full coverage, 2021-10-15 → 2026-09-01) so the graded/ungraded pair
+differs in one variable.
+
+| | BTC (full cov.) | ETH | **SOL — v71, this run** |
+|---|---|---|---|
+| Profit factor | 1.0534251 | 1.02872954 | **0.83284886** |
+| Trades | 241 | 316 | **388** |
+| Net | +8.87299247% | +7.98609566% | **−49.49734446%** |
+| Max drawdown | 26.97850442% | 27.31398997% | **52.33387193%** |
+| Cascade | — | 1.0 | **1.0 (388/388, depth 1)** |
+
+**388 trades — the largest sample this lab has ever produced**, and the result is unambiguous.
+**Buy & hold:** none in the payload, so none claimed; from this run's own recorded prices SOL ran
+**$195.825** (first entry 2021-10-23) to **$102.36** (last exit 2026-09-01), **−47.73%**, against the
+build's −49.49734446%. **It did not beat holding a halving asset — it slightly underperformed it.**
+**Funding:** no `fundingPaid` field; none reported. `commissionPaid` **$3,083.967246**.
+
+## THE CORRECTION — v69's HEADLINE WAS MIS-ATTRIBUTED
+
+v69 concluded the FVG gate *"does not merely fail to travel — it inverts and worsens"* off BTC. **With
+the control in hand that reading does not survive.** Placing every graded run beside its own ungraded
+base on the same instrument:
+
+| Instrument | **base (ungraded)** | **+ FVG gate** | Gate effect |
+|---|---|---|---|
+| BTC | 1.0534251 (241) | **2.04354108** (40) | **+0.990** |
+| ETH | 1.02872954 (316) | 0.97825349 (49) | −0.050 |
+| **SOL** | **0.83284886 (388)** | **0.87179834 (63)** | **+0.039** |
+
+**On SOL the FVG gate IMPROVES the base.** It helps on two of three instruments and hurts marginally
+on the third. **It is not BTC-specific.**
+
+**What is BTC-and-ETH-specific is the BASE.** It sits barely above 1.0 on both (1.053, 1.029) and at
+**0.833** on SOL. The gate was doing its job on SOL — selecting better trades — on a mechanism that
+has no edge there to select from. **v69 measured the gate and attributed the base's failure to it.**
+
+The gross-edge screen says the same thing more precisely, all on SOL:
+
+| Build | n | **Gross / trade** |
+|---|---|---|
+| **base (v71)** | 388 | **−$4.81** |
+| base + FVG gate (v69) | 63 | **−$2.98** |
+| base + source MA-stack bias (v70) | 108 | **−$14.20** |
+
+**The FVG gate raises gross edge on SOL by $1.83 per trade; the source's own bias rule lowers it by
+$9.39.** Two filters, opposite signs, on the same failing base.
+
+## AND IT CONFIRMS v70 ON A MATCHED WINDOW
+
+v70 ran 2022-01-01 → 2026-09-01, this run 2021-10-15 →. Restricting **this run's own trade log** to
+v70's window:
+
+| | base, v70's window | v70 (base + source bias) |
+|---|---|---|
+| Profit factor | **0.842836** | 0.75219388 |
+| Trades | 371 | 108 |
+| Gross / trade | **−$3.94** | **−$14.20** |
+
+**v70's conclusion holds and is now properly controlled**: the source's MA-stack bias rule makes SOL
+strictly worse than doing nothing, on a like-for-like window.
+
+## DECOMPOSITION — THIS IS A ROBUST NEGATIVE, NOT AN AVERAGE OF MIXED PHASES
+
+| Phase | n | PF | Net | Gross/trade |
+|---|---|---|---|---|
+| BEAR 21-22 | 102 | 0.8743 | −$1,176.30 | −$1.75 |
+| RECOVERY 22-24 | 115 | 0.8980 | −$896.41 | +$0.07 |
+| 2024-26 | 170 | 0.7527 | −$2,823.63 | −$9.69 |
+
+**Every phase is below 1.0.** By year only **2024** is net-positive, and barely (PF 1.0148, +$103.60).
+**Both halves by trade order fail** — H1 n=194 PF 0.850034, H2 n=194 PF 0.810954.
+
+**As in v70, decomposition here confirms the whole-window number instead of dissolving it.** That is
+now twice on this instrument, and it is what a real absence of edge looks like as opposed to a lucky
+or unlucky phase.
+
+## WHAT THIS CHANGES, STATED PLAINLY
+
+1. **v69's "the gate is BTC-specific and inverts off BTC" is withdrawn.** The gate helps on BTC and
+   SOL and is roughly neutral-to-slightly-negative on ETH. Its measured 2.04 on BTC remains a
+   BTC-specific *magnitude*, but the *sign* travels.
+2. **The instrument problem is one level deeper than this lab thought.** It is not that the grading
+   term fails to generalise; **the supply/demand base itself is the thing that does not travel**, and
+   it was never at 1.0 by much even where it works — 1.053 on BTC, 1.029 on ETH, on 241 and 316
+   trades. **Two of three instruments sit within rounding distance of no edge at all.**
+3. **v62-fvg's champion status is unaffected but reframed.** It is still PF 2.04354108 on 40 BTC
+   trades. What changes is the explanation: it is a good filter on a base that is only marginally
+   positive, on the one instrument where that base is least bad.
+
+## STATE
+
+**CHAMPION OF RECORD (LONG): v62-fvg** — unchanged (PF 2.04354108, 40 trades, DD 4.50890824%, BTCUSDT
+only). **VALIDATED SHORT: v60/v61(short)** — unchanged. **No champion change.** v71 is `status:
+testing`, a control run on a non-champion instrument.
+
+## QUEUE
+
+1. **The instrument question is now closed and should stop consuming credits.** Three instruments,
+   two filter axes, one base — the pattern is established and a fourth instrument would cost a credit
+   to confirm what three already say.
+2. **The live question is the base's own thinness on BTC and ETH.** PF 1.053 on 241 trades and 1.029
+   on 316 are barely-positive results carrying every filter this lab has built. **Whether the base
+   has an edge at all on its home instrument is a bigger question than any filter on top of it**, and
+   it has never been asked directly.
+3. **Do not stack further terms on the FVG base** — unchanged from v67/v68/v69/v70.
+4. **Do not combine v56 and v62** — unchanged; ~10–15 trades, unsplittable.
+5. **VOCABULARY.md's Type 1 (3M candle anatomy) and the swing rule remain undecoded** across all ten
+   captured transcripts, and the complete faithful indicator — the workstream's stated outstanding
+   deliverable — cannot be finished without them. **This is now the longest-standing open item in the
+   lab and no amount of backtesting will close it.**
+
+## SOURCES
+- FinanceFeeds, *Supply and Demand Zones in Crypto Trading: Complete Guide* — https://financefeeds.com/supply-and-demand-zones-in-crypto-trading/
+- Mudrex Learn, *Supply and Demand Zones in Crypto Trading* — https://mudrex.com/learn/supply-and-demand-zones-in-crypto-trading/
+- BingX Academy, *Mastering Supply and Demand Zones in Cryptocurrency Trading* — https://bingx.com/en/learn/supply-demand-zones
+- Bybit Learn, *Supply and Demand Zones: Tips For Successful Trading* — https://learn.bybit.com/en/strategies/supply-and-demand-zones-strategies
