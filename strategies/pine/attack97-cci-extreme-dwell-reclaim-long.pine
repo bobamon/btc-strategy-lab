@@ -1,0 +1,174 @@
+//@version=6
+// BTC ATTACK 97 - CCI NEGATIVE-EXTREME DWELL RECLAIM, LONG. A GENUINELY NEW MECHANISM PER ATTACK 96's
+// QUEUE ITEM 1 (remaining untried indicator families after 96: ta.sar, ta.cci, ta.stoch, ta.tsi, ta.wpr,
+// ta.iii, ta.wvad, ta.percentrank -- ta.macd consumed at 96, ta.cog at 94/95, ta.wad at 93, ta.linreg at
+// 91/92, ta.supertrend at 89/90). Attack 96's own queue recommended ta.cci or ta.stoch specifically, both
+// bounded/scale-normalized oscillators, with a dwell-or-persistence gate analogous to Attack 96's
+// dwellBars (a bare crossover with no persistence requirement is already implicitly rejected by Attack 57,
+// HARD LESSON 8's fourth confirmation). This build uses ta.cci, listed first in that recommendation.
+//
+// The stored scheduled prompt again asks to "build Attack 37's filter stack," describing a board state
+// more than ninety attacks stale. The docs override it, again, per the prompt's own standing instruction:
+// Attack 37 was closed on cost by Attack 41; the OBV-divergence stack (66/68/82/83) is CLOSED at three
+// terms (board's strongest both-halves candidate, PF 1.61044869/1.15365198, 88/79 trades); SuperTrend
+// (89/90), linreg-channel (91/92), Williams A/D (93), COG trough-turn (94/95, untestable at n=1/n=2) and
+// MACD zero-line regime flip (96, H1 passed/H2 failed) are all discarded, untestable-and-shelved, or
+// consumed. Numbering continues after Attack 96, the last entry on the board.
+//
+// ==================== THE CLAIM UNDER TEST ====================
+// ta.cci is NOT a bounded 0-100 rank oscillator like RSI (51/52, price gain/loss smoothing only) or MFI
+// (79, volume-weighted flow, also bounded 0-100). CCI measures how far a bar's typical price sits from its
+// own N-bar moving average, normalized by that window's own mean absolute deviation (scaled by Lambert's
+// constant 0.015 so that roughly 70-80% of readings fall inside +/-100 under a Gaussian assumption) -- it
+// is UNBOUNDED, closer to a rolling z-score than a rank. That means the same -100 threshold represents a
+// comparable statistical rarity (a genuinely unusual downside deviation from the recent mean) whether BTC
+// is at $20k or $100k, without HARD LESSON 58's non-stationary-absolute-price-threshold problem, because
+// the normalization is against the instrument's own recent dispersion, not an absolute price level.
+// The claim: CCI DWELLING below -100 for a sustained stretch (not a single instantaneous poke, which fires
+// on every noise spike the same way a bare RSI/MFI cross would) marks a persistent, statistically unusual
+// downside deviation exhausting itself; the subsequent cross back above -100 marks the reclaim and a
+// tradeable continuation. This is a single-point trigger (crossUp of a fixed level after a measured dwell),
+// not a two-confirmed-pivot comparison -- Attack 80 already showed the two-pivot shape is not a
+// near-guarantee either (it failed via the inverted-payoff shape), so per Attack 80's own queue item 7 this
+// candidate is argued from the mechanism (CCI's magnitude/z-score property vs. RSI/MFI's bounded rank), not
+// chosen by structural shape alone. Distinct from every prior oscillator build: RSI (51/52 divergence, 64
+// overbought reversal) and MFI (79) are both rank-bounded with no magnitude information beyond their 0-100
+// range; MACD (96) is a difference of two EMAs referenced against a fixed zero, not normalized by dispersion
+// at all; COG (94/95) is a zero-lag centre-of-gravity of a fixed window, not a deviation-from-mean
+// construction. Long only this cycle. Pine:
+// `strategies/pine/attack97-cci-extreme-dwell-reclaim-long.pine`.
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS ====================
+// cciVal = ta.cci(close, cciLen). belowCount is a `var int` counter: belowCount := cciVal < cciThresh ?
+// belowCount[1] + 1 : 0 -- a plain historical tally, not a separately-armed/invalidated latch, so HARD
+// LESSON 8's arm-vs-death race does not apply: there is no second event that can kill this state before the
+// trigger reads it, because the state IS the trigger's own precondition (how long cciVal has already sat
+// below the threshold), read one bar before the cross via belowCount[1]. dwellOk = belowCount[1] >=
+// dwellBars, checked ON the crossover bar itself -- safe exactly because dwellOk and crossUp are NOT
+// mutually exclusive on the same bar (unlike the coil/thrust and zone-tap/engulf failures LESSON 8
+// documents): dwellOk describes bars STRICTLY BEFORE the current one (the [1] read), while crossUp
+// describes the transition INTO the current bar, so the two clauses read disjoint bar ranges and can both
+// be true together by construction -- byte-identical safety argument to Attack 96's MACD build, with
+// cciThresh (-100) substituted for MACD's zero reference. crossUp = ta.crossover(cciVal, cciThresh).
+// armEvent = crossUp and dwellOk and flat -> immediate entry, no separate arm/confirm-later-bar split (the
+// trigger IS the arming bar, so no latch object exists for a later bar to invalidate). Stop: STRUCTURAL,
+// ta.lowest(low, lb)[1], the lb-bar swing low frozen the bar before entry (LESSON 5) -- never the CCI value.
+// R floor: EXCLUSION, not clamping (LESSON 3) -- rawR = close - stopPx must be >= 0.80% of price or the
+// trade is skipped. Target: STRUCTURAL LEVEL, not an R-multiple (HARD LESSON 41) -- ta.highest(high,
+// targetLookback)[1], excluded (not clamped) unless it clears a 1.0 reward:risk floor against the frozen
+// stop.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - EXCLUSION via rBig on rawR = close - stopPx, never clamped to a wider stop.
+//   Stop beyond STRUCTURE (LESSON 5) - stopPx = ta.lowest(low, lb)[1], the lb-bar swing low frozen one bar
+//        before entry, never the CCI value and never the entry bar's own low.
+//   Each leg separately (LESSON 6) - LONG ONLY this cycle; short (CCI crossing back below +100 after a
+//        sustained dwell ABOVE +100, same structural stop/target construction mirrored to the downside) is
+//        the standing structural asymmetry, queued exactly as every prior fresh-mechanism cycle's short.
+//   BINDING (E17) - four independently-shrinking terms: crossUp (the -100 transition itself), dwellOk
+//        (excludes flickers that did not sit below the threshold long enough), rBig (excludes
+//        stop-too-close setups), rrOk (excludes target-too-close setups against the 100-bar structural
+//        high).
+//   REDUNDANCY (E14) - cciVal's SIGN/MAGNITUDE reads a DISPERSION-DEVIATION domain (how far typical price
+//        sits from its own recent mean, normalized by that window's own mean absolute deviation);
+//        belowCount reads a TEMPORAL-PERSISTENCE domain (how long that deviation has held, independent of
+//        the deviation's own magnitude); stopPx reads a PRICE-STRUCTURE domain with zero dependency on CCI;
+//        rBig reads a RISK-GEOMETRY domain; rrOk reads a REWARD-GEOMETRY domain from a longer window
+//        (targetLookback=100 > lb=20). Five independent domains, no restatement of the same information
+//        twice.
+//   LATCH IN SEQUENCE (LESSON 8) - N/A BY CONSTRUCTION, explained above: no arm-now/confirm-later split, so
+//        no latch exists for a subsequent event to invalidate before the trigger reads it. dwellOk and
+//        crossUp read disjoint bar ranges ([1]-and-earlier vs. the current bar's transition), so they
+//        cannot be mutually exclusive the way a same-bar coil+thrust or zone-tap+engulf conjunction can be.
+//   OCCUPANCY (LESSONS 24/28/29) - `flat` (strategy.position_size == 0) gates entry so a live position can
+//        never re-enter on a later crossover before the current trade closes.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity, single entry id "L", no partials, no scale-outs;
+//        expect totalTrades == unique entries, cascadeRatio 1, maxCascadeDepth 1.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4): No prior attack has plotted CCI on this
+// engine. CCI(20) is a fast, noisy oscillator that normally mean-reverts around zero within a handful of
+// bars, so an instantaneous cross below -100 is expected to be frequent (plausibly comparable to or above
+// Attack 96's pre-dwell MACD-sign-cross frequency), but SUSTAINING 20 consecutive bars below -100 (dwellOk)
+// is a much more demanding persistence bar than MACD's sign-dwell, because CCI's own construction actively
+// pulls it back toward zero as the moving-average/deviation window rolls forward, unlike MACD's slower
+// EMA difference which can sit on one side of zero for an extended trend. Anchored against Attack 96's
+// post-dwell count (310 on H1) but expected LOWER given CCI's faster mean-reversion tendency working
+// against a 20-bar dwell requirement. Registered estimate: **30-200 trades per half**, wide band and low
+// confidence since no prior CCI construction exists on this board to anchor against directly.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17). BARE MECHANISM, H1 ONLY (the never-tuned pre-2024 half,
+// per the kill rule; credits checked at 250-500 tier -> one run authorized this cycle):
+//   * H1 ABOVE 1.0 AND TRADES INSIDE ~30-350 -> the CCI extreme-dwell-reclaim thesis has a real bare edge
+//     at a workable frequency; queue an H2 run before any filter work (the standard Attack 37/91/96 all
+//     required -- both halves before a stack is earned).
+//   * H1 ABOVE 1.0 BUT TRADES FAR OUTSIDE ~30-350 -> report which direction and by how much; a follow-up
+//     would retune dwellBars toward the band, not add a filter yet.
+//   * TRADES UNDER ~30 -> UNTESTABLE per LESSON 12's floor; no ratio quoted, no H2 run.
+//   * H1 BELOW 1.0 -> DISCARDED by the kill rule immediately. No H2 run, no filter rescue. ta.cci becomes a
+//     consumed indicator family alongside ta.macd (96), ta.wad (93), ta.linreg (91/92) and ta.supertrend
+//     (89/90).
+//   * A MAJORITY WIN RATE WITH ratioAvgWinLoss WELL BELOW 1.0 -> HARD LESSON 53's inverted-payoff shape;
+//     report it as that, and compute the breakeven win rate (1/(1+payoff)) before calling it an edge.
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside net and max drawdown
+//   (LESSONS 36/39 and the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack97 CCI Extreme-Dwell Reclaim Long", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+cciLen         = input.int(20, "CCI length")
+cciThresh      = input.float(-100.0, "CCI extreme dwell threshold")
+dwellBars      = input.int(20, "Min consecutive bars CCI must be below threshold before the cross")
+lb             = input.int(20, "Structural swing lookback (bars)")
+targetLookback = input.int(100, "Structural target lookback (bars)")
+minRpct        = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+minRR          = input.float(1.0, "Min reward:risk from the structural target (exclusion floor)")
+maxBars        = input.int(192, "Max bars in trade")
+
+cciVal = ta.cci(close, cciLen)
+
+var int belowCount = 0
+belowCount := cciVal < cciThresh ? belowCount[1] + 1 : 0
+
+crossUp = ta.crossover(cciVal, cciThresh)
+dwellOk = belowCount[1] >= dwellBars
+
+flat = strategy.position_size == 0
+
+armEvent = crossUp and dwellOk and flat
+
+stopPx = ta.lowest(low, lb)[1]
+rawR   = close - stopPx
+minR   = close * minRpct / 100
+rBig   = rawR >= minR
+
+targetPx = ta.highest(high, targetLookback)[1]
+rrOk     = (targetPx - close) >= rawR * minRR
+
+goLong = armEvent and rBig and rrOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if goLong
+    strategy.entry("L", strategy.long)
+    slPx   := stopPx
+    tpPx   := targetPx
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(cciVal, title="CCI")
+plot(belowCount, title="BelowThreshDwellCount")

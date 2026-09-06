@@ -9337,3 +9337,128 @@ remain standing both-halves candidates. The remaining untried families are `ta.s
 6. **This session cannot continue the new-engine cross-sectional track (Attacks 84-86)** — no
    `backtest-lab`/`sweep_backtest` tool is available here, unaffected by this cycle.
 6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+
+---
+
+# ATTACK 97 — CCI NEGATIVE-EXTREME DWELL RECLAIM, LONG. A GENUINELY NEW MECHANISM PER ATTACK 96'S QUEUE ITEM 1. UNTESTABLE AT N=3 — THE BIGGEST FREQUENCY MISS THIS BOARD HAS RECORDED.
+
+The stored scheduled prompt again asks to "build Attack 37's filter stack," describing a board state more
+than ninety attacks stale. **The docs override it, again**, per the prompt's own standing instruction:
+Attack 37 was closed on cost by Attack 41; the OBV-divergence stack (66/68/82/83) is CLOSED at three terms
+(board's strongest both-halves candidate, PF 1.61044869/1.15365198, 88/79 trades); SuperTrend (89/90),
+linreg-channel (91/92), Williams A/D (93), COG trough-turn (94/95, untestable at n=1/n=2) and MACD
+zero-line regime flip (96, H1 passed/H2 failed) are all discarded, shelved, or consumed. Attack 96's queue
+recommended `ta.cci` or `ta.stoch` specifically, with a dwell-or-persistence gate analogous to its own
+`dwellBars`. This cycle used `ta.cci`, listed first in that recommendation. Numbering continues after
+Attack 96, the last entry on the board.
+
+## THE CLAIM
+
+`ta.cci` is not a bounded 0-100 rank oscillator like RSI (51/52) or MFI (79) — it measures how far typical
+price sits from its own N-bar moving average, normalized by that window's own mean absolute deviation, so
+it is unbounded and closer to a rolling z-score than a percentile rank. A DWELL below -100 for at least 20
+consecutive bars (not a single instantaneous poke) should mark a persistent, statistically unusual downside
+deviation exhausting itself; the cross back above -100 marks the reclaim. Argued from the mechanism (CCI's
+magnitude/deviation property vs. RSI/MFI's bounded rank), not from structural shape, per Attack 80's finding
+that a two-confirmed-pivot shape is not a near-guarantee either. Pine:
+`strategies/pine/attack97-cci-extreme-dwell-reclaim-long.pine`.
+
+## AUDIT (one line per leg, template copied byte-for-byte from Attack 96's proven-safe dwell/cross shape)
+
+R >= 0.8% (LESSON 3) — EXCLUSION via `rBig` on `rawR = close - stopPx`, never clamped. Stop beyond
+STRUCTURE (LESSON 5) — `stopPx = ta.lowest(low, lb)[1]`, the 20-bar swing low frozen one bar before entry,
+never the CCI value. Each leg separately (LESSON 6) — LONG ONLY; short (CCI crossing back below +100 after
+a sustained dwell above +100) is the standing structural asymmetry, queued alongside every prior
+fresh-mechanism cycle's short. BINDING (E17) — four independently-shrinking terms: `crossUp`, `dwellOk`,
+`rBig`, `rrOk`. REDUNDANCY (E14) — five independent domains: dispersion-deviation (CCI itself),
+temporal-persistence (`belowCount`), price-structure (`stopPx`), risk-geometry (`rBig`), reward-geometry
+(`rrOk`, 100-bar window vs. 20-bar stop). LATCH IN SEQUENCE (LESSON 8) — N/A BY CONSTRUCTION, identical
+argument to Attack 96: `dwellOk` reads `belowCount[1]` (strictly earlier bars), `crossUp` reads the
+transition into the current bar — disjoint bar ranges, cannot be mutually exclusive. CASCADE (HARD LESSON
+42/43) — LONG at 100% equity, single entry id "L"; `cascadeRatio` 1, `maxCascadeDepth` 1, 3 total rows, 3
+unique entries, confirmed. SL/TP FIXED AT ENTRY, no trailing, no martingale.
+
+## FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4)
+
+No prior attack has plotted CCI on this engine. Registered estimate: **30-200 trades per half**, reasoned
+as lower than Attack 96's post-dwell 310 because CCI(20) is a faster, more actively mean-reverting
+oscillator than MACD's EMA difference, so a 20-bar continuous dwell below -100 was expected to be a
+demanding but still-clearable bar.
+
+## OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17)
+
+* H1 above 1.0 and trades inside ~30-350 → real bare edge at a workable frequency; queue an H2 run.
+* H1 above 1.0 but trades far outside the band → report the miss direction; retune `dwellBars`, not add a
+  filter.
+* Trades under ~30 → UNTESTABLE per LESSON 12's floor; no ratio quoted, no H2 run.
+* H1 below 1.0 → DISCARDED by the kill rule immediately; `ta.cci` becomes consumed.
+
+## RESULT — H1 ONLY (474 credits at `get_credits`, 250-500 tier → one run authorized, pre-2024 half only)
+
+| Metric | Attack 97a (H1, 2022-01-01 → 2024-06-08) |
+|---|---|
+| Trades | **3** — three orders of magnitude short of the registered 30-200 band |
+| Win rate | 0% (0W / 3L) |
+| Profit factor | **0** (no winners at all) |
+| Net return | -5.34588046% |
+| Max drawdown | 7.51839324% |
+| Avg loser | -$178.20 |
+| Largest loss | -$244.08 |
+| Commission paid | $28.99 |
+| Avg bars in trade | 10.67 |
+
+## THE VERDICT — UNTESTABLE, THE BIGGEST FREQUENCY MISS THIS BOARD HAS RECORDED
+
+**3 trades is three orders of magnitude short of LESSON 12's ~30-trade floor.** No ratio is quotable; PF 0
+is not evidence of a negative edge at this sample, it is evidence of no sample. All three trades lost, but
+n=3 cannot distinguish a genuine negative edge from noise — this is the same "untestable" verdict as Attack
+94 (n=1) and Attack 95 (n=2), now on a bounded-ish oscillator rather than a cumulative or self-relative
+construction, and the worst frequency miss of the three relative to its own pre-registered band (94/95 were
+single-digit against an admittedly low-confidence estimate; this one missed a 30-200 band by roughly 10x
+at the low end).
+
+**Root cause.** Requiring `ta.cci(20)` to sit continuously below -100 for 20 consecutive bars is far more
+restrictive than the pre-registration reasoned. CCI is actively mean-reverting by construction — the same
+rolling window that computes the deviation also pulls the statistic back toward zero as it rolls forward
+bar by bar, unlike MACD's slower EMA difference (Attack 96), which can sit on one side of zero through an
+entire multi-week trend because nothing in its construction actively restores it toward zero. A 20-bar
+unbroken stay below -100 on a 20-length CCI is close to a coincidence of the dwell window matching the
+indicator's own window, which this pre-registration did not weight heavily enough.
+
+**`ta.cci` is NOT ruled out by this result.** Only this specific pairing (`cciLen`=20, `dwellBars`=20,
+threshold -100) is shown to be far too restrictive. A future attempt should separate `dwellBars` from
+`cciLen` (e.g. a shorter dwell like 5-8 bars, or a longer `cciLen` so the extreme zone itself is entered
+less often but stays occupied longer once entered), before concluding anything about CCI's underlying
+claim.
+
+## WHAT THIS SETTLES
+
+**Attack 97 (CCI negative-extreme dwell reclaim, long) is UNTESTABLE AS BUILT, not discarded and not
+`ta.cci` consumed.** No credits remain this cycle (one run authorized at the 250-500 band, one run spent,
+474 → ~473 balance). The next cycle inherits an explicit choice: retry `ta.cci` with `dwellBars` separated
+from `cciLen`, or spend the fresh-mechanism slot on `ta.stoch` (Attack 96's other named recommendation) or
+another untried family, leaving the CCI retry queued — the same shape of choice Attack 94/95 faced with
+COG, where the board recommends NOT immediately re-spending a second credit on the same construction
+without first fixing the diagnosed bottleneck.
+
+## QUEUE
+
+1. **A CCI retry is not automatically warranted.** Per the Attack 94/95 precedent (two consecutive
+   untestable results on one skeleton was the trigger to deprioritize a third try), one untestable result
+   here should first be weighed against spending the next fresh-mechanism slot on `ta.stoch` — Attack 96's
+   other named recommendation, genuinely bounded (0-100) rather than CCI's unbounded deviation shape, and
+   therefore not subject to the same "dwell window collides with indicator window" failure mode diagnosed
+   above (Stochastic's %K is a range-position ratio, not a deviation magnitude that actively mean-reverts
+   the same way).
+2. **If CCI is retried instead**, separate `dwellBars` from `cciLen` (shorter dwell, e.g. 5-8 bars, against
+   the same `cciLen`=20) rather than re-running the byte-identical construction.
+3. **Remaining untried families after this cycle**: `ta.sar`, `ta.stoch`, `ta.tsi`, `ta.wpr`, `ta.iii`,
+   `ta.wvad`, `ta.percentrank` (`ta.cci` not consumed, only this pairing shown untestable).
+4. **Attack 83 remains the board's strongest both-halves candidate** (PF 1.61044869/1.15365198 on 88/79
+   trades, DD 11.08%/10.76%), unaffected by this cycle.
+5. **Attack 46 (long) remains a candidate alongside Attack 83**, unaffected by this cycle.
+6. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if that
+   family is revisited before another fresh mechanism.
+7. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+8. **This session cannot continue the new-engine cross-sectional track (Attacks 84-86)** — no
+   `backtest-lab`/`sweep_backtest` tool is available here, unaffected by this cycle.

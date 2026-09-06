@@ -3871,5 +3871,55 @@
       "verifiedAt": "2026-09-06T00:00:00Z"
     },
     "verdict": "H2 (2024-06-08 to 2026-09-01, the never-before-tested half for this mechanism, byte-identical Pine source, same saved strategyId, only the date window overridden) fails the kill rule: PF 0.9843619, below 1.0, on 275 trades (inside the ~60-350 workable band). Win rate 38.18%, avg winner $248.74, avg loser -$156.08 (payoff 1.594), max drawdown 29.47%. H1's PF 1.05863227 did not survive out-of-period. DISCARDED per the pre-registered outcome tree: ta.macd is now consumed, joining ta.linreg (91/92), ta.supertrend (89/90) and ta.wad (93) as tested-and-failed indicator families. Only one credit was authorized this cycle (476 at get_credits, the 250-500 tier), spent on this H2 run since H1 already existed -- no second run taken."
+  },
+  {
+    "id": "attack97-cci-extreme-dwell-reclaim-long-h1",
+    "name": "Attack 97: CCI negative-extreme dwell reclaim LONG (bare, new mechanism) -- pre-2024 half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack97-cci-extreme-dwell-reclaim-long.pine",
+    "description": "Genuinely new mechanism per Attack 96's queue item 1 (untried indicator families: ta.sar, ta.cci, ta.stoch, ta.tsi, ta.wpr, ta.iii, ta.wvad, ta.percentrank). Claim: ta.cci(20), an unbounded deviation-from-mean oscillator (unlike RSI/MFI's bounded 0-100 rank), dwelling below -100 for at least 20 consecutive bars then crossing back above -100 marks exhaustion of a statistically unusual downside deviation and a tradeable reclaim. Long only, bare mechanism, no filter stack. Stop: 20-bar structural swing low frozen one bar before entry. Target: 100-bar structural high, excluded (not clamped) below a 1.0 reward:risk floor. R floor 0.8% of price, excluded not clamped. Max 192 bars in trade.",
+    "metrics": {
+      "netProfitPct": -5.34588046,
+      "profitFactor": 0,
+      "maxDrawdownPct": 7.51839324,
+      "totalTrades": 3,
+      "winningTrades": 0,
+      "losingTrades": 3,
+      "winRatePct": 0,
+      "avgTradePct": -1.78196015,
+      "avgWinningTrade": 0,
+      "avgLosingTrade": -178.196015283333,
+      "ratioAvgWinLoss": 0,
+      "largestWin": 0,
+      "largestLoss": -244.084974,
+      "avgBarsInTrade": 10.66666667,
+      "avgBarsWinning": 0,
+      "avgBarsLosing": 10.66666667,
+      "sharpeRatio": -0.88935925,
+      "sortinoRatio": -0.0177991,
+      "commissionPaid": 28.99854585,
+      "grossProfit": 0,
+      "grossLoss": 534.588045849999,
+      "longTrades": 3,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1TRWPM4DC0WZSP35FAS5RM3",
+      "strategyId": "01M1TRWPT75EW48DS7SZ5VGKJM",
+      "resultId": "01M1TRWPM4QATM1BP7F5JCE3A6",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1TRWPM4QATM1BP7F5JCE3A6",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-06T07:11:22Z"
+    },
+    "verdict": "UNTESTABLE PER LESSON 12's ~30-TRADE FLOOR. Only 3 trades over the full 85,655-bar H1 window (2022-01-01 to 2024-06-08), three orders of magnitude short of the registered 30-200 estimate and short of LESSON 12's own floor -- no ratio is quotable, PF 0 is not a real edge signal at this sample. All 3 trades lost (0% win rate), avg loser -$178.20, max DD 7.52% (small in absolute terms only because so few trades fired). Root cause: requiring CCI(20) to sit continuously below -100 for 20 consecutive bars is far more restrictive than anticipated -- CCI is a fast, actively mean-reverting oscillator (the same rolling window that measures the deviation also pulls the statistic back toward zero as it rolls forward), so sustained 20-bar dwells in extreme territory are rare almost by construction, unlike MACD's slower EMA-difference (Attack 96) which can sit on one side of zero through an entire trend. This is not a kill-rule failure (no defensible PF exists to trigger it) and not an edge finding either way -- ta.cci is NOT ruled out by this result, only this specific dwell-length pairing (cciLen=20, dwellBars=20) is. No H2 run: per the pre-registered outcome tree, trades under ~30 means untestable, no second half spent. One credit spent this cycle (474 balance before the run)."
   }
 ]
