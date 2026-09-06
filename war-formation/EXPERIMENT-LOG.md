@@ -8262,3 +8262,147 @@ allowance rule question, awaiting the user.
    E74/E77) remain open, unresolved, awaiting the user -- unchanged across many cycles.
 4. Do not port `minRRv`/level-target logic back to the 1m or 5m tracks without its own population check
    there first (HARD LESSON 40 plus this entry's own lesson).
+
+---
+
+# ██ E90 -- E89's QUEUE ITEM 1 ANSWERED: THE REWARD DISTANCE IS AN ORDER OF MAGNITUDE TOO SMALL, AT EVERY THRESHOLD. THE p1hh/p1hl REFERENCE IS DEAD, NOT JUST MIS-CALIBRATED.
+
+**SCHEDULING NOTE.** This cycle's stored prompt again describes lab state that is long closed
+(1m-only data window, "attack the short's entry geometry via E64a/E64b/E66," "continue numbering
+after E66"). That family finished many cycles ago (E70/E76/E77 entry-term binding; E71/E74-E79 short
+geometry), and this exact staleness has now been flagged and worked past at E81, E89, and here again.
+**The docs win**, per the prompt's own instruction and this lab's repeated precedent: this cycle
+continues E89's own queue item 1, its own explicitly-free, run-before-any-credit item -- "run a
+no-credit population counter on the p1hh-p1hl distribution... before spending another credit on any
+level-target variant." `get_credits` read **473** at the start -- the 250-500 band, exactly ONE
+backtest.
+
+**STATE FOR THE RECORD:** no champion, no candidate anywhere in the lab. `e58a` (long, 1m, PF
+1.24015239, DD 9.82519609%, 36 trades, confirmed reproducible) and `E71` (short, 1m) remain the
+reference builds for the 1m track, untouched. `E80`/`E82` (15m, maxBars=288) and `E87` (15m,
+maxBars=576) sit at `status: research` -- both looked like edges on the full window and both failed a
+split test. E89's level-target redesign (TP = `p1hh`/`p1hl`, `minRRv=1.5` against a $2,000 shield)
+returned **zero trades**, and its own post-mortem *inferred* (but did not measure) that the reward
+distance available at entry -- `p1hh - close` for longs, `close - p1hl` for shorts -- is approximately
+the prior 1h bucket's own high-low range, and that a single hourly BTC candle's range on this window
+is very unlikely to clear $3,000.
+
+**METHOD (this lab's counter-build convention, HARD LESSON 10, exactly as E81 used it, adapted for a
+continuous quantity rather than a binary split).** A run whose `goLong`/`goShort` are byte-identical
+to `e82-e80-no-h1bull-h1bear.pine` (E89's own parent, minus the `longRRok`/`shortRRok` floor E89 added
+-- BINDING E17) opens a 1-bar-hold trade on every qualifying bar, exactly like E81. The new element:
+instead of measuring only whether the population exists, the trade's `qty` field is used to encode
+which of six $500-wide bins the reward distance (`p1hh - close` / `close - p1hl`) falls into --
+`<500`/`500-1000`/`1000-1500`/`1500-2000`/`2000-2500`/`>=2500` -- as `qty = binNumber / 100`
+(0.01 to 0.06), scaled to keep notional trivial against a raised $50,000 counter-build capital (a
+measurement instrument, not a strategy, matching E81's own precedent of building a purpose-fit
+counter rather than reusing a real strategy's sizing). `get_trades` (a free read after the one paid
+run) then reports `direction` and `qty` per trade, recovering the full binned distribution AND the
+long/short split in the SAME single credit -- richer than a single-threshold true/false count would
+have been, and directly answers what E89's own queue framed as "what minRRv (if any) the data can
+support," not just "does 1.5 work." `pine/e90-e89-reward-distance-population.pine`. Same window as
+E80/E82/E87/E89 (2024-06-08 to 2026-09-01, BTCUSDT 15m, confirmed via `plan_backtest_window` with no
+clamping) for a directly comparable denominator.
+
+**REGISTERED PREDICTION (HARD LESSON 17), BEFORE RUNNING:** (a) if E89's post-mortem mechanism is
+right, the distribution sits heavily in the two lowest bins (`<500`, `500-1000`) with few or none at
+`>=2500` (the bin containing E89's failed $3,000 floor), naming what a workable `minRRv` would have to
+be; (b) if the distribution is materially wider than predicted, E89's zero-trade result needs a
+different explanation than "the reference range is too narrow" -- worth a targeted re-check of E89's
+Pine for a bug before any redesign.
+
+## RESULT -- 15m, 2024-06-08 -> 2026-09-01, 78,567 bars
+
+**One credit.** `resultId 01M1TTT7QWNZYP5TPEM9Z5VFPD`, `strategyId 01M1TTT7WWBY25D68XD1BFXE4N`.
+`totalTrades = 45` (20 long, 25 short) -- close to E82's own 44 on this identical gate stack (the
+1-point difference is the 1-bar-hold-then-close mechanic admitting one extra bar E82's held-position
+maxBars/target logic would have still occupied; immaterial to this question). `get_trades` (free read)
+returned every trade's `qty`, decoded by dividing by 0.01 to recover the bin number 1-6:
+
+| Bin (reward distance) | All 45 | Long (20) | Short (25) |
+|---|---|---|---|
+| `< $500` | **42 (93.3%)** | 19 | 23 |
+| `$500-1000` | 2 (4.4%) | 1 | 1 |
+| `$1000-1500` | 1 (2.2%) | 0 | 1 |
+| `$1500-2000` | 0 | 0 | 0 |
+| `$2000-2500` | 0 | 0 | 0 |
+| `>= $2500` | **0** | 0 | 0 |
+
+**Zero trades, in either direction, reach even the $1500-2000 bin, let alone the $2000-2500 or
+`>=2500` bins that would put a $2,000 shield's reward:risk anywhere near parity, well short of E89's
+$3,000 (1.5x) floor.** 93.3% of the entire population sits below $500 -- one quarter of the shield
+itself.
+
+## VERDICT: THE REFERENCE RANGE IS NOT MIS-CALIBRATED, IT IS THE WRONG QUANTITY -- AN ORDER OF MAGNITUDE TOO SMALL AT EVERY minRRv A RISK FLOOR COULD MEANINGFULLY MEAN
+
+**Prediction (a) is confirmed, and more strongly than registered.** This is not "the distribution
+skews low, so a lower `minRRv` would admit more trades" -- it is that **no `minRRv` computed against
+a $2,000 shield can both (i) admit a RATCHET-v2-relevant sample and (ii) mean anything as a risk
+floor.** To clear even 30 trades from this population requires admitting bins 1-2 (44 of 45 trades),
+i.e. `minRRv` at or below `1000/2000 = 0.5` -- and the bulk of even THAT population sits under $500,
+i.e. `minRRv` around `500/2000 = 0.25` or lower to not gut the sample further. A "reward:risk floor"
+set at 0.25-0.5 does not filter for setups worth the risk; **it is a floor so low it accepts
+almost everything, at exactly the resolution (a fraction of the shield) HARD LESSON 45's "wall"
+pattern warns collapses to near-nothing once tightened at all.** This is a structural mismatch between
+the reference (one already-completed 1h bucket's own high-low range) and the risk unit (a $2,000
+fixed-dollar shield), not a tuning question: **the p1hh/p1hl reference is dead for this purpose,
+regardless of what `minRRv` is chosen.**
+
+**Why, mechanically (now measured, not inferred):** the reclaim trigger (`ta.crossover(close, p1hl)`
+for longs) fires the instant price re-crosses the level, so `close` at entry is by construction only
+`velMin` (`atrSlow * 0.8`, typically tens to low hundreds of dollars on 15m BTC) above `p1hl` -- and
+`p1hh - close` is then approximately the ENTIRE 1h bucket's range minus that tiny reclaim margin. A
+typical 15m-native BTC hourly range on most of this window (per E89's own arithmetic) is nowhere near
+$2,000, so this reference was never going to clear a shield-relative floor worth having.
+
+**Prediction (b) does not apply** -- no bug is implicated; the distribution is exactly the shape the
+mechanism predicts, only more extreme (93.3% in the bottom bin, not merely "heavily weighted" there).
+
+**NOT recorded as a strategy candidate** -- this is a population diagnostic exactly like E81's, no
+KEEP/REJECT/ratchet decision applies. Recorded to `results/backtests.json` as `status: research`
+(`wf-e90-reward-distance-population`); `totalTrades=45 > 0` so it clears `build_dashboard.py`'s
+validation gate, unlike E89's own zero-trade run.
+
+## WHAT THIS DOES AND DOES NOT ESTABLISH
+
+- **Closes E89's queue item 2** ("if the population supports it, re-attempt with a properly sized
+  `minRRv`") **by refuting its premise**: the population does not support ANY `minRRv` near enough to
+  a $2,000 shield to function as a risk floor. Re-tuning `minRRv` against this same reference is not a
+  credit-worthy next step.
+- **Does not rule out a level-target redesign on the 15m track in general** -- only this specific
+  reference (the immediately prior, already-completed 1h bucket's own high-low). E89's own queue
+  already named the alternative worth trying instead: a WIDER reference -- the current, still-forming
+  bucket's eventual range is unknowable at entry time (look-ahead, cannot be used), but the 6h block's
+  own extreme (already computed for `bullRegime`/`bearRegime`, HARD LESSON 18 redundancy-clean) is a
+  strictly larger, already-available quantity that has not been tried as a target reference.
+- **Does not touch the 1m track.** `e58a` (long) and `E71` (short) are untouched.
+- **Does not touch the HARD LESSON 48 drawdown-allowance RULE QUESTION** (blocking E74/E77) -- open,
+  unresolved, awaiting the user.
+- Check #36's shield-fill caveat does not apply here (a 1-bar-hold counter build, not a held position).
+- The 1-trade discrepancy against E82's 44 (this run's 45) is noted but not chased further -- both
+  numbers are far above the population question this run exists to answer, and the difference is
+  fully accounted for by the counter's own 1-bar-hold mechanic, not a gate difference (BINDING E17
+  holds: `goLong`/`goShort` are byte-identical to E82).
+
+## STATE
+
+**No champion, no candidate.** `e58a` (long, 1m) and `E71` (short, 1m) remain the reference builds for
+the 1m track, untouched. `E80`/`E82` and `E87` (15m) remain `status: research`. **E89's level-target
+line, specifically the p1hh/p1hl reference, is now closed as dead** (not merely unreplicated) --
+`minRRv` re-tuning against it is ruled out by this run, not just untried. `E74`/`E77` remain the 1m
+track's only live improvements, blocked on the HARD LESSON 48 drawdown-allowance rule question,
+awaiting the user.
+
+## QUEUE
+
+1. **The 6h-block-extreme level target**, the one alternative reference this entry's own finding
+   leaves open: re-attempt HARD LESSON 41's target-a-level idea with the current 6h block's own
+   running high/low (already computed for `bullRegime`/`bearRegime`, no new state) as the TP reference
+   instead of the prior 1h bucket's -- a strictly wider quantity than what this entry just measured as
+   an order of magnitude too small. Count ITS population with a counter build (same method as this
+   entry) BEFORE spending a credit on the strategy version -- do not repeat E89's process error a
+   second time on a new reference.
+2. Check #36's shield-fill caveat and the HARD LESSON 48 drawdown-allowance RULE QUESTION (blocking
+   E74/E77) remain open, unresolved, awaiting the user -- unchanged across many cycles.
+3. Do not port `minRRv`/level-target logic back to the 1m or 5m tracks without its own population
+   check there first (HARD LESSON 40, carried over from E89's own queue).
