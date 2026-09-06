@@ -6905,4 +6905,81 @@ not a demonstrated method**, and the record should say so wherever it is cited.
    FVG gate; if ETH is breakeven, the gate may be selecting a BTC-only regularity. The clean test is
    v37 (ungraded) on ETH — if it is *also* ~0.98, the instrument is the problem; if it is worse, the
    FVG gate is still adding something on ETH too.
+
+---
+
+# ██ v68 — QUEUE ITEM 3 TAKEN: v37 (UNGRADED) ON ETH. THE INSTRUMENT IS THE PROBLEM, NOT THE FVG GATE (2026-09-06)
+
+**The scheduled prompt fired again as the identical v37/v53 snapshot** — "QUEUE ITEM 1" (implement the
+12H/24H bias gate) and "QUEUE ITEM 2" (resolve the cascade signature), both closed since v54–v61
+(bias gate: HARD LESSON 32/45, ratcheted on both legs at v54/v57/v60; cascade: HARD LESSON 34/35/50,
+the margin-liquidation unwind, resolved for zero credits and reconfirmed clean on every long-leg build
+since including this one). Per "THE DOCS WIN over this prompt," neither is repeated. The prompt's
+"continue numbering after v53" is likewise stale — this lab is at v67 on disk; this entry is v68.
+
+**`git pull --rebase origin main` at cycle start:** already up to date, no concurrent commits to
+reconcile. **Credits: 466 (250–500 bracket → exactly ONE backtest).**
+
+## THE REAL QUEUE — TAKEN FROM THIS FILE'S OWN LAST ENTRY, NOT THE STALE PROMPT
+
+The live queue (previous entry, above) has three items: (1) stop adding filters to a 40-trade base,
+(2) run v62-fvg on a third/fourth instrument (SOL, BNB), (3) run v37 UNGRADED on ETH to isolate
+whether the champion's failure to generalise (PF 2.04 BTC → 0.978 ETH) is the FVG grading term or the
+instrument itself. With one credit, item 3 was chosen: it is fully specified, directly resolves an
+already-registered ambiguity from the prior cycle, and needs no new data pull (same ETH window already
+proven available: 2021-03-15 → 2026-09-01).
+
+**PRE-REGISTERED OUTCOMES (LESSON 17), stated before running:** if ungraded v37 on ETH is *also*
+~0.98, the instrument is the problem and the FVG gate is exonerated; if it is *worse* than 0.98, the
+FVG gate itself is doing something ETH-specific and harmful.
+
+## THE BUILD AND RUN
+
+Byte-identical `pine/3m-elite-v37-freshness-tight.pine` — no code change at all, only the `symbol`
+parameter — pointed at ETHUSDT on the same full-coverage window already used for v62-fvg's ETH run.
+`resultId 01M1V285RAS76NSNM5CXDN9T6Y`.
+
+| | BTC (v37, full coverage) | BTC (v62-fvg, champion) | **ETH — v37 ungraded (this run)** | ETH — v62-fvg |
+|---|---|---|---|---|
+| Profit factor | 1.0534251 | **2.04354108** | **1.02872954** | 0.97825349 |
+| Trades | 241 | 40 | **316** | 49 |
+| Net | +8.87299247% | +25.61599544% | **+7.98609566%** | -0.8260768% |
+| Max drawdown | 26.97850442% | 4.50890824% | **27.31398997%** | 8.49043491% |
+| Cascade | 1.0 clean | 1.0 clean | **1.0 clean (316/316, depth 1)** | 1.0 clean |
+
+## THE VERDICT: THE PESSIMISTIC BRANCH FIRED — THE INSTRUMENT IS THE PROBLEM
+
+**1.02872954 lands in the same near-breakeven neighbourhood as v62-fvg's own 0.97825349 on ETH — not
+the "worse than 0.98" outcome that would have implicated the FVG gate.** BTC's edge (PF 2.04 graded,
+1.05 ungraded, both well above 1.0) simply does not travel to ETH with or without FVG grading. This is
+a DIAGNOSTIC, not a RATCHET v2 decision — it competes against nothing (different instrument) and does
+not touch the BTC champion.
+
+**But the FVG term is not inert on ETH either — it just isn't fixing PF.** Same ETH window, same
+lineage: grading cuts drawdown by 18.8pp (27.31% → 8.49%) and trade count by 84.5% (316 → 49) for a PF
+that is statistically indistinguishable from ungraded's 1.03. The grading term is doing real
+risk-reduction work on ETH; it just cannot manufacture edge the instrument does not have. This sharpens
+last cycle's caveat rather than replacing it: **v62-fvg is a BTCUSDT PROFIT-FACTOR result specifically
+— its risk-reduction mechanism (fewer, tighter-stopped trades) appears to generalise even where its
+profitability does not.**
+
+## CREDIT ACCOUNTING
+
+One backtest spent, as the 250–500 bracket allows. No further runs this cycle.
+
+## QUEUE
+
+1. Item 2 from the prior entry remains open: run v62-fvg on a third/fourth instrument (SOL, BNB) to
+   distinguish "BTC-specific" from "BTC and ETH happen to differ" — two points is not a distribution.
+2. The short leg has no further single-term lever queued (bias, FVG-grading, cascade/sizing,
+   MA-overextension all closed axes per HARD LESSON 45 ×7) — needs new source material, not another
+   baseline variant.
+3. VOCABULARY.md's Type 1 (3M candle anatomy) and the swing rule remain genuinely undecoded across all
+   ten captured transcripts.
+
+**CHAMPION OF RECORD (LONG): v62-fvg** — unchanged (PF 2.04354108 full coverage, DD 4.50890824%, 40
+trades, BTCUSDT only). **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61(short)** — unchanged (PF
+1.88616546 on the 2022-01-01 window, `passed`; PF 1.01300244 on full coverage, `testing`). **THIS
+CYCLE: no champion change.** v68 (this entry) is a diagnostic on a non-champion instrument, recorded
+with status `testing` in `results/backtests.json`.
 4. The short leg (v60/v61) has never been tested off BTC either.
