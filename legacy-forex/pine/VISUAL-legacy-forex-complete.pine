@@ -6,6 +6,16 @@
 //                ·  v4 2026-09-06 (tick #10, the touch tolerance — FINDING 19)
 //                ·  v5 2026-09-06 (tick #11, the volume gate — FINDING 20)
 //                ·  v6 2026-09-06 (tick #12, market structure / pivLen — FINDING 21)
+//                ·  v7 2026-09-06 (tick #14, trade-resolution instrumentation — FINDING 23)
+//
+// ⚠ v7 ADDS NO RULE AND CHANGES NO DEFAULT. Its signal set and trade record are identical to v6's.
+//   It measures one thing the corpus says should be alarming: HOW LONG A TRADE LASTS RELATIVE TO
+//   THE BAR IT IS SIMULATED ON. In all five NY live streams the target ladder is traversed in
+//   seconds-to-minutes (FINDING 23) — 1R→4R in 3m11s in `video1270175432`, inside the FIRST 5m bar
+//   of the session — while this file's own universe is 5m and 15m. If a trade lives and dies inside
+//   its entry bar, no bar-close simulator can resolve it: the stop/target ordering is unknowable and
+//   the "ambiguous bar books the stop" convention (v2 fix 4) decides the trade record instead of the
+//   market. The new dashboard row and plots make that measurable on one chart instead of argued.
 //
 // ⚠ v6 IS THE FIRST VERSION SINCE v2 WHOSE DEFAULT SIGNAL SET DIFFERS FROM ITS PREDECESSOR'S.
 //   v3, v4 and v5 all shipped their corrections behind switches that default to the old behaviour.
@@ -718,6 +728,21 @@ if dir != 0 and not na(curRprev)
 var int deadRun = 0
 deadRun := dir == 0 ? 0 : (volOK ? 0 : deadRun + 1)
 
+// ── v7: TRADE RESOLUTION vs BAR RESOLUTION (tick #14 — SYSTEM.md FINDING 23) ───────────────────
+// PURE INSTRUMENTATION. Nothing below feeds a signal, an exit or the rolling-R window.
+// The corpus records his ladder being traversed in seconds-to-minutes on every one of the five NY
+// streams. This counts what the simulator actually experiences, in the same units, so the mismatch
+// is a number on the chart rather than an argument in a markdown file.
+var int   barsInTrade   = 0
+var int   lastTradeBars = na
+var float sumTradeBars  = 0.0
+var int   nClosedT      = 0
+var int   nEntriesT     = 0
+var int   nTgtInBarT    = 0
+var int   nBothInBarT   = 0
+barsInTrade := dir == 0 ? 0 : barsInTrade + 1
+tfMins      = timeframe.in_seconds() / 60.0
+
 hitT = dir ==  1 and high >= tgtPx  or dir == -1 and low  <= tgtPx
 hitS = dir ==  1 and low  <= stopPx or dir == -1 and high >= stopPx
 
@@ -744,6 +769,9 @@ if dir != 0 and (hitT or hitS)
     r3 := r2
     r2 := r1
     r1 := math.max(outR, 0)
+    lastTradeBars := barsInTrade                 // v7 instrumentation only
+    sumTradeBars  := sumTradeBars + barsInTrade
+    nClosedT      := nClosedT + 1
     dir := 0
 
 // ── v5: THE VOLUME-DEATH EARLY EXIT (9. 03:22-03:38) ──────────────────────────────────────────
@@ -782,6 +810,9 @@ if volDead
     r3 := r2
     r2 := r1
     r1 := math.max(outR, 0)          // a loss scores 0, exactly as a full stop does (10. 02:56)
+    lastTradeBars := barsInTrade                 // v7 instrumentation only
+    sumTradeBars  := sumTradeBars + barsInTrade
+    nClosedT      := nClosedT + 1
     dir := 0
 
 if dir == 0 and (goLong or goShort)
@@ -796,6 +827,18 @@ if dir == 0 and (goLong or goShort)
     tgtR    := rTargetUse
     tgtPx   := goLong ? entryPx + initR * tgtR : entryPx - initR * tgtR
     tradesToday += 1
+    // v7 instrumentation (tick #14, FINDING 23) — DIAGNOSTIC ONLY, it drives nothing.
+    // Does the ENTRY BAR's own range already span this trade's target, or its target AND its stop?
+    // Entry is taken at that bar's close, so the part of the bar after entry is unknown and this is
+    // NOT a claim the trade would have resolved there. It is a statement about the bar being coarse
+    // relative to the trade's geometry — the exact condition FINDING 23 says the corpus implies is
+    // normal rather than exceptional. Used for exits it would be lookahead; used as a counter it is
+    // the cheapest available test of whether this timeframe can represent his trades at all.
+    barTgt   = goLong ? high >= tgtPx  : low  <= tgtPx
+    barStop  = goLong ? low  <= stopPx : high >= stopPx
+    nEntriesT  := nEntriesT  + 1
+    nTgtInBarT := nTgtInBarT + (barTgt ? 1 : 0)
+    nBothInBarT:= nBothInBarT + (barTgt and barStop ? 1 : 0)
     if showTrade
         lnE := line.new(bar_index, entryPx, bar_index+1, entryPx, color=color.blue,  width=2)
         lnS := line.new(bar_index, stopPx,  bar_index+1, stopPx,  color=color.red,   width=2, style=line.style_dashed)
@@ -831,7 +874,7 @@ bgcolor(inSess and bearStruct     ? color.new(color.red, 94) : na,   title="Bear
 barcolor(useVol and not volOK ? color.new(color.gray, 50) : na,      title="No volume")
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────────────────────
-var table d = table.new(position.top_right, 3, 21, border_width=1, frame_width=1, frame_color=color.gray)
+var table d = table.new(position.top_right, 3, 22, border_width=1, frame_width=1, frame_color=color.gray)
 f_row(t, r, k, ok, v) =>
     table.cell(t, 0, r, k, text_color=color.white,  text_size=size.small, bgcolor=color.new(color.black,20), text_halign=text.align_left)
     table.cell(t, 1, r, ok ? "✔" : "✖", text_color=ok ? color.lime : color.red, text_size=size.small, bgcolor=color.new(color.black,20))
@@ -916,6 +959,16 @@ if showDash and barstate.islast
                                                     : "1:" + str.tostring(rTargetUse, "#") + "  fixed (adaptive rule off)"))
     f_row(d, 18, "Trail rule", true,      trailMode + "   (source is ambiguous — see header)")
     f_row(d, 19, "Trades today", underCap, str.tostring(tradesToday) + " / " + str.tostring(maxTrades) + "  (cap counts across NQ+YM)")
+    // v7 instrumentation (tick #14, FINDING 23). The corpus traverses 1R→4R in ~3 minutes on his
+    // showcased days. This row says what that costs on THIS bar size. "✖" means at least one entry
+    // bar already spanned both the target and the stop — a trade this timeframe cannot order, whose
+    // outcome is then decided by v2 fix 4's tie-break convention rather than by price.
+    f_row(d, 20, "Trade resolution", nBothInBarT == 0,
+         (dir != 0 ? str.tostring(barsInTrade) + " bars held (" + str.tostring(barsInTrade * tfMins, "#") + " min)" : "flat")
+         + (nClosedT > 0 ? "  ·  mean " + str.tostring(sumTradeBars / nClosedT, "#.#") + " bars ("
+                           + str.tostring(sumTradeBars / nClosedT * tfMins, "#") + " min) over " + str.tostring(nClosedT) : "")
+         + "  ·  entry bar already spans target " + str.tostring(nTgtInBarT) + "/" + str.tostring(nEntriesT)
+         + ", target AND stop " + str.tostring(nBothInBarT))
 
     // name the FIRST unmet condition, in his own order, so the dashboard says what is blocking
     blocker = not inSess        ? "NO TRADE — outside New York session"
@@ -932,9 +985,9 @@ if showDash and barstate.islast
                     + (volDeadExit and not volOK ? "   [vol dead " + str.tostring(deadRun) + "/" + str.tostring(volDeadBars) + "]" : ""))
       : blocker
     vc = goLong ? color.green : goShort ? color.red : dir != 0 ? color.blue : color.new(color.gray,40)
-    table.cell(d, 0, 20, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
-    table.cell(d, 1, 20, "", bgcolor=vc)
-    table.cell(d, 2, 20, verdict, text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+    table.cell(d, 0, 21, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+    table.cell(d, 1, 21, "", bgcolor=vc)
+    table.cell(d, 2, 21, verdict, text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
 
 alertcondition(goLong,  "Legacy LONG",  "Legacy Forex: LONG — structure bullish, resistance broken, volume present")
 alertcondition(goShort, "Legacy SHORT", "Legacy Forex: SHORT — structure bearish, support broken, volume present")
@@ -979,3 +1032,11 @@ plot(ageOldMins,           "Oldest defining pivot (minutes ago)", display=displa
 plot(nPreSess,             "Defining pivots formed pre-open (0-4)", display=display.data_window)
 plot(bullRaw ? 1 : 0,      "BullStruct before invalidation (v1-v5)", display=display.data_window)
 plot(bearRaw ? 1 : 0,      "BearStruct before invalidation (v1-v5)", display=display.data_window)
+// v7 instrumentation — FINDING 23. The corpus's holding period is minutes; this bar size is
+// `tfMins` minutes. These six settle whether a 5m/15m simulator can represent his trade at all.
+plot(barsInTrade,                  "Bars in trade",                        display=display.data_window)
+plot(barsInTrade * tfMins,         "Minutes in trade",                     display=display.data_window)
+plot(lastTradeBars,                "Bars in LAST closed trade",            display=display.data_window)
+plot(nClosedT > 0 ? sumTradeBars / nClosedT : na, "Mean bars per closed trade", display=display.data_window)
+plot(nTgtInBarT,                   "Entry bars already spanning target",   display=display.data_window)
+plot(nBothInBarT,                  "Entry bars spanning target AND stop",  display=display.data_window)

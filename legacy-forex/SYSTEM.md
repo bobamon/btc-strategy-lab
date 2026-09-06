@@ -2189,3 +2189,206 @@ runs on.
 - **It does not reopen the symbol hunt** (closed by exhaustion, tick #7) and it does not license a
   Legacy Forex backtest on trader-dev (forbidden, tick #2 FINDING 4).
 - **No past *result* changes**, because there are none. One past *lead* is corrected (22.6).
+
+---
+
+# ██ TICK #14, 2026-09-06 — HIS TRADES LAST MINUTES, ON A SYSTEM WHOSE ONLY TIMEFRAMES ARE 5m AND 15m
+
+**Zero credits. No backtest, no `plan_backtest_window`, no engine call of any kind.** Pure decode of
+transcripts already committed here, plus one instrumentation-only change to the deliverable (v7).
+
+## ██ FINDING 23 — THE HOLDING PERIOD IS SECONDS-TO-MINUTES, AND THAT BREAKS TWO THINGS THIS REPO HAS WRITTEN DOWN
+
+Thirteen ticks have decoded **what** he does. Not one has asked **how long a trade takes**. The five
+NY live streams answer it directly, because he calls each ladder rung out loud as it prints and the
+transcripts carry timestamps.
+
+### FIRST, THE CLOCK IS TRUSTWORTHY ON AT LEAST ONE FILE — CHECKED, NOT ASSUMED
+
+`video1270175432` contains two independent countdown anchors to the 09:30 ET open:
+
+> [00:03] *"We have **two minutes left** on market opens"*  → open at ≈ [02:03]
+> [01:50] *"**12 seconds left** be ready be ready"*         → open at ≈ [02:02]
+
+**107 seconds of stream elapse for 108 seconds of his countdown.** The two anchors agree to one
+second, and the file's duration header (494 s) matches its last timestamp ([08:12]). That is strong
+evidence this transcript is continuous real time over that span, not an edited highlight reel. **This
+check was run before any interval below was quoted**, and it has only been passed by this one file —
+the other four have no open anchor and their continuity is assumed, not established.
+
+### THE LADDER, TIMED
+
+| stream | instrument | callouts | elapsed |
+|---|---|---|---|
+| `video1270175432` | US30 | [02:24] *"I'm selling us 30 on that entry zone"* → [02:27] T1 → [03:23] T2 → [03:45] T3 → [05:35] T4 | **T1→T4 = 3m08s**; T4 lands **3m32s after the 09:30 open** |
+| `video1038794732` | NQ | [01:04] *"I'm buying Nasdaq"* → [01:16] *"target one target two"* → [06:09] *"target four for Nasdaq"* | entry→T2 = **12s**; entry→T4 = **5m05s** |
+| `video1855004398` | NQ+YM | [02:37] *"here's our two little positions"* → [03:41] *"target one hit for both"* → [05:29] T2 → [06:07] T3 | **T1→T3 = 2m26s** |
+| `video1979454677` | US30 | [03:05] T1 → [03:28] T2 | **23s**; second trade [11:00] T1 → [12:11] T2 = **71s** |
+| `video1263885792` | NQ+YM | [03:33] T2 → [03:58] *"target for smashed target to smashed"* → [04:33] *"Quick target for"* | T2→T4 inside **25s** (instrument attribution ambiguous — used qualitatively only) |
+
+**Every rung-to-rung interval in the corpus is between ~12 seconds and ~110 seconds. No full ladder
+traversal exceeds ~5 minutes.**
+
+### AND HIS OWN COURSE SAYS SO — IT WAS IN A MODULE THIS FILE ALREADY CITES
+
+`5._ANALYZING_TIME_FRAMES` is one of the eight numbered Mamba modules this spec was built from:
+
+> [00:27] *"we need to **get in** and we need to **get out**"*
+> [00:36] *"hence why **we scalp**"* … [00:45] *"**Scalping** is the fastest and most effective way of
+> trading and it's the **backbone of how I've created everything here**"*
+> [01:30] *"We're here for **fast** … we're here to **get in and get the hell out**"*
+> [02:18] *"if we're shorting this right here **super quick super scalpy**"*
+
+The word *"scalp"* is load-bearing and it was read, for thirteen ticks, as a statement about
+*timeframe* rather than about *duration*. It is both.
+
+### CONSEQUENCE 1 — FINDING 13's EPPS PREMISE IS WITHDRAWN, AND ITS DIRECTION INVERTS
+
+FINDING 13 (tick #6) wrote, as the reason not to measure ρ on 5m bars:
+
+> *"his positions are held for **hours inside one RTH session**, scaling out along a target ladder.
+> The independence question therefore lives at the **holding-period horizon**, not the bar horizon."*
+
+**That premise is false and the corpus contradicts it on every day it records.** Nobody measured it;
+it was inferred from "he holds through a scale-out", and a scale-out that completes in three minutes
+is still a scale-out.
+
+The correction runs the other way from the warning. Epps says measured correlation **falls as
+sampling frequency rises**. If the true hold is ~3 minutes, then **5m bar returns are sampled at or
+slightly *coarser* than the holding horizon**, so a 5m ρ is not systematically *too low* — if
+anything it is marginally *too high*. The specific "easy dishonest pass" the trap named (quote a
+short-horizon ρ to clear a pooling threshold) is **harder** at his real hold, not easier.
+
+**What does NOT change: the pooling ruling itself.** Tick #7 already established that the verdict
+rests on the bottom of the band, `T = 26 < 30`, where `N_eff ≤ T` holds at *any* `p` and *any* `ρ`.
+The ruling never needed the correlation and does not need it now. **NQ and YM still may not be
+pooled to clear the sample floor.** What is withdrawn is a stated reason attached to a subsidiary
+warning, and the general rule the warning encodes — *specify the horizon in writing when you state a
+threshold* — is sound and stands. It was the factual input to it that was never checked.
+
+### CONSEQUENCE 2 — A 5m/15m BAR CANNOT RESOLVE THE TRADE THE SYSTEM TAKES
+
+This is the larger one and it is new to this workstream.
+
+| | | |
+|---|---|---|
+| His stated universe | *"we have to go five minute. We have to go 15 minute"* (`5.` [01:00]) | 5m and 15m only |
+| Observed trade duration | entry → 4R in **3m08s–5m05s** | **inside one 5m bar**, a fraction of a 15m bar |
+
+An OHLC bar records four prices and **no ordering between them**. If entry, stop and target all fall
+inside a single bar, no bar-close simulator can say which came first. This file's own convention for
+that case — v2 fix 4, *"an ambiguous bar books the STOP"* — was introduced as a conservative tie-break
+for an edge case. **On this evidence it is not an edge case; it is close to the normal case, and it
+would decide the trade record instead of the market deciding it.**
+
+It is worse than that in the deliverable as written: `hitT`/`hitS` are evaluated **before** the entry
+block, so `dir` is still 0 on the entry bar and **the earliest exit any version can take is the bar
+after entry**. A trade that lives and dies inside its entry bar is invisible to the simulator, which
+then exits it on the following bar at whatever that bar happens to do — **a different trade from the
+one he took.**
+
+**This is a fourth, independent reason a faithful backtest is unavailable here, and it is the only one
+this project could have fixed and cannot.** The other three are external — the engine deadlock
+(tick #3), the vendor's ~60-day index retention (tick #6), the sample floor (ticks #5–#7). This one is
+intrinsic to bar resolution: **a deeper 5m history would not fix it.** Resolving his trade needs 1m or
+tick data, and 1m is a timeframe he says he uses *"very rare[ly]"* (`5.` [01:06]) — so a 1m simulation
+would be faithful to his *execution* while unfaithful to his *analysis*, which is its own problem, and
+is stated here rather than resolved.
+
+**The distinction that makes it coherent:** 5m/15m is where he reads **structure, levels and the
+break**. It is not the resolution his **trade** occupies. Thirteen ticks read the timeframe statement
+as covering both. It covers one.
+
+### WHAT v7 DOES ABOUT IT — MEASURES, ASSERTS NOTHING
+
+Consistent with every audit tick in this file: the finding is instrumented, not acted on. v7 adds
+**no rule and changes no default; its signal set and trade record are identical to v6's.**
+
+- A **`Trade resolution`** dashboard row: bars held and minutes held on the live trade, the mean over
+  all closed trades in both units, and two counters — how many entry bars' own ranges already spanned
+  the trade's **target**, and how many spanned **target AND stop**. The row shows ✖ the moment the
+  second counter is non-zero, i.e. the moment the chart contains a trade this timeframe cannot order.
+- Six data-window plots carrying the same quantities.
+- **The entry-bar counters are diagnostics and drive nothing.** Entry is taken at that bar's close, so
+  the part of the bar after entry is unknown; a spanned range is evidence the *bar is coarse relative
+  to the trade's geometry*, never a claim the trade resolved there. Used for an exit it would be
+  lookahead. Used as a counter it is the cheapest test available of whether this timeframe can
+  represent his method at all.
+- Note when reading it: `barsInTrade` counts bars **after** entry, so a trade closed on the first
+  subsequent bar reads **1**, and a trade that in reality died inside its entry bar reads **1** as
+  well. **A modal value of 1 is therefore the alarm, not the healthy case.**
+
+---
+
+## ██ FINDING 24 — FOUR SMALLER DECODES FROM THE SAME PASS
+
+### 24.1 — "SIX TARGETS HIT TODAY" IS A SUM OF RUNGS ACROSS THE BOOK, NOT A TRADE COUNT
+
+> `video1038794732` [06:09] / [08:37] *"**target two for us 30 target four for Nasdaq**"*
+> [07:17] *"I mean **six targets hit today**. We hit **eight targets** yesterday"*
+
+**4 + 2 = 6.** The arithmetic closes inside one transcript, three callouts apart. So *"targets hit"*
+counts **R rungs summed across both instruments**, and a *"six-target day"* is **two trades reaching
+4R and 2R** — not six trades.
+
+Nobody in this workstream has made that mistake, but FINDING 9/11's trade rate is the only
+quantitative claim this workstream owns, and reading his *"targets"* boasts as a trade count would
+inflate it by roughly 3×. Nailed down now so it cannot be made later. **His "14 targets" and "eight
+targets" claims are rung sums and carry no information about trade frequency.**
+
+### 24.2 — THE OBSERVED RUNG CEILING IS 4R. FIVE IS NEVER CONFIRMED.
+
+Across all five NY streams the highest rung **confirmed hit** is **target four**
+(`video1038794732` [06:09]; `video1263885792` [03:58]/[04:33]; `video1270175432` [05:35]). *"Target
+five"* appears exactly once and speculatively — *"looks like it **might even** hit the target five
+because it's still going"* (`video1263885792` [06:27]) — and is never called as hit. His own
+acceptance line is *"I will take a **one to four** all day"* (`video1979454677` [05:29]).
+
+**This is not banked and is not a result.** n is far below the floor, and it is the most favourable
+sample obtainable — five days *he* selected to broadcast while selling prop-firm accounts. But the
+bias runs the flattering way: **a hand-picked showcase that never reaches 5R is weak evidence against
+the top of the stated 1:3–1:5 band**, and it is the only evidence about that band the corpus contains.
+
+### 24.3 — HE RE-ENTERS THE SAME SETUP AFTER A STOP-OUT. NOT IN THIS SPEC.
+
+> `video1038794732` [00:21] *"I had to refresh my liquid account here **if took a loss**"*
+> [00:31] *"Give this a second. **We'll reenter**"* → [01:04] *"All right, **I'm buying Nasdaq**"*
+> [01:09] *"**We can call the first one a loss** if we have to that's fine"* → [01:16] target one, target two
+> [01:51] *"Beautiful target two **even if we took that first loss**, that's fine"*
+
+A stop-out on a setup does not retire the setup. Two consequences, both mechanical:
+- **The 2/day cap counts re-entries.** A losing first attempt spends one of the two.
+- **The rolling-mean window receives both** — a `0` for the stop and the winner's R for the re-entry
+  (`10.` [02:56]). A day like this one *lowers* his traded target even though it made money.
+
+### 24.4 — HE CLOSES THE WEAKER LEG AT BREAK-EVEN TO FUND THE OTHER. NOT IN THIS SPEC.
+
+> `video1979454677` [03:16] *"**I'll take a loss on Nasdaq** if this pushes all the way **it'll pay for
+> itself**"* → [03:20] *"I'm actually **close Nasdaq here** [at] break even **and let US 30 go**"*
+> → [03:36] *"**closing a Nasdaq could care less** US 30s out of Target to keep pushing"*
+
+This is a **book-level** rule, not an instrument-level one: the decision to flatten NQ is taken
+*because* YM is running. **No single-instrument backtest can express it**, and it is a second reason —
+alongside FINDING 13's — that his book is not two independent observations. It is recorded, and
+deliberately **not** implemented: the deliverable is a single-instrument indicator and inventing a
+cross-instrument rule inside it would be fabrication.
+
+---
+
+## ██ WHAT TICK #14 DID NOT ESTABLISH
+
+- **No number came from a run.** No `runId` exists for this workstream and none was created. Every
+  figure above is a timestamp read off a committed transcript, or arithmetic on those timestamps.
+- **That the narrated times are fill times.** They are **speech**, and speech lags or leads the price
+  event by an unknown amount. The 3-second entry→T1 in `video1270175432` is almost certainly loose
+  attribution, which is why the claims rest on **rung-to-rung intervals** and not on entry timing.
+- **The holding-period distribution.** Five broadcast days, selected by him, are biased toward fast
+  favourable days — so the observed minutes may be shorter than his typical hold. **What the corpus
+  supports is that "held for hours" is false, not that the median hold is three minutes.**
+- **Continuity of four of the five streams.** Only `video1270175432` carries an internal clock check.
+- **How often the entry bar actually spans the trade.** That is exactly what v7 instruments and it is
+  a chart measurement, not an argument.
+- **Whether any version compiles** — unchanged, still blocked by this environment's egress policy.
+- **It retunes nothing.** No threshold, gate or default was changed. v7's signal set equals v6's.
+- `US30` depth, `p`, `ρ`, the direction contradiction and the rolling-mean-target predictions are all
+  unchanged and unrun.

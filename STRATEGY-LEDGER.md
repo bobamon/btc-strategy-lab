@@ -2898,6 +2898,17 @@ pooling threshold dishonestly without anyone noticing**, because it looks like e
 that was asked for. Specify the horizon in the reversal condition, in writing, at the same time you
 state the threshold.
 
+**██ THE "MULTI-HOUR HOLD" ABOVE IS WITHDRAWN — Legacy Forex tick #14, 2026-09-06.** That holding
+period was never measured; it was inferred from "he scales out along a ladder". The five NY live
+transcripts time the ladder, and **every rung-to-rung interval in the corpus is 12 to 110 seconds,
+with a complete 1R→4R traversal in 3m08s** (`legacy-forex/SYSTEM.md` FINDING 23). At a ~3-minute
+hold, 5m bars sample at or slightly *coarser* than the holding horizon, so a 5m ρ there is if anything
+marginally **too high** — the specific dishonest pass this paragraph warns about is *harder* at that
+trader's real hold, not easier. **The general rule survives intact and is the part to keep: name the
+horizon in writing when you state a threshold, and check that the horizon you named was measured
+rather than assumed.** The `N_eff` verdict it supports is untouched — that rests on `T < 30` with
+`N_eff ≤ T`, which needs neither ρ nor the horizon.
+
 ### HOW THIS BINDS EVERY LAB HERE, NOT JUST THIS ONE
 
 The BTC lab is one instrument, so it looks exempt. It is not. `N_eff` applies wherever a count is
@@ -2970,3 +2981,86 @@ access on any of the three ticks. A static audit of a deliverable's own arithmet
 that a credit-spending run would have absorbed into its trade count without comment. **When there is no
 engine, auditing units is the highest-yield work available — and when there is one, it is the work that
 should happen first.**
+
+
+---
+
+## ██ HARD LESSON 59 — A BACKTEST BAR MUST BE FINER THAN THE EVENT IT HAS TO RESOLVE. THE TIMEFRAME A METHOD IS *ANALYSED* ON IS NOT THE TIMEFRAME ITS TRADES *OCCUPY*. (LEGACY FOREX TICK #14, 2026-09-06)
+
+**Earned:** thirteen ticks decoded a system's rules from its own transcripts and never asked how long
+one of its trades lasts. The fourteenth asked, and the answer disqualifies the timeframe the whole
+spec is written on.
+
+The source states his universe outright — *"we have to go five minute. We have to go 15 minute"*
+(`5._ANALYZING_TIME_FRAMES` [01:00]) — and the spec, the Pine deliverable and every sample-size
+argument in that workstream were built on it. The same corpus, timed off its own timestamps, shows the
+target ladder traversed in **12 to 110 seconds per rung** and a full 1R→4R excursion in **3m08s**,
+finishing **3m32s after the 09:30 open**. **The trade lives inside a single 5m bar.**
+
+### WHY THAT IS FATAL RATHER THAN UNTIDY
+
+An OHLC bar carries four prices and **no ordering between them**. When entry, stop and target all fall
+inside one bar, no bar-close simulator can say which was touched first, so the trade's outcome is
+decided by the **tie-break convention** the code happens to carry, not by price. That workstream's
+convention — *an ambiguous bar books the stop* — was written as a conservative edge-case rule. On this
+evidence it is close to the **modal** case, which means it would have authored the trade record.
+
+And the failure is silent in exactly the way HARD LESSON 58's unit defects are silent: the run
+completes, the trade count looks plausible, the profit factor is a number. **Nothing in the output
+says the simulator never saw the trade.**
+
+### THE DISTINCTION THAT GENERALISES
+
+**A trader's stated timeframe is where they READ the market. It is not necessarily the resolution
+their POSITION occupies.** Structure, levels and the break can be read on 15m by someone whose trade
+opens and closes inside one of those bars. Reading one statement as covering both is the error, and it
+is easy to make because the trader makes no distinction either — they have a chart and a fill, and only
+the chart has a timeframe.
+
+### HOW TO APPLY, BEFORE SPENDING ANYTHING
+
+1. **Estimate the trade's duration before choosing the simulation bar, and estimate it from evidence,
+   not from the chart timeframe.** In a transcript corpus the timestamps are free. In a banked result
+   `avgBarsWinning` / `avgBarsLosing` already answer it — this project has quoted those fields for
+   dozens of runs as a *diagnostic of stop placement* and never once as a check on whether the bar
+   size was adequate.
+2. **If the modal hold is 1 bar, the result is about the tie-break rule, not the market.** Treat a hold
+   distribution piled at 1 as a disqualifying finding, in the same class as a zero-trade run.
+3. **Check whether the entry bar's own range already spans the target and the stop.** That is a free
+   counter, it needs no re-run, and a non-zero count means the timeframe cannot order that trade. (It
+   is a diagnostic only — using the entry bar's extremes to drive an exit is lookahead.)
+4. **More history at the same resolution does not fix this.** It is not a sample-size problem. It needs
+   a finer bar, which is usually a different data tier with its own coverage limits — and on this
+   engine the finer tiers are exactly the shallow ones (the VERIFIED COVERAGE GRID: 1m is frozen and
+   fixed-size, 2m/3m do not exist).
+5. **A resolution test is not an edge test.** Running the same rules at two bar sizes and comparing
+   **trade records** tells you whether the coarse number was an artifact. It tells you nothing about
+   whether the method works, and must never be recorded as if it did.
+
+**Where this binds beyond the workstream that earned it:** any lab whose mechanism resolves fast
+relative to its bar. War Formation's cascade is synthesised from 1m timestamp arithmetic and 3M Elite
+specifies 4-minute structure — both are constructions whose events can be finer than the bar a result
+was banked on, and **neither has ever had its hold distribution checked against its bar size.** That
+check is free on every run already recorded, because `avgBarsWinning` and `avgBarsLosing` are in the
+response.
+
+### THE CHECK RUN AGAINST THIS REPO'S OWN RECORDED RESULTS — IT CHANGES NOTHING, AND SAYING SO IS THE POINT
+
+Run on `results/backtests.json` the same tick the lesson was written: **67 of 79 recorded runs carry
+`avgBarsWinning`, and the diagnostic fires on none of them.** The BTC lab's holds sit between ~16 and
+330 bars, comfortably coarser than the bar they were simulated on, and every existing use of these two
+fields in this project is against a **hold cap** (HARD LESSON 38) or against each other for **stop
+placement** — never as a bar-adequacy test. So the lesson is **prospective, and no banked verdict here
+is withdrawn by it.**
+
+**Two apparent exceptions, and neither survives inspection — which is itself the reading caveat:**
+
+| run | `avgBarsWinning` | what it actually is |
+|---|---|---|
+| Attack 54a | **0** | **0 winning trades out of 7.** An empty-bucket artifact, not an instant winner. |
+| Attack 55a | **3** | **one** winning trade out of 8. n = 1. |
+
+Both were already rejected on other grounds and both are far below the sample floor. **`avgBarsWinning`
+= 0 means the bucket is empty, not that winners resolved instantly** — read `winningTrades` before
+reading the average, or this lesson's own diagnostic becomes the next HARD LESSON 58 (a plausible
+number produced by a mechanism other than the one you think you are measuring).
