@@ -9776,3 +9776,83 @@ Not duplicated — see E95's own queue (do not sweep the cap, do not fund furthe
 lineage, the `STRATEGY-LEDGER.md` symptom-index remains the highest-leverage free item, the
 `E79`/`E80`/`E81` numbering collisions remain unreconciled, and the two 1m-track rule questions
 for the user remain open). Nothing in this entry adds a new item to it.
+
+
+---
+
+# ██ CYCLE CHECK #39, 2026-09-06 (no credits) — STORED PROMPT IS STILL THE PRE-E67 TEXT; THE BOARD HAS MOVED FAR PAST IT, AND BOTH ITS OWN QUEUE ITEMS ARE CLOSED A THIRD LINEAGE OVER
+
+`git pull --rebase origin main` first (the concurrency guard E94b's queue item 1 asked for): fast-forwarded
+cleanly onto `d98f13a` (E95b) with no new war-formation commits to merge and no collision. Credit balance
+**451** at start of cycle — comfortably in the 250-500 bracket (one backtest permitted), none spent.
+
+**This cycle's stored prompt is, once again, byte-for-byte the pre-E67 text.** It assigns two queue
+items — (1) attack the short's entry geometry on the 1m ALCM track, (2) finish the four-term binding
+sweep — that were already closed by E76/E77 two days ago, re-confirmed stale in nine consecutive
+"CYCLE CHECK" entries above (#1-#38 across 2026-09-04/05), and have since been overtaken by an entire
+**second** lineage that opened, ran to E95/E95b, and was itself explicitly closed:
+
+- **1m ALCM track (e58a long / E71 short).** Unchanged since E77. Entry-term binding sweep complete on
+  both legs (long: E69a/E69b/E70a/E70b; short: E74/E75a/E75b/E76). No ninth short-geometry construction
+  is queued or implied. **Still the only two reproducible references this lab has for the 1m window.**
+- **15m 1h-structure cascade (E78-E95b), opened and closed entirely since the last time this exact
+  prompt fired.** E80 was the first War Formation result ever to clear PF 1.0 on a bankable sample
+  (bidirectional, both legs positive) but failed its own split test (E85/E88a/E88b). E93 re-ran it on
+  the full 6-year archive and the short leg flipped negative. E94 isolated the long leg alone (PF
+  1.45289788, 43 trades) but phase decomposition showed it is a 2020-dependent, low-significance result
+  (t=1.0112, falling further to 0.6856 once the hold cap is removed). E95/E95b tested the Oracle's own
+  stated exit ("no time limit, target or liquidation") faithfully and it made the build both less
+  profitable and far riskier (PF 1.453→1.211, max drawdown 17.3%→40.9%). **E95's own words: "Further
+  work on the 15m 1h-structure cascade should not be funded. The next War Formation credit belongs to a
+  different construction or to nothing."** That conclusion is confirmed independently by E95b and is not
+  revisited here.
+
+**So the stored prompt's two items are not merely stale — the lab has since opened, fully worked, and
+closed an entire second construction on top of them**, and reverted to the identical "no live axis"
+state the pre-E67 prompt was already wrong about. Inventing a third construction speculatively, on a
+scheduled no-live-guidance cycle, is a judgement call bigger than "continue the queue" and is not taken
+on this session's own authority — see below.
+
+## WHAT IS ACTUALLY OPEN ON THIS BOARD RIGHT NOW
+
+1. **Two rule questions still await the user**, unchanged and now flagged for a second time in this
+   file's own experiment log (first at E69b/E74, `STRATEGY-LEDGER.md` line 2451):
+   - Should RATCHET v2 clause 1 admit a symmetric band — keep a change whose PF is within ~0.02 of the
+     parent when drawdown, sample size and net return all improve? (E69b sat exactly in this gap.)
+   - Should the 0.50pp drawdown allowance in clause 2 be proportional to the base drawdown rather than
+     absolute? (E74's drawdown rose 0.45pp over the allowance on a 2.67%→3.61% base, where 0.50pp is a
+     quarter of the total; the same allowance was calibrated on 8-45% drawdown builds.)
+2. **A concurrency problem has now cost two duplicated credits in one calendar day**, not zero. E94/E94b
+   and E95/E95b were each independently run by two sessions inside the same ~20-minute window before
+   either could see the other's push — `git fetch`-before-spend (which this cycle did, and found clean)
+   catches a *stale* read, not a *simultaneous* one, exactly as E94b named. Worth surfacing to the user
+   directly: if multiple War Formation sessions are being scheduled to fire close together, two credits
+   were spent this day producing byte-identical duplicate results.
+3. **`E79`/`E80`/`E81` numbering collisions from earlier concurrent sessions remain unreconciled** —
+   explicitly flagged as belonging to that sibling branch to repair, not this one.
+4. **The `STRATEGY-LEDGER.md` symptom-index** (E94b's queue item 2: a one-line-per-lesson table of
+   62 hard lessons keyed by the observation that should trigger each one) remains the highest-leverage
+   free item on the board, and remains undone. It is cross-lab housekeeping rather than a war-formation
+   experiment, so it is named here rather than attempted on this session's own initiative mid-cycle.
+
+## STATE, UNCHANGED FROM E95b
+
+No champion, no candidate. **1m references**: `e58a` (long, 100% equity, PF 1.24015239 net / 1.38769869
+gross, 36 trades) and `E71` (short, 25%-equity declared deviation per HARD LESSON 42, PF 0.97315988, 33
+trades). **15m reference**: none — the entire 1h-structure lineage (E78-E95b) is closed without a KEEP.
+The user's standing both-directions requirement (`ORACLE-RULES.md` L150-180) remains unmet on this
+instrument: the 1m short is gross-positive but net-negative to fees and blocked from promotion by the
+30-trade floor sitting exactly at its sample size; the 15m attempt produced one leg that clears PF 1.0
+on a bankable sample (E80) but fails its own split test, and the long-only isolate of it is a 2020-
+dependent single-trade artifact by E94's own phase decomposition.
+
+**Zero backtests run. Zero credits spent** (451 available, unchanged by this cycle).
+
+## QUEUE
+
+Unchanged in substance from E95b's own queue. Hold here until one of: the two rule questions above are
+answered, the concurrency/scheduling question is addressed, new 1m or 15m data becomes available, or the
+user authorizes a genuinely new (third) construction rather than a variant of either closed lineage.
+**Recommend the stored prompt for this scheduled task be updated** — it has now fired at least ten times
+since E67 without absorbing any of the intervening board state, each firing costing a full read-through
+to re-derive the same "nothing new to spend on" conclusion.

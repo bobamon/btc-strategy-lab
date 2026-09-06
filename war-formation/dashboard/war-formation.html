@@ -2340,7 +2340,7 @@ const DATA = [
     "notes": "PROCESS: a credit was duplicated, the second time this has happened in this lab (first was E94/E94b). Both sessions independently identified E94's queue item 3 as the one live, non-blocked, credit-worthy item on the entire board -- the 1m ALCM track (this cycle's literal stored-prompt subject) has nothing left to test without new data or a user answer to two standing rule questions, closed and re-confirmed closed across roughly a dozen prior CYCLE CHECK entries in EXPERIMENT-LOG.md. Both sessions ran the concurrency guard (git fetch origin main) before spending and found no collision at that point -- the other session's push landed after this session's fetch but before this session's own push, which fetch-before-spend cannot catch since the race is between two simultaneous credit spends, not a stale read. Recommend: the guard prevents acting on stale state, it cannot prevent two sessions from both correctly concluding the same item is next within the same window; no further process fix is proposed beyond what E94b already queued."
   }
 ];
-const BUILT = "2026-09-06 11:48";
+const BUILT = "2026-09-06 12:43";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
