@@ -3997,9 +3997,59 @@ const DATA = [
       "verifiedAt": "2026-09-06T04:11:31Z"
     },
     "verdict": "STILL UNTESTABLE AT THE SAMPLE FLOOR, per the pre-registered outcome tree. Widening targetLookback 100->300 moved the trade count from 1 to 2 (both winners) over the same 85,655-bar H1 window -- the reward-geometry fix added exactly one trade and profit factor remains mathematically undefined (zero losers), unquotable under LESSON 12's ~30-trade floor by three orders of magnitude. This settles the diagnosis question Attack 94 could not: the rrOk reward floor was NOT the dominant bottleneck -- fixing it all but proved so (a monotonic, can-only-help change) and the count barely moved. The binding constraint is the armEvent/priceBreak population itself (troughZone AND cogTurnUp AND priceBreak-within-armBars), which is simply very rare on BTC 15m. No H2 run: one credit was authorized this cycle (250-500 band) and it is spent; running H2 on a 2-trade H1 would add no information per the standing kill-rule discipline."
+  },
+  {
+    "id": "attack96-macd-zeroline-regime-flip-h1",
+    "name": "Attack 96: MACD zero-line momentum regime-flip LONG (bare, new mechanism) -- pre-2024 half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack96-macd-zeroline-momentum-regime-flip-long.pine",
+    "description": "Genuinely new mechanism per Attack 95's queue item 2 (untried indicator families: ta.sar, ta.cci, ta.stoch, ta.macd, ta.tsi, ta.wpr, ta.iii, ta.wvad, ta.percentrank). Claim: MACD line (emaFast-emaSlow) crossing back above its own scale-invariant zero line, after sitting negative for at least 20 consecutive bars (a dwell requirement that separates a genuine bearish-to-bullish momentum regime flip from a noise flicker around zero), marks a tradeable continuation. Long only, bare mechanism, no filter stack. Stop: 20-bar structural swing low frozen one bar before entry. Target: 100-bar structural high, excluded (not clamped) below a 1.0 reward:risk floor. R floor 0.8% of price, excluded not clamped. Max 192 bars in trade.",
+    "metrics": {
+      "netProfitPct": 16.68115253,
+      "profitFactor": 1.05863227,
+      "maxDrawdownPct": 26.95166859,
+      "totalTrades": 310,
+      "winningTrades": 130,
+      "losingTrades": 180,
+      "winRatePct": 41.93548387,
+      "avgTradePct": 0.05381017,
+      "avgWinningTrade": 231.681364089616,
+      "avgLosingTrade": -158.058122658611,
+      "ratioAvgWinLoss": 1.46579853,
+      "largestWin": 924.6816735,
+      "largestLoss": -875.413656,
+      "avgBarsInTrade": 68.27419355,
+      "avgBarsWinning": 90.60769231,
+      "avgBarsLosing": 52.14444444,
+      "sharpeRatio": 0.37116713,
+      "sortinoRatio": 0.19246198,
+      "commissionPaid": 3268.5947469,
+      "grossProfit": 30118.57733165003,
+      "grossLoss": 28450.46207854998,
+      "longTrades": 310,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1TJ3P1NJ8E6NE3WSHZKESDD",
+      "strategyId": "01M1TJ3P7HEQE90WBP2BYDV5F7",
+      "resultId": "01M1TJ3P1NYHVZ0YAG5APF44RY",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1TJ3P1NYHVZ0YAG5APF44RY",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-06T04:32:27Z"
+    },
+    "verdict": "CLEARS THE KILL RULE ON H1. PF 1.05863227 on 310 trades (right at the top of the ~60-350 workable band), win rate 41.94%, DD 26.95%, avg loser -$158.06, avg winner $231.68 (payoff 1.466, breakeven win rate 40.6% -- won by 1.3pp). Drawdown sits in the same category-3 shape as Attack 37/83 (many small losses against a real, thin, positive edge) rather than a few large ones. Frequency estimate registered before the run said 'likely ABOVE the workable band before dwell, uncertain after it' -- the dwell requirement (20 consecutive negative bars) pruned enough that the actual count landed INSIDE the band, a miss in the opposite direction from the pre-registration, consistent with this lab's frequency-estimate scorecard being unreliable in both directions. Only one credit was authorized this cycle (478 at get_credits, the 250-500 tier) so H2 (2024-06-08 to present, the never-tuned-on-this-mechanism-until-now half is actually H1 here since dwellBars/lb/targetLookback were all carried over unchanged from the Attack 94/95 template, not fit to this window) could not be run. Per the mandate, an H1 pass inside the workable band queues an H2 run before any filter work -- queued as this attack's own queue item 1, not yet run."
   }
 ];
-const BUILT = "2026-09-06 04:13";
+const BUILT = "2026-09-06 05:14";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

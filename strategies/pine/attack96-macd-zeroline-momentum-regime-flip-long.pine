@@ -1,0 +1,169 @@
+//@version=6
+// BTC ATTACK 96 - MACD ZERO-LINE MOMENTUM REGIME FLIP, LONG. A GENUINELY NEW MECHANISM, PER
+// ATTACK 95's QUEUE ITEM 2 (remaining untried indicator families after 95: ta.sar, ta.cci, ta.stoch,
+// ta.macd, ta.tsi, ta.wpr, ta.iii, ta.wvad, ta.percentrank -- ta.cog consumed at 94/95, ta.wad at 93,
+// ta.linreg at 91/92, ta.supertrend at 89/90).
+//
+// The stored scheduled prompt again asks to "build Attack 37's filter stack," describing a board state
+// more than ninety attacks stale. The docs override it, again, per the prompt's own standing
+// instruction: Attack 37 was closed on cost by Attack 41; the OBV-divergence stack (66/68/82/83) is
+// CLOSED at three terms (board's strongest both-halves candidate, PF 1.61044869/1.15365198, 88/79
+// trades); SuperTrend (89/90), linreg-channel (91/92), Williams A/D (93) and COG trough-turn (94/95, both
+// untestable at n=1/n=2) are all discarded or inconclusive-and-shelved. Attack 95's own queue recommended
+// spending this cycle's fresh-mechanism slot on an untried indicator family rather than a third COG retry.
+// Numbering continues after Attack 95, the last entry on the board.
+//
+// ==================== THE CLAIM UNDER TEST ====================
+// ta.macd's LINE (ema-fast minus ema-slow) is a difference of two trend estimates, not a bounded
+// oscillator like RSI/MFI/Stochastic (tried at 51/52/79) and not a self-relative window construction like
+// COG (94/95). Its ZERO LINE is a scale-invariant reference: the sign of (emaFast - emaSlow) does not
+// depend on BTC's absolute price level, so testing which side of zero it sits on is immune to the
+// non-stationary-absolute-threshold problem HARD LESSON 58 warns about, even though BTC's price (and
+// hence the raw MACD line's magnitude) ran from ~$20k to well over $60k across this lab's history.
+// The claim: a bullish momentum regime that has been NEGATIVE (bearish-dominant) for a sustained dwell,
+// then crosses back above zero, marks a genuine regime flip that BTC continues into for a tradeable
+// stretch -- as opposed to a bare crossover with no dwell requirement, which fires on every noise flicker
+// around zero and would just be a fast EMA cross in disguise (already implicitly rejected by the
+// crossover/rising-filter failure at Attack 57, HARD LESSON 8's fourth confirmation). The dwell
+// requirement is what makes this a REGIME claim rather than a raw crossover claim: BTC's 15m EMA(12)/
+// EMA(26) difference crosses zero often in chop, and only a cross that follows a real bearish stretch
+// (not an instantaneous flicker) is being claimed as informative. Distinct from every prior momentum
+// build: SuperTrend/PSAR-family (not yet tried) are price-envelope trailing lines; linreg-channel (91) is
+// a price-regression breakout; COG (94/95) is a zero-lag self-relative level; MACD is the only family
+// here built from the DIFFERENCE of two trend estimates with a natural, scale-invariant zero reference.
+// Pine: `strategies/pine/attack96-macd-zeroline-momentum-regime-flip-long.pine`.
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS ====================
+// [macdLine, signalLine, histLine] = ta.macd(close, fastLen, slowLen, sigLen). belowCount is a `var int`
+// counter: belowCount := macdLine < 0 ? belowCount[1] + 1 : 0 -- a plain historical tally, not a
+// separately-armed/invalidated latch, so HARD LESSON 8's arm-vs-death race does not apply here: there is
+// no second event that can kill the state before the trigger reads it, because the state IS the trigger's
+// own precondition (how long macdLine has already been negative), read one bar before the flip via
+// belowCount[1]. dwellOk = belowCount[1] >= dwellBars, checked ON the crossover bar itself -- this is safe
+// exactly because dwellOk and crossUp are NOT mutually exclusive on the same bar (unlike the coil/thrust
+// and zone-tap/engulf failures LESSON 8 documents): dwellOk describes bars STRICTLY BEFORE the current one
+// (the [1] read), while crossUp describes the transition INTO the current bar, so the two clauses read
+// disjoint bar ranges and can both be true together by construction. crossUp = ta.crossover(macdLine, 0.0).
+// armEvent = crossUp and dwellOk and flat -> immediate entry, no separate arm/confirm-later-bar split (no
+// latch object is needed because there is nothing here for a subsequent bar's price action to invalidate
+// before the trigger fires -- the trigger IS the arming bar). Stop: STRUCTURAL, ta.lowest(low, lb)[1], the
+// lb-bar swing low frozen the bar before entry (LESSON 5) -- never the MACD value, never the entry bar's
+// own low. R floor: EXCLUSION, not clamping (LESSON 3) -- rawR = close - stopPx must be >= 0.80% of price
+// or the trade is skipped, the stop is never widened to force compliance. Target: STRUCTURAL LEVEL, not an
+// R-multiple (HARD LESSON 41, confirmed at 44/46/47/94/95) -- ta.highest(high, targetLookback)[1], excluded
+// (not clamped) unless it clears a 1.0 reward:risk floor against the frozen stop.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - EXCLUSION via rBig on rawR = close - stopPx, never clamped to a wider stop.
+//   Stop beyond STRUCTURE (LESSON 5) - stopPx = ta.lowest(low, lb)[1], the lb-bar swing low frozen one bar
+//        before entry, never the MACD value and never the entry bar's own low.
+//   Each leg separately (LESSON 6) - LONG ONLY this cycle; short (MACD line crossing back BELOW zero after
+//        a sustained POSITIVE dwell, same structural stop/target construction mirrored to the downside) is
+//        the standing structural asymmetry, queued exactly as Attacks 91/93/94/95's shorts were queued.
+//   BINDING (E17) - four independently-shrinking terms: crossUp (the zero-line transition itself), dwellOk
+//        (excludes flickers that did not sit negative long enough), rBig (excludes stop-too-close setups),
+//        rrOk (excludes target-too-close setups against the 100-bar structural high).
+//   REDUNDANCY (E14) - macdLine's SIGN reads a momentum-STATE domain (which trend estimate currently
+//        dominates, scale-invariant via the zero reference); belowCount reads a TEMPORAL-PERSISTENCE domain
+//        (how long that state has held, independent of the sign itself); stopPx reads a PRICE-STRUCTURE
+//        domain with zero dependency on MACD; rBig reads a RISK-GEOMETRY domain; rrOk reads a
+//        REWARD-GEOMETRY domain from a longer window (targetLookback=100 > lb=20). Five independent
+//        domains, no restatement of the same information twice.
+//   LATCH IN SEQUENCE (LESSON 8) - N/A BY CONSTRUCTION, explained above: this mechanism has no
+//        arm-now/confirm-later split, so there is no latch for a subsequent event to invalidate before the
+//        trigger reads it. The dwell state and the crossover trigger read disjoint bar ranges ([1]-and-
+//        earlier vs. the current bar), so they cannot be mutually exclusive the way a same-bar coil+thrust
+//        or zone-tap+engulf conjunction can be.
+//   OCCUPANCY (LESSONS 24/28/29) - `flat` (strategy.position_size == 0) gates entry so a live position can
+//        never re-enter on a later crossover before the current trade closes.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity, single entry id "L", no partials, no scale-outs;
+//        expect totalTrades == unique entries, cascadeRatio 1, maxCascadeDepth 1.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4): fastLen=12/slowLen=26 on 15m are short
+// windows in bar-count (3h/6.5h), so raw ema12/ema26 zero-crossings are expected to be FREQUENT relative to
+// this lab's other arm events -- plausibly in the high hundreds to low thousands over the 85,655-bar H1
+// window, an order of magnitude above Attack 91's single-term 327. dwellBars=20 (matching this board's
+// standing lb=20 structural convention) should prune a large fraction of that by rejecting quick flickers
+// that reverse before establishing 20 bars of persistence, but the exact reduction ratio is unmeasured and
+// is exactly the kind of estimate HARD LESSON 4 says to score, not trust. rBig and rrOk (unchanged values
+// from the Attack 94/95 template, which that pair's H1/H2 runs showed were NOT the bottleneck there) prune
+// further but modestly. Best estimate: likely ABOVE the ~60-350 workable band before dwell, uncertain after
+// it; to be reported against the band explicitly, in both directions, per the frequency scorecard's own
+// history of misses in both directions.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17). BARE MECHANISM, H1 ONLY (credits 478 at get_credits, the
+// 250-500 tier -> one run authorized, the never-tuned pre-2024 half, per the kill rule):
+//   * H1 ABOVE 1.0 AND TRADES INSIDE ~60-350 -> the MACD zero-line regime-flip thesis has a real bare edge
+//     at a workable frequency; queue an H2 run before any filter work (the standard Attack 37/91 both
+//     required -- both halves before a stack is earned).
+//   * H1 ABOVE 1.0 BUT TRADES FAR OUTSIDE ~60-350 -> report which direction and by how much; a follow-up
+//     would widen/narrow dwellBars toward the band, not add a filter yet.
+//   * H1 BELOW 1.0 -> DISCARDED by the kill rule immediately. No H2 run, no filter rescue. ta.macd becomes
+//     a consumed indicator family alongside ta.linreg (91/92), ta.supertrend (89/90), ta.wad (93) and
+//     ta.cog (94/95).
+//   * A MAJORITY WIN RATE WITH ratioAvgWinLoss WELL BELOW 1.0 -> HARD LESSON 53's inverted-payoff shape;
+//     report it as that, and compute the breakeven win rate (1/(1+payoff)) before calling it an edge.
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside net and max drawdown
+//   (LESSONS 36/39 and the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack96 MACD Zero-Line Regime Flip Long", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+fastLen        = input.int(12, "MACD fast EMA length")
+slowLen        = input.int(26, "MACD slow EMA length")
+sigLen         = input.int(9, "MACD signal length (unused in the zero-line trigger, kept for a proven call shape)")
+dwellBars      = input.int(20, "Min consecutive bars MACD line must be negative before the cross")
+lb             = input.int(20, "Structural swing lookback (bars)")
+targetLookback = input.int(100, "Structural target lookback (bars)")
+minRpct        = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+minRR          = input.float(1.0, "Min reward:risk from the structural target (exclusion floor)")
+maxBars        = input.int(192, "Max bars in trade")
+
+[macdLine, signalLine, histLine] = ta.macd(close, fastLen, slowLen, sigLen)
+
+var int belowCount = 0
+belowCount := macdLine < 0 ? belowCount[1] + 1 : 0
+
+crossUp = ta.crossover(macdLine, 0.0)
+dwellOk = belowCount[1] >= dwellBars
+
+flat = strategy.position_size == 0
+
+armEvent = crossUp and dwellOk and flat
+
+stopPx = ta.lowest(low, lb)[1]
+rawR   = close - stopPx
+minR   = close * minRpct / 100
+rBig   = rawR >= minR
+
+targetPx = ta.highest(high, targetLookback)[1]
+rrOk     = (targetPx - close) >= rawR * minRR
+
+goLong = armEvent and rBig and rrOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if goLong
+    strategy.entry("L", strategy.long)
+    slPx   := stopPx
+    tpPx   := targetPx
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(macdLine, title="MACD_Line")
+plot(belowCount, title="BelowZeroDwellCount")
