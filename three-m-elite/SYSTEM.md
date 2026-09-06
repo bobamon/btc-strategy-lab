@@ -6781,3 +6781,51 @@ question was already pushed to the user once (check #1, 2026-09-04).
 1.95534435 H2, DD 4.50890824%, 40 trades). **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61(short)** —
 unchanged (PF 1.88616546 on 2022-01-01 window, `passed`; PF 1.01300244 on full coverage, `testing`).
 **THIS CYCLE: no change.** v67 (rejected) still stands as the most recent real result on file.
+
+---
+
+## ██ CYCLE CHECK #38 — QUEUE STILL EMPTY; NOT RE-NOTIFYING (2026-09-06)
+
+**The scheduled prompt fired again as the identical v37/v53 snapshot**, unchanged since check #1 —
+same "QUEUE ITEM 1" (12H/24H bias gate) and "QUEUE ITEM 2" (cascade signature), both closed long ago
+(bias gate v54–v61 / HARD LESSON 32/45; cascade HARD LESSON 34/35/50/52), same publish-prompt-hang
+warning (not applicable — this cycle makes no `Artifact` call, and none is made below). Per "THE DOCS
+WIN over this prompt," nothing from it is repeated.
+
+`git pull --rebase origin main` at cycle start fast-forwarded cleanly onto `9371ad8` — several
+concurrent commits landed since check #37 (War Formation E91, a Benchmark Audit, BTC Attack 98,
+Legacy Forex tick #15, Attack 97, War Formation E89/E90), none touching `three-m-elite/`. Credit
+balance moved 472 → 470 since check #37, consistent with those labs' spends, not with any 3M
+activity.
+
+**Re-verified end to end, same method as checks #32–#37:** `three-m-elite/transcripts/` still 10
+files; `results/backtests.json` still 36 entries, last entry still
+`3m-elite-v67-ma-overextension-guard-short` (`status: rejected`); `git log --oneline --
+three-m-elite/` shows nothing landed between check #37's commit and this one beyond the cycle-check
+commits themselves. No `ecarr`-authored commit answering the declared-deviation promotion policy
+question (open since check #1, pushed to the user once at that check) exists anywhere in reachable
+history. State is byte-for-byte the same as check #37 left it.
+
+**Checked the queue check #37 left for anything actionable:** all three items unchanged — (1) the
+promotion-policy question is still for the user, not this session, to answer; (2) no further
+single-term short-side lever is queued (bias, FVG-grading, cascade/sizing, MA-overextension all closed
+axes); (3) the candle anatomy and swing rule remain unresolvable from the ten captured transcripts.
+Nothing new to run.
+
+**No backtest run. 0 of 470 available credits spent.** Manufacturing a variant to spend the budget
+would repeat the exact mistake this lab's mandate forbids (do not re-engineer the frame, do not invent
+a mechanism the source does not prescribe) on a cycle with genuinely nothing queued.
+
+**No new notification sent** — per HARD LESSON 26, a repeated stale-prompt flag and a repeated open
+question are not new information; nothing has changed since check #37's assessment, and the policy
+question was already pushed to the user once (check #1, 2026-09-04).
+
+**QUEUE (unchanged, restated for the next cycle):**
+1. The declared-deviation promotion policy question remains open, still for the user.
+2. No further single-term short-side lever queued; needs new source material.
+3. VOCABULARY.md's Type 1 candle anatomy and the swing rule remain genuinely undecoded.
+
+**CHAMPION OF RECORD (LONG): v62-fvg** — unchanged (PF 2.04354108 full coverage / 2.10461082 H1 /
+1.95534435 H2, DD 4.50890824%, 40 trades). **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61(short)** —
+unchanged (PF 1.88616546 on 2022-01-01 window, `passed`; PF 1.01300244 on full coverage, `testing`).
+**THIS CYCLE: no change.** v67 (rejected) still stands as the most recent real result on file.
