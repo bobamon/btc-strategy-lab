@@ -2214,3 +2214,38 @@ it is available in one tool call. It was not made.
 - NinjaTrader forum, *Entry and exit in the same bar when backtesting* — https://forum.ninjatrader.com/forum/ninjatrader-8/strategy-development/1155719-entry-and-exit-in-the-same-bar-when-backtesting
 - TradingView, *Backtest more accurately with the Bar Magnifier* — https://www.tradingview.com/blog/en/accurate-backtesting-with-bar-magnifier-31746
 - QuantInsti, *Common mistakes to avoid while Backtesting* — https://blog.quantinsti.com/common-mistakes-backtesting/
+
+---
+
+## ⚠️ CORRECTION TO TICK #21, SAME DAY — THE "ENGINE AVAILABILITY" BLOCKER WAS TOO STRONG
+
+**Tick #21 added a fifth blocker, "engine availability", on the grounds that `backtest-lab` is
+unreachable. That is wrong, and the row is withdrawn.**
+
+What is true: the **locally configured `backtest-lab` MCP server** returns HTTP 401 on a revoked key.
+What tick #21 inferred and should not have: that the backend itself is unreachable. **The claude.ai
+connector to the same backtester24 backend works.** It was used the same day to run two ten-cell
+`sweep_backtest` grids, all cells `pinned: true`.
+
+**This is the project's own recurring meta-error — treating one tool's answer as a property of the
+engine — and it is the fourth occurrence.** It is worth noting where it happened: in a tick whose
+entire subject was not trusting a single tool's answer about a symbol. The discipline was applied to
+the symbol resolver and not to the connection error in the same paragraph.
+
+**What this changes, and what it does not:**
+
+- **Withdrawn:** the fifth blocker row. There is a working route to `backtest-lab`.
+- **Unchanged:** the 15m-execution and Yahoo data-quality blockers. They are properties of that
+  engine and its data source, not of the connection, and the working connector does not lift either.
+  They should now be **re-verified** through the connector rather than assumed.
+- **Unchanged and strengthened:** everything tick #21 measured on `trader-dev`. `NQ` → `IONQUSDT`,
+  `YM` → `DYMUSDT`, `NAS100` and `US30` hard-erroring, and the substring-matching mechanism are all
+  direct observations, unaffected by this correction.
+- **Newly available:** `list_pairs` on the connector shows a **Yahoo source covering "indices, forex,
+  metals, stocks"**, with the note *"Friendly names shown here map to Yahoo symbols, e.g. NAS100 ->
+  ^NDX"*, and *"any listed stock ticker also works."* **That is the route this workstream needs**, and
+  tick #21 declared it closed without checking it.
+
+**Queue item added, ahead of the others:** re-verify the 5m/15m execution map and the intraday
+retention limit through the connector before treating either as settled. Tick #19's findings were
+measured on the local server and have not been reproduced since.

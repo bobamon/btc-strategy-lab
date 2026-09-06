@@ -10817,3 +10817,173 @@ Record: `attack100-price-volume-correlation-dwell-reclaim-long-h1` (**rejected**
    logic, and this cycle followed it rather than a fourth OBV-adjacent variant.
 5. Credits remaining after this cycle: 457 (one spent). Next cycle at this tier still runs H1-only for
    any fresh mechanism; the two-run (full-pair) tier requires 500+.
+
+---
+
+# ██ ATTACK 101 — THE CROSS-SECTIONAL 52-WEEK-HIGH SWEEP, FINALLY RUN. IT FAILS, THE FAILURE IS STRUCTURAL, AND THE QUEUE ITEM'S OWN PREMISE WAS WRONG
+
+**Zero credits** — the connector route to `backtest-lab` works (the locally-configured `backtest-lab`
+server is 401 on a revoked key; the claude.ai connector to the same backend is fine). Two free sweeps,
+20 cells, all `pinned: true`, all `source: binance_perp_archive`.
+
+This executes the item that has sat at the top of this board's queue since Attack 80: **run the
+52-week-high nearness test cross-sectionally via `sweep_backtest`.** A prior cycle pre-registered it
+and the call died mid-flight, so no number ever existed. It exists now.
+
+## THE SPEC, REPRODUCED EXACTLY — AND THE REPLICATION THAT PROVES IT
+
+    entry_long = close / highest(high, 2184) > 0.95
+    exit_long  = close / highest(high, 2184) < 0.90
+    4h, long only, fee 5bps, perp source, no stop, no target
+
+**The BTC cell reproduces Attack 80a to the last decimal**: netProfit +29.002918%, PF 1.691394, 7
+trades, buy & hold +48.440379%, maxDD −32.179483% — identical to `bt_9688f5f41c`. **The spec was
+reconstructed correctly from the board's own text**, and that is worth recording independently of the
+result: this project can now re-derive a prior run from its own notes and get the same numbers back.
+
+## WHAT THE RESEARCH SAID TO EXPECT, AND IT SAID FAIL
+
+Searched for the failure case, per the standing rule.
+
+- **Bornholt & Malin:** the strategy profits in 18 of 20 markets, but *"the momentum strategy is
+  significantly more profitable than the corresponding 52-week high strategy, and in general, the
+  52-week high effect is not as reliable or as robust as the momentum effect."*
+- **Barroso & Wang (2021):** George & Hwang's result *"is limited to small stocks"*, and *"price
+  momentum explains the predictability of 52-week high momentum"* — i.e. it may not be a separate
+  effect at all.
+- **The decay, which is the sharpest warning:** the strategy earns *"a positive, though statistically
+  insignificant return in 1980–2014, with severely divergent performances in subperiods 1980–2000
+  (significantly positive) and 2001–2014 (significantly negative)."*
+- **The conditional that matches this exact window:** these strategies have *"no premiums at all in
+  months following bear markets or high volatility."* **H1 here is bear-dominated (2022).**
+
+**The prior was: expect this to fail, and expect it to fail hardest after drawdowns.** It did both.
+
+## H1 — 2022-01-01 → 2024-06-08, ten cells, 5,305–5,335 bars each
+
+| Pair | PF | Trades | Net % | Buy & hold % |
+|---|---|---|---|---|
+| SOL | **2.721514** | 10 | +84.500272 | −5.911062 |
+| AVAX | 1.748415 | 9 | +30.814716 | −69.366496 |
+| BTC | 1.691394 | 7 | +29.002918 | **+48.440379** |
+| BNB | 1.442376 | 7 | +17.940225 | **+31.684200** |
+| ETH | 1.000264 | 8 | +0.008381 | −0.839049 |
+| ADA | 0.879554 | 5 | −3.874248 | −66.261421 |
+| LINK | 0.729590 | 10 | −14.263272 | −17.531614 |
+| DOGE | 0.557402 | 7 | −12.854722 | −13.269949 |
+| LTC | 0.129801 | 2 | −9.453200 | −45.626269 |
+| XRP | 0.000000 | 1 | −9.662293 | −40.558859 |
+
+**66 trades across ten instruments. Five cells above 1.0, five below. Median PF 0.939909 — the median
+cell loses money.** No cell reaches ten trades; **not one comes near the 30-trade floor.**
+
+Equal-weighted across cells: **+11.215878% against buy & hold's −17.924014%, a +29.14pp spread.**
+That number is the reason this looked worth pursuing. It is also the number that H2 explains away.
+
+## H2 — 2024-06-08 → 2026-09-01, the never-tuned half. THIS IS THE RESULT
+
+| Pair | H1 PF (n) | **H2 PF (n)** |
+|---|---|---|
+| SOL | 2.721514 (10) | **NO TRADES (0)** |
+| AVAX | 1.748415 (9) | **NO TRADES (0)** |
+| BTC | 1.691394 (7) | **0.214302 (3)** |
+| BNB | 1.442376 (7) | 3.432821 (4) |
+| ETH | 1.000264 (8) | **0.505661 (4)** |
+| ADA | 0.879554 (5) | **NO TRADES (0)** |
+| LINK | 0.729590 (10) | **NO TRADES (0)** |
+| DOGE | 0.557402 (7) | **NO TRADES (0)** |
+| LTC | 0.129801 (2) | **NO TRADES (0)** |
+| XRP | 0.000000 (1) | 0.000000 (1) |
+
+**Six of ten instruments produced ZERO trades. Twelve trades in total, across ten instruments, over
+2.2 years.** Of the four cells that traded, **one** is above 1.0, on four trades.
+
+**Rank persistence is absent.** H1's best cell (SOL, 2.72) never fires again. H1's third-best (BTC,
+1.69) collapses to 0.21. The only H2 winner, BNB, ranked fourth in H1.
+
+## WHAT ACTUALLY HAPPENED, AND IT IS STRUCTURAL RATHER THAN STATISTICAL
+
+**The mechanism is a state, and after a deep drawdown the state is never entered.** "Within 5% of the
+trailing 2184-bar high" requires price to climb back to within touching distance of a year's peak. On
+six of these ten instruments that simply never happened between 2024 and 2026 — so the strategy sat
+in cash for 2.2 years and reported a flat 0.00%.
+
+**This re-reads the H1 headline completely.** Equal-weighted, H2 returned **+0.629594% against buy &
+hold's −12.360633%** — it "beat" the benchmark again, by **+12.99pp**, while making twelve trades and
+holding nothing at all on most instruments. **A strategy that is in cash beats a falling market by
+definition.** The +29.14pp spread in H1 was the same effect: the measured single-instrument exposure
+on the BTC cell was **23.111528%** — three quarters of the window in cash, through the worst crypto
+bear on record.
+
+**So the outperformance-versus-buy-and-hold in both halves is an artifact of absence, not of
+selection.** That is the finding, and it would have been invisible without running the second half.
+
+**The one place the cost of absence is visible:** XRP's buy & hold in H2 was **+177.295459%**, the
+largest move anywhere in the sample. The strategy took one trade and lost 2.810822%.
+
+## THE PREMISE OF THE QUEUE ITEM WAS WRONG, AND THAT MATTERS MORE THAN THE RESULT
+
+The queue item said a `sweep_backtest` **"matches the published form."** **It does not, and this
+should be corrected rather than carried forward.**
+
+George & Hwang's estimator forms **one portfolio**, long the coins nearest their 52-week high and
+short those furthest from it, ranked *relative to each other* and rebalanced. **A sweep is ten
+independent, long-only, absolute-threshold time-series backtests, ranked after the fact.** It has no
+short leg, no relative ranking, and no portfolio. Running ten instruments instead of one **aggregates
+sample; it does not change the estimator.**
+
+**Attack 80's own caveat therefore stands untouched** — *"the literature's numbers lend the mechanism
+plausibility; they lend this build's results nothing"* — and, symmetrically, **this failure is not
+evidence against George & Hwang either.** It is evidence against *this construction*.
+
+## VERDICT — DISCARDED. THE KILL RULE FIRES AND THE SAMPLE FIX FAILED ON ITS OWN TERMS
+
+- **H2 fails**: one of four traded cells above 1.0, on four trades.
+- **Not banked, and unbankable**: the largest cell in either half is ten trades. The 30-trade floor is
+  not approached anywhere.
+- **The cross-sectional aggregation did not solve the sample problem it was queued to solve.** 66
+  trades in H1 and **12 in H2** across ten instruments. The diagnosis in Attack 86 — *"a long-horizon
+  anchor changes state too rarely to generate episodes"* — was right, and it is worse than it looked:
+  the anchor does not merely generate few episodes, **it generates none at all after a large
+  drawdown**, which is precisely when the literature says the premium disappears.
+
+**The 52-week-high nearness family is now consumed.** Not because one variant lost, but because the
+mechanism's own trade-generation property has been measured and it cannot produce a bankable sample on
+this universe, in either half, on any instrument.
+
+## A CORRECTION OWED FROM EARLIER TODAY
+
+**Legacy Forex tick #21 recorded "engine availability" as a new blocker on the grounds that
+`backtest-lab` is unreachable. That was too strong.** The *locally configured* `backtest-lab` MCP
+server is 401 on a revoked key; **the claude.ai connector to the same backend works, and this entry's
+two sweeps were run through it.** Corrected in `legacy-forex/STATUS.md`. This is the project's own
+recurring meta-error — *treating one tool's answer as a property of the engine* — and it has now
+happened a fourth time, in a tick that was itself about not trusting a single tool's answer.
+
+## STATE
+
+**No champion change.** Attack 83 remains the strongest both-halves candidate on PF
+(1.61044869/1.15365198, 88/79 trades); Attack 88 holds the highest recorded PF at n≥30
+(2.021320/1.154330). Neither is touched by this cycle.
+
+## QUEUE
+
+1. **Do not attempt another absolute-threshold nearness variant** (tuning 0.95/0.90, or the anchor
+   length). The failure is that the state is unreachable after drawdowns, and no threshold pair fixes
+   that — HARD LESSONS 45/49 territory.
+2. **If the published form is ever wanted, it needs a portfolio engine**, not a sweep: relative
+   ranking across a universe with a short leg and periodic rebalancing. Neither engine here exposes
+   that, and saying so now is cheaper than discovering it again.
+3. **The board's family count rises by one** (nearness-to-anchor), and per the family-counting entry
+   that raises the multiple-testing hurdle for every other record on this board. **This cycle spent
+   no credits and still made the bar harder to clear** — which is the structural cost the audit named,
+   arriving on schedule.
+4. Attack 37's filter stack, the funding-clock counter-build diagnostic, and Benchmark Audit II's
+   item 1 all remain queued and untouched.
+
+## SOURCES
+- George & Hwang, *The 52-Week High and Momentum Investing* (J. Finance 2004) — https://www.bauer.uh.edu/tgeorge/papers/gh4-paper.pdf
+- Bornholt & Malin, *The 52-week high momentum strategy in international stock markets* — https://www.sciencedirect.com/science/article/abs/pii/S0261560610001099
+- *What explains price momentum and 52-week high momentum when they really work?* — https://acfr.aut.ac.nz/__data/assets/pdf_file/0005/576995/Haoxu-Wang-paper_NZFM.pdf
+- *Momentum Crashes and the 52-Week High* (Financial Analysts Journal 2023) — https://epublications.marquette.edu/cgi/viewcontent.cgi?article=1168&context=fin_fac
+- Quantpedia, *52-Weeks High Effect in Stocks* — https://quantpedia.com/strategies/52-weeks-high-effect-in-stocks
