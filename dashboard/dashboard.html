@@ -3999,12 +3999,12 @@ const DATA = [
     "verdict": "STILL UNTESTABLE AT THE SAMPLE FLOOR, per the pre-registered outcome tree. Widening targetLookback 100->300 moved the trade count from 1 to 2 (both winners) over the same 85,655-bar H1 window -- the reward-geometry fix added exactly one trade and profit factor remains mathematically undefined (zero losers), unquotable under LESSON 12's ~30-trade floor by three orders of magnitude. This settles the diagnosis question Attack 94 could not: the rrOk reward floor was NOT the dominant bottleneck -- fixing it all but proved so (a monotonic, can-only-help change) and the count barely moved. The binding constraint is the armEvent/priceBreak population itself (troughZone AND cogTurnUp AND priceBreak-within-armBars), which is simply very rare on BTC 15m. No H2 run: one credit was authorized this cycle (250-500 band) and it is spent; running H2 on a 2-trade H1 would add no information per the standing kill-rule discipline."
   },
   {
-    "id": "attack96-macd-zeroline-regime-flip-h1",
+    "id": "attack96a-macd-zeroline-regime-flip-h1",
     "name": "Attack 96: MACD zero-line momentum regime-flip LONG (bare, new mechanism) -- pre-2024 half",
     "symbol": "BTCUSDT",
     "timeframe": "15m",
     "direction": "long",
-    "status": "testing",
+    "status": "rejected",
     "createdDate": "2026-09-06",
     "lastTestedDate": "2026-09-06",
     "backtestStart": "2022-01-01",
@@ -4046,10 +4046,60 @@ const DATA = [
       "cascadeRatio": 1,
       "verifiedAt": "2026-09-06T04:32:27Z"
     },
-    "verdict": "CLEARS THE KILL RULE ON H1. PF 1.05863227 on 310 trades (right at the top of the ~60-350 workable band), win rate 41.94%, DD 26.95%, avg loser -$158.06, avg winner $231.68 (payoff 1.466, breakeven win rate 40.6% -- won by 1.3pp). Drawdown sits in the same category-3 shape as Attack 37/83 (many small losses against a real, thin, positive edge) rather than a few large ones. Frequency estimate registered before the run said 'likely ABOVE the workable band before dwell, uncertain after it' -- the dwell requirement (20 consecutive negative bars) pruned enough that the actual count landed INSIDE the band, a miss in the opposite direction from the pre-registration, consistent with this lab's frequency-estimate scorecard being unreliable in both directions. Only one credit was authorized this cycle (478 at get_credits, the 250-500 tier) so H2 (2024-06-08 to present, the never-tuned-on-this-mechanism-until-now half is actually H1 here since dwellBars/lb/targetLookback were all carried over unchanged from the Attack 94/95 template, not fit to this window) could not be run. Per the mandate, an H1 pass inside the workable band queues an H2 run before any filter work -- queued as this attack's own queue item 1, not yet run."
+    "verdict": "CLEARS THE KILL RULE ON H1. PF 1.05863227 on 310 trades (right at the top of the ~60-350 workable band), win rate 41.94%, DD 26.95%, avg loser -$158.06, avg winner $231.68 (payoff 1.466, breakeven win rate 40.6% -- won by 1.3pp). Drawdown sits in the same category-3 shape as Attack 37/83 (many small losses against a real, thin, positive edge) rather than a few large ones. Frequency estimate registered before the run said 'likely ABOVE the workable band before dwell, uncertain after it' -- the dwell requirement (20 consecutive negative bars) pruned enough that the actual count landed INSIDE the band, a miss in the opposite direction from the pre-registration, consistent with this lab's frequency-estimate scorecard being unreliable in both directions. H2 (2024-06-08 to 2026-09-01, byte-identical Pine, run via run_backtest on the saved strategyId with the date window overridden) came back PF 0.9843619 on 275 trades, below 1.0 -- fails the kill rule. Per this attack's own pre-registered outcome tree and queue item 3, ta.macd is DISCARDED and consumed, joining ta.linreg (91/92), ta.supertrend (89/90) and ta.wad (93). Both halves recorded: H1 PF 1.05863227/310 trades, H2 PF 0.9843619/275 trades -- H1 alone was never sufficient per the mandate's both-halves standard."
+  },
+  {
+    "id": "attack96b-macd-zeroline-regime-flip-h2",
+    "name": "Attack 96: MACD zero-line momentum regime-flip LONG (bare, new mechanism) -- post-2024 half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2026-09-01",
+    "specPath": "strategies/pine/attack96-macd-zeroline-momentum-regime-flip-long.pine",
+    "description": "Genuinely new mechanism per Attack 95's queue item 2 (untried indicator families: ta.sar, ta.cci, ta.stoch, ta.macd, ta.tsi, ta.wpr, ta.iii, ta.wvad, ta.percentrank). Claim: MACD line (emaFast-emaSlow) crossing back above its own scale-invariant zero line, after sitting negative for at least 20 consecutive bars (a dwell requirement that separates a genuine bearish-to-bullish momentum regime flip from a noise flicker around zero), marks a tradeable continuation. Long only, bare mechanism, no filter stack. Stop: 20-bar structural swing low frozen one bar before entry. Target: 100-bar structural high, excluded (not clamped) below a 1.0 reward:risk floor. R floor 0.8% of price, excluded not clamped. Max 192 bars in trade.",
+    "metrics": {
+      "netProfitPct": -4.14925654,
+      "profitFactor": 0.9843619,
+      "maxDrawdownPct": 29.47160658,
+      "totalTrades": 275,
+      "winningTrades": 105,
+      "losingTrades": 170,
+      "winRatePct": 38.18181818,
+      "avgTradePct": -0.01508821,
+      "avgWinningTrade": 248.743550700953,
+      "avgLosingTrade": -156.076461631764,
+      "ratioAvgWinLoss": 1.59372879,
+      "largestWin": 813.4665695,
+      "largestLoss": -507.199065050001,
+      "avgBarsInTrade": 70.62545455,
+      "avgBarsWinning": 97.37142857,
+      "avgBarsLosing": 54.10588235,
+      "sharpeRatio": 0.03112997,
+      "sortinoRatio": 0.0159299,
+      "commissionPaid": 3089.785453799999,
+      "grossProfit": 26118.07282360003,
+      "grossLoss": 26532.99847739993,
+      "longTrades": 275,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1TNJ10J8E0DEDEADKK798XC",
+      "strategyId": "01M1TJ3P7HEQE90WBP2BYDV5F7",
+      "resultId": "01M1TNJ10JPNAE9CN6B2JK74NS",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1TNJ10JPNAE9CN6B2JK74NS",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-06T00:00:00Z"
+    },
+    "verdict": "H2 (2024-06-08 to 2026-09-01, the never-before-tested half for this mechanism, byte-identical Pine source, same saved strategyId, only the date window overridden) fails the kill rule: PF 0.9843619, below 1.0, on 275 trades (inside the ~60-350 workable band). Win rate 38.18%, avg winner $248.74, avg loser -$156.08 (payoff 1.594), max drawdown 29.47%. H1's PF 1.05863227 did not survive out-of-period. DISCARDED per the pre-registered outcome tree: ta.macd is now consumed, joining ta.linreg (91/92), ta.supertrend (89/90) and ta.wad (93) as tested-and-failed indicator families. Only one credit was authorized this cycle (476 at get_credits, the 250-500 tier), spent on this H2 run since H1 already existed -- no second run taken."
   }
 ];
-const BUILT = "2026-09-06 05:14";
+const BUILT = "2026-09-06 06:14";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

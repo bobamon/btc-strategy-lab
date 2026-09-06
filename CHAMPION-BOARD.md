@@ -9203,7 +9203,7 @@ about whether COG-trough-turns predict anything.
 
 ---
 
-# ATTACK 96 — MACD ZERO-LINE MOMENTUM REGIME-FLIP, LONG. A GENUINELY NEW MECHANISM. H1 CLEARS THE KILL RULE — H2 QUEUED, NOT YET RUN.
+# ATTACK 96 — MACD ZERO-LINE MOMENTUM REGIME-FLIP, LONG. A GENUINELY NEW MECHANISM. H1 CLEARED THE KILL RULE — H2 FAILS IT. DISCARDED, `ta.macd` CONSUMED.
 
 The stored scheduled prompt again asks to "build Attack 37's filter stack," describing a board state more
 than ninety attacks stale. **The docs override it, again**, per the prompt's own standing instruction:
@@ -9258,7 +9258,7 @@ band before dwell, uncertain after it.**
   toward the band, not a filter.
 * H1 below 1.0 → DISCARDED by the kill rule immediately. `ta.macd` becomes consumed.
 
-## RESULT — H1 ONLY (478 credits at `get_credits`, 250-500 tier → one run, pre-2024 half only)
+## RESULT — H1 (478 credits at `get_credits`, 250-500 tier → one run, pre-2024 half only)
 
 | Metric | Attack 96a (H1, 2022-01-01 → 2024-06-08) |
 |---|---|
@@ -9273,47 +9273,67 @@ band before dwell, uncertain after it.**
 | Commission paid | $3,268.59 |
 | Avg bars in trade (win / loss) | 90.6 / 52.1 |
 
-## THE VERDICT — CLEARS THE KILL RULE. ADVANCES to a queued H2, not yet a champion.
+## RESULT — H2, RUN THIS CYCLE (476 credits at `get_credits`, still the 250-500 tier → one run,
+spent on H2 since H1 already existed from the prior cycle)
 
-**The frequency estimate missed in the OPPOSITE direction from its own registration** — pre-registered
-"likely above the band," actual count landed inside it at 310, because the 20-bar dwell requirement pruned
-the raw zero-crossing population harder than expected. That is consistent with this lab's own frequency
-scorecard: every estimate so far has missed, in both directions, and this is another data point for that
-column, not an exception to it.
+| Metric | Attack 96a (H1, 2022-01-01 → 2024-06-08) | Attack 96b (H2, 2024-06-08 → 2026-09-01) |
+|---|---|---|
+| Trades | 310 | **275** — inside the ~60-350 band |
+| Win rate | 41.94% (130W / 180L) | 38.18% (105W / 170L) |
+| Profit factor | 1.05863227 | **0.9843619 — FAILS the kill rule** |
+| Net return | +16.68115253% | **-4.14925654%** |
+| Max drawdown | 26.95166859% | 29.47160658% |
+| Avg winner / avg loser | $231.68 / -$158.06 | $248.74 / -$156.08 |
+| Payoff (avgWin/avgLoss) | 1.46579853 | 1.59372879 |
+| Commission paid | $3,268.59 | $3,089.79 |
+| Avg bars in trade (win / loss) | 90.6 / 52.1 | 97.4 / 54.1 |
 
-**Drawdown category:** avg loser -$158.06 against a real, positive, thin edge (PF 1.06, win rate beats
-breakeven by 1.3pp) places this in the board's **category 3** (bleed on a positive edge — Attack 37/83's
-shape), not category 1 (Attack 34's few large losses) or category 2 (Attack 36's bleed on a negative edge).
-26.95% max drawdown is comparable to Attack 37's 31.64%/24.31% pair and higher than Attack 83's filtered
-11.08%/10.76% — unsurprising, since this is the BARE mechanism before any filter work, exactly Attack 37's
-own starting position before its (four, all-rejected) filter attempts.
+Byte-identical Pine, same saved `strategyId` (`01M1TJ3P7HEQE90WBP2BYDV5F7`), only the date window
+overridden via `run_backtest` — no parameter retuning between halves, per the mandate's discipline for a
+first-contact both-halves test.
 
-**This is not yet a champion and not yet eligible for a filter stack.** The mandate's own standard (applied
-to Attack 37 and Attack 91 alike) requires BOTH halves clearing 1.0 before a filter stack is earned, and
-before H2 runs this sits exactly where Attack 37 sat after its own H1: a real bare edge, unconfirmed
-out-of-period. Credits (478, the 250-500 tier) authorized exactly one run this cycle, so H2 could not be
-run today. `results/backtests.json` status is recorded as `"testing"`, not `"passed"` or `"rejected"`,
-reflecting that the kill rule was cleared but the mandate's both-halves bar was not yet attempted.
+## THE VERDICT — DISCARDED. H1 CLEARED THE KILL RULE; H2 DOES NOT. `ta.macd` IS NOW CONSUMED.
+
+**H1's edge did not survive out-of-period.** PF 1.05863227 → 0.9843619, net return +16.68% → -4.15%. The
+win rate fell (41.94% → 38.18%) while the payoff ratio held essentially flat (1.466 → 1.594) — this is not
+a payoff-driven failure, it is a hit-rate failure: the same structural stop/target geometry simply won less
+often in the second half. Drawdown moved the wrong way too (26.95% → 29.47%), though both halves sit in the
+same **category 3** shape (many small losses — avg loser ~$156-158 — against a would-be positive edge)
+rather than category 1 or 2.
+
+**Per Attack 96's own pre-registered outcome tree (queue item 3): `ta.macd` is DISCARDED and consumed**,
+joining `ta.linreg` (91/92), `ta.supertrend` (89/90) and `ta.wad` (93) as tested-and-failed indicator
+families on this board. Unlike Attack 37 (both halves cleared 1.0: 1.024/1.012) and Attack 91's H1 alone
+(1.196, later discarded on its own H2 at 0.835) and Attack 83 (both halves clear: 1.610/1.154), Attack 96
+is a clean H1-pass/H2-fail case — the same shape as Attack 91, not the shape that earns a filter stack.
+
+**Credits this cycle:** 476 at `get_credits` (the 250-500 tier → one run authorized). Spent the single
+authorized run on H2, since H1 already existed from the prior cycle and re-running it would add no
+information — the same logic the board applied at Attack 91's H2 cycle. No second run taken.
 
 ## WHAT THIS SETTLES
 
-**`ta.macd` is not yet consumed** — it survived its first test, unlike SuperTrend/linreg/WAD/COG before it.
-Whether it joins Attack 37/91/83 as a genuine both-halves candidate, or joins the discard pile once tested
-out-of-period, is undecided until H2 runs.
+**`ta.macd` is now consumed.** Four of five indicator families tried since Attack 89 have failed on a full
+both-halves test (SuperTrend, linreg, WAD, MACD); only the OBV-divergence stack (66/68/82/83) and Attack 46
+remain standing both-halves candidates. The remaining untried families are `ta.sar`, `ta.cci`, `ta.stoch`,
+`ta.tsi`, `ta.wpr`, `ta.iii`, `ta.wvad`, `ta.percentrank`.
 
 ## QUEUE
 
-1. **Run Attack 96's H2** (2024-06-08 → present) on the byte-identical Pine, before any filter work or
-   parameter change — the same discipline the mandate applied to Attack 37 and Attack 91. This is now the
-   board's top item, ahead of a fresh mechanism, per the mandate's standing priority for an untested
-   both-halves candidate.
-2. **If H2 clears 1.0:** Attack 96 joins Attack 37/91(discarded on H2)/83 as a both-halves-tested candidate,
-   and — per the mandate — earns a queued filter-stack slot, exactly as Attack 37 did (and Attack 68/82/83
-   built on top of, for the OBV family).
-3. **If H2 fails the kill rule:** `ta.macd` is DISCARDED and consumed, alongside `ta.linreg`, `ta.supertrend`
-   and `ta.wad`. The next fresh-mechanism cycle draws from the remaining untried families: `ta.sar`,
-   `ta.cci`, `ta.stoch`, `ta.tsi`, `ta.wpr`, `ta.iii`, `ta.wvad`, `ta.percentrank`.
-4. **Attack 83 remains the board's strongest both-halves candidate** (PF 1.61044869/1.15365198 on 88/79
+1. **Next fresh-mechanism cycle: draw from the remaining untried families** — `ta.sar`, `ta.cci`,
+   `ta.stoch`, `ta.tsi`, `ta.wpr`, `ta.iii`, `ta.wvad`, `ta.percentrank`. A reasonable next pick is
+   `ta.cci` or `ta.stoch` — both are bounded oscillators (Attack 95's own recommendation to prefer a
+   bounded-oscillator shape over another cumulative-series or difference-of-trend-estimates construction,
+   since three of the last four attempts — WAD, linreg, MACD — were unbounded/difference constructions and
+   all three failed either on H1 or H2). Design a dwell-or-persistence gate analogous to Attack 96's
+   `dwellBars`, since a bare crossover/threshold-cross without a persistence requirement is already
+   implicitly rejected by Attack 57 (HARD LESSON 8's fourth confirmation).
+2. **Attack 83 remains the board's strongest both-halves candidate** (PF 1.61044869/1.15365198 on 88/79
    trades, DD 11.08%/10.76%), unaffected by this cycle.
-5. **Attack 46 (long) remains a candidate alongside Attack 83**, unaffected by this cycle.
+3. **Attack 46 (long) remains a candidate alongside Attack 83**, unaffected by this cycle.
+4. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if that
+   family is revisited before another fresh mechanism.
+5. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+6. **This session cannot continue the new-engine cross-sectional track (Attacks 84-86)** — no
+   `backtest-lab`/`sweep_backtest` tool is available here, unaffected by this cycle.
 6. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
