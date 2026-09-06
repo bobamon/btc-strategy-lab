@@ -1,0 +1,168 @@
+//@version=6
+// BTC ATTACK 99 - WVAD ROLLING-SUM DWELL-RECLAIM, LONG. A GENUINELY NEW MECHANISM PER ATTACK 98's
+// QUEUE (remaining untried families after 98: ta.sar, ta.wvad, ta.tsi, ta.wpr, ta.iii, ta.percentrank --
+// ta.stoch consumed at 98, ta.macd at 96, ta.cci UNTESTABLE at 97, ta.cog at 94/95, ta.wad at 93,
+// ta.linreg at 91/92, ta.supertrend at 89/90).
+//
+// The stored scheduled prompt again asks to "build Attack 37's filter stack," describing a board state
+// more than ninety attacks stale. The docs override it, again, per the prompt's own standing instruction:
+// Attack 37 was closed on cost by Attack 41; the OBV-divergence stack (66/68/82/83) is CLOSED at three
+// terms (board's strongest both-halves candidate, PF 1.61044869/1.15365198, 88/79 trades); SuperTrend
+// (89/90), linreg-channel (91/92), Williams A/D (93), COG trough-turn (94/95), MACD zero-line flip (96),
+// CCI extreme-dwell (97, untestable) and Stochastic oversold-dwell (98, H1 passed/H2 failed) are all
+// discarded, shelved, or untestable. Numbering continues after Attack 98, the last entry on the board.
+//
+// ==================== THE CLAIM UNDER TEST ====================
+// ta.wad (Attack 93) is CUMULATIVE and signed by whether CLOSE moved up or down from the PRIOR close,
+// adding/subtracting the bar's true range. ta.obv (66-68/82/83) is also cumulative and signed by
+// close-vs-prior-close, weighted by raw volume. Williams Variable A/D (`wvad`) is neither: it is a
+// PER-BAR (non-cumulative) quantity, `((close - open) / (high - low)) * volume`, signed by whether the
+// bar closed in the UPPER or LOWER half of its OWN range relative to where it OPENED -- an intrabar
+// accumulation/distribution measure that has zero dependency on the prior bar's close. The claim: a
+// rolling SUM of this per-bar quantity over a short window (wvadSum) dwelling below zero (net intrabar
+// distribution: closes persistently settling below their opens, in the lower part of their own range,
+// on volume) for a sustained stretch, then crossing back above zero, marks a shift from net intrabar
+// selling pressure to net intrabar buying pressure -- a different claim from Attack 93's cumulative lead
+// (which needs a NEW N-BAR HIGH on the WAD line, an unbounded running total) and from Attack 96's MACD
+// zero-line (a smoothed PRICE momentum construction with no volume or intrabar-range term at all) and
+// from Attack 98's Stochastic (a pure price range-position ratio with no volume term at all). Long only
+// this cycle. Pine: `strategies/pine/attack99-wvad-accumulation-dwell-reclaim-long.pine`.
+//
+// ==================== AVOIDING ATTACK 97's DIAGNOSED FAILURE MODE ====================
+// Attack 97's root cause: dwellBars was set EQUAL to the indicator's own lookback length, colliding with
+// a construction that already actively restores itself toward zero within that same window, crashing the
+// trade count to n=3. Per that lesson, this build keeps `sumLen` (the wvad rolling-sum window, 20) and
+// `dwellBars` (the minimum consecutive bars wvadSum must stay below zero before the cross, 10)
+// deliberately UNEQUAL and dwellBars < sumLen, so the dwell is not asking the window to outlast itself.
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS ====================
+// wvad = per-bar `((close - open) / (high - low)) * volume`, guarded to 0.0 when high==low (a doji/flat
+// bar with zero range, to avoid a div-by-zero). wvadSum = math.sum(wvad, sumLen), a built-in rolling sum
+// (not a user-defined function, not an array). belowCount is a `var int` plain historical tally:
+// belowCount := wvadSum < 0 ? belowCount[1] + 1 : 0 -- not a separately-armed/invalidated latch, so HARD
+// LESSON 8's arm-vs-death race does not apply: the state IS the trigger's own precondition, read one bar
+// before the cross via belowCount[1]. dwellOk = belowCount[1] >= dwellBars, checked ON the crossover bar
+// itself -- safe because dwellOk reads bars STRICTLY BEFORE the current one while crossUp reads the
+// transition INTO the current bar, so the two clauses read disjoint bar ranges and can both be true
+// together by construction (byte-identical safety argument to Attacks 96/97/98). crossUp =
+// ta.crossover(wvadSum, 0). armEvent = crossUp and dwellOk and flat -> immediate entry, no separate
+// arm/confirm-later-bar split. Stop: STRUCTURAL, ta.lowest(low, lb)[1], the lb-bar swing low frozen the
+// bar before entry (LESSON 5) -- never the wvadSum value. R floor: EXCLUSION, not clamping (LESSON 3).
+// Target: STRUCTURAL LEVEL (HARD LESSON 41), ta.highest(high, targetLookback)[1], excluded unless it
+// clears a 1.0 reward:risk floor against the frozen stop -- identical geometry to Attacks 96/97/98 for
+// direct comparability.
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - EXCLUSION via rBig on rawR = close - stopPx, never clamped to a wider stop.
+//   Stop beyond STRUCTURE (LESSON 5) - stopPx = ta.lowest(low, lb)[1], the lb-bar swing low frozen one bar
+//        before entry, never the wvadSum value and never the entry bar's own low.
+//   Each leg separately (LESSON 6) - LONG ONLY this cycle; short (wvadSum crossing back below zero after a
+//        sustained dwell ABOVE zero, same structural stop/target construction mirrored to the downside) is
+//        the standing structural asymmetry, queued exactly as every prior fresh-mechanism cycle's short.
+//   BINDING (E17) - four independently-shrinking terms: crossUp (the zero-line transition itself), dwellOk
+//        (excludes flickers that did not sit below zero long enough), rBig (excludes stop-too-close
+//        setups), rrOk (excludes target-too-close setups against the 100-bar structural high).
+//   REDUNDANCY (E14) - wvadSum reads an INTRABAR CLOSE-VS-OPEN-WITHIN-RANGE domain weighted by volume,
+//        zero dependency on the prior bar's close (unlike ta.obv/ta.wad, both close-vs-PRIOR-close) and
+//        zero dependency on a moving average or deviation calc (unlike CCI) and zero dependency on the
+//        high-low BOX position used by Stochastic (Stochastic reads where the CURRENT close sits inside
+//        an N-bar high-low box; wvad reads where EACH bar's own close sits inside THAT bar's own
+//        high-low range, then weights by volume and sums over time -- a materially different
+//        construction, not a rescaling of the same ratio); belowCount reads a TEMPORAL-PERSISTENCE
+//        domain; stopPx reads a PRICE-STRUCTURE domain with zero dependency on wvadSum; rBig reads a
+//        RISK-GEOMETRY domain; rrOk reads a REWARD-GEOMETRY domain from a longer window (targetLookback
+//        100 > lb 20 > sumLen 20). Independent domains, no restatement of the same information twice.
+//   LATCH IN SEQUENCE (LESSON 8) - N/A BY CONSTRUCTION, explained above: no arm-now/confirm-later split,
+//        so no latch exists for a subsequent event to invalidate before the trigger reads it. dwellOk and
+//        crossUp read disjoint bar ranges ([1]-and-earlier vs. the current bar's transition), so they
+//        cannot be mutually exclusive the way a same-bar coil+thrust or zone-tap+engulf conjunction can be.
+//   OCCUPANCY (LESSONS 24/28/29) - `flat` (strategy.position_size == 0) gates entry so a live position can
+//        never re-enter on a later crossover before the current trade closes.
+//   CASCADE (HARD LESSON 42/43) - LONG at 100% equity, single entry id "L", no partials, no scale-outs;
+//        expect totalTrades == unique entries, cascadeRatio 1, maxCascadeDepth 1.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4): No prior attack has summed ta.wvad on
+// this engine. It is a per-bar quantity with no built-in restoring pull (unlike CCI), so a sustained
+// distribution phase (many bars closing in the lower half of their own range) should be able to hold
+// wvadSum below zero for well more than 10 bars at a time -- structurally closer to Attack 98's
+// Stochastic %K (which also lacks a restoring pull) than to Attack 97's CCI. Anchored loosely against
+// Attack 98's post-dwell Stochastic count (37 on H1). Registered estimate: **30-250 trades per half**,
+// wide band and low confidence since no prior wvad construction exists on this board to anchor against.
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17). BARE MECHANISM, H1 ONLY (the never-tuned pre-2024 half,
+// per the kill rule; credits checked at 250-500 tier -> one run authorized this cycle):
+//   * H1 ABOVE 1.0 AND TRADES INSIDE ~30-350 -> the wvad accumulation-dwell-reclaim thesis has a real bare
+//     edge at a workable frequency; queue an H2 run before any filter work (the standard Attack 37/91/96/98
+//     precedent -- both halves before a stack is earned).
+//   * H1 ABOVE 1.0 BUT TRADES FAR OUTSIDE ~30-350 -> report which direction and by how much; a follow-up
+//     would retune sumLen/dwellBars, not add a filter yet.
+//   * TRADES UNDER ~30 -> UNTESTABLE per LESSON 12's floor; no ratio quoted, no H2 run.
+//   * H1 BELOW 1.0 -> DISCARDED by the kill rule immediately. No H2 run, no filter rescue. ta.wvad becomes
+//     a consumed indicator family alongside ta.stoch (98), ta.macd (96), ta.wad (93), ta.linreg (91/92)
+//     and ta.supertrend (89/90).
+//   * A MAJORITY WIN RATE WITH ratioAvgWinLoss WELL BELOW 1.0 -> HARD LESSON 53's inverted-payoff shape;
+//     report it as that, and compute the breakeven win rate (1/(1+payoff)) before calling it an edge.
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside net and max drawdown
+//   (LESSONS 36/39 and the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack99 WVAD Accumulation Dwell-Reclaim Long", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+sumLen         = input.int(20, "WVAD rolling-sum window")
+dwellBars      = input.int(10, "Min consecutive bars wvadSum must be below zero before the cross")
+lb             = input.int(20, "Structural swing lookback (bars)")
+targetLookback = input.int(100, "Structural target lookback (bars)")
+minRpct        = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+minRR          = input.float(1.0, "Min reward:risk from the structural target (exclusion floor)")
+maxBars        = input.int(192, "Max bars in trade")
+
+rangeSpan = high - low
+wvad = rangeSpan != 0 ? ((close - open) / rangeSpan) * volume : 0.0
+wvadSum = math.sum(wvad, sumLen)
+
+var int belowCount = 0
+belowCount := wvadSum < 0 ? belowCount[1] + 1 : 0
+
+crossUp = ta.crossover(wvadSum, 0)
+dwellOk = belowCount[1] >= dwellBars
+
+flat = strategy.position_size == 0
+
+armEvent = crossUp and dwellOk and flat
+
+stopPx = ta.lowest(low, lb)[1]
+rawR   = close - stopPx
+minR   = close * minRpct / 100
+rBig   = rawR >= minR
+
+targetPx = ta.highest(high, targetLookback)[1]
+rrOk     = (targetPx - close) >= rawR * minRR
+
+goLong = armEvent and rBig and rrOk
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if goLong
+    strategy.entry("L", strategy.long)
+    slPx   := stopPx
+    tpPx   := targetPx
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(wvadSum, title="WVADSum")
+plot(belowCount, title="BelowZeroDwellCount")

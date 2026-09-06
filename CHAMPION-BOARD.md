@@ -10180,3 +10180,119 @@ decision, not a tick's. **What this entry does is put the number in front of tha
 - Bailey et al., *Statistical Overfitting and Backtest Performance* — https://sdm.lbl.gov/oapapers/ssrn-id2507040-bailey.pdf
 - Wikipedia, *Deflated Sharpe ratio* — https://en.wikipedia.org/wiki/Deflated_Sharpe_ratio
 - Harvey, Liu & Zhu, *…and the Cross-Section of Expected Returns* — https://www.nber.org/system/files/working_papers/w20592/w20592.pdf
+
+---
+
+# ATTACK 99 — WVAD ROLLING-SUM ACCUMULATION DWELL-RECLAIM LONG. A GENUINELY NEW MECHANISM, DISCARDED ON COST DESPITE NOMINALLY CLEARING THE KILL RULE.
+
+**Note on sequencing:** this cycle's research and backtest ran concurrently with, and was committed
+before seeing, the board-wide statistical audit immediately above (pushed by a parallel session to the
+same merge point). That audit's queue item 4 says "stop generating new mechanisms at the current bar."
+Attack 99 was already built and run under the mandate as it stood at cycle start and is recorded as-is;
+it does not answer or dispute the audit's conclusion. The audit itself says its own recommendation is
+"not being enforced as a rule here" pending a user decision, so this entry does not treat itself as
+having violated anything — but a future cycle should read that audit before proposing Attack 100 and
+flag the tension to the user rather than silently continuing to generate mechanisms at the old bar.
+
+The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") over
+ninety attacks stale, instructing "continue numbering after 37." **The docs override it, again**, per
+the prompt's own standing instruction: Attack 37 was closed on cost by Attack 41 (2026-09-04); the
+OBV-divergence stack (66/68/82/83) is CLOSED at three terms (board's strongest both-halves candidate,
+PF 1.61044869/1.15365198, 88/79 trades); SuperTrend (89/90), linreg-channel (91/92), Williams A/D (93),
+COG trough-turn (94/95), MACD zero-line flip (96), CCI extreme-dwell (97, untestable) and Stochastic
+oversold-dwell (98, H1 passed/H2 failed) are all discarded, shelved, or untestable. Numbering continues
+after Attack 98, the last numbered entry on the board.
+
+Credits at cycle start: 463 (250-500 tier per the mandate) → **one run authorized, pre-2024 half only.**
+
+## THE MECHANISM AND WHAT IT CLAIMS
+
+`ta.wvad` (Williams Variable Accumulation/Distribution) is a **per-bar, non-cumulative** quantity —
+`((close - open) / (high - low)) * volume` — signed by where each bar's own close settles relative to
+its own open, WITHIN that bar's own range. This is a different domain from every volume/price indicator
+already tried on this board: `ta.obv` (66-68/82/83) and `ta.wad` (93) are both cumulative running totals
+signed by close-vs-**prior**-close; `ta.nvi` (76) is conditional on low-volume days only. WVAD has zero
+dependency on the prior bar's close.
+
+**The claim under test:** a rolling sum of this per-bar quantity (`wvadSum`, 20-bar window) dwelling
+below zero for at least 10 consecutive bars (deliberately unequal to and less than the 20-bar sum
+window, per Attack 97's collision lesson), then crossing back above zero, marks a shift from net
+intrabar distribution to net intrabar accumulation — a tradeable reclaim. Long only. Stop: 20-bar
+structural swing low frozen one bar before entry (LESSON 5). Target: 100-bar structural high, excluded
+below a 1.0 reward:risk floor (HARD LESSON 41). R floor 0.8% of price, excluded not clamped (LESSON 3).
+Max 192 bars in trade. Pine: `strategies/pine/attack99-wvad-accumulation-dwell-reclaim-long.pine` (full
+audit header inline, mirroring Attacks 96/97/98's construction for direct comparability).
+
+**Pre-run audit, one line per leg:**
+  R ≥ 0.8% (LESSON 3) — EXCLUSION via `rBig`, never clamped.
+  Stop beyond STRUCTURE (LESSON 5) — `ta.lowest(low, 20)[1]`, never the wvadSum value.
+  Each leg separately (LESSON 6) — long only; short is the standing structural asymmetry, queued.
+  BINDING (E17) — four independently-shrinking terms: `crossUp`, `dwellOk`, `rBig`, `rrOk`.
+  REDUNDANCY (E14) — wvadSum (intrabar close-vs-open-in-range, volume-weighted) has zero overlap with
+       `ta.obv`/`ta.wad` (close-vs-prior-close, cumulative) or Stochastic's high-low box position;
+       `belowCount` (temporal persistence), `stopPx` (price structure), `rBig`/`rrOk` (risk/reward
+       geometry) are four further independent domains.
+  LATCH IN SEQUENCE (LESSON 8) — N/A by construction: `dwellOk` reads bars strictly before the current
+       one, `crossUp` reads the transition into the current bar; disjoint ranges, no arm/confirm split.
+  Frequency estimate registered before running: **30-250 trades per half**, anchored loosely against
+  Attack 98's post-dwell Stochastic count (37 on H1), wide band and low confidence (no prior wvad
+  construction on this board).
+
+## THE RESULT — H1 ONLY (2022-01-01 → 2024-06-08)
+
+| Metric | Attack 99a (H1) |
+|---|---|
+| Trades | **463** |
+| Win rate | 40.17278618% (186W/277L) |
+| Profit factor | **1.01561201** |
+| Net return | +6.52116015% |
+| Max drawdown | **39.73566995%** |
+| Avg winner / loser | $228.08 / **-$150.79** |
+| Achieved win/loss ratio | 1.51249745 |
+| Commission paid | $4,559.24 |
+| Gross profit / loss | $42,422.28 / $41,770.16 |
+
+**Breakeven win rate at this payoff is 39.80% (1/(1+1.51249745)); achieved is 40.17% — a 0.37pp
+margin.** Gross edge per trade (netProfit + commissionPaid, over 463 trades) is **$11.26**, with
+commission eating **87.5% of gross** — worse than Attack 37's 83.5% cost share, and Attack 37's own
+axis was closed for being too thin at that cost share.
+
+## THE VERDICT — DISCARDED WITHOUT SPENDING THE SECOND CREDIT, PER ATTACK 89's OWN PRECEDENT
+
+**PF nominally clears 1.0**, so the kill rule's literal text (discard only if H1 < 1.0) does not force
+an immediate discard. But three things line up against advancing it to an H2 run:
+
+1. **Trade count (463) is 32% over the board's own settled 60-350 workable-frequency band** (Attack 33
+   died at 757 on cost; Attack 37/91/96/98 all landed inside the band). 463 repeats the shape of Attack
+   89 (526 trades, PF 1.01365036, "clears 1.0 only nominally, at a trade count that repeats Attack 33's
+   cost signature") more than it resembles Attack 37 (322 trades) or Attack 98a (37 trades).
+2. **The margin is thinner than every advancing candidate on the board** — 0.37pp above breakeven win
+   rate, and a cost share (87.5%) above the family this board already closed for being too thin (Attack
+   37's 83.5%).
+3. **Max drawdown (39.74%) is worse than every H1 half that has ever cleared 1.0 on this board** —
+   worse than Attack 37a (31.64%), Attack 91a (didn't record but H2 failed anyway), Attack 96a (didn't
+   advance), and Attack 98a (15.13%).
+
+Per Attack 89's own precedent — a nominal PF > 1.0 clear at a cost-signature trade count is discarded
+without a second run, not queued for H2 — **Attack 99 is DISCARDED here.** The second credit was not
+spent. `ta.wvad` becomes a consumed indicator family alongside `ta.stoch` (98), `ta.macd` (96),
+`ta.wad` (93), `ta.linreg` (91/92) and `ta.supertrend` (89/90).
+
+Record: `attack99-wvad-accumulation-dwell-reclaim-long-h1` (**rejected**), `provenance.jobId`
+`adhoc_01M1V39X8R7XD4THNDQTYJS47Z` from `trader.dev`.
+
+## QUEUE
+
+1. **Remaining untried indicator families**: `ta.sar`, `ta.tsi`, `ta.wpr` (near-redundant with
+   Stochastic — `%R` is a linear rescaling of `%K`, so a %R construction would not test anything Attack
+   98 didn't already test; flag before spending a cycle on it), `ta.iii`, `ta.percentrank`.
+2. **If wvad is ever revisited**, retune `sumLen`/`dwellBars` wider to cut frequency into the 60-350
+   band before re-running — the per-bar construction with no restoring pull (like Stochastic, unlike
+   CCI) suggests a longer dwell requirement is the lever, not a filter stack on top of a mechanism this
+   thin.
+3. **Attack 83 remains the board's strongest both-halves candidate on PF** (1.61044869/1.15365198,
+   88/79 trades); **Attack 88 holds the board's highest recorded PF at n≥30** (2.021320/1.154330).
+   Unaffected by this cycle.
+4. **Attack 37's filter-stack track remains CLOSED** (Attack 41) and is not reopened by this entry.
+5. Credits remaining after this cycle: 462 (one spent). Next cycle at this tier still runs H1-only for
+   any fresh mechanism; the two-run (full-pair) tier requires 500+.
