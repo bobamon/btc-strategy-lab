@@ -10064,3 +10064,119 @@ raised.** That is what this tick produced: not a new number, the right bar.
 - SSRN listing — https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2249314
 - *Do t-Statistic Hurdles Need to be Raised?* — https://arxiv.org/pdf/2204.10275
 - *Publication Bias in Asset Pricing Research* — https://arxiv.org/pdf/2209.13623
+
+---
+
+# ██ BOARD-WIDE STATISTICAL AUDIT — NOT ONE OF 79 SCORED RESULTS CLEARS THE NOISE THRESHOLD ITS OWN TRIAL COUNT IMPLIES
+
+Zero credits. No backtest. Every number below is computed from `results/backtests.json` — 83 recorded
+runs, 79 of which carry a Sharpe ratio and a dated window.
+
+**This tick ran no new mechanism deliberately.** Attack 86's own queue item said to stop testing it,
+because each further look raises the hurdle rather than the evidence. The same logic applies to adding
+Attack 87: another result decided at "PF > 1.0 on 30+ trades" would not tell us anything the previous
+eighty-three did not. **The open question was never "what is the next mechanism" — it was "does the bar
+this board judges by mean anything."**
+
+## THE TOOL
+
+**Bailey & López de Prado's Deflated Sharpe Ratio** exists for exactly this situation: *"when
+researchers try many variations and keep the best one, the maximum SR will be inflated even if all
+candidates are pure noise."* It corrects for selection bias under multiple testing, sample length and
+non-normality.
+
+The full DSR needs the variance of trial Sharpes; a cruder but sufficient version of the same idea is
+the **expected maximum of N pure-noise trials**, which for N independent standard normals is
+approximately **√(2 ln N)**. With the board's **83 recorded trials that is 2.973** — and it lands
+almost exactly on Harvey/Liu/Zhu's independently derived t > 3.0 hurdle, which is a reassuring check on
+both.
+
+## THE AUDIT — implied t = Sharpe × √years, every scored record
+
+| id | implied t | Sharpe | trades | PF |
+|---|---|---|---|---|
+| attack88a — obv-divergence regime-conditioned | **2.019** | 1.294 | 55 | 2.021 |
+| attack83a — obv-divergence regime-conditioned | 1.724 | 1.105 | 88 | 1.610 |
+| attack68a — obv-divergence magnitude-floor | 1.640 | 1.051 | 89 | 1.565 |
+| attack87a — obv-divergence regime-conditioned | 1.554 | 0.996 | 75 | 1.578 |
+| attack70a — obv-divergence swing-quality floor | 1.477 | 0.947 | 52 | 1.646 |
+| attack66a — obv-divergence breakout | 1.452 | 0.930 | 137 | 1.365 |
+| attack69a — obv-divergence swing-quality floor | 1.430 | 0.917 | 38 | 1.753 |
+| attack46b — level-target RR floor 3.5 | 1.408 | 0.942 | 38 | 1.586 |
+| attack74a — weekend-vacuum breakout | 1.349 | 0.864 | 82 | 1.401 |
+| attack40a — sweep-depth cap | 1.318 | 0.845 | 182 | 1.211 |
+
+| Threshold | Records clearing it |
+|---|---|
+| implied t ≥ 3.0 (Harvey/Liu/Zhu) | **0 of 79** |
+| implied t ≥ 2.973 (noise max at N=83) | **0 of 79** |
+| implied t ≥ 2.0 (conventional) | **1 of 79** |
+
+## THE FINDING
+
+**The board's single best result, attack88a at implied t = 2.019, is below what the best of 83 pure-noise
+trials would be expected to produce (2.973).**
+
+Put precisely: √(2 ln N) = 2.019 solves at **N = 7.68**. So the board's best result exceeds the
+pure-noise expected maximum **only if the effective number of independent trials is fewer than about
+eight.**
+
+| effective N | E[max t] under pure noise |
+|---|---|
+| 5 | 1.794 |
+| **8** | **2.039** |
+| 10 | 2.146 |
+| 20 | 2.448 |
+| 83 | 2.973 |
+
+**Eighty-three backtests are recorded.** For the best of them to be distinguishable from noise, all but
+about seven would have to be counted as the same trial.
+
+**And the top of the table argues the opposite way.** Seven of the top ten are OBV-divergence variants
+— attacks 66, 67, 68, 69, 70, 83, 87, 88. That is one family, re-specified and re-run eight times, and
+the best of those eight was then read as the board's leading candidate. **That is the selection
+mechanism Bailey and López de Prado describe, occurring in this repository, visible in its own records.**
+
+## THE CAVEATS, AND THEY ARE REAL
+
+1. **The 83 trials are not independent.** Many are variants of one mechanism on one instrument over one
+   window, so the *effective* N is below 83 — which lowers the threshold and cuts in the results'
+   favour. But it would have to fall below **eight** to rescue even the best one.
+2. **t ≈ Sharpe × √years assumes iid returns.** Trading returns are autocorrelated and fat-tailed, and
+   López de Prado's own work exists partly because of that. This is an approximation, not a test.
+3. **Sharpe here is the engine's, with its annualisation convention**, applied uniformly across records
+   but not independently verified.
+4. **This is not a Deflated Sharpe Ratio.** The real DSR needs the cross-sectional variance of trial
+   Sharpes and a skew/kurtosis adjustment. This is the order-of-magnitude version of the same argument.
+
+**None of those caveats moves the conclusion by the factor of ten it would need to.**
+
+## WHAT THIS DOES AND DOES NOT SAY
+
+**It does not say any individual result is fake.** Every number in `results/backtests.json` came from a
+real recorded run, and the discipline that produced them — pre-registration, split tests, the sample
+floor, the kill rule — is better than most.
+
+**It says the bar was too low, and that the board's ranking of its own candidates is not distinguishable
+from ranking noise.** "PF > 1.0 on 30+ trades" admits results that a coin-flipping process with 83 tries
+would beat.
+
+**This is a ledger-level conclusion and it is deliberately not being enforced as a rule here.** Adding a
+t-hurdle to RATCHET v2 would retroactively unseat every candidate on this board, and that is the user's
+decision, not a tick's. **What this entry does is put the number in front of that decision.**
+
+## QUEUE
+
+1. **Decide whether a t-hurdle joins RATCHET v2.** If it does, no current board candidate survives it.
+2. **If a hurdle is adopted, prefer the real Deflated Sharpe Ratio** over this approximation — it needs
+   the trial-Sharpe variance, which `results/backtests.json` already contains.
+3. **The OBV-divergence family should be counted as one trial, not eight**, in any future assessment.
+4. **Stop generating new mechanisms at the current bar.** Eighty-three trials have produced nothing that
+   clears a threshold their own count implies. An eighty-fourth at the same bar changes nothing.
+
+## SOURCES
+- Bailey & López de Prado, *The Deflated Sharpe Ratio* — https://www.davidhbailey.com/dhbpapers/deflated-sharpe.pdf
+- SSRN listing — https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2460551
+- Bailey et al., *Statistical Overfitting and Backtest Performance* — https://sdm.lbl.gov/oapapers/ssrn-id2507040-bailey.pdf
+- Wikipedia, *Deflated Sharpe ratio* — https://en.wikipedia.org/wiki/Deflated_Sharpe_ratio
+- Harvey, Liu & Zhu, *…and the Cross-Section of Expected Returns* — https://www.nber.org/system/files/working_papers/w20592/w20592.pdf
