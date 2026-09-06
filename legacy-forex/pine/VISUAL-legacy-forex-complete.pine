@@ -4,6 +4,7 @@
 // v1 2026-09-05  ·  v2 2026-09-06 (tick #8 code audit — SYSTEM.md FINDING 17)
 //                ·  v3 2026-09-06 (tick #9, the stop-width gate — FINDING 18)
 //                ·  v4 2026-09-06 (tick #10, the touch tolerance — FINDING 19)
+//                ·  v5 2026-09-06 (tick #11, the volume gate — FINDING 20)
 //
 // NOT ONE NUMBER IN THIS FILE HAS EVER COME FROM A RUN. This workstream has no runId. Every
 // default here is either a source quote or a labelled interpretation; nothing is a measurement.
@@ -186,6 +187,72 @@
 //   separate — price must leave a 50-pt band entirely before a new visit can begin. The two push
 //   opposite ways and no arithmetic settles which dominates. That is a chart measurement, and the
 //   dashboard row + data-window plots added here exist so it can be made instead of argued.
+//
+// ── WHAT v5 CHANGED, AND WHY (tick #11 — SYSTEM.md FINDING 20) ─────────────────────────────────
+// Ticks #9 and #10 each found a gate whose UNITS were wrong. The volume gate's defect is a
+// different one: the gate's THRESHOLD (volMult 1.0) is fine, and the quantity underneath it is
+// not the quantity the source uses at all.
+//
+//  12. `volLen = 20` IS A BAR COUNT ON A SYSTEM THAT TRADES TWO TIMEFRAMES, SO IT IS TWO
+//      DIFFERENT GATES. 20 bars is 100 minutes on 5m and 5 HOURS on 15m. The NY session he trades
+//      is 09:30-16:00 ET = 390 min = 78 bars on 5m, 26 on 15m. So the trailing baseline does not
+//      consist purely of session bars until:
+//         5m  — 11:10 ET, i.e. the first 20 of 78 session bars (26%) are judged against a
+//               baseline reaching back to 07:50 ET;
+//         15m — 14:30 ET, i.e. the first 20 of 26 session bars (77%) are judged against a
+//               baseline reaching back to 04:30 ET, entirely overnight.
+//      On 15m more than three-quarters of the session he trades is scored against an overnight
+//      average. This is the ledger's HARD LESSON 10 shape — a flat parameter binding differently
+//      per timeframe — in a file whose own header insists 5m and 15m are the entire universe.
+//      DIRECTION IS SIGNED HERE, unlike v4's tolerance: overnight index-futures volume is
+//      structurally below cash-session volume, so a mostly-overnight baseline makes
+//      `volume > avg` EASIER. The gate is LOOSEST at 09:30 — the moment his own course says the
+//      volume is best anyway ("you're gonna have the most amount of volume", 8. 02:05) and the
+//      moment FINDING 9 says he takes most of his ~0.7-0.9 trades — and only starts binding in
+//      the afternoon, when he has usually finished. It filters where he does not trade.
+//      MAGNITUDE IS UNMEASURED and is not asserted anywhere. A `Vol baseline` dashboard row now
+//      shows the baseline's span in minutes and how many of its bars are outside the session, so
+//      one live chart settles it. A `Session-to-date average` baseline is added as a
+//      pre-registered option and is OFF by default — the default baseline is unchanged, so with
+//      default inputs v5's signal set and trade record are IDENTICAL to v4's.
+//  13. THE QUANTITY IS NOT HIS. He defines volume kinematically — "volume is how fast is the
+//      markets moving" (9. 00:41) — and every one of his three worked diagnoses is read off
+//      PRICE DISPLACEMENT, never off a histogram: "moving sideways, which means we're moving left
+//      to right" (02:30), "we're not going left to right, we are going straight up like price is
+//      supposed to" (06:18-06:22), "a little bit sideways... not the best volume" (09:24-09:31).
+//      He never reads a volume bar aloud, never states a threshold, and never names a lookback.
+//      `volume > sma(volume, 20)` is therefore an INTERPRETATION with no source support — the
+//      only gate in this file whose underlying quantity is not the one the source uses. It is
+//      left in place (there is nothing measured to replace it with) but it is now labelled.
+//  14. AND IT IS IN THE WRONG PLACE. All three diagnoses are made on bars AFTER the break —
+//      "if price breaks OUT and slowly starts to consolidate" (01:03); the 17:30 example is judged
+//      after the short is already open; "boom that is a good volume" (06:18) is after the long is
+//      taken. His PRE-entry proxy for volume is not a histogram at all, it is the SESSION: "why
+//      did we have volume? because we traded during New York session like we're supposed to"
+//      (06:31-06:37). v1-v4 have it exactly backwards — a hard pre-entry gate and NO post-entry
+//      test. That also makes the pre-entry gate partly REDUNDANT with the session gate already in
+//      the file, which is War Formation E82's shape; recorded as a pre-registered ablation, not
+//      claimed.
+//  15. TWO STATED RULES WERE IN SYSTEM.md's MECHANICAL SPEC AND ABSENT FROM THE CODE — the same
+//      defect class as v2's role flip.
+//      (a) THE EARLY EXIT. "No volume doesn't look good. We're out of this trade. Yes, we're
+//          negative right now, but we would rather lose this small amount, about SEVEN POINTS,
+//          than let it go all the way up and take us out for 15 points, more than double that"
+//          (9. 03:22-03:38). Now implemented, OFF by default (it changes the trade record).
+//      (b) CONVICTION SIZING. "The volume is okay, the setup looks good but not great. I'm gonna
+//          risk less. Not a tighter stop loss — my contract size is going to get smaller"
+//          (9. 09:45-09:58). A three-state rule against a binary gate. This is an INDICATOR and
+//          takes no positions, so it is rendered as a dashboard row only, and the band edge that
+//          separates "okay" from "good" is UNSOURCED and printed in the cell so it reads as a
+//          knob, not a finding. It never touches `volOK` and never changes a signal.
+//
+// ⚠ WHAT v5 DOES **NOT** CLAIM. No magnitude. Whether the overnight baseline changes the gate's
+//   hit rate by a lot or a little is a chart measurement and is instrumented, not asserted. The
+//   `volDeadBars` default is UNSOURCED — the source states the behaviour and its outcome, never a
+//   bar count — which is why the exit ships OFF. And 15 points (9. 03:38) is a THIRD stop-width
+//   figure in this corpus alongside module 11's 25 and 20; the instrument is not identified in
+//   that passage and the trade is one he is holding up as a mistake, so the caps are NOT retuned
+//   on it. It is recorded in FINDING 20 as an observation.
 // ═══════════════════════════════════════════════════════════════════════════════════════════════
 
 indicator("Legacy Forex Trader — Complete Visualiser", overlay=true, max_lines_count=500, max_labels_count=500, max_boxes_count=500)
@@ -217,9 +284,21 @@ flipTrades=input.bool(false, "Allow flipped levels to fire signals", group=gLvl,
      tooltip="OFF by default on purpose: turning it on changes the signal set, and v2's job was to correct the level test, not to alter what fires.")
 
 gVol = "Volume"
-useVol   = input.bool(true, "Require volume",                      group=gVol)
-volLen   = input.int(20,    "Volume average length",               group=gVol)
-volMult  = input.float(1.0, "Volume must exceed avg ×",            group=gVol)
+useVol   = input.bool(true, "Require volume",                      group=gVol,
+     tooltip="v5 audit: the source never mechanises volume as a histogram test. He defines it kinematically — 'volume is how fast is the markets moving' (9. 00:41) — and reads it off price displacement every time. This gate is an INTERPRETATION, not a stated rule. See SYSTEM.md FINDING 20.")
+volLen   = input.int(20,    "Volume average length (bars)",        group=gVol,
+     tooltip="UNSOURCED — the source names no lookback. And it is a BAR count on a system that trades two timeframes: 20 bars = 100 min on 5m but 5 HOURS on 15m. At the 09:30 open the window reaches back to 07:50 (5m) / 04:30 (15m), so the baseline is partly overnight for the first 20 of 78 session bars on 5m and 20 of 26 on 15m. Read the 'Vol baseline' dashboard row on a live chart before changing this.")
+volMult  = input.float(1.0, "Volume must exceed baseline ×",       group=gVol)
+volBaseline= input.string("Trailing N bars (v1-v4 behaviour)", "Volume baseline", options=["Trailing N bars (v1-v4 behaviour)","Session-to-date average (v5 option)"], group=gVol,
+     tooltip="v5: the trailing baseline is contaminated by overnight bars for most of the 15m session (see volLen). A session-to-date mean removes that and makes the 5m and 15m gates commensurable. It is OFF by default because switching it CHANGES THE SIGNAL SET, and a correction tick does not audit and alter at the same time — the same treatment v2 gave flipTrades and v4 gave breakClears. Pre-registered as a one-dimensional test.")
+volGoodMult= input.float(1.5, "Full-size conviction threshold, × baseline", group=gVol,
+     tooltip="DISPLAY ONLY — never touches volOK, never changes a signal. Renders the three-state sizing rule at 9. 09:45-09:58 ('the volume is okay... I'm gonna risk less... my contract size is going to get smaller') which v1-v4 had no representation of at all. The band edge between 'okay' and 'good' is UNSOURCED; it is printed in the dashboard cell so it reads as a knob and not as a finding.")
+volDeadExit= input.bool(false, "Exit early when volume dies after entry (9. 03:22)", group=gVol,
+     tooltip="OFF by default: this CHANGES THE TRADE RECORD. 'No volume doesn't look good. We're out of this trade... we would rather lose this small amount, about seven points, than let it go all the way up and take us out for 15 points' (9. 03:22-03:38). The behaviour is stated plainly and was missing from v1-v4 entirely; the bar count below is not stated anywhere, which is why this ships off.")
+volDeadBars= input.int(3,   "…after this many consecutive no-volume bars", group=gVol, minval=1,
+     tooltip="UNSOURCED. The source states the behaviour and its outcome (7 pts cut vs a 15-pt stop) and never a bar count. This is a placeholder exposed as a pre-registered test, not a measured value, and must never be quoted as one.")
+volDeadR   = input.float(0.0, "…and only while the trade is below this R", group=gVol,
+     tooltip="0.0 is the minimal source-expressible reading of 'price is not moving down… it's moving sideways' (9. 02:25-02:35): the trade has not advanced at all. Same style of minimal reading as v3's one-tick pad.")
 
 gRisk = "Risk"
 padMode   = input.string("Ticks beyond the level (v3 default)", "Stop padding unit", options=["Ticks beyond the level (v3 default)","% of price (v1/v2 behaviour)"], group=gRisk,
@@ -264,7 +343,11 @@ instNm= isYM ? "YM / US30" : "NQ / NAS100"
 maxStopPts = isYM ? maxStopYM : maxStopNQ
 
 // ── 1. SESSION ────────────────────────────────────────────────────────────────────────────────
-inSess  = not useSession or not na(time(timeframe.period, sessTime, sessTZ))
+// v5: the raw session test is kept separate from the gate. The volume-baseline instrumentation
+// has to know what is really outside the New York session even when the session GATE is switched
+// off, or turning `useSession` off would silently report a clean baseline.
+inSessRaw = not na(time(timeframe.period, sessTime, sessTZ))
+inSess  = not useSession or inSessRaw
 newDay  = ta.change(time("1D")) != 0
 
 // ── 2. MARKET STRUCTURE — higher highs / higher lows vs lower lows / lower highs ──────────────
@@ -382,9 +465,48 @@ brkLvlLong  = brokeFlipL and not brokeResRaw ? flipSup : resLvl
 brkLvlShort = brokeFlipS and not brokeSupRaw ? flipRes : supLvl
 
 // ── 5. VOLUME ─────────────────────────────────────────────────────────────────────────────────
+// v5 (tick #11 — SYSTEM.md FINDING 20). Three things are wrong in this block and NOT ONE of them
+// is the threshold: the baseline is a bar count that means two different durations on his two
+// timeframes and is overnight for most of the 15m session; the quantity is a histogram test the
+// source never uses; and the source's two actual volume BEHAVIOURS (an early exit and conviction
+// sizing) were absent from the code entirely. See the v5 header note.
+//
+// THE DEFAULT BASELINE IS UNCHANGED. With default inputs this block returns exactly what v4's did,
+// so v5's signal set and trade record are identical to v4's and the diff is auditable.
 volAvg = ta.sma(volume, volLen)
-volOK  = not useVol or (not na(volAvg) and volAvg > 0 and volume > volAvg * volMult)
-volRat = (na(volAvg) or volAvg == 0) ? na : volume / volAvg
+
+// Session-to-date baseline (v5 option): the mean of the PRIOR in-session bars of the current day.
+// Excluding the current bar is not a detail — including it makes the first session bar's ratio
+// exactly 1.0, which would block the 09:30 entry the whole method is built around.
+var float sessVolSum = 0.0
+var int   sessVolCnt = 0
+if newDay
+    sessVolSum := 0.0
+    sessVolCnt := 0
+volAvgSessPrev = sessVolCnt > 0 ? sessVolSum / sessVolCnt : na
+if inSessRaw
+    sessVolSum += volume
+    sessVolCnt += 1
+
+useSessBase  = volBaseline == "Session-to-date average (v5 option)"
+sessBaseLive = useSessBase and not na(volAvgSessPrev)   // falls back to the SMA on the day's first bar
+volBase = sessBaseLive ? volAvgSessPrev : volAvg
+volOK   = not useVol or (not na(volBase) and volBase > 0 and volume > volBase * volMult)
+volRat  = (na(volBase) or volBase == 0) ? na : volume / volBase
+
+// v5 instrumentation — how much of the trailing baseline is not the session at all. 20 bars is
+// 100 min on 5m and 300 min on 15m, against a 390-min session, so this row reads very differently
+// on his two timeframes and that difference is the finding.
+volOutBars  = math.sum(inSessRaw ? 0.0 : 1.0, volLen)
+volBaseMins = volLen * timeframe.in_seconds() / 60.0
+
+// Conviction (9. 09:45-09:58) — a stated rule with no representation in v1-v4. DISPLAY ONLY: this
+// file is an indicator, it takes no positions, `volGoodMult` is UNSOURCED, and this never feeds
+// volOK or any signal. "Not a tighter stop loss — my contract size is going to get smaller."
+convTxt = not volOK   ? "NO TRADE — no volume (9. 07:51)"
+     : na(volRat)     ? "—"
+     : volRat >= volGoodMult ? "FULL SIZE"
+     : "REDUCED SIZE — smaller contracts, NOT a tighter stop (9. 09:55)"
 
 // ── DAILY TRADE COUNTER — "up to two trades max per day" ─────────────────────────────────────
 var int tradesToday = 0
@@ -483,6 +605,11 @@ if dir != 0 and not na(curRprev)
         newStop = dir == 1 ? entryPx + wantR * initR : entryPx - wantR * initR
         stopPx := dir == 1 ? math.max(stopPx, newStop) : math.min(stopPx, newStop)
 
+// v5: the run of consecutive bars inside the trade that fail the volume test. Reset while flat so
+// a stale run cannot carry across into the next trade.
+var int deadRun = 0
+deadRun := dir == 0 ? 0 : (volOK ? 0 : deadRun + 1)
+
 hitT = dir ==  1 and high >= tgtPx  or dir == -1 and low  <= tgtPx
 hitS = dir ==  1 and low  <= stopPx or dir == -1 and high >= stopPx
 
@@ -509,6 +636,44 @@ if dir != 0 and (hitT or hitS)
     r3 := r2
     r2 := r1
     r1 := math.max(outR, 0)
+    dir := 0
+
+// ── v5: THE VOLUME-DEATH EARLY EXIT (9. 03:22-03:38) ──────────────────────────────────────────
+// "No volume doesn't look good. We're out of this trade. Yes, we're negative right now, but we
+// would rather lose this small amount right here, which would be about seven points, then let it
+// go all the way up and take us out for 15 points, more than double that. Just take your loss,
+// cut it off early."  SYSTEM.md has carried this in the mechanical spec since tick #1 and v1-v4
+// never implemented it — the same defect class as v2's role flip.
+//
+// Evaluated AFTER the stop/target block on purpose: an intrabar stop or target touch precedes the
+// close this exit is taken at, and booking the stop on an ambiguous bar is the convention v2 fix
+// #4 already set for this file.
+//
+// ⚠ THE INTERACTION THIS CREATES WITH HIS OWN TARGET RULE, derived in FINDING 20 and NOT measured:
+// a loss scores ZERO in his rolling window regardless of its size (10. 02:56). So relative to
+// letting the trade run, cutting early can only replace would-be WINNERS with zeros — the cut
+// itself is invisible on the loss side of that computation. It saves real money and it can only
+// push the rolling-mean target DOWN. Two of his own rules, pulling against each other.
+volDead = dir != 0 and volDeadExit and deadRun >= volDeadBars and not na(curR) and curR < volDeadR
+if volDead
+    outR = curR
+    label.new(bar_index, dir == 1 ? low : high,
+         "VOL DEAD — cut " + str.tostring(outR, "#.##") + "R  (9. 03:22)",
+         style = dir == 1 ? label.style_label_up : label.style_label_down,
+         color = color.new(color.purple, 20), textcolor=color.white, size=size.small)
+    if not na(lnE)
+        line.set_x2(lnE, bar_index), line.set_x2(lnS, bar_index), line.set_x2(lnT, bar_index)
+    if not na(lad1)
+        line.set_x2(lad1, bar_index), line.set_x2(lad2, bar_index), line.set_x2(lad3, bar_index)
+        line.set_x2(lad4, bar_index), line.set_x2(lad5, bar_index)
+    r8 := r7
+    r7 := r6
+    r6 := r5
+    r5 := r4
+    r4 := r3
+    r3 := r2
+    r2 := r1
+    r1 := math.max(outR, 0)          // a loss scores 0, exactly as a full stop does (10. 02:56)
     dir := 0
 
 if dir == 0 and (goLong or goShort)
@@ -558,7 +723,7 @@ bgcolor(inSess and bearStruct     ? color.new(color.red, 94) : na,   title="Bear
 barcolor(useVol and not volOK ? color.new(color.gray, 50) : na,      title="No volume")
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────────────────────
-var table d = table.new(position.top_right, 3, 17, border_width=1, frame_width=1, frame_color=color.gray)
+var table d = table.new(position.top_right, 3, 19, border_width=1, frame_width=1, frame_color=color.gray)
 f_row(t, r, k, ok, v) =>
     table.cell(t, 0, r, k, text_color=color.white,  text_size=size.small, bgcolor=color.new(color.black,20), text_halign=text.align_left)
     table.cell(t, 1, r, ok ? "✔" : "✖", text_color=ok ? color.lime : color.red, text_size=size.small, bgcolor=color.new(color.black,20))
@@ -585,31 +750,45 @@ if showDash and barstate.islast
          (na(flipSup) ? "" : "sup " + str.tostring(flipSup, format.mintick) + "  ") +
          (na(flipRes) and na(flipSup) ? "none live" : (flipTrades ? "(can fire)" : "(drawn only)")))
     f_row(d, 8, "Break",      brokeRes or brokeSup, brokeRes ? "broke RESISTANCE ✓" : brokeSup ? "broke SUPPORT ✓" : "waiting for a break")
-    f_row(d, 9, "Volume",     volOK,        na(volRat) ? "—" : str.tostring(volRat, "#.##") + "× avg  (need > " + str.tostring(volMult, "#.##") + ")")
+    f_row(d, 9, "Volume",     volOK,        na(volRat) ? "—" : str.tostring(volRat, "#.##") + "× baseline  (need > " + str.tostring(volMult, "#.##") + ")")
+    // v5 instrumentation — the baseline's own composition. 20 bars is 100 min on 5m and 300 on
+    // 15m against a 390-min session, so at the open this row reads "20 of 20 outside the session"
+    // on 15m. It is the fourth zero/near-inert-signal cause the dashboard can now name, and the
+    // only one whose bias direction is signed: overnight volume is structurally lower, so a
+    // contaminated baseline makes the gate LOOSER, not tighter.
+    f_row(d, 10, "Vol baseline", sessBaseLive or volOutBars == 0,
+         sessBaseLive ? "session-to-date, " + str.tostring(sessVolCnt) + " bars today  (v5 option)"
+            : str.tostring(volLen) + " bars = " + str.tostring(volBaseMins, "#") + " min  →  "
+              + str.tostring(volOutBars, "#") + " of them OUTSIDE the session"
+              + (volOutBars > 0 ? "  ← partly overnight, gate is looser" : "  ← all in-session"))
+    // v5: a stated three-state rule (9. 09:45-09:58) that v1-v4 rendered nowhere. Display only —
+    // the threshold is printed because it is UNSOURCED and must read as a knob, not a finding.
+    f_row(d, 11, "Conviction", volOK,
+         convTxt + (na(volRat) ? "" : "   (full ≥ " + str.tostring(volGoodMult, "#.##") + "× — UNSOURCED, display only)"))
     // which side's stop width is the live question depends on which side structure permits
     projR    = bullStruct ? projRlong : bearStruct ? projRshort : na
     stopOKnow= bullStruct ? stopOKlong : bearStruct ? stopOKshort : true
-    f_row(d, 10, "Stop width", stopOKnow, na(projR) ? "—" : str.tostring(projR, "#.#") + " pts  (max " + str.tostring(maxStopPts, "#") + " — he refused 64)")
+    f_row(d, 12, "Stop width", stopOKnow, na(projR) ? "—" : str.tostring(projR, "#.#") + " pts  (max " + str.tostring(maxStopPts, "#") + " — he refused 64)")
     // v3 instrumentation: the pad and the cap were in different units, and the pad was eating most
     // of the budget. This row makes that visible so a zero-signal chart can be attributed to the
     // right gate instead of being confused with v2's touch-counting correction.
-    f_row(d, 11, "Stop budget", stopBudget > 0,
+    f_row(d, 13, "Stop budget", stopBudget > 0,
          str.tostring(padNow, "#.##") + " pts pad (" + str.tostring(padPct, "#") + "% of cap)  →  "
          + (stopBudget > 0 ? str.tostring(stopBudget, "#.#") + " pts left for entry-to-level"
                            : "PAD ≥ CAP — no setup can ever pass"))
     // v4 instrumentation: the touch tolerance was a % of price while everything it has to be
     // commensurable with is in index points. This row is the third and last zero-signal cause on
     // the dashboard, so a blank chart can now be attributed rather than guessed at.
-    f_row(d, 12, "Level width", tolFitsBudget,
+    f_row(d, 14, "Level width", tolFitsBudget,
          "±" + str.tostring(tol, "#.##") + " pts  (band " + str.tostring(bandPts, "#.#") + ", "
          + str.tostring(tolPct, "#") + "% of cap)  →  "
          + (tolFitsBudget ? "fits inside the " + str.tostring(stopBudget, "#.#") + "-pt stop budget"
                           : "TOL > BUDGET — every tradeable break is still inside the touch band"))
-    f_row(d, 13, "Target",    true,      (useAdaptR ? (windowFull ? "1:" + str.tostring(rTargetUse, "#") + "  from mean " + str.tostring(avgAchR, "#.##") + "R of last " + str.tostring(cntR) + " (10._USING_DATA)"
+    f_row(d, 15, "Target",    true,      (useAdaptR ? (windowFull ? "1:" + str.tostring(rTargetUse, "#") + "  from mean " + str.tostring(avgAchR, "#.##") + "R of last " + str.tostring(cntR) + " (10._USING_DATA)"
                                                                   : "1:" + str.tostring(rTargetUse, "#") + "  FALLBACK — window " + str.tostring(cntR) + "/" + str.tostring(rrWindow) + " trades")
                                                     : "1:" + str.tostring(rTargetUse, "#") + "  fixed (adaptive rule off)"))
-    f_row(d, 14, "Trail rule", true,      trailMode + "   (source is ambiguous — see header)")
-    f_row(d, 15, "Trades today", underCap, str.tostring(tradesToday) + " / " + str.tostring(maxTrades) + "  (cap counts across NQ+YM)")
+    f_row(d, 16, "Trail rule", true,      trailMode + "   (source is ambiguous — see header)")
+    f_row(d, 17, "Trades today", underCap, str.tostring(tradesToday) + " / " + str.tostring(maxTrades) + "  (cap counts across NQ+YM)")
 
     // name the FIRST unmet condition, in his own order, so the dashboard says what is blocking
     blocker = not inSess        ? "NO TRADE — outside New York session"
@@ -620,11 +799,14 @@ if showDash and barstate.islast
       : not stopOKnow           ? "NO TRADE — stop too wide (" + str.tostring(projR, "#.#") + " pts)"
       : not underCap            ? "NO TRADE — daily cap reached"
       : "WAIT"
-    verdict = goLong ? "▲ LONG NOW" : goShort ? "▼ SHORT NOW" : dir != 0 ? ("HOLDING  " + (na(curR)?"":str.tostring(curR,"#.##") + "R  → 1:" + str.tostring(tgtR,"#"))) : blocker
+    verdict = goLong ? "▲ LONG NOW" : goShort ? "▼ SHORT NOW"
+      : dir != 0 ? ("HOLDING  " + (na(curR)?"":str.tostring(curR,"#.##") + "R  → 1:" + str.tostring(tgtR,"#"))
+                    + (volDeadExit and not volOK ? "   [vol dead " + str.tostring(deadRun) + "/" + str.tostring(volDeadBars) + "]" : ""))
+      : blocker
     vc = goLong ? color.green : goShort ? color.red : dir != 0 ? color.blue : color.new(color.gray,40)
-    table.cell(d, 0, 16, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
-    table.cell(d, 1, 16, "", bgcolor=vc)
-    table.cell(d, 2, 16, verdict, text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+    table.cell(d, 0, 18, "VERDICT", text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
+    table.cell(d, 1, 18, "", bgcolor=vc)
+    table.cell(d, 2, 18, verdict, text_color=color.white, text_size=size.normal, bgcolor=vc, text_halign=text.align_left)
 
 alertcondition(goLong,  "Legacy LONG",  "Legacy Forex: LONG — structure bullish, resistance broken, volume present")
 alertcondition(goShort, "Legacy SHORT", "Legacy Forex: SHORT — structure bearish, support broken, volume present")
@@ -649,3 +831,11 @@ plot(tol,           "Touch tolerance (pts, half-band)", display=display.data_win
 plot(bandPts,       "Touch band width (pts)",           display=display.data_window)
 plot(tolPct,        "Tolerance as % of max stop",       display=display.data_window)
 plot(tolFitsBudget ? 1 : 0, "TolFitsStopBudget",        display=display.data_window)
+// v5 instrumentation — the volume gate. The first two settle FINDING 20's headline on one chart:
+// how long the baseline window actually is in minutes, and how much of it is not the session.
+plot(volBaseMins,   "Vol baseline span (minutes)",           display=display.data_window)
+plot(volOutBars,    "Vol baseline bars outside session",     display=display.data_window)
+plot(volRat,        "Volume vs baseline (×)",                display=display.data_window)
+plot(volOK ? 1 : 0, "VolGatePass",                           display=display.data_window)
+plot(sessBaseLive ? 1 : 0, "SessionBaselineLive",            display=display.data_window)
+plot(deadRun,       "Consecutive no-volume bars in trade",   display=display.data_window)

@@ -1611,3 +1611,211 @@ threshold he **states**, and it is not retuned here — but unlike the tolerance
   only so a later session knows what to check.
 - **No past conclusion changes.** This workstream has still never banked a result, and that remains the
   correct state.
+
+---
+
+## ██ FINDING 20 — THE VOLUME GATE'S THRESHOLD IS FINE. THE QUANTITY UNDER IT IS NOT HIS, THE PLACE IT SITS IS NOT HIS, AND ITS BASELINE IS OVERNIGHT FOR 77% OF THE 15m SESSION
+
+**Tick #11, 2026-09-06. Zero credits. No backtest, no `plan_backtest_window`, no engine call of any
+kind.** Everything below is arithmetic on the file's own defaults, on the session hours the source
+states, and on verbatim quotes from `9._VOLUME` and `8._SESSIONS_TO_TRADE`.
+
+Tick #10's queue item 4 named the next un-audited gate: *"`volMult = 1.0` against
+tick-volume-vs-contract-volume on index CFDs, and `pivLen = 5`."* The volume gate was audited. The
+CFD tick-volume question turned out **not** to be the interesting defect and is recorded below as a
+secondary caveat; four larger things were found first. `pivLen` was **not** audited this tick and
+remains open.
+
+### THE PATTERN THIS BREAKS, AND WHY THAT MATTERS
+
+Ticks #8, #9 and #10 each found a gate whose **units or counting basis** were wrong. That run created
+an expectation that the next gate would fail the same way. **It does not.** `volMult = 1.0` is
+dimensionless and comparing a bar's volume to an average of bar volumes is unit-consistent. Had this
+tick gone looking only for a units mismatch it would have reported the gate clean. The defects are of
+three different kinds, and the threshold — the thing a tuning pass would have reached for — is the
+one part with nothing wrong with it.
+
+### DEFECT 1 (THE HEADLINE) — `volLen` IS A BAR COUNT ON A SYSTEM THAT TRADES TWO TIMEFRAMES, SO IT IS TWO DIFFERENT GATES
+
+The New York session he trades is **09:30–16:00 ET = 390 minutes** (`8.` [00:36]/[00:44], which states
+both clocks explicitly: *"6:30 a.m. Pacific Standard Time is when session starts... if you're on the
+east coast of the US it is going to be 9:30 a.m. Eastern"*). `volLen = 20` bars against that:
+
+| tf | 20 bars = | baseline at the 09:30 open reaches back to | session bars | bars judged against a partly-overnight baseline |
+|---|---|---|---|---|
+| **5m** | 100 min | **07:50 ET** — pre-open | 78 | first **20 of 78 = 26%** |
+| **15m** | **300 min (5 h)** | **04:30 ET** — entirely overnight | 26 | first **20 of 26 = 77%** |
+
+The baseline is not composed purely of session bars until **11:10 ET on 5m** and **14:30 ET on 15m**.
+On 15m, **more than three-quarters of the only session he trades is scored against an average that is
+mostly overnight**, and the baseline never becomes clean before 14:30 — by which time `FINDING 9`'s
+~0.7–0.9 trades per session have usually already happened.
+
+**This is the ledger's HARD LESSON 10 shape** ("a flat % R floor binds harder on the tighter
+timeframe") in a different parameter: a single default cannot serve two timeframes when the quantity
+it controls is a *duration* and the parameter is a *count*. It sits in a file whose own header
+insists 5m and 15m are the entire universe (`5.` [03:18]).
+
+**And unlike FINDING 19, the direction of the bias is signed.** Overnight index-futures volume is
+structurally below cash-session volume, so a mostly-overnight baseline makes `volume > avg × 1.0`
+**easier**, not harder. The gate is therefore **loosest at 09:30** — the moment his own course says
+the volume is best anyway (*"you're gonna have the most amount of volume"*, `8.` [02:05]) and the
+moment he takes most of his trades — and only begins to bind in the afternoon, when he has usually
+finished. **It does most of its filtering at the time of day he barely trades.**
+
+**MAGNITUDE IS NOT ASSERTED.** How much this moves the gate's hit rate is a chart measurement. v5 adds
+a `Vol baseline` dashboard row (span in minutes, and how many of the baseline's bars are outside the
+session) plus data-window plots, so one live chart settles it. A `Session-to-date average` baseline is
+added as a **pre-registered option, OFF by default** — switching it changes the signal set, and this
+file's precedent (v2 `flipTrades`, v4 `breakClears`) is that a correction tick does not audit and
+alter at the same time.
+
+### DEFECT 2 — THE QUANTITY IS NOT THE ONE THE SOURCE USES
+
+He defines volume kinematically and then reads it off **price displacement**, every single time:
+
+> [00:41] *"Volume is **how fast is the markets moving** how fast are the markets moving?"*
+> [02:30] *"Price is not moving down. It's **moving sideways**, which means we're **moving left to
+> right** and creating consolidation."*
+> [06:18] *"Boom that is a good volume. **We're not going left to right. We are going straight up**
+> like price is supposed to."*
+> [09:24] *"Prices moving... okay, but it is **a little bit sideways**. Not the best volume like the
+> examples we just saw, but it is there."*
+
+**He never reads a volume bar aloud in 831 seconds, never states a threshold, and never names a
+lookback.** `volume > ta.sma(volume, 20)` is an **interpretation with no source support** — the only
+gate in the visualiser whose underlying quantity is not the one the source uses. It is left in place,
+because there is nothing *measured* to replace it with and inventing a displacement threshold would be
+the fabrication this project forbids, but it is now labelled as an interpretation in the input tooltip
+and in the file header.
+
+### DEFECT 3 — AND IT IS IN THE WRONG PLACE. HIS PRE-ENTRY PROXY FOR VOLUME IS THE SESSION.
+
+Every one of those three diagnoses is made on bars **after** the break:
+
+> [00:56] *"If **price breaks out** and slowly starts to consolidate, more than likely price is going
+> to lose."*
+
+The 17:30 example is judged after the short is already open (*"if we were to take our short position
+here"* [02:02], then *"that's already not good"* [02:23]). The 06:30 example's *"boom that is a good
+volume"* [06:18] comes after *"let's take our long position as we break right there"* [05:45].
+
+His **pre-entry** proxy is not a histogram at all:
+
+> [06:31] *"**Why did we have volume? Because we traded during New York session** like we're supposed
+> to. We're not trading outside of our session."*
+> [02:12] *"This is what happens when there's no volume, and because **I'm trading at 1730, which is
+> way out of the session.**"*
+
+**v1–v4 have this exactly backwards: a hard pre-entry gate and no post-entry test at all.** It also
+means the pre-entry gate is **partly redundant with the session gate already in the file** — War
+Formation E82's shape, where `h1Bull`/`h1Bear` turned out fully redundant with `brokeBelow`/
+`brokeAbove`. **That redundancy is recorded as a pre-registered ablation, not claimed**: whether it is
+partial or total is exactly the kind of thing E82 needed a run to settle.
+
+*(The 17:30 timestamp is on his own screen clock, which `8.` [00:36] fixes as **Pacific**. 17:30 PT =
+20:30 ET — several hours past the 16:00 close, consistent with "way out of the session". The 6:30
+examples are 09:30 ET, the session open. This is corroboration of the session anchor from a second
+module, not a new finding.)*
+
+### DEFECT 4 — TWO STATED RULES WERE IN THIS FILE'S OWN MECHANICAL SPEC AND ABSENT FROM THE CODE
+
+Both appear in the SPEC TABLE above (rows **Early exit** and **Sizing**), decoded at tick #1. Neither
+was ever implemented. **This is v2's role-flip defect exactly** — advertised in the documentation,
+missing from the build — and it has now happened twice in this one file.
+
+**(a) The volume-death early exit.**
+
+> [03:22] *"**No volume doesn't look good. We're out of this trade.** Yes, we're negative right now,
+> but we would rather lose this small amount right here, which would be about **seven points**, then
+> let it go all the way up and take us out for **15 points**, more than double that. **Just take your
+> loss, cut it off early.**"*
+
+Now implemented in v5, **OFF by default** (it changes the trade record). The exit is evaluated *after*
+the stop/target block, because an intrabar stop or target touch precedes the close this exit is taken
+at — the conservative convention v2's fix #4 already set for this file.
+
+**(b) Conviction sizing — a three-state rule against a binary gate.**
+
+> [09:45] *"The volume is okay? The setup looks good **but not great**. I'm gonna **risk less**. Okay,
+> **not** stop loss. I'm **not** gonna make a tighter stop loss, but instead **my contract size is
+> going to get smaller**."*
+
+Three states — no volume → no trade; okay → smaller size; good → full size — against a binary gate.
+This file is an **indicator and takes no positions**, so v5 renders it as a dashboard row only. The
+band edge separating "okay" from "good" is **UNSOURCED**; it is printed inside the cell so it reads as
+a knob rather than a finding, and it never touches `volOK` or any signal.
+
+### THE DERIVED CONSEQUENCE — HIS EARLY-EXIT RULE AND HIS TARGET RULE PULL AGAINST EACH OTHER
+
+This follows from two of his own stated rules and needs no data.
+
+A loss scores **zero** in the rolling window that sets his target, **regardless of its size**:
+*"we take the three, **zero for a loss**, two point five, five, five and a three"* (`10.` [02:56]).
+So, relative to letting a trade run:
+
+| what the cut-early rule does to a trade | effect on the rolling-mean window |
+|---|---|
+| turns a would-be **full stop** (−1R) into a small loss (−0.47R in his example) | **none** — both score 0 |
+| turns a would-be **winner** into a small loss | replaces a positive entry with a **0** |
+
+**The cut is invisible on the loss side of that computation and can only remove winners from it.** So
+the more disciplined he is about cutting early, the lower his rolling-mean target drifts — and the
+target is recomputed daily off that same window. The rule saves real money and simultaneously degrades
+the statistic he uses to set his targets. **Derived, not measured**, and stated here as a structural
+property of his two rules rather than a prediction about their magnitude.
+
+### THE SECONDARY CAVEAT TICK #10 ACTUALLY NAMED — CONTRACT VOLUME vs TICK VOLUME
+
+The visualiser's header offers `NAS100` / `US30` as alternatives to NQ/YM. On CME futures the volume
+series is **real contract volume**; on an index CFD it is **tick count**. `volMult` is a *ratio*
+against a same-series average, so a uniform substitution of one series for the other does not
+by itself break the ratio — which is why this is a caveat and not a defect. What it does mean is that
+a live-chart reading of the `Vol baseline` row **is not transferable between a futures chart and a CFD
+chart**, and the instrument the measurement was taken on must be recorded with it. **Unverified
+against any external source** — `tradingview.com` and every `WebFetch` target remain blocked by this
+environment's egress proxy (ticks #9, #10), so this rests on the definition of the two series and
+nothing was fetched to confirm it.
+
+### WHAT v5 CHANGED
+
+1. **A `Vol baseline` dashboard row and four data-window plots** — the baseline's span in minutes, how
+   many of its bars fall outside the session, the live ratio, and whether the gate passed. This is the
+   fourth zero/near-inert-signal cause the dashboard can name and separate, after touch counting (#8),
+   stop budget (#9) and level width (#10).
+2. **A `Session-to-date average` baseline option, OFF by default.** Default behaviour unchanged.
+3. **The volume-death early exit, implemented and OFF by default**, with `volDeadBars` labelled
+   UNSOURCED and `volDeadR = 0` as the minimal source-expressible reading of "not moving".
+4. **A `Conviction` dashboard row**, display only, with its unsourced threshold printed.
+5. **`inSessRaw` split from `inSess`**, so the baseline instrumentation reports the real session even
+   when the session gate is switched off.
+
+**With default inputs, v5's signal set and trade record are identical to v4's.** Every addition is
+either instrumentation or an explicitly-off pre-registered option. That is a checkable claim about the
+diff, not a measurement.
+
+### ██ WHAT FINDING 20 DOES NOT ESTABLISH
+
+- **No number here came from a run.** No `runId` exists for this workstream and none was created. Every
+  figure above is arithmetic on session hours the source states and on the file's own defaults.
+- **The magnitude of defect 1.** The *direction* is signed by the structure of overnight vs cash-session
+  volume; **how much** it moves the gate's hit rate is unmeasured and instrumented, never asserted.
+- **Whether the volume gate is wholly or only partly redundant with the session gate.** Named as a
+  pre-registered ablation. Not claimed.
+- **What the right displacement measure would be.** Defect 2 says the quantity is wrong; it does not say
+  what the correct one is, and no substitute was invented.
+- **Whether `volDeadBars = 3` is anything.** It is a placeholder on an off-by-default feature. The source
+  states the behaviour and its outcome and never a bar count.
+- **The 15-point stop at [03:38] is NOT used to retune anything.** It is a third stop-width figure in
+  this corpus alongside module 11's 25 and 20 and module 4's 20/30, but the instrument is not identified
+  in that passage and the trade is one he is holding up as a **mistake**. `maxStopNQ` and `maxStopYM` are
+  unchanged. Recorded as an observation only.
+- **Whether any version compiles — queue item 2 is still open**, still blocked by the egress proxy, still
+  no Pine compiler here. **No compile-error claim is made.** v5 adds three built-ins not previously in the
+  file: `math.sum`, `timeframe.in_seconds()` and `inSessRaw`'s reuse of `time()`; expect to fix syntax,
+  not logic.
+- **`pivLen = 5` was not audited.** It remains the last un-audited number in the file and the source
+  states none.
+- **No past conclusion changes.** This workstream has still never banked a result, and that remains the
+  correct state. As in ticks #8–#10, a run banked off v4 would have had its trade count shaped by this
+  gate invisibly — luck, not process.
