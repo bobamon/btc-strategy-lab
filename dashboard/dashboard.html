@@ -3846,9 +3846,60 @@ const DATA = [
     },
     "verdict": "H2 FAILS. PF 0.83455321 (below 1.0), max drawdown 43.98374415% (worse than H1's 27.43%), net -34.20%. Per Attack 91's own pre-registered outcome tree (LESSON 17), H2 below 1.0 means the mechanism is a single-half result, discarded, joining the one-half-only discard list. Win rate is still a MAJORITY (62.03%) but ratioAvgWinLoss fell further (0.51095095 vs H1's 0.55756758) -- the breakeven win rate at this payoff is ~66.2%, and the achieved 62.03% falls SHORT of it by ~4pp, flipping from H1's real edge into HARD LESSON 53's inverted-payoff failure shape on this half. Avg loser -$172.27 vs avg winner $88.02 confirms the flip: the H1 edge did not transfer.",
     "notes": "Queue item 1 from Attack 91's H1 record, run this cycle at 486 credits (250-500 tier). Per the mandate's credit-band rule the tier authorizes one run; since H1 already cleared the kill rule in the prior cycle, this cycle's single authorized run was spent on the outstanding H2 measurement rather than repeating H1. Byte-identical pine source to H1 (no parameters changed). Never more than two runs; only one run spent this cycle. VERDICT: Attack 91 (linear-regression channel breakout) is DISCARDED -- H1/H2 spread is the finding: PF 1.19555356 -> 0.83455321, DD 27.43% -> 43.98%, ratioAvgWinLoss 0.558 -> 0.511. Attack 83 remains the board's strongest both-halves candidate (PF 1.61044869/1.15365198, 88/79 trades, DD 11.08%/10.76%), unaffected by this cycle."
+  },
+  {
+    "id": "attack93-wad-accumulation-breakout-long-h1",
+    "name": "Attack 93: Williams A/D accumulation-leads-breakout LONG (bare, new mechanism) -- pre-2024 half",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "rejected",
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2024-06-08",
+    "specPath": "strategies/pine/attack93-wad-accumulation-breakout-long.pine",
+    "description": "Genuinely new mechanism per Attack 92's queue item 1 (untried indicator families). Claim: ta.wad (Williams Accumulation/Distribution, signed true-range flow) printing a new 20-bar high BEFORE price prints its own 20-bar high marks accumulation building ahead of visible structure; a latch arms on the WAD-lead and requires price to confirm with its own 20-bar breakout within 10 bars, with an explicit invalidation (a new 20-bar low while armed clears the latch early). Stop is the pre-breakout 20-bar structural swing low (LESSON 5), R floored at 0.8% by exclusion (LESSON 3), target fixed at 2R (HARD LESSON 13). Long leg only this cycle; short is the standing queued asymmetry.",
+    "metrics": {
+      "netProfitPct": -15.81384947,
+      "profitFactor": 0.97213381,
+      "maxDrawdownPct": 56.74561326,
+      "totalTrades": 683,
+      "winningTrades": 284,
+      "losingTrades": 399,
+      "winRatePct": 41.58125915,
+      "avgTradePct": -0.02315351,
+      "avgWinningTrade": 194.252976836972,
+      "avgLosingTrade": -142.228647540852,
+      "ratioAvgWinLoss": 1.36577954,
+      "largestWin": 956.988191,
+      "largestLoss": -889.884110999998,
+      "avgBarsInTrade": 87.22547584,
+      "avgBarsWinning": 112.83450704,
+      "avgBarsLosing": 68.99749373,
+      "sharpeRatio": 0.05438348,
+      "sortinoRatio": 0.0455861,
+      "commissionPaid": 5145.660547100003,
+      "grossProfit": 55167.84542169999,
+      "grossLoss": 56749.23036879993,
+      "longTrades": 683,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1T7R4W3F4Q1VAM9YBQ7K5EK",
+      "strategyId": "01M1T7R514NJ81Y2BX774ETVY7",
+      "resultId": "01M1T7R4W3XAXPBVD1GBYAZE2Q",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1T7R4W3XAXPBVD1GBYAZE2Q",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "verifiedAt": "2026-09-06T00:00:00Z"
+    },
+    "verdict": "H1 FAILS THE KILL RULE. PF 0.97213381 (below 1.0), max drawdown 56.74561326% -- the worst of any candidate on this board -- on 683 trades, nearly 2x the ~60-350 workable band's upper edge. Per the pre-registered outcome tree (LESSON 17), H1 below 1.0 means DISCARD immediately: no H2 run, no filter rescue. The frequency estimate missed LOW by roughly 2x (registered as 'most likely inside the band, toward its low end'; actual 683 is nearly double the band's top). Root cause: ta.wad is a running cumulative sum, so during a broadly rising 2.5-year window it prints new 20-bar highs on a large fraction of bars -- the WAD-lead term binds far more weakly than a pivot-pair divergence would, so the three-term conjunction behaves closer to a bare price breakout at high frequency than to a rare, selective lead signal. Win rate (41.58%) times payoff (1.36578) is close to breakeven (breakeven win rate at this payoff is ~42.3%) -- this is not HARD LESSON 53's inverted-payoff shape (payoff is healthy, win rate is just short), it is a frequency/cost problem: 683 trades paid $5,145.66 in commission against a -$1,581.38 net loss, commission at over 3x the net loss.",
+    "notes": "Credits at get_credits: 483 (250-500 tier -> H1 only, one run authorized, never more than two). ta.wad is now a consumed indicator family on this board, alongside ta.linreg (91/92) and ta.supertrend (89/90). Attack 83 remains the board's strongest both-halves candidate (PF 1.61044869/1.15365198, 88/79 trades, DD 11.08%/10.76%), unaffected by this cycle. Attack 46 (long) remains a candidate alongside Attack 83, unaffected. Next cycle proposes a new mechanism from the remaining untried families: ta.sar, ta.cci, ta.stoch, ta.macd, ta.cog, ta.tsi, ta.wpr, ta.iii, ta.wvad, ta.percentrank -- and per this cycle's finding, any future cumulative-running-sum indicator (ta.wvad, ta.pvi/ta.nvi-shaped, ta.accdist) used as a 'new N-bar high' lead term should pre-register that a cumulative series binds far more weakly than a pivot-pair or oscillator-bounded term, since it tends to make rolling highs during any sustained directional run regardless of the underlying signal's selectivity."
   }
 ];
-const BUILT = "2026-09-06 01:11";
+const BUILT = "2026-09-06 02:13";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

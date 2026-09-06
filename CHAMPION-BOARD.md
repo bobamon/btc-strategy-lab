@@ -8853,3 +8853,106 @@ OBV-divergence (66/68/82/83, closed) and SuperTrend (89/90, discarded).
 5. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
 6. **This session cannot continue the new-engine cross-sectional track (Attacks 84-86)** — no
    `backtest-lab`/`sweep_backtest` tool is available here, unaffected by this cycle.
+
+
+---
+
+# ATTACK 93 — WILLIAMS A/D ACCUMULATION-LEADS-BREAKOUT LONG. A GENUINELY NEW MECHANISM PER ATTACK 92'S QUEUE ITEM 1. H1 FAILS THE KILL RULE — DISCARDED, WORST DRAWDOWN ON THE BOARD.
+
+The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") more than
+90 attacks stale, instructing "continue numbering after 37." **The docs override it, again**, per the
+prompt's own instruction: Attack 37 closed on cost at Attack 41; the OBV-divergence stack (66/68/82/83) is
+CLOSED at three terms; the SuperTrend family (89/90) and the linreg-channel family (91/92) are both
+discarded, the latter on an H1/H2 sign flip. Numbering continues after Attack 92, the last entry on the
+board.
+
+## THE CLAIM UNDER TEST
+
+`ta.wad` (Williams Accumulation/Distribution, signed true-range flow rather than OBV's binary up/down tick)
+printing a new 20-bar high BEFORE price itself prints a new 20-bar high should mark accumulation building
+ahead of visible structure. A latch arms on the WAD-lead and requires price to confirm with its own 20-bar
+breakout within 10 bars (LESSON 8: setup and trigger on different bars), with an explicit invalidation — a
+new 20-bar low while armed clears the latch early (LESSON 8, generalised: name what else the arming event
+triggers). Stop is the pre-breakout 20-bar structural swing low (LESSON 5); R floored at 0.8% by exclusion,
+never clamped (LESSON 3); target fixed at 2R (HARD LESSON 13: the R:R axis is neutral, not retuned without
+cause). Long leg only this cycle; short (WAD-lead off a 20-bar low, price confirms with its own 20-bar low)
+is the standing queued asymmetry, same status as Attack 91's short. Pine:
+`strategies/pine/attack93-wad-accumulation-breakout-long.pine`.
+
+## CREDITS AND WHICH RUN THIS CYCLE SPENT
+
+Balance at `get_credits`: 483 (the 250-500 tier → one run authorized, pre-2024 half only). Spent on H1
+(2022-01-01 → 2024-06-08, never-tuned), per the kill-rule gate. One run spent, never more than two.
+
+## RESULT — H1 ONLY
+
+| Metric | Attack 93a (H1) |
+|---|---|
+| Profit factor | **0.97213381** |
+| Trades | 683 |
+| Win rate | 41.58125915% |
+| Achieved win/loss ratio | 1.36577954 |
+| Avg winner | $194.25 |
+| Avg loser | -$142.23 |
+| Max drawdown | **56.74561326%** — worst on this board |
+| Net return | -15.81384947% |
+| Commission paid | $5,145.66 (>3x the net loss) |
+| Largest loss | -$889.88 |
+
+## THE VERDICT — DISCARDED, PER THE PRE-REGISTERED OUTCOME TREE (LESSON 17)
+
+**H1 is below 1.0.** Per the outcomes registered before the run: "H1 BELOW 1.0 → DISCARDED by the kill
+rule immediately. No H2 run, no filter rescue." That is the outcome that happened. `ta.wad` is now a
+consumed indicator family on this board, alongside `ta.linreg` (91/92) and `ta.supertrend` (89/90).
+
+**The frequency estimate missed LOW by roughly 2x**, in the wrong direction from what was registered. The
+pre-registration reasoned that stacking a WAD-lead term on top of a price-breakout term would fire *less*
+than Attack 91's single-term 327 (H1), most likely toward the low end of the ~60-350 band. The actual count
+is **683** — nearly double the band's top edge, and more than double Attack 91's single-term count.
+
+**Root cause, worth recording explicitly:** `ta.wad` is a running cumulative sum. During a broadly rising
+2.5-year window it prints a new 20-bar high on a large share of bars almost by construction — the WAD-lead
+term does not bind the way a pivot-pair divergence or a bounded oscillator crossover would, because a
+cumulative series trends and makes rolling highs whenever the underlying flow is net positive for a
+stretch, independent of whether that flow is *unusual*. The three-term conjunction ended up behaving close
+to a bare high-frequency price breakout rather than a rare, selective lead signal — the opposite of the
+design intent.
+
+**This is not HARD LESSON 53's inverted-payoff shape.** The payoff ratio is healthy (1.36577954) and win
+rate (41.58%) sits just under its own breakeven of ~42.3% at that payoff — a near-miss on the edge itself,
+not a majority-win-rate trap. The real damage is frequency and cost: 683 trades paid **$5,145.66** in
+commission against a **-$1,581.38** net loss — commission alone is **more than 3x the net loss**, the
+HARD LESSON 1 commission-budget failure mode, not a signal-quality failure. And **the drawdown, 56.75%, is
+now the worst of any candidate this board has ever recorded** — worse than Attack 91's 27.43%/43.98% pair
+and worse than Attack 34's 46.88%/32.25%.
+
+## AUDIT RECORD (for the next cycle porting a cumulative-series term)
+
+Any future "new N-bar high" lead term built on a **cumulative running-sum indicator** (`ta.wvad`, the
+`ta.pvi`/`ta.nvi`-shaped family, `ta.accdist`) should pre-register that it binds far more weakly than a
+pivot-pair or a bounded oscillator, because a cumulative series makes rolling highs during any sustained
+directional run regardless of the underlying signal's selectivity — this cycle's ~2x-low frequency miss is
+the concrete evidence. A bounded oscillator (`ta.cci`, `ta.stoch`, `ta.wpr`, `ta.tsi`, `ta.cog`) does not
+have this failure mode, since it is range-limited and its own "new N-bar extreme" is a genuinely rarer
+event.
+
+## WHAT THIS SETTLES
+
+**Attack 93 (Williams A/D accumulation-leads-breakout, long) is DISCARDED.** No filter stack is warranted —
+the mandate reserves that for a mechanism that clears both halves, and this one fails the first. `ta.wad`
+is now consumed, alongside `ta.linreg` (91/92) and `ta.supertrend` (89/90).
+
+## QUEUE
+
+1. **The next cycle proposes ONE genuinely new mechanism** from the remaining untried indicator families:
+   `ta.sar`, `ta.cci`, `ta.stoch`, `ta.macd`, `ta.cog`, `ta.tsi`, `ta.wpr`, `ta.iii`, `ta.wvad`,
+   `ta.percentrank` (`ta.wad` now consumed, per this cycle). Prefer a bounded oscillator over another
+   cumulative-series construction, per this cycle's frequency-miss finding above.
+2. **Attack 83 remains the board's strongest both-halves candidate** (PF 1.61044869/1.15365198 on 88/79
+   trades, DD 11.08%/10.76%), unaffected by this cycle.
+3. **Attack 46 (long) remains a candidate alongside Attack 83**, unaffected by this cycle.
+4. **The funding-clock family's counter-build diagnostic (Attack 55's queue item 1) is still owed** if that
+   family is revisited before another fresh mechanism.
+5. **The short leg remains a reported standing structural asymmetry**, unaffected by this cycle.
+6. **This session cannot continue the new-engine cross-sectional track (Attacks 84-86)** — no
+   `backtest-lab`/`sweep_backtest` tool is available here, unaffected by this cycle.

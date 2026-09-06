@@ -1,0 +1,160 @@
+//@version=6
+// BTC ATTACK 93 - WILLIAMS A/D ACCUMULATION-LEADS-BREAKOUT LONG. A GENUINELY NEW MECHANISM, PER
+// ATTACK 92's QUEUE ITEM 1 (remaining untried indicator families: ta.sar, ta.cci, ta.stoch, ta.macd,
+// ta.cog, ta.tsi, ta.wpr, ta.iii, ta.wad, ta.wvad, ta.percentrank -- ta.linreg consumed at Attack 91/92).
+//
+// The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") more
+// than 90 attacks stale, instructing "continue numbering after 37." The docs override it, again, per the
+// prompt's own instruction: Attack 37 closed on cost at Attack 41; the OBV-divergence stack (66/68/82/83)
+// is CLOSED at three terms; the SuperTrend family (89/90) and the linreg-channel family (91/92) are both
+// discarded, the latter on an H1/H2 sign flip (PF 1.196 -> 0.835). Numbering continues after Attack 92,
+// the last entry on the board.
+//
+// ==================== THE CLAIM UNDER TEST ====================
+// ta.wad (Williams Accumulation/Distribution) adds or subtracts the full bar's TRUE RANGE each bar,
+// signed by whether close moved up or down from the PRIOR close -- unlike ta.obv (which weights every bar
+// by raw volume regardless of where price closed within its range) and unlike a pivot-based divergence
+// (which needs two confirmed swings). The claim: when the WAD line prints a new N-bar high BEFORE price
+// itself prints a new N-bar high, accumulation pressure (buyers absorbing range on up bars) is building
+// ahead of the visible price structure. Entering only once price CONFIRMS that lead with its own N-bar
+// breakout -- not on the WAD signal alone -- tests whether the lead has any predictive value, rather than
+// just being a coincident restatement of the same price move. No prior BTC attack in this lab has used
+// ta.wad, and this is a LEAD-CONFIRM latch, not a divergence (no pivot pairing) and not a bare price
+// breakout (Attack 42/59, already tried) or an oscillator crossover (Attacks 57/58/64/79, already tried).
+// Pine: `strategies/pine/attack93-wad-accumulation-breakout-long.pine`.
+//
+// ==================== MECHANICS, NO ARRAYS, NO USER-DEFINED FUNCTIONS ====================
+// wad = ta.wad. wadBreak = wad > ta.highest(wad, lb)[1] (excludes current bar from its own reference).
+// On wadBreak, latch `armed := true` and stamp `armedBar := bar_index` (HARD LESSON 8: setup and trigger
+// on different bars, never the same one). While armed and within armBars bars, priceBreak = high >
+// ta.highest(high, lb)[1] confirms the entry. INVALIDATION (HARD LESSON 8, generalised): if price prints a
+// new lb-bar LOW while armed, the accumulation thesis is contradicted and the latch clears early, before
+// armBars would have expired it anyway -- named explicitly so the "what else does arming trigger" question
+// is answered, not assumed. Stop: the lb-bar structural swing low at the moment of entry (LESSON 5, never
+// the WAD line, which this lab's fixed-SL/TP-at-entry rule forbids using as a trailing exit). Target: 2R,
+// the lab's standing risk-reward setting (HARD LESSON 13: the R:R axis is neutral at best, do not retune
+// it without a specific reason).
+//
+// AUDIT, one line per leg:
+//   R >= 0.8% (LESSON 3) - EXCLUSION via rBig on rawR = close - swingLow, never clamped to a wider stop.
+//   Stop beyond STRUCTURE (LESSON 5) - stopPx = ta.lowest(low, lb)[1] at entry, the swing low that stood
+//        BEFORE the breakout bar, never the WAD value and never the entry bar's own low.
+//   Each leg separately (LESSON 6) - LONG ONLY this cycle; short (WAD lb-bar-low lead + price lb-bar-low
+//        confirm) is the standing structural asymmetry, queued for a future cycle exactly as Attack 91's
+//        short was queued and Attack 64 named before it.
+//   BINDING (E17) - three necessarily-binding terms: wadBreak (arms; removes bars where accumulation has
+//        not led), priceBreak-within-armBars (triggers; removes armed windows price never confirms), rBig
+//        (excludes; removes confirmed breakouts too close to their own stop). Each independently shrinks
+//        the raw priceBreak count, which is why NO fourth term is added this cycle -- three unique domains
+//        (volume-and-range flow, price structure, risk geometry) is the mechanism, not a filter stack.
+//   REDUNDANCY (E14) - wadBreak and priceBreak read different inputs (ta.wad's cumulative signed true-range
+//        vs. raw `high`), so neither is a restatement of the other by construction; that is the entire
+//        thesis under test, not an assumption to wave past. rBig reads distance-to-stop, a third
+//        independent domain from both.
+//   LATCH IN SEQUENCE (LESSON 8) - `armed`/`armedBar` are var state set only on the WAD-break bar; the
+//        price-confirm read happens on a STRICTLY LATER bar via the `armed` flag, and armBars=10 plus the
+//        lb-bar-low invalidation both bound how long the latch can stay live. Never required on one bar.
+//   OCCUPANCY (LESSONS 24/28/29) - pyramiding=1 (forced by engine), explicit `flat` check gates every
+//        entry so a live position blocks a fresh arm-then-trigger sequence.
+//   CASCADE (HARD LESSON 42/43) - single TP+SL per entry, no partials, no scale-outs; expect
+//        totalTrades == unique entries, cascadeRatio 1.
+//   SL and TP FIXED AT ENTRY. No trailing, no averaging down, no martingale.
+//
+// FREQUENCY ESTIMATE, REGISTERED BEFORE RUNNING (HARD LESSON 4): lb=20 (5-hour window on 15m) is the
+// same lookback this board has used for prior swing/channel constructions (Attacks 37/59/91). Two
+// independently-binding terms stacked on top of a base rate that Attack 91's single term alone put at
+// 327/1591 bars (H1) suggests this fires LESS often than a bare breakout -- most likely INSIDE the
+// ~60-350 workable band, plausibly toward its low end because the WAD-lead requirement is the harder of
+// the two conditions to satisfy. To be confirmed against the actual count and reported against the band
+// explicitly rather than assumed (three of the last five frequency estimates in this lab missed by 2x or
+// more).
+//
+// OUTCOMES REGISTERED BEFORE THE RUN (LESSON 17). BARE MECHANISM, H1 ONLY (credits band 250-500 at
+// get_credits, the never-tuned pre-2024 half, per the kill rule):
+//   * H1 ABOVE 1.0 AND TRADES INSIDE ~60-350 -> the WAD-lead thesis has a real bare edge at a workable
+//     frequency; queue an H2 run before any filter work (the mandate this board applied to Attack 37 and
+//     Attack 91 alike -- both halves before a stack is earned).
+//   * H1 ABOVE 1.0 BUT TRADES OUTSIDE ~60-350 -> report which direction and by how much; a follow-up
+//     would widen/narrow lb or armBars toward the band, not add a filter yet.
+//   * H1 BELOW 1.0 -> DISCARDED by the kill rule immediately. No H2 run, no filter rescue. ta.wad becomes
+//     a consumed indicator family alongside ta.linreg (91/92) and ta.supertrend/ta.sar-shaped flips (89/90).
+//   * A MAJORITY WIN RATE WITH ratioAvgWinLoss WELL BELOW 1.0 -> HARD LESSON 53's inverted-payoff shape;
+//     report it as that, and compute the breakeven win rate (1/(1+payoff)) before calling it an edge.
+//   REPORT GROSS, COMMISSION, ACHIEVED RATIO, AVG LOSER AND WIN RATE alongside net and max drawdown
+//   (LESSONS 36/39 and the board's own three-drawdown-category taxonomy).
+
+strategy("BTC Attack93 WAD Accumulation-Leads-Breakout Long", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+lb        = input.int(20, "Lookback bars for WAD-high and price-high (bars)")
+armBars   = input.int(10, "Bars the WAD-lead latch stays armed")
+minRpct   = input.float(0.80, "Min stop distance as % of price (LESSON 3)")
+rMult     = input.float(2.0, "Target as multiple of R (HARD LESSON 13: neutral axis, not retuned)")
+maxBars   = input.int(192, "Max bars in trade")
+
+wad = ta.wad
+
+wadHighPrior   = ta.highest(wad, lb)[1]
+priceHighPrior = ta.highest(high, lb)[1]
+priceLowPrior  = ta.lowest(low, lb)[1]
+
+wadBreak   = wad > wadHighPrior
+priceBreak = high > priceHighPrior
+priceBreakdown = low < priceLowPrior
+
+var bool armed    = false
+var int  armedBar = na
+
+flat = strategy.position_size == 0
+
+// Invalidate the latch first: a new lb-bar low while armed contradicts the accumulation thesis.
+if armed and priceBreakdown
+    armed    := false
+    armedBar := na
+
+// Expire the latch if the confirm window has elapsed.
+if armed and not na(armedBar) and (bar_index - armedBar) > armBars
+    armed    := false
+    armedBar := na
+
+// Arm on a fresh WAD-lead (LATCH IN SEQUENCE: set state here, read it on a later bar below).
+if wadBreak and not armed and flat
+    armed    := true
+    armedBar := bar_index
+
+longTrigger = armed and priceBreak and flat
+
+stopPx = priceLowPrior
+rawR   = close - stopPx
+minR   = close * minRpct / 100
+rBig   = rawR >= minR
+
+goLong = longTrigger and rBig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+if goLong
+    strategy.entry("L", strategy.long)
+    slPx     := stopPx
+    tpPx     := close + rMult * rawR
+    barsIn   := 0
+    armed    := false
+    armedBar := na
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")
+plot(armed ? 1 : 0, title="ArmedLatch")
+plot(wad, title="WAD")
