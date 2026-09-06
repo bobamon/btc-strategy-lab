@@ -1580,9 +1580,59 @@ const DATA = [
       "verifiedAt": "2026-09-05T00:00:00Z"
     },
     "verdict": "brokeBelow/brokeAbove IS THE LOAD-BEARING TERM OF THE PAIR, NOT h1Bull/h1Bear. Removing brokeBelow/brokeAbove while holding h1Bull/h1Bear collapses the result: trades 44->238 (5.4x), PF 1.24221581->0.87958829 (below 1.0), net +9.11%->-18.19%, max drawdown 17.29%->42.08%. Both legs flip net-negative (long +$418.75->-$568.00, short +$492.42->-$1,251.42). This closes E80/E82's redundancy question with a clean, non-symmetric answer: h1Bull/h1Bear alone cannot substitute for brokeBelow/brokeAbove -- it is a strictly weaker filter that lets through far more (worse) trades. Combined with E82 (h1Bull/h1Bear removable with NO change when brokeBelow/brokeAbove stays), the simplification implied is to DROP h1Bull/h1Bear and KEEP brokeBelow/brokeAbove -- exactly what E82's build already does, byte-identical to E80. E83 itself is REJECTED as a construction (PF < 1.0, DD roughly 2.4x E80's, clearly worse on every metric) -- it is a diagnostic result, not a candidate."
+  },
+  {
+    "id": "wf-e84-e80-split-window-h1",
+    "name": "E84: split-window replication of E80/E82, first half only (2024-06 to 2025-07)",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "direction": "both",
+    "status": "research",
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "backtestStart": "2024-06-08",
+    "backtestEnd": "2025-07-20",
+    "specPath": "war-formation/pine/e84-e80-split-window-h1.pine",
+    "description": "E83's queue item 2: a split-window replication of E80 (the 15m both-legs-positive result), now the lab's most important open item on this line since the h1Bull/brokeBelow redundancy question closed at E82+E83. Byte-identical strategy body to e82-e80-no-h1bull-h1bear.pine (the established minimal four-gate equivalent of E80); only the backtest window changed, split at the same points this lab already used for the 5m E63a/E63b split (2024-06-08 to 2025-07-20 / 2025-07-20 to 2026-09-01). Credit budget this cycle (488, the 250-500 band) permits exactly ONE backtest, so only the first half is run; the second half is queued for a future cycle, mirroring this lab's own pattern of splitting a two-run test across cycles (E82 then E83's mirror).",
+    "metrics": {
+      "netProfitPct": 21.37016025,
+      "profitFactor": 2.77443947,
+      "maxDrawdownPct": 7.64852641,
+      "totalTrades": 20,
+      "winRatePct": 40,
+      "avgTradePct": 1.06850801,
+      "sharpeRatio": 1.89129577,
+      "sortinoRatio": 0.49765502,
+      "commissionPaid": 199.40107475,
+      "avgWinningTrade": 417.6686292875,
+      "avgLosingTrade": -100.3610840875,
+      "ratioAvgWinLoss": 4.1616592,
+      "largestWin": 645.3167448,
+      "largestLoss": -339.4520872,
+      "avgBarsInTrade": 121.6,
+      "avgBarsWinning": 199,
+      "avgBarsLosing": 70,
+      "longTrades": 9,
+      "shortTrades": 11,
+      "longWinning": 7,
+      "shortWinning": 1,
+      "longNetProfit": 2196.289697400006,
+      "shortNetProfit": -59.27367215
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "adhoc_01M1T2G2QRPAM0EVR7RMPCFM6F",
+      "strategyId": "01M1SVRDYWR37N753D99B18DKR",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1T2G2QRXF7YVJ1SNMVGHMPP",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1.1111111111111112,
+      "verifiedAt": "2026-09-06T00:00:00Z"
+    },
+    "verdict": "FIRST HALF ONLY, NOT A COMPLETE SPLIT TEST. PF 2.77443947 on 20 trades (9 long/7 win, 11 short/1 win), net +21.37%, max drawdown 7.65% -- markedly STRONGER than the full-window E80/E82 result (PF 1.24221581, 44 trades, net +9.11%, DD 17.29%). Long leg carries almost all of it (+,196.29 of +,137.02 total net, since short net is -9.27 on this half). Because the full window's aggregate PF (1.24) sits well below this half's (2.77), the second half necessarily carries a materially weaker (very likely sub-1.0 on the blend, though the exact figure cannot be derived from these two runs alone -- position sizing is percent-of-equity and the two runs use independent 0,000 starting bases, so full-window minus first-half totals do not equal second-half totals). This is the single-period-driven-result pattern HARD LESSON 22 warns a split test is meant to catch. NOT YET A VERDICT ON E80/E82: the second half must be run before concluding whether the edge reproduces or was concentrated in one sub-period.",
+    "notes": "ANSWERS HALF OF E83's QUEUE ITEM 2. The second half (2025-07-20 to 2026-09-01) is NOT run this cycle -- credit budget (488, the 250-500 band) permits exactly one backtest -- and is the single highest-priority item for the next cycle with budget. Trade count splits 20 (this half) + 24 (implied remainder, by simple subtraction of E80's 44 total; not independently verified since the second half has not been run) -- both sub-30, so neither half alone clears RATCHET v2's 30-trade floor; only the combined 44-trade full window does. This means even a completed split test here will be informal (a directional check per E83's queue, not a formal RATCHET v2 clause-3 split, which only strictly applies to a >50% trade-count cut from a term-removal, not to this holdout check). Recorded as status: research, not a candidate and no ratchet decision applies -- this is a replication diagnostic on E80/E82's existing population, exactly like E81's coil-gate check. E80 (15m, testing, both-legs-positive) remains this lab's newest candidate line, its own status unchanged by this run. e58a (long, 1m) and E71 (short, 1m) remain the 1m-track reference builds, both untouched. Check #36's shield-fill caveat (every PF is an upper bound) applies here as everywhere. HARD LESSON 48 drawdown-allowance RULE QUESTION (blocking E74) remains open, unresolved, awaiting the user."
   }
 ];
-const BUILT = "2026-09-05 23:41";
+const BUILT = "2026-09-06 00:41";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

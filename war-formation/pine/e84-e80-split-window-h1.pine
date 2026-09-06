@@ -1,0 +1,182 @@
+//@version=6
+// WAR FORMATION E84 -- E83's QUEUE ITEM 2: SPLIT-WINDOW REPLICATION OF E80, FIRST HALF ONLY.
+//
+// E83 closed the h1Bull/brokeBelow redundancy question (E82+E83): brokeBelow/brokeAbove is
+// load-bearing, h1Bull/h1Bear is droppable, and E82's file is already the minimal four-gate
+// equivalent of E80. With that closed, E83's own queue named the split-window replication of
+// E80 "now the most important open item" -- a single 44-trade run on one continuous window has
+// no holdout (HARD LESSON 22), and RATCHET v2's spirit (even though its letter only strictly
+// requires a split after a >50% trade-count cut) calls for checking whether the edge reproduces
+// in both halves before E80 becomes anyone's reference construction.
+//
+// SOURCE: byte-identical to e82-e80-no-h1bull-h1bear.pine (the E80/E82 four-gate build --
+// h1Bull/h1Bear already established as droppable with zero cost to the population, per E82).
+// Nothing in the strategy body changed. ONLY the backtest window changed (BINDING, HARD LESSON
+// 16/E17: one variable -- the date range -- differs from E80/E82's full-window run).
+//
+// SPLIT POINTS: 2024-06-08 to 2025-07-20 (this file, first half) and 2025-07-20 to 2026-09-01
+// (second half, NOT run this cycle). These are the exact split points this lab already used for
+// the 5m E63a/E63b split (EXPERIMENT-LOG.md check #38's window table), reused here for direct
+// methodological consistency rather than inventing a new midpoint.
+//
+// CREDIT CONSTRAINT, STATED UP FRONT: this cycle's balance (488) is in the 250-500 band, ONE
+// backtest only. A split test properly needs two runs (both halves). Only the first half is run
+// this cycle; the second half is queued for a future cycle with budget for it. This mirrors this
+// lab's own established pattern of splitting a two-run test across cycles (E82 then E83's mirror).
+//
+// REGISTERED PREDICTION (HARD LESSON 17), BEFORE RUNNING: no directional prediction is possible
+// from priors alone -- this is the first replication check of a single-window result, not a
+// parameter change with a mechanical expectation. What would count as "reproduces": PF clears 1.0
+// on an adequate sample in BOTH halves, with both legs not both collapsing to net-negative in
+// either half. What would count as "does not reproduce": one half carries the entire edge and the
+// other is flat or negative -- the classic single-period-driven-result pattern HARD LESSON 22
+// warns about.
+//
+// PRE-RUN AUDIT:
+//   R = shieldUsd $2,000 against this half's BTC price range (~$60k-$110k): clears the 0.8% floor
+//     (HARD LESSON 3).
+//   Stop is risk-defined per the ALCM spec (HARD LESSON 5), unchanged from E80/E82.
+//   Both legs reported separately (HARD LESSON 6).
+//   BINDING (E17): only the date window changed from E82; every gate, threshold and the
+//     h1Bull/h1Bear removal are byte-identical.
+//   Latch order unchanged (HARD LESSON 8). shieldUsd/rr/maxBars unchanged from E80/E82, so this
+//     run introduces no NEW occupancy confound relative to them (LESSONS 24/28/29) -- though a
+//     shorter window mechanically caps how many maxBars-length trades can complete near the edges,
+//     which is a property of any split test, not a new confound specific to this build.
+//   RATCHET v2's own >50% trade-count-cut split-test clause does not literally apply here (this
+//     is a holdout check on an existing result, not a term removal) -- run in its spirit anyway,
+//     per E83's queue.
+//
+// RESULT, and the honest state of the split test (one half done, one half pending), are recorded
+// in EXPERIMENT-LOG.md and results/backtests.json after this run completes, per the lab's
+// provenance rule (never hand-write a metric).
+strategy("War Formation E84 split-window h1 (E82 build)", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+greenBull = input.int(4,     "Green 1h candles for BULL")
+greenBear = input.int(2,     "Green 1h candles at or below for BEAR")
+skipOpen  = input.int(60,    "Skip first N minutes of 6h block")
+skipClose = input.int(60,    "Skip last N minutes of 6h block")
+coilK     = input.float(0.85,"Coil: atrFast < atrSlow * K")
+velK      = input.float(0.8, "Velocity: min reclaim as multiple of atrSlow")
+midLo     = input.float(400, "Whole-number middles low")
+midHi     = input.float(600, "Whole-number middles high")
+etOffset  = input.int(-4,    "ET offset from UTC")
+witchOn   = input.bool(true, "Ban longs in witching hour 1-4am ET")
+shieldUsd = input.float(2000,"THE SHIELD: fixed dollar gap to liquidation")
+rr        = input.float(2.0, "Reward:risk")
+maxBars   = input.int(288,   "Max bars in trade -- three days of 15m")
+
+MS6H = 21600000
+MS1H = 3600000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+
+var float h1o     = na
+var int   grnCur  = 0
+var int   cntCur  = 0
+var int   grnPrev = 0
+var int   cntPrev = 0
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    grnCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(h1o)
+        cntCur := cntCur + 1
+        if close[1] > h1o
+            grnCur := grnCur + 1
+    h1o := open
+
+regimeReady = cntPrev >= 5
+bullRegime  = regimeReady and grnPrev >= greenBull
+bearRegime  = regimeReady and grnPrev <= greenBear
+
+minsIn    = (time - b6 * MS6H) / 60000
+timeGate  = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+// h1Bull/h1Bear REMOVED from this build's gates (still computed/plotted for audit, not gated on),
+// unchanged from E82 -- established droppable with zero cost to the population.
+h1Bull = not na(h1o) and close > h1o
+h1Bear = not na(h1o) and close < h1o
+
+var float c1hh = na
+var float c1hl = na
+var float p1hh = na
+var float p1hl = na
+
+if new1h
+    p1hh := c1hh
+    p1hl := c1hl
+    c1hh := high
+    c1hl := low
+else
+    c1hh := na(c1hh) ? high : math.max(c1hh, high)
+    c1hl := na(c1hl) ? low  : math.min(c1hl, low)
+
+brokeBelow = not na(p1hl) and c1hl < p1hl
+brokeAbove = not na(p1hh) and c1hh > p1hh
+
+atrFast = ta.atr(1)
+atrSlow = ta.atr(2)
+coiled  = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK
+coilPrev = coiled[1]
+velMin   = na(atrSlow) ? na : atrSlow * velK
+
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+hUTC     = math.floor(time / MS1H) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+longBan  = witchOn and witching
+
+longTrig  = not na(p1hl) and not na(velMin) and ta.crossover(close, p1hl)  and (close - p1hl) >= velMin
+shortTrig = not na(p1hh) and not na(velMin) and ta.crossunder(close, p1hh) and (p1hh - close) >= velMin
+
+goLong  = bullRegime and timeGate and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig
+goShort = bearRegime and timeGate and brokeAbove and coilPrev and not inMiddle and shortTrig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := close - shieldUsd
+    tpPx   := close + shieldUsd * rr
+    barsIn := 0
+
+if flat and goShort
+    strategy.entry("S", strategy.short)
+    slPx   := close + shieldUsd
+    tpPx   := close - shieldUsd * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if strategy.position_size < 0
+    strategy.exit("SX", from_entry="S", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong  ? 1 : 0, title="LongSignal")
+plot(goShort ? 1 : 0, title="ShortSignal")

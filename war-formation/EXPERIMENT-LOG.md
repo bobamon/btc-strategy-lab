@@ -7365,3 +7365,124 @@ minimal (four-gate) equivalent of E80.
 5. If a future cycle wants to formally promote E82's four-gate build as "the E80 simplification"
    rather than a redundancy diagnostic, that is a separate, cheap (zero-credit, no new backtest
    needed) bookkeeping step -- the numbers already exist and are byte-identical to E80's.
+
+---
+
+# ██ E84 -- E83's QUEUE ITEM 2, FIRST HALF ONLY: THE SPLIT-WINDOW REPLICATION OF E80 BEGINS, AND THE FIRST HALF DOES NOT LOOK LIKE THE FULL WINDOW
+
+**SCHEDULING NOTE.** This cycle's stored prompt again described a stale lab state (attack the
+short's entry geometry via E64a/E64b/E66 on 1m/5m, "continue numbering after E66"), already
+superseded and closed against at E81/E82/E83. **The docs win**, per the prompt's own instruction
+and HARD LESSON 26's precedent: this cycle continues from E83's own real, still-open queue item 2
+-- the split-window replication of E80 -- rather than re-deriving E64a-E66 territory the lab
+worked past weeks ago. (Queue item 5, promoting E82's build as a formal simplification, is a
+zero-credit bookkeeping step and is deferred to a cycle that is not also running a backtest, so it
+does not compete with this item for the credit.)
+
+**`get_credits` read 488 at the start** -- the 250-500 band, exactly ONE backtest.
+
+**METHOD.** Per E83's queue item 2, a split-window replication of E80/E82 (byte-identical four-gate
+build, `h1Bull`/`h1Bear` already established droppable at E82) at the same split points this lab
+already used for the 5m E63a/E63b split (check #38's window table): 2024-06-08 to 2025-07-20
+("first half") and 2025-07-20 to 2026-09-01 ("second half"). **A split test needs two runs.** This
+cycle's credit budget permits exactly one, so only the first half is run here, exactly the way E82
+ran one half of the h1Bull/brokeBelow redundancy test and E83 ran the mirror in a later cycle. The
+second half is queued below, not skipped.
+
+**PRE-RUN AUDIT.** R = shieldUsd $2,000 against this half's BTC price range (~$60k-$110k): clears
+the 0.8% floor (HARD LESSON 3). Stop is risk-defined per the ALCM spec (HARD LESSON 5), unchanged.
+Both legs reported separately (HARD LESSON 6). BINDING (E17): only the date window changed from
+E82 -- every gate, threshold, and the `h1Bull`/`h1Bear` removal are byte-identical. Latch order
+unchanged (HARD LESSON 8). `shieldUsd`/`rr`/`maxBars` unchanged from E80/E82, so no new occupancy
+confound relative to them (LESSONS 24/28/29). `pine/e84-e80-split-window-h1.pine`.
+
+**REGISTERED PREDICTION (LESSON 17), before running:** no mechanical prediction is possible here --
+this is a replication check, not a parameter change. What counts as "reproduces": PF clears 1.0 on
+an adequate sample in BOTH halves, neither leg collapsing net-negative in both. What counts as
+"does not reproduce": one half carries the entire edge while the other is flat or negative -- the
+single-period-driven-result pattern HARD LESSON 22 exists to catch.
+
+## RESULT -- 15m, 2024-06-08 -> 2025-07-20 (first half only), 39,429 bars
+
+**One credit.** `resultId 01M1T2G2QRXF7YVJ1SNMVGHMPP`, `strategyId 01M1SVRDYWR37N753D99B18DKR`
+(E82's saved strategy, re-run with an overridden date window -- no source change).
+
+| | E80/E82 (full window) | **E84 (first half only)** |
+|---|---|---|
+| Profit factor | 1.24221581 | **2.77443947** |
+| Trades | 44 | **20** |
+| Win rate | 27.27272727% | **40%** |
+| Net | +9.11169035% | **+21.37016025%** |
+| Max drawdown | 17.28630995% | **7.64852641%** |
+| Long | 19 trades, 9 wins, +$418.75 | 9 trades, **7 wins**, **+$2,196.29** |
+| Short | 25 trades, 3 wins, +$492.42 | 11 trades, **1 win**, **-$59.27** |
+
+**The first half does not look like the full window -- it looks stronger, and differently shaped.**
+PF more than doubles (1.24 -> 2.77), drawdown less than halves (17.29% -> 7.65%), and the long leg
+now carries essentially all of the profit (+$2,196.29 of +$2,137.02 net) while the short leg is
+flat-to-slightly-negative (-$59.27) rather than the full window's out-earning-the-long short leg
+(+$492.42). **The short leg's standout result in E80 -- the first net-profitable short in this
+lab's history -- is not visible in this half at all.**
+
+## WHAT THIS ESTABLISHES
+
+**Arithmetically, the second half must be materially weaker than this half, on the blend.** The
+full window's aggregate PF (1.24) sits well below this half's (2.77); a weighted blend of two
+positive-PF halves that are both similar in strength could not produce an aggregate this much
+lower than either. **Note precisely what can and cannot be inferred from that, stated to avoid a
+HARD LESSON 25-style overreach:** the two runs use independent $10,000 starting capital bases under
+percent-of-equity sizing, so the full window's totals are NOT simply this half's totals plus the
+second half's totals -- the compounding path differs between "one continuous $10k-based equity
+curve across both halves" (what E80/E82 measured) and "two separate $10k-based curves, one per
+half" (what a completed split test would measure). **The exact second-half PF cannot be
+back-calculated from these two runs and is not asserted here** -- only that the arithmetic strongly
+disfavours a second half anywhere near this one's 2.77, and is consistent with (not proof of) the
+edge being concentrated in the earlier sub-period.
+
+**This is exactly the pattern a split test exists to catch (HARD LESSON 22), and it is not yet
+concluded** -- concluding "the edge does not replicate" from one half alone would be the same
+error in miniature that check #36 made from one quantity (see check #38's correction): a strong
+first half does not by itself prove a weak second half, it only makes one likely enough that
+running it is now urgent rather than optional.
+
+## WHAT THIS DOES NOT ESTABLISH
+
+- **Not a complete split test.** Exactly half of it. The second half is the single highest-priority
+  item for the next cycle with budget, not a "nice to have."
+- **Neither half individually clears RATCHET v2's 30-trade floor** (this half: 20; the full window's
+  44 split roughly 20/24). This means even a completed split test here is informal -- a directional
+  replication check per E83's queue, not a formal RATCHET v2 clause-3 split test, which by its
+  letter only strictly applies to a >50% trade-count cut from a term removal, a different situation
+  from this holdout check. Both halves clearing the floor was never going to happen on this window;
+  that limitation is stated rather than engineered around, per this lab's standing convention.
+- **Not a ratchet decision and not a change to E80/E82's own recorded status.** `E80` remains
+  `testing`; this is a diagnostic on its existing population, exactly like E81's coil-gate check.
+- **Does not touch the HARD LESSON 48 drawdown-allowance RULE QUESTION** (blocking E74) -- open,
+  unresolved, awaiting the user.
+- Check #36's shield-fill caveat (every recorded PF is an upper bound) applies here as everywhere.
+
+## STATE
+
+**No champion.** `e58a` (long, 1m) and `E71` (short, 1m) remain the reference builds for the 1m
+track, untouched. `E80` (15m, both-legs-positive, `status: testing`) remains this lab's newest
+candidate line -- its internal redundancy question is fully closed (E81/E82/E83) but its
+out-of-sample question is now half-answered and pointing toward concentration in the earlier
+sub-period, not yet resolved. `E74` remains blocked on the HARD LESSON 48 drawdown-allowance
+RULE QUESTION, awaiting the user.
+
+## QUEUE
+
+1. **Run the second half** (2025-07-20 to 2026-09-01) on the identical `e84`/E82 build. This is now
+   the single most important item on the board -- without it, E80's headline result cannot be told
+   apart from a first-sub-period-driven result. One credit, same strategyId, override the date
+   window only.
+2. **Once both halves exist, report the short leg specifically** -- E80's short leg was this lab's
+   first-ever net-profitable short construction, and this half shows none of that profitability
+   (1 win in 11 short trades, -$59.27). Whether the short's edge is real, timing-concentrated, or an
+   artifact of the full window's particular path is the direct follow-up once the second half lands.
+3. Check #36's shield-fill caveat and the HARD LESSON 48 drawdown-allowance RULE QUESTION (blocking
+   E74) remain open, unresolved by this run, awaiting the user.
+4. Do not port E80's exact win (or E82's simplification) back to 1m or 5m -- unchanged from E80's
+   own note.
+5. Queue item 5 from E83 (formally promoting E82's build as "the E80 simplification," zero-credit)
+   remains open and can be done in the same cycle as item 1 above, or in a zero-credit cycle.
