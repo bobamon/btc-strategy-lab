@@ -3187,3 +3187,89 @@ so it compounds; it does not bound the outcomes that update it. **No banked resu
 is withdrawn by this lesson.** It is prospective, and it bites the moment any lab makes a target, a stop
 multiple, a hold cap or a risk fraction adaptive to its own realised trades — which the ratchet mandate
 makes a natural thing to reach for.
+
+---
+
+## ██ HARD LESSON 62 — A LAB'S OWN RECORD OF FAILED TRIALS IS THE DATA THAT SETS ITS SIGNIFICANCE BAR. MEASURE THE BAR FROM IT, AND MEASURE THE DISPERSION BEFORE TRUSTING THE SHORTCUT. (BTC INVENTED LAB, 2026-09-06)
+
+**Earned:** two board entries on the same day. The *Board-wide statistical audit* established the
+finding — not one of 79 scored results clears the noise threshold its own trial count implies. *The
+statistical audit, closed out* then executed that entry's queue items 2 and 3 and resolved its caveat 3.
+**Two sessions reached the question independently and neither installed a gate off it; that restraint
+was right twice.** Reproducible source on disk (HARD LESSON 21):
+`analysis/multiple_testing_audit.py`.
+
+### THE MOVE
+
+A lab that has run N attacks and written down every result is holding, without noticing, the two numbers
+that decide whether its best result means anything: **N itself, and the dispersion of the trial
+statistics.** Bailey & López de Prado's expected maximum of a null search,
+
+```
+E[max] = sd · [ (1-γ)·Z⁻¹(1 - 1/N) + γ·Z⁻¹(1 - 1/(N·e)) ],   γ = 0.5772
+```
+
+needs nothing else. **No new run, no new data, no credit.** The failed attacks are not waste being kept
+out of tidiness — they *are* the null distribution, and they are the only honest source for it.
+
+### FOUR THINGS THAT GENERALISE
+
+1. **"PF > 1.0 on ≥30 trades" is a t > 0 bar.** It separates positive from negative; every lab in this
+   repo has been calling that separating signal from noise. **It does not invalidate a single recorded
+   number** — every one was really run — but it changes what those numbers were ever able to establish.
+   The board's best in 98 attacks is implied t = 2.019, against 2.929 from its own trial count and 3.40
+   from a Bonferroni correction over the same count. Three independent derivations — the literature's
+   t > 3.0, the noise-maximum, and Bonferroni — land in the same place.
+
+2. **Measure the dispersion before trusting √(2 ln N).** That shortcut is the expected maximum of N
+   *standard normal* trials, so it silently assumes the trial statistics have unit dispersion. Here,
+   expressed in the same t units: on the trimmed pool measured sd(t) = 1.218 and the shortcut is
+   accurate to **0.5%** (2.929 vs 2.945) — but **untrimmed, measured sd(t) = 2.272 and the shortcut
+   understates the true hurdle by 1.88×** (2.956 vs 5.559). It was safe here because of a trimming
+   nobody had done yet, not because the null held. **A shortcut that happens to be right is not a
+   shortcut that is right.**
+
+3. **Prove a metric's units before converting it.** Two entries converted `sharpeRatio` to an implied t
+   assuming an annualisation nothing in this repo documents. The assumption was correct and is now
+   *proved*, without the return series: model each strategy's trades as a two-point distribution (every
+   win = `avgWinningTrade`, every loss = `avgLosingTrade`), which is the **minimum** variance consistent
+   with the recorded averages and therefore the **maximum possible per-trade Sharpe**. For the board's
+   eight highest that ceiling is 0.156–0.359 against recorded 0.917–1.294. **Per-trade is
+   arithmetically impossible; the figure is time-annualised.** The technique is general — a summary
+   metric's units can often be pinned by bounding it from the *other* summary metrics.
+
+4. **Bound the one bias that runs your way; do not wave at it.** `E[max]` assumes independent trials and
+   these are nested, so `N_eff < N` lowers the hurdle. HARD LESSON 57's sweep closes it: the break-even
+   is **N_eff ≤ 11.83**, while a census of the records shows 59 distinct mechanism slugs of which only
+   10 are the OBV family — so collapsing that entire family to **one** effective bet still floors
+   `N_eff` at **50**, where the hurdle is 2.773. **A bias you can bound is not a caveat, it is a closed
+   question** (HARD LESSON 11).
+
+### WHAT DOES NOT GENERALISE — THE TRIMMING IS AN ENORMOUS LEVER
+
+Dropping five degenerate runs (n<10) and one fee blowout (attack57, SR -11.04) roughly halves the
+hurdle. That lever was pulled **in the lab's favour deliberately**, so the verdict could not be an
+artifact of it. **Whenever a hurdle is this sensitive to which trials count as trials, choose the
+trimming that makes your own result hardest to defend, and say that is what you did.**
+
+### THE STRUCTURAL CONSEQUENCE, WHICH IS THE UNCOMFORTABLE PART
+
+**The bar rises with N.** Attack 99 faces a harder hurdle than Attack 98 did, purely because Attack 98
+happened. A search cannot test its way out of its own trial count, and each re-run "for reassurance"
+raises the bar it is trying to clear. Three board entries have now reached that conclusion by three
+different routes — Attack 86's 1h port from the literature, the audit from the noise maximum, and the
+close-out from Bonferroni.
+
+**The only route that adds evidence rather than hurdle is forward-recorded signals**, where the looks
+happen after the hypothesis is fixed. It has been named in four consecutive entries and started in none.
+
+### SCOPE — WHAT THIS DOES AND DOES NOT TOUCH
+
+- **The invented lab only.** War Formation, 3M Elite and Legacy Forex keep separate records and were not
+  measured. The arithmetic transfers to each; the measurement has not been taken there, and taking it
+  requires no merging — **each lab's own trial file is its own null distribution.**
+- **No result is withdrawn, no verdict reversed, nothing promoted or demoted.** RATCHET v2, the 30-trade
+  sample floor and the kill rule are unchanged.
+- **The standing-gate decision is deliberately NOT taken.** Attack 86's 1h port ruled it a ledger-level
+  decision rather than a tick's, and both audits respected that. What changed is that it is now a
+  decision with three measurements under it rather than a proposal.

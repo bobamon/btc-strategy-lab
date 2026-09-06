@@ -10180,3 +10180,315 @@ decision, not a tick's. **What this entry does is put the number in front of tha
 - Bailey et al., *Statistical Overfitting and Backtest Performance* — https://sdm.lbl.gov/oapapers/ssrn-id2507040-bailey.pdf
 - Wikipedia, *Deflated Sharpe ratio* — https://en.wikipedia.org/wiki/Deflated_Sharpe_ratio
 - Harvey, Liu & Zhu, *…and the Cross-Section of Expected Returns* — https://www.nber.org/system/files/working_papers/w20592/w20592.pdf
+
+---
+
+# ATTACK 99 — WVAD ROLLING-SUM ACCUMULATION DWELL-RECLAIM LONG. A GENUINELY NEW MECHANISM, DISCARDED ON COST DESPITE NOMINALLY CLEARING THE KILL RULE.
+
+**Note on sequencing:** this cycle's research and backtest ran concurrently with, and was committed
+before seeing, the board-wide statistical audit immediately above (pushed by a parallel session to the
+same merge point). That audit's queue item 4 says "stop generating new mechanisms at the current bar."
+Attack 99 was already built and run under the mandate as it stood at cycle start and is recorded as-is;
+it does not answer or dispute the audit's conclusion. The audit itself says its own recommendation is
+"not being enforced as a rule here" pending a user decision, so this entry does not treat itself as
+having violated anything — but a future cycle should read that audit before proposing Attack 100 and
+flag the tension to the user rather than silently continuing to generate mechanisms at the old bar.
+
+The stored scheduled prompt again describes a board state ("Attack 37, build its filter stack") over
+ninety attacks stale, instructing "continue numbering after 37." **The docs override it, again**, per
+the prompt's own standing instruction: Attack 37 was closed on cost by Attack 41 (2026-09-04); the
+OBV-divergence stack (66/68/82/83) is CLOSED at three terms (board's strongest both-halves candidate,
+PF 1.61044869/1.15365198, 88/79 trades); SuperTrend (89/90), linreg-channel (91/92), Williams A/D (93),
+COG trough-turn (94/95), MACD zero-line flip (96), CCI extreme-dwell (97, untestable) and Stochastic
+oversold-dwell (98, H1 passed/H2 failed) are all discarded, shelved, or untestable. Numbering continues
+after Attack 98, the last numbered entry on the board.
+
+Credits at cycle start: 463 (250-500 tier per the mandate) → **one run authorized, pre-2024 half only.**
+
+## THE MECHANISM AND WHAT IT CLAIMS
+
+`ta.wvad` (Williams Variable Accumulation/Distribution) is a **per-bar, non-cumulative** quantity —
+`((close - open) / (high - low)) * volume` — signed by where each bar's own close settles relative to
+its own open, WITHIN that bar's own range. This is a different domain from every volume/price indicator
+already tried on this board: `ta.obv` (66-68/82/83) and `ta.wad` (93) are both cumulative running totals
+signed by close-vs-**prior**-close; `ta.nvi` (76) is conditional on low-volume days only. WVAD has zero
+dependency on the prior bar's close.
+
+**The claim under test:** a rolling sum of this per-bar quantity (`wvadSum`, 20-bar window) dwelling
+below zero for at least 10 consecutive bars (deliberately unequal to and less than the 20-bar sum
+window, per Attack 97's collision lesson), then crossing back above zero, marks a shift from net
+intrabar distribution to net intrabar accumulation — a tradeable reclaim. Long only. Stop: 20-bar
+structural swing low frozen one bar before entry (LESSON 5). Target: 100-bar structural high, excluded
+below a 1.0 reward:risk floor (HARD LESSON 41). R floor 0.8% of price, excluded not clamped (LESSON 3).
+Max 192 bars in trade. Pine: `strategies/pine/attack99-wvad-accumulation-dwell-reclaim-long.pine` (full
+audit header inline, mirroring Attacks 96/97/98's construction for direct comparability).
+
+**Pre-run audit, one line per leg:**
+  R ≥ 0.8% (LESSON 3) — EXCLUSION via `rBig`, never clamped.
+  Stop beyond STRUCTURE (LESSON 5) — `ta.lowest(low, 20)[1]`, never the wvadSum value.
+  Each leg separately (LESSON 6) — long only; short is the standing structural asymmetry, queued.
+  BINDING (E17) — four independently-shrinking terms: `crossUp`, `dwellOk`, `rBig`, `rrOk`.
+  REDUNDANCY (E14) — wvadSum (intrabar close-vs-open-in-range, volume-weighted) has zero overlap with
+       `ta.obv`/`ta.wad` (close-vs-prior-close, cumulative) or Stochastic's high-low box position;
+       `belowCount` (temporal persistence), `stopPx` (price structure), `rBig`/`rrOk` (risk/reward
+       geometry) are four further independent domains.
+  LATCH IN SEQUENCE (LESSON 8) — N/A by construction: `dwellOk` reads bars strictly before the current
+       one, `crossUp` reads the transition into the current bar; disjoint ranges, no arm/confirm split.
+  Frequency estimate registered before running: **30-250 trades per half**, anchored loosely against
+  Attack 98's post-dwell Stochastic count (37 on H1), wide band and low confidence (no prior wvad
+  construction on this board).
+
+## THE RESULT — H1 ONLY (2022-01-01 → 2024-06-08)
+
+| Metric | Attack 99a (H1) |
+|---|---|
+| Trades | **463** |
+| Win rate | 40.17278618% (186W/277L) |
+| Profit factor | **1.01561201** |
+| Net return | +6.52116015% |
+| Max drawdown | **39.73566995%** |
+| Avg winner / loser | $228.08 / **-$150.79** |
+| Achieved win/loss ratio | 1.51249745 |
+| Commission paid | $4,559.24 |
+| Gross profit / loss | $42,422.28 / $41,770.16 |
+
+**Breakeven win rate at this payoff is 39.80% (1/(1+1.51249745)); achieved is 40.17% — a 0.37pp
+margin.** Gross edge per trade (netProfit + commissionPaid, over 463 trades) is **$11.26**, with
+commission eating **87.5% of gross** — worse than Attack 37's 83.5% cost share, and Attack 37's own
+axis was closed for being too thin at that cost share.
+
+## THE VERDICT — DISCARDED WITHOUT SPENDING THE SECOND CREDIT, PER ATTACK 89's OWN PRECEDENT
+
+**PF nominally clears 1.0**, so the kill rule's literal text (discard only if H1 < 1.0) does not force
+an immediate discard. But three things line up against advancing it to an H2 run:
+
+1. **Trade count (463) is 32% over the board's own settled 60-350 workable-frequency band** (Attack 33
+   died at 757 on cost; Attack 37/91/96/98 all landed inside the band). 463 repeats the shape of Attack
+   89 (526 trades, PF 1.01365036, "clears 1.0 only nominally, at a trade count that repeats Attack 33's
+   cost signature") more than it resembles Attack 37 (322 trades) or Attack 98a (37 trades).
+2. **The margin is thinner than every advancing candidate on the board** — 0.37pp above breakeven win
+   rate, and a cost share (87.5%) above the family this board already closed for being too thin (Attack
+   37's 83.5%).
+3. **Max drawdown (39.74%) is worse than every H1 half that has ever cleared 1.0 on this board** —
+   worse than Attack 37a (31.64%), Attack 91a (didn't record but H2 failed anyway), Attack 96a (didn't
+   advance), and Attack 98a (15.13%).
+
+Per Attack 89's own precedent — a nominal PF > 1.0 clear at a cost-signature trade count is discarded
+without a second run, not queued for H2 — **Attack 99 is DISCARDED here.** The second credit was not
+spent. `ta.wvad` becomes a consumed indicator family alongside `ta.stoch` (98), `ta.macd` (96),
+`ta.wad` (93), `ta.linreg` (91/92) and `ta.supertrend` (89/90).
+
+Record: `attack99-wvad-accumulation-dwell-reclaim-long-h1` (**rejected**), `provenance.jobId`
+`adhoc_01M1V39X8R7XD4THNDQTYJS47Z` from `trader.dev`.
+
+## QUEUE
+
+1. **Remaining untried indicator families**: `ta.sar`, `ta.tsi`, `ta.wpr` (near-redundant with
+   Stochastic — `%R` is a linear rescaling of `%K`, so a %R construction would not test anything Attack
+   98 didn't already test; flag before spending a cycle on it), `ta.iii`, `ta.percentrank`.
+2. **If wvad is ever revisited**, retune `sumLen`/`dwellBars` wider to cut frequency into the 60-350
+   band before re-running — the per-bar construction with no restoring pull (like Stochastic, unlike
+   CCI) suggests a longer dwell requirement is the lever, not a filter stack on top of a mechanism this
+   thin.
+3. **Attack 83 remains the board's strongest both-halves candidate on PF** (1.61044869/1.15365198,
+   88/79 trades); **Attack 88 holds the board's highest recorded PF at n≥30** (2.021320/1.154330).
+   Unaffected by this cycle.
+4. **Attack 37's filter-stack track remains CLOSED** (Attack 41) and is not reopened by this entry.
+5. Credits remaining after this cycle: 462 (one spent). Next cycle at this tier still runs H1-only for
+   any fresh mechanism; the two-run (full-pair) tier requires 500+.
+# ██ THE STATISTICAL AUDIT, CLOSED OUT — THE REAL DEFLATED SHARPE AGREES WITH THE APPROXIMATION TO WITHIN 0.5%, THE ANNUALISATION CAVEAT IS RESOLVED, AND THE OBV-AS-ONE-TRIAL RESCUE DOES NOT WORK. ZERO RUNS, ZERO CREDITS.
+
+**This entry does not restate the audit above it — it executes that audit's queue items 2 and 3 and
+closes its caveat 3.** Two sessions reached the multiple-testing question independently on the same day;
+the entry above got there first and its conclusion stands unchanged. What follows is the three
+measurements it flagged as owed.
+
+**Environment:** trader-dev connector present, `get_credits` → **463**. **Zero credits spent** — the
+rotation put this tick on the invented lab, which is no-backtest work in a cloud session. Every input is
+a metric already in `results/backtests.json` with `provenance`. **Reproducible source on disk:
+`analysis/multiple_testing_audit.py`** (HARD LESSON 21).
+
+## ITEM 2 — THE REAL DEFLATED SHARPE, USING THE TRIAL VARIANCE THE FILE ALREADY CONTAINS
+
+The audit above used **√(2 ln N)**, the expected maximum of N *standard normal* trials, and flagged that
+the real thing needs the measured dispersion. Bailey & López de Prado's form:
+
+```
+E[max] = sd · [ (1-γ)·Z⁻¹(1 - 1/N) + γ·Z⁻¹(1 - 1/(N·e)) ],   γ = 0.5772
+```
+
+**`sd` is measurable here.** Working in the same t units the audit used (implied t = SR·√years), so the
+two are commensurable — under an iid-normal null the trial-t dispersion should be exactly **1.00**, and
+what it actually is decides whether the approximation was safe:
+
+| trial pool | N | **measured sd(t)** | √(2 ln N) | **E[max t], measured** | ratio |
+|---|---|---|---|---|---|
+| all recorded | 79 | **2.272** | 2.956 | **5.559** | 1.88× |
+| **all, n≥10 & SR>-5** | **73** | **1.218** | 2.929 | **2.945** | **1.01×** |
+| H1 only | 59 | 2.586 | 2.856 | 6.048 | 2.12× |
+| H1, n≥10 & SR>-5 | 53 | 1.365 | 2.818 | **3.138** | 1.11× |
+| H2 only | 20 | 0.661 | 2.448 | 1.256 | 0.51× |
+
+**On the like-for-like pool the approximation was accurate to 0.5%** — 2.929 against a measured 2.945.
+The audit's caveat 4 ("*this is not a Deflated Sharpe Ratio*") is discharged: the real one, on this
+board's own trial variance, gives the same answer.
+
+**But the agreement is contingent, and that is the finding worth keeping.** It holds only after
+trimming the five degenerate runs (n<10) and attack57's -11.04 fee blowout. **Untrimmed, the measured
+trial-t dispersion is 2.272, not 1.00, and the true hurdle is 5.559 — the approximation understates it
+by 1.88×.** So √(2 ln N) is not safe here because the iid-normal null holds; it is safe because a
+trimming nobody had done yet happens to make it hold. **Whenever this tool is reached for again, measure
+`sd` before trusting √(2 ln N).**
+
+Break-even effective trial count for the board's best result (implied t = 2.019, attack88a):
+
+| basis | attack88a clears only if |
+|---|---|
+| √(2 ln N) approximation | N_eff ≤ **7.68** |
+| measured sd(t) = 1.365 (H1 trimmed) | N_eff ≤ **8.31** |
+| measured sd(t) = 1.218 (all trimmed) | N_eff ≤ **11.83** |
+
+The measured version is slightly *more* forgiving than the approximation. It does not matter — see item 3.
+
+## ITEM 3 — COUNTING THE OBV FAMILY AS ONE TRIAL, AS THE AUDIT ASKED. IT DOES NOT RESCUE ANYTHING.
+
+The audit's queue item 3 says the OBV-divergence family "*should be counted as one trial, not eight*".
+Executed, with two corrections to the census on the way:
+
+- **"Seven of the top ten are OBV variants" is exactly right** — confirmed: 88a, 83a, 68a, 87a, 70a,
+  66a, 69a occupy 7 of the top 10 by Sharpe; 46b, 74a and 40a are the other three.
+- **The family roster is 10 attacks, not eight** — 66, 67, 68, 69, 70, 71, 82, 83, 87, 88 (20 records
+  across both halves). Attacks 67 and 71 are in the family but not in the top ten, and 82 sits below it.
+  The audit's parenthetical listed eight; the correct count is ten, which makes its point stronger.
+
+**The census of the whole trial population:** the 79 records carry **59 distinct mechanism slugs**, of
+which **10 are OBV** and **49 are not**. Collapsing the *entire* OBV family to a single effective bet —
+more generous than any correlation could justify — still leaves **N_eff ≥ 50**:
+
+| N_eff | E[max t], measured sd(t)=1.218 | E[max t], √(2 ln N) |
+|---|---|---|
+| 8 | 1.777 | 2.039 |
+| 12 | 2.028 | 2.229 |
+| **50** (census floor, OBV as one bet) | **2.773** | 2.797 |
+| 73 | 2.945 | 2.929 |
+
+**The rescue needs N_eff ≤ 11.83 and the census floors it at 50.** The audit's caveat 1 — the one bias
+that ran in the results' favour — is now closed rather than bounded. It cannot be made to work.
+
+## CAVEAT 3 — THE ANNUALISATION CONVENTION, RESOLVED BY ARITHMETIC
+
+The audit flagged: "*Sharpe here is the engine's, with its annualisation convention, applied uniformly
+across records but not independently verified.*" Nothing in `results/SCHEMA.md` or the ledger's
+*Platform constraints* defines it, and the whole implied-t conversion depends on it.
+
+It can be pinned without the return series. If `sharpeRatio` were **per-trade**, it would be bounded by
+the recorded win rate and average win/loss: model each strategy's trades as a two-point distribution
+(every win = `avgWinningTrade`, every loss = `avgLosingTrade`). That is the **minimum** variance
+consistent with those averages, so `mean/sd` from it is the **maximum possible per-trade Sharpe**:
+
+| record | win rate | avgWin | avgLoss | **max possible SR/trade** | recorded |
+|---|---|---|---|---|---|
+| attack88a | 0.691 | 208.52 | -230.59 | **0.359** | 1.294 |
+| attack83a | 0.659 | 171.25 | -205.59 | **0.240** | 1.105 |
+| attack68a | 0.652 | 169.46 | -202.62 | **0.225** | 1.051 |
+| attack87a | 0.653 | 181.48 | -216.69 | **0.229** | 0.996 |
+| attack70a | 0.654 | 224.65 | -257.86 | **0.251** | 0.947 |
+| attack46b | 0.263 | 552.17 | -124.37 | **0.180** | 0.942 |
+| attack66a | 0.606 | 160.24 | -180.48 | **0.156** | 0.930 |
+| attack69a | 0.658 | 258.44 | -283.45 | **0.284** | 0.917 |
+
+**The per-trade reading is arithmetically impossible for all 8 of the board's 8 highest Sharpes** — the
+ceiling is 2.5×–6× below the recorded figure in every row. Per-*bar* fails by far more. The consistency
+check agrees: read as annualised, these imply annual volatilities of **9.2%–12.7%** against recorded max
+drawdowns of **10.7%–13.6%**, coherent for a book in the market a small fraction of the time.
+
+**`sharpeRatio` is time-annualised.** The audit's implied-t conversion, and Attack 86's before it, were
+using the right units. That is now established rather than assumed.
+
+## A SECOND, INDEPENDENT ROUTE TO THE SAME BAR
+
+The audit derived its threshold from the expected maximum of a noise search. A plain **two-sided
+Bonferroni** correction across the same trial count gives the same place:
+
+| N | α = 0.05 | α = 0.10 |
+|---|---|---|
+| 73 | **3.396** | 3.201 |
+| 79 | **3.417** | 3.224 |
+| 98 (numbered attacks) | **3.475** | 3.285 |
+
+**Harvey/Liu/Zhu's t > 3.0 is not an outside standard being imported into this board. The board's own
+search history generates 3.40–3.48 from first principles.** Three independent derivations — the
+literature's, the noise-maximum, and Bonferroni — land in the same place, and the board's best is 2.019.
+
+## WHAT THIS ADDS, AND WHAT IT DOES NOT
+
+- **It does not change the audit's conclusion.** It removes the three reasons someone could have had for
+  not believing it.
+- **Benchmark Audit II's Finding 4 closes on a second axis.** That entry established *"Attack 83 remains
+  the strongest both-halves candidate"* was an endorsement rather than a measurement, and corrected the
+  ranking to Attack 88 on profit factor. On this axis both are below the hurdle — implied t 1.724 and
+  2.019 against 3.40. The ranking question was real; neither answer is a survivor. *(Their recorded
+  buy & hold standing is unchanged and comes from that audit, not from here: Attack 83 bracketed at
+  -12.07/-5.65 to +6.51/+9.59 pp depending on baseline column; Attack 46b +6.93 raw / +22.17 perp in H2.)*
+- **The standing-gate decision stays untaken, for the second entry running.** Both sessions independently
+  declined to install it, and that judgement is right twice. It now has three measurements under it.
+
+## WHAT I COULD NOT ESTABLISH
+
+- **A skew/kurtosis-adjusted DSR p-value.** That needs the return *series*; only summary metrics are on
+  disk. The direction is known (fat tails and negative skew *raise* the hurdle), the magnitude is not.
+  **No p-value is quoted here, deliberately.**
+- **The engine's risk-free rate and exact annualisation factor.** Annualisation is now proved; the
+  constants are still undocumented. The E[max] comparison is unit-internal and unaffected; the implied-t
+  conversion depends on them mildly.
+- **Attack 86 is not in this trial pool.** Its BTC/ETH 4h and 1h runs went through the connector route
+  and were never written into `results/backtests.json`. Its own entry records implied t of 1.74/1.77 by
+  the same method — consistent, but outside this data, and it would *raise* N if it were inside.
+- **Nothing about the other three workstreams.** War Formation, 3M Elite and Legacy Forex keep their own
+  records and were not touched. The arithmetic transfers; the measurement has not been taken there, and
+  taking it requires no merging — each lab's own trial file is its own null distribution.
+
+## QUEUE
+
+1. **The audit's queue items 2 and 3 are done and are struck.** Item 1 (whether a t-hurdle joins
+   RATCHET v2) and item 4 (stop generating mechanisms at the current bar) stand unchanged and are still
+   the user's call.
+2. **Measure `sd` before using √(2 ln N) again.** It was accurate here only after a trimming; untrimmed
+   it understated the hurdle by 1.88×.
+3. **The bar rises with N.** Attack 99 faces a harder hurdle than Attack 98 did, purely because Attack 98
+   happened. **Forward-recorded signals are the only route that adds evidence rather than hurdle** —
+   named now in four consecutive entries and started in none.
+4. **Unchanged and unaffected:** the funding-clock counter-build (Attack 55 queue item 1), the
+   `backtest-lab` funding re-run of Attack 83a/83b (Benchmark Audit II queue item 1), Attack 34's
+   unfixable H2 sample floor, and the short leg's standing structural asymmetry.
+
+## SOURCES
+- Bailey & López de Prado, *The Deflated Sharpe Ratio* — https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2460551
+- Harvey, Liu and Zhu, *…and the Cross-Section of Expected Returns* — https://www.nber.org/system/files/working_papers/w20592/w20592.pdf
+- Bailey, Borwein, López de Prado & Zhu, *Pseudo-Mathematics and Financial Charlatanism* — https://www.ams.org/notices/201405/rnoti-p458.pdf
+- *Do t-Statistic Hurdles Need to be Raised?* — https://arxiv.org/pdf/2204.10275
+
+## ██ POSTSCRIPT, SAME DAY — ATTACK 99 LANDED WHILE THIS WAS BEING WRITTEN, AND MOVED THE BAR EXACTLY AS DESCRIBED
+
+Attack 99 (WVAD accumulation dwell-reclaim, discarded on cost) added a scored record to
+`results/backtests.json` between this entry's computation and its commit. Recomputed on the enlarged
+pool, **nothing about the verdict changes and one thing gets sharper**:
+
+| | at N = 79 scored (73 trimmed) | **at N = 80 scored (74 trimmed)** |
+|---|---|---|
+| measured sd(t), trimmed | 1.218 | **1.211** |
+| **E[max t], measured** | 2.945 | **2.934** |
+| √(2 ln N) | 2.929 | **2.934** |
+| ratio | 1.01× | **1.00×** |
+| best observed implied t | 2.019 | **2.019** — unchanged |
+| trials clearing the hurdle | **0** | **0** |
+
+**Attack 99 raised the hurdle and did not raise the evidence.** That is not a criticism of Attack 99 —
+it was correctly discarded on cost, and this entry does not reopen it. It is the structural consequence
+above, happening inside a single commit window: **the ninety-ninth attack made the bar harder for the
+hundredth, and the top of the table did not move.** The tables in this entry are left at their computed
+values of N = 79 rather than restated, because that is what was actually measured; this postscript is
+the correction, per the standing rule to record the delta rather than quietly overwrite it.
+
+*(The Bonferroni row for "98 numbered attacks" should now read 99: z = 3.478 at α = 0.05, against 3.475.
+The bar moves in the third decimal. The point is the direction, not the digit.)*
