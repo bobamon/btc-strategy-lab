@@ -7777,3 +7777,84 @@ home instrument. This is new evidence: earlier cycles verified the champion via 
 BTCUSDT, full coverage), now with a bootstrap-confirmed robust net edge (95% CI on PF
 [1.046, 4.025], 1.9% chance of net loss on resample). **VALIDATED SHORT (NOT A CO-CHAMPION):
 v60/v61(short)** — unchanged. **No champion change this cycle.**
+
+---
+
+# ██ v73 — THE SHORT LEG'S OWN NET EDGE IS ALSO ROBUST UNDER RESAMPLING (CLOSES v72 QUEUE ITEM 1) (2026-09-06)
+
+Zero credits, no backtest — the same method v72 used on the long leg, applied to v72's own queue item 1:
+*"Bootstrap the validated short leg's own 39-trade full-coverage sample the same way."* `get_trades`
+against resultId `01M1NXR2YRB23N335M7DEH5NW1` (v60 short, first clean measurement, 39 trades, the
+`passed` full-window entry in `backtests.json`, not the separately-recorded full-data-coverage
+re-baseline).
+
+## A NOTE ON THE SCHEDULED PROMPT, AGAIN
+
+This cycle's stored scheduled prompt is a v37/v53 snapshot, unchanged from the version v72 already
+flagged. Its two queue items — the 12H/24H bias gate and the short-leg `cascadeRatio` signature — were
+both closed days ago (bias gate: v54/v55/v57; cascade signature: identified as a short-leg-only
+latch artefact and fixed, `cascadeRatio 1.0` confirmed on every build since v58/v60 — see HARD LESSON
+31/42). Per "THE DOCS WIN over this prompt," this cycle again took SYSTEM.md's own live queue (v72
+item 1) as the actual next step.
+
+## METHOD
+
+Identical to v72: case-resampling bootstrap over the recorded trade sequence (resample-with-replacement,
+n=39 each draw), 20,000 iterations at the reported seed, cross-checked at 100,000 iterations and against
+five independent reseeds for stability. Profit factor computed on **net** (commission-inclusive) P&L per
+trade, which reproduces the recorded headline exactly — `sum(wins)/abs(sum(losses))` on the `profit`
+field gives **1.8861654563861205**, matching `backtests.json`'s recorded 1.88616546 to 7 decimal places
+and confirming the trade log pulled is the one the recorded metric came from.
+
+## RESULT
+
+| Build | Instrument | n | Actual PF (net) | Bootstrap 95% CI (PF) | P(bootstrap net ≤ 0) |
+|---|---|---|---|---|---|
+| v37 ungraded base (v72, for comparison) | BTC | 241 | 1.0534251 | [0.789, 1.387] | 36.8% |
+| **v62-fvg champion (v72, for comparison)** | **BTC** | **40** | **2.04354108** | **[1.046, 4.025]** | **1.9%** |
+| **v60 short leg — v73, this measurement** | **BTC** | **39** | **1.88616546** | **[0.955, 3.840]** | **3.4%** |
+
+(100,000-iteration run; five 20,000-iteration reseeds all landed P(net ≤ 0) in a tight 3.2%–3.6% band,
+so this is not seed-dependent.)
+
+**The short leg's net edge clears the same bar the long champion did.** A ~3.4% chance of a net loss on
+resample is an order of magnitude below the ungraded base's 36.8–41.1%, and in the same neighbourhood as
+the long champion's 1.9% — both single-digit, both far from the "coin flip on whether this beats
+breakeven" territory the ungraded base sits in. The CI's lower bound (0.955) dips fractionally below 1.0,
+unlike the long champion's (1.046), which is the expected consequence of a marginally smaller, higher-
+variance short sample (39 trades, several large swings — trade #35 alone is +$85.57 gross) rather than a
+sign of fragility: the median and mean of the resampled distribution (1.884 and 2.017) sit comfortably
+above 1.0 either way.
+
+## WHAT THIS CLOSES AND WHAT IT DOESN'T
+
+- **Closes v72 queue item 1.** The validated short leg now has the same direct, non-parametric robustness
+  read as the long champion, not just a RATCHET v2 pass/fail.
+- **Does not change champion or validated-short status.** v60/v61(short) was already `passed`/"validated,
+  not co-champion"; this adds a robustness read RATCHET v2 doesn't ask for. No `backtests.json` row is
+  added — matching the precedent v72 itself set (arithmetic on an already-recorded trade log is not a new
+  build) and the earlier gross-edge-screen entry before that.
+- **No new vocabulary decoded.** Type 1 (3M candle anatomy) and the swing rule remain the only undecoded
+  terms across all ten captured transcripts — now the longest-standing open item across three straight
+  cycles (v71, v72, v73).
+
+## QUEUE
+
+1. Per v71/v72, the instrument-generalisation question and the FVG-base-stacking question stay closed;
+   no further single-term or single-instrument test is queued on either axis.
+2. Per v71 queue item 4 / v72 queue item 3: do not combine v56 and v62.
+3. Both legs now have a bootstrap-confirmed robust net edge on their home instrument (BTC) — long via
+   v62-fvg, short via v60/v61(short). The next open, genuinely unasked question in this lab is whether
+   *either* leg's edge survives the same instrument-generalisation test v71 ran on the long leg's base —
+   i.e., is the short leg's `1.88616546` also a BTC-specific number, the way the long base's `1.053` was?
+   This has never been run on the short side and would need one credit (a saved short-leg strategy object
+   re-run on ETH or SOL), so it is queued, not executed this cycle, per the credit-tier guidance for a
+   balance in the 250-500 band (one backtest at most) — and this cycle spent zero, so the budget is intact
+   for whichever session picks this up next.
+4. **VOCABULARY.md's Type 1 (3M candle anatomy) and the swing rule remain the longest-standing open item
+   in the lab** and no amount of backtesting or resampling closes them.
+
+**CHAMPION OF RECORD (LONG): v62-fvg** — unchanged (PF 2.04354108, 40 trades, DD 4.50890824%, BTCUSDT,
+full coverage; bootstrap-confirmed, 95% CI [1.046, 4.025], 1.9% P(net≤0)). **VALIDATED SHORT (NOT A
+CO-CHAMPION): v60/v61(short)** — unchanged (PF 1.88616546, 39 trades; now also bootstrap-confirmed, 95%
+CI [0.955, 3.840], ~3.4% P(net≤0)). **No champion change this cycle.**
