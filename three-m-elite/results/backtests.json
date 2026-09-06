@@ -1459,5 +1459,50 @@
     },
     "verdict": "REJECTED under RATCHET v2, decisively: trade count collapsed 64 -> 6 (-90.6%), far below the ~30-trade quoting floor, and profit factor fell hard (1.01300244 -> 0.57821551, reversing the baseline from barely-profitable to a clear loser). No split test owed or possible -- 6 trades cannot be split.",
     "notes": "HARD LESSON 45's pattern for a SEVENTH time, and the most severe cut measured yet on this mechanism (previous worst was v56's 155->37, -76%; this is -90.6%). Confirms v66's registered prediction (Outcome B) rather than merely assuming it. Cascade ratio 1.0 (6/6, depth 1), clean -- HARD LESSON 42's fix continues to hold on every bias-gated or declared-deviation short construction tried. This closes v66's queue item 1 and, combined with v65's earlier rejection, exhausts every well-specified single-term lever this lab has identified for the short leg without new source material (unchanged conclusion from the entries immediately preceding this one). Does not touch the long champion (v62-fvg, unchanged) or the short reference (v60/v61(short), unchanged: PF 1.88616546 on its original 2022-01-01 window / PF 1.01300244 on full coverage)."
+  },
+  {
+    "id": "3m-elite-v68-v37-ungraded-on-eth",
+    "name": "3M Elite v37 (ungraded champion, pre-FVG) on ETHUSDT, full coverage -- isolates whether the FVG grading term or the instrument itself explains the champion's failure to generalise",
+    "symbol": "ETHUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "backtestStart": "2021-03-15",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/pine/3m-elite-v37-freshness-tight.pine",
+    "pineSource": "three-m-elite/pine/3m-elite-v37-freshness-tight.pine",
+    "description": "Queue item 3 from the second-instrument generalisation cycle (SYSTEM.md's v62-fvg-on-ETH entry): 'the clean test is v37 (ungraded) on ETH -- if it is also ~0.98, the instrument is the problem; if it is worse, the FVG gate is still adding something on ETH too.' Byte-identical v37 source (pine/3m-elite-v37-freshness-tight.pine, the pre-FVG champion: engulf creates the demand zone, [low,open] geometry, most-recent replacement, body mitigation with the One Candle Rule, maxAge=6, R floor 0.8%, 2R target, no FVG grading, no bias gate) pointed at ETHUSDT on the same full-coverage window already used for the v62-fvg ETH run (2021-03-15, ClickHouse's first ETH bar, through 2026-09-01), so the two ETH results are directly comparable. No new vocabulary decoded this cycle -- this is a measurement against the existing model, not a rule change. LONG ONLY, unchanged from every prior v37 run (LESSON 6 -- legs are not independent in this lab, v24). This is the single backtest this cycle's credit bracket (466, 250-500) allowed.",
+    "metrics": {
+      "profitFactor": 1.02872954,
+      "maxDrawdownPct": 27.31398997,
+      "netProfitPct": 7.98609566,
+      "totalTrades": 316,
+      "winningTrades": 126,
+      "losingTrades": 190,
+      "winRatePct": 39.87341772,
+      "sharpeRatio": 0.17047977,
+      "sortinoRatio": 0.03916347,
+      "avgTradePct": 0.02527245,
+      "ratioAvgWinLoss": 1.55125883,
+      "longTrades": 316,
+      "shortTrades": 0
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "resultId": "01M1V285RAS76NSNM5CXDN9T6Y",
+      "jobId": "adhoc_01M1V285RAYQPWC2VPD3AP9S27",
+      "strategyId": "01M1V2860AQGM5J5TT4XP1VZV0",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1V285RAS76NSNM5CXDN9T6Y",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1,
+      "uniqueEntries": 316,
+      "totalRows": 316,
+      "maxCascadeDepth": 1,
+      "verifiedAt": "2026-09-06T00:00:00Z"
+    },
+    "verdict": "DIAGNOSTIC, not a RATCHET v2 decision -- this does not compete against v62-fvg (different instrument) and does not touch the BTC champion. Answers the pre-registered question: PF 1.02872954 on ETH, in the same near-breakeven neighbourhood as v62-fvg's own ETH result (0.97825349), NOT the 'worse than 0.98' outcome that would have implicated the FVG gate specifically. THE INSTRUMENT IS THE PROBLEM, not the grading term -- BTC's edge (PF 2.04 graded / 1.05 ungraded on BTC full coverage) simply does not travel to ETH, with or without FVG grading.",
+    "notes": "Full comparison, same ETH window (2021-03-15 to 2026-09-01), same v37 lineage: ungraded PF 1.02872954 / DD 27.31398997% / 316 trades / net +7.98609566%, vs FVG-graded (v62-fvg-on-ETH) PF 0.97825349 / DD 8.49043491% / 49 trades / net -0.8260768%. Two things are true at once: (1) neither construction clears PF 1.0 by a meaningful margin on ETH, closing the generalisation question from the prior cycle's queue item 3 with 'BTC-specific mechanism' rather than 'FVG-specific artifact' -- and (2) the FVG grading term is NOT inert on ETH even though it does not fix the PF problem: it cuts drawdown by 18.8pp (27.31% -> 8.49%) and trade count by 84.5% (316 -> 49) for a PF that is statistically indistinguishable from ungraded's 1.03. Cascade ratio 1.0 (316/316, depth 1), clean -- consistent with v62-fvg's own clean cascade and with the cascade signature having ALREADY been resolved at v54-v61 (HARD LESSON 35/50: it was a margin-liquidation unwind on the SHORT leg only, PF-transparent, fixed by 25%-equity sizing at v60; no long-leg build, including this one, has ever shown the defect). Does not change the champion (v62-fvg, BTCUSDT-only, unchanged) or its own caveat (already recorded: 'v62 is a BTCUSDT result, not a demonstrated method'). Closes the second-instrument cycle's queue item 3; queue item 2 (a third/fourth instrument, SOL/BNB) remains open for a future cycle, unattempted here (one-backtest credit bracket)."
   }
 ]
