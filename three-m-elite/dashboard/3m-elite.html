@@ -755,8 +755,9 @@ const DATA = [
       "cascadeRatio": 1,
       "verifiedAt": "2026-09-04T06:09:00Z"
     },
-    "verdict": "DOES NOT PROMOTE -- RATCHET v2 clause 4 is UNSATISFIABLE at this sample size. My registered falsifier fired.",
-    "notes": "MY REGISTERED FALSIFIER FIRED, AND IT IS REPORTED FIRST BECAUSE IT WAS THE POINT OF THE RUN. I predicted in the Pine header that 'a stack ordering is a COMMON state' so the count cut would be far milder than v54's 155->48, and that a collapse would mean the stack reading is ALSO too strict. THE COUNT WENT 155 -> 37, a 76% cut, WORSE than v54's 69%. MY REASONING WAS WRONG: a full 20>50>200 alignment on a 15m chart is NOT a common state, because 15m is noisy and a 200-SMA spans about 50 hours, so it rarely sits cleanly below both faster averages at the moment a demand zone is being tapped. THE HEADLINE LOOKS EXCELLENT AND IT DOES NOT MATTER: PF 1.62137752 against the v37 champion's 1.25172059, drawdown 6.18395066% against 8.72815312%, win rate 48.64864865%, Sharpe 0.55523409, cascadeRatio 1 on 37 clean entries. Under RATCHET v2 clauses 1-3 it would KEEP outright. IT IS CLAUSE 4 THAT STOPS IT: a >50% count cut must pass a SPLIT TEST BEFORE being kept, and THE SPLIT TEST CANNOT BE SATISFIED AT THIS SAMPLE SIZE. Determined FREE from the per-trade log rather than by spending two more credits on halves that could not have counted: splitting the 37 entries at 2024-06-08 (trade 27 enters 2024-03-12, trade 28 enters 2024-06-12) gives H1 = 27 TRADES and H2 = 10 TRADES. BOTH ARE BELOW THE 30-TRADE FLOOR, so neither half's ratio is quotable under LESSON 12 and the split can never clear clause 4 no matter how it lands. DERIVED FIGURES, COMPUTED BY ME FROM THE FREE TRADE LOG AND EXPLICITLY NOT ENGINE METRICS -- recorded because the consistency is interesting, and NOT quotable as results: H1 about 1.60 on 13W/14L, H2 about 1.67 on 5W/5L. The two halves being that close is the most encouraging thing here and it is still not evidence, because 10 trades cannot carry a ratio. WHAT THIS SETTLES: the bias axis is now closed for THIS mechanism on THIS data, and not because bias is the wrong idea. Every bias gate tried -- the lab's 12H/24H proxy and now the source's own MA stack -- cuts the sample below what the ratchet requires to believe the improvement. The constraint is the DATA, not the gate. NO CHAMPION CHANGE: v37 stands at 1.25172059 / 155 trades with all existing caveats, and it stands on a sample that can actually be split (96/59)."
+    "verdict": "PASSED RATCHET v2 CLAUSES 1-3; CLAUSE 4 UNSATISFIABLE AT THIS SAMPLE SIZE, SO IT CANNOT BE BANKED -- which is a sample verdict, not a verdict on the filter. My registered falsifier fired on the count cut (155 -> 37, 76%), and the mandatory split gives H1=27 / H2=10, both under the 30-trade floor. See statusNote for the language correction and v70 for the cross-instrument result.",
+    "notes": "MY REGISTERED FALSIFIER FIRED, AND IT IS REPORTED FIRST BECAUSE IT WAS THE POINT OF THE RUN. I predicted in the Pine header that 'a stack ordering is a COMMON state' so the count cut would be far milder than v54's 155->48, and that a collapse would mean the stack reading is ALSO too strict. THE COUNT WENT 155 -> 37, a 76% cut, WORSE than v54's 69%. MY REASONING WAS WRONG: a full 20>50>200 alignment on a 15m chart is NOT a common state, because 15m is noisy and a 200-SMA spans about 50 hours, so it rarely sits cleanly below both faster averages at the moment a demand zone is being tapped. THE HEADLINE LOOKS EXCELLENT AND IT DOES NOT MATTER: PF 1.62137752 against the v37 champion's 1.25172059, drawdown 6.18395066% against 8.72815312%, win rate 48.64864865%, Sharpe 0.55523409, cascadeRatio 1 on 37 clean entries. Under RATCHET v2 clauses 1-3 it would KEEP outright. IT IS CLAUSE 4 THAT STOPS IT: a >50% count cut must pass a SPLIT TEST BEFORE being kept, and THE SPLIT TEST CANNOT BE SATISFIED AT THIS SAMPLE SIZE. Determined FREE from the per-trade log rather than by spending two more credits on halves that could not have counted: splitting the 37 entries at 2024-06-08 (trade 27 enters 2024-03-12, trade 28 enters 2024-06-12) gives H1 = 27 TRADES and H2 = 10 TRADES. BOTH ARE BELOW THE 30-TRADE FLOOR, so neither half's ratio is quotable under LESSON 12 and the split can never clear clause 4 no matter how it lands. DERIVED FIGURES, COMPUTED BY ME FROM THE FREE TRADE LOG AND EXPLICITLY NOT ENGINE METRICS -- recorded because the consistency is interesting, and NOT quotable as results: H1 about 1.60 on 13W/14L, H2 about 1.67 on 5W/5L. The two halves being that close is the most encouraging thing here and it is still not evidence, because 10 trades cannot carry a ratio. WHAT THIS SETTLES: the bias axis is now closed for THIS mechanism on THIS data, and not because bias is the wrong idea. Every bias gate tried -- the lab's 12H/24H proxy and now the source's own MA stack -- cuts the sample below what the ratchet requires to believe the improvement. The constraint is the DATA, not the gate. NO CHAMPION CHANGE: v37 stands at 1.25172059 / 155 trades with all existing caveats, and it stands on a sample that can actually be split (96/59).",
+    "statusNote": "LANGUAGE CORRECTION 2026-09-06 (closes the rejected-filters re-screen's queue item 1). The status field stays 'rejected' only because this file uses a four-value controlled vocabulary (passed/testing/rejected/research) that the dashboard reads; 'rejected' here does NOT mean the filter failed on evidence. v56 PASSED RATCHET v2 clauses 1, 2 and 3 -- PF 1.25172059 -> 1.62137752, maxDrawdown 8.72815312% -> 6.18395066%, 37 trades clearing the 30 floor -- and could not SATISFY clause 4, whose mandatory split lands at 27/10, both halves below the floor. The correct phrase is 'passed clauses 1-3, clause 4 unsatisfiable on this sample', not 'the filter failed'. The gross-edge re-screen put v56 at +0.4624%/trade against the v37 base's +0.2571%, a 1.80x improvement in trade quality, so on the axis that measures whether a filter selects better trades it is one of the best terms this lab has produced on BTC. SEE v70: the same rule is gross-NEGATIVE on SOLUSDT, so this quality is BTCUSDT-specific."
   },
   {
     "id": "3m-elite-v57-source-ma-stack-bias-short",
@@ -1775,10 +1776,129 @@ const DATA = [
       "verifiedAt": "2026-09-06T00:00:00Z"
     },
     "verdict": "DIAGNOSTIC, not a RATCHET v2 decision -- this does not compete against v62-fvg (different instrument) and does not touch the BTC champion. Answers the pre-registered question with the sharpest of the three outcomes named in advance: PF 0.87179834 is BELOW ETH's own 0.97825349, not merely 'in the same neighbourhood' -- the generalisation series now reads BTC 2.04354108 -> ETH 0.97825349 -> SOL 0.87179834, monotonically declining and never recovering above 1.0 off BTC.",
-    "notes": "Gross edge per trade (HARD LESSON 37): gross = net + commission = -856.88709955 + 669.04099955 = -187.8461, i.e. -$2.98/trade -- NEGATIVE gross edge, not merely cost-crushed positive edge like BTC ($12.89 ungraded) or ETH ($14.24 ungraded / $8.42 graded). This is a different and harsher failure mode than ETH's: on ETH the FVG gate selected lower-quality-but-still-positive-gross trades (x0.59); on SOL, absent an ungraded SOL baseline to compare against, the graded construction alone is already gross-negative -- the gate is not merely failing to add value here, the trades it selects lose money before commission is even charged. Cascade ratio 1.0 (63/63, depth 1), clean -- consistent with every long-leg build in this lab; the cascade defect (HARD LESSON 35/50) remains a short-leg-only, already-fixed (v60, 25%-equity sizing) artifact. Closes the v68 entry's queue item 1 (three-instrument point now exists: BTC/ETH/SOL). Does not change the champion (v62-fvg, BTCUSDT-only, unchanged) or the validated short (v60/v61(short), unchanged). Queue item 4 from the rejected-filters re-screen entry (does v56's source bias rule raise gross edge on SOL too, or is it BTC-specific like FVG) remains open and unattempted -- one-backtest bracket allowed only this run."
+    "notes": "Gross edge per trade (HARD LESSON 37): gross = net + commission = -856.88709955 + 669.04099955 = -187.8461, i.e. -$2.98/trade -- NEGATIVE gross edge, not merely cost-crushed positive edge like BTC ($12.89 ungraded) or ETH ($14.24 ungraded / $8.42 graded). This is a different and harsher failure mode than ETH's: on ETH the FVG gate selected lower-quality-but-still-positive-gross trades (x0.59); on SOL, absent an ungraded SOL baseline to compare against, the graded construction alone is already gross-negative -- the gate is not merely failing to add value here, the trades it selects lose money before commission is even charged. Cascade ratio 1.0 (63/63, depth 1), clean -- consistent with every long-leg build in this lab; the cascade defect (HARD LESSON 35/50) remains a short-leg-only, already-fixed (v60, 25%-equity sizing) artifact. Closes the v68 entry's queue item 1 (three-instrument point now exists: BTC/ETH/SOL). Does not change the champion (v62-fvg, BTCUSDT-only, unchanged) or the validated short (v60/v61(short), unchanged). Queue item 4 from the rejected-filters re-screen entry (does v56's source bias rule raise gross edge on SOL too, or is it BTC-specific like FVG) remains open and unattempted -- one-backtest bracket allowed only this run.",
+    "statusNote": "CORRECTED BY v71 (2026-09-06). v69 concluded the FVG gate 'does not merely fail to travel -- it inverts and worsens' off BTC. That reading does not survive the control. The ungraded v37 base on the SAME instrument and the SAME window scores PF 0.83284886 on 388 trades, BELOW the graded 0.87179834, so on SOL the FVG gate IMPROVES the base rather than harming it (+0.039 PF, +$1.83/trade of gross edge). The gate helps on BTC (+0.990) and SOL (+0.039) and hurts marginally on ETH (-0.050); it is not BTC-specific. What is BTC-and-ETH-specific is the BASE. v69 measured the gate and charged it with the base's failure. Every NUMBER in v69 stands; its attribution does not."
+  },
+  {
+    "id": "3m-elite-v70-v56-source-bias-on-sol",
+    "name": "v70: the SOURCE's own 20/50/200 MA-stack bias rule (v56, byte-identical) on SOLUSDT",
+    "symbol": "SOLUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "backtestStart": "2022-01-01",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/pine/3m-elite-v56-source-ma-stack-bias.pine",
+    "description": "Closes v69's queue item 2, the sharpest item open in this lab: the lab-INVENTED FVG grading term (v62) was shown BTC-specific by a three-instrument series (BTC 2.04 -> ETH 0.98 -> SOL 0.87), so the obvious next question is whether the SOURCE'S OWN bias rule -- the 20/50/200 SMA stack on the 15m working chart, the top line of their checklist -- travels where the lab's invention does not. Different axis, never attempted on any instrument but BTC. Byte-identical source: no new pine file, the saved v56 strategy (01M1NGHXB367KCXKYQW5C39XMF) re-run with only the symbol parameter changed, the same symbol-override methodology used for the ETH and SOL tests of v62. WINDOW-MATCHED to v56's own BTC reference (2022-01-01 -> 2026-09-01) rather than SOL's full coverage, so the comparison changes one variable and not two; plan_backtest_window confirmed SOL 15m covers this window with no clamping (first bar 2021-10-15). PRE-REGISTERED before running: PF near BTC's 1.62 => the source's rule generalises where the lab's invention does not; PF near 1.0 => no edge, the same pattern as the FVG term; PF below SOL-FVG's 0.87179834 => the source's own rule fails HARDER on altcoins than the lab's invention did.",
+    "metrics": {
+      "netProfitPct": -24.56095502,
+      "profitFactor": 0.75219388,
+      "maxDrawdownPct": 34.78557289,
+      "totalTrades": 108,
+      "winRatePct": 30.55555556,
+      "avgTradePct": -0.22741625,
+      "sharpeRatio": -0.42971379,
+      "sortinoRatio": -0.05603473,
+      "commissionPaid": 922.63620165,
+      "grossProfit": 7455.264012499997,
+      "grossLoss": 9911.359514149999,
+      "avgWinningTrade": 225.917091287879,
+      "avgLosingTrade": -132.151460188667,
+      "ratioAvgWinLoss": 1.70953156,
+      "largestWin": 578.655333000001,
+      "largestLoss": -578.609144999999,
+      "avgBarsInTrade": 25.09259259,
+      "avgBarsWinning": 34.06060606,
+      "avgBarsLosing": 21.14666667,
+      "longTrades": 108,
+      "shortTrades": 0,
+      "longWinning": 33,
+      "shortWinning": 0,
+      "longNetProfit": -2456.09550165,
+      "shortNetProfit": 0,
+      "finalEquity": 7543.904498350001,
+      "barsEvaluated": 163826
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1V6YXGXCEPCQM091MMR2H08",
+      "resultId": "01M1V6YXGXCEPCQM091MMR2H08",
+      "strategyId": "01M1V6YXPPGC7MQ2ESV3D7SKXH",
+      "sourceStrategyId": "01M1NGHXB367KCXKYQW5C39XMF",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1V6YXGXCEPCQM091MMR2H08",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1.0,
+      "uniqueEntries": 108,
+      "totalRows": 108,
+      "maxCascadeDepth": 1,
+      "verifiedAt": "2026-09-06T00:00:00Z"
+    },
+    "verdict": "THE THIRD, HARSHEST PRE-REGISTERED OUTCOME FIRED: PF 0.75219388 is BELOW SOL-FVG's 0.87179834. The SOURCE's own bias rule fails harder on SOL than the lab's invented FVG term does. On 108 trades -- nearly three times BTC's 37 and comfortably above the 30-trade floor, so this is a well-sampled negative, which is rare in this lab. Gross edge per trade is -$14.1987 (gross -$1,533.46 = net -$2,456.10 + commission $922.64), or -0.141987% of initial capital per trade: the trades this rule selects on SOL lose money BEFORE commission is charged. Cost is not the story; the selection is. Cascade clean (1.0, 108/108 at depth 1), so no HARD LESSON 31 recompute is owed and every printed statistic here is safe as-is. No RATCHET v2 comparison applies -- different instrument, no fixed-window parent -- so this is a generalisation diagnostic, not a KEEP/REJECT.",
+    "notes": "PHASE DECOMPOSITION (mandatory; computed from this run's own 108 trades, which reconcile to the engine net to the cent at -$2,456.095502): BEAR 2022 n=20 PF 0.4902 -$1,242.99 gross/trade -$52.12; RECOVERY 22-24 n=39 PF 1.1258 +$420.51 gross/trade +$19.03; 2024-25 n=27 PF 0.5991 -$1,055.66 gross/trade -$30.50; 2025-26 n=22 PF 0.6137 -$577.95 gross/trade -$18.62. By year, ONLY 2024 is net-positive (n=32, PF 1.2870, +$731.07); 2022 PF 0.4325, 2023 PF 0.8413, 2025 PF 0.3579, 2026 PF 0.9994. The split by trade order fails on BOTH halves (H1 n=54 PF 0.736995, H2 n=54 PF 0.770570), so this is not a single bad phase dragging an otherwise sound rule -- it is consistently negative across the window, which makes it a more trustworthy negative than most results in this lab. BUY & HOLD: the engine returns no buy-and-hold figure so none is claimed for the exact window; from this run's OWN recorded prices SOL went $113.345 at the first entry (2022-02-10) to $92.16 at the last exit (2026-08-23), a -18.69% price move, against this build's -24.56% -- it underperformed even a falling asset. FUNDING: the payload has no fundingPaid field, so none is reported rather than invented; commissionPaid is $922.63620165. EXIT MODEL: only 6 of 108 exits (5.56%) hit the maxBars=96 hold cap, so unlike War Formation's E94 this build's result really is about its shield/target model rather than its timeout. WHAT THIS DOES NOT SAY: not that v56 is invalidated on BTC -- that record is untouched, still PF 1.62137752 with a gross edge 1.80x the base -- and not that the rule is worthless in the source's hands, where it is read on charts they choose. It says the rule's measured edge is BTCUSDT-specific, exactly as the lab's own FVG term proved to be, and on the one alternative instrument tested it is the WORSE of the two."
+  },
+  {
+    "id": "3m-elite-v71-v37-ungraded-base-on-sol",
+    "name": "v71: the v37 ungraded BASE on SOLUSDT -- the missing control for every cross-instrument claim in this lab",
+    "symbol": "SOLUSDT",
+    "timeframe": "15m",
+    "direction": "long",
+    "status": "testing",
+    "createdDate": "2026-09-06",
+    "lastTestedDate": "2026-09-06",
+    "backtestStart": "2021-10-15",
+    "backtestEnd": "2026-09-01",
+    "specPath": "three-m-elite/pine/3m-elite-v37-freshness-tight.pine",
+    "description": "Closes v70's queue item 2, named there as 'the single most informative unspent credit in this lab'. THE MISSING CONTROL: every cross-instrument result in this lab has compared a FILTERED build on SOL against nothing, so 'the gate is gross-negative on SOL' could not be distinguished from 'the whole mechanism is gross-negative on SOL'. This run supplies the ungraded baseline. PROVENANCE: strategyId 01M1V2860AQGM5J5TT4XP1VZV0 is the same saved v37 source object used for the ETH control (v68), re-run with only the symbol changed -- BTC, ETH and SOL now share ONE source object across three symbols, the strongest provenance available for a three-instrument comparison. Window matched exactly to the v62-fvg SOL run (SOL full coverage, 2021-10-15 -> 2026-09-01, first ClickHouse bar) so the graded/ungraded pair differs in one variable only. RESEARCH PRIOR, registered before the run: supply and demand logic is portable in principle -- 'the logic of supply and demand liquidity zones applies across BTC, ETH, and other currency pairs' -- but is qualified by liquidity, since zones are 'powerful' in 'fast-moving markets like Bitcoin or Ethereum' while altcoins require accounting for 'slippage in low-liquidity altcoins' and are better suited to 'breakout trading and trend-following strategies', implying supply-demand zones alone may not be sufficient there; and the named failure case matches this window's shape, 'a demand zone in a strong downtrend may fail'.",
+    "metrics": {
+      "netProfitPct": -49.49734446,
+      "profitFactor": 0.83284886,
+      "maxDrawdownPct": 52.33387193,
+      "totalTrades": 388,
+      "winRatePct": 32.73195876,
+      "avgTradePct": -0.12757048,
+      "sharpeRatio": -0.65717585,
+      "sortinoRatio": -0.15051798,
+      "commissionPaid": 3083.967245500002,
+      "grossProfit": 24662.594215549994,
+      "grossLoss": 29612.32866104999,
+      "avgWinningTrade": 194.193655240551,
+      "avgLosingTrade": -113.457197935057,
+      "ratioAvgWinLoss": 1.71160278,
+      "largestWin": 588.5128444,
+      "largestLoss": -531.694889999999,
+      "avgBarsInTrade": 22.0128866,
+      "avgBarsWinning": 27.06299213,
+      "avgBarsLosing": 19.55555556,
+      "longTrades": 388,
+      "shortTrades": 0,
+      "longWinning": 127,
+      "shortWinning": 0,
+      "longNetProfit": -4949.734445500002,
+      "shortNetProfit": 0,
+      "finalEquity": 5050.265554499998,
+      "barsEvaluated": 171006
+    },
+    "provenance": {
+      "source": "trader.dev",
+      "jobId": "01M1V8M8M4WEMP30PTTXEKE8TZ",
+      "resultId": "01M1V8M8M4WEMP30PTTXEKE8TZ",
+      "strategyId": "01M1V8M9E779W2GH24Y0KMT1DX",
+      "sourceStrategyId": "01M1V2860AQGM5J5TT4XP1VZV0",
+      "backtestUrl": "https://mcp-api.trader.dev/backtest/01M1V8M8M4WEMP30PTTXEKE8TZ",
+      "engineVersion": "tv_jul26_mc7",
+      "cascadeRatio": 1.0,
+      "uniqueEntries": 388,
+      "totalRows": 388,
+      "maxCascadeDepth": 1,
+      "verifiedAt": "2026-09-06T00:00:00Z"
+    },
+    "verdict": "THE SECOND PRE-REGISTERED OUTCOME FIRED AND IT CORRECTS AN EARLIER ENTRY. PF 0.83284886 on 388 trades -- the largest sample this lab has ever produced -- against the same source's 1.0534251 on BTC (241 trades) and 1.02872954 on ETH (316 trades). THE BASE MECHANISM IS WHAT FAILS ON SOL. Placing every graded run beside its own ungraded base on the same instrument: BTC 1.0534251 -> 2.04354108 (gate +0.990), ETH 1.02872954 -> 0.97825349 (gate -0.050), SOL 0.83284886 -> 0.87179834 (gate +0.039). ON SOL THE FVG GATE IMPROVES THE BASE. It helps on two of three instruments and hurts marginally on the third, so it is NOT BTC-specific -- v69's headline ('it does not merely fail to travel, it inverts and worsens') is WITHDRAWN as a mis-attribution: v69 measured the gate and charged it with the base's failure. What is BTC-and-ETH-specific is the BASE, and even there it sits barely above 1.0. Gross edge per trade, all on SOL: base -$4.8087, base+FVG -$2.98, base+source-MA-bias -$14.1987 -- the FVG gate RAISES gross edge by $1.83/trade while the source's own bias rule LOWERS it by $9.39.",
+    "notes": "CONFIRMS v70 ON A MATCHED WINDOW: restricting THIS run's own trade log to v70's window (2022-01-01 onward) gives base PF 0.842836 on 371 trades with gross -$3.9363/trade, against v70's 0.75219388 on 108 trades with gross -$14.1987 -- so the source's MA-stack bias rule makes SOL strictly worse than doing nothing, like-for-like. PHASE DECOMPOSITION (from this run's own 388 trades, which reconcile to the engine net to the cent at -$4,949.734446): BEAR 21-22 n=102 PF 0.8743 -$1,176.30 gross/trade -$1.75; RECOVERY 22-24 n=115 PF 0.8980 -$896.41 +$0.07; 2024-26 n=170 PF 0.7527 -$2,823.63 -$9.69. EVERY PHASE IS BELOW 1.0, both halves by trade order fail (H1 n=194 PF 0.850034, H2 n=194 PF 0.810954), and by year only 2024 is net-positive and barely (PF 1.0148, +$103.60). As in v70, decomposition CONFIRMS the whole-window number rather than dissolving it -- twice now on this instrument, which is what a real absence of edge looks like as against a lucky or unlucky phase. BUY & HOLD: no figure in the payload so none is claimed; from this run's OWN recorded prices SOL ran $195.825 at the first entry (2021-10-23) to $102.36 at the last exit (2026-09-01), -47.73%, against the build's -49.49734446% -- it slightly UNDERPERFORMED holding a halving asset. FUNDING: no fundingPaid field exists in the payload; none is reported. Cascade clean (1.0, 388/388 depth 1). WHAT THIS DOES NOT SAY: v62-fvg's champion status is unaffected -- still PF 2.04354108 on 40 BTC trades -- but it is reframed as a good filter on a base that is only marginally positive, on the one instrument where that base is least bad. THE DEEPER FINDING: the instrument problem is one level lower than this lab thought. It is not that the grading term fails to generalise; the supply/demand BASE does not travel, and it was never far above 1.0 even where it works -- 1.053 on 241 BTC trades and 1.029 on 316 ETH trades are both within rounding distance of no edge at all."
   }
 ];
-const BUILT = "2026-09-06 10:56";
+const BUILT = "2026-09-06 11:58";
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');

@@ -7696,3 +7696,84 @@ testing`, a control run on a non-champion instrument.
 - Mudrex Learn, *Supply and Demand Zones in Crypto Trading* — https://mudrex.com/learn/supply-and-demand-zones-in-crypto-trading/
 - BingX Academy, *Mastering Supply and Demand Zones in Cryptocurrency Trading* — https://bingx.com/en/learn/supply-demand-zones
 - Bybit Learn, *Supply and Demand Zones: Tips For Successful Trading* — https://learn.bybit.com/en/strategies/supply-and-demand-zones-strategies
+
+---
+
+# ██ v72 — BOOTSTRAP RESAMPLING ANSWERS v71's QUEUE ITEM 2 DIRECTLY: THE BASE'S NET EDGE ON BTC/ETH IS NOT ROBUST, THE CHAMPION'S IS (2026-09-06)
+
+Zero credits, no backtest. Every number is a bootstrap resample computed on trade logs already on
+file: `get_trades` against resultIds `01M1SES9QF5Y18V67JH78FC1DY` (BTC, v37 ungraded, full coverage,
+241 trades), `01M1V285RAS76NSNM5CXDN9T6Y` (ETH, v37 ungraded, full coverage, 316 trades), and
+`01M1SETEAG1ADNXCW7JD5SXSGJ` (BTC, v62-fvg champion, full coverage, 40 trades). Executes v71's queue
+item 2 verbatim: "whether the base has an edge at all on its home instrument... has never been asked
+directly."
+
+## A NOTE ON THE SCHEDULED PROMPT, AGAIN
+
+This cycle's stored scheduled prompt is a v37/v53 snapshot. Its two queue items — "implement the
+12H/24H bias gate" and "resolve the cascade signature" (`cascadeRatio` 1.4655/1.419 on the short
+builds) — were both closed long before this cycle: the bias gate at v54/v55 (long) and v55/v57
+(short, including the conditional-bias variant), and the cascade signature identified as a
+short-leg-only artefact and fixed (HARD LESSON 31/42), with `cascadeRatio 1.0` confirmed on every
+long-leg build and every short build since v58/v60. Per "THE DOCS WIN over this prompt," this cycle
+took SYSTEM.md's own live queue (v71 item 2) as the actual next step, matching how the v58 entry
+handled the same stale-prompt situation two days ago.
+
+## METHOD
+
+A case-resampling bootstrap (resample-with-replacement over the trade sequence, 20,000 iterations),
+computed for each sample's total net profit and profit factor, giving an empirical 95% CI and the
+fraction of resamples landing at or below breakeven. This is a direct, non-parametric answer to "is
+this edge distinguishable from noise" — sharper than the Sharpe-derived "implied t" used at the
+FVG-gate-isolation cycle, and computed on the actual recorded trade sequence rather than an
+approximation from summary statistics.
+
+## RESULT
+
+| Build | Instrument | n | Actual PF | Bootstrap 95% CI (PF) | P(bootstrap net ≤ 0) |
+|---|---|---|---|---|---|
+| v37 ungraded base | BTC | 241 | 1.0534251 | [0.789, 1.387] | **36.8%** |
+| v37 ungraded base | ETH | 316 | 1.02872954 | [0.801, 1.303] | **41.1%** |
+| **v62-fvg champion** | **BTC** | **40** | **2.04354108** | **[1.046, 4.025]** | **1.9%** |
+
+**The base fails the direct test on both instruments where it was called "barely positive."** A PF
+whose bootstrap CI straddles 1.0 with better than a one-in-three chance of a net loss on resample is
+not distinguishable from a no-edge mechanism. This quantifies, rather than merely restates, the
+earlier "implied t ≈ 0.4" finding — both readings agree, one from Sharpe algebra, one from direct
+resampling of the actual trade sequence.
+
+**The champion clears it decisively.** Only 1.9% of 20,000 resamples of the FVG-graded BTC trade set
+showed a net loss, and the CI's lower bound (1.046) stays above breakeven despite the small sample.
+The FVG gate's selection — already shown by the gross-edge screen to lift gross edge per trade 5.8×
+on BTC — also converts a statistically fragile base into a statistically robust result on its own
+home instrument. This is new evidence: earlier cycles verified the champion via RATCHET v2
+(PF/drawdown/count/split) and never resampled its own trade set for robustness.
+
+## WHAT THIS CLOSES AND WHAT IT DOESN'T
+
+- **Closes v71 queue item 2** with a direct answer: no, the base does not have a defensible net edge
+  on BTC or ETH under resampling; yes, the champion built on top of it does.
+- **Does not change champion status.** v62-fvg was already `passed`; this adds a robustness read
+  RATCHET v2 doesn't ask for — it does not substitute for it, and no `backtests.json` entry is added
+  for this cycle, matching the precedent set by the earlier gross-edge-screen entry (arithmetic on
+  recorded runs, not a new build, is not a new row).
+- **Does not touch the short leg.** v60/v61(short)'s own 39-trade full-coverage sample is the natural
+  next resampling target, at zero further credit cost, and is queued below rather than rushed here.
+- **No new vocabulary decoded.** Type 1 (3M candle anatomy) and the swing rule remain the only
+  undecoded terms across all ten captured transcripts.
+
+## QUEUE
+
+1. **Bootstrap the validated short leg's own 39-trade full-coverage sample** the same way — zero
+   credit, `get_trades` on the already-recorded v60/v61(short) resultId. Not run this cycle.
+2. Per v71 queue item 1, the instrument-generalisation question stays closed; no further BTC/ETH/SOL
+   comparison is queued.
+3. Per v71 queue items 2-4 (item 2 now closed by this entry): do not stack a new filter on the FVG
+   base, and do not combine v56 and v62.
+4. VOCABULARY.md's Type 1 (3M candle anatomy) and the swing rule remain the longest-standing open
+   items in the lab and no amount of backtesting closes them.
+
+**CHAMPION OF RECORD (LONG): v62-fvg** — unchanged (PF 2.04354108, 40 trades, DD 4.50890824%,
+BTCUSDT, full coverage), now with a bootstrap-confirmed robust net edge (95% CI on PF
+[1.046, 4.025], 1.9% chance of net loss on resample). **VALIDATED SHORT (NOT A CO-CHAMPION):
+v60/v61(short)** — unchanged. **No champion change this cycle.**
