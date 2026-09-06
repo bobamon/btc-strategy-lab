@@ -1,0 +1,196 @@
+//@version=6
+// WAR FORMATION E94b -- INDEPENDENT REPLICATION OF E94. RENUMBERED AFTER THE FACT.
+//
+// ██ NUMBERING NOTE, WRITTEN AFTER THE RUN. This file was authored and this backtest was run as
+// "E94" by a concurrent session, ~20 minutes after ANOTHER concurrent session committed its own
+// E94 (b15e5e8, pine/e94-e93-long-only.pine, resultId 01M1V6H407ST3XEWGRC8H2KC53) executing the
+// SAME E93 queue item 1. Both sessions took War Formation's rotation slot and both spent a credit
+// on the same question. The collision was found on rebase, not before.
+//
+// This branch is renumbered to E94b rather than leaving a fourth colliding pair in the log (E79,
+// E80, E81 already collide). The other E94 was committed first and keeps the number. Its entry is
+// the primary record of the experiment; the E94b entry in EXPERIMENT-LOG.md records only what
+// this run adds that is not already there -- the exact replication itself, and the significance
+// test on the axis the board already uses.
+//
+// Everything below this line is the ORIGINAL pre-registration, written and saved to disk BEFORE
+// the credit was spent and left unedited so the predictions can be scored against the result.
+// WAR FORMATION E94 -- E80/E93's 1h-STRUCTURE CASCADE, LONG-ONLY, ON THE FULL 6-YEAR ARCHIVE.
+//
+// PARENT: E93 (resultId 01M1V526XR04BWHC7Q0ZHE5CEE, strategyId 01M1SMXCYQ9KD43GRJJJ0TN7N4),
+// which ran pine/e80-15m-native-1h-structure.pine bidirectionally over
+// 2020-08-19 -> 2026-09-01 and returned PF 1.08806654 on 147 reported trades, with the LONG
+// leg net +$2,714.31 and the SHORT leg net -$1,801.00.
+//
+// THIS IS E93 QUEUE ITEM 1, PRE-REGISTERED THERE VERBATIM: "Re-run this same construction
+// LONG-ONLY on the full 6-year archive (mechanically delete goShort / the short
+// strategy.entry, the way e50a/e50b did for the 1m track) to see whether dropping the
+// now-established-weak short leg improves PF/DD relative to this bidirectional full-archive
+// number (1.08806654 / 147 trades)."
+//
+// BINDING (E17 / HARD LESSON 16): the ONLY change from e80-15m-native-1h-structure.pine is the
+// deletion of the short leg -- `goShort`, its `strategy.entry`, and the now-dead
+// `strategy.position_size < 0` exit block. shieldUsd ($2,000), rr (2.0), coilK (0.85),
+// velK (0.8), maxBars (288), greenBull/greenBear, the time gate, the witching ban, the whole-
+// number band, the 1h structure tier and the latch order are all byte-identical to the parent.
+// The backtest window is byte-identical to E93's (2020-08-19 -> 2026-09-01). Two variables are
+// therefore NOT being changed at once: E93 changed the window against E80; E94 changes the leg
+// against E93.
+//
+// THE OCCUPANCY CONFOUND IS THE POINT OF THE TEST, NOT A HIDDEN DEFECT (HARD LESSONS 24/28/29).
+// The parent runs pyramiding=1 with a `flat` guard, so every short entry BLOCKS any long signal
+// that fires while the short is open. Deleting the short leg therefore cannot be modelled as
+// "E93 minus the short rows": the long population is free to GROW above E93's 43. Whether it
+// does, and whether the added longs are better or worse than the 43 already recorded, is
+// exactly what this run measures. It is declared here in advance so the trade count is read as
+// a result rather than as a surprise.
+//
+// PRE-RUN AUDIT
+//   R floor (HARD LESSON 3): shieldUsd $2,000 against E93's own traded entry-price range on
+//     this exact window ($10,117.50 - $121,267, read from get_trades on the parent) is
+//     1.65% - 19.77% of price. Clears the 0.8% floor across the entire archive.
+//   Stop placement (HARD LESSON 5): unchanged, risk-defined per the ALCM spec, not at the
+//     signal level.
+//   Leg reporting (HARD LESSON 6): only one leg exists by construction; this run must be
+//     described as LONG-ONLY and therefore an INTERIM state under the standing both-directions
+//     requirement, never as a finished bidirectional result.
+//   Latch order (HARD LESSON 8): unchanged.
+//   Redundancy (HARD LESSON 18): no term added.
+//
+// REGISTERED PREDICTIONS (HARD LESSON 17), BEFORE RUNNING:
+//   P1. PF should IMPROVE on E93's 1.08806654, because a net-negative leg is being removed.
+//       This is close to arithmetic and is therefore NOT the interesting output.
+//   P2. The interesting output is the LONG TRADE COUNT. If it stays near 43, the shorts were
+//       rarely blocking longs and the long leg's own per-year profile (below) is unchanged.
+//       If it rises materially, the added longs are a genuinely new, previously unobservable
+//       population and must be phase-decomposed before the headline PF is believed.
+//   P3. THE PHASE PREDICTION, which is the one that matters. A free get_trades decomposition of
+//       E93 (performed this cycle, before this run) shows the parent's LONG leg is not broadly
+//       profitable at all: its entire net comes from calendar 2020. By entry year --
+//         2020: 7 trades, +$2,532.70   2021: 5, -$510.09   2022: 2, +$303.40
+//         2023: 7,   +$743.59          2024: 7,  -$52.56   2025: 8, +$712.40
+//         2026: 7, -$1,015.13
+//       -- so the 4.5-month 2020 stub (+$2,532.70) alone exceeds the whole leg's +$2,714.31 net
+//       by all but $181.61 across the other 36 trades. PREDICTION: this run's long-only PF will
+//       show the SAME concentration, i.e. removing 2020 will leave a PF at or below ~1.0 on the
+//       remaining trades. If so, "long-only-viable" as E93 phrased it does not survive a phase
+//       decomposition (HARD LESSON 54) and must be withdrawn.
+//
+// RESULT, VERDICT and KEEP/REJECT are recorded in EXPERIMENT-LOG.md and
+// war-formation/results/backtests.json after this run completes. No metric is hand-written.
+strategy("War Formation E94 15m 1h-structure LONG ONLY full archive", overlay=true,
+     pyramiding=1, process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     margin_long=100, margin_short=100)
+
+greenBull = input.int(4,     "Green 1h candles for BULL")
+greenBear = input.int(2,     "Green 1h candles at or below for BEAR")
+skipOpen  = input.int(60,    "Skip first N minutes of 6h block")
+skipClose = input.int(60,    "Skip last N minutes of 6h block")
+coilK     = input.float(0.85,"Coil: atrFast < atrSlow * K")
+velK      = input.float(0.8, "Velocity: min reclaim as multiple of atrSlow")
+midLo     = input.float(400, "Whole-number middles low")
+midHi     = input.float(600, "Whole-number middles high")
+etOffset  = input.int(-4,    "ET offset from UTC")
+witchOn   = input.bool(true, "Ban longs in witching hour 1-4am ET")
+shieldUsd = input.float(2000,"THE SHIELD: fixed dollar gap to liquidation")
+rr        = input.float(2.0, "Reward:risk")
+maxBars   = input.int(288,   "Max bars in trade -- three days of 15m")
+
+MS6H = 21600000
+MS1H = 3600000
+
+b6  = math.floor(time / MS6H)
+b1h = math.floor(time / MS1H)
+
+new6  = b6  != b6[1]
+new1h = b1h != b1h[1]
+
+var float h1o     = na
+var int   grnCur  = 0
+var int   cntCur  = 0
+var int   grnPrev = 0
+var int   cntPrev = 0
+
+if new6
+    grnPrev := grnCur
+    cntPrev := cntCur
+    grnCur  := 0
+    cntCur  := 0
+
+if new1h
+    if not na(h1o)
+        cntCur := cntCur + 1
+        if close[1] > h1o
+            grnCur := grnCur + 1
+    h1o := open
+
+regimeReady = cntPrev >= 5
+bullRegime  = regimeReady and grnPrev >= greenBull
+bearRegime  = regimeReady and grnPrev <= greenBear
+
+minsIn    = (time - b6 * MS6H) / 60000
+timeGate  = minsIn >= skipOpen and minsIn <= (360 - skipClose)
+
+h1Bull = not na(h1o) and close > h1o
+h1Bear = not na(h1o) and close < h1o
+
+var float c1hh = na
+var float c1hl = na
+var float p1hh = na
+var float p1hl = na
+
+if new1h
+    p1hh := c1hh
+    p1hl := c1hl
+    c1hh := high
+    c1hl := low
+else
+    c1hh := na(c1hh) ? high : math.max(c1hh, high)
+    c1hl := na(c1hl) ? low  : math.min(c1hl, low)
+
+brokeBelow = not na(p1hl) and c1hl < p1hl
+brokeAbove = not na(p1hh) and c1hh > p1hh
+
+atrFast = ta.atr(1)
+atrSlow = ta.atr(2)
+coiled  = not na(atrSlow) and atrSlow > 0 and atrFast < atrSlow * coilK
+coilPrev = coiled[1]
+velMin   = na(atrSlow) ? na : atrSlow * velK
+
+sub      = close - math.floor(close / 1000) * 1000
+inMiddle = sub >= midLo and sub <= midHi
+
+hUTC     = math.floor(time / MS1H) % 24
+hET      = (hUTC + etOffset + 24) % 24
+witching = hET >= 1 and hET < 4
+longBan  = witchOn and witching
+
+longTrig  = not na(p1hl) and not na(velMin) and ta.crossover(close, p1hl)  and (close - p1hl) >= velMin
+
+// SHORT LEG DELETED -- this is the single change from the parent.
+goLong  = bullRegime and timeGate and h1Bull and brokeBelow and coilPrev and not inMiddle and not longBan and longTrig
+
+var float slPx   = na
+var float tpPx   = na
+var int   barsIn = 0
+
+flat = strategy.position_size == 0
+
+if flat and goLong
+    strategy.entry("L", strategy.long)
+    slPx   := close - shieldUsd
+    tpPx   := close + shieldUsd * rr
+    barsIn := 0
+
+if strategy.position_size > 0
+    strategy.exit("LX", from_entry="L", stop=slPx, limit=tpPx)
+    barsIn := barsIn + 1
+
+if barsIn >= maxBars and strategy.position_size != 0
+    strategy.close_all()
+    barsIn := 0
+
+plot(goLong ? 1 : 0, title="LongSignal")

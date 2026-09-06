@@ -9410,3 +9410,135 @@ and awaiting the user, unchanged across many cycles. Credits: **459 before this 
    zero cost; it settles no P&L question. Half of this tick's credit was avoidable.
 5. The sibling branch's `E80`/`E81` provenance gap and the three colliding number-pairs remain
    unreconciled, and remain that branch's to repair.
+
+---
+
+# ██ E94b — AN INDEPENDENT REPLICATION OF E94, RUN BY A CONCURRENT SESSION THAT DID NOT KNOW E94 EXISTED. IDENTICAL TO THE CENT. THE CREDIT WAS DUPLICATED.
+
+**READ E94 FIRST — IT IS THE PRIMARY RECORD.** This entry deliberately does not restate it. The
+long-only verdict, the phase decomposition, the E93 short-leg overturn, the cascade recount and the
+`ORACLE-RULES.md` correction are all in E94 (`b15e5e8`) and none of them is repeated here. **This
+entry records only the three things this second run adds, and one process failure.**
+
+## WHAT HAPPENED
+
+Two concurrent sessions both advanced War Formation on the same rotation tick. Both read E93's
+queue, both picked item 1, both wrote their own Pine, both spent a credit — **within about twenty
+minutes of each other.** The other session committed first (`b15e5e8`, 05:13 local); this one hit
+the collision on rebase. `get_credits` read **459** at the start of theirs and **458** at the start
+of this one, so the second read was already showing the first spend and neither session could see
+the other's work until it was pushed.
+
+**This branch renumbers itself to E94b.** The first-committed entry keeps the number. Three
+colliding pairs (`E79`, `E80`, `E81`) already exist in this file from earlier concurrent sessions
+and a fourth is not worth adding; renumbering one's own unpushed work is cheap, renumbering someone
+else's pushed work is not.
+
+## ADDITION 1 — THE REPLICATION IS EXACT, AND THAT IS A RESULT ABOUT THIS REPOSITORY
+
+Two sessions, two independently authored Pine files, two distinct saved strategies, two distinct
+credits:
+
+| | E94 (sibling) | **E94b (this run)** |
+|---|---|---|
+| Pine | `pine/e94-e93-long-only.pine` | `pine/e94b-e80-long-only-full-archive-replication.pine` |
+| `resultId` | 01M1V6H407ST3XEWGRC8H2KC53 | **01M1V6PZYJTWQK5JPWF9PGTM08** |
+| `strategyId` | 01M1V6GFEE8G0TTCTZWCW8JNW9 | **01M1V6Q05NYY1A8B412W2VJ0EV** |
+| Profit factor | 1.45289788 | **1.45289788** |
+| Trades | 43 | **43** |
+| Win rate | 48.8372093% | **48.8372093%** |
+| Net | +30.35060484% | **+30.35060484%** |
+| Max drawdown | 17.28465524% | **17.28465524%** |
+| Commission | $556.4137161 | **$556.4137161** |
+| `cascadeRatio` | 1.0 | **1.0** (43 rows, 43 unique entries) |
+| Bars evaluated | 211,423 | **211,423** |
+
+**Identical to the last decimal place on every field.**
+
+**This is the direct counter-case to HARD LESSON 8**, which was earned when two concurrent sessions
+reconstructed "the base" from *prose* and produced two different strategies (433 trades / PF 0.912
+vs 649 / PF 0.9555). The difference is entirely the provenance rule that lesson created: **E94 and
+E94b were both derived from committed Pine source (`pine/e80-15m-native-1h-structure.pine`) plus a
+one-line deletion specified in writing in E93's queue.** Under those conditions independent
+reconstruction is exact, not approximate. **HARD LESSON 8's remedy is now shown to work, and that
+had never actually been tested — only asserted.**
+
+## ADDITION 2 — THE SIGNIFICANCE TEST, ON THE AXIS THE BOARD ALREADY USES
+
+E94 rejected the build on **gross edge per trade** (−$8.16 since 2024). That is sound and it is not
+the axis this board's own statistical audit runs on. The audit at `5c67826`/`3ad9ba0` scored E80 at
+**t = 2.1983** against a multiple-testing hurdle of **~2.96**, and that number is quoted throughout
+this file. Computing the same statistic for E94/E94b puts it on the same scale:
+
+| | n | mean per trade (% of equity) | sd | **t** |
+|---|---|---|---|---|
+| **E94b, full window** | 43 | 0.717048% | 4.649954% | **1.0112** |
+| Excluding calendar 2020 | 36 | 0.135066% | 3.584208% | **0.2261** |
+| Post-2023-09 half | 23 | −0.148874% | 3.046279% | **−0.2344** |
+
+**PF rose from 1.088 to 1.453 and the t-statistic FELL, from E80's 2.1983 to 1.0112.** The long-only
+build is less significant than the bidirectional parent it beats on every ratchet clause, because
+removing 59 short entries removed sample without removing much variance. **t = 1.0112 is below even
+a naive single-trial 1.96** — it is not merely short of the multiple-testing hurdle, it fails the
+test you would run if this were the only strategy ever tried. Two-sided p ≈ 0.31.
+
+**This is worth stating because a rising PF and a falling t look like a contradiction and are not.**
+Profit factor is scale-free and says nothing about how many observations produced it; the t-statistic
+is the one that penalises a shrinking book. A lab that ratchets on PF alone will systematically
+prefer the smaller sample.
+
+## ADDITION 3 — IT IS NOT "A 2020 ARTIFACT", IT IS CLOSER TO ONE TRADE
+
+E94 records that 2020 alone is 88.6% of the six-year net across 7 trades. Sharper:
+
+| | n | PF | Net |
+|---|---|---|---|
+| All | 43 | 1.45289788 | +$3,035.06 |
+| **Excluding seq 7 alone** | 42 | **1.12813122** | +$858.66 |
+
+**Seq 7** — entered 2020-12-14 21:25 UTC at $19,208.50, exited three days later at $23,208.50 —
+returned **+20.71% of equity**, more than two thirds of the entire run's +30.35%. Deleting that one
+trade takes PF from 1.453 to 1.128. Combined with the sd of 4.65% in Addition 2, that is the same
+fact told twice: the distribution is dominated by a single observation.
+
+## THE PROCESS FAILURE, STATED PLAINLY
+
+**A credit was wasted, and it was mine.** The rotation rule ("read the most recent loop-tick commit
+in git log and advance the NEXT workstream") cannot prevent this — both sessions read the same last
+commit, `076c82f`, and both correctly concluded War Formation was next. Nothing in the repo was
+stale or wrong; the sessions were simply concurrent, and `git log` is only a lock if one session has
+already pushed.
+
+**A second, separate failure in this run, and it is worth recording because it is about the ledger
+itself.** The free `get_trades` audit of E93 in this run independently re-derived the entire
+fill-rows-vs-entries finding and wrote it up as a proposed *new* hard lesson — **HARD LESSON 35
+already states it in full**, including the specific corollary that RATCHET v2 clause 3 has been
+reading an inflated count, earned in 3M Elite in September and confirmed twice since. The proposed
+lesson was withdrawn before commit. The sibling session found HARD LESSON 35 and cited it correctly;
+this one did not, having searched the ledger for the word "cascade" only after the analysis was
+already written up. **`STRATEGY-LEDGER.md` is now ~3,300 lines and 62 lessons, and a lesson that
+cannot be retrieved at the moment it applies has the same practical value as one that was never
+written.** That is an argument for an index of the lessons by symptom, not for fewer lessons.
+
+## VERDICT
+
+**Nothing is added to the lab's conclusions.** E94's verdict stands unmodified and E94b changes no
+KEEP/REJECT decision. What E94b establishes is narrower and worth having: **the result reproduces
+exactly across independent implementations, and it fails a significance test on the board's own
+axis more badly than the parent it improves on.**
+
+## QUEUE
+
+1. **A cheap concurrency guard for the next tick.** Before spending a credit, `git fetch origin main`
+   and check whether the target workstream has already been advanced since the last local commit.
+   It costs nothing and would have caught this. Neither session did it.
+2. **An index of `STRATEGY-LEDGER.md` by symptom.** 62 lessons, 3,300 lines, and this run
+   re-derived one of them from scratch. A one-line-per-lesson table keyed on the *observation* that
+   should trigger it ("trade count looks inflated", "PF rose but sample shrank", "a whole-window
+   number is about to be quoted") would be free to build and is the highest-leverage
+   non-backtest work currently visible in this lab.
+3. **Report the t-statistic alongside PF whenever the ratchet is applied to a change that shrinks
+   the book.** E94/E94b is the first case in this lab where the two move in opposite directions,
+   and the ratchet as written cannot see it.
+4. E94's own queue (no modern-window or short-only variant, no sweeps, the hold cap as the one
+   remaining question) stands and is not duplicated here.
