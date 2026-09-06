@@ -7359,3 +7359,187 @@ trades, BTCUSDT only). **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61(short)** �
 CYCLE: no champion change.** v69 (this entry) is a diagnostic on a non-champion instrument, recorded
 with status `testing` in `results/backtests.json`.
 - PineConnector, *What Is the Expectancy Ratio?* — https://www.pineconnector.com/blogs/pico-blog/what-is-expectancy-ratio
+
+---
+
+# ██ v70 — THE SOURCE'S OWN BIAS RULE ON SOL: IT TRAVELS WORSE THAN THE LAB'S INVENTION, ON THE BEST-SAMPLED NEGATIVE THIS LAB HAS (2026-09-06)
+
+One credit, `resultId 01M1V6YXGXCEPCQM091MMR2H08`. Closes **v69's queue item 2** — the sharpest item
+open — and **the rejected-filters re-screen's queue item 1** (v56's status language), free.
+Credits: **456** before this run.
+
+## RESEARCH FIRST, INCLUDING THE EVIDENCE AGAINST
+
+The term under test is a **higher-timeframe bias filter expressed as a 20/50/200 MA stack**, the top
+line of the source's own checklist. The practitioner literature is not kind to the assumption that
+such a filter carries across instruments: *"a strategy that performs well on one asset in one period
+may not generalize"*; MA-crossover systems *"work particularly well on instruments with clear
+trending behavior"*, which is an instrument-selection statement, not a universal one; and optimal
+periods differ by asset class — *"volatile growth stocks might benefit from slightly longer moving
+average periods"*, crypto day-trading *"might require faster moving averages like 5, 13, 21"*. The
+warning that matters most here names the exact failure mode this lab keeps circling: traders
+*"respond to chop by adding more lines, more filters, and more parameter tuning, which usually
+improves the backtest and weakens the live system."*
+
+**So the pre-registered expectation was not that the source's rule would travel.** It was that
+testing it was the only way to separate two very different explanations of v56's strong BTC result:
+a real structural selector, or a term fitted to one instrument's character.
+
+## THE QUESTION, AND WHY IT WAS THE RIGHT ONE TO SPEND ON
+
+v69 established that the **lab-invented** FVG grading term is BTC-specific, on a three-point series
+that declines monotonically: **BTC 2.04354108 → ETH 0.97825349 → SOL 0.87179834.** That leaves an
+obvious asymmetry unexamined. **The FVG term is this lab's invention. The MA-stack bias rule is the
+source's own.** If the source's material carries structural knowledge the lab lacks, its rule should
+travel better. If it does not, the two are the same kind of object and should be treated the same
+way.
+
+## THE BUILD AND RUN — ONE VARIABLE CHANGED, NOT TWO
+
+Byte-identical `pine/3m-elite-v56-source-ma-stack-bias.pine`; the saved v56 strategy
+(`01M1NGHXB367KCXKYQW5C39XMF`) re-run with **only the symbol parameter changed**, the same
+symbol-override method used for the ETH and SOL tests of v62.
+
+**Window-matched to v56's own BTC reference — 2022-01-01 → 2026-09-01 — not SOL's full coverage.**
+v69 used full coverage for the FVG test, which changes instrument *and* window at once. Here only
+the instrument changes. `plan_backtest_window` confirmed SOL 15m covers this window with no
+clamping (first bar 2021-10-15).
+
+**PRE-REGISTERED, before the run:** PF near BTC's 1.62 → the source's rule generalises where the
+lab's invention does not; PF near 1.0 → no edge, same pattern as FVG; **PF below SOL-FVG's 0.87179834
+→ the source's own rule fails harder on altcoins than the lab's invention did.**
+
+## RESULT — SOLUSDT 15m, 2022-01-01 → 2026-09-01, 163,826 bars
+
+| | v56 on BTC (reference) | **v70 = v56 on SOL** |
+|---|---|---|
+| Profit factor | 1.62137752 | **0.75219388** |
+| Trades | 37 | **108** |
+| Win rate | 48.64864865% | 30.55555556% |
+| Net | +14.70257913% | **−24.56095502%** |
+| Max drawdown | 6.18395066% | **34.78557289%** |
+| Sharpe | 0.55523409 | **−0.42971379** |
+| Cascade | 1.0 | **1.0 (108/108, depth 1)** |
+
+**The third and harshest pre-registered outcome fired.** 0.75219388 sits **below** SOL-FVG's
+0.87179834.
+
+**Buy & hold:** the payload returns none, so none is claimed. From this run's own recorded prices,
+SOL ran **$113.345** at the first entry (2022-02-10) to **$92.16** at the last exit (2026-08-23) — a
+**−18.69%** price move against this build's **−24.56%**. **It underperformed a falling asset.**
+**Funding:** no `fundingPaid` field exists in the payload; none is reported. `commissionPaid` is
+**$922.63620165**.
+
+## THE GROSS-EDGE SCREEN MAKES IT UNAMBIGUOUS
+
+Gross = net + commission = −$2,456.10 + $922.64 = **−$1,533.46 over 108 trades = −$14.1987 per
+trade**, or **−0.141987% of initial capital per trade.**
+
+**The trades this rule selects on SOL lose money before commission is charged.** Cost is not the
+story; the selection is. This is the same harsher-than-ETH failure mode v69 found for the FVG term
+on SOL, now reproduced on a completely different axis.
+
+## WHY THIS NEGATIVE IS WORTH MORE THAN MOST POSITIVES HERE
+
+**108 trades** — nearly three times BTC's 37, comfortably above the 30-trade floor, and **the best-
+sampled result in this lab.** The recurring complaint in the re-screen entry was that *"the
+high-quality filters are all measured on unstable samples"*; that does not apply to this one.
+
+And it does not rest on a single bad phase. **Both halves fail** — H1 n=54 PF 0.736995, H2 n=54 PF
+0.770570 — and only one year in five is net-positive:
+
+| Phase | n | PF | Net | Gross/trade |
+|---|---|---|---|---|
+| BEAR 2022 | 20 | 0.4902 | −$1,242.99 | −$52.12 |
+| RECOVERY 22-24 | 39 | 1.1258 | +$420.51 | +$19.03 |
+| 2024-25 | 27 | 0.5991 | −$1,055.66 | −$30.50 |
+| 2025-26 | 22 | 0.6137 | −$577.95 | −$18.62 |
+
+By year: 2022 PF 0.4325 · 2023 PF 0.8413 · **2024 PF 1.2870, the only positive year** · 2025 PF
+0.3579 · 2026 PF 0.9994.
+
+**Decomposition here does the opposite of what it usually does in this project.** Elsewhere it has
+dissolved whole-window claims into one lucky phase. Here it confirms the whole-window number:
+the rule is consistently negative on SOL, not negative-on-average.
+
+## AND THE SHORT LEG, WHICH THIS SAME RULE ALSO GOVERNS — FREE, FROM RECORDED DATA
+
+The mandate treats the short as first-class, and the source's bias rule was tested on it too. Gross
+edge per **entry** (not per row — v53 and v57 are cascaded at ratio 1.4655 and 1.5128, so per HARD
+LESSON 31 the row count is not the position count):
+
+| Short build | Entries | Net | Commission | **Gross / entry** |
+|---|---|---|---|---|
+| v53 supply-zone mirror (base) | 174 | −$2,480.31 | $1,585.06 | **−$5.14** |
+| **v57 = base + source's bias rule** | **39** | +$379.61 | $401.17 | **+$20.02** |
+| v60 (v57 at 25% size, declared deviation) | 39 | +$469.83 | $97.84 | +$14.56 |
+| v60 extended to full coverage | 64 | +$16.51 | $154.07 | **+$2.67** |
+
+**On BTC the source's bias rule flips the short leg's gross edge from −$5.14 to +$20.02 per
+entry.** It is a genuine selector in both directions on BTC — matching v56's 1.80× on the long leg —
+**and it is gross-negative on SOL.** The rule's quality and its instrument-specificity are now
+established on the same axis, in both directions.
+
+Note also what the full-coverage row says: extending v60 from the 2022 window to the full archive
+collapses gross edge from +$14.56 to **+$2.67 per entry**. The short leg's edge is thin and
+window-dependent even on BTC.
+
+## QUEUE ITEM 1 CLOSED — v56's STATUS LANGUAGE
+
+The re-screen queued this twice and it is now fixed in `results/backtests.json`. The `status` field
+stays `rejected` **only because this file uses a four-value controlled vocabulary the dashboard
+reads**; a `statusNote` now states the distinction explicitly:
+
+> **v56 passed RATCHET v2 clauses 1, 2 and 3** — PF 1.25172059 → 1.62137752, maxDrawdown 8.72815312%
+> → 6.18395066%, 37 trades clearing the floor — **and could not SATISFY clause 4**, whose mandatory
+> split lands at 27/10, both halves below the floor. **The correct phrase is "passed clauses 1–3,
+> clause 4 unsatisfiable on this sample", not "the filter failed."**
+
+**And v70 now supplies the sentence that was missing from that correction:** the quality is real, and
+it is BTCUSDT-specific.
+
+## WHAT THIS DOES NOT SAY
+
+- **v56 on BTC is untouched.** Still PF 1.62137752, still 1.80× the base's gross edge. A rule can be
+  a real selector on one instrument and negative on another; that is the finding, not a retraction.
+- **Not that the rule is worthless in the source's hands**, where it is read on charts they choose,
+  with judgement, on instruments they select.
+- **Not a RATCHET KEEP/REJECT.** Different instrument, no fixed-window parent. Status `testing`.
+
+## THE PATTERN NOW VISIBLE ACROSS BOTH LABS TODAY
+
+War Formation's `ORACLE-RULES.md` was corrected this same day to **1 of 6** — six of the Oracle's
+stated rules mechanised faithfully and tested, five failed, and the one that helped was his
+*diagnostic* rather than any rule he stated as a rule. **3M Elite has now produced the same shape
+from the other direction:** the source's best-performing stated rule is real on the instrument it was
+demonstrated on and inverts off it. **Mine a source for the why, not the what** — the conclusion at
+the foot of `ORACLE-RULES.md` — is now supported by evidence from two independent source corpora.
+
+## STATE
+
+**CHAMPION OF RECORD (LONG): v62-fvg** — unchanged (PF 2.04354108, 40 trades, DD 4.50890824%,
+BTCUSDT only). **VALIDATED SHORT (NOT A CO-CHAMPION): v60/v61(short)** — unchanged. **No champion
+change this cycle.** v70 is a diagnostic on a non-champion instrument, `status: testing`.
+
+## QUEUE
+
+1. **Stop testing instrument generalisation of single terms one at a time.** Two axes have now given
+   the same answer on the same instruments (FVG: BTC 2.04 → ETH 0.98 → SOL 0.87; MA-stack bias:
+   BTC 1.62 → SOL 0.75). A third single-term instrument test is predictable and low-information. The
+   open question is no longer *does term X travel* but **does anything in this lab travel**, which
+   needs the BASE mechanism tested off BTC, not another filter.
+2. **Test the v37 base on SOL** — that is the missing control. Every cross-instrument result so far
+   compares a *filtered* build to nothing, because no ungraded SOL baseline exists. Without it, "the
+   gate is gross-negative on SOL" cannot be separated from "the whole mechanism is gross-negative on
+   SOL." **This is now the single most informative unspent credit in this lab.**
+3. **Do not stack further terms on the FVG base** — unchanged from v67/v68/v69.
+4. **Do not combine v56 and v62** — unchanged; ~10–15 trades, unsplittable.
+5. VOCABULARY.md's **Type 1 (3M candle anatomy)** and the **swing rule** remain genuinely undecoded
+   across all ten captured transcripts, and the complete faithful indicator cannot be finished
+   without them.
+
+## SOURCES
+- Trade Nation, *Master the Moving Average Trading Strategy* — https://tradenation.com/articles/moving-average-trading-strategy/
+- Excavo, *Moving Average Trading Strategies: Complete TradingView Guide for 2026* — https://excavo.com/blog/moving-average-trading-strategies-guide
+- WalletFinder, *Crypto Moving Average Strategy* — https://www.walletfinder.ai/blog/moving-average-strategy
+- TradeFundrr, *Bias From Higher Timeframe* — https://tradefundrr.com/bias-from-higher-timeframe/
