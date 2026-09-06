@@ -2249,3 +2249,239 @@ the symbol resolver and not to the connection error in the same paragraph.
 **Queue item added, ahead of the others:** re-verify the 5m/15m execution map and the intraday
 retention limit through the connector before treating either as settled. Tick #19's findings were
 measured on the local server and have not been reproduced since.
+
+---
+
+# ██ TICK #22, 2026-09-06 — THE FORWARD TEST'S DECISION RULE ACCEPTS A WORTHLESS SYSTEM HALF THE TIME, AND MAKING n BIGGER DOES NOT FIX IT
+
+Zero credits. No backtest, no engine call, no performance claim of any kind. This tick audits the
+**pre-registered decision rule** in `FORWARD-TEST-PROTOCOL.md` — the last un-audited artefact in this
+workstream, and now its only route to a result.
+
+**Why this tick and not the queue.** Tick #21's queue heads with *"re-verify the 5m/15m execution map
+through the `backtest-lab` connector"*. **Neither `backtest-lab` nor the claude.ai connector is
+available to this session** — the only engine reachable here is `trader-dev`, and per the standing
+rotation rules Legacy Forex does not run on it. Queue item 2 (regenerate the key) is a user action.
+So the queue is blocked by environment, and the protocol audit is the work that was actually available.
+
+**The rest of the workstream has been audited to death — nine ticks (#8–#16) checked every constant in
+the Pine deliverable. Nobody ever checked the rule that decides what the forward test MEANS.** Ticks
+#17–#21 established that forward testing is the only honest route, then tick #20 wrote the protocol,
+and no tick since has asked whether the protocol can actually decide anything.
+
+**It cannot, as written.**
+
+## ██ FINDING 28 — `PF > 1.0` IS NOT A TEST. ITS FALSE-POSITIVE RATE IS ~50%, AT EVERY SAMPLE SIZE.
+
+The protocol's decision table reads:
+
+| Criterion | Threshold | Source |
+|---|---|---|
+| Profit factor | **> 1.0 net of costs** | RATCHET v2 clause 1 |
+| Sample | ≥ 100 | this protocol, stricter than the project's 30 floor |
+
+**The defect is in the first row, and the second row is what disguises it.** The whole design effort
+of tick #20 went into arguing 100 over 30 — a debate about *sample size*. But the accept rule compares
+a **point estimate** against the exact boundary value of the thing being tested. A consistent estimator
+sitting on the boundary of its own null splits about evenly either side of it. So:
+
+> **If the method's true profit factor were exactly 1.0 — no edge whatsoever — the pre-registered rule
+> passes it roughly half the time, and the failure does not shrink as the sample grows. It grows
+> toward exactly 50%.**
+
+### THE EXACT ARITHMETIC — two-outcome reference case, payoff `b`R against a 1R stop
+
+Break-even win rate is `p₀ = 1/(1+b)`; a true PF of 1.0 means the win rate IS `p₀`. Exact binomial,
+computed not estimated:
+
+| payoff `b` | n=30 | n=100 | n=400 | n=2000 |
+|---|---|---|---|---|
+| 1R | 0.4278 | 0.4602 | 0.4801 | **0.4911** |
+| 2R | 0.4152 | 0.4812 | 0.4906 | **0.5021** |
+| **3R** (his decoded target) | 0.4857 | **0.4465** | 0.4732 | **0.4880** |
+| 4R | 0.3930 | 0.4405 | 0.4701 | **0.4866** |
+
+**Every cell is the probability of ACCEPTING a system with ZERO edge.** Read the rows left to right:
+the number gets *worse* with more trades. **Going from 30 trades to 100 — the protocol's central
+design decision, the thing the multi-month timeline is being spent on — moves the false-positive rate
+from ~44% to ~46%.** It was never the axis that mattered.
+
+### AND IT IS NOT AN ARTEFACT OF THE BINOMIAL IDEALISATION
+
+The obvious objection is that his method is not a two-outcome bet: he scales out at rungs, cuts early
+for a partial loss when volume dies, and closes the weaker leg at break-even. So the audit was re-run
+by Monte Carlo over R-distributions carrying **all** of those outcomes — `{−1.0, −0.3, 0.0, +1, +2,
++3, +4}`, the shape taken from this file's own decodes (`11.` [00:07] full stop; `9._VOLUME` [03:18]
+the seven-point early cut; SYSTEM 24.4 the break-even leg; SYSTEM 24.2 the 4R observed rung ceiling).
+The winning tail of each shape was **calibrated so the population profit factor is exactly 1.0** —
+zero edge by construction — and the mix was varied across three plausible anatomies:
+
+| R-distribution shape | n=30 | n=100 | n=400 | n=2000 |
+|---|---|---|---|---|
+| ladder-heavy (many small rungs) | 0.4859 | 0.4936 | 0.5097 | **0.5274** |
+| target-heavy (mostly 3R exits) | 0.4840 | 0.4919 | 0.5013 | **0.5108** |
+| chop (early cuts dominate) | 0.4838 | 0.4875 | 0.4935 | **0.5011** |
+| *(control)* pure 3R two-outcome | 0.4848 | 0.4464 | 0.4669 | 0.4709 |
+
+*40,000 trials per cell, MC error ≈ ±0.005.* **The control row reproduces the exact binomial table
+above to within Monte Carlo error (0.4464 vs 0.4465 at n=100; 0.4848 vs 0.4857 at n=30)** — that is
+the simulator checking itself against a closed form, and it passes.
+
+**The defect survives every anatomy tested, and under the realistic ladder shapes it is slightly worse
+than the binomial case, not better.** It is a property of thresholding a point estimate at the null
+value, not a property of the trade model.
+
+## ██ FINDING 29 — THE SAME TEST IS ALSO UNDERPOWERED, WHICH IS THE OPPOSITE FAILURE AND IT IS SIMULTANEOUS
+
+Oversized tests are normally *easy* to pass. The trap here is that fixing the size exposes a second
+problem that was hidden underneath it.
+
+**What threshold would a real 5% test need at n=100?**
+
+| payoff `b` | wins needed of 100 | i.e. observed PF must reach |
+|---|---|---|
+| 1R | 59 | **1.439** |
+| 2R | 42 | **1.448** |
+| **3R** | 33 | **1.478** |
+| 4R | 28 | **1.556** |
+
+**A real 5%-level test at n=100 requires an observed profit factor near 1.5, not "above 1.0".**
+
+**And the power of that corrected test, at n=100:**
+
+| payoff `b` | true PF 1.3 | true PF 1.5 | true PF 2.0 |
+|---|---|---|---|
+| 1R | 0.346 | 0.623 | 0.957 |
+| 2R | 0.331 | 0.606 | 0.956 |
+| **3R** | **0.307** | 0.566 | 0.938 |
+| 4R | 0.242 | 0.473 | 0.893 |
+
+**At his decoded 3R target, a genuinely profitable system with a true PF of 1.3 is missed 69% of the
+time.** The smallest true edge n=100 can detect with 80% power is **PF 1.73** at 3R — a very large
+edge, well above anything this repository has ever banked on a real sample.
+
+**So the pre-registered test is oversized AND underpowered at once:** it waves through about half of
+all worthless systems, and still misses roughly two-thirds of genuinely good ones. Those are not
+opposing complaints to be traded off — they are both consequences of never having asked the question.
+
+## ██ FINDING 30 — THE CALENDAR PRICE OF FIXING IT, ON THE PROTOCOL'S OWN ASSUMPTIONS
+
+Trade counts for 80% power at a real 5% level, and the calendar they imply at his 2-trade daily cap
+(21 New York sessions per month — the model reproduces the protocol's own timeline table, which says
+100 trades is "~5 months" at 1/day and "~10 months" at 0.5/day; this arithmetic gives 4.8 and 9.5):
+
+| target | trades | @1.0 trade/day | @0.5 trade/day |
+|---|---|---|---|
+| **as pre-registered** | 100 | 4.8 months | 9.5 months |
+| 80% power vs true PF 2.0 | 65 | 3.1 months | 6.2 months |
+| 80% power vs true PF 1.5 | 190 | 9.0 months | 18.1 months |
+| 80% power vs true PF 1.3 | **460** | 21.9 months | **43.8 months (3.7 years)** |
+
+**This is the finding that matters practically.** Detecting a modest-but-real edge (PF 1.3) to a normal
+standard of evidence takes between two and four years of live NY sessions at his own trade cap. **That
+is the honest cost of the only honest route**, and it was not stated when the protocol was written.
+
+**It does not mean the forward test should not be run.** It means the pre-registered stopping point of
+100 buys far less than tick #20 believed, and the protocol must say what 100 trades can and cannot
+conclude *before* anyone spends nine months reaching it.
+
+## ██ WHAT THE LITERATURE SAYS — INCLUDING THAT IT DOES NOT SAY THIS
+
+Per HARD LESSON 14 and the standing rule that `WebSearch` returns search-engine summaries rather than
+sources, **all quotations below are summary text, not verified source text, and are marked as such.**
+
+**The "100 trades" figure the protocol inherited is practitioner folklore, and is criticised as such:**
+
+> *"The rule 'You need at least 100 trades' is wrong in both directions — far too few for a scalping
+> strategy, more than necessary for one with a large, consistent edge… There is no single magic
+> number, because it depends on the size and consistency of the edge you are trying to detect."*
+> — trading-edge.app / darwintIQ (unverified summary)
+
+That is the same conclusion this tick reached by arithmetic, from the other end: the required n depends
+on the effect size, which is exactly what Finding 30's table makes explicit. The competing blog
+thresholds are mutually inconsistent (30 / 60 / 100 / 200 / 500 / 1000 all appear, each asserted) and
+none carries a derivation.
+
+**Treating profit factor as an estimator with a confidence interval is established practice**, not an
+invention of this tick: PyBroker computes bias-corrected-and-accelerated (BCa) bootstrap confidence
+intervals for profit factor and reports the lower bound as the conservative estimate
+(https://www.pybroker.com/en/latest/notebooks/3.%20Evaluating%20with%20Bootstrap%20Metrics.html).
+
+**⚠️ AND THE PART THAT MUST BE RECORDED AGAINST MY OWN FINDING.** A dedicated search for the specific
+claim in Finding 28 — that thresholding PF at 1.0 has a ~50% false-positive rate — **returned nothing.
+No academic or practitioner source states it.** The search engine reported the gap explicitly:
+
+> *"the search results do not contain specific information about sampling distribution theory,
+> estimator bias, 'true profit factor' as a statistical parameter, or false positive thresholds."*
+
+**So Finding 28 is presented as this lab's own derivation and simulation, with a citation available
+for neither. It stands on the exact binomial table and the Monte Carlo, both reproducible from
+the scripts described above — not on any authority.** That is the correct status for it and it should
+not later be re-cited as though a source had been found.
+
+**One citation trap found and deliberately not used.** backtestbase.com attributes to Bailey &
+López de Prado (2014) the claim that *"backtests with fewer than 200 trades have high false discovery
+rates"*. **The Bailey/López de Prado results are framed in track-record length and number of trials,
+not trade counts.** That attribution looks like blog drift and is recorded here so no later tick picks
+it up as an academic source. The genuine adjacent literature — *Pseudo-Mathematics and Financial
+Charlatanism* (https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2308659), the Deflated Sharpe Ratio
+(https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2460551) and Lo's Sharpe standard error
+`SE(SR) = √((1 + ½·SR²)/T)` (https://traders.studentorg.berkeley.edu/papers/The-Statistics-of-Sharpe-Ratios.pdf)
+— attacks backtest validity from the **multiple-testing** angle, which is a different axis from this
+one and does not substitute for it.
+
+## ██ WHAT THIS TICK CHANGED IN THE DELIVERABLE
+
+`FORWARD-TEST-PROTOCOL.md`'s decision table has been corrected in place: the `PF > 1.0` row is
+withdrawn and replaced with a threshold that reflects the sample actually reached, the reporting
+requirement now includes a confidence interval rather than a point estimate, and the power table is
+stated up front so the calendar cost of each standard of evidence is visible before the test starts.
+
+## ██ WHAT THIS TICK DID **NOT** ESTABLISH
+
+- **Nothing whatsoever about whether this method has an edge.** No backtest was run, no credit spent,
+  no live signal recorded. Every profit-factor value above is a *hypothetical* used to compute a
+  sampling distribution. **None of them is a measurement of anything, and none may ever be quoted as
+  one.**
+- **The payoff `b` is assumed, not measured.** The 3R column is the target his decoded rule produces
+  (SYSTEM Finding 7), and tick #16 established that rule can only ratchet *down* toward 1R — which is
+  why `b` is tabulated across 1–4 rather than fixed. If the realised payoff differs, the tables move.
+- **The power figures are binomial-only.** The Monte Carlo established that the *size* defect is
+  invariant to the ladder anatomy; the *power* and *required-n* figures were not re-derived under the
+  ladder distributions. Scaling out changes the variance of per-trade R, so Findings 29–30 should be
+  read as a clean reference case rather than as this method's exact numbers.
+- **Whether the 15m execution hole and the Yahoo data-quality blocker still hold.** Unreachable this
+  session; tick #21's queue item stands unchanged.
+
+## QUEUE
+
+1. **Unchanged and still first:** re-verify the 5m/15m execution map and intraday retention through the
+   `backtest-lab` connector. Blocked by environment in this session.
+2. **`backtest-lab`'s key needs regenerating.** User action.
+3. **Before any forward test begins, the corrected decision table is the one to pre-register** — the
+   old one would have produced a verdict with a coin-flip false-positive rate after nine months of work.
+4. **The `IntraBarAmbiguity` field remains the number this workstream most needs** and is unaffected
+   by this tick.
+5. **Open and NOT taken here:** whether the whole project's `PF > 1.0` conventions want the same
+   treatment. The arithmetic transfers; the decision is a ledger-level one, not this tick's. Recorded
+   as HARD LESSON 63.
+
+## SOURCES
+- MarketPulse, *How many trades does a backtest need?* — https://trading-edge.app/blog/how-many-trades-does-a-backtest-need/
+- darwintIQ, *Statistical Significance in Trading* — https://www.darwintiq.com/articles/statistical-significance-in-trading
+- darwintIQ, *Profit Factor Trading Strategy* — https://www.darwintiq.com/articles/profit-factor-trading-strategy
+- PyBroker, *Evaluating with Bootstrap Metrics* — https://www.pybroker.com/en/latest/notebooks/3.%20Evaluating%20with%20Bootstrap%20Metrics.html
+- Bailey, Borwein, López de Prado & Zhu, *Pseudo-Mathematics and Financial Charlatanism* — https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2308659
+- Bailey & López de Prado, *The Deflated Sharpe Ratio* — https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2460551
+- Lo, *The Statistics of Sharpe Ratios* — https://traders.studentorg.berkeley.edu/papers/The-Statistics-of-Sharpe-Ratios.pdf
+- QuestDB, *Statistical Power Analysis in Backtesting Models* — https://questdb.com/glossary/statistical-power-analysis-in-backtesting-models/
+
+### REPRODUCING TICK #22
+
+Committed alongside this tick, stdlib-only, no arguments, deterministic seed:
+
+| script | produces |
+|---|---|
+| `legacy-forex/analysis/tick22-power-exact.py` | Finding 28's exact binomial table; Finding 29's corrected thresholds and power |
+| `legacy-forex/analysis/tick22-power-montecarlo.py` | Finding 28's ladder-anatomy Monte Carlo (~10 min; the last row is the self-check against the closed form) |
+| `legacy-forex/analysis/tick22-mde-and-calendar.py` | Finding 29's minimum detectable edge; Finding 30's calendar table |

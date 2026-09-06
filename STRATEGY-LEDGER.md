@@ -3273,3 +3273,55 @@ happen after the hypothesis is fixed. It has been named in four consecutive entr
 - **The standing-gate decision is deliberately NOT taken.** Attack 86's 1h port ruled it a ledger-level
   decision rather than a tick's, and both audits respected that. What changed is that it is now a
   decision with three measurements under it rather than a proposal.
+
+---
+
+## ██ HARD LESSON 63 — A PROFIT-FACTOR THRESHOLD AT 1.0 IS A COIN FLIP, AND MORE TRADES DOES NOT FIX IT
+
+**Earned:** Legacy Forex tick #22, 2026-09-06. Full arithmetic in `legacy-forex/STATUS.md` Findings
+28–30. **No backtest, no credit, no performance claim** — this is a property of the decision rule, and
+it was derived and simulated, not measured.
+
+**The result.** Profit factor is a point estimate. Testing it against **1.0** — the exact boundary of
+"no edge" — accepts a system whose TRUE profit factor is exactly 1.0 about **half the time**:
+
+| payoff | n=30 | n=100 | n=400 | n=2000 |
+|---|---|---|---|---|
+| 3R vs 1R stop | 0.4857 | **0.4465** | 0.4732 | **0.4880** |
+
+**Read that row left to right.** The false-positive rate does not fall as the sample grows — **it rises
+toward exactly 50%.** A consistent estimator sitting on the boundary of its own null splits evenly
+either side of it, and no amount of data moves a coin flip off 50/50. Confirmed by Monte Carlo across
+four different R-distribution shapes (0.44–0.53), including ladder anatomies with partial exits and
+break-even closes, so it is not an artefact of a binomial idealisation.
+
+**The corollary that hurts:** every debate this project has had about *sample size* — 30 vs 100 vs 200
+— was arguing the wrong axis for any rule shaped like `PF > 1.0`. Sample size fixes **variance**; it
+does nothing about a threshold placed at the null value.
+
+**The direction of the error decides whether it matters, and this is the part to apply:**
+
+- **A PF threshold at 1.0 used to ACCEPT is ~50% false-positive.** Forbidden. Use a threshold derived
+  from the sampling distribution (at n=100 that is an observed PF near **1.44–1.56**, depending on
+  payoff), or report a bootstrap confidence interval and quote its lower bound.
+- **A PF threshold at 1.0 used to REJECT — this project's KILL RULE — fails in the conservative
+  direction.** It discards genuinely-good systems near the boundary, which costs opportunity, not
+  credibility. **The kill rule is NOT withdrawn and needs no change.**
+- **RATCHET v2 clause 1 is a COMPARISON between two configurations, not a threshold at a null**, so
+  this lesson does not apply to it directly. What it does imply is that a PF improvement of a few
+  hundredths on samples of 30–40 — which several KEPT changes rest on — is inside the noise of the
+  estimator, which HARD LESSON 20 and the board's own audits reached independently by other routes.
+
+**The second failure, which appears the moment the first is fixed.** A properly-sized 5% test at
+n=100 has power **0.307** against a true PF of 1.3 at a 3R payoff — it misses a real, modest edge
+roughly **69%** of the time. The smallest edge n=100 can detect at 80% power is **PF 1.73**. So the
+naive rule is oversized and the corrected rule is underpowered, simultaneously, and the honest
+statement of what a 100-trade result means has to name both.
+
+**How to apply:** before quoting any PF against a threshold, ask **which direction the error runs** and
+**what effect size the sample could actually have detected.** A "fail" at low power is not evidence of
+no edge, and a "pass" at PF 1.05 on any sample size is not evidence of one.
+
+**Not taken here:** whether the other three workstreams' accept-side conventions want the same
+treatment. The arithmetic transfers to each; the decision is the user's, and no existing verdict in
+any lab is withdrawn by this entry.
