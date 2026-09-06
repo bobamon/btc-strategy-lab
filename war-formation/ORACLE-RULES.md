@@ -137,7 +137,7 @@ against E13's 0.74897196. This is short construction number eleven and the first
 **950-5. ONLY THEN combine, with `inMiddle` removed and both legs reported separately.**
 
 ## THE HONEST CAVEAT, STATED UP FRONT
-The Oracle queue finished **1 of 6**, and the one item that helped was the *diagnostic* one — his
+The Oracle queue finished **1 of 7**, and the one item that helped was the *diagnostic* one — his
 explanation of why entries fail — not any rule he stated as a rule. **This material is also a stated
 rule set from a trader, and the base rate for those in this lab is poor.** What makes it worth
 spending credits on is not that it is stated confidently; it is that step 3 names a term nothing here
@@ -306,7 +306,7 @@ that this "wrecks an absolutely perfect trade" even when the direction is right.
 
 ---
 
-## THE QUEUE IS FULLY WORKED. SCORE: 1 OF 6.
+## THE QUEUE IS FULLY WORKED. SCORE: 1 OF 7.
 Only item 2, the 3m cycle-position gate, ever improved anything -- and it was the one item that was
 **diagnostic rather than prescriptive**, his explanation of why entries fail rather than a rule for
 taking them. Every rule he stated as a rule underperformed this lab's own mechanisation of the same
@@ -340,3 +340,39 @@ work. It says that the sixth rule he states as a rule, mechanised faithfully and
 floor, underperformed this lab's own build without it — **which is the same pattern as the other
 five, now with the strongest sample behind it.** The conclusion at the top of this section stands
 unchanged and reinforced: mine a trader's material for the *why*, not the *what*.
+
+---
+
+## ⚠️ SCORE CORRECTION #2, 2026-09-06 — HIS EXIT MODEL MAKES IT 1 OF 7
+
+**The coil made it 1 of 6 earlier today. E95 makes it 1 of 7, and this one is his EXIT rule.**
+
+The ALCM as recorded at the top of this file is unambiguous: **"No protective stop. The position ends
+at target or at liquidation."** No time limit is stated anywhere in his material. **Every 15m build in
+this lab has nevertheless carried `maxBars = 288`, a three-day hold cap that is a LAB ADDITION and
+was never his.**
+
+E95 removed it, which makes the build strictly more faithful to what he actually specifies, and the
+result is worse on two independent RATCHET v2 clauses:
+
+| | E94 (cap at 288, lab's rule) | **E95 (no cap, HIS rule)** |
+|---|---|---|
+| Profit factor | **1.45289788** | 1.21092925 |
+| **Max drawdown** | **17.28465524%** | **40.90896772%** |
+| Avg bars in trade | 208.67 | **806.62** |
+| Trades | 43 | 37 |
+| Implied t | 1.0112 | **0.6856** |
+
+**Drawdown more than doubles.** The 2022 bear is the clearest cell: with the cap, two trades netted
+**+$391.42**; without it, the same two both lose and the cell reads **PF 0.0000, −$2,576.54**. A time
+stop is protection against a trend running the other way, and a bear is exactly that.
+
+**What this does not say:** not that he is wrong to trade without a clock — he is reading a 3-minute
+chart with judgement and closes when his own colour rule tells him to, and E15 already showed that
+colour rule is not mechanisable at this resolution. It says that **once the discretionary exit is
+removed, something has to bound the hold, and the lab's arbitrary three days beats his stated
+"target or liquidation" by a wide margin on this data.**
+
+**Seventh stated rule, sixth failure, and the pattern has not been contradicted once:** the only item
+of his that ever helped remains the *diagnostic* one — his explanation of why entries fail — not any
+rule he stated as a rule. **Mine a trader's material for the why, not the what.**

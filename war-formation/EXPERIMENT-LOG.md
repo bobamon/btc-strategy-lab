@@ -9542,3 +9542,179 @@ axis more badly than the parent it improves on.**
    and the ratchet as written cannot see it.
 4. E94's own queue (no modern-window or short-only variant, no sweeps, the hold cap as the one
    remaining question) stands and is not duplicated here.
+
+---
+
+# ██ E95 — THE HOLD CAP IS NOT THE ORACLE'S RULE, AND REMOVING IT MAKES THE BUILD FAITHFUL AND WORSE. HIS EXIT SPEC IS THE SEVENTH STATED RULE TO FAIL.
+
+One credit, `resultId 01M1V899ECED9P8C87Z6QE14DN`, `strategyId 01M1V88Q1HPE2TV2AGMY3DK5DJ`.
+Executes E94's queue item 3 — *"the hold cap is the one term here worth a future credit, and only as
+a population question first"* — with the population question answered free, first, as that item
+required.
+
+**AND IT REFRAMES THE ITEM.** `maxBars = 288` is **a lab addition, not the Oracle's rule.**
+`ORACLE-RULES.md` records the ALCM as *"No protective stop. The position ends at target or at
+liquidation."* **No time limit is stated anywhere in his material.** So removing the cap is not a
+parameter sweep looking for a better number — **it is the seventh of his stated rules to be
+mechanised faithfully and tested**, and that is squarely this workstream's mandate.
+
+## RESEARCH FIRST, AND IT POINTED THE OTHER WAY
+
+The literature broadly favours time exits for short-horizon systems: *"for strategies targeting
+short-term price moves… extended holding periods can lead to diminishing returns or reversals"*, and
+a fixed time exit *"helps prevent overfitting to specific price patterns."* It is explicitly
+recommended in this asset class — time-based exits are *"especially useful in crypto to force
+reassessment of stagnant positions rather than holding indefinitely."* The named cost of removing
+one is exactly what happened: *"prolonged horizons lead to overlapping exposures and amplified
+drawdowns."*
+
+**So the research prior favoured KEEPING the cap and predicted the drawdown failure mode
+specifically.** It was registered before the run and it was right.
+
+## THE FREE POPULATION WORK, DONE FIRST — AND ONE PART OF IT WAS WRONG
+
+From E94's own trade log, two questions were settled at zero cost.
+
+**1. Is the timeout edge also a 2020 artifact?** E94 found 22 of 43 exits hit the cap and carried
+PF 3.074932 against the resolved trades' 1.172450. Splitting both by year:
+
+| | 2020 | 2021–2026 |
+|---|---|---|
+| **Timeout exits** | n=6, +$513.25, PF 2.527436 | **n=16, +$1,536.51, PF 3.357164, gross +$109.23/trade** |
+| **Resolved at shield/target** | n=1, **+$2,176.40** | **n=20, −$1,191.10, PF 0.791531, gross −$46.00/trade** |
+
+**E94 said the build is a 2020 artifact. This is sharper: 2020's entire contribution is ONE trade
+that hit its target.** Outside 2020 the shield/target route is gross-negative and the timeout route
+is not.
+
+**But that comparison is survivorship-conditioned and cannot be read as an exit-rule edge**, which
+was stated before spending: a trade only becomes a "timeout" by surviving 288 bars without being
+stopped, so the losers are pre-sorted into the resolved bucket. **The only way to know what those 22
+trades would actually have done is to let them run.** That is what the credit bought.
+
+**2. How much sample would removing the cap cost?** Gap in bars from each timeout exit to the next
+entry: **median 2,447, minimum 220, and only 2 of 21 gaps under 288 bars.** Registered prediction:
+**41–43 trades.**
+
+**That prediction was wrong — the answer is 37.** Six entries were blocked, not two. **The error is
+instructive and generalises: I bounded the extra holding time by the cap I was removing (288 bars),
+but with the cap gone the mean hold is 806.6 bars and the longest is 4,482.** **The blocking horizon
+of a removed cap is not bounded by the cap.** Recorded so the next population estimate of this shape
+is not made the same way.
+
+## RESULT — 15m, 2020-08-19 → 2026-09-01, 211,423 bars
+
+| | E94 (cap at 288) | **E95 (no cap)** |
+|---|---|---|
+| Profit factor | **1.45289788** | 1.21092925 |
+| Trades | 43 | 37 |
+| Win rate | 48.8372093% | 37.83783784% |
+| Net | +30.35060484% | +28.27165669% |
+| **Max drawdown** | **17.28465524%** | **40.90896772%** |
+| Avg bars in trade | 208.6744186 | **806.62162162** |
+| Sharpe / Sortino | 0.53361831 / 0.1136451 | 0.33962785 / 0.12665617 |
+| `commissionPaid` | $556.4137161 | $462.8343315 |
+| Cascade | 1.0 | **1.0 (37/37, depth 1)** |
+
+**Buy & hold:** no figure in the payload, so none is claimed. From this run's own recorded prices,
+BTC ran **$10,715.50** (first entry, 2020-09-26) to **$68,156.50** (last exit, 2026-08-19) — a
+**+536.06%** price move against this build's **+28.27%**. **Funding:** no `fundingPaid` field exists;
+none is reported.
+
+## RATCHET v2 — REVERTED ON TWO INDEPENDENT GROUNDS
+
+| Clause | Test | Verdict |
+|---|---|---|
+| 1 — PF improves | 1.45289788 → **1.21092925** | ⛔ **fails** |
+| 2 — drawdown not worse | 17.28465524% → **40.90896772%** | ⛔ **fails by 23.62 points** |
+| 3 — ≥30 trades | 37 | ✅ |
+| 4 — split needed | attaches only to kept changes | n/a |
+
+**Drawdown more than doubles.** That is precisely the failure mode the research named for removing a
+time exit, and it is not close.
+
+## THE HOLD CAP WAS LOAD-BEARING, AND THE SURVIVORSHIP CAVEAT IS NOW PROVEN
+
+The free analysis showed timeout trades looking excellent; **letting them run did not preserve
+that.** The clearest single case: the trade entered 2022-11-03 was **+$502.42** when the cap closed
+it in E94 and is **−$1,215.63** when allowed to run in E95. The 2020 opener, a −$23.96 timeout in
+E94, becomes **+$3,716.15**. **Both directions are large, and the net of letting all of them run is
+worse.**
+
+**So "51% of exits and 68% of profit run through the timeout" was a statement about which trades
+survive long enough to be labelled timeouts, not about the exit rule's value.** The caveat was
+stated as a caveat before the run and is now a measured fact.
+
+## PHASE DECOMPOSITION — AND THE SIGN FLIPS BY PHASE
+
+| Phase | n | PF | Net | Gross/trade |
+|---|---|---|---|---|
+| BULL 2020-21 | 8 | 1.8628 | +$3,614.95 | +$465.50 |
+| **BEAR 2022** | **2** | **0.0000** | **−$2,576.54** | **−$1,276.00** |
+| RECOVERY 22-24 | 5 | 1.2187 | +$534.54 | +$117.20 |
+| **2024-26** | **22** | **1.2992** | **+$1,254.23** | **+$69.64** |
+
+**Two things here, and they cut opposite ways.**
+
+**Against the cap:** in the modern phase the cap was *hurting*. E94's 2024-26 was PF 0.8870,
+−$483.76, gross −$8.16/trade; E95's is **PF 1.2992, +$1,254.23, gross +$69.64/trade.** On the
+largest phase sample this build has, removing the cap turns a gross-negative into a gross-positive.
+
+**For the cap:** the 2022 bear is annihilated — **both trades lose, PF 0.0000, −$2,576.54**, against
+E94's +$391.42. A time stop is protection against a trend running the other way, which is exactly
+what a bear does.
+
+**This is NOT a licence to build a regime-conditioned cap.** Choosing the cap setting per phase after
+seeing which phase each setting wins in is the phase-selected fitting refused in E94 and in Attack
+101 today. Two trades decide the 2022 cell. **Recorded as an observation; explicitly not actionable
+without an independent sample.**
+
+## THE DEPENDENCE ON 2020 GOT WORSE, NOT BETTER
+
+| | E94 | **E95** |
+|---|---|---|
+| 2020 share of total net | 88.6% (7 trades) | **168.6% (3 trades)** |
+| Everything after 2020 | — | **n=34, PF 0.837570, −$1,938.51, gross −$44.53/trade** |
+
+**E95 loses money in every year after 2020 combined.** By year: 2021 PF 0.5770, 2022 PF 0.0000,
+2023 PF 1.2187, 2024 PF 1.5248, 2025 PF 1.7680, 2026 PF 0.8301.
+
+**And the significance falls again.** Per-trade % of equity: mean 1.074521%, sd 9.533422%, n=37 →
+**t = 0.6856**, against E94b's 1.0112 for E94 and the audit's 2.1983 for E80. **Three successive
+builds, each beating its parent on some ratio, each less statistically distinguishable from noise
+than the last.** The direction of travel is unambiguous.
+
+## THE ORACLE'S SCORE IS NOW 1 OF 7
+
+`ORACLE-RULES.md` was corrected to 1 of 6 earlier today when E81 tested his coil. **E95 adds his
+stated exit model — target or liquidation, no time limit — as the seventh, and it fails on two
+ratchet clauses with drawdown more than doubling.** The lab's own unstated addition beats his stated
+rule. **That is now the seventh instance of the same pattern**, and the conclusion at the foot of
+that file — *mine a trader's material for the why, not the what* — has not been contradicted once.
+
+## STATE
+
+**No champion, no candidate.** `e58a` (long, 1m, PF 1.24015239, 36 trades) and `E71` (short, 1m,
+PF 0.97315988, 33 trades) remain the untouched 1m references. The 15m 1h-structure lineage now reads:
+bidirectional PF 1.088 / t —, long-only capped PF 1.453 / t 1.0112, long-only uncapped PF 1.211 /
+t 0.6856. **All three are 2020-carried.** HARD LESSON 48 remains open and awaiting the user. Credits:
+**455** before this run.
+
+## QUEUE
+
+1. **The cap stays at 288. Do not sweep it**, and do not condition it on regime — see above.
+2. **This lineage is finished.** Three consecutive builds have each moved a ratio and lowered the
+   t-statistic, and every one depends on calendar 2020 for more than its whole net. **Further work
+   on the 15m 1h-structure cascade should not be funded.** The next War Formation credit belongs to
+   a different construction or to nothing.
+3. **The free-trade-log technique's boundary is now known**: it settles trade population and
+   attribution exactly, and it CANNOT settle any question whose answer depends on what a trade would
+   have done after the point it was closed. E94 established the first half; E95 establishes the
+   second.
+4. The sibling branch's `E79`/`E80`/`E81` numbering collisions and missing provenance remain
+   unreconciled and remain that branch's to repair.
+
+## SOURCES
+- Polec, *Stop-Loss, Take-Profit, Triple-Barrier & Time-Exit* — https://medium.com/@jpolec_72972/stop-loss-take-profit-triple-barrier-time-exit-advanced-strategies-for-backtesting-8b51836ec5a2
+- KJ Trading Systems, *What 567,000 Backtests Taught Me About Algo Trading Exits* — https://kjtradingsystems.com/algo-trading-exits.html
+- Tradeciety, *The Ultimate Guide to Backtesting* — https://tradeciety.com/the-ultimate-guide-to-backtesting
